@@ -1,0 +1,110 @@
+[
+  {
+    "id": "604a224b952ac3ff3cbe3198",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.3",
+    "path": "com::java1",
+    "type": "java",
+    "file": {
+      "content": "package examples.metadata.test;\n\nimport javax.annotation.Generated;\nimport java.time.*;\nimport java.util.*;\nimport javax.validation.*;\nimport javax.validation.constraints.*;\n\n@Generated(value=\"examples.metadatatest::ClassWithDependency\")\npublic class ClassWithDependency {\n\n    @NotNull\n    @Valid\n    private String Name;\n\n    private static final String _version_ = \"A1qDEi13RqA#A3Ul:At5Fv:3\";\n\n    private static final String _type_ = \"ClassWithDependency\";\n\n    public ClassWithDependency() {\n    }\n\n    @NotNull\n    @Valid\n    public String getName() {\n        return this.Name;\n    }\n\n    public void setName(@NotNull @Valid String Name) {\n        this.Name = Name;\n    }\n\n    @Override\n    public String toString() {\n        return \"ClassWithDependency{\" +\n                    \"Name = \" + this.getName() + \", \" +\n                '}';\n    }\n\n    @Override\n    public boolean equals(Object o) {\n        if (this == o) return true;\n        if (o == null || getClass() != o.getClass()) return false;\n        \n        ClassWithDependency that = (ClassWithDependency) o;\n        \n        if (this.getName() != null ? !this.getName().equals(that.getName()) : that.getName() != null) return false;\n        return true;\n    }\n\n    @Override\n    public int hashCode() {\n        int result = 0;\n        result = 31 * result + (this.getName() != null ? this.getName().hashCode() : 0);\n        return result;\n    }\n}",
+      "path": "/examples/metadata/test/ClassWithDependency.java"
+    }
+  },
+  {
+    "id": "604a224b952ac3ff3cbe319d",
+    "versionId": "2.3.3",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "path": "com::java1",
+    "type": "java",
+    "file": {
+      "content": "package examples.metadata.test;\n\nimport javax.annotation.Generated;\nimport java.time.*;\nimport java.util.*;\nimport javax.validation.*;\nimport javax.validation.constraints.*;\n\n@Generated(value=\"examples.metadatatest::ClientBasic\")\npublic class ClientBasic {\n\n    @NotNull\n    @Valid\n    private String Name;\n\n    private int EntityId;\n\n    private boolean IsActive;\n\n    private float RiskScore;\n\n    @NotNull\n    @Valid\n    private LocalDate IncorporationDate;\n\n    private Optional<String> OptionalAlternativeName = Optional.empty();\n\n    private Optional<String> newProperty = Optional.empty();\n\n    private static final String _version_ = \"ACcYaFr9#A3Ul:At5Fv:3-AeC+oi:AEfOIi:3-AfTXVg:AEJazI:3-ADvzkVt:AFpMM:3-ABLTXYq+ENo:Aa5nbEB:3-g:At5Fv:0-ADqJGoC7:At5Fv:0\";\n\n    private static final String _type_ = \"ClientBasic\";\n\n    public ClientBasic() {\n    }\n\n    @NotNull\n    @Valid\n    public String getName() {\n        return this.Name;\n    }\n\n    public int getEntityId() {\n        return this.EntityId;\n    }\n\n    public boolean getIsActive() {\n        return this.IsActive;\n    }\n\n    public float getRiskScore() {\n        return this.RiskScore;\n    }\n\n    @NotNull\n    @Valid\n    public LocalDate getIncorporationDate() {\n        return this.IncorporationDate;\n    }\n\n    public Optional<String> getOptionalAlternativeName() {\n        return this.OptionalAlternativeName;\n    }\n\n    public Optional<String> getNewProperty() {\n        return this.newProperty;\n    }\n\n    public void setName(@NotNull @Valid String Name) {\n        this.Name = Name;\n    }\n\n    public void setEntityId(int EntityId) {\n        this.EntityId = EntityId;\n    }\n\n    public void setIsActive(boolean IsActive) {\n        this.IsActive = IsActive;\n    }\n\n    public void setRiskScore(float RiskScore) {\n        this.RiskScore = RiskScore;\n    }\n\n    public void setIncorporationDate(@NotNull @Valid LocalDate IncorporationDate) {\n        this.IncorporationDate = IncorporationDate;\n    }\n\n    public void setOptionalAlternativeName(Optional<String> OptionalAlternativeName) {\n        this.OptionalAlternativeName = OptionalAlternativeName;\n    }\n\n    public void setNewProperty(Optional<String> newProperty) {\n        this.newProperty = newProperty;\n    }\n\n    @Override\n    public String toString() {\n        return \"ClientBasic{\" +\n                    \"Name = \" + this.getName() + \", \" +\n                    \"EntityId = \" + this.getEntityId() + \", \" +\n                    \"IsActive = \" + this.getIsActive() + \", \" +\n                    \"RiskScore = \" + this.getRiskScore() + \", \" +\n                    \"IncorporationDate = \" + this.getIncorporationDate() + \", \" +\n                    \"OptionalAlternativeName = \" + this.getOptionalAlternativeName() + \", \" +\n                    \"newProperty = \" + this.getNewProperty() + \", \" +\n                '}';\n    }\n\n    @Override\n    public boolean equals(Object o) {\n        if (this == o) return true;\n        if (o == null || getClass() != o.getClass()) return false;\n        \n        ClientBasic that = (ClientBasic) o;\n        \n        if (this.getName() != null ? !this.getName().equals(that.getName()) : that.getName() != null) return false;\n        if (this.getEntityId() != that.getEntityId()) return false;\n        if (this.getIsActive() != that.getIsActive()) return false;\n        if (Float.compare(this.getRiskScore(), that.getRiskScore()) != 0) return false;\n        if (this.getIncorporationDate() != null ? !this.getIncorporationDate().equals(that.getIncorporationDate()) : that.getIncorporationDate() != null) return false;\n        if (this.getOptionalAlternativeName() != null ? !this.getOptionalAlternativeName().equals(that.getOptionalAlternativeName()) : that.getOptionalAlternativeName() != null) return false;\n        if (this.getNewProperty() != null ? !this.getNewProperty().equals(that.getNewProperty()) : that.getNewProperty() != null) return false;\n        return true;\n    }\n\n    @Override\n    public int hashCode() {\n        int result = 0;\n        result = 31 * result + (this.getName() != null ? this.getName().hashCode() : 0);\n        result = 31 * result + this.getEntityId();\n        result = 31 * result + (this.getIsActive() ? 1 : 0);\n        result = 31 * result + Float.floatToIntBits(this.getRiskScore());\n        result = 31 * result + (this.getIncorporationDate() != null ? this.getIncorporationDate().hashCode() : 0);\n        result = 31 * result + (this.getOptionalAlternativeName() != null ? this.getOptionalAlternativeName().hashCode() : 0);\n        result = 31 * result + (this.getNewProperty() != null ? this.getNewProperty().hashCode() : 0);\n        return result;\n    }\n}",
+      "path": "/examples/metadata/test/ClientBasic.java"
+    }
+  },
+  {
+    "id": "604a224b952ac3ff3cbe31a0",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.3",
+    "path": "com::java1",
+    "type": "java",
+    "file": {
+      "content": "package examples.metadata.test.dependency;\n\nimport javax.annotation.Generated;\nimport java.time.*;\nimport java.util.*;\nimport javax.validation.*;\nimport javax.validation.constraints.*;\n\n@Generated(value=\"examples.metadatatest::dependency::Dependency\")\npublic class Dependency {\n\n    @NotNull\n    @Valid\n    private String Name;\n\n    private int EntityId;\n\n    private boolean IsActive;\n\n    private static final String _version_ = \"AWYKr9d#A3Ul:At5Fv:3-AeC+oi:AEfOIi:3-AfTXVg:AEJazI:3\";\n\n    private static final String _type_ = \"Dependency\";\n\n    public Dependency() {\n    }\n\n    @NotNull\n    @Valid\n    public String getName() {\n        return this.Name;\n    }\n\n    public int getEntityId() {\n        return this.EntityId;\n    }\n\n    public boolean getIsActive() {\n        return this.IsActive;\n    }\n\n    public void setName(@NotNull @Valid String Name) {\n        this.Name = Name;\n    }\n\n    public void setEntityId(int EntityId) {\n        this.EntityId = EntityId;\n    }\n\n    public void setIsActive(boolean IsActive) {\n        this.IsActive = IsActive;\n    }\n\n    @Override\n    public String toString() {\n        return \"Dependency{\" +\n                    \"Name = \" + this.getName() + \", \" +\n                    \"EntityId = \" + this.getEntityId() + \", \" +\n                    \"IsActive = \" + this.getIsActive() + \", \" +\n                '}';\n    }\n\n    @Override\n    public boolean equals(Object o) {\n        if (this == o) return true;\n        if (o == null || getClass() != o.getClass()) return false;\n        \n        Dependency that = (Dependency) o;\n        \n        if (this.getName() != null ? !this.getName().equals(that.getName()) : that.getName() != null) return false;\n        if (this.getEntityId() != that.getEntityId()) return false;\n        if (this.getIsActive() != that.getIsActive()) return false;\n        return true;\n    }\n\n    @Override\n    public int hashCode() {\n        int result = 0;\n        result = 31 * result + (this.getName() != null ? this.getName().hashCode() : 0);\n        result = 31 * result + this.getEntityId();\n        result = 31 * result + (this.getIsActive() ? 1 : 0);\n        return result;\n    }\n}",
+      "path": "/examples/metadata/test/dependency/Dependency.java"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31ae",
+    "versionId": "2.3.3",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "path": "com::proto",
+    "type": "protobuf",
+    "file": {
+      "content": "message ClassWithDependency {\n string name = 1;\n}",
+      "path": "/examples/metadata/test/ClassWithDependency.proto"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31b2",
+    "versionId": "2.3.3",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "path": "com::proto",
+    "type": "protobuf",
+    "file": {
+      "content": "message ClientBasic {\n string name = 1;\n int64 entityid = 2;\n bool isactive = 3;\n double riskscore = 4;\n timestamp incorporationdate = 5;\n string optionalalternativename = 6;\n string newproperty = 7;\n}",
+      "path": "/examples/metadata/test/ClientBasic.proto"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31b7",
+    "versionId": "2.3.3",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "path": "com::proto",
+    "type": "protobuf",
+    "file": {
+      "content": "message Dependency {\n string name = 1;\n int64 entityid = 2;\n bool isactive = 3;\n}",
+      "path": "/examples/metadata/test/dependency/Dependency.proto"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31bb",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.3",
+    "path": "com::avrogen",
+    "type": "avro",
+    "file": {
+      "content": "{\n  \"type\" : \"record\",\n  \"name\" : \"ClassWithDependency\",\n  \"namespace\" : \"examples.metadata.test\",\n  \"fields\" : [ {\n    \"name\" : \"Name\",\n    \"type\" : \"string\"\n  } ]\n}",
+      "path": "/examples/metadata/test/ClassWithDependency.avro"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31be",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.3",
+    "path": "com::avrogen",
+    "type": "avro",
+    "file": {
+      "content": "{\n  \"type\" : \"record\",\n  \"name\" : \"ClientBasic\",\n  \"namespace\" : \"examples.metadata.test\",\n  \"fields\" : [ {\n    \"name\" : \"Name\",\n    \"type\" : \"string\"\n  }, {\n    \"name\" : \"EntityId\",\n    \"type\" : \"long\"\n  }, {\n    \"name\" : \"IsActive\",\n    \"type\" : \"boolean\"\n  }, {\n    \"name\" : \"RiskScore\",\n    \"type\" : \"double\"\n  }, {\n    \"name\" : \"IncorporationDate\",\n    \"type\" : {\n      \"type\" : \"int\",\n      \"logicalType\" : \"date\"\n    }\n  }, {\n    \"name\" : \"OptionalAlternativeName\",\n    \"type\" : [ \"null\", \"string\" ],\n    \"default\" : null\n  }, {\n    \"name\" : \"newProperty\",\n    \"type\" : [ \"null\", \"string\" ],\n    \"default\" : null\n  } ]\n}",
+      "path": "/examples/metadata/test/ClientBasic.avro"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31c3",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.3",
+    "path": "com::avrogen",
+    "type": "avro",
+    "file": {
+      "content": "{\n  \"type\" : \"record\",\n  \"name\" : \"Dependency\",\n  \"namespace\" : \"examples.metadata.test.dependency\",\n  \"fields\" : [ {\n    \"name\" : \"Name\",\n    \"type\" : \"string\"\n  }, {\n    \"name\" : \"EntityId\",\n    \"type\" : \"long\"\n  }, {\n    \"name\" : \"IsActive\",\n    \"type\" : \"boolean\"\n  } ]\n}",
+      "path": "/examples/metadata/test/dependency/Dependency.avro"
+    }
+  }
+]

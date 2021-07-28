@@ -1,0 +1,108 @@
+[
+  {
+    "versionId": "2.2.0",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionedEntity": false,
+    "entity": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "content": {
+        "_type": "profile",
+        "name": "TestProfile",
+        "package": "examples::metadata::test"
+      }
+    },
+    "id": ""
+  },
+  {
+    "versionId": "2.2.0",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionedEntity": false,
+    "entity": {
+      "path": "examples::metadata::test::ClientBasic",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "content": {
+        "_type": "class",
+        "name": "ClientBasic",
+        "package": "examples::metadata::test",
+        "properties": [
+          {
+            "multiplicity": {
+              "lowerBound": 1,
+              "upperBound": 1
+            },
+            "name": "Name",
+            "type": "String"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 1,
+              "upperBound": 1
+            },
+            "name": "EntityId",
+            "type": "Integer"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 1,
+              "upperBound": 1
+            },
+            "name": "IsActive",
+            "type": "Boolean"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 1,
+              "upperBound": 1
+            },
+            "name": "RiskScore",
+            "type": "Float"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 1,
+              "upperBound": 1
+            },
+            "name": "IncorporationDate",
+            "type": "StrictDate"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 0,
+              "upperBound": 1
+            },
+            "name": "OptionalAlternativeName",
+            "type": "String"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 0,
+              "upperBound": 1
+            },
+            "name": "newProperty",
+            "type": "String"
+          }
+        ]
+      }
+    },
+    "id": ""
+  },
+  {
+    "versionId": "2.2.0",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionedEntity": false,
+    "entity": {
+      "path": "examples::metadata::test::subpackage::TestProfileTwo",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "content": {
+        "_type": "profile",
+        "name": "TestProfileTwo",
+        "package": "examples::metadata::test::subpackage"
+      }
+    },
+    "id": ""
+  }
+]

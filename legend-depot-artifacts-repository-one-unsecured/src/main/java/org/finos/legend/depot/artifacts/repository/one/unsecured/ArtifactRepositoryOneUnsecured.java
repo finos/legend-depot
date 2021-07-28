@@ -1,0 +1,325 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+package org.finos.legend.depot.artifacts.repository.one.unsecured;
+
+import org.apache.maven.model.Build;
+import org.apache.maven.model.Dependency;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.Parent;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.io.DefaultSettingsReader;
+import org.apache.maven.settings.io.SettingsReader;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
+import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
+import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
+import org.finos.legend.depot.domain.version.VersionValidator;
+import org.finos.legend.depot.tracing.services.TracerFactory;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
+import org.jboss.shrinkwrap.resolver.api.NoResolvedResultException;
+import org.jboss.shrinkwrap.resolver.api.ResolutionException;
+import org.jboss.shrinkwrap.resolver.api.VersionResolutionException;
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
+import org.jboss.shrinkwrap.resolver.api.maven.MavenVersionRangeResult;
+import org.jboss.shrinkwrap.resolver.api.maven.PackagingType;
+import org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenCoordinate;
+import org.slf4j.Logger;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public class ArtifactRepositoryOneUnsecured implements ArtifactRepository
+{
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ArtifactRepositoryOneUnsecured.class);
+    private static final String EMPTY_STRING = "";
+    private static final String GAV_SEP = ":";
+    private static final String GROUP = "group";
+    private static final String ARTIFACT = "artifact";
+    private static final String ALL_VERSIONS_SCOPE = ":[0.0,)";
+    private final MavenXpp3Reader mavenReader = new MavenXpp3Reader();
+    private final String settingsLocation;
+    private String localRepository;
+
+
+    public ArtifactRepositoryOneUnsecured(ArtifactRepositoryProviderConfiguration configuration)
+    {
+        if (configuration == null)
+        {
+            this.settingsLocation = null;
+            return;
+        }
+        if (configuration instanceof OneUnsecuredArtifactRepositoryConfiguration)
+        {
+            this.settingsLocation = ((OneUnsecuredArtifactRepositoryConfiguration)configuration).getSettingsLocation();
+            loadSettings(this.settingsLocation);
+        }
+        else
+        {
+            throw new IllegalArgumentException("cannot initialise repository , please provide a settings file");
+        }
+    }
+
+
+    private MavenResolverSystem getResolver()
+    {
+        return Maven.configureResolver()
+                .withMavenCentralRepo(false)
+                .withClassPathResolution(false)
+                .fromFile(settingsLocation);
+    }
+
+    private void loadSettings(String settingsFile)
+    {
+        SettingsReader reader = new DefaultSettingsReader();
+        LOGGER.info("reading settings xml:[{}] ", settingsFile);
+        try (FileInputStream stream = new FileInputStream(settingsFile))
+        {
+            Settings settings = reader.read(stream, new HashMap<>());
+            if (settings.getLocalRepository() == null)
+            {
+                throw new ArtifactRepositoryException("Please provide a valid local repository in settings.xml");
+            }
+            this.localRepository = settings.getLocalRepository();
+
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("could not initialise settings.xml {}", e.getMessage());
+            throw new ArtifactRepositoryException(e.getMessage());
+        }
+    }
+
+    protected String gavCoordinates(String group, String artifact, PackagingType type, String version)
+    {
+        return group + GAV_SEP + artifact + (type == null ? EMPTY_STRING : GAV_SEP + type.getId()) + GAV_SEP + version;
+    }
+
+    protected String gavCoordinates(String group, String artifact, String version)
+    {
+        return gavCoordinates(group, artifact, null, version);
+    }
+
+    @Override
+    public boolean areValidCoordinates(String group, String artifact)
+    {
+        return group != null && artifact != null
+                && !group.contains(GAV_SEP)
+                && !artifact.contains(GAV_SEP);
+    }
+
+    @Override
+    public List<VersionId> findVersions(String group, String artifact)
+    {
+        return TracerFactory.get().executeWithTrace("resolveVersionsFromRepository",
+                () ->
+                {
+                    Map<String, String> tags = new HashMap<>();
+                    tags.put(GROUP, group);
+                    tags.put(ARTIFACT, artifact);
+                    TracerFactory.get().decorateSpan(tags);
+                    return resolveVersionsFromRepository(group, artifact, ALL_VERSIONS_SCOPE);
+                });
+    }
+
+    @Override
+    public List<File> findFiles(ArtifactType type, String group, String artifactId, String version)
+    {
+        LOGGER.info("resolving {} for {}:{}-{}", type, group, artifactId, version);
+        List<String> artifacts = getModulesFromPOM(type, group, artifactId, version);
+        List<File> foundFiles = new ArrayList<>();
+        try
+        {
+            artifacts.forEach(artifact ->
+            {
+                File[] artifactFiles = resolveArtifactFilesFromRepository(group, artifact, version);
+                foundFiles.addAll(Arrays.asList(artifactFiles));
+            });
+        }
+        catch (NoResolvedResultException ex)
+        {
+            LOGGER.error("could not resolver {} {} {} {}", group, artifactId, version, ex.getMessage());
+        }
+        LOGGER.info("found {} files for {}:{}-{} : {}", type, group, artifactId, version, foundFiles.size());
+        return foundFiles;
+    }
+
+
+    @Override
+    public List<File> findDependenciesFiles(ArtifactType type, String group, String artifact, String version)
+    {
+        List<File> files = new ArrayList<>();
+        findDependencies(type, group, artifact, version).forEach(dep ->
+                files.addAll(Arrays.asList(resolveArtifactFilesFromRepository(group, dep.getArtifactId(), dep.getVersion()))));
+        return files;
+    }
+
+    @Override
+    public Set<ArtifactDependency> findDependencies(ArtifactType type, String groupId, String artifactId, String versionId)
+    {
+
+        List<Dependency> dependencies = new ArrayList<>();
+        getModulesFromPOM(type, groupId, artifactId, versionId)
+                .stream()
+                .filter(mod -> mod.endsWith(type.getModuleName()))
+                .forEach(mod -> dependencies.addAll(getPOM(groupId, mod, versionId).getDependencies()));
+        return dependencies.stream().filter(dep -> dep.getArtifactId().endsWith(type.getModuleName())).map(dep -> new ArtifactDependency(dep.getGroupId(), dep.getArtifactId(), dep.getVersion())).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<ArtifactDependency> findDependencies(String groupId, String artifactId, String versionId)
+    {
+        Set<ArtifactDependency> dependencies = new HashSet<>();
+        List<String> modules = getModulesFromPOM(ArtifactType.ENTITIES, groupId, artifactId, versionId);
+        if (!modules.isEmpty())
+        {
+            modules.forEach(module ->
+            {
+                Model modulePom = getPOM(groupId, module, versionId);
+                List<Dependency> moduleDependencies = modulePom.getDependencies().stream().filter(dep -> dep.getVersion() != null).collect(Collectors.toList());
+                if (moduleDependencies.isEmpty())
+                {
+                    List<Dependency> pluginsDependencies = new ArrayList<>();
+                    Build build = modulePom.getBuild();
+                    if (build != null && build.getPlugins() != null && !build.getPlugins().isEmpty())
+                    {
+                        build.getPlugins().forEach(plugin -> pluginsDependencies.addAll(plugin.getDependencies()));
+                        moduleDependencies = pluginsDependencies;
+                    }
+                }
+                moduleDependencies.stream().filter(dep -> dep.getArtifactId().endsWith(ArtifactType.ENTITIES.getModuleName()))
+                        .forEach(dependency ->
+                                {
+                                    Parent parent = getPOM(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()).getParent();
+                                    if (parent != null)
+                                    {
+                                        dependencies.add(new ArtifactDependency(parent.getGroupId(), parent.getArtifactId(), parent.getVersion()));
+                                    }
+                                }
+                        );
+
+            });
+        }
+
+        return dependencies;
+    }
+
+    @Override
+    public List<String> getModulesFromPOM(ArtifactType type, String group, String artifact, String version)
+    {
+        LOGGER.info("trying to resolveArtifacts pom file {}.{}-{}", group, artifact, version);
+        Model model = getPOM(group, artifact, version);
+        List<String> modules = new ArrayList<>();
+        if (model.getModules().isEmpty())
+        {
+            modules.add(artifact);
+        }
+        else
+        {
+            modules.addAll(model.getModules().stream().filter(mod -> mod.endsWith(type.getModuleName())).collect(Collectors.toList()));
+        }
+        LOGGER.info("modules {}", modules);
+        return modules;
+    }
+
+
+    public Model getPOM(String group, String artifact, String version)
+    {
+        URL[] pom = null;
+        try
+        {
+            pom = resolvePOMFromRepository(group, artifact, version);
+        }
+        catch (ResolutionException re)
+        { // this will download the pom but wont be able to resolveArtifacts it(workaround)
+
+        }
+        String pomFileLocation;
+        if (pom == null || pom.length == 0)
+        {
+            pomFileLocation = localRepository + File.separator + group.replace(".", File.separator) +
+                    File.separator + artifact + File.separator + version + File.separator + artifact + "-" + version + "." + PackagingType.POM.getId();
+        }
+        else
+        {
+            pomFileLocation = pom[0].getFile();
+        }
+        LOGGER.info("pom file name has been successfully resolved {}", pomFileLocation);
+        try (InputStream reader = new FileInputStream(pomFileLocation))
+        {
+            return mavenReader.read(reader);
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("could not read {}", pomFileLocation);
+            LOGGER.error(e.getMessage());
+            return new Model();
+        }
+    }
+
+    protected File[] resolveArtifactFilesFromRepository(String group, String artifact, String version)
+    {
+        return getResolver().resolve(gavCoordinates(group, artifact, version)).withoutTransitivity().asFile();
+    }
+
+    protected URL[] resolvePOMFromRepository(String group, String artifact, String version)
+    {
+        return getResolver().resolve(gavCoordinates(group, artifact, PackagingType.POM, version)).withoutTransitivity().as(URL.class);
+    }
+
+    private List<VersionId> resolveVersionsFromRepository(String group, String artifact, String scope)
+    {
+        List<VersionId> result = new ArrayList<>();
+        try
+        {
+            String groupArtifactVersionRange = gavCoordinates(group, artifact, scope);
+            final MavenVersionRangeResult versionRangeResult = getResolver().resolveVersionRange(groupArtifactVersionRange);
+            LOGGER.info("%{}:{}-{} , Version data: [{}]", group, artifact, scope, versionRangeResult);
+            for (MavenCoordinate coordinate : versionRangeResult.getVersions())
+            {
+                if (VersionValidator.isValidReleaseVersion(coordinate.getVersion()))
+                {
+                    result.add(VersionId.parseVersionId(coordinate.getVersion()));
+                }
+            }
+        }
+        catch (VersionResolutionException ex)
+        {
+            LOGGER.error(String.format("%s: %s-%s version resolution issue", group, artifact, scope), ex.getMessage());
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("unknown error", e);
+            throw new ArtifactRepositoryException(e.getMessage());
+        }
+        Collections.sort(result);
+        return result;
+    }
+
+}
