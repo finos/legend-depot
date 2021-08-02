@@ -1,0 +1,19 @@
+{
+  "fields": [
+    {
+      "name": "Name",
+      "type": "string"
+    },
+    {
+      "name": "EntityId",
+      "type": "long"
+    },
+    {
+      "name": "IsActive",
+      "type": "boolean"
+    }
+  ],
+  "name": "Dependency",
+  "namespace": "examples.metadata.test.dependency",
+  "type": "record"
+}

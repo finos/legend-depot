@@ -1,0 +1,11 @@
+{
+  "fields": [
+    {
+      "name": "Name",
+      "type": "string"
+    }
+  ],
+  "name": "ClassWithDependency",
+  "namespace": "examples.metadata.test",
+  "type": "record"
+}

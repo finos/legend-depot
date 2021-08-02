@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~  Copyright 2021 Goldman Sachs
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  ~
+  -->
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+         xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>examples.metadata</groupId>
+    <artifactId>test-dependencies</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>test-dependencies-entities</module>
+        <module>test-dependencies-versioned-entities</module>
+        <module>test-dependencies-service-execution</module>
+        <module>test-dependencies-file-generation</module>
+    </modules>
+    <properties>
+        <legend.version>0.0.0</legend.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>examples.metadata</groupId>
+                <artifactId>test-dependencies-entities</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>examples.metadata</groupId>
+                <artifactId>test-dependencies-versioned-entities</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>examples.metadata</groupId>
+                <artifactId>test-dependencies-service-execution</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>examples.metadata</groupId>
+                <artifactId>test-dependencies-file-generation</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>platform.legend</groupId>
+                <artifactId>legend-sdlc-test-utils</artifactId>
+                <version>${legend.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>platform.legend</groupId>
+                <artifactId>legend-execution-executionPlan-execution</artifactId>
+                <version>${legend.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>platform.legend</groupId>
+                <artifactId>legend-execution-executionPlan-execution-store-inMemory</artifactId>
+                <version>${legend.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>platform.legend</groupId>
+                <artifactId>legend-execution-executionPlan-execution-store-relational</artifactId>
+                <version>${legend.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>*</artifactId>
+                        <groupId>sybase.jdbc4.sqlanywhere</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>platform.legend</groupId>
+                <artifactId>legend-execution-executionPlan-execution-store-service</artifactId>
+                <version>${legend.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
