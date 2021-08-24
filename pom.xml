@@ -248,9 +248,9 @@
                         <id>enforce</id>
                         <configuration>
                             <rules> 
-                                <!--<requireJavaVersion> -->
-                                <!--<version>[11,12)</version> -->
-                                <!--</requireJavaVersion>-->
+                                <requireJavaVersion> 
+                                <version>[11,12)</version> 
+                                </requireJavaVersion>
                                 <dependencyConvergence/>
                                 <bannedDependencies>
                                     <excludes>
