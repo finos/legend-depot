@@ -217,7 +217,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>8.29</version>
+                        <version>8.25</version>
                     </dependency>
                 </dependencies>
                 <executions>
@@ -249,7 +249,7 @@
                         <configuration>
                             <rules> 
                                 <requireJavaVersion> 
-                                <version>[11,16)</version> 
+                                <version>[11,12)</version> 
                                 </requireJavaVersion>
                                 <dependencyConvergence/>
                                 <bannedDependencies>
