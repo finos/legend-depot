@@ -5,8 +5,25 @@
 
 
 # legend-depot
+The Legend Depot Server provides a rich REST API allowing users to query metadata fast and realiably which has been authored in Legend Studio/SDLC
+Legend Depot has two main components:
+- Depot Server: read only metadata query REST API
+- Depot Store Server: manages internal metadata cache and sources it from maven style repository where models artifacts have been published.
 
 ## Usage example
+
+### Depot Store Server
+
+Start by creating a json configuration file based on your particular environment. A sample configuration file is included to help you get started. You will need to supply some information, such as the host and port your store server is running on.
+
+You need an instance of mongoDb where your metadata will be stored. Add the mongodb URL and database name to the mongo section of your config file. No prior setup its required and you can choose any database name.
+
+You will also need to configure a maven settings.xml config file in order to let the server know from what maven repository to fetch and cache the published metadata artifacts. An example file has been provided to help you.
+
+Once you have your configuration file, you can run the server with Java 8 or later. You can use a command such as this to start the server:
+
+java -cp $SHADED_JAR_PATH org.finos.legend.depot.store.server.LegendDepotStoreServer server $CONFIG_DIR/config.json
+If you want to use the shaded JAR built by mvn install in this project, you can get it from legend-depot-store-server/target/legend-depot-store-server-*.jar. 
 
 ## Development setup
 
