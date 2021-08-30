@@ -66,7 +66,6 @@
         <!-- Dependency versions -->
         <apache.httpcomponents.client.version>4.5.13</apache.httpcomponents.client.version>
         <apache.httpcomponents.core.version>4.4.13</apache.httpcomponents.core.version>
-        <apache.maven.version>3.6.2</apache.maven.version>
         <commons-codec.version>1.15</commons-codec.version>
         <commons-compress.version>1.20</commons-compress.version>
         <commons-io.version>2.7</commons-io.version>
@@ -76,6 +75,7 @@
         <dropwizard.metrics.version>4.1.16</dropwizard.metrics.version>
         <dropwizard-guicier.version>1.3.5.2</dropwizard-guicier.version>
         <dropwizard-swagger.version>1.3.17-1</dropwizard-swagger.version>
+        <swagger-annotations.version>1.5.20</swagger-annotations.version>
         <eclipse.collections.version>10.2.0</eclipse.collections.version>
         <findbugs.version>3.0.0</findbugs.version>
         <freemaker.version>2.3.31</freemaker.version>
@@ -95,11 +95,12 @@
         <junit.version>4.13.1</junit.version>
         <mockito.version>3.9.0</mockito.version>
         <pac4j.version>3.8.3</pac4j.version>
-        <plexus-utils.version>3.1.0</plexus-utils.version>
         <slf4j.version>1.7.25</slf4j.version>
-        <shrinkwrap-resolver-api.version>3.1.2</shrinkwrap-resolver-api.version>
-        <swagger-annotations.version>1.5.20</swagger-annotations.version>
 
+        <apache.maven.version>3.6.2</apache.maven.version>
+        <shrinkwrap-resolver-api.version>3.1.2</shrinkwrap-resolver-api.version>
+        <plexus-utils.version>3.1.0</plexus-utils.version>
+        <guava.version>30.1-jre</guava.version>
         <!-- TRACING -->
         <zipkin-reporter.version>2.15.0</zipkin-reporter.version>
         <zipkin.version>2.21.1</zipkin.version>
@@ -722,9 +723,17 @@
                         <groupId>org.jsoup</groupId>
                         <artifactId>jsoup</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
-
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
 
             <!-- PROMETHEUS -->
             <dependency>
@@ -931,11 +940,4 @@
             <url>https://oss.sonatype.org/content/repositories/releases/</url>
         </repository>
     </repositories>
-<!--    <pluginRepositories>-->
-<!--        <pluginRepository>-->
-<!--            <id>central</id>-->
-<!--            <name>Maven Central</name>-->
-<!--            <url>http://gscentral.area.services.gs.com/maven/</url>-->
-<!--        </pluginRepository>-->
-<!--    </pluginRepositories>-->
 </project>
