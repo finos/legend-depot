@@ -28,20 +28,19 @@ import java.util.Map;
 
 public final class BasicAuthorisationProvider implements AuthorisationProvider
 {
-    private static final URL CONFIG_FILE = BasicAuthorisationProvider.class.getClassLoader().getResource("authorisedIdentities.json");
     private final Map<String, List<String>> authorisedIdentities;
 
     public BasicAuthorisationProvider()
     {
-        if (CONFIG_FILE == null)
+        URL configFile = this.getClass().getClassLoader().getResource("authorisedIdentities.json");
+        if (configFile == null)
         {
             new IllegalArgumentException("authorisedIdentities.json not found in classpath");
         }
         try
         {
-            authorisedIdentities = new ObjectMapper().readValue(CONFIG_FILE, new TypeReference<Map<String, List<String>>>()
-            {
-            });
+            authorisedIdentities = new ObjectMapper().readValue(configFile, new TypeReference<Map<String, List<String>>>()
+            {});
         }
         catch (IOException e)
         {

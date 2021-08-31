@@ -59,7 +59,7 @@ public final class SchedulesFactory
         Optional<ScheduleInfo> existingInfo = manageSchedulesService.get(name);
 
         ScheduleInfo info = existingInfo.isPresent() ? existingInfo.get() : new ScheduleInfo(name);
-        info.alloyMultipleRuns = parallelRun;
+        info.allowMultipleRuns = parallelRun;
         info.frequency = interval;
         manageSchedulesService.createOrUpdate(info);
     }
@@ -105,7 +105,7 @@ public final class SchedulesFactory
             LOGGER.info("Job {} is disabled, skipping", jobId);
             return null;
         }
-        if (!scheduleInfo.alloyMultipleRuns && scheduleInfo.running)
+        if (!scheduleInfo.allowMultipleRuns && scheduleInfo.running)
         {
             LOGGER.info("Other instance is running, skipping {}  ", jobId);
             return null;
