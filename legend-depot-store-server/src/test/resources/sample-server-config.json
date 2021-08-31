@@ -30,7 +30,7 @@
     }
   },
   "mongo": {
-    "url": "mongodb://your URI here",
+    "url": "mongodb://127.0.0.1:27017",
     "database": "depot-dev"
   },
   "openTracing": {
@@ -56,21 +56,20 @@
   },
   "swagger": {
     "resourcePackage": "org.finos.legend.depot.store",
-    "title": "Legend Depot Store Manager"
+    "title": "Legend Depot Store Manager",
+    "uriPrefix": "/depot-store/api"
   },
   "pac4j": {
     "callbackPrefix": "/depot-store",
     "bypassPaths": [
       "/depot-store/api/info"
     ],
+    "bypassBranches": [
+      "/depot-store/api/queue"
+    ],
     "clients": [
       {
-        "org.finos.legend.server.pac4j.gitlab.GitlabClient": {
-          "name": "gitlab",
-          "clientId": "your app id here",
-          "secret": "your app secret here",
-          "discoveryUri": "https://$GITLAB_HOST/.well-known/openid-configuration",
-          "scope": "openid profile api"
+        "org.pac4j.core.client.direct.AnonymousClient": {
         }
       }
     ],
@@ -91,8 +90,11 @@
     "CORS": 5
   },
   "artifactRepositoryProviderConfiguration": {
-    "org.finos.legend.metadata.artifacts.repository.one.unsecured.OneUnsecuredArtifactRepositoryConfiguration": {
-      "settingsLocation": "config/sample-repository-settings.xml"
+    "org.finos.legend.depot.artifacts.repository.one.unsecured.OneUnsecuredArtifactRepositoryConfiguration": {
+      "settingsLocation": "src/test/resources/sample-repository-settings.xml"
     }
+  },
+  "includeProjectPropertiesConfiguration": {
+    "properties": []
   }
 }

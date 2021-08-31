@@ -30,7 +30,7 @@
     }
   },
   "mongo": {
-    "url": "mongodb://your URI here",
+    "url": "mongodb://127.0.0.1:27017",
     "database": "depot-dev"
   },
   "openTracing": {
@@ -56,7 +56,7 @@
   "swagger": {
     "resourcePackage": "org.finos.legend.depot.server",
     "title": "Legend Depot server",
-    "uriPrefix": "/metadata/api"
+    "uriPrefix": "/depot/api"
   },
   "pac4j": {
     "callbackPrefix": "/depot",
@@ -65,12 +65,7 @@
     ],
     "clients": [
       {
-        "org.finos.legend.server.pac4j.gitlab.GitlabClient": {
-          "name": "gitlab",
-          "clientId": "your app id here",
-          "secret": "your app secret here",
-          "discoveryUri": "https://$GITLAB_HOST/.well-known/openid-configuration",
-          "scope": "openid profile api"
+        "org.pac4j.core.client.direct.AnonymousClient": {
         }
       }
     ],

@@ -30,7 +30,7 @@ public class ScheduleInfo implements HasIdentifier
     @JsonProperty
     public boolean running = false;
     @JsonProperty
-    public boolean alloyMultipleRuns = false;
+    public boolean allowMultipleRuns = false;
     @JsonProperty
     public String jobId;
     @JsonProperty
@@ -57,7 +57,7 @@ public class ScheduleInfo implements HasIdentifier
     {
         this.jobId = id;
         this.frequency = frequency;
-        this.alloyMultipleRuns = parallelRun;
+        this.allowMultipleRuns = parallelRun;
     }
 
     @Override
@@ -107,8 +107,8 @@ public class ScheduleInfo implements HasIdentifier
         return message;
     }
 
-    public boolean isAlloyMultipleRuns()
+    public boolean isAllowMultipleRuns()
     {
-        return alloyMultipleRuns;
+        return allowMultipleRuns;
     }
 }
