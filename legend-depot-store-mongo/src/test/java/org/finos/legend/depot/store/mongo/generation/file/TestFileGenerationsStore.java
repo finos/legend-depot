@@ -138,7 +138,7 @@ public class TestFileGenerationsStore extends TestStoreMongo
 
         Assert.assertTrue(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "/examples/metadata/test/ClientBasic.avro").isPresent());
         Assert.assertFalse(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "0.01.1", "/examples/metadata/test/ClientBasic.avro").isPresent());
-        Assert.assertFalse(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT, "com/gs/sdgashdf").isPresent());
+        Assert.assertFalse(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT, "com/finos/sdgashdf").isPresent());
 
     }
 
