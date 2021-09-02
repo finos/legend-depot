@@ -25,7 +25,7 @@ Once you have your configuration file, you can run the server with Java 8 or lat
 java -cp $SHADED_JAR_PATH org.finos.legend.depot.store.server.LegendDepotStoreServer server $CONFIG_DIR/config.json
 If you want to use the shaded JAR built by mvn install in this project, you can get it from legend-depot-store-server/target/legend-depot-store-server-*.jar. 
 
-You can test by trying http://localhost:8076/depot-store/api/info in a web browser. The swagger page can be accessed at http://locahost:8076/depot-store/api/swagger.
+You can test by trying http://127.0.0.1:8076/depot-store/api/info in a web browser. The swagger page can be accessed at http://127.0.0.1:8076/depot-store/api/swagger.
 
 Certain store APIs required elevated permissions.
 
