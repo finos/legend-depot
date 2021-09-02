@@ -20,6 +20,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
@@ -40,6 +43,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Path("")
 @Api("Notifications")
@@ -50,13 +54,15 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
 
     private final Notifications eventsApi;
     private final Queue queue;
+    private final ManageProjectsService projectsService;
 
     @Inject
-    protected NotificationsManagerResource(Notifications events, Queue queue, AuthorisationProvider authorisationProvider, @Named("requestPrincipal") Provider<Principal> principalProvider)
+    protected NotificationsManagerResource(Notifications events, Queue queue, ManageProjectsService projectsService, AuthorisationProvider authorisationProvider, @Named("requestPrincipal") Provider<Principal> principalProvider)
     {
         super(authorisationProvider, principalProvider);
         this.eventsApi = events;
         this.queue = queue;
+        this.projectsService = projectsService;
     }
 
     @Override
@@ -105,10 +111,20 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     }
 
 
-    protected String pushToQueue(String projectId, String groupId, String artifactId, String versionId, int maxRetries)
+    private String pushToQueue(String projectId, String groupId, String artifactId, String versionId, int maxRetries)
     {
+        validateMavenCoordinates(projectId,groupId,artifactId);
         MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId, maxRetries);
         return queue.push(event);
+    }
+
+    private void validateMavenCoordinates(String projectId, String groupId, String artifactId)
+    {
+        Optional<ProjectData> found = projectsService.find(groupId, artifactId);
+        if (found.isPresent() && !found.get().getProjectId().equals(projectId))
+        {
+            throw new IllegalArgumentException(String.format("%s:%s are already associated with project %s", groupId,artifactId,found.get().getProjectId()));
+        }
     }
 
 
