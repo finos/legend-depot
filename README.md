@@ -10,7 +10,7 @@ Legend Depot has two main components:
 - Depot Server: read only metadata query REST API
 - Depot Store Server: manages internal metadata cache and sources it from maven style repository where models artifacts have been published.
 
-## Usage example
+## Getting started
 
 ### Depot Store Server
 
