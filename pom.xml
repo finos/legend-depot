@@ -919,7 +919,12 @@
                 <artifactId>legend-sdlc-entity-serialization</artifactId>
                 <version>${legend.sdlc.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.finos.legend.shared</groupId>
+                <artifactId>legend-shared-pac4j-gitlab</artifactId>
+                <version>${legend.shared.version}</version>
+                <scope>runtime</scope>
+            </dependency>
             <!-- LEGEND-->
 
         </dependencies>
