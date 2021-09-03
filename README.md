@@ -27,7 +27,7 @@ If you want to use the shaded JAR built by mvn install in this project, you can 
 
 You can test by trying http://127.0.0.1:8076/depot-store/api/info in a web browser. The swagger page can be accessed at http://127.0.0.1:8076/depot-store/api/swagger.
 
-Certain store APIs required elevated permissions.
+Certain store APIs required elevated permissions, add your gitlab id to the authorisedIdentities.json file
 
 #### Registeting metadata projects with depot store server
 
