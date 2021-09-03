@@ -71,6 +71,17 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.finos.legend.shared</groupId>
+            <artifactId>legend-shared-pac4j-gitlab</artifactId>
+            <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.activation</groupId>
+                    <artifactId>activation</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
 
