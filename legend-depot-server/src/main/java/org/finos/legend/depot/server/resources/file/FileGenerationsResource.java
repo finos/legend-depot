@@ -144,10 +144,10 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<FileGeneration> getFileGenerationsByFile(@PathParam("groupId") String groupId,
                                                              @PathParam("artifactId") String artifactId,
-                                                             @PathParam("versionId") String versionId, @PathParam("path") String path)
+                                                             @PathParam("versionId") String versionId, @PathParam("file") String file)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
-        return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFile(groupId, artifactId, versionId, path));
+        return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFile(groupId, artifactId, versionId, file));
     }
 
 }
