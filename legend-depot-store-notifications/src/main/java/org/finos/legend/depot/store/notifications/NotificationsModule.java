@@ -55,7 +55,7 @@ public class NotificationsModule extends PrivateModule
     boolean initQueue(SchedulesFactory schedulesFactory, QueueManagerConfiguration config, ManageProjectsService projects, Notifications events, Queue queue, ArtifactsRefreshService artifactsRefreshService)
     {
         NotificationsQueueManager eventsQueueManager = new NotificationsQueueManager(events, queue, projects, artifactsRefreshService);
-        schedulesFactory.register(QUEUE_OBSERVER, LocalDateTime.now().plusMinutes(10), config.getQueueInterval(), true, eventsQueueManager::run);
+        schedulesFactory.register(QUEUE_OBSERVER, LocalDateTime.now().plusMinutes(1), config.getQueueInterval(), true, eventsQueueManager::run);
         return true;
     }
 
