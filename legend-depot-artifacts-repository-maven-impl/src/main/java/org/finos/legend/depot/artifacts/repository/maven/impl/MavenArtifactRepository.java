@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.artifacts.repository.one.unsecured;
+package org.finos.legend.depot.artifacts.repository.maven.impl;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
@@ -55,9 +55,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ArtifactRepositoryOneUnsecured implements ArtifactRepository
+public class MavenArtifactRepository implements ArtifactRepository
 {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ArtifactRepositoryOneUnsecured.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MavenArtifactRepository.class);
     private static final String EMPTY_STRING = "";
     private static final String GAV_SEP = ":";
     private static final String GROUP = "group";
@@ -68,16 +68,16 @@ public class ArtifactRepositoryOneUnsecured implements ArtifactRepository
     private String localRepository;
 
 
-    public ArtifactRepositoryOneUnsecured(ArtifactRepositoryProviderConfiguration configuration)
+    public MavenArtifactRepository(ArtifactRepositoryProviderConfiguration configuration)
     {
         if (configuration == null)
         {
             this.settingsLocation = null;
             return;
         }
-        if (configuration instanceof OneUnsecuredArtifactRepositoryConfiguration)
+        if (configuration instanceof MavenArtifactRepositoryConfiguration)
         {
-            this.settingsLocation = ((OneUnsecuredArtifactRepositoryConfiguration)configuration).getSettingsLocation();
+            this.settingsLocation = ((MavenArtifactRepositoryConfiguration)configuration).getSettingsLocation();
             loadSettings(this.settingsLocation);
         }
         else
