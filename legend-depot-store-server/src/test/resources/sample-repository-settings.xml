@@ -28,10 +28,50 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <repositories>
+                <!--pubic gitlab group packages repository examples; replace gitlab groupId with yours-->
                 <repository>
-                    <id>test-repo</id>
-                    <url>http://finos.central</url>
-                    <layout>default</layout>
+                    <id>legend-group-repo</id>
+                    <url>https://gitlab.com/api/v4/groups/10863602/-/packages/maven</url>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>LegendPipelineTesting-group-repo</id>
+                    <url>https://gitlab.com/api/v4/groups/13480401/-/packages/maven</url>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                    </snapshots>
+                </repository>
+                <!--private gitlab group packages repository example; replace gitlab groupId with yours-->
+                <repository>
+                    <id>LegendPipelineTesting-private-group-repo</id>
+                    <url>https://gitlab.com/api/v4/groups/13480401/-/packages/maven</url>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                    </snapshots>
+                </repository>
+                <!--private gitlab project packages repository example; replace gitlab project id with yours.
+                Credentials are provided in the servers section, ids must match,
+                deploy token with read-registry to repository its needed -->
+                <repository>
+                    <id>private-project-repo</id>
+                    <url>https://gitlab.com/api/v4/projects/25339854/packages/maven</url>
                     <releases>
                         <enabled>true</enabled>
                         <updatePolicy>never</updatePolicy>
@@ -44,4 +84,12 @@
             </repositories>
         </profile>
     </profiles>
+    <servers>
+        <server>
+            <id>private-project-repo</id>
+            <!-- replace with deploy token username and password-->
+            <username>gitlab+deploy-token-username</username>
+            <password>am_secret</password>
+        </server>
+    </servers>
 </settings>

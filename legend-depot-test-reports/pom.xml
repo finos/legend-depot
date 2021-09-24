@@ -95,7 +95,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-artifacts-repository-one-unsecured</artifactId>
+            <artifactId>legend-depot-artifacts-repository-maven-impl</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
