@@ -39,7 +39,7 @@
 
         <module>legend-depot-artifacts-refresh</module>
         <module>legend-depot-artifacts-repository-api</module>
-        <module>legend-depot-artifacts-repository-one-unsecured</module>
+        <module>legend-depot-artifacts-repository-maven-impl</module>
 
         <module>legend-depot-server</module>
         <module>legend-depot-store-server</module>
