@@ -35,7 +35,7 @@
     </properties>
 
     <dependencies>
-        <!--Project Dependencies-->
+
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-http</artifactId>

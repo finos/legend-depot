@@ -101,5 +101,6 @@
   },
   "includeProjectPropertiesConfiguration": {
     "properties": []
-  }
+  },
+  "queue-interval": 30
 }
