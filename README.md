@@ -10,7 +10,7 @@ Legend Depot has two main components:
 - Depot Server: read only metadata query REST API
 - Depot Store Server: manages internal metadata cache and sources it from maven style repository where models artifacts have been published.
 
-## Usage example
+## Getting started
 
 ### Depot Store Server
 
@@ -25,9 +25,14 @@ Once you have your configuration file, you can run the server with Java 8 or lat
 java -cp $SHADED_JAR_PATH org.finos.legend.depot.store.server.LegendDepotStoreServer server $CONFIG_DIR/config.json
 If you want to use the shaded JAR built by mvn install in this project, you can get it from legend-depot-store-server/target/legend-depot-store-server-*.jar. 
 
-You can test by trying http://127.0.0.1:8076 in a web browser. The swagger page can be accessed at http://127.0.0.1:8076/depot-store/api/swagger.
+You can test by trying http://127.0.0.1:8076/depot-store/api/info in a web browser. The swagger page can be accessed at http://127.0.0.1:8076/depot-store/api/swagger.
 
-Certain store APIs required elevated permissions.
+#### Gitlab oauth set up
+
+Follow instructions here to set up gitlab authentication https://legend.finos.org/docs/installation/maven-install-guide.
+Add following callback url to config: http://127.0.0.1:8076/depot-store/callback
+
+Certain store APIs required elevated permissions, add your gitlab id to the authorisedIdentities.json file
 
 #### Registeting metadata projects with depot store server
 
@@ -48,7 +53,7 @@ Once you have your configuration file, you can run the server with Java 8 or lat
 java -cp $SHADED_JAR_PATH org.finos.legend.depot.server.LegendDepotServer server $CONFIG_DIR/config.json
 If you want to use the shaded JAR built by mvn install in this project, you can get it from legend-depot-server/target/legend-depot-server-*.jar. 
 
-You can test by trying http://127.0.0.1:8075 in a web browser. The swagger page can be accessed at http://127.0.0.1:8075/depot/api/swagger.
+You can test by trying http://127.0.0.1:8075/depot/api/info in a web browser. The swagger page can be accessed at http://127.0.0.1:8075/depot/api/swagger.
 
 ## Development setup
 
