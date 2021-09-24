@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.artifacts.repository.one.unsecured;
+package org.finos.legend.depot.artifacts.repository.maven.impl;
 
 import org.finos.legend.depot.artifacts.repository.api.ArtifactNotFoundException;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
@@ -29,7 +29,7 @@ import java.util.Set;
 public class TestRepository extends TestStoreMongo
 {
     public static final String GROUP_ID = "examples.metadata";
-    private ArtifactRepository repository = new TestArtifactsRepository();
+    private ArtifactRepository repository = new TestMavenArtifactsRepository();
 
     @Test
     public void canResolveVersionsRanges()

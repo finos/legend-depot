@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.artifacts.repository.one.unsecured;
+package org.finos.legend.depot.artifacts.repository.maven.impl;
 
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
@@ -26,11 +26,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestArtifactsRepository extends ArtifactRepositoryOneUnsecured implements ArtifactRepository
+public class TestMavenArtifactsRepository extends MavenArtifactRepository implements ArtifactRepository
 {
     public static final String SEPARATOR = "/";
     public static final String DOT = ".";
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TestArtifactsRepository.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TestMavenArtifactsRepository.class);
     private static Map<String, List<VersionId>> TESTING_VERSIONS = new HashMap<>();
 
     static
@@ -41,7 +41,7 @@ public class TestArtifactsRepository extends ArtifactRepositoryOneUnsecured impl
         TESTING_VERSIONS.put("examples.metadata.test-dependencies", Arrays.asList(VersionId.parseVersionId("1.0.0")));
     }
 
-    public TestArtifactsRepository()
+    public TestMavenArtifactsRepository()
     {
         super(null);
     }

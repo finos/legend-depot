@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.artifacts.repository.one.unsecured;
+package org.finos.legend.depot.artifacts.repository.maven.impl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,7 +22,7 @@ import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProvide
 
 import javax.validation.constraints.NotNull;
 
-public class OneUnsecuredArtifactRepositoryConfiguration extends ArtifactRepositoryProviderConfiguration
+public class MavenArtifactRepositoryConfiguration extends ArtifactRepositoryProviderConfiguration
 {
 
     @NotNull
@@ -30,7 +30,7 @@ public class OneUnsecuredArtifactRepositoryConfiguration extends ArtifactReposit
     private String settingsLocation;
 
     @JsonCreator
-    public OneUnsecuredArtifactRepositoryConfiguration(@JsonProperty("settingsLocation") String settingsLocation)
+    public MavenArtifactRepositoryConfiguration(@JsonProperty("settingsLocation") String settingsLocation)
     {
         super("OneUnsecuredArtifactRepository");
         this.settingsLocation = settingsLocation;
@@ -44,7 +44,7 @@ public class OneUnsecuredArtifactRepositoryConfiguration extends ArtifactReposit
     @Override
     public ArtifactRepository initialiseArtifactRepositoryProvider()
     {
-        return new ArtifactRepositoryOneUnsecured(this);
+        return new MavenArtifactRepository(this);
     }
 
     @Override
