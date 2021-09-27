@@ -51,6 +51,11 @@
     </modules>
 
     <properties>
+      
+        <sonar.projectKey>legend-depot</sonar.projectKey>
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+
+      
         <timestamp>${maven.build.timestamp}</timestamp>
         <encoding>UTF-8</encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
