@@ -30,7 +30,7 @@
             <repositories>
                 <!--pubic gitlab group packages repository examples; replace gitlab groupId with yours-->
                 <repository>
-                    <id>legend-group-repo</id>
+                    <id>legend-public-group-repo</id>
                     <url>https://gitlab.com/api/v4/groups/10863602/-/packages/maven</url>
                     <releases>
                         <enabled>true</enabled>
@@ -42,7 +42,7 @@
                     </snapshots>
                 </repository>
                 <repository>
-                    <id>LegendPipelineTesting-group-repo</id>
+                    <id>LegendPipelineTesting-public-group-repo</id>
                     <url>https://gitlab.com/api/v4/groups/13480401/-/packages/maven</url>
                     <releases>
                         <enabled>true</enabled>
@@ -89,7 +89,13 @@
             <id>private-project-repo</id>
             <!-- replace with deploy token username and password-->
             <username>gitlab+deploy-token-username</username>
-            <password>am_secret</password>
+            <password>...</password>
+        </server>
+        <server>
+            <id>LegendPipelineTesting-private-group-repo</id>
+            <!-- replace with group level deploy token username and password-->
+            <username>gitlab+deploy-token-username</username>
+            <password>...</password>
         </server>
     </servers>
 </settings>
