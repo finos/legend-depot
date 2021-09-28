@@ -25,7 +25,7 @@ public final class PrometheusMetricsFactory
 {
 
     private static final PrometheusMetricsFactory INSTANCE = new PrometheusMetricsFactory();
-    private static volatile PrometheusMetricsHandler metricsHandler = new VoidPrometheusMetricsHandler();
+    private static PrometheusMetricsHandler metricsHandler = new VoidPrometheusMetricsHandler();
 
     private PrometheusMetricsFactory()
     {
@@ -41,7 +41,7 @@ public final class PrometheusMetricsFactory
 
     }
 
-    public static PrometheusMetricsHandler get()
+    public static synchronized PrometheusMetricsHandler get()
     {
         return metricsHandler;
     }
