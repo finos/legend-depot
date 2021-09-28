@@ -51,4 +51,4 @@ jobs:
         run: mvn install javadoc:javadoc
       - name: Build + Test + Sonar + Maven Deploy
         if: (github.repository == 'finos/legend-depot') && (github.ref == 'refs/heads/master')
-        run: mvn -X javadoc:javadoc install -Psonar
+        run: mvn javadoc:javadoc install -Psonar
