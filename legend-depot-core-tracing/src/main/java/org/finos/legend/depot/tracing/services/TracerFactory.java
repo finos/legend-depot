@@ -66,8 +66,7 @@ public final class TracerFactory
 
     public static synchronized TracerFactory configure(OpenTracingConfiguration openTracingConfiguration)
     {
-        isEnabled = openTracingConfiguration != null && openTracingConfiguration.isEnabled();
-        if (isEnabled)
+        if (openTracingConfiguration != null && openTracingConfiguration.isEnabled())
         {
             if (openTracingConfiguration.getOpenTracingUri() == null || openTracingConfiguration.getOpenTracingUri().isEmpty())
             {
