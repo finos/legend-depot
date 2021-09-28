@@ -42,8 +42,8 @@ public final class TracerFactory
 {
     private static final TracerFactory INSTANCE = new TracerFactory();
     public static final String DEFAULT_SERVICE_NAME = "legend-depot";
-    private static volatile Tracer tracer = NoopTracerFactory.create();
-    private static volatile boolean isEnabled = false;
+    private static Tracer tracer = NoopTracerFactory.create();
+    private static boolean isEnabled = false;
 
     private TracerFactory()
     {
@@ -54,12 +54,12 @@ public final class TracerFactory
         return INSTANCE;
     }
 
-    public boolean isTracingEnabled()
+    public synchronized boolean isTracingEnabled()
     {
         return isEnabled;
     }
 
-    public Tracer getTracer()
+    public synchronized Tracer getTracer()
     {
         return tracer;
     }
