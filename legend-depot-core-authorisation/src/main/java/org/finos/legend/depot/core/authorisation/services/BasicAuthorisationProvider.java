@@ -35,7 +35,7 @@ public final class BasicAuthorisationProvider implements AuthorisationProvider
         URL configFile = this.getClass().getClassLoader().getResource("authorisedIdentities.json");
         if (configFile == null)
         {
-            new IllegalArgumentException("authorisedIdentities.json not found in classpath");
+            throw new IllegalArgumentException("authorisedIdentities.json not found in classpath");
         }
         try
         {
