@@ -58,7 +58,7 @@
 
     <properties>
       
-        <sonar.projectKey>legend-depot</sonar.projectKey>
+        <sonar.projectKey>finos_legend-depot</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
         <sonar.organization>finos</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
