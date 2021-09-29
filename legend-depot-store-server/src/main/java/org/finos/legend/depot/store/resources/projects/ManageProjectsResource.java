@@ -93,4 +93,21 @@ public class ManageProjectsResource extends BaseAuthorisedResource
                 });
     }
 
+    @DELETE
+    @Path("/projects/{projectId}")
+    @ApiOperation(ResourceLoggingAndTracing.DELETE_PROJECT_ID)
+    @Produces(MediaType.APPLICATION_JSON)
+    public MetadataEventResponse deleteProject(@PathParam("projectId") String projectId)
+    {
+
+        return handle(
+                ResourceLoggingAndTracing.DELETE_PROJECT_ID,
+                ResourceLoggingAndTracing.DELETE_PROJECT + projectId,
+                () ->
+                {
+                    validateUser();
+                    return projectApi.delete(projectId);
+                });
+    }
+
 }

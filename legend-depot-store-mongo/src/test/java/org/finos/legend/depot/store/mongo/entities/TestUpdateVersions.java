@@ -120,6 +120,17 @@ public class TestUpdateVersions extends TestStoreMongo
         Assert.assertEquals(0, versionsMongo.getVersionEntityCount("examples.metadata", "test", "2.2.0"));
     }
 
+
+    @Test
+    public void canDeleteStoreEntities()
+    {
+        setUpEntitiesDataFromFile(ENTITIES_FILE);
+        long count = versionsMongo.getEntityCount("examples.metadata", "test");
+        Assert.assertEquals(3, count);
+        versionsMongo.deleteAll("examples.metadata", "test");
+        Assert.assertEquals(0, versionsMongo.getEntityCount("examples.metadata", "test"));
+    }
+
     @Test
     public void canCreateIndexesIfAbsent()
     {

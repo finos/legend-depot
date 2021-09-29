@@ -50,6 +50,12 @@ public class ProjectsServiceImpl implements ManageProjectsService
     }
 
     @Override
+    public MetadataEventResponse delete(String projectId)
+    {
+        return projects.deleteByProjectId(projectId);
+    }
+
+    @Override
     public List<ProjectData> getAll()
     {
         return projects.getAll();

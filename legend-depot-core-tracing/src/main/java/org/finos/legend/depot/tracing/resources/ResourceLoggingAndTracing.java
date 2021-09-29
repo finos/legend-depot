@@ -21,6 +21,7 @@ public class ResourceLoggingAndTracing
     public static final String GET_PROJECT_BY_ID = "get project by id";
     public static final String GET_PROJECT_BY_GA = "get project by ga";
     public static final String DELETE_PROJECT = "delete project";
+    public static final String DELETE_PROJECT_ID = "delete projects by id";
     public static final String CREATE_EMPTY_PROJECT = "create empty project";
     public static final String GET_PROJECT_DEPENDENCIES = "get upstream project dependencies";
     public static final String GET_DEPENDANT_PROJECTS = "downstream projects";
@@ -34,6 +35,7 @@ public class ResourceLoggingAndTracing
     public static final String GET_VERSION_DEPENDENCY_ENTITIES = "get version dependencies entities";
     public static final String GET_REVISION_DEPENDENCY_ENTITIES = "get latest dependencies entities";
     public static final String GET_VERSION_STORE_ENTITIES = "get stored version entities";
+    public static final String DELETE_STORE_ENTITIES = "delete entities";
     public static final String GET_VERSION_ENTITIES_AS_PMCD = "get version entities as PMCD";
     public static final String GET_VERSION_ENTITY = "get version entity";
     public static final String GET_VERSION_ENTITIES_BY_PACKAGE = "get version entities by package";
@@ -64,6 +66,7 @@ public class ResourceLoggingAndTracing
     public static final String GET_VERSIONS_BY_LAST_USED = "versions last used";
     public static final String TOGGLE_SCHEDULE = "toggle schedule";
     public static final String ENQUEUE_REFRESH_ALL_EVENT = "queue refresh all";
+    public static final String ORPHAN_STORE_ENTITIES = "get orphaned entities";
 
 
     private ResourceLoggingAndTracing()

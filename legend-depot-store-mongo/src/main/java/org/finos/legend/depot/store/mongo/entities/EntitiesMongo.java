@@ -15,6 +15,8 @@
 
 package org.finos.legend.depot.store.mongo.entities;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.ReadConcern;
 import com.mongodb.ReadPreference;
@@ -24,10 +26,15 @@ import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.finos.legend.depot.domain.EntityValidator;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.entity.StoredEntityOverview;
@@ -42,14 +49,18 @@ import org.finos.legend.sdlc.domain.model.entity.Entity;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.ne;
@@ -99,11 +110,11 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
 
     public boolean createIndexesIfAbsent()
     {
-        createIndexIfAbsent("groupId-artifactId-versionId",GROUP_ID,ARTIFACT_ID,VERSION_ID);
-        createIndexIfAbsent("groupId-artifactId-versionId-entityPath",GROUP_ID,ARTIFACT_ID,VERSION_ID,ENTITY_PATH);
-        createIndexIfAbsent("groupId-artifactId-versionId-package",GROUP_ID,ARTIFACT_ID,VERSION_ID,ENTITY_PACKAGE);
-        createIndexIfAbsent("groupId-artifactId-hashed",GROUP_ID,ARTIFACT_ID);
-        createIndexIfAbsent("entity-classifier",ENTITY_CLASSIFIER_PATH);
+        createIndexIfAbsent("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID);
+        createIndexIfAbsent("groupId-artifactId-versionId-entityPath", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH);
+        createIndexIfAbsent("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE);
+        createIndexIfAbsent("groupId-artifactId-hashed", GROUP_ID, ARTIFACT_ID);
+        createIndexIfAbsent("entity-classifier", ENTITY_CLASSIFIER_PATH);
         return true;
 
     }
@@ -405,13 +416,20 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
 
 
     @Override
-    public void delete(String groupId, String artifactId, String versionId)
+    public StoreOperationResult delete(String groupId, String artifactId, String versionId)
     {
         Bson filter = getArtifactAndVersionFilter(groupId, artifactId, versionId);
         DeleteResult result = getCollection().deleteMany(filter);
-        result.getDeletedCount();
+        return new StoreOperationResult(0, 0, result.getDeletedCount(), Collections.emptyList());
     }
 
+    @Override
+    public StoreOperationResult deleteAll(String groupId, String artifactId)
+    {
+        Bson filter = getArtifactFilter(groupId, artifactId);
+        DeleteResult result = getCollection().deleteMany(filter);
+        return new StoreOperationResult(0, 0, result.getDeletedCount(), Collections.emptyList());
+    }
 
     public long getRevisionEntityCount()
     {
@@ -429,5 +447,34 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     public long getVersionEntityCount(String groupId, String artifactId, String versionId)
     {
         return getCollection().countDocuments(getArtifactAndVersionFilter(groupId, artifactId, versionId));
+    }
+
+
+    @Override
+    public long getEntityCount(String groupId, String artifactId)
+    {
+        return getCollection().countDocuments(getArtifactFilter(groupId, artifactId));
+    }
+
+    @Override
+    public List<Pair<String, String>> getStoredEntitiesCoordinates()
+    {
+        List<Pair<String, String>> result = new ArrayList<>();
+        BasicDBList concat = new BasicDBList();
+        concat.add("$groupId");
+        concat.add(":");
+        concat.add("$artifactId");
+        Bson allCoordinates = Aggregates.project(Projections.fields(
+                Projections.excludeId(),
+                Projections.include(GROUP_ID, ARTIFACT_ID),
+                Projections.computed("coordinate", new BasicDBObject("$concat", concat))));
+
+        getCollection().aggregate(Arrays.asList(allCoordinates, group("$coordinate"))).forEach((Consumer<Document>)document ->
+                {
+                    StringTokenizer tokenizer = new StringTokenizer(document.getString("_id"),":");
+                    result.add(Tuples.pair(tokenizer.nextToken(),tokenizer.nextToken()));
+                }
+        );
+        return result;
     }
 }
