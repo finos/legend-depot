@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.api.entities;
 
+import org.eclipse.collections.api.tuple.Pair;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.status.StoreOperationResult;
 import org.finos.legend.depot.domain.version.VersionValidator;
@@ -28,7 +29,9 @@ public interface UpdateEntities extends Entities
 
     boolean createIndexesIfAbsent();
 
-    void delete(String groupId, String artifactId, String versionId);
+    StoreOperationResult deleteAll(String groupId, String artifactId);
+
+    StoreOperationResult delete(String groupId, String artifactId, String versionId);
 
     default void deleteLatest(String groupId, String artifactId)
     {
@@ -41,5 +44,5 @@ public interface UpdateEntities extends Entities
 
     List<StoredEntity> getStoredEntities(String groupId, String artifactId, String versionId, boolean versioned);
 
-
+    List<Pair<String, String>> getStoredEntitiesCoordinates();
 }

@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.services.entities;
 
+import org.eclipse.collections.api.tuple.Pair;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
@@ -107,11 +108,16 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     }
 
     @Override
-    public void delete(String groupId, String artifactId, String versionId)
+    public MetadataEventResponse delete(String groupId, String artifactId, String versionId)
     {
-        entities.delete(groupId, artifactId, versionId);
+        return new MetadataEventResponse().combine(entities.delete(groupId, artifactId, versionId));
     }
 
+    @Override
+    public MetadataEventResponse deleteAll(String groupId, String artifactId)
+    {
+        return new MetadataEventResponse().combine(entities.deleteAll(groupId, artifactId));
+    }
 
     @Override
     public MetadataEventResponse createOrUpdate(List<StoredEntity> versionedEntities)
@@ -119,4 +125,10 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
         return new MetadataEventResponse().combine(entities.createOrUpdate(versionedEntities));
     }
 
+    @Override
+    public List<Pair<String, String>> getOrphanedStoredEntities()
+    {
+        List<Pair<String, String>> allArtifacts = entities.getStoredEntitiesCoordinates();
+        return allArtifacts.stream().filter(art -> !projects.find(art.getOne(), art.getTwo()).isPresent()).collect(Collectors.toList());
+    }
 }

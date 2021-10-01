@@ -25,4 +25,6 @@ public interface ManageProjectsService extends ProjectsService
 
     MetadataEventResponse delete(String groupId,String artifactId);
 
+    MetadataEventResponse delete(String projectId);
+
 }

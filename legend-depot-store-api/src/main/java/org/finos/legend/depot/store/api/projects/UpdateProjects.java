@@ -27,5 +27,6 @@ public interface UpdateProjects extends Projects
 
     MetadataEventResponse delete(String groupId, String artifactId);
 
+    MetadataEventResponse deleteByProjectId(String projectId);
 }
 

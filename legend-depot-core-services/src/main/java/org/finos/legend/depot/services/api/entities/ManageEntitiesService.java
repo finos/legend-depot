@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.services.api.entities;
 
+import org.eclipse.collections.api.tuple.Pair;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -36,8 +37,9 @@ public interface ManageEntitiesService extends EntitiesService
         return getEntities(groupId, artifactId, MASTER_SNAPSHOT, versioned);
     }
 
+    MetadataEventResponse deleteAll(String groupId, String artifactId);
 
-    void delete(String groupId, String artifactId, String versionId);
+    MetadataEventResponse delete(String groupId, String artifactId, String versionId);
 
     default void deleteLatest(String groupId, String artifactId)
     {
@@ -46,4 +48,5 @@ public interface ManageEntitiesService extends EntitiesService
 
     MetadataEventResponse createOrUpdate(List<StoredEntity> versionedEntities);
 
+    List<Pair<String, String>> getOrphanedStoredEntities();
 }

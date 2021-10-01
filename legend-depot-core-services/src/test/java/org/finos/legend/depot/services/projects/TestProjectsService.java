@@ -20,6 +20,7 @@ import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
 import org.finos.legend.depot.services.TestBaseServices;
+import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,6 +28,7 @@ import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
@@ -34,7 +36,7 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class TestProjectsService extends TestBaseServices
 {
 
-    protected ProjectsService projectsService = new ProjectsServiceImpl(projectsStore);
+    protected ManageProjectsService projectsService = new ProjectsServiceImpl(projectsStore);
 
     @Before
     public void setUpData()
@@ -48,6 +50,24 @@ public class TestProjectsService extends TestBaseServices
         projectsStore.createOrUpdate(project1);
         Assert.assertEquals(1, projectsStore.findByProjectId("PROD-B").get(0).getDependencies().size());
         loadEntities("PROD-A", "2.3.1");
+    }
+
+    @Test
+    public void canDeleteProjectByCoordinates()
+    {
+        Optional<ProjectData> project1 = projectsService.find("examples.metadata","test-dependencies");
+        Assert.assertTrue(project1.isPresent());
+        projectsService.delete("examples.metadata","test-dependencies");
+        Assert.assertFalse(projectsService.find("examples.metadata","test-dependencies").isPresent());
+    }
+
+    @Test
+    public void canDeleteProjectById()
+    {
+        ProjectData project1 = projectsService.findByProjectId("PROD-B").get(0);
+        Assert.assertNotNull(project1);
+        projectsService.delete("PROD-B");
+        Assert.assertTrue(projectsService.findByProjectId("PROD-B").isEmpty());
     }
 
 
@@ -137,7 +157,7 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertTrue(dependencyList2.contains(new ProjectVersionPlatformDependency("examples.metadata", "test", MASTER_SNAPSHOT, new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
 
         ProjectData projectData = projectsService.find("examples.metadata", "test-dependencies").get();
-        projectData.addDependency(new ProjectVersionDependency("examples.metadata", "test-dependencies", "1.0.0", new ProjectVersion("example.services.test", "test","2.0.0")));
+        projectData.addDependency(new ProjectVersionDependency("examples.metadata", "test-dependencies", "1.0.0", new ProjectVersion("example.services.test", "test", "2.0.0")));
         projectsStore.createOrUpdate(projectData);
 
         List<ProjectVersionPlatformDependency> dependencyList3 = projectsService.getDependentProjects("example.services.test", "test", "all");

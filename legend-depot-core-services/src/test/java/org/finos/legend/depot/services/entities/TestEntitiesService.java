@@ -15,12 +15,16 @@
 
 package org.finos.legend.depot.services.entities;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
+import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
+import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.services.TestBaseServices;
-import org.finos.legend.depot.services.api.entities.EntitiesService;
+import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,7 +38,7 @@ public class TestEntitiesService extends TestBaseServices
 {
 
 
-    protected EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, projectsStore);
+    protected ManageEntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, projectsStore);
 
     @Before
     public void setUpData()
@@ -92,7 +96,7 @@ public class TestEntitiesService extends TestBaseServices
     private Predicate<ProjectVersionEntities> projectToArtifactFilter(String projectId)
     {
         List<ProjectData> p = projectsStore.findByProjectId(projectId);
-        Assert.assertEquals(1,p.size());
+        Assert.assertEquals(1, p.size());
         return dep -> dep.getGroupId().equals(p.get(0).getGroupId()) && dep.getArtifactId().equals(p.get(0).getArtifactId());
     }
 
@@ -109,5 +113,17 @@ public class TestEntitiesService extends TestBaseServices
 
     }
 
+    @Test
+    public void canGetOrphanedEntities()
+    {
+        entitiesService.createOrUpdate(Arrays.asList(
+                new StoredEntity("example.one", "orphaned", "1.0.0", new EntityDefinition("la", "la", null)),
+                new StoredEntity("example.two", "orphaned", "1.0.1", new EntityDefinition("lala", "la", null))
+        ));
 
+        List<Pair<String, String>> orphaned = entitiesService.getOrphanedStoredEntities();
+        Assert.assertEquals(2, orphaned.size());
+        Assert.assertTrue(orphaned.contains(Tuples.pair("example.one", "orphaned")));
+        Assert.assertTrue(orphaned.contains(Tuples.pair("example.two", "orphaned")));
+    }
 }

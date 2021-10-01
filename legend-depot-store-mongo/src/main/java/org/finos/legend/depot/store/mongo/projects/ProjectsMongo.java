@@ -135,6 +135,14 @@ public class ProjectsMongo extends BaseMongo<ProjectData> implements Projects, U
     }
 
     @Override
+    public MetadataEventResponse deleteByProjectId(String projectId)
+    {
+        MetadataEventResponse response = new MetadataEventResponse();
+        getCollection().deleteMany(eq(PROJECT_ID, projectId));
+        return response;
+    }
+
+    @Override
     public Optional<VersionId> getLatestVersion(String groupId, String artifactId)
     {
         Optional<ProjectData> projectData = findOne(getArtifactFilter(groupId, artifactId));

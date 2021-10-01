@@ -60,6 +60,8 @@ public interface Entities
 
     long getVersionEntityCount();
 
+    long getEntityCount(String groupId, String artifactId);
+
     long getVersionEntityCount(String groupId, String artifactId, String versionId);
 
     default long getRevisionEntityCount(String groupId, String artifactId)
