@@ -95,8 +95,8 @@
     "CORS": 5
   },
   "artifactRepositoryProviderConfiguration": {
-    "org.finos.legend.depot.artifacts.repository.one.unsecured.OneUnsecuredArtifactRepositoryConfiguration": {
-      "settingsLocation": "src/test/resources/sample-repository-settings.xml"
+    "org.finos.legend.depot.artifacts.repository.maven.impl.MavenArtifactRepositoryConfiguration": {
+      "settingsLocation": "legend-depot-store-server/src/test/resources/sample-repository-settings.xml"
     }
   },
   "includeProjectPropertiesConfiguration": {
