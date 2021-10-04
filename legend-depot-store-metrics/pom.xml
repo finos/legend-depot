@@ -26,7 +26,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Legend Depot - Store - Metrics</name>
     <artifactId>legend-depot-store-metrics</artifactId>
+
     <dependencies>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>

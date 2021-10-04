@@ -26,7 +26,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Legend Depot - Artifacts - Repository - Maven Implementation</name>
     <artifactId>legend-depot-artifacts-repository-maven-impl</artifactId>
+
     <dependencies>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>

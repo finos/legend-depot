@@ -26,6 +26,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Legend Depot - Test Reports</name>
     <artifactId>legend-depot-test-reports</artifactId>
     <packaging>pom</packaging>
 

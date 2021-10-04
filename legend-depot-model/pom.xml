@@ -26,9 +26,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Legend Depot - Model</name>
     <artifactId>legend-depot-model</artifactId>
     <packaging>jar</packaging>
-
 
     <dependencies>
         <dependency>
