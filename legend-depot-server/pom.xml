@@ -36,15 +36,10 @@
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-http</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
@@ -74,6 +69,15 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
         <!--Testing-->
         <dependency>
             <groupId>junit</groupId>
@@ -90,10 +94,7 @@
             <artifactId>mongo-java-server</artifactId>
             <scope>test</scope>
         </dependency>
-
-
     </dependencies>
-
 
     <build>
         <plugins>
@@ -101,7 +102,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-
             <plugin>
                 <!-- https://github.com/ktoso/maven-git-commit-id-plugin -->
                 <groupId>pl.project13.maven</groupId>
