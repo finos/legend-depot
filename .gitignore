@@ -16,3 +16,8 @@ Thumbs.db
 .settings
 .project
 .classpath
+
+# Development
+legend-depot-server/src/test/resources/local-config.json
+legend-depot-store-server/src/test/resources/local-config.json
+legend-depot-store-server/src/test/resources/local-repository-settings.xml
