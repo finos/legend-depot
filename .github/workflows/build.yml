@@ -1,4 +1,4 @@
-# Copyright 2020 FINOS
+# Copyright 2021 Goldman Sachs
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,4 +51,4 @@ jobs:
         run: mvn install javadoc:javadoc
       - name: Build + Test + Sonar + Maven Deploy
         if: (github.repository == 'finos/legend-depot') && (github.ref == 'refs/heads/master')
-        run: mvn javadoc:javadoc install -Psonar
+        run: mvn javadoc:javadoc deploy -Psonar

@@ -17,8 +17,8 @@
 
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-   <modelVersion>4.0.0</modelVersion>
-   <parent>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
         <groupId>org.finos</groupId>
         <artifactId>finos</artifactId>
         <version>2</version>
@@ -27,8 +27,8 @@
     <name>Legend Depot</name>
     <groupId>org.finos.legend.depot</groupId>
     <artifactId>legend-depot</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <version>trunk-SNAPSHOT</version>
 
     <modules>
         <module>legend-depot-model</module>
@@ -53,17 +53,14 @@
 
         <module>legend-depot-test-reports</module>
         <module>legend-depot-store-api</module>
-
-
     </modules>
 
     <properties>
-      
         <sonar.projectKey>finos_legend-depot</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
         <sonar.organization>finos</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-      
+
         <timestamp>${maven.build.timestamp}</timestamp>
         <encoding>UTF-8</encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -114,13 +111,13 @@
         <shrinkwrap-resolver-api.version>3.1.2</shrinkwrap-resolver-api.version>
         <plexus-utils.version>3.1.0</plexus-utils.version>
         <guava.version>30.1-jre</guava.version>
+
         <!-- TRACING -->
         <zipkin-reporter.version>2.15.0</zipkin-reporter.version>
         <zipkin.version>2.21.1</zipkin.version>
         <opentracing.version>0.32.0</opentracing.version>
         <opentracing-mongo-driver.version>0.1.4</opentracing-mongo-driver.version>
         <prometheus.version>0.8.1</prometheus.version>
-        <metrics-utils.version>0.3.0</metrics-utils.version><!-- TODO OPEN SOURCE-->
 
         <!-- MONGO -->
         <bson.version>3.10.2</bson.version>
@@ -129,105 +126,213 @@
 
         <validation-api.version>1.1.0.Final</validation-api.version>
 
+        <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
+        <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
+        <maven.checkstyle.plugin.version>3.1.2</maven.checkstyle.plugin.version>
+        <maven.surefire.plugin.version>3.0.0-M3</maven.surefire.plugin.version>
+        <maven.dependency.plugin.version>2.10</maven.dependency.plugin.version>
+        <maven.shade.plugin.version>3.2.1</maven.shade.plugin.version>
+        <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
+        <maven.enforcer.plugin.version>3.0.0-M1</maven.enforcer.plugin.version>
+        <maven.jar.plugin.version>3.1.2</maven.jar.plugin.version>
 
+        <git.commit.plugin.version>2.2.6</git.commit.plugin.version>
+        <versions.maven.plugin.version>2.7</versions.maven.plugin.version>
+        <jacoco.maven.plugin.version>0.8.5</jacoco.maven.plugin.version>
+        <sonar.maven.plugin.version>3.7.0.1746</sonar.maven.plugin.version>
+        <dockerfile.maven.plugin.version>1.4.13</dockerfile.maven.plugin.version>
     </properties>
+
+    <scm>
+        <developerConnection>scm:git:https://github.com/finos/legend-depot</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <build>
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.plugin.version}</version>
+                    <configuration>
+                        <source>${maven.compiler}</source>
+                        <target>${maven.compiler}</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>${maven.clean.plugin.version}</version>
+                    <configuration>
+                        <filesets>
+                            <fileset>
+                                <directory>.</directory>
+                                <includes>
+                                    <include>**/node_modules/**</include>
+                                    <include>**/target/**</include>
+                                    <include>**/dist/**</include>
+                                </includes>
+                            </fileset>
+                        </filesets>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.0</version>
+                    <version>${maven.surefire.plugin.version}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>2.10</version>
+                    <version>${maven.dependency.plugin.version}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven.jar.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>${maven.shade.plugin.version}</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-plugin-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>${maven.plugin.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>${maven.checkstyle.plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>8.25</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>verify</id>
+                            <phase>verify</phase>
+                            <configuration>
+                                <configLocation>checkstyle.xml</configLocation>
+                                <logViolationsToConsole>true</logViolationsToConsole>
+                                <failOnViolation>true</failOnViolation>
+                                <violationSeverity>warning</violationSeverity>
+                                <sourceDirectories>
+                                    <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+                                    <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
+                                </sourceDirectories>
+                            </configuration>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0-M1</version>
+                    <version>${maven.enforcer.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>enforce</id>
+                            <configuration>
+                                <rules>
+                                    <requireJavaVersion>
+                                        <version>[11,12)</version>
+                                    </requireJavaVersion>
+                                    <dependencyConvergence/>
+                                    <bannedDependencies>
+                                        <excludes>
+                                            <exclude>log4j</exclude>
+                                            <exclude>org.slf4j</exclude>
+                                            <exclude>commons-logging</exclude>
+                                            <exclude>javax.mail</exclude>
+                                        </excludes>
+                                        <includes>
+                                            <!--only the specific included logging jars are allowed -->
+                                            <include>org.slf4j:jul-to-slf4j:${slf4j.version}</include>
+                                            <include>org.slf4j:slf4j-api:${slf4j.version}</include>
+                                            <include>org.slf4j:jcl-over-slf4j:${slf4j.version}</include>
+                                            <include>org.slf4j:slf4j-ext:${slf4j.version}</include>
+                                        </includes>
+                                    </bannedDependencies>
+                                </rules>
+                            </configuration>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>pl.project13.maven</groupId>
+                    <artifactId>git-commit-id-plugin</artifactId>
+                    <version>${git.commit.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.7</version>
+                    <version>${versions.maven.plugin.version}</version>
                     <configuration>
                         <excludes>
                             <exclude>org.apache.commons:commons-collections4</exclude>
                         </excludes>
                     </configuration>
                 </plugin>
-               <plugin>
+                <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.5</version>
+                    <version>${jacoco.maven.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>pre-unit-test</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>post-unit-test</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
                     <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.7.0.1746</version>
+                    <version>${sonar.maven.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.spotify</groupId>
+                    <artifactId>dockerfile-maven-plugin</artifactId>
+                    <version>${dockerfile.maven.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
-                <configuration>
-                    <source>${maven.compiler}</source>
-                    <target>${maven.compiler}</target>
-                </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>.</directory>
-                            <includes>
-                                <include>**/node_modules/**</include>
-                                <include>**/target/**</include>
-                                <include>**/dist/**</include>
-                            </includes>
-                        </fileset>
-                    </filesets>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M3</version>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>pre-unit-test</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>post-unit-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -236,75 +341,290 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.1.2</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.puppycrawl.tools</groupId>
-                        <artifactId>checkstyle</artifactId>
-                        <version>8.25</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>verify</id>
-                        <phase>verify</phase>
-                        <configuration>
-                            <configLocation>checkstyle.xml</configLocation>
-                            <logViolationsToConsole>true</logViolationsToConsole>
-                            <failOnViolation>true</failOnViolation>
-                            <violationSeverity>warning</violationSeverity>
-                            <sourceDirectories>
-                                <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-                                <sourceDirectory>${project.build.testSourceDirectory}</sourceDirectory>
-                            </sourceDirectories>
-                        </configuration>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>enforce</id>
-                        <configuration>
-                            <rules> 
-                                <requireJavaVersion> 
-                                <version>[11,12)</version> 
-                                </requireJavaVersion>
-                                <dependencyConvergence/>
-                                <bannedDependencies>
-                                    <excludes>
-                                        <exclude>log4j</exclude>
-                                        <exclude>org.slf4j</exclude>
-                                        <exclude>commons-logging</exclude>
-                                        <exclude>javax.mail</exclude>
-                                    </excludes>
-                                    <includes>
-                                        <!--only the specific included logging jars are allowed -->
-                                        <include>org.slf4j:jul-to-slf4j:${slf4j.version}</include>
-                                        <include>org.slf4j:slf4j-api:${slf4j.version}</include>
-                                        <include>org.slf4j:jcl-over-slf4j:${slf4j.version}</include>
-                                        <include>org.slf4j:slf4j-ext:${slf4j.version}</include>
-                                    </includes>
-                                </bannedDependencies>
-                            </rules>
-                        </configuration>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
-
     </build>
 
     <dependencyManagement>
         <dependencies>
+
+            <!-- DEPOT -->
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-store-mongo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-store-admin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-store-status</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-store-metrics</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-store-notifications</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-core-services</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-core-http</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-core-tracing</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-core-authorisation</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-artifacts-refresh</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-artifacts-repository-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-artifacts-repository-maven-impl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-store-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-test-reports</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-store-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-store-mongo</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-core-services</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-artifacts-repository-maven-impl</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <classifier>tests</classifier>
+            </dependency>
+            <!-- DEPOT -->
+
+            <!-- SHARED -->
+            <dependency>
+                <groupId>org.finos.legend.shared</groupId>
+                <artifactId>legend-shared-server</artifactId>
+                <version>${legend.shared.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.ws.rs</groupId>
+                        <artifactId>javax.ws.rs-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.finos.legend.shared</groupId>
+                        <artifactId>legend-shared-pac4j-gitlab</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>io.opentracing</groupId>
+                        <artifactId>opentracing-noop</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.shared</groupId>
+                <artifactId>legend-shared-pac4j</artifactId>
+                <version>${legend.shared.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.ws.rs</groupId>
+                        <artifactId>javax.ws.rs-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.mongodb</groupId>
+                        <artifactId>mongo-java-driver</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.shared</groupId>
+                <artifactId>legend-shared-opentracing-base</artifactId>
+                <version>${legend.shared.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.shared</groupId>
+                <artifactId>legend-shared-opentracing-jersey</artifactId>
+                <version>${legend.shared.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>javax.servlet-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.glassfish.jersey.core</groupId>
+                        <artifactId>jersey-client</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.shared</groupId>
+                <artifactId>legend-shared-pac4j-gitlab</artifactId>
+                <version>${legend.shared.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <!-- SHARED-->
+
+            <!-- ENGINE-->
+            <dependency>
+                <groupId>org.finos.legend.engine</groupId>
+                <artifactId>legend-engine-shared-core</artifactId>
+                <version>${legend.engine.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.pac4j</groupId>
+                        <artifactId>pac4j-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>javax.servlet-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guave</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.finos.legend.shared</groupId>
+                        <artifactId>legend-shared-pac4j-kerberos</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.engine</groupId>
+                <artifactId>legend-engine-protocol</artifactId>
+                <version>${legend.engine.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>pure</groupId>
+                        <artifactId>pure-m2-dsl-lake</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.engine</groupId>
+                <artifactId>legend-engine-protocol-pure</artifactId>
+                <version>${legend.engine.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.mongodb</groupId>
+                        <artifactId>bson</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.finos.legend.shared</groupId>
+                        <artifactId>legend-shared-pac4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- ENGINE-->
+
+            <!--SDLC-->
+            <dependency>
+                <groupId>org.finos.legend.sdlc</groupId>
+                <artifactId>legend-sdlc-model</artifactId>
+                <version>${legend.sdlc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.sdlc</groupId>
+                <artifactId>legend-sdlc-server-shared</artifactId>
+                <version>${legend.sdlc.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-server</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-servlets</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.ws.rs</groupId>
+                        <artifactId>javax.ws.rs-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.finos.legend.shared</groupId>
+                        <artifactId>legend-shared-pac4j-kerberos</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.sdlc</groupId>
+                <artifactId>legend-sdlc-protocol</artifactId>
+                <version>${legend.sdlc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.sdlc</groupId>
+                <artifactId>legend-sdlc-entity-serialization</artifactId>
+                <version>${legend.sdlc.version}</version>
+            </dependency>
+            <!--SDLC-->
+
             <dependency>
                 <groupId>org.eclipse.collections</groupId>
                 <artifactId>eclipse-collections</artifactId>
@@ -381,12 +701,14 @@
                 <artifactId>validation-api</artifactId>
                 <version>${validation-api.version}</version>
             </dependency>
+
             <!-- LOGGING-->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
+            <!-- LOGGING-->
 
             <dependency>
                 <groupId>com.google.inject</groupId>
@@ -404,7 +726,6 @@
                 <artifactId>guice-servlet</artifactId>
                 <version>${guice.version}</version>
             </dependency>
-
 
             <!-- WEB-->
             <dependency>
@@ -668,7 +989,6 @@
                 <scope>test</scope>
             </dependency>
 
-
             <!-- TRACING-->
             <dependency>
                 <groupId>io.zipkin.reporter2</groupId>
@@ -780,176 +1100,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
             <!-- PROMETHEUS -->
-
-            <!--LEGEND-->
-
-            <dependency>
-                <groupId>org.finos.legend.shared</groupId>
-                <artifactId>legend-shared-server</artifactId>
-                <version>${legend.shared.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>javax.ws.rs-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.finos.legend.shared</groupId>
-                        <artifactId>legend-shared-pac4j-gitlab</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.opentracing</groupId>
-                        <artifactId>opentracing-noop</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.shared</groupId>
-                <artifactId>legend-shared-pac4j</artifactId>
-                <version>${legend.shared.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>javax.ws.rs-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.mongodb</groupId>
-                        <artifactId>mongo-java-driver</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <!-- LEGEND ENGINE-->
-            <dependency>
-                <groupId>org.finos.legend.engine</groupId>
-                <artifactId>legend-engine-shared-core</artifactId>
-                <version>${legend.engine.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.pac4j</groupId>
-                        <artifactId>pac4j-core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guave</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.finos.legend.shared</groupId>
-                        <artifactId>legend-shared-pac4j-kerberos</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.engine</groupId>
-                <artifactId>legend-engine-protocol</artifactId>
-                <version>${legend.engine.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>pure</groupId>
-                        <artifactId>pure-m2-dsl-lake</artifactId>
-                    </exclusion>
-
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.engine</groupId>
-                <artifactId>legend-engine-protocol-pure</artifactId>
-                <version>${legend.engine.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.mongodb</groupId>
-                        <artifactId>bson</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.finos.legend.shared</groupId>
-                        <artifactId>legend-shared-pac4j</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <!-- LEGEND OPENTRACING-->
-            <dependency>
-                <groupId>org.finos.legend.shared</groupId>
-                <artifactId>legend-shared-opentracing-base</artifactId>
-                <version>${legend.shared.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.shared</groupId>
-                <artifactId>legend-shared-opentracing-jersey</artifactId>
-                <version>${legend.shared.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.glassfish.jersey.core</groupId>
-                        <artifactId>jersey-client</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <!--LEGEND SDLC-->
-            <dependency>
-                <groupId>org.finos.legend.sdlc</groupId>
-                <artifactId>legend-sdlc-model</artifactId>
-                <version>${legend.sdlc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.sdlc</groupId>
-                <artifactId>legend-sdlc-server-shared</artifactId>
-                <version>${legend.sdlc.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-server</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-servlets</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>javax.ws.rs-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.finos.legend.shared</groupId>
-                        <artifactId>legend-shared-pac4j-kerberos</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.sdlc</groupId>
-                <artifactId>legend-sdlc-protocol</artifactId>
-                <version>${legend.sdlc.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.finos.legend.sdlc</groupId>
-                <artifactId>legend-sdlc-entity-serialization</artifactId>
-                <version>${legend.sdlc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.shared</groupId>
-                <artifactId>legend-shared-pac4j-gitlab</artifactId>
-                <version>${legend.shared.version}</version>
-                <scope>runtime</scope>
-            </dependency>
-            <!-- LEGEND-->
-
         </dependencies>
     </dependencyManagement>
 
@@ -968,4 +1119,22 @@
             <url>https://oss.sonatype.org/content/repositories/releases/</url>
         </repository>
     </repositories>
+
+    <profiles>
+        <profile>
+            <id>docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.spotify</groupId>
+                        <artifactId>dockerfile-maven-plugin</artifactId>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
