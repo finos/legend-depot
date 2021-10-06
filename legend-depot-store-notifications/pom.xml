@@ -26,8 +26,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Legend Depot - Store - Notifications</name>
     <artifactId>legend-depot-store-notifications</artifactId>
-
 
     <dependencies>
         <dependency>

@@ -26,6 +26,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Legend Depot - Store - Server</name>
     <artifactId>legend-depot-store-server</artifactId>
     <packaging>jar</packaging>
 
@@ -35,7 +36,6 @@
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-http</artifactId>
@@ -66,6 +66,7 @@
             <artifactId>legend-depot-artifacts-refresh</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -84,14 +85,12 @@
         </dependency>
     </dependencies>
 
-
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-
             <plugin>
                 <!-- https://github.com/ktoso/maven-git-commit-id-plugin -->
                 <groupId>pl.project13.maven</groupId>
