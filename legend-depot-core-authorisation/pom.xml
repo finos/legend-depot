@@ -22,7 +22,7 @@
     <parent>
         <artifactId>legend-depot</artifactId>
         <groupId>org.finos.legend.depot</groupId>
-        <version>trunk-SNAPSHOT</version>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -30,6 +30,14 @@
     <artifactId>legend-depot-core-authorisation</artifactId>
 
     <dependencies>
+        <!-- DEPOT -->
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-tracing</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <!-- DEPOT -->
+
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
@@ -41,12 +49,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-tracing</artifactId>
-            <version>trunk-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

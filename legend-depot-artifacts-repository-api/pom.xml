@@ -22,7 +22,7 @@
     <parent>
         <artifactId>legend-depot</artifactId>
         <groupId>org.finos.legend.depot</groupId>
-        <version>trunk-SNAPSHOT</version>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -30,11 +30,12 @@
     <artifactId>legend-depot-artifacts-repository-api</artifactId>
 
     <dependencies>
+        <!-- DEPOT -->
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-model</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
+        <!-- DEPOT -->
 
         <dependency>
             <groupId>org.apache.maven</groupId>
