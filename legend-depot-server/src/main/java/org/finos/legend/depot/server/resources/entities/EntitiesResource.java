@@ -36,18 +36,12 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_ENTITIES;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_ENTITIES_BY_PACKAGE;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_ENTITY;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_BY_PACKAGE;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITY;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.*;
 
 @Path("")
 @Api("Entities")
 public class EntitiesResource extends BaseResource
 {
-
     private final EntitiesService entitiesService;
 
     @Inject
@@ -152,6 +146,4 @@ public class EntitiesResource extends BaseResource
         QueryMetricsContainer.record(groupId, artifactId, MASTER_SNAPSHOT);
         return handle(GET_REVISION_ENTITIES_BY_PACKAGE, GET_REVISION_ENTITIES_BY_PACKAGE + packageName, () -> this.entitiesService.getLatestEntitiesByPackage(groupId, artifactId, packageName, versioned, classifierPaths, includeSubPackages));
     }
-
-
 }

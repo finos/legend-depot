@@ -26,14 +26,12 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 
 public interface Entities
 {
-
     List<Entity> getAllEntities(String groupId, String artifactId, String versionId);
 
     default List<Entity> getAllLatestEntities(String groupId, String artifactId)
     {
         return getAllEntities(groupId, artifactId, MASTER_SNAPSHOT);
     }
-
 
     List<Entity> getEntities(String groupId, String artifactId, String versionId, boolean versionedEntities);
 
@@ -76,6 +74,4 @@ public interface Entities
     List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary, boolean versioned);
 
     List<StoredEntity> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier, boolean summary, boolean versionedEntities);
-
-
 }
