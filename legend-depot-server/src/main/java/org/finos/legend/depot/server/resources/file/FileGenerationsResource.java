@@ -29,19 +29,11 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Optional;
 
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION_BY_FILEPATH;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION_BY_PATH;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION_ENTITIES;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_FILEPATH;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_PATH;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_ENTITIES;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.*;
 
 @Path("")
 @Api("File Generations")
@@ -149,5 +141,4 @@ public class FileGenerationsResource extends BaseResource
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFile(groupId, artifactId, versionId, file));
     }
-
 }

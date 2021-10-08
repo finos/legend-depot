@@ -32,13 +32,11 @@ import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 
-
 public class AdminServicesModule extends PrivateModule
 {
     @Override
     protected void configure()
     {
-
         bind(Projects.class).to(ProjectsMongo.class);
         bind(UpdateProjects.class).to(ProjectsMongo.class);
         bind(Entities.class).to(EntitiesMongo.class);
@@ -50,19 +48,14 @@ public class AdminServicesModule extends PrivateModule
         bind(FileGenerationsService.class).to(FileGenerationsServiceImpl.class);
         bind(ManageFileGenerationsService.class).to(FileGenerationsServiceImpl.class);
 
-
         expose(ManageProjectsService.class);
         expose(ManageEntitiesService.class);
         expose(ManageFileGenerationsService.class);
-
 
         expose(UpdateEntities.class);
         expose(Entities.class);
         expose(UpdateFileGenerations.class);
         expose(Projects.class);
         expose(UpdateProjects.class);
-
     }
-
-
 }

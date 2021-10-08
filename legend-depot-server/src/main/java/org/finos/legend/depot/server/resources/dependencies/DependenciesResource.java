@@ -40,16 +40,12 @@ import java.util.List;
 import java.util.Set;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_DEPENDANT_PROJECTS;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCIES;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_DEPENDENCY_ENTITIES;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_DEPENDENCY_ENTITIES;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.*;
 
 @Path("")
 @Api("Dependencies")
 public class DependenciesResource extends BaseResource
 {
-
     private final EntitiesService entitiesService;
     private final ProjectsService projectApi;
 
@@ -103,7 +99,6 @@ public class DependenciesResource extends BaseResource
         return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, versioned, transitive, includeOrigin));
     }
 
-
     @GET
     @Path("/projects/{groupId}/{artifactId}/revisions/latest/dependants")
     @ApiOperation(GET_REVISION_DEPENDENCY_ENTITIES)
@@ -122,7 +117,6 @@ public class DependenciesResource extends BaseResource
         return handle(GET_REVISION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getLatestDependenciesEntities(groupId, artifactId, versioned, transitive, includeOrigin));
     }
 
-
     @POST
     @Path("/projects/dependencies")
     @ApiOperation(GET_VERSION_DEPENDENCY_ENTITIES)
@@ -136,9 +130,7 @@ public class DependenciesResource extends BaseResource
                                                                        @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
         projectDependencies.forEach(dep ->
-                QueryMetricsContainer.record(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()));
+            QueryMetricsContainer.record(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()));
         return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, versioned, transitive, includeOrigin));
     }
-
-
 }

@@ -67,7 +67,7 @@ public class ResourceLoggingAndTracing
     public static final String TOGGLE_SCHEDULE = "toggle schedule";
     public static final String ENQUEUE_REFRESH_ALL_EVENT = "queue refresh all";
     public static final String ORPHAN_STORE_ENTITIES = "get orphaned entities";
-
+    public static final String GET_ENTITIES_BY_CLASSIFIER_PATH = "get entities by classifier path";
 
     private ResourceLoggingAndTracing()
     {
