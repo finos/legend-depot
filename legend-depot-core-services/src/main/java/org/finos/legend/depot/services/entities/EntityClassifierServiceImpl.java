@@ -15,9 +15,6 @@
 
 package org.finos.legend.depot.services.entities;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
-import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
@@ -27,9 +24,6 @@ import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -49,42 +43,31 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
         this.entities = versions;
     }
 
-    private Set<StoredEntity> findReleasedEntitiesByClassifier(String classifierPath)
+    @Override
+    public Set<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit)
     {
-        Stream<StoredEntity> allEntities = this.entities.findReleasedEntitiesByClassifier(classifierPath, false, false).stream();
+        Stream<StoredEntity> entities = this.entities.findReleasedEntitiesByClassifier(classifierPath, false, false).stream();
         LOGGER.info("finished getting entities by classifier path {} ", classifierPath);
         Map<String, Optional<VersionId>> latestVersions = projects.getAll().stream().collect(Collectors.toMap(k -> k.getGroupId() + ":" + k.getArtifactId(), ProjectData::getLatestVersion));
+
         LOGGER.info("getting entities by latest version classifier path {} ", classifierPath);
-        allEntities = allEntities.filter(ent ->
+        entities = entities.filter(ent ->
         {
             Optional<VersionId> version = latestVersions.get(ent.getGroupId() + ":" + ent.getArtifactId());
             return version.isPresent() && version.get().toVersionIdString().equals(ent.getVersionId());
-        });
-        Set<StoredEntity> uniqueEntities = allEntities.collect(Collectors.toSet());
-        LOGGER.info("found {} ", uniqueEntities.size());
-        Map<Pair<String, String>, Integer> counts = new HashMap<>();
+        }).distinct();
 
-        uniqueEntities.forEach(ent ->
-        {
-            int count = counts.getOrDefault(Tuples.pair(ent.getGroupId() + ":" + ent.getArtifactId(), ent.getVersionId()), 0) + 1;
-            counts.put(Tuples.pair(ent.getGroupId() + ":" + ent.getArtifactId(), ent.getVersionId()), count);
-        });
-
-        return uniqueEntities;
-    }
-
-    @Override
-    public List<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit)
-    {
-        List<StoredEntity> entities = new ArrayList<>(this.findReleasedEntitiesByClassifier(classifierPath));
         if (search != null)
         {
-            entities = ListIterate.select(entities, entity -> entity.getEntity().getPath().contains(search));
+            LOGGER.info("getting entities by search string {} ", search);
+            entities = entities.filter(entity -> entity.getEntity().getPath().contains(search));
         }
+
         if (limit != null)
         {
-            entities = ListIterate.take(entities, limit);
+            entities = entities.limit(limit);
         }
-        return entities;
+
+        return entities.collect(Collectors.toSet());
     }
 }
