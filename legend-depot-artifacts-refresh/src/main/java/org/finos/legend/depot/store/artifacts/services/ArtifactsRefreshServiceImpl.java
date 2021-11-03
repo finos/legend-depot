@@ -156,7 +156,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         Optional<ProjectData> found = projects.find(groupId, artifactId);
         if (!found.isPresent())
         {
-            throw new IllegalArgumentException("can find project for  " + groupId + artifactId);
+            throw new IllegalArgumentException("can't find project for  " + groupId + " " + artifactId);
         }
         return found.get();
     }
