@@ -17,6 +17,7 @@ package org.finos.legend.depot.services.entities;
 
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.version.Scope;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
@@ -44,18 +45,27 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
     }
 
     @Override
-    public Set<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit)
+    public Set<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Scope scope, Integer limit)
     {
-        Stream<StoredEntity> entities = this.entities.findReleasedEntitiesByClassifier(classifierPath, false, false).stream();
-        LOGGER.info("finished getting entities by classifier path {} ", classifierPath);
-        Map<String, Optional<VersionId>> latestVersions = projects.getAll().stream().collect(Collectors.toMap(k -> k.getGroupId() + ":" + k.getArtifactId(), ProjectData::getLatestVersion));
-
-        LOGGER.info("getting entities by latest version classifier path {} ", classifierPath);
-        entities = entities.filter(ent ->
+        Stream<StoredEntity> entities;
+        if (Scope.SNAPSHOT.equals(scope))
         {
-            Optional<VersionId> version = latestVersions.get(ent.getGroupId() + ":" + ent.getArtifactId());
-            return version.isPresent() && version.get().toVersionIdString().equals(ent.getVersionId());
-        }).distinct();
+            entities = this.entities.findLatestEntitiesByClassifier(classifierPath, false, false).stream();
+        }
+        else
+        {
+            entities = this.entities.findReleasedEntitiesByClassifier(classifierPath, false, false).stream();
+            Map<String, Optional<VersionId>> latestVersions = projects.getAll().stream().collect(Collectors.toMap(k -> k.getGroupId() + ":" + k.getArtifactId(), ProjectData::getLatestVersion));
+
+            LOGGER.info("getting entities by latest version classifier path {} ", classifierPath);
+            entities = entities.filter(ent ->
+            {
+                Optional<VersionId> version = latestVersions.get(ent.getGroupId() + ":" + ent.getArtifactId());
+                return version.isPresent() && version.get().toVersionIdString().equals(ent.getVersionId());
+            });
+        }
+        entities = entities.distinct();
+        LOGGER.info("finished getting entities by classifier path {} ", classifierPath);
 
         if (search != null)
         {
