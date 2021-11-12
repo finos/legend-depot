@@ -16,10 +16,11 @@
 package org.finos.legend.depot.services.api.entities;
 
 import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.domain.version.Scope;
 
 import java.util.Set;
 
 public interface EntityClassifierService
 {
-    Set<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit);
+    Set<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Scope scope, Integer limit);
 }
