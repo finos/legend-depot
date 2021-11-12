@@ -24,6 +24,7 @@ import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 
 import javax.inject.Inject;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -55,7 +56,7 @@ public class EntityClassifierResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public Set<StoredEntity> getEntities(@PathParam("classifierPath") @ApiParam("The classifier path of the entities") String classifierPath,
                                          @QueryParam("search") @ApiParam("The search string that the entity path contains") String search,
-                                         @QueryParam("scope") @ApiParam("Whether to return entities for the latest released version or snapshot") Scope scope,
+                                         @QueryParam("scope") @ApiParam("Whether to return entities for the latest released version or snapshot") @DefaultValue("RELEASES") Scope scope,
                                          @QueryParam("limit") @ApiParam("Limit the number of entities returned") Integer limit)
     {
         return handle(GET_ENTITIES_BY_CLASSIFIER_PATH, () -> this.graphService.getEntitiesByClassifierPath(classifierPath, search, scope, limit));
