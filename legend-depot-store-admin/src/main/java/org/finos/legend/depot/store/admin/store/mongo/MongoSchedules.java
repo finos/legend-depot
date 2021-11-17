@@ -94,7 +94,7 @@ public class MongoSchedules extends BaseMongo<ScheduleInfo> implements ManageSch
     public void toggle(String jobId, boolean toggle)
     {
         ScheduleInfo info = getScheduleInfo(jobId);
-        info.disabled = toggle;
+        info.disabled.getAndSet(toggle);
         createOrUpdate(info);
     }
 
@@ -103,7 +103,7 @@ public class MongoSchedules extends BaseMongo<ScheduleInfo> implements ManageSch
     {
         getAll().stream().forEach(info ->
         {
-            info.disabled = toggle;
+            info.disabled.getAndSet(toggle);
             createOrUpdate(info);
         });
     }

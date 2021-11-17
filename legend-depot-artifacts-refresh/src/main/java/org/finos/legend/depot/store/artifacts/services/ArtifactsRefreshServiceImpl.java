@@ -58,6 +58,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 {
 
@@ -177,7 +179,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     @Override
     public MetadataEventResponse refreshAllProjectRevisionsArtifacts()
     {
-        return handleRefresh(REVISIONS, ALL, ALL, VersionValidator.MASTER_SNAPSHOT, () ->
+        return handleRefresh(REVISIONS, ALL, ALL, MASTER_SNAPSHOT, () ->
                 {
                     MetadataEventResponse result = new MetadataEventResponse();
                     ParallelIterate.forEach(getProjects(), p -> result.combine(refreshProjectRevisionArtifacts(p)));
@@ -203,7 +205,16 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     @Override
     public MetadataEventResponse refreshProjectVersionArtifacts(String groupId, String artifactId, String versionId, boolean fullUpdate)
     {
+        checkVersionExists(groupId,artifactId,versionId);
         return refreshProjectVersionArtifacts(getProject(groupId, artifactId), versionId, fullUpdate);
+    }
+
+    private void checkVersionExists(String groupId, String artifactId, String versionId)
+    {
+       if (!MASTER_SNAPSHOT.equals(versionId) && !this.repository.findVersions(groupId,artifactId).contains(VersionId.parseVersionId(versionId)))
+       {
+           throw new IllegalArgumentException(String.format("Version %s does not exists for %s-%s",versionId,groupId,artifactId));
+       }
     }
 
     private MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId, boolean fullUpdate)
@@ -255,11 +266,11 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 
     private MetadataEventResponse refreshProjectRevisionArtifacts(ProjectData project)
     {
-        return executeWithTrace("refreshProjectRevisionArtifacts", REVISIONS, project.getGroupId(), project.getArtifactId(), VersionValidator.MASTER_SNAPSHOT, () ->
+        return executeWithTrace("refreshProjectRevisionArtifacts", REVISIONS, project.getGroupId(), project.getArtifactId(), MASTER_SNAPSHOT, () ->
         {
             MetadataEventResponse response = new MetadataEventResponse();
-            getSupportedArtifactTypes().forEach(artifactType -> response.combine(executeVersionRefresh(artifactType, project, VersionValidator.MASTER_SNAPSHOT, false)));
-            response.combine(refreshDependencies(project.getGroupId(), project.getArtifactId(), VersionValidator.MASTER_SNAPSHOT, false));
+            getSupportedArtifactTypes().forEach(artifactType -> response.combine(executeVersionRefresh(artifactType, project, MASTER_SNAPSHOT, false)));
+            response.combine(refreshDependencies(project.getGroupId(), project.getArtifactId(), MASTER_SNAPSHOT, false));
             return response;
         });
     }
@@ -278,7 +289,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 Optional<ProjectData> projectData = projects.find(groupId, artifactId);
                 if (projectData.isPresent())
                 {
-                    if (versionId.equals(VersionValidator.MASTER_SNAPSHOT))
+                    if (versionId.equals(MASTER_SNAPSHOT))
                     {
                         projectData.get().removeLatest();
                     }
@@ -437,5 +448,11 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     public boolean createIndexesIfAbsent()
     {
         return artifacts.createIndexesIfAbsent();
+    }
+
+    @Override
+    public List<String> getRepositoryVersions(String groupId, String artifactId)
+    {
+        return repository.findVersions(groupId,artifactId).stream().map(vid -> vid.toVersionIdString()).collect(Collectors.toList());
     }
 }

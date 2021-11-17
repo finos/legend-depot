@@ -70,9 +70,9 @@ public class TestSchedules extends TestStoreMongo
         schedulesFactory.register("jobb", LocalDateTime.now(), 100000, false, () -> "hello again");
         Assert.assertEquals(2, schedulesFactory.printStats().size());
         schedulesFactory.toggle("joba", true);
-        Assert.assertTrue(schedulesService.get("joba").get().disabled);
+        Assert.assertTrue(schedulesService.get("joba").get().disabled.get());
         schedulesFactory.toggle("joba", false);
-        Assert.assertFalse(schedulesService.get("joba").get().disabled);
+        Assert.assertFalse(schedulesService.get("joba").get().disabled.get());
 
         schedulesFactory.toggleAll(true);
         schedulesFactory.printStats().stream().forEach(s -> Assert.assertTrue(s.isDisabled()));

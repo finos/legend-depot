@@ -340,4 +340,19 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertFalse(projectsStore.findByProjectId(PROJECT_A).get(0).getVersions().contains(versionId));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void cantRefreshANonExistingVersion()
+    {
+        String versionId = "4.0.0";
+         artifactsRefreshService.refreshProjectVersionArtifacts(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
+    }
+
+    @Test
+    public void cantRefreshAExistingVersion()
+    {
+        String versionId = "2.0.0";
+        MetadataEventResponse response = artifactsRefreshService.refreshProjectVersionArtifacts(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
+        Assert.assertNotNull(response);
+        Assert.assertFalse(response.hasErrors());
+    }
 }
