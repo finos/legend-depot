@@ -60,6 +60,19 @@ public class DependenciesResource extends BaseResource
     @Path("/projects/{groupId}/{artifactId}/version/{versionId}/projectDependencies")
     @ApiOperation(GET_PROJECT_DEPENDENCIES)
     @Produces(MediaType.APPLICATION_JSON)
+    @Deprecated
+    public Set<ProjectVersion> getDeprecatedProjectDependencies(@PathParam("groupId") String groupId,
+                                                      @PathParam("artifactId") String artifactId,
+                                                      @PathParam("versionId") String versionId,
+                                                      @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to return transitive dependencies") boolean transitive)
+    {
+        return handle(GET_PROJECT_DEPENDENCIES, GET_PROJECT_DEPENDENCIES + groupId + artifactId, () -> this.projectApi.getDependencies(groupId, artifactId, versionId, transitive));
+    }
+
+    @GET
+    @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/projectDependencies")
+    @ApiOperation(GET_PROJECT_DEPENDENCIES)
+    @Produces(MediaType.APPLICATION_JSON)
     public Set<ProjectVersion> getProjectDependencies(@PathParam("groupId") String groupId,
                                                       @PathParam("artifactId") String artifactId,
                                                       @PathParam("versionId") String versionId,
