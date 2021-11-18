@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.finos.legend.depot.domain.HasIdentifier;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -40,7 +41,7 @@ public class ScheduleInfo implements HasIdentifier
     @JsonProperty
     public long lastExecutionDuration;
     @JsonProperty
-    public boolean disabled = false;
+    public AtomicBoolean disabled = new AtomicBoolean();
     @JsonProperty
     public Object message;
 
@@ -99,7 +100,7 @@ public class ScheduleInfo implements HasIdentifier
 
     public boolean isDisabled()
     {
-        return disabled;
+        return disabled.get();
     }
 
     public Object getMessage()

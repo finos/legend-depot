@@ -186,4 +186,14 @@ public class ArtifactsResource extends BaseAuthorisedResource
     {
         return ARTIFACTS_RESOURCE;
     }
+
+    @GET
+    @Path("/artifacts/{groupId}/{artifactId}/versions")
+    @ApiOperation(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<String> getRepositoryVersions(@PathParam("groupId") String groupId,
+                                                       @PathParam("artifactId") String artifactId)
+    {
+        return handle(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId, () -> artifactsRefreshService.getRepositoryVersions(groupId, artifactId));
+    }
 }

@@ -17,6 +17,8 @@ package org.finos.legend.depot.store.artifacts.api;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 
+import java.util.List;
+
 public interface ArtifactsRefreshService
 {
 
@@ -52,4 +54,6 @@ public interface ArtifactsRefreshService
     void delete(String groupId, String artifactId, String versionId);
 
     boolean createIndexesIfAbsent();
+
+    List<String> getRepositoryVersions(String groupId, String artifactId);
 }

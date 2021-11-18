@@ -100,7 +100,7 @@ public final class SchedulesFactory
     private Object handleExecution(String jobId, Supplier<Object> fucntionToExecute)
     {
         ScheduleInfo scheduleInfo = get(jobId);
-        if (scheduleInfo.disabled)
+        if (scheduleInfo.disabled.get())
         {
             LOGGER.info("Job {} is disabled, skipping", jobId);
             return null;

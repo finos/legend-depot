@@ -68,6 +68,7 @@ public class ResourceLoggingAndTracing
     public static final String ENQUEUE_REFRESH_ALL_EVENT = "queue refresh all";
     public static final String ORPHAN_STORE_ENTITIES = "get orphaned entities";
     public static final String GET_ENTITIES_BY_CLASSIFIER_PATH = "get entities by classifier path";
+    public static final String REPOSITORY_PROJECT_VERSIONS = "repo versions";
 
     private ResourceLoggingAndTracing()
     {
