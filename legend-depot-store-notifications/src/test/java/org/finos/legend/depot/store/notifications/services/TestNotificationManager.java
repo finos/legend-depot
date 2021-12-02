@@ -62,6 +62,8 @@ public class TestNotificationManager extends TestStoreMongo
         when(artifactsRefreshService.refreshProjectVersionArtifacts(TEST_GROUP_ID, "test", VERSION_ID, false)).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
         when(artifactsRefreshService.refreshProjectVersionsArtifacts(TEST_GROUP_ID, "test", true)).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
         when(artifactsRefreshService.refreshProjectVersionsArtifacts(TEST_GROUP_ID, "test-dependencies", true)).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
+        when(artifactsRefreshService.refreshAllProjectArtifacts(TEST_GROUP_ID, "test")).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
+        when(artifactsRefreshService.refreshAllProjectArtifacts(TEST_GROUP_ID, "test-dependencies")).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
 
     }
 

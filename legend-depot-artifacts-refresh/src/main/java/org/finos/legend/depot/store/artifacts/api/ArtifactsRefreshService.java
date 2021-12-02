@@ -56,4 +56,6 @@ public interface ArtifactsRefreshService
     boolean createIndexesIfAbsent();
 
     List<String> getRepositoryVersions(String groupId, String artifactId);
+
+    MetadataEventResponse refreshAllProjectArtifacts(String groupId, String artifactId);
 }

@@ -16,6 +16,7 @@
 package org.finos.legend.depot.store.artifacts.services;
 
 import org.apache.commons.codec.digest.DigestUtils;
+
 import org.apache.maven.model.Model;
 import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
@@ -215,6 +216,17 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
        {
            throw new IllegalArgumentException(String.format("Version %s does not exists for %s-%s",versionId,groupId,artifactId));
        }
+    }
+
+    @Override
+    public MetadataEventResponse refreshAllProjectArtifacts(String groupId, String artifactId)
+    {
+        return executeWithTrace("refreshAllProjectArtifacts", VERSIONS, groupId, artifactId, ALL, () ->
+        {
+            MetadataEventResponse response = refreshProjectVersionsArtifacts(groupId,artifactId,true);
+            response.combine(refreshProjectRevisionArtifacts(groupId,artifactId));
+            return  response;
+        });
     }
 
     private MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId, boolean fullUpdate)

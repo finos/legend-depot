@@ -117,7 +117,7 @@ public final class NotificationsQueueManager
         }
 
         MetadataEventResponse response = ALL.equalsIgnoreCase(event.getVersionId()) ?
-                artifactsRefreshService.refreshProjectVersionsArtifacts(event.getGroupId(), event.getArtifactId(),true) :
+                artifactsRefreshService.refreshAllProjectArtifacts(event.getGroupId(), event.getArtifactId()) :
                 artifactsRefreshService.refreshProjectVersionArtifacts(event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.isFullUpdate());
         if (response != null)
         {
