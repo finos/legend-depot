@@ -66,13 +66,13 @@ public class TestSchedules extends TestStoreMongo
     @Test
     public void testToggles()
     {
-        schedulesFactory.register("joba", LocalDateTime.now(), 100000, false, () -> "hello");
-        schedulesFactory.register("jobb", LocalDateTime.now(), 100000, false, () -> "hello again");
+        schedulesFactory.register("jobaa", LocalDateTime.now(), 100000, false, () -> "hello");
+        schedulesFactory.register("jobbb", LocalDateTime.now(), 100000, false, () -> "hello again");
         Assert.assertEquals(2, schedulesFactory.printStats().size());
-        schedulesFactory.toggleDisable("joba", true);
-        Assert.assertTrue(schedulesService.get("joba").get().disabled.get());
-        schedulesFactory.toggleDisable("joba", false);
-        Assert.assertFalse(schedulesService.get("joba").get().disabled.get());
+        schedulesFactory.toggleDisable("jobaa", true);
+        Assert.assertTrue(schedulesService.get("jobaa").get().disabled.get());
+        schedulesFactory.toggleDisable("jobaa", false);
+        Assert.assertFalse(schedulesService.get("jobaa").get().disabled.get());
 
         schedulesFactory.toggleDisableAll(true);
         schedulesFactory.printStats().stream().forEach(s -> Assert.assertTrue(s.isDisabled()));
@@ -81,11 +81,11 @@ public class TestSchedules extends TestStoreMongo
     @Test
     public void testRunningToggles()
     {
-        schedulesFactory.register("joba", LocalDateTime.now(), 100000, false, () -> "hello");
-        schedulesFactory.toggleRunning("joba", true);
-        Assert.assertTrue(schedulesService.get("joba").get().running.get());
-        schedulesFactory.toggleRunning("joba", false);
-        Assert.assertFalse(schedulesService.get("joba").get().running.get());
+        schedulesFactory.register("job1", LocalDateTime.now(), 100000, false, () -> "hello toggles");
+        schedulesFactory.toggleRunning("job1", true);
+        Assert.assertTrue(schedulesService.get("job1").get().running.get());
+        schedulesFactory.toggleRunning("job1", false);
+        Assert.assertFalse(schedulesService.get("job1").get().running.get());
 
     }
 }
