@@ -191,7 +191,8 @@ public class StoreStatus
         @JsonProperty
         public List<String> versionsNotInCache;
 
-        public VersionMismatch(String projectId, String groupId, String artifactId, List<String> versionsNotInCache) {
+        public VersionMismatch(String projectId, String groupId, String artifactId, List<String> versionsNotInCache)
+        {
             this.projectId = projectId;
             this.groupId = groupId;
             this.artifactId = artifactId;
@@ -199,15 +200,23 @@ public class StoreStatus
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+        public boolean equals(Object o)
+        {
+            if (this == o)
+            {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass())
+            {
+                return false;
+            }
             VersionMismatch that = (VersionMismatch) o;
             return Objects.equals(projectId, that.projectId) && Objects.equals(groupId, that.groupId) && Objects.equals(artifactId, that.artifactId);
         }
 
         @Override
-        public int hashCode() {
+        public int hashCode()
+        {
             return Objects.hash(projectId, groupId, artifactId);
         }
     }

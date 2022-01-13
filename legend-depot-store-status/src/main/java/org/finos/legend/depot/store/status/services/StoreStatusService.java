@@ -116,9 +116,10 @@ public class StoreStatusService
         return queryMetrics.getSummaryByProjectVersion();
     }
 
-    public List<StoreStatus.VersionMismatch> getVersionsMismatches() {
+    public List<StoreStatus.VersionMismatch> getVersionsMismatches()
+    {
         List<StoreStatus.VersionMismatch> versionMismatches = new ArrayList<>();
-        projectApi.getAll().forEach( p ->
+        projectApi.getAll().forEach(p ->
         {
           List<String> versions = new ArrayList<>(artifactsRefreshService.getRepositoryVersions(p.getGroupId(), p.getArtifactId()));
           versions.removeAll(p.getVersions());
