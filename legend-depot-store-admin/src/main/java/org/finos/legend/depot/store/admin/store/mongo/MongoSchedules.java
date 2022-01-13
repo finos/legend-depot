@@ -99,7 +99,8 @@ public class MongoSchedules extends BaseMongo<ScheduleInfo> implements ManageSch
     }
 
     @Override
-    public void toggleRunning(String jobId, boolean toggle) {
+    public void toggleRunning(String jobId, boolean toggle)
+    {
         ScheduleInfo info = getScheduleInfo(jobId);
         info.running.getAndSet(toggle);
         createOrUpdate(info);
