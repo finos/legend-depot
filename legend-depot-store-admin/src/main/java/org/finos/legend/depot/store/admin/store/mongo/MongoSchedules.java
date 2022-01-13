@@ -104,7 +104,8 @@ public class MongoSchedules extends BaseMongo<ScheduleInfo> implements ManageSch
     @Override
     public void toggleRunning(String jobId, boolean toggle)
     {
-        synchronized (ScheduleInfo.class) {
+        synchronized (ScheduleInfo.class)
+        {
             ScheduleInfo info = getScheduleInfo(jobId);
             info.running.getAndSet(toggle);
             createOrUpdate(info);
@@ -114,11 +115,11 @@ public class MongoSchedules extends BaseMongo<ScheduleInfo> implements ManageSch
     @Override
     public void toggleAll(boolean toggle)
     {
-        synchronized (ScheduleInfo.class) {
+        synchronized (ScheduleInfo.class)
+        {
             getAll().stream().forEach(info ->
             {
-                info.disabled.getAndSet(toggle);
-                createOrUpdate(info);
+                toggleRunning(info.jobId,toggle);
             });
         }
     }
