@@ -29,7 +29,7 @@ public class ScheduleInfo implements HasIdentifier
     @JsonProperty
     public String id;
     @JsonProperty
-    public AtomicBoolean running = new AtomicBoolean();
+    public AtomicBoolean running = new AtomicBoolean(false);
     @JsonProperty
     public boolean allowMultipleRuns = false;
     @JsonProperty
@@ -41,7 +41,7 @@ public class ScheduleInfo implements HasIdentifier
     @JsonProperty
     public long lastExecutionDuration;
     @JsonProperty
-    public AtomicBoolean disabled = new AtomicBoolean();
+    public AtomicBoolean disabled = new AtomicBoolean(false);
     @JsonProperty
     public Object message;
 
