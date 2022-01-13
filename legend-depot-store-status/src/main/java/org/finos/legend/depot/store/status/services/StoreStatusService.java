@@ -19,6 +19,7 @@ import org.finos.legend.depot.domain.entity.VersionRevision;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.projects.Projects;
+import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.status.RefreshStatusService;
 import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
 import org.finos.legend.depot.store.metrics.api.ManageQueryMetrics;
@@ -26,6 +27,7 @@ import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
 import org.finos.legend.depot.store.status.domain.StoreStatus;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -35,14 +37,16 @@ public class StoreStatusService
 
     private final Projects projectApi;
     private final Entities entities;
+    private final ArtifactsRefreshService artifactsRefreshService;
     private final RefreshStatusService statusService;
     private final ManageQueryMetrics queryMetrics;
 
     @Inject
-    public StoreStatusService(Projects projectApi, Entities versions, RefreshStatusService statusService, ManageQueryMetrics queryMetrics)
+    public StoreStatusService(Projects projectApi, Entities versions, ArtifactsRefreshService artifactsRefreshService, RefreshStatusService statusService, ManageQueryMetrics queryMetrics)
     {
         this.projectApi = projectApi;
         this.entities = versions;
+        this.artifactsRefreshService = artifactsRefreshService;
         this.statusService = statusService;
         this.queryMetrics = queryMetrics;
     }
@@ -110,5 +114,20 @@ public class StoreStatusService
     public List<VersionQuerySummary> summaryByProjectVersion()
     {
         return queryMetrics.getSummaryByProjectVersion();
+    }
+
+    public List<StoreStatus.VersionMismatch> getVersionsMismatches()
+    {
+        List<StoreStatus.VersionMismatch> versionMismatches = new ArrayList<>();
+        projectApi.getAll().forEach(p ->
+        {
+          List<String> versions = new ArrayList<>(artifactsRefreshService.getRepositoryVersions(p.getGroupId(), p.getArtifactId()));
+          versions.removeAll(p.getVersions());
+          if (!versions.isEmpty())
+          {
+              versionMismatches.add(new StoreStatus.VersionMismatch(p.getProjectId(),p.getGroupId(),p.getArtifactId(),versions));
+          }
+        });
+        return versionMismatches;
     }
 }

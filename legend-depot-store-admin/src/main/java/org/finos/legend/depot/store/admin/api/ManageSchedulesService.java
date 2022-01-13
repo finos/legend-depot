@@ -27,9 +27,13 @@ public interface ManageSchedulesService
 
     List<ScheduleInfo> getAll();
 
-    void toggle(String jobId, boolean toggle);
+    void toggleDisable(String jobId, boolean toggle);
+
+    void toggleRunning(String jobId, boolean toggle);
 
     void toggleAll(boolean toggle);
 
     ScheduleInfo createOrUpdate(ScheduleInfo scheduleInfo);
+
+
 }

@@ -29,7 +29,7 @@ public class ScheduleInfo implements HasIdentifier
     @JsonProperty
     public String id;
     @JsonProperty
-    public boolean running = false;
+    public AtomicBoolean running = new AtomicBoolean(false);
     @JsonProperty
     public boolean allowMultipleRuns = false;
     @JsonProperty
@@ -41,7 +41,7 @@ public class ScheduleInfo implements HasIdentifier
     @JsonProperty
     public long lastExecutionDuration;
     @JsonProperty
-    public AtomicBoolean disabled = new AtomicBoolean();
+    public AtomicBoolean disabled = new AtomicBoolean(false);
     @JsonProperty
     public Object message;
 
@@ -69,13 +69,13 @@ public class ScheduleInfo implements HasIdentifier
 
     public ScheduleInfo withRunning(boolean running)
     {
-        this.running = running;
+        this.running.getAndSet(running);
         return this;
     }
 
     public boolean isRunning()
     {
-        return running;
+        return running.get();
     }
 
     public String getJobId()

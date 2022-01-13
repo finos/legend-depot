@@ -173,7 +173,7 @@ public class AdminResource extends BaseAuthorisedResource
     }
 
     @PUT
-    @Path("/schedules/{jobId}/{toggle}")
+    @Path("/schedules/{jobId}/disable/{toggle}")
     @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULE)
     @Produces(MediaType.APPLICATION_JSON)
     public Response toggleScheduler(@PathParam("jobId") String jobId, @PathParam("toggle") boolean toggle)
@@ -181,13 +181,27 @@ public class AdminResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.TOGGLE_SCHEDULE, () ->
         {
             validateUser();
-            schedulesFactory.toggle(jobId, toggle);
+            schedulesFactory.toggleDisable(jobId, toggle);
             return Response.noContent().build();
         });
     }
 
     @PUT
-    @Path("/schedules/all/{toggle}")
+    @Path("/schedules/{jobId}/running/{toggle}")
+    @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULE)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response toggleRunningScheduler(@PathParam("jobId") String jobId, @PathParam("toggle") boolean toggle)
+    {
+        return handle(ResourceLoggingAndTracing.TOGGLE_SCHEDULE, () ->
+        {
+            validateUser();
+            schedulesFactory.toggleRunning(jobId, toggle);
+            return Response.noContent().build();
+        });
+    }
+
+    @PUT
+    @Path("/schedules/all/disable/{toggle}")
     @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULE)
     @Produces(MediaType.APPLICATION_JSON)
     public Response toggleScheduler(@PathParam("toggle") boolean toggle)
@@ -195,7 +209,7 @@ public class AdminResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.TOGGLE_SCHEDULE, () ->
         {
             validateUser();
-            schedulesFactory.toggleAll(toggle);
+            schedulesFactory.toggleDisableAll(toggle);
             return Response.noContent().build();
         });
     }
