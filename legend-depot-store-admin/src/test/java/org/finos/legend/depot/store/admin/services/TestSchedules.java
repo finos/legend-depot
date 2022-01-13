@@ -37,9 +37,9 @@ public class TestSchedules extends TestStoreMongo
     @Before
     public void setUp()
     {
+        this.mongoProvider.drop();
         schedulesService = new MongoSchedules(mongoProvider);
         schedulesFactory = new SchedulesFactory(schedulesService);
-        this.mongoProvider.drop();
         Assert.assertTrue(schedulesService.getAll().isEmpty());
     }
 
