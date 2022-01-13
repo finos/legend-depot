@@ -69,12 +69,17 @@ public final class SchedulesFactory
         schedulesBuffer.get(jobId).getOne().run();
     }
 
-    public void toggle(String jobId, boolean toggle)
+    public void toggleDisable(String jobId, boolean toggle)
     {
-        manageSchedulesService.toggle(jobId, toggle);
+        manageSchedulesService.toggleDisable(jobId, toggle);
     }
 
-    public void toggleAll(boolean toggle)
+    public void toggleRunning(String jobId, boolean toggle)
+    {
+        manageSchedulesService.toggleRunning(jobId, toggle);
+    }
+
+    public void toggleDisableAll(boolean toggle)
     {
         manageSchedulesService.toggleAll(toggle);
     }
@@ -105,7 +110,7 @@ public final class SchedulesFactory
             LOGGER.info("Job {} is disabled, skipping", jobId);
             return null;
         }
-        if (!scheduleInfo.allowMultipleRuns && scheduleInfo.running)
+        if (!scheduleInfo.allowMultipleRuns && scheduleInfo.running.get())
         {
             LOGGER.info("Other instance is running, skipping {}  ", jobId);
             return null;
@@ -137,4 +142,6 @@ public final class SchedulesFactory
         Optional<ScheduleInfo> scheduleInfo = this.manageSchedulesService.get(jobId);
         return scheduleInfo.isPresent() ? scheduleInfo.get() : new ScheduleInfo(jobId, schedulesBuffer.get(jobId).getTwo().frequency, false);
     }
+
+
 }

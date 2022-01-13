@@ -17,6 +17,7 @@ package org.finos.legend.depot.store.status;
 
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.store.mongo.MongoRefreshStatus;
 import org.finos.legend.depot.store.metrics.QueryMetricsContainer;
 import org.finos.legend.depot.store.metrics.store.mongo.MongoQueryMetrics;
@@ -30,6 +31,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class TestStatusServices extends TestStoreMongo
 {
 
@@ -37,7 +44,8 @@ public class TestStatusServices extends TestStoreMongo
     private MongoQueryMetrics queryMetrics = new MongoQueryMetrics(mongoProvider);
     private UpdateProjects projects = new ProjectsMongo(mongoProvider);
     private UpdateEntities entities = new EntitiesMongo(mongoProvider);
-    private StoreStatusService statusService = new StoreStatusService(projects, entities, refreshStatus, queryMetrics);
+    private ArtifactsRefreshService artifactsRefreshService = mock(ArtifactsRefreshService.class);
+    private StoreStatusService statusService = new StoreStatusService(projects, entities, artifactsRefreshService, refreshStatus, queryMetrics);
 
     @Before
     public void setup()
@@ -93,5 +101,16 @@ public class TestStatusServices extends TestStoreMongo
         Assert.assertEquals(8, counts.totalRevisionEntities);
     }
 
+    @Test
+    public void getVersionsMismatch()
+    {
+        when(artifactsRefreshService.getRepositoryVersions("examples.metadata", "test")).thenReturn(Arrays.asList("2.2.0","2.3.0"));
+        List<StoreStatus.VersionMismatch> counts = statusService.getVersionsMismatches();
+        Assert.assertNotNull(counts);
+        Assert.assertEquals(1, counts.size());
+        Assert.assertEquals(1, counts.get(0).versionsNotInCache.size());
+        Assert.assertEquals("2.3.0", counts.get(0).versionsNotInCache.get(0));
+
+    }
 
 }
