@@ -343,13 +343,13 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                         getLOGGER().info("Fetching project {} versions ", projectArtifacts);
                         List<VersionId> repoVersions = repository.findVersions(project.getGroupId(), project.getArtifactId());
                         List<VersionId> versionsToUpdate = new ArrayList<>();
-                        if (repoVersions!=null)
+                        if (repoVersions != null)
                         {
                             versionsToUpdate.addAll(repoVersions);
                         }
                         if (versionsToUpdate != null && !versionsToUpdate.isEmpty())
                         {
-                            if (!fullUpdate && project.getVersions()!=null)
+                            if (!fullUpdate && project.getVersions() != null)
                             {
                                 versionsToUpdate.removeAll(project.getVersions());
                             }
