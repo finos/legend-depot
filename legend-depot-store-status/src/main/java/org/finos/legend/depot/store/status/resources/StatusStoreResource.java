@@ -102,7 +102,7 @@ public class StatusStoreResource extends BaseResource
     @Path("/status/versions/mismatch")
     @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<StoreStatus.VersionMismatch> getVersionMissMatches(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
+    public List<StoreStatus.VersionMismatch> getVersionMissMatches()
     {
         return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES, () -> this.statusService.getVersionsMismatches());
     }
