@@ -341,13 +341,12 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                     if (repository.areValidCoordinates(project.getGroupId(), project.getArtifactId()))
                     {
                         getLOGGER().info("Fetching project {} versions ", projectArtifacts);
-                        List<VersionId> versions = repository.findVersions(project.getGroupId(), project.getArtifactId());
+                        List<VersionId> versions = new ArrayList<>(repository.findVersions(project.getGroupId(), project.getArtifactId()));
                         if (versions != null && !versions.isEmpty())
                         {
                             if (!fullUpdate)
                             {
-                                Optional<VersionId> latestVersion = project.getLatestVersion();
-                                latestVersion.ifPresent(versionId -> versions.removeIf(v -> v.compareTo(versionId) <= 0));
+                                versions.removeAll(project.getVersions());
                             }
                             getLOGGER().info(String.format("[%s] %s new versions found: [%s]", projectArtifacts, versions.size(), versions.toString()));
                             versions.forEach(v -> refreshProjectVersionArtifacts(project, v.toVersionIdString(), fullUpdate));
