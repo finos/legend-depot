@@ -25,6 +25,7 @@ import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
 import org.finos.legend.depot.store.metrics.api.ManageQueryMetrics;
 import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
 import org.finos.legend.depot.store.status.domain.StoreStatus;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ import java.util.Optional;
 
 public class StoreStatusService
 {
-
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(StoreStatusService.class);
     private final Projects projectApi;
     private final Entities entities;
     private final ArtifactsRefreshService artifactsRefreshService;
@@ -126,6 +127,7 @@ public class StoreStatusService
           if (!versions.isEmpty())
           {
               versionMismatches.add(new StoreStatus.VersionMismatch(p.getProjectId(),p.getGroupId(),p.getArtifactId(),versions));
+              LOGGER.info("version-mismatch found for {} {} {} : {} ",p.getProjectId(),p.getGroupId(), p.getArtifactId(), versions);
           }
         });
         return versionMismatches;
