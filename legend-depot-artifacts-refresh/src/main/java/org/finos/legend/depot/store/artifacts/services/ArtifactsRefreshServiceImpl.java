@@ -341,22 +341,25 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                     if (repository.areValidCoordinates(project.getGroupId(), project.getArtifactId()))
                     {
                         getLOGGER().info("Fetching project {} versions ", projectArtifacts);
-                        List<VersionId> versions = repository.findVersions(project.getGroupId(), project.getArtifactId());
-                        if (versions != null && !versions.isEmpty())
+                        List<VersionId> repoVersions = repository.findVersions(project.getGroupId(), project.getArtifactId());
+                        List<VersionId> versionsToUpdate = new ArrayList<>();
+                        if (repoVersions != null)
                         {
-                            if (!fullUpdate)
+                            versionsToUpdate.addAll(repoVersions);
+                        }
+                        if (versionsToUpdate != null && !versionsToUpdate.isEmpty())
+                        {
+                            if (!fullUpdate && project.getVersions() != null)
                             {
-                                Optional<VersionId> latestVersion = project.getLatestVersion();
-                                latestVersion.ifPresent(versionId -> versions.removeIf(v -> v.compareTo(versionId) <= 0));
+                                versionsToUpdate.removeAll(project.getVersions());
                             }
-                            getLOGGER().info(String.format("[%s] %s new versions found: [%s]", projectArtifacts, versions.size(), versions.toString()));
-                            versions.forEach(v -> refreshProjectVersionArtifacts(project, v.toVersionIdString(), fullUpdate));
+                            getLOGGER().info(String.format("[%s] %s new versions found: [%s]", projectArtifacts, versionsToUpdate.size(), versionsToUpdate.toString()));
+                            versionsToUpdate.forEach(v -> refreshProjectVersionArtifacts(project, v.toVersionIdString(), fullUpdate));
                             response.addMessage(String.format("[%s:%s:%s] found [%s] new versions", project.getProjectId(),
                                     project.getGroupId(),
                                     project.getArtifactId(),
-                                    versions.size()));
+                                    versionsToUpdate.size()));
                         }
-
                     }
                     else
                     {
