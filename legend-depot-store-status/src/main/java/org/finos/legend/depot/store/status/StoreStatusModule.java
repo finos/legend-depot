@@ -16,11 +16,19 @@
 package org.finos.legend.depot.store.status;
 
 import com.google.inject.PrivateModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.status.resources.StatusStoreResource;
 import org.finos.legend.depot.store.status.services.StoreStatusService;
+import javax.inject.Named;
+import java.time.LocalDateTime;
+
 
 public class StoreStatusModule extends PrivateModule
 {
+    private static final String MISMATCH_VERSIONS_SCHEDULE = "versions-mismatch-schedule";
+
     @Override
     protected void configure()
     {
@@ -29,5 +37,14 @@ public class StoreStatusModule extends PrivateModule
 
         bind(StatusStoreResource.class);
         expose(StatusStoreResource.class);
+    }
+
+    @Provides
+    @Singleton
+    @Named("check-versions-mismatch")
+    boolean initVersionsMismatchDaemon(SchedulesFactory schedulesFactory, StoreStatusService storeStatusService)
+    {
+        schedulesFactory.register(MISMATCH_VERSIONS_SCHEDULE, LocalDateTime.now().plusMinutes(40), 6 * 36000, false,storeStatusService::getVersionsMismatches);
+        return true;
     }
 }
