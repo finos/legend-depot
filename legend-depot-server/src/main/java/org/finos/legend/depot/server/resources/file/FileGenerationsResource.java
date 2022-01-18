@@ -141,4 +141,30 @@ public class FileGenerationsResource extends BaseResource
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFile(groupId, artifactId, versionId, file));
     }
+
+    @GET
+    @Path("/generationFileContent/{groupId}/{artifactId}/versions/{versionId}/file/{file}")
+    @ApiOperation(GET_VERSION_FILE_GENERATION_BY_FILEPATH)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Optional<String> getFileGenerationContentByFile(@PathParam("groupId") String groupId,
+                                                           @PathParam("artifactId") String artifactId,
+                                                           @PathParam("versionId") String versionId, @PathParam("file") String file)
+    {
+        QueryMetricsContainer.record(groupId, artifactId, versionId);
+        return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationContentByFile(groupId, artifactId, versionId, file));
+    }
+
+    @GET
+    @Path("/generationFileContent/{groupId}/{artifactId}/latest/file/{file}")
+    @ApiOperation(GET_VERSION_FILE_GENERATION_BY_FILEPATH)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Optional<String> getLatestFileGenerationContentByFile(@PathParam("groupId") String groupId,
+                                                                 @PathParam("artifactId") String artifactId,
+                                                                 @PathParam("file") String file)
+    {
+        QueryMetricsContainer.record(groupId, artifactId,VersionValidator.MASTER_SNAPSHOT);
+        return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getLatestFileGenerationContentByFile(groupId, artifactId, file));
+    }
+
+
 }
