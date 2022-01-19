@@ -111,4 +111,12 @@ public class TestFileGenerationsService extends TestStoreMongo
         Assert.assertFalse(service.getFileGenerationsByFile("group.test", "test", "1.0.0", "bad").isPresent());
 
     }
+
+
+    @Test
+    public void canQueryFileGenerationEntitiesByFileContent()
+    {
+        Assert.assertTrue(service.getFileGenerationContentByFile("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assert.assertTrue(service.getLatestFileGenerationContentByFile("group.test", "test",  "/examples/metadata/test/ClientBasic.avro").isPresent());
+    }
 }

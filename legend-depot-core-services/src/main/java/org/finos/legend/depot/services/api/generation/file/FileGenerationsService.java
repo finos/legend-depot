@@ -54,4 +54,14 @@ public interface FileGenerationsService
 
     Optional<FileGeneration> getFileGenerationsByFile(String groupId, String artifactId, String versionsId, String file);
 
+    default  Optional<String> getFileGenerationContentByFile(String groupId, String artifactId, String versionsId, String file)
+    {
+        return  getFileGenerationsByFile(groupId,artifactId,versionsId,file).map(o -> o.getContent());
+    }
+
+    default Optional<String> getLatestFileGenerationContentByFile(String groupId, String artifactId, String file)
+    {
+        return getFileGenerationContentByFile(groupId, artifactId, MASTER_SNAPSHOT, file);
+    }
+
 }
