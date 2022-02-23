@@ -156,14 +156,14 @@ public class FileGenerationsResource extends BaseResource
 
     @GET
     @Path("/generationFileContent/{groupId}/{artifactId}/latest/file/{file}")
-    @ApiOperation(GET_VERSION_FILE_GENERATION_BY_FILEPATH)
+    @ApiOperation(GET_REVISION_FILE_GENERATION_BY_FILEPATH)
     @Produces(MediaType.TEXT_PLAIN)
     public Optional<String> getLatestFileGenerationContentByFile(@PathParam("groupId") String groupId,
                                                                  @PathParam("artifactId") String artifactId,
                                                                  @PathParam("file") String file)
     {
         QueryMetricsContainer.record(groupId, artifactId,VersionValidator.MASTER_SNAPSHOT);
-        return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getLatestFileGenerationContentByFile(groupId, artifactId, file));
+        return handle(GET_REVISION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getLatestFileGenerationContentByFile(groupId, artifactId, file));
     }
 
 

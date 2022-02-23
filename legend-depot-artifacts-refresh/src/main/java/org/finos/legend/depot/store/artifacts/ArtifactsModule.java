@@ -41,9 +41,10 @@ import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
 import javax.inject.Named;
 import java.time.LocalDateTime;
 
+import static org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory.ONE_HOUR;
+
 public class ArtifactsModule extends PrivateModule
 {
-    public static final int ONE_HOUR = 60 * 60 * 1000;
     private static final String UPDATE_MASTER_REVISIONS_SCHEDULER = "refreshVersionArtifacts-master-revisions-scheduler";
     private static final String UPDATE_VERSIONS_SCHEDULER = "refreshVersionArtifacts-versions-scheduler";
 
@@ -96,7 +97,7 @@ public class ArtifactsModule extends PrivateModule
     @Named("update-versions")
     boolean initVersions(SchedulesFactory schedulesFactory,ArtifactsRefreshService artifactsRefreshService)
     {
-        schedulesFactory.register(UPDATE_VERSIONS_SCHEDULER, LocalDateTime.now().plusMinutes(40), 3 * ONE_HOUR, false,artifactsRefreshService::refreshAllProjectsVersionsArtifacts);
+        schedulesFactory.register(UPDATE_VERSIONS_SCHEDULER, LocalDateTime.now().plusMinutes(40), 12 * ONE_HOUR, false,artifactsRefreshService::refreshAllProjectsVersionsArtifacts);
         return true;
     }
 
@@ -105,7 +106,7 @@ public class ArtifactsModule extends PrivateModule
     @Named("update-revisions")
     boolean initRevisions(SchedulesFactory schedulesFactory,ArtifactsRefreshService artifactsRefreshService)
     {
-        schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusMinutes(20), ONE_HOUR,false, artifactsRefreshService::refreshAllProjectRevisionsArtifacts);
+        schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusMinutes(20), 3 * ONE_HOUR,false, artifactsRefreshService::refreshAllProjectRevisionsArtifacts);
         return true;
     }
 }

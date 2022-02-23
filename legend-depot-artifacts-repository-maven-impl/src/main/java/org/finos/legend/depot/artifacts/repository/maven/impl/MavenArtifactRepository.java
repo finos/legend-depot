@@ -300,7 +300,7 @@ public class MavenArtifactRepository implements ArtifactRepository
         {
             String groupArtifactVersionRange = gavCoordinates(group, artifact, scope);
             final MavenVersionRangeResult versionRangeResult = getResolver().resolveVersionRange(groupArtifactVersionRange);
-            LOGGER.info("%{}:{}-{} , Version data: [{}]", group, artifact, scope, versionRangeResult);
+            LOGGER.info("resolveVersionsFromRepository {}:{}-{} , Version data: [{}]", group, artifact, scope, versionRangeResult);
             for (MavenCoordinate coordinate : versionRangeResult.getVersions())
             {
                 if (VersionValidator.isValidReleaseVersion(coordinate.getVersion()))
@@ -311,11 +311,11 @@ public class MavenArtifactRepository implements ArtifactRepository
         }
         catch (VersionResolutionException ex)
         {
-            LOGGER.error(String.format("%s: %s-%s version resolution issue", group, artifact, scope), ex.getMessage());
+            LOGGER.error(String.format("Error resolveVersionsFromRepository %s: %s-%s version resolution issue", group, artifact, scope), ex.getMessage());
         }
         catch (Exception e)
         {
-            LOGGER.error("unknown error", e);
+            LOGGER.error("unknown error executing resolveVersionsFromRepository", e);
             throw new ArtifactRepositoryException(e.getMessage());
         }
         Collections.sort(result);

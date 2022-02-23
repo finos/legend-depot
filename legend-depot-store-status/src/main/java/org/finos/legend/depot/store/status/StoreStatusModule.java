@@ -24,6 +24,7 @@ import org.finos.legend.depot.store.status.services.StoreStatusService;
 import javax.inject.Named;
 import java.time.LocalDateTime;
 
+import static org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory.ONE_HOUR;
 
 public class StoreStatusModule extends PrivateModule
 {
@@ -44,7 +45,7 @@ public class StoreStatusModule extends PrivateModule
     @Named("check-versions-mismatch")
     boolean initVersionsMismatchDaemon(SchedulesFactory schedulesFactory, StoreStatusService storeStatusService)
     {
-        schedulesFactory.register(MISMATCH_VERSIONS_SCHEDULE, LocalDateTime.now().plusMinutes(40), 6 * 36000, false,storeStatusService::getVersionsMismatches);
+        schedulesFactory.register(MISMATCH_VERSIONS_SCHEDULE, LocalDateTime.now().plusMinutes(10), 6 * ONE_HOUR, false,storeStatusService::getVersionsMismatches);
         return true;
     }
 }

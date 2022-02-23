@@ -36,8 +36,8 @@ import java.util.function.Supplier;
 public final class SchedulesFactory
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SchedulesFactory.class);
-
-    private Map<String, Pair<TimerTask, ScheduleInfo>> schedulesBuffer = Maps.mutable.empty();
+    public static final long ONE_HOUR   = 60 * 60 * 1000;
+    private final Map<String, Pair<TimerTask, ScheduleInfo>> schedulesBuffer = Maps.mutable.empty();
 
     private final ManageSchedulesService manageSchedulesService;
 
@@ -51,14 +51,14 @@ public final class SchedulesFactory
         return manageSchedulesService.getAll();
     }
 
-    public void register(String name, LocalDateTime start, int interval, boolean parallelRun, Supplier function)
+    public void register(String name, LocalDateTime start, long interval, boolean parallelRun, Supplier<Object> function)
     {
         TimerTask task = createTask(name, function);
         schedulesBuffer.put(name, Tuples.pair(task, new ScheduleInfo(name, interval, parallelRun)));
         new Timer().scheduleAtFixedRate(task, java.sql.Date.from(start.atZone(ZoneId.systemDefault()).toInstant()), interval);
         Optional<ScheduleInfo> existingInfo = manageSchedulesService.get(name);
 
-        ScheduleInfo info = existingInfo.isPresent() ? existingInfo.get() : new ScheduleInfo(name);
+        ScheduleInfo info = existingInfo.orElseGet(() -> new ScheduleInfo(name));
         info.allowMultipleRuns = parallelRun;
         info.frequency = interval;
         manageSchedulesService.createOrUpdate(info);
@@ -102,25 +102,25 @@ public final class SchedulesFactory
         };
     }
 
-    private Object handleExecution(String jobId, Supplier<Object> fucntionToExecute)
+    private void handleExecution(String jobId, Supplier<Object> functionToExecute)
     {
         ScheduleInfo scheduleInfo = get(jobId);
         if (scheduleInfo.disabled.get())
         {
             LOGGER.info("Job {} is disabled, skipping", jobId);
-            return null;
+            return;
         }
         if (!scheduleInfo.allowMultipleRuns && scheduleInfo.running.get())
         {
             LOGGER.info("Other instance is running, skipping {}  ", jobId);
-            return null;
+            return;
 
         }
         long t = System.currentTimeMillis();
         try
         {
             this.manageSchedulesService.createOrUpdate(scheduleInfo.withRunning(true));
-            scheduleInfo.message = fucntionToExecute.get();
+            scheduleInfo.message = functionToExecute.get();
         }
         catch (Exception e)
         {
@@ -134,13 +134,12 @@ public final class SchedulesFactory
             this.manageSchedulesService.createOrUpdate(scheduleInfo.withRunning(false));
             LOGGER.info("Finished {} ", jobId);
         }
-        return null;
     }
 
     private ScheduleInfo get(String jobId)
     {
         Optional<ScheduleInfo> scheduleInfo = this.manageSchedulesService.get(jobId);
-        return scheduleInfo.isPresent() ? scheduleInfo.get() : new ScheduleInfo(jobId, schedulesBuffer.get(jobId).getTwo().frequency, false);
+        return scheduleInfo.orElseGet(() -> new ScheduleInfo(jobId, schedulesBuffer.get(jobId).getTwo().frequency, false));
     }
 
 
