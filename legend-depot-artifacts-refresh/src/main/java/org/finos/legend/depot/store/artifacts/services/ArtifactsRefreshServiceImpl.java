@@ -268,7 +268,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         while (propertyNames.hasMoreElements())
         {
             String propertyName = propertyNames.nextElement().toString();
-            if (projectProperties.contains(propertyName) || projectProperties.stream().filter(propertyName::matches).count() > 0)
+            if (projectProperties.contains(propertyName) || projectProperties.stream().anyMatch(propertyName::matches))
             {
                 projectPropertyList.add(new ProjectProperty(propertyName, model.getProperties().getProperty(propertyName), versionId));
             }
@@ -347,13 +347,13 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                         {
                             versionsToUpdate.addAll(repoVersions);
                         }
-                        if (versionsToUpdate != null && !versionsToUpdate.isEmpty())
+                        if (!versionsToUpdate.isEmpty())
                         {
                             if (!fullUpdate && project.getVersions() != null)
                             {
-                                versionsToUpdate.removeAll(project.getVersions());
+                                versionsToUpdate.removeAll(project.getVersionIds());
                             }
-                            getLOGGER().info(String.format("[%s] %s new versions found: [%s]", projectArtifacts, versionsToUpdate.size(), versionsToUpdate.toString()));
+                            getLOGGER().info(String.format("[%s] %s new versions found: [%s]", projectArtifacts, versionsToUpdate.size(), versionsToUpdate));
                             versionsToUpdate.forEach(v -> refreshProjectVersionArtifacts(project, v.toVersionIdString(), fullUpdate));
                             response.addMessage(String.format("[%s:%s:%s] found [%s] new versions", project.getProjectId(),
                                     project.getGroupId(),
@@ -373,7 +373,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     private List<File> findFiles(ArtifactType type, ProjectData project, String versionId, boolean ignoreFileChanges)
     {
         List<File> filesFromRepo = repository.findFiles(type, project.getGroupId(), project.getArtifactId(), versionId);
-        return new ArrayList<>(filesFromRepo.stream().filter(file -> ignoreFileChanges || fileHasChanged(file)).collect(Collectors.toList()));
+        return filesFromRepo.stream().filter(file -> ignoreFileChanges || fileHasChanged(file)).collect(Collectors.toList());
     }
 
     private boolean fileHasChanged(File file)
@@ -468,6 +468,6 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     @Override
     public List<String> getRepositoryVersions(String groupId, String artifactId)
     {
-        return repository.findVersions(groupId,artifactId).stream().map(vid -> vid.toVersionIdString()).collect(Collectors.toList());
+        return repository.findVersions(groupId,artifactId).stream().map(VersionId::toVersionIdString).collect(Collectors.toList());
     }
 }

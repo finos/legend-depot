@@ -76,6 +76,13 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
         return versions;
     }
 
+    @JsonIgnore
+    public List<VersionId> getVersionIds()
+    {
+        Collections.sort(versions);
+        return versions.stream().map(VersionId::parseVersionId).collect(Collectors.toList());
+    }
+
     public void setVersions(List<String> versions)
     {
         this.versions = versions;
@@ -116,11 +123,7 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
     public String getLatestVersionAsString()
     {
         Optional<VersionId> latest = getLatestVersion();
-        if (latest.isPresent())
-        {
-            return latest.get().toVersionIdString();
-        }
-        return null;
+        return latest.map(VersionId::toVersionIdString).orElse(null);
     }
 
     @JsonIgnore
