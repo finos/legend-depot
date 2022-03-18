@@ -40,7 +40,10 @@ import java.util.List;
 import java.util.Set;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.*;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_DEPENDANT_PROJECTS;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCIES;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_DEPENDENCY_ENTITIES;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_DEPENDENCY_ENTITIES;
 
 @Path("")
 @Api("Dependencies")

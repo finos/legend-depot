@@ -70,6 +70,8 @@ public class ResourceLoggingAndTracing
     public static final String GET_ENTITIES_BY_CLASSIFIER_PATH = "get entities by classifier path";
     public static final String REPOSITORY_PROJECT_VERSIONS = "repo versions";
     public static final String GET_PROJECT_CACHE_MISMATCHES = "version mismatch";
+    public static final String UPDATE_SCHEDULE = "update schedule";
+
 
     private ResourceLoggingAndTracing()
     {

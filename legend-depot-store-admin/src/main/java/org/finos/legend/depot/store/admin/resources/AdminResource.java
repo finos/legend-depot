@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import org.bson.Document;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.store.admin.api.ManageSchedulesService;
 import org.finos.legend.depot.store.admin.api.ManageStoreService;
 import org.finos.legend.depot.store.admin.services.schedules.ScheduleInfo;
 import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
@@ -37,6 +38,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.security.Principal;
@@ -53,6 +55,7 @@ public class AdminResource extends BaseAuthorisedResource
     private final UpdateFileGenerations fileGenerations;
     private final ManageStoreService manageStoreService;
     private final SchedulesFactory schedulesFactory;
+    private final ManageSchedulesService manageSchedulesService;
 
     @Inject
     protected AdminResource(UpdateProjects projects,
@@ -60,7 +63,7 @@ public class AdminResource extends BaseAuthorisedResource
                             UpdateFileGenerations fileGenerations,
                             ManageStoreService manageStoreService,
                             AuthorisationProvider authorisationProvider,
-                            @Named("requestPrincipal") Provider<Principal> principalProvider, SchedulesFactory schedulesFactory)
+                            @Named("requestPrincipal") Provider<Principal> principalProvider, SchedulesFactory schedulesFactory, ManageSchedulesService manageSchedulesService)
     {
         super(authorisationProvider, principalProvider);
         this.projects = projects;
@@ -68,6 +71,7 @@ public class AdminResource extends BaseAuthorisedResource
         this.fileGenerations = fileGenerations;
         this.manageStoreService = manageStoreService;
         this.schedulesFactory = schedulesFactory;
+        this.manageSchedulesService = manageSchedulesService;
     }
 
     @Override
@@ -155,7 +159,7 @@ public class AdminResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<ScheduleInfo> getSchedulerStatus()
     {
-        return handle(ResourceLoggingAndTracing.SCHEDULES_STATUS, () -> schedulesFactory.printStats());
+        return handle(ResourceLoggingAndTracing.SCHEDULES_STATUS, schedulesFactory::printStats);
     }
 
     @PUT
@@ -168,6 +172,21 @@ public class AdminResource extends BaseAuthorisedResource
         {
             validateUser();
             schedulesFactory.run(jobId);
+            return Response.noContent().build();
+        });
+    }
+
+    @PUT
+    @Path("/schedules")
+    @ApiOperation(ResourceLoggingAndTracing.TRIGGER_SCHEDULE)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response registerSchedule(ScheduleInfo info)
+    {
+        return handle(ResourceLoggingAndTracing.UPDATE_SCHEDULE, () ->
+        {
+            validateUser();
+            manageSchedulesService.createOrUpdate(info);
             return Response.noContent().build();
         });
     }

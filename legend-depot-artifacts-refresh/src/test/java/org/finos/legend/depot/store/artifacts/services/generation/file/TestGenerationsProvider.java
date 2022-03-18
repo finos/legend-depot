@@ -17,7 +17,6 @@ package org.finos.legend.depot.store.artifacts.services.generation.file;
 
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-
 import org.finos.legend.depot.artifacts.repository.maven.impl.TestMavenArtifactsRepository;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
@@ -49,11 +48,11 @@ public class TestGenerationsProvider extends TestStoreMongo
     public static final String PRODUCT_A = "PROD-23992";
     protected static final String TEST_GROUP_ID = "examples.metadata";
     public static final String TEST_ARTIFACT_ID = "test";
-    private ArtifactRepository repository = new TestMavenArtifactsRepository();
+    private final ArtifactRepository repository = new TestMavenArtifactsRepository();
     private FileGenerationsProvider fileGenerationsProvider = new FileGenerationsProviderImpl();
-    private UpdateProjects projects = new ProjectsMongo(mongoProvider);
-    private UpdateEntities entities = new EntitiesMongo(mongoProvider);
-    private ManageFileGenerationsService generations = new FileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities);
+    private final UpdateProjects projects = new ProjectsMongo(mongoProvider);
+    private final UpdateEntities entities = new EntitiesMongo(mongoProvider);
+    private final ManageFileGenerationsService generations = new FileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities);
 
     @Before
     public void setup()

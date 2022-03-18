@@ -39,9 +39,9 @@ public class TestNotificationsResource extends TestStoreMongo
 {
 
     public static final String VERSION = "1.0.0";
-    private NotificationsMongo eventsMongo = new NotificationsMongo(mongoProvider);
-    private Queue queue = new QueueMongo(mongoProvider);
-    private ManageProjectsService projectsService = new ProjectsServiceImpl(new ProjectsMongo(mongoProvider));
+    private final NotificationsMongo eventsMongo = new NotificationsMongo(mongoProvider);
+    private final Queue queue = new QueueMongo(mongoProvider);
+    private final ManageProjectsService projectsService = new ProjectsServiceImpl(new ProjectsMongo(mongoProvider));
 
     @Test
     public void canRetrieveEventsByDate()
@@ -57,7 +57,7 @@ public class TestNotificationsResource extends TestStoreMongo
         eventsMongo.insert(event2.setLastUpdated(toDate(aPointInTime.plusHours(1))));
         eventsMongo.insert(event3.setLastUpdated(toDate(aPointInTime.plusHours(2))));
         eventsMongo.insert(event4.setLastUpdated(toDate(aPointInTime.plusHours(2).plusMinutes(35))));
-        NotificationsManagerResource resource = new NotificationsManagerResource(eventsMongo, queue, projectsService, new MockAuthorisationProvider(), null);
+        NotificationsManagerResource resource = new NotificationsManagerResource(projectsService, eventsMongo, queue, new MockAuthorisationProvider(), null);
 
         List<MetadataNotification> allEvents = resource.getAllEvents(aPointInTime.minusDays(100).format(NotificationsManagerResource.DATE_TIME_FORMATTER), null);
         Assert.assertNotNull(allEvents);
@@ -72,7 +72,7 @@ public class TestNotificationsResource extends TestStoreMongo
     @Test
     public void refreshAll()
     {
-        NotificationsManagerResource resource = new NotificationsManagerResource(eventsMongo, queue, projectsService, new MockAuthorisationProvider(), null);
+        NotificationsManagerResource resource = new NotificationsManagerResource(projectsService, eventsMongo, queue, new MockAuthorisationProvider(), null);
 
         resource.queueRefreshAllEvent();
 
@@ -83,26 +83,8 @@ public class TestNotificationsResource extends TestStoreMongo
         Assert.assertEquals(1, resource.getAllEventsInQueue().size());
     }
 
-    @Test
-    public void canValidateCoordinates()
-    {
-        projectsService.createOrUpdate(new ProjectData("1","test.group","artifact"));
-        Assert.assertEquals(1,projectsService.getAll().size());
-        NotificationsManagerResource resource = new NotificationsManagerResource(eventsMongo, queue, projectsService, new MockAuthorisationProvider(), null);
-        resource.queueEvent("1","test.group","artifact","1.0.0",5);
-        Assert.assertEquals(1, queue.getAll().size());
-        try
-        {
-            resource.queueEvent("2","test.group","artifact","1.0.0",5);
-            Assert.fail();
-        }
-        catch (Exception e)
-        {
-            Assert.assertEquals(1, queue.getAll().size());
-        }
-    }
 
-    private class MockAuthorisationProvider implements AuthorisationProvider
+    private static class MockAuthorisationProvider implements AuthorisationProvider
     {
         @Override
         public void authorise(Provider<Principal> principalProvider, String role)

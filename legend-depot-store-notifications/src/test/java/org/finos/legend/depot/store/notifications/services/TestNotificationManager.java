@@ -48,11 +48,11 @@ public class TestNotificationManager extends TestStoreMongo
     public static final String VERSION_ID = "2.3.1";
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
-    private NotificationsMongo eventsMongo = new NotificationsMongo(mongoProvider);
-    private QueueMongo queue = new QueueMongo(mongoProvider);
-    private ManageProjectsService projectsService = new ProjectsServiceImpl(projectsStore);
-    private ArtifactsRefreshService artifactsRefreshService = mock(ArtifactsRefreshService.class);
-    private NotificationsQueueManager eventsManager = new NotificationsQueueManager(eventsMongo, queue, projectsService, artifactsRefreshService);
+    private final NotificationsMongo eventsMongo = new NotificationsMongo(mongoProvider);
+    private final QueueMongo queue = new QueueMongo(mongoProvider);
+    private final ManageProjectsService projectsService = new ProjectsServiceImpl(projectsStore);
+    private final ArtifactsRefreshService artifactsRefreshService = mock(ArtifactsRefreshService.class);
+    private final NotificationsQueueManager eventsManager = new NotificationsQueueManager(eventsMongo, queue, projectsService, artifactsRefreshService);
 
     @Before
     public void setUpData()
@@ -64,7 +64,6 @@ public class TestNotificationManager extends TestStoreMongo
         when(artifactsRefreshService.refreshProjectVersionsArtifacts(TEST_GROUP_ID, "test-dependencies", true)).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
         when(artifactsRefreshService.refreshAllProjectArtifacts(TEST_GROUP_ID, "test")).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
         when(artifactsRefreshService.refreshAllProjectArtifacts(TEST_GROUP_ID, "test-dependencies")).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
-
     }
 
     protected MetadataEventResponse loadEntities(String projectId, String versionId)

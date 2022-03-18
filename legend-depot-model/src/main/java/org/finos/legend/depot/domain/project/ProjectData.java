@@ -104,7 +104,12 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
 
     public void removeVersion(String versionId)
     {
-        this.getVersions().remove(versionId);
+        this.versions.remove(versionId);
+    }
+
+    public void removeDependency(ProjectVersionDependency projectVersionDependency)
+    {
+        this.dependencies.remove(projectVersionDependency);
     }
 
     @Override
@@ -166,10 +171,6 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
         this.dependencies = dependencies;
     }
 
-    public void removeLatest()
-    {
-        dependencies = dependencies.stream().filter(dep -> !dep.getVersionId().equals(VersionValidator.MASTER_SNAPSHOT)).collect(Collectors.toList());
-    }
 
     public List<ProjectProperty> getProperties()
     {
