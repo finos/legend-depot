@@ -33,7 +33,14 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Optional;
 
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.*;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION_BY_FILEPATH;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION_BY_PATH;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION_ENTITIES;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_FILEPATH;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_PATH;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_ENTITIES;
 
 @Path("")
 @Api("File Generations")

@@ -92,9 +92,7 @@ public final class NotificationsQueueManager
     private void handleRefreshAllEvent()
     {
         projects.getAll().forEach(p ->
-        {
-            queue.push(new MetadataNotification(p.getProjectId(), p.getGroupId(), p.getArtifactId(), ALL, true));
-        });
+                queue.push(new MetadataNotification(p.getProjectId(), p.getGroupId(), p.getArtifactId(), ALL, true)));
     }
 
     private void handleEvent(MetadataNotification event)

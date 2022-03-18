@@ -291,30 +291,39 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     {
         MetadataEventResponse response = new MetadataEventResponse();
         Set<ArtifactDependency> dependencies = repository.findDependencies(groupId, artifactId, versionId);
-        dependencies.forEach(dependency ->
+        Optional<ProjectData> projectData = projects.find(groupId, artifactId);
+        LOGGER.info(" Found {} dependencies {}-{}-{}",dependencies.size(),groupId,artifactId,versionId);
+        if (projectData.isPresent())
         {
-            Optional<ProjectData> found = projects.find(dependency.getGroupId(), dependency.getArtifactId());
-            if (found.isPresent())
+            ProjectData project = projectData.get();
+            List<ProjectVersionDependency> newDependencies = new ArrayList<>();
+
+            dependencies.forEach(dependency ->
             {
-                ProjectData dependentProject = found.get();
-                response.combine(refreshProjectVersionArtifacts(dependentProject.getGroupId(), dependentProject.getArtifactId(), dependency.getVersion(), fullUpdate));
-                Optional<ProjectData> projectData = projects.find(groupId, artifactId);
-                if (projectData.isPresent())
+                Optional<ProjectData> found = projects.find(dependency.getGroupId(), dependency.getArtifactId());
+                if (found.isPresent())
                 {
-                    if (versionId.equals(MASTER_SNAPSHOT))
-                    {
-                        projectData.get().removeLatest();
-                    }
-                    projectData.get().addDependency(new ProjectVersionDependency(projectData.get().getGroupId(), projectData.get().getArtifactId(), versionId,
+                    ProjectData dependentProject = found.get();
+                    response.combine(refreshProjectVersionArtifacts(dependentProject.getGroupId(), dependentProject.getArtifactId(), dependency.getVersion(), fullUpdate));
+
+                    newDependencies.add(new ProjectVersionDependency(project.getGroupId(), project.getArtifactId(), versionId,
                             new ProjectVersion(dependentProject.getGroupId(), dependentProject.getArtifactId(), dependency.getVersion())));
-                    projects.createOrUpdate(projectData.get());
                 }
-            }
-            else
-            {
-                response.addMessage(String.format("No project found with coordinates: %s-%s", dependency.getGroupId(), dependency.getArtifactId()));
-            }
-        });
+                else
+                {
+                    response.addMessage(String.format("No project found with coordinates: %s-%s", dependency.getGroupId(), dependency.getArtifactId()));
+                }
+            });
+            ProjectData projectToUpdate = projects.find(groupId,artifactId).get();
+            projectToUpdate.getDependencies(versionId).forEach(projectToUpdate::removeDependency);
+            projectToUpdate.addDependencies(newDependencies);
+            projects.createOrUpdate(projectToUpdate);
+            LOGGER.info("Finished updating {} dependencies {}-{}-{}",  projectToUpdate.getDependencies(versionId).size(),groupId,artifactId,versionId);
+        }
+        else
+        {
+            response.addMessage(String.format("No project found with coordinates: %s-%s", groupId, artifactId));
+        }
         return response;
     }
 

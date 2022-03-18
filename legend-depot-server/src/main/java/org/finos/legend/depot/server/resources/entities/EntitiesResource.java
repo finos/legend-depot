@@ -36,7 +36,12 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.*;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_ENTITIES;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_ENTITIES_BY_PACKAGE;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_ENTITY;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_BY_PACKAGE;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITY;
 
 @Path("")
 @Api("Entities")

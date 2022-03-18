@@ -236,7 +236,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         MetadataEventResponse response = artifactsRefreshService.refreshProjectRevisionArtifacts(TEST_GROUP_ID, TEST_ARTIFACT_ID);
         Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
 
-        Assert.assertEquals(1, projectsStore.findByProjectId(PROJECT_A).get(0).getDependencies().size());
+        Assert.assertEquals(2, projectsStore.findByProjectId(PROJECT_A).get(0).getDependencies().size());
         Assert.assertEquals(18, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).size());
 
         Assert.assertEquals(1, projectsStore.findByProjectId(PROJECT_B).get(0).getVersions().size());
@@ -244,7 +244,25 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertEquals(0, projectsStore.findByProjectId(PROJECT_B).get(0).getDependencies().size());
 
         List<ProjectVersionDependency> dependencies = projectsStore.findByProjectId(PROJECT_A).get(0).getDependencies();
-        Assert.assertEquals(1, dependencies.size());
+        Assert.assertEquals(2, dependencies.size());
+
+    }
+
+
+    @Test
+    public void canRefreshProjectMasterVersionWithAllDependencies()
+    {
+
+        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).size());
+
+        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
+        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, "art101", "2.0.0").size());
+
+        MetadataEventResponse response = artifactsRefreshService.refreshProjectRevisionArtifacts(TEST_GROUP_ID, TEST_ARTIFACT_ID);
+        Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
+
+        List<ProjectVersionDependency> dependencies = projectsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().getDependencies();
+        Assert.assertEquals(2, dependencies.size());
 
     }
 
@@ -275,7 +293,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
 
         List<ProjectVersionDependency> dependencies = projectsStore.findByProjectId(PROJECT_A).get(0).getDependencies();
         Assert.assertFalse(dependencies.isEmpty());
-        Assert.assertEquals(1, dependencies.size());
+        Assert.assertEquals(2, dependencies.size());
 
     }
 

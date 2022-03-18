@@ -19,7 +19,6 @@ import org.apache.maven.model.Model;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-
 import org.finos.legend.depot.artifacts.repository.maven.impl.TestMavenArtifactsRepository;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -34,8 +33,8 @@ public class TestEntityProvider
 {
 
     public static final String TEST_GROUP_ID = "examples.metadata";
-    private ArtifactRepository repository = new TestMavenArtifactsRepository();
-    private EntityArtifactsProvider artifactProvider = new EntityProvider();
+    private final ArtifactRepository repository = new TestMavenArtifactsRepository();
+    private final EntityArtifactsProvider artifactProvider = new EntityProvider();
 
     List<File> getFiles(String group, String artifact, String version)
     {

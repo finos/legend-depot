@@ -139,8 +139,6 @@ public final class SchedulesFactory
     private ScheduleInfo get(String jobId)
     {
         Optional<ScheduleInfo> scheduleInfo = this.manageSchedulesService.get(jobId);
-        return scheduleInfo.orElseGet(() -> new ScheduleInfo(jobId, schedulesBuffer.get(jobId).getTwo().frequency, false));
+        return scheduleInfo.orElseGet(() -> schedulesBuffer.get(jobId).getTwo());
     }
-
-
 }

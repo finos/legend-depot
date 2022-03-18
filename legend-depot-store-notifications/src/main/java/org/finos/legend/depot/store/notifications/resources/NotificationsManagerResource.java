@@ -57,12 +57,12 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     private final ManageProjectsService projectsService;
 
     @Inject
-    protected NotificationsManagerResource(Notifications events, Queue queue, ManageProjectsService projectsService, AuthorisationProvider authorisationProvider, @Named("requestPrincipal") Provider<Principal> principalProvider)
+    protected NotificationsManagerResource(ManageProjectsService projectsService, Notifications events, Queue queue, AuthorisationProvider authorisationProvider, @Named("requestPrincipal") Provider<Principal> principalProvider)
     {
         super(authorisationProvider, principalProvider);
+        this.projectsService = projectsService;
         this.eventsApi = events;
         this.queue = queue;
-        this.projectsService = projectsService;
     }
 
     @Override
@@ -83,6 +83,16 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.FIND_PAST_EVENTS, () ->
                 eventsApi.find(from == null ? null : LocalDateTime.parse(from, DATE_TIME_FORMATTER),
                         to == null ? null : LocalDateTime.parse(to, DATE_TIME_FORMATTER)));
+    }
+
+    @GET
+    @Path("/queuesRefreshAllVersions")
+    @ApiOperation(ResourceLoggingAndTracing.ENQUEUE_REFRESH_ALL_EVENT)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String queueRefreshAllEvent()
+    {
+        validateUser();
+        return handle(ResourceLoggingAndTracing.ENQUEUE_REFRESH_ALL_EVENT, () -> queue.push(new RefreshAllMetadataNotification()));
     }
 
     @GET
@@ -110,31 +120,22 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> pushToQueue(projectId, groupId, artifactId, versionId, maxRetries));
     }
 
-
-    private String pushToQueue(String projectId, String groupId, String artifactId, String versionId, int maxRetries)
-    {
-        validateMavenCoordinates(projectId,groupId,artifactId);
-        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId, maxRetries);
-        return queue.push(event);
-    }
-
     private void validateMavenCoordinates(String projectId, String groupId, String artifactId)
     {
-        Optional<ProjectData> found = projectsService.find(groupId, artifactId);
-        if (found.isPresent() && !found.get().getProjectId().equals(projectId))
+        Optional<ProjectData> project = projectsService.find(groupId, artifactId);
+        if (project.isPresent() && !project.get().getProjectId().equals(projectId))
         {
-            throw new IllegalArgumentException(String.format("%s:%s are already associated with project %s", groupId,artifactId,found.get().getProjectId()));
+            throw new IllegalArgumentException(String.format("%s:%s coordinates already registered with project %s", groupId, artifactId, project.get().getProjectId()));
         }
     }
 
 
-    @GET
-    @Path("/queuesRefreshAllVersions")
-    @ApiOperation(ResourceLoggingAndTracing.ENQUEUE_REFRESH_ALL_EVENT)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String queueRefreshAllEvent()
+    protected String pushToQueue(String projectId, String groupId, String artifactId, String versionId, int maxRetries)
     {
-        validateUser();
-        return handle(ResourceLoggingAndTracing.ENQUEUE_REFRESH_ALL_EVENT, () -> queue.push(new RefreshAllMetadataNotification()));
+        validateMavenCoordinates(projectId, groupId, artifactId);
+        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId, maxRetries);
+        return queue.push(event);
     }
+
+
 }
