@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.finos</groupId>
         <artifactId>finos</artifactId>
-        <version>2</version>
+        <version>4</version>
     </parent>
 
     <name>Legend Depot</name>
@@ -135,6 +135,7 @@
         <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
         <maven.enforcer.plugin.version>3.0.0-M1</maven.enforcer.plugin.version>
         <maven.jar.plugin.version>3.1.2</maven.jar.plugin.version>
+        <nexus.staging.maven.plugin.version>1.6.8</nexus.staging.maven.plugin.version>
 
         <git.commit.plugin.version>2.2.6</git.commit.plugin.version>
         <versions.maven.plugin.version>2.7</versions.maven.plugin.version>
@@ -176,6 +177,11 @@
                             </fileset>
                         </filesets>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>${nexus.staging.maven.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -318,6 +324,16 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -1108,7 +1124,7 @@
         <repository>
             <id>ossrh</id>
             <name>OSSRH Public Group</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -1116,7 +1132,7 @@
         <repository>
             <id>ossrh-releases</id>
             <name>OSSRH Public Releases Group</name>
-            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+            <url>https://s01.oss.sonatype.org/content/repositories/releases/</url>
         </repository>
     </repositories>
 
