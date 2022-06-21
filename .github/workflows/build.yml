@@ -51,5 +51,7 @@ jobs:
         run: mvn install javadoc:javadoc
       - name: Build + Test + Sonar + Maven Deploy
         if: (github.repository == 'finos/legend-depot') && (github.ref == 'refs/heads/master')
-        # TODO?: change to 'deploy' once this is published to Maven Central
-        run: mvn javadoc:javadoc install -P sonar,docker-snapshot
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: mvn javadoc:javadoc deploy -P sonar,docker-snapshot
