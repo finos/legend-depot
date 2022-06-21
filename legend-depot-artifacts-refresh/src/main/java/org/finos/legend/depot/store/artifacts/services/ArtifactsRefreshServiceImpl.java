@@ -292,7 +292,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         MetadataEventResponse response = new MetadataEventResponse();
         Set<ArtifactDependency> dependencies = repository.findDependencies(groupId, artifactId, versionId);
         Optional<ProjectData> projectData = projects.find(groupId, artifactId);
-        LOGGER.info(" Found {} dependencies {}-{}-{}",dependencies.size(),groupId,artifactId,versionId);
+        LOGGER.info(" Found {} dependencies {}-{}-{}",dependencies.size(), groupId, artifactId, versionId);
         if (projectData.isPresent())
         {
             ProjectData project = projectData.get();
@@ -311,14 +311,13 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 }
                 else
                 {
-                    response.addMessage(String.format("No project found with coordinates: %s-%s", dependency.getGroupId(), dependency.getArtifactId()));
+                    response.addMessage(String.format("No dependent project found with coordinates: %s-%s", dependency.getGroupId(), dependency.getArtifactId()));
                 }
             });
-            ProjectData projectToUpdate = projects.find(groupId,artifactId).get();
-            projectToUpdate.getDependencies(versionId).forEach(projectToUpdate::removeDependency);
-            projectToUpdate.addDependencies(newDependencies);
-            projects.createOrUpdate(projectToUpdate);
-            LOGGER.info("Finished updating {} dependencies {}-{}-{}",  projectToUpdate.getDependencies(versionId).size(),groupId,artifactId,versionId);
+            project.getDependencies(versionId).forEach(project::removeDependency);
+            project.addDependencies(newDependencies);
+            projects.createOrUpdate(project);
+            LOGGER.info("Finished updating {} dependencies {}-{}-{}",  project.getDependencies(versionId).size(),groupId,artifactId,versionId);
         }
         else
         {
