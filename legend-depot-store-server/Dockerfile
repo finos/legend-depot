@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM openjdk:11.0.12
+FROM openjdk:11.0.15-bullseye
 COPY target/legend-depot-store-server-*.jar /app/bin/
 CMD java -cp /app/bin/*-shaded.jar \
 -XX:+ExitOnOutOfMemoryError \
