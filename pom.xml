@@ -69,8 +69,8 @@
         <maven.compiler>1.8</maven.compiler>
 
         <!-- Legend dependency versions -->
-        <legend.engine.version>3.3.1</legend.engine.version>
-        <legend.sdlc.version>0.77.1</legend.sdlc.version>
+        <legend.engine.version>3.6.2</legend.engine.version>
+        <legend.sdlc.version>0.79.0</legend.sdlc.version>
         <legend.shared.version>0.22.0</legend.shared.version>
 
         <!-- Dependency versions -->
