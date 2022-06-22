@@ -1,4 +1,4 @@
-# Copyright 2021 Goldman Sachs
+# Copyright 2022 Goldman Sachs
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ name: Docker
 
 on:
   schedule:
-    - cron: '0 0 * * 2' # every Tuesday on default/base branch
+    - cron: "0 0 * * 2" # every Tuesday on default/base branch
   push:
     branches:
       - master
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: ['legend-depot-server', 'legend-depot-store-server']
+        module: [legend-depot-server, legend-depot-store-server]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -39,11 +39,17 @@ jobs:
         # NOTE: if this gets more complicated, consider having this as a bash script
         run: mkdir -p ./${{ matrix.module }}/target && touch ./${{ matrix.module }}/target/${{ matrix.module }}-dummy.jar && docker build --quiet --tag local/${{ matrix.module }}:${{ github.sha }} ./${{ matrix.module }}
       - name: Scan image for security issues
-        uses: Azure/container-scan@v0
-        env:
-          # Skip `won't fix` CVEs
-          # See https://github.com/Azure/container-scan/issues/61
-          TRIVY_IGNORE_UNFIXED: true
+        uses: aquasecurity/trivy-action@0.4.1
         with:
-          image-name: local/${{ matrix.module }}:${{ github.sha }}
-          severity-threshold: CRITICAL
+          # TODO: we should probably also setup misconfiguration scanning
+          # See https://github.com/aquasecurity/trivy-action#using-trivy-to-scan-infrastucture-as-code
+          scan-type: image
+          image-ref: local/${{ matrix.module }}:${{ github.sha }}
+          format: table
+          exit-code: 1
+          # Ignore unpatched/unfixed vulnerabilities/CVEs
+          ignore-unfixed: true
+          severity: CRITICAL
+          # Manually increase timeout as the default 2-minute is not enough
+          # See https://github.com/aquasecurity/trivy/issues/802
+          timeout: 10m
