@@ -52,6 +52,6 @@ jobs:
       - name: Build + Test + Sonar + Maven Deploy
         if: (github.repository == 'finos/legend-depot') && (github.ref == 'refs/heads/master')
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_USERNAME: finos
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: mvn javadoc:javadoc deploy -P sonar,docker-snapshot
