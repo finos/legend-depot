@@ -65,6 +65,4 @@ public class EntityProvider implements EntityArtifactsProvider
         });
         return entities;
     }
-
-
 }

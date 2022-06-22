@@ -65,5 +65,4 @@ public final class BasicAuthorisationProvider implements AuthorisationProvider
             throw new SecurityException(String.format("User [%s] not authorised for role [%s]", principalProvider.get().getName(), role));
         }
     }
-
 }

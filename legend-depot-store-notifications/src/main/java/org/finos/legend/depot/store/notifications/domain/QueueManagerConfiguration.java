@@ -21,18 +21,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class QueueManagerConfiguration
 {
-    public static final int TWENTY_SECONDS = 20 * 1000;
+    public static final long TWENTY_SECONDS = 20 * 1000L;
+    public static final long ONE_MINUTE = 60 * 1000L;
 
     @JsonProperty
-    int queueInterval = TWENTY_SECONDS;
+    long queueInterval = TWENTY_SECONDS;
 
-    public int getQueueInterval()
+    @JsonProperty
+    long queueDelay = ONE_MINUTE;
+
+    public long getQueueInterval()
     {
         return queueInterval;
     }
 
-    public void setQueueInterval(int queueInterval)
+    public long getQueueDelay()
+    {
+        return queueDelay;
+    }
+
+    public void setQueueInterval(long queueInterval)
     {
         this.queueInterval = queueInterval;
+    }
+
+    public void setQueueDelay(long queueDelay)
+    {
+        this.queueDelay = queueDelay;
     }
 }
