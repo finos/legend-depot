@@ -31,6 +31,12 @@
     <packaging>pom</packaging>
 
     <modules>
+        <!--
+            NOTE: we must put test-reports here to ensure it's not the last module to be built,
+            else it would interfere with deploy step
+        -->
+        <module>legend-depot-test-reports</module>
+
         <module>legend-depot-model</module>
 
         <module>legend-depot-store-mongo</module>
@@ -51,7 +57,6 @@
         <module>legend-depot-server</module>
         <module>legend-depot-store-server</module>
 
-        <module>legend-depot-test-reports</module>
         <module>legend-depot-store-api</module>
     </modules>
 
