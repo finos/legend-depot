@@ -29,7 +29,6 @@ import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.ProjectProperty;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
-import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.ProjectVersionArtifactsHandler;
@@ -292,7 +291,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         MetadataEventResponse response = new MetadataEventResponse();
         Set<ArtifactDependency> dependencies = repository.findDependencies(groupId, artifactId, versionId);
         Optional<ProjectData> projectData = projects.find(groupId, artifactId);
-        LOGGER.info(" Found {} dependencies {}-{}-{}",dependencies.size(), groupId, artifactId, versionId);
+        LOGGER.info(" Found {} dependencies {}-{}-{}",dependencies.size(),groupId,artifactId,versionId);
         if (projectData.isPresent())
         {
             ProjectData project = projectData.get();
@@ -305,7 +304,6 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 {
                     ProjectData dependentProject = found.get();
                     response.combine(refreshProjectVersionArtifacts(dependentProject.getGroupId(), dependentProject.getArtifactId(), dependency.getVersion(), fullUpdate));
-
                     newDependencies.add(new ProjectVersionDependency(project.getGroupId(), project.getArtifactId(), versionId,
                             new ProjectVersion(dependentProject.getGroupId(), dependentProject.getArtifactId(), dependency.getVersion())));
                 }
