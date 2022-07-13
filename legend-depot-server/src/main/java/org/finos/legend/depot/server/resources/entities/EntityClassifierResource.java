@@ -36,7 +36,7 @@ import java.util.Set;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_ENTITIES_BY_CLASSIFIER_PATH;
 
 @Path("")
-@Api("Entities")
+@Api("Classifiers")
 public class EntityClassifierResource extends BaseResource
 {
     private final EntityClassifierService graphService;

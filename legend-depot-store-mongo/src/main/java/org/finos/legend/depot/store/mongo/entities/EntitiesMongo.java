@@ -60,8 +60,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.mongodb.client.model.Aggregates.group;
-import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Updates.*;
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.ne;
+import static com.mongodb.client.model.Filters.regex;
+import static com.mongodb.client.model.Updates.combine;
+import static com.mongodb.client.model.Updates.currentDate;
+import static com.mongodb.client.model.Updates.set;
 import static org.finos.legend.depot.domain.entity.StoredEntity.VERSION_PATTERN;
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
@@ -77,6 +82,7 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     public static final String PATH = "path";
     public static final String ENTITY_PACKAGE = "entity.content.package";
     public static final String VERSIONED_ENTITY = "versionedEntity";
+
 
     public final boolean transactionMode;
 
@@ -109,6 +115,7 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         createIndexIfAbsent("groupId-artifactId-hashed", GROUP_ID, ARTIFACT_ID);
         createIndexIfAbsent("entity-classifier", ENTITY_CLASSIFIER_PATH);
         return true;
+
     }
 
     @Override
@@ -121,14 +128,14 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     protected Bson getKeyFilter(StoredEntity data)
     {
         return and(getArtifactAndVersionFilter(data.getGroupId(), data.getArtifactId(), data.getVersionId()),
-            eq(ENTITY_PATH, data.getEntity().getPath()));
+                eq(ENTITY_PATH, data.getEntity().getPath()));
     }
 
 
     private Bson getEntityPathFilter(StoredEntity entity)
     {
         return and(getArtifactAndVersionFilter(entity.getGroupId(), entity.getArtifactId(), entity.getVersionId()),
-            eq(ENTITY_PATH, entity.getEntity().getPath()));
+                eq(ENTITY_PATH, entity.getEntity().getPath()));
     }
 
     private Bson getEntityPathFilter(String groupId, String artifactId, String versionId, String path)
@@ -151,14 +158,14 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     protected Bson combineDocument(StoredEntity entity)
     {
         return combine(
-            set(GROUP_ID, entity.getGroupId()),
-            set(ARTIFACT_ID, entity.getArtifactId()),
-            set(VERSION_ID, entity.getVersionId()),
-            set(VERSIONED_ENTITY, VERSION_PATTERN.matcher(entity.getEntity().getPath()).reset().find()),
-            set(ENTITY_PATH, entity.getEntity().getPath()),
-            set(ENTITY_CLASSIFIER_PATH, entity.getEntity().getClassifierPath()),
-            set(ENTITY_CONTENT, entity.getEntity().getContent()),
-            currentDate(LAST_MODIFIED));
+                set(GROUP_ID, entity.getGroupId()),
+                set(ARTIFACT_ID, entity.getArtifactId()),
+                set(VERSION_ID, entity.getVersionId()),
+                set(VERSIONED_ENTITY, VERSION_PATTERN.matcher(entity.getEntity().getPath()).reset().find()),
+                set(ENTITY_PATH, entity.getEntity().getPath()),
+                set(ENTITY_CLASSIFIER_PATH, entity.getEntity().getClassifierPath()),
+                set(ENTITY_CONTENT, entity.getEntity().getContent()),
+                currentDate(LAST_MODIFIED));
     }
 
 
@@ -230,9 +237,9 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
 
         StoreOperationResult report = new StoreOperationResult(0, 0, 0, new ArrayList<>());
         TransactionOptions txnOptions = TransactionOptions.builder()
-            .readConcern(ReadConcern.MAJORITY)
-            .writeConcern(WriteConcern.ACKNOWLEDGED)
-            .readPreference(ReadPreference.primary()).build();
+                .readConcern(ReadConcern.MAJORITY)
+                .writeConcern(WriteConcern.ACKNOWLEDGED)
+                .readPreference(ReadPreference.primary()).build();
         try
         {
             clientSession.startTransaction(txnOptions);
@@ -340,10 +347,10 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
             return convert(query);
         }
         List<StoredEntity> result = new ArrayList<>();
-        query.forEach((Consumer<Document>) doc ->
+        query.forEach((Consumer<Document>)doc ->
         {
-            Map<String, Object> entity = (Map<String, Object>) doc.get(ENTITY);
-            result.add(new StoredEntityOverview(doc.getString(GROUP_ID), doc.getString(ARTIFACT_ID), doc.getString(VERSION_ID), (String) entity.get(PATH), (String) entity.get(CLASSIFIER_PATH)));
+            Map<String, Object> entity = (Map<String, Object>)doc.get(ENTITY);
+            result.add(new StoredEntityOverview(doc.getString(GROUP_ID), doc.getString(ARTIFACT_ID), doc.getString(VERSION_ID), (String)entity.get(PATH), (String)entity.get(CLASSIFIER_PATH)));
         });
         return result;
     }
@@ -353,6 +360,7 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     {
         return transform(summary, executeFind(and(and(eq(ENTITY_CLASSIFIER_PATH, classifier), eq(VERSIONED_ENTITY, versionedEntities)), ne(VERSION_ID, MASTER_SNAPSHOT))));
     }
+
 
     public List<StoredEntity> findEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
     {
@@ -397,12 +405,14 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         }
     }
 
+
     @Override
     public List<Entity> getEntities(String groupId, String artifactId, String version, boolean versioned)
     {
         validateInput(groupId, artifactId, version);
         return getAllEntities(groupId, artifactId, version, versioned);
     }
+
 
     @Override
     public StoreOperationResult delete(String groupId, String artifactId, String versionId)
@@ -454,15 +464,15 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         concat.add(":");
         concat.add("$artifactId");
         Bson allCoordinates = Aggregates.project(Projections.fields(
-            Projections.excludeId(),
-            Projections.include(GROUP_ID, ARTIFACT_ID),
-            Projections.computed("coordinate", new BasicDBObject("$concat", concat))));
+                Projections.excludeId(),
+                Projections.include(GROUP_ID, ARTIFACT_ID),
+                Projections.computed("coordinate", new BasicDBObject("$concat", concat))));
 
-        getCollection().aggregate(Arrays.asList(allCoordinates, group("$coordinate"))).forEach((Consumer<Document>) document ->
-            {
-                StringTokenizer tokenizer = new StringTokenizer(document.getString("_id"), ":");
-                result.add(Tuples.pair(tokenizer.nextToken(), tokenizer.nextToken()));
-            }
+        getCollection().aggregate(Arrays.asList(allCoordinates, group("$coordinate"))).forEach((Consumer<Document>)document ->
+                {
+                    StringTokenizer tokenizer = new StringTokenizer(document.getString("_id"),":");
+                    result.add(Tuples.pair(tokenizer.nextToken(),tokenizer.nextToken()));
+                }
         );
         return result;
     }

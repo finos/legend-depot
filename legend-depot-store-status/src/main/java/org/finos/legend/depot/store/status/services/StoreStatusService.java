@@ -122,13 +122,25 @@ public class StoreStatusService
         List<StoreStatus.VersionMismatch> versionMismatches = new ArrayList<>();
         projectApi.getAll().forEach(p ->
         {
-          List<String> versions = new ArrayList<>(artifactsRefreshService.getRepositoryVersions(p.getGroupId(), p.getArtifactId()));
-          versions.removeAll(p.getVersions());
-          if (!versions.isEmpty())
-          {
-              versionMismatches.add(new StoreStatus.VersionMismatch(p.getProjectId(),p.getGroupId(),p.getArtifactId(),versions));
-              LOGGER.info("version-mismatch found for {} {} {} : {} ",p.getProjectId(),p.getGroupId(), p.getArtifactId(), versions);
-          }
+            List<String> repositoryVersions = new ArrayList<>(artifactsRefreshService.getRepositoryVersions(p.getGroupId(), p.getArtifactId()));
+            Collections.sort(repositoryVersions);
+            //check versions not in cache
+            List<String> versionsNotInCache = new ArrayList<>(repositoryVersions);
+            versionsNotInCache.removeAll(p.getVersions());
+            if (!versionsNotInCache.isEmpty())
+            {
+                versionMismatches.add(new StoreStatus.VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache));
+                LOGGER.info("version-mismatch found for {} {} {} : {} ", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache);
+            }
+            //chek versions not in repo
+            List<String> versionsNotInRepo = new ArrayList<>(p.getVersions());
+            versionsNotInRepo.removeAll(repositoryVersions);
+            if (!versionsNotInRepo.isEmpty())
+            {
+                versionMismatches.add(new StoreStatus.VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), null, versionsNotInRepo));
+                LOGGER.info("version-mismatch found for {} {} {} : {} ", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInRepo);
+            }
+
         });
         return versionMismatches;
     }

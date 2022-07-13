@@ -190,13 +190,21 @@ public class StoreStatus
         public String artifactId;
         @JsonProperty
         public List<String> versionsNotInCache;
+        @JsonProperty
+        public List<String> versionsNotInRepo;
 
         public VersionMismatch(String projectId, String groupId, String artifactId, List<String> versionsNotInCache)
+        {
+            this(projectId,groupId,artifactId,versionsNotInCache,null);
+        }
+
+        public VersionMismatch(String projectId, String groupId, String artifactId, List<String> versionsNotInCache, List<String> versionsNotInRepo)
         {
             this.projectId = projectId;
             this.groupId = groupId;
             this.artifactId = artifactId;
             this.versionsNotInCache = versionsNotInCache;
+            this.versionsNotInRepo = versionsNotInRepo;
         }
 
         @Override
