@@ -25,10 +25,10 @@ public abstract class ArtifactRepositoryProviderConfiguration
     private final String name;
 
     @JsonProperty
-    long versionsUpdateInterval = 12 * ONE_HOUR;
+    long versionsUpdateIntervalInMillis = 12 * ONE_HOUR;
 
     @JsonProperty
-    long latestUpdateInterval = 3 * ONE_HOUR;
+    long latestUpdateIntervalInMillis = 3 * ONE_HOUR;
 
 
     protected ArtifactRepositoryProviderConfiguration(String name)
@@ -57,14 +57,14 @@ public abstract class ArtifactRepositoryProviderConfiguration
         return name;
     }
 
-    public long getVersionsUpdateInterval()
+    public long getVersionsUpdateIntervalInMillis()
     {
-        return versionsUpdateInterval;
+        return versionsUpdateIntervalInMillis;
     }
 
-    public long getLatestUpdateInterval()
+    public long getLatestUpdateIntervalInMillis()
     {
-        return latestUpdateInterval;
+        return latestUpdateIntervalInMillis;
     }
 
     public abstract ArtifactRepository initialiseArtifactRepositoryProvider();
