@@ -15,12 +15,21 @@
 
 package org.finos.legend.depot.artifacts.repository.api;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class ArtifactRepositoryProviderConfiguration
 {
+    private static final long ONE_HOUR =  60 * 60 * 1000L;
     private final String name;
+
+    @JsonProperty
+    long versionsUpdateIntervalInMillis = 12 * ONE_HOUR;
+
+    @JsonProperty
+    long latestUpdateIntervalInMillis = 3 * ONE_HOUR;
+
 
     protected ArtifactRepositoryProviderConfiguration(String name)
     {
@@ -46,6 +55,16 @@ public abstract class ArtifactRepositoryProviderConfiguration
     public String getName()
     {
         return name;
+    }
+
+    public long getVersionsUpdateIntervalInMillis()
+    {
+        return versionsUpdateIntervalInMillis;
+    }
+
+    public long getLatestUpdateIntervalInMillis()
+    {
+        return latestUpdateIntervalInMillis;
     }
 
     public abstract ArtifactRepository initialiseArtifactRepositoryProvider();

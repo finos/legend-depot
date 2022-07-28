@@ -19,7 +19,11 @@
           xmlns="http://maven.apache.org/SETTINGS/1.0.0"
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
                           https://maven.apache.org/xsd/settings-1.0.0.xsd">
-    <localRepository>target/.m2/repository</localRepository>
+
+
+    <localRepository>target/.m2/repository</localRepository>     <!--the location of the local maven repository can be changed-->
+
+
     <interactiveMode>false</interactiveMode>
     <offline>false</offline>
     <profiles>
