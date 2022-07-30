@@ -20,7 +20,7 @@ In order to start the `Depot Server` and `Depot Store Server`, follow the instru
 
 #### Setup Gitlab OAuth
 
-Follow the instructions [here](https://legend.finos.org/docs/installation/maven-install-guide) to set up `Gitlab authentication`
+Follow the instructions [here](https://legend.finos.org/docs/getting-started/installation-guide#maven-install) to set up `Gitlab authentication`
 Add following callback url to config: `http://127.0.0.1:8076/depot-store/callback`
 
 > Certain store APIs required elevated permissions, add your `Gitlab handle` to `authorisedIdentities.json`
