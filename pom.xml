@@ -75,7 +75,7 @@
 
         <!-- Legend dependency versions -->
         <legend.engine.version>3.14.5</legend.engine.version>
-        <legend.sdlc.version>0.90.1</legend.sdlc.version>
+        <legend.sdlc.version>0.90.0</legend.sdlc.version>
         <legend.shared.version>0.22.5</legend.shared.version>
 
         <!-- Dependency versions -->
