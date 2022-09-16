@@ -19,8 +19,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
+import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionDependencies;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
@@ -87,12 +87,12 @@ public class DependenciesResource extends BaseResource
     }
 
     @POST
-    @Path("/projects/projectDependencyTree")
+    @Path("/projects/analyzeDependencyTree")
     @ApiOperation(GET_PROJECT_DEPENDENCY_TREE)
     @Produces(MediaType.APPLICATION_JSON)
-    public Set<ProjectVersionDependencies> getProjectDependencyTree(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies)
+    public ProjectDependencyInfo analyzeDependencyTree(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies)
     {
-        return handle(GET_PROJECT_DEPENDENCY_TREE, GET_PROJECT_DEPENDENCY_TREE, () -> this.projectApi.getDependencyTree(projectDependencies));
+        return handle(GET_PROJECT_DEPENDENCY_TREE, GET_PROJECT_DEPENDENCY_TREE, () -> this.projectApi.getProjectDependencyInfo(projectDependencies));
     }
 
     @GET

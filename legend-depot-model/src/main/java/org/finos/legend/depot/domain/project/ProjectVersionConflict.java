@@ -1,4 +1,4 @@
-//  Copyright 2021 Goldman Sachs
+//  Copyright 2022 Goldman Sachs
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -15,56 +15,55 @@
 
 package org.finos.legend.depot.domain.project;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.BaseDomain;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProjectVersionDependencies extends BaseDomain
+public class ProjectVersionConflict extends BaseDomain
 {
 
-    private String path;
-    private String versionId;
-    private Set<ProjectVersionDependencies> dependencies;
+    private Set<String> conflictPaths;
+    private Set<String> versions;
 
-    public ProjectVersionDependencies()
-    {
 
-    }
-
-    public ProjectVersionDependencies(String groupId, String artifactId, String versionId)
+    public ProjectVersionConflict(String groupId, String artifactId)
     {
         super(groupId, artifactId);
-        this.versionId = versionId;
-        this.dependencies = new HashSet<>();
     }
 
-    public Set<ProjectVersionDependencies> getDependencies()
+    public Set<String> getConflictPaths()
     {
-        return dependencies;
+        return conflictPaths;
     }
 
-    public String getVersionId()
+    public void initConflicts()
     {
-        return versionId;
+        this.conflictPaths = new HashSet<>();
     }
 
-
-    public String getPath()
+    public void initVersions()
     {
-        return path;
+        this.versions = new HashSet<>();
     }
 
-    public void setPath(String path)
+    public Set<String> getVersions()
     {
-        this.path = path;
+        return versions;
     }
 
-    @JsonIgnore
-    public String getGav()
+    @Override
+    public boolean equals(Object obj)
     {
-        return String.format("%s:%s:%s", this.getGroupId(), this.getArtifactId(), this.getVersionId());
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 }

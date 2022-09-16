@@ -16,13 +16,13 @@
 package org.finos.legend.depot.services.projects;
 
 import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionDependencies;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,7 +88,8 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertFalse(projectsService.getDependencies("examples.metadata", "test", "2.3.1", false).contains(new ProjectVersion("example.services.test", "test", "1.0.0")));
 
         // Dependency Tree
-        Set<ProjectVersionDependencies> dependencyTree = projectsService.getDependencyTree("examples.metadata", "test", "2.3.1");
+        ProjectDependencyInfo dependencyInfo = projectsService.getProjectDependencyInfo("examples.metadata", "test", "2.3.1");
+        Set<ProjectVersionDependencies> dependencyTree = dependencyInfo.getTree();
         Assert.assertEquals(1, dependencyTree.size());
         Set<ProjectVersionDependencies> projectVersionDependencies = dependencyTree.iterator().next().getDependencies();
         Assert.assertEquals(1, projectVersionDependencies.size());
