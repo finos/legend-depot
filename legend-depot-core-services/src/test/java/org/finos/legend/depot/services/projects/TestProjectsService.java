@@ -16,12 +16,13 @@
 package org.finos.legend.depot.services.projects;
 
 import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.ProjectVersionDependencies;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,9 +85,24 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertFalse(dependencyList2.isEmpty());
         Assert.assertTrue(dependencyList2.contains(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0")));
         Assert.assertTrue(dependencyList2.contains(new ProjectVersion("example.services.test", "test", "1.0.0")));
-
         Assert.assertFalse(projectsService.getDependencies("examples.metadata", "test", "2.3.1", false).contains(new ProjectVersion("example.services.test", "test", "1.0.0")));
 
+        // Dependency Tree
+        ProjectDependencyInfo dependencyInfo = projectsService.getProjectDependencyInfo("examples.metadata", "test", "2.3.1");
+        Set<ProjectVersionDependencies> dependencyTree = dependencyInfo.getTree();
+        Assert.assertEquals(1, dependencyTree.size());
+        Set<ProjectVersionDependencies> projectVersionDependencies = dependencyTree.iterator().next().getDependencies();
+        Assert.assertEquals(1, projectVersionDependencies.size());
+        ProjectVersionDependencies projectVersionDependencies1 = projectVersionDependencies.iterator().next();
+        Assert.assertEquals(projectVersionDependencies1.getGroupId(), "examples.metadata");
+        Assert.assertEquals(projectVersionDependencies1.getArtifactId(), "test-dependencies");
+        Assert.assertEquals(projectVersionDependencies1.getVersionId(), "1.0.0");
+        Set<ProjectVersionDependencies> dependencies1 = projectVersionDependencies1.getDependencies();
+        Assert.assertEquals(1, dependencies1.size());
+        ProjectVersionDependencies projectVersionDependencies2 = dependencies1.iterator().next();
+        Assert.assertEquals(projectVersionDependencies2.getGroupId(), "example.services.test");
+        Assert.assertEquals(projectVersionDependencies2.getArtifactId(), "test");
+        Assert.assertEquals(projectVersionDependencies2.getVersionId(), "1.0.0");
     }
 
     @Test

@@ -24,6 +24,7 @@ public class ResourceLoggingAndTracing
     public static final String DELETE_PROJECT_ID = "delete projects by id";
     public static final String CREATE_EMPTY_PROJECT = "create empty project";
     public static final String GET_PROJECT_DEPENDENCIES = "get upstream project dependencies";
+    public static final String GET_PROJECT_DEPENDENCY_TREE = "get project dependency tree";
     public static final String GET_DEPENDANT_PROJECTS = "downstream projects";
     public static final String GET_REVISION_ENTITIES = "get revision entities";
     public static final String GET_REVISION_ENTITIES_AS_PMCD = "get revision entities as PMCD";

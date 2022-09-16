@@ -17,6 +17,7 @@ package org.finos.legend.depot.services.projects;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
@@ -84,6 +85,12 @@ public class ProjectsServiceImpl implements ManageProjectsService
     public Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, boolean transitive)
     {
         return projects.getDependencies(projectVersions, transitive);
+    }
+
+    @Override
+    public ProjectDependencyInfo getProjectDependencyInfo(List<ProjectVersion> projectVersions)
+    {
+        return projects.getProjectDependencyInfo(projectVersions);
     }
 
     @Override
