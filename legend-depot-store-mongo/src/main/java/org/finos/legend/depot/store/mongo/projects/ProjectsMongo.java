@@ -24,6 +24,7 @@ import org.finos.legend.depot.domain.EntityValidator;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.ProjectVersionDependencies;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
 import org.finos.legend.depot.store.api.projects.Projects;
@@ -169,7 +170,21 @@ public class ProjectsMongo extends BaseMongo<ProjectData> implements Projects, U
             projectVersionDependencies.forEach(dep -> dependencies.add(dep.getDependency()));
         });
         return dependencies;
+    }
 
+
+    public Set<ProjectVersionDependencies> getDependencyTree(List<ProjectVersion> projectVersions)
+    {
+        Set<ProjectVersionDependencies> rootTree = new HashSet<>();
+        projectVersions.forEach(projectVersion ->
+        {
+            ProjectVersionDependencies projectVersionDependencyTree = new ProjectVersionDependencies(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId());
+            ProjectData projectData = getProject(projectVersion.getGroupId(), projectVersion.getArtifactId());
+            List<ProjectVersionDependency> projectVersionDependencies = projectData.getDependencies(projectVersion.getVersionId());
+            projectVersionDependencies.forEach(dep -> projectVersionDependencyTree.getDependencies().addAll(getDependencyTree(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId())));
+            rootTree.add(projectVersionDependencyTree);
+        });
+        return rootTree;
     }
 
     @Override
