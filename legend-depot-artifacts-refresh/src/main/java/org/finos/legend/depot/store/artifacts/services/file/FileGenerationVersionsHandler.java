@@ -25,7 +25,6 @@ import javax.inject.Inject;
 public class FileGenerationVersionsHandler extends BaseFileGenerationHandler implements FileGenerationsVersionArtifactsHandler
 {
 
-
     @Inject
     public FileGenerationVersionsHandler(ArtifactRepository repository, FileGenerationsProvider provider, ManageFileGenerationsService generations)
     {

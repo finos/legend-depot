@@ -38,7 +38,6 @@ import static org.finos.legend.depot.domain.generation.file.FileGeneration.GENER
 public abstract class BaseFileGenerationHandler
 {
 
-
     public static final String TYPE = "type";
     public static final String PATH = "/";
     public static final String GENERATION_OUTPUT_PATH = "generationOutputPath";

@@ -100,6 +100,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 
     private List<ArtifactType> getSupportedArtifactTypes()
     {
+        // TODO add here
         return Arrays.asList(ArtifactType.ENTITIES, ArtifactType.FILE_GENERATIONS);
     }
 
