@@ -19,11 +19,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import java.util.Arrays;
+import java.util.Collections;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.domain.EntityValidator;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.ProjectVersionConflict;
+import org.finos.legend.depot.domain.project.ProjectVersionDependencies;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
 import org.finos.legend.depot.store.api.projects.Projects;
@@ -50,6 +55,8 @@ public class ProjectsMongo extends BaseMongo<ProjectData> implements Projects, U
     public static final String MONGO_PROJECTS = "project-configurations";
 
     public static final String PROJECT_ID = "projectId";
+
+    public static final String PATH_DELIMITER = ">";
 
     @Inject
     public ProjectsMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -169,8 +176,72 @@ public class ProjectsMongo extends BaseMongo<ProjectData> implements Projects, U
             projectVersionDependencies.forEach(dep -> dependencies.add(dep.getDependency()));
         });
         return dependencies;
-
     }
+
+
+    public Set<ProjectVersionDependencies> getDependencyTree(List<ProjectVersion> projectVersions, String parentPath, Set<ProjectVersionDependencies> fullDependencies)
+    {
+        Set<ProjectVersionDependencies> rootTree = new HashSet<>();
+        projectVersions.forEach(projectVersion ->
+        {
+            ProjectVersionDependencies projectVersionDependencyTree = new ProjectVersionDependencies(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId());
+            fullDependencies.add(projectVersionDependencyTree);
+            String fullPath = (parentPath == null ? "" : parentPath + PATH_DELIMITER) + projectVersionDependencyTree.getGav();
+            projectVersionDependencyTree.setPath(fullPath);
+            ProjectData projectData = getProject(projectVersion.getGroupId(), projectVersion.getArtifactId());
+            List<ProjectVersionDependency> projectVersionDependencies = projectData.getDependencies(projectVersion.getVersionId());
+            projectVersionDependencies.forEach(dep ->
+                projectVersionDependencyTree.getDependencies().addAll(
+                    getDependencyTree(Collections.singletonList(new ProjectVersion(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId())), fullPath, fullDependencies)
+                )
+            );
+            rootTree.add(projectVersionDependencyTree);
+        });
+        return rootTree;
+    }
+
+    public ProjectDependencyInfo getProjectDependencyInfo(List<ProjectVersion> projectVersions)
+    {
+        Set<ProjectVersionDependencies> dependencyLine = new HashSet<>();
+        Set<ProjectVersionDependencies> dependencyTree = getDependencyTree(projectVersions, null, dependencyLine);
+
+        // Calculate conflicts
+        // 1.collect dependency projects
+        Set<ProjectVersionConflict> projectVersionConflicts = new HashSet<>();
+        for (ProjectVersionDependencies dependency : dependencyLine)
+        {
+            projectVersionConflicts.add(new ProjectVersionConflict(dependency.getGroupId(), dependency.getArtifactId()));
+        }
+        // 2. add conflicts if more than one versions
+        for (ProjectVersionConflict projectVersionConflict : projectVersionConflicts)
+        {
+            Set<String> versions = new HashSet<>();
+            Set<ProjectVersionDependencies> correspondingDependencies = new HashSet<>();
+            dependencyLine.forEach(dependency ->
+            {
+                if (dependency.getGroupId().equals(projectVersionConflict.getGroupId()) && dependency.getArtifactId().equals(projectVersionConflict.getArtifactId()))
+                {
+                    versions.add(dependency.getVersionId());
+                    correspondingDependencies.add(dependency);
+                }
+            });
+            // Initialize Conflicts if more than one person per project
+            if (versions.size() > 1)
+            {
+                projectVersionConflict.initConflicts();
+                projectVersionConflict.initVersions();
+                correspondingDependencies.forEach(dependency ->
+                {
+                    projectVersionConflict.getConflictPaths().add(dependency.getPath());
+                    projectVersionConflict.getVersions().add(dependency.getVersionId());
+                });
+            }
+        }
+        projectVersionConflicts.removeIf(s -> s.getConflictPaths() == null || s.getConflictPaths().isEmpty());
+        return new ProjectDependencyInfo(dependencyTree, projectVersionConflicts);
+    }
+
+
 
     @Override
     public List<ProjectVersionPlatformDependency> getDependentProjects(String groupId, String artifactId, String versionId)

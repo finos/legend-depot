@@ -39,6 +39,8 @@ import org.finos.legend.server.shared.bundles.ChainFixingFilterHandler;
 import org.finos.legend.server.shared.bundles.HostnameHeaderBundle;
 import org.finos.legend.server.shared.bundles.OpenTracingBundle;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -70,6 +72,9 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
                 return configuration.getSwaggerBundleConfiguration();
             }
         });
+
+        // Enable variable substitution with environment variables
+        bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(true)));
 
         bootstrap.getObjectMapper().setDateFormat(new SimpleDateFormat(SIMPLE_DATE_FORMAT));
 

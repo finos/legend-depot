@@ -19,6 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
+import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
@@ -42,6 +43,7 @@ import java.util.Set;
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_DEPENDANT_PROJECTS;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCIES;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCY_TREE;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_DEPENDENCY_ENTITIES;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_DEPENDENCY_ENTITIES;
 
@@ -82,6 +84,15 @@ public class DependenciesResource extends BaseResource
                                                       @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to return transitive dependencies") boolean transitive)
     {
         return handle(GET_PROJECT_DEPENDENCIES, GET_PROJECT_DEPENDENCIES + groupId + artifactId, () -> this.projectApi.getDependencies(groupId, artifactId, versionId, transitive));
+    }
+
+    @POST
+    @Path("/projects/analyzeDependencyTree")
+    @ApiOperation(GET_PROJECT_DEPENDENCY_TREE)
+    @Produces(MediaType.APPLICATION_JSON)
+    public ProjectDependencyInfo analyzeDependencyTree(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies)
+    {
+        return handle(GET_PROJECT_DEPENDENCY_TREE, GET_PROJECT_DEPENDENCY_TREE, () -> this.projectApi.getProjectDependencyInfo(projectDependencies));
     }
 
     @GET

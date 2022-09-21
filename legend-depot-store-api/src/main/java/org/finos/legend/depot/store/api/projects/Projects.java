@@ -16,6 +16,7 @@
 package org.finos.legend.depot.store.api.projects;
 
 import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
@@ -44,6 +45,8 @@ public interface Projects
     {
         return getDependencies(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)), transitive);
     }
+
+    ProjectDependencyInfo getProjectDependencyInfo(List<ProjectVersion> projectVersions);
 
     List<ProjectVersionPlatformDependency> getDependentProjects(String groupId, String artifactId, String versionId);
 
