@@ -13,18 +13,11 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.artifacts.api.generation.file;
+package org.finos.legend.depot.store.artifacts.api.generation;
 
-import java.util.List;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.generation.file.FileGeneration;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.store.artifacts.api.ProjectVersionArtifactsHandler;
 
-public interface FileGenerationsVersionArtifactsHandler
+public interface FileArtifactGenerationsVersionArtifactsHandler extends ProjectVersionArtifactsHandler
 {
-    MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId, List<FileGeneration> fileGenerations);
-
-    void delete(String groupId, String artifactId, String versionId);
-
 
 }

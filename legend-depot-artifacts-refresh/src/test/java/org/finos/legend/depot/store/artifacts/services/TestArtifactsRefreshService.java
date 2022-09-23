@@ -1,4 +1,4 @@
-//  Copyright 2021 Goldman Sachs
+//  Copyright 2022 Goldman Sachs
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -26,9 +26,11 @@ import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfigurati
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
+import org.finos.legend.depot.services.generation.artifact.ArtifactGenerationsServiceImpl;
 import org.finos.legend.depot.services.generation.file.FileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
+import org.finos.legend.depot.store.api.generation.artifact.UpdateArtifactGenerations;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
@@ -37,13 +39,16 @@ import org.finos.legend.depot.store.artifacts.api.generation.file.FileGeneration
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntityProvider;
-import org.finos.legend.depot.store.artifacts.services.file.FileGenerationVersionsHandler;
+import org.finos.legend.depot.store.artifacts.services.file.ArtifactGenerationHandler;
+import org.finos.legend.depot.store.artifacts.services.file.FileArtifactGenerationVersionsHandler;
+import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandler;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProviderImpl;
 import org.finos.legend.depot.store.artifacts.store.mongo.ArtifactsMongo;
 import org.finos.legend.depot.store.artifacts.store.mongo.MongoRefreshStatus;
 import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
+import org.finos.legend.depot.store.mongo.generation.artifact.ArtifactGenerationsMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -73,6 +78,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     protected List<String> properties = Arrays.asList("[a-zA-Z0-9]+.version");
     protected UpdateFileGenerations fileGenerationsStore = new FileGenerationsMongo(mongoProvider);
+    protected UpdateArtifactGenerations artifactGenerationsStore = new ArtifactGenerationsMongo(mongoProvider);
     protected ManageRefreshStatusService refreshStatusStore = new MongoRefreshStatus(mongoProvider);
 
     protected EntityArtifactsProvider entitiesProvider = new EntityProvider();
@@ -86,7 +92,10 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void setUpData()
     {
         ArtifactResolverFactory.registerVersionUpdater(ArtifactType.ENTITIES, new EntitiesHandlerImpl(new EntitiesServiceImpl(entitiesStore, projectsStore), entitiesProvider));
-        ArtifactResolverFactory.registerVersionUpdater(ArtifactType.FILE_GENERATIONS, new FileGenerationVersionsHandler(repository, fileGenerationsProvider, new FileGenerationsServiceImpl(fileGenerationsStore, entitiesStore)));
+        FileGenerationHandler fileGenerationHandler = new FileGenerationHandler(repository, new FileGenerationsServiceImpl(fileGenerationsStore, entitiesStore));
+        ArtifactGenerationHandler artifactGenerationHandler = new ArtifactGenerationHandler(repository, new ArtifactGenerationsServiceImpl(artifactGenerationsStore));
+
+        ArtifactResolverFactory.registerVersionUpdater(ArtifactType.FILE_GENERATIONS, new FileArtifactGenerationVersionsHandler(fileGenerationsProvider, artifactGenerationHandler, fileGenerationHandler));
 
         projectsStore.createOrUpdate(new ProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID));
         projectsStore.createOrUpdate(new ProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID));

@@ -24,6 +24,8 @@ import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.entities.EntitiesVersionArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
+import org.finos.legend.depot.store.artifacts.api.generation.FileArtifactGenerationsVersionArtifactsHandler;
+import org.finos.legend.depot.store.artifacts.api.generation.artifact.ArtifactGenerationsVersionArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsProvider;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsVersionArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
@@ -33,7 +35,9 @@ import org.finos.legend.depot.store.artifacts.services.ArtifactResolverFactory;
 import org.finos.legend.depot.store.artifacts.services.ArtifactsRefreshServiceImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntityProvider;
-import org.finos.legend.depot.store.artifacts.services.file.FileGenerationVersionsHandler;
+import org.finos.legend.depot.store.artifacts.services.file.ArtifactGenerationHandler;
+import org.finos.legend.depot.store.artifacts.services.file.FileArtifactGenerationVersionsHandler;
+import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandler;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProviderImpl;
 import org.finos.legend.depot.store.artifacts.store.mongo.ArtifactsMongo;
 import org.finos.legend.depot.store.artifacts.store.mongo.MongoRefreshStatus;
@@ -62,8 +66,11 @@ public class ArtifactsModule extends PrivateModule
         bind(EntitiesVersionArtifactsHandler.class).to(EntitiesHandlerImpl.class);
         bind(EntityArtifactsProvider.class).to(EntityProvider.class);
 
-        bind(FileGenerationsVersionArtifactsHandler.class).to(FileGenerationVersionsHandler.class);
+        bind(ArtifactGenerationsVersionArtifactsHandler.class).to(ArtifactGenerationHandler.class);
+        bind(FileGenerationsVersionArtifactsHandler.class).to(FileGenerationHandler.class);
+        bind(FileArtifactGenerationsVersionArtifactsHandler.class).to(FileArtifactGenerationVersionsHandler.class);
         bind(FileGenerationsProvider.class).to(FileGenerationsProviderImpl.class);
+
 
         bind(ArtifactsRefreshService.class).to(ArtifactsRefreshServiceImpl.class);
 
@@ -73,6 +80,8 @@ public class ArtifactsModule extends PrivateModule
         expose(ManageRefreshStatusService.class);
         expose(RefreshStatusService.class);
         expose(ArtifactsResource.class);
+        expose(ArtifactGenerationsVersionArtifactsHandler.class);
+        expose(FileGenerationsVersionArtifactsHandler.class);
     }
 
     @Provides
@@ -87,7 +96,7 @@ public class ArtifactsModule extends PrivateModule
     @Provides
     @Named("fileGenerationRefresh")
     @Singleton
-    boolean registerFileGenerationRefresh(FileGenerationsVersionArtifactsHandler versionArtifactsHandler)
+    boolean registerFileGenerationRefresh(FileArtifactGenerationsVersionArtifactsHandler versionArtifactsHandler)
     {
         ArtifactResolverFactory.registerVersionUpdater(ArtifactType.FILE_GENERATIONS, versionArtifactsHandler);
         return true;

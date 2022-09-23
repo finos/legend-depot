@@ -53,13 +53,16 @@ public class TestFileGenerationsService extends TestStoreMongo
             Assert.assertNotNull(data);
             data.forEach(gen ->
             {
-                FileGeneration generation = new FileGeneration(gen.getPath().replace("examples_avrogen/", ""), gen.getContent());
-                generations.createOrUpdate(new StoredFileGeneration("group.test", "test", VersionValidator.MASTER_SNAPSHOT, "examples::avrogen", AVRO, generation));
-                generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.1", "examples::avrogen", AVRO, generation));
-                generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.0", "examples::avrogen", AVRO, generation));
-                generations.createOrUpdate(new StoredFileGeneration("group.test.otherproject", "test", "1.0.0", "examples::avrogen1", AVRO, generation));
-            });
+                if (!gen.getPath().startsWith("/model/"))
+                {
+                    FileGeneration generation = new FileGeneration(gen.getPath().replace("examples_avrogen/", ""), gen.getContent());
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test", VersionValidator.MASTER_SNAPSHOT, "examples::avrogen", AVRO, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.1", "examples::avrogen", AVRO, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.0", "examples::avrogen", AVRO, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test.otherproject", "test", "1.0.0", "examples::avrogen1", AVRO, generation));
+                }
 
+            });
             Assert.assertEquals(48, generations.getAll().size());
         }
     }

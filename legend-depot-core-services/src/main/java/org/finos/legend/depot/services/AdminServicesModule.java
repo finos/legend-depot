@@ -16,19 +16,24 @@
 package org.finos.legend.depot.services;
 
 import com.google.inject.PrivateModule;
+import org.finos.legend.depot.services.api.generation.artifact.ArtifactGenerationsService;
+import org.finos.legend.depot.services.api.generation.artifact.ManageArtifactGenerationsService;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
+import org.finos.legend.depot.services.generation.artifact.ArtifactGenerationsServiceImpl;
 import org.finos.legend.depot.services.generation.file.FileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
+import org.finos.legend.depot.store.api.generation.artifact.UpdateArtifactGenerations;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
+import org.finos.legend.depot.store.mongo.generation.artifact.ArtifactGenerationsMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 
@@ -42,19 +47,24 @@ public class AdminServicesModule extends PrivateModule
         bind(Entities.class).to(EntitiesMongo.class);
         bind(UpdateEntities.class).to(EntitiesMongo.class);
         bind(UpdateFileGenerations.class).to(FileGenerationsMongo.class);
+        bind(UpdateArtifactGenerations.class).to(ArtifactGenerationsMongo.class);
 
         bind(ManageProjectsService.class).to(ProjectsServiceImpl.class);
         bind(ManageEntitiesService.class).to(EntitiesServiceImpl.class);
         bind(FileGenerationsService.class).to(FileGenerationsServiceImpl.class);
         bind(ManageFileGenerationsService.class).to(FileGenerationsServiceImpl.class);
+        bind(ArtifactGenerationsService.class).to(ArtifactGenerationsServiceImpl.class);
+        bind(ManageArtifactGenerationsService.class).to(ArtifactGenerationsServiceImpl.class);
 
         expose(ManageProjectsService.class);
         expose(ManageEntitiesService.class);
         expose(ManageFileGenerationsService.class);
+        expose(ManageArtifactGenerationsService.class);
 
         expose(UpdateEntities.class);
         expose(Entities.class);
         expose(UpdateFileGenerations.class);
+        expose(UpdateArtifactGenerations.class);
         expose(Projects.class);
         expose(UpdateProjects.class);
     }

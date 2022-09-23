@@ -1,4 +1,4 @@
-//  Copyright 2022 Goldman Sachs
+//  Copyright 2021 Goldman Sachs
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,18 +13,16 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.artifacts.api.generation.file;
+package org.finos.legend.depot.store.api.generation.artifact;
 
-import java.util.List;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.generation.file.FileGeneration;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.generation.artifact.StoredArtifactGeneration;
 
-public interface FileGenerationsVersionArtifactsHandler
+public interface UpdateArtifactGenerations extends ArtifactGenerations
 {
-    MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId, List<FileGeneration> fileGenerations);
+    StoredArtifactGeneration createOrUpdate(StoredArtifactGeneration artifactGenerations);
 
-    void delete(String groupId, String artifactId, String versionId);
+    boolean delete(String groupId, String artifactId, String versionId);
 
+    boolean createIndexesIfAbsent();
 
 }

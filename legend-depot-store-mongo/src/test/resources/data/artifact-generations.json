@@ -1,0 +1,103 @@
+[
+  {
+    "id": "604a224b952ac3ff3cbe31981",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "master-SNAPSHOT",
+    "generator": "examples::metadata::test::MainGenerator",
+    "artifact": {
+      "content": "my test content",
+      "path": "/examples/metadata/test/ClientBasic/my-extension/MyArtifact.txt"
+    }
+  },
+  {
+    "id": "604a224b952ac3ff3cbe319d2",
+    "versionId": "master-SNAPSHOT",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "generator": null,
+    "artifact": {
+      "content": "my test content",
+      "path": "/examples/metadata/test/ClientBasic.json"
+    }
+  },
+  {
+    "id": "604a224b952ac3ff3cbe31a03",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.3",
+    "generator": "examples::metadata::test::MainGenerator",
+    "artifact": {
+      "content": "my test content 3",
+      "path": "/examples/metadata/test/dependency/Test.json"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31ae4",
+    "versionId": "2.3.3",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "generator": "examples::metadata::test::MainGenerator",
+    "type": "protobuf",
+    "artifact": {
+      "content": "my test content 3",
+      "path": "/Root/MyFile.json"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31b25",
+    "versionId": "2.3.3",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "generator": "examples::metadata::test::MainGenerator",
+    "artifact": {
+      "content": "my test content 4",
+      "path": "/examples/metadata/test/ClientBasic.proto"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31b76",
+    "versionId": "2.3.3",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "generator": "examples::metadata::test::ClientBasic5",
+    "artifact": {
+      "content": "my test content 5",
+      "path": "/examples/metadata/test/dependency/Dependency.proto"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31bb",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.3",
+    "generator": "examples::metadata::test::ClientBasic6",
+    "type": "avro",
+    "artifact": {
+      "content": "my test content 6",
+      "path": "/examples/metadata/test/ClassWithDependency.avro"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31be7",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.3",
+    "generator": "examples::metadata::test::ClientBasic7",
+    "artifact": {
+      "content": "my test content 7",
+      "path": "/examples/metadata/test/ClientBasic.avro"
+    }
+  },
+  {
+    "id": "604a224c952ac3ff3cbe31c38",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.3",
+    "generator": null,
+    "artifact": {
+      "content": "my test content for nothing",
+      "path": "/examples/metadata/test/dependency/Dependency.avro"
+    }
+  }
+]

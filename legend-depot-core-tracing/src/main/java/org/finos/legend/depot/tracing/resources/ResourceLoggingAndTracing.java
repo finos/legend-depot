@@ -54,6 +54,14 @@ public class ResourceLoggingAndTracing
     public static final String GET_VERSION_FILE_GENERATION = "get version file generations";
     public static final String GET_VERSION_FILE_GENERATION_BY_PATH = "get version file generations by path";
     public static final String GET_VERSION_FILE_GENERATION_BY_FILEPATH = "get revision file generations by file";
+    public static final String GET_LATEST_ARTIFACT_GENERATIONS = "get latest artifact generations";
+    public static final String GET_ARTIFACT_GENERATIONS = "get artifact generations";
+    public static final String GET_ARTIFACT_GENERATIONS_BY_GENERATOR = "get artifact generations by generator";
+    public static final String GET_LATEST_ARTIFACT_GENERATIONS_BY_GENERATOR = "get latest artifact generations by generator";
+    public static final String GET_ARTIFACT_GENERATION_BY_PATH = "get artifact generation by path";
+    public static final String GET_LATEST_ARTIFACT_GENERATION_BY_PATH = "get latest artifact generation by path";
+    public static final String GET_ARTIFACT_GENERATION_CONTENT_BY_PATH = "get artifact generation content by path";
+    public static final String GET_LATEST_ARTIFACT_GENERATION_CONTENT_BY_PATH = "get latest artifact generation content by path";
     public static final String GET_ALL_EVENTS_IN_QUEUE = "get all queue events";
     public static final String FIND_PAST_EVENTS = "find past events";
     public static final String ENQUEUE_EVENT = "enqueue event";

@@ -15,6 +15,15 @@
 
 package org.finos.legend.depot.store.artifacts.services.file;
 
+import static org.finos.legend.depot.domain.generation.file.FileGeneration.GENERATION_CONFIGURATION;
+
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
@@ -22,23 +31,14 @@ import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
-import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsProvider;
+import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsVersionArtifactsHandler;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.finos.legend.sdlc.serialization.EntityLoader;
 import org.slf4j.Logger;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.finos.legend.depot.domain.generation.file.FileGeneration.GENERATION_CONFIGURATION;
-
-public abstract class BaseFileGenerationHandler
+@Singleton
+public class FileGenerationHandler implements FileGenerationsVersionArtifactsHandler
 {
-
-
     public static final String TYPE = "type";
     public static final String PATH = "/";
     public static final String GENERATION_OUTPUT_PATH = "generationOutputPath";
@@ -46,20 +46,22 @@ public abstract class BaseFileGenerationHandler
     public static final String UNDERSCORE = "_";
     public static final String VERSIONED_ENTITIES = "versioned-entities";
     public static final String BLANK = "";
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BaseFileGenerationHandler.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(FileGenerationHandler.class);
+
+    // File Generations
     protected final ManageFileGenerationsService generations;
-    private final FileGenerationsProvider provider;
     private final ArtifactRepository repository;
 
-
-    protected BaseFileGenerationHandler(ArtifactRepository repository, FileGenerationsProvider provider, ManageFileGenerationsService generations)
+    @Inject
+    public FileGenerationHandler(ArtifactRepository repository, ManageFileGenerationsService generations)
     {
         this.repository = repository;
-        this.provider = provider;
         this.generations = generations;
     }
 
-    public MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId, List<File> files)
+
+    @Override
+    public MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId,  List<FileGeneration> gens)
     {
         MetadataEventResponse response = new MetadataEventResponse();
         List<Entity> fileGenerationEntities = findFileGenerationEntities(project.getGroupId(), project.getArtifactId(), versionId);
@@ -68,16 +70,15 @@ public abstract class BaseFileGenerationHandler
             response.addMessage(String.format("%s no generations found for version %s", project.getProjectId(), versionId));
             return response;
         }
-        List<FileGeneration> gens = provider.loadArtifacts(files);
         String message = String.format(" %s version %s found %s generations", project.getProjectId(), versionId, gens.size());
         LOGGER.info(message);
         response.addMessage(message);
 
         fileGenerationEntities.forEach(entity ->
         {
-            String generationPath = (String)entity.getContent().get(GENERATION_OUTPUT_PATH);
+            String generationPath = (String) entity.getContent().get(GENERATION_OUTPUT_PATH);
             String path = PATH + (generationPath != null ? generationPath : entity.getPath().replace(PURE_PACKAGE_SEPARATOR, UNDERSCORE));
-            String type = (String)entity.getContent().get(TYPE);
+            String type = (String) entity.getContent().get(TYPE);
 
             gens.stream().filter(gen -> gen.getPath().startsWith(path)).forEach(gen ->
             {
@@ -88,13 +89,20 @@ public abstract class BaseFileGenerationHandler
         return response;
     }
 
+    @Override
+    public void delete(String groupId, String artifactId, String versionId)
+    {
+        this.generations.delete(groupId, artifactId, versionId);
+    }
+
 
     private List<Entity> findFileGenerationEntities(String groupId, String artifactId, String versionId)
     {
         List<File> files = repository.findFiles(ArtifactType.ENTITIES, groupId, artifactId, versionId);
         Optional<File> entitiesFiles = files.stream().filter(file -> isEntitiesArtifactFile(versionId, file)).findFirst();
-        return entitiesFiles.map(file -> EntityLoader.newEntityLoader(file).getAllEntities()
-                .filter(en -> en.getClassifierPath().equalsIgnoreCase(GENERATION_CONFIGURATION)).collect(Collectors.toList())).orElse(Collections.emptyList());
+        return entitiesFiles.map(
+                file -> EntityLoader.newEntityLoader(file).getAllEntities().filter(en -> en.getClassifierPath().equalsIgnoreCase(GENERATION_CONFIGURATION)).collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
     }
 
     private boolean isEntitiesArtifactFile(String versionId, File file)
