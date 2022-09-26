@@ -373,4 +373,6 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertNotNull(response);
         Assert.assertFalse(response.hasErrors());
     }
+
+
 }

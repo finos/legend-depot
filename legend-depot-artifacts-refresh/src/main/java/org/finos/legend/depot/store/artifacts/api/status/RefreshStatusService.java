@@ -18,13 +18,17 @@ package org.finos.legend.depot.store.artifacts.api.status;
 import org.finos.legend.depot.domain.entity.VersionRevision;
 import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface RefreshStatusService
 {
-
     RefreshStatus get(VersionRevision entitiesType,String groupId, String artifactId, String version);
 
-    List<RefreshStatus> find(VersionRevision entityType, String groupId, String artifactId, String version, Boolean running);
+    List<RefreshStatus> find(VersionRevision entityType, String groupId, String artifactId, String version, Boolean running, LocalDateTime startTimeFrom,LocalDateTime startTimeTo);
 
+    default List<RefreshStatus> find(VersionRevision entityType, String groupId, String artifactId, String version, Boolean running)
+    {
+        return  find(entityType,groupId,artifactId,version,running,null,null);
+    }
 }

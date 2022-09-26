@@ -179,53 +179,5 @@ public class StoreStatus
         }
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class VersionMismatch
-    {
-        @JsonProperty
-        public String projectId;
-        @JsonProperty
-        public String groupId;
-        @JsonProperty
-        public String artifactId;
-        @JsonProperty
-        public List<String> versionsNotInCache;
-        @JsonProperty
-        public List<String> versionsNotInRepo;
 
-        public VersionMismatch(String projectId, String groupId, String artifactId, List<String> versionsNotInCache)
-        {
-            this(projectId,groupId,artifactId,versionsNotInCache,null);
-        }
-
-        public VersionMismatch(String projectId, String groupId, String artifactId, List<String> versionsNotInCache, List<String> versionsNotInRepo)
-        {
-            this.projectId = projectId;
-            this.groupId = groupId;
-            this.artifactId = artifactId;
-            this.versionsNotInCache = versionsNotInCache;
-            this.versionsNotInRepo = versionsNotInRepo;
-        }
-
-        @Override
-        public boolean equals(Object o)
-        {
-            if (this == o)
-            {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass())
-            {
-                return false;
-            }
-            VersionMismatch that = (VersionMismatch) o;
-            return Objects.equals(projectId, that.projectId) && Objects.equals(groupId, that.groupId) && Objects.equals(artifactId, that.artifactId);
-        }
-
-        @Override
-        public int hashCode()
-        {
-            return Objects.hash(projectId, groupId, artifactId);
-        }
-    }
 }

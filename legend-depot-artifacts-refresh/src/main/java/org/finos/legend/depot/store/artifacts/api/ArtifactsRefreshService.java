@@ -16,6 +16,7 @@
 package org.finos.legend.depot.store.artifacts.api;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.store.artifacts.domain.status.VersionMismatch;
 
 import java.util.List;
 
@@ -58,4 +59,8 @@ public interface ArtifactsRefreshService
     List<String> getRepositoryVersions(String groupId, String artifactId);
 
     MetadataEventResponse refreshAllProjectArtifacts(String groupId, String artifactId);
+
+    List<VersionMismatch> findVersionsMismatches();
+
+    MetadataEventResponse refreshProjectsVersionMismatches();
 }

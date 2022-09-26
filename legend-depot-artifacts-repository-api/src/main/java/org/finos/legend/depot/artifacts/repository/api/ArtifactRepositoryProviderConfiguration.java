@@ -30,6 +30,8 @@ public abstract class ArtifactRepositoryProviderConfiguration
     @JsonProperty
     long latestUpdateIntervalInMillis = 3 * ONE_HOUR;
 
+    @JsonProperty
+    long fixVersionsMismatchIntervalInMillis = 1 * ONE_HOUR;
 
     protected ArtifactRepositoryProviderConfiguration(String name)
     {
@@ -65,6 +67,11 @@ public abstract class ArtifactRepositoryProviderConfiguration
     public long getLatestUpdateIntervalInMillis()
     {
         return latestUpdateIntervalInMillis;
+    }
+
+    public long getFixVersionsMismatchIntervalInMillis()
+    {
+        return fixVersionsMismatchIntervalInMillis;
     }
 
     public abstract ArtifactRepository initialiseArtifactRepositoryProvider();

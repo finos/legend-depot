@@ -151,4 +151,9 @@ public class RefreshStatus implements HasIdentifier
         return this;
     }
 
+    public RefreshStatus withStartTime(Date startTime)
+    {
+        this.startTime = startTime;
+        return this;
+    }
 }
