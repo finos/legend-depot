@@ -89,7 +89,7 @@ public class ArtifactsResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.STORE_STATUS, () -> refreshStatusService.find(entityType, group, artifact, version, running,fromStatTime,toStartTime));
     }
 
-    @PUT
+    @DELETE
     @Path("/artifactsRefreshStatus/{id}")
     @ApiOperation("reset by id")
     @Produces(MediaType.APPLICATION_JSON)
