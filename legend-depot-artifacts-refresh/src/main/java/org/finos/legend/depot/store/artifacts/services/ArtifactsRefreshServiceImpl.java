@@ -496,6 +496,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                         );
                     }
                 );
+        LOGGER.info("Finished fixing mismatched versions");
         return response;
     }
 
