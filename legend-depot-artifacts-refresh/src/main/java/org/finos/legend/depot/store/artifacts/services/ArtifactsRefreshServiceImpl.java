@@ -488,7 +488,9 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 {
                         vm.versionsNotInCache.forEach(missingVersion ->
                         {
-                            response.addMessage(String.format("fixing version-mismatch: %s %s %s ",vm.groupId, vm.artifactId, missingVersion));
+                            String message = String.format("fixing version-mismatch: %s %s %s ",vm.groupId, vm.artifactId, missingVersion);
+                            LOGGER.info(message);
+                            response.addMessage(message);
                             response.combine(refreshProjectVersionArtifacts(vm.groupId,vm.artifactId,missingVersion,true));
                         }
                         );
