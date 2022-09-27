@@ -28,7 +28,6 @@ import org.finos.legend.depot.store.status.domain.StoreStatus;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -117,31 +116,5 @@ public class StoreStatusService
         return queryMetrics.getSummaryByProjectVersion();
     }
 
-    public List<StoreStatus.VersionMismatch> getVersionsMismatches()
-    {
-        List<StoreStatus.VersionMismatch> versionMismatches = new ArrayList<>();
-        projectApi.getAll().forEach(p ->
-        {
-            List<String> repositoryVersions = new ArrayList<>(artifactsRefreshService.getRepositoryVersions(p.getGroupId(), p.getArtifactId()));
-            Collections.sort(repositoryVersions);
-            //check versions not in cache
-            List<String> versionsNotInCache = new ArrayList<>(repositoryVersions);
-            versionsNotInCache.removeAll(p.getVersions());
-            if (!versionsNotInCache.isEmpty())
-            {
-                versionMismatches.add(new StoreStatus.VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache));
-                LOGGER.info("version-mismatch found for {} {} {} : {} ", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache);
-            }
-            //chek versions not in repo
-            List<String> versionsNotInRepo = new ArrayList<>(p.getVersions());
-            versionsNotInRepo.removeAll(repositoryVersions);
-            if (!versionsNotInRepo.isEmpty())
-            {
-                versionMismatches.add(new StoreStatus.VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), null, versionsNotInRepo));
-                LOGGER.info("version-mismatch found for {} {} {} : {} ", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInRepo);
-            }
 
-        });
-        return versionMismatches;
-    }
 }

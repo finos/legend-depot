@@ -28,7 +28,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
 
 @Path("")
 @Api("Store Status")
@@ -98,13 +97,6 @@ public class StatusStoreResource extends BaseResource
         return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_STATUS, () -> this.statusService.getProjectStatus(groupId, artifactId));
     }
 
-    @GET
-    @Path("/status/versions/mismatch")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<StoreStatus.VersionMismatch> getVersionMissMatches()
-    {
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES, () -> this.statusService.getVersionsMismatches());
-    }
+
 
 }

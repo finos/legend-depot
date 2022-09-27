@@ -28,12 +28,17 @@ import org.finos.legend.depot.store.mongo.BaseMongo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.exists;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lte;
 
 
 public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements ManageRefreshStatusService
@@ -43,6 +48,7 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
 
     private static final String TYPE = "type";
     private static final String RUNNING = "running";
+    private static final String STAR_TIME = "startTime";
 
     @Inject
     public MongoRefreshStatus(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -74,7 +80,7 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
     }
 
     @Override
-    public List<RefreshStatus> find(VersionRevision entityType, String groupId, String artifactId, String version, Boolean running)
+    public List<RefreshStatus> find(VersionRevision entityType, String groupId, String artifactId, String version, Boolean running, LocalDateTime fromStartTime,LocalDateTime toStartTime)
     {
         Bson filter = exists(TYPE);
         if (entityType != null)
@@ -97,6 +103,14 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
         {
             filter = and(filter, eq(RUNNING, running));
         }
+        if (fromStartTime != null)
+        {
+            filter = and(filter, gte(STAR_TIME, toTime(fromStartTime)));
+        }
+        if (toStartTime != null)
+        {
+            filter = and(filter, lte(STAR_TIME, toTime(toStartTime)));
+        }
         return find(filter);
     }
 
@@ -113,6 +127,12 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
     {
         Bson filter = eq("_id", new ObjectId(id));
         getCollection().deleteOne(filter);
+    }
+
+    private long toTime(LocalDateTime date)
+    {
+        return Date.from(date.atZone(ZoneId.systemDefault())
+                .toInstant()).getTime();
     }
 
 

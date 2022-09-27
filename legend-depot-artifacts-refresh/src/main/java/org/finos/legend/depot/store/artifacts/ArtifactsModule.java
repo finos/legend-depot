@@ -42,11 +42,14 @@ import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
 import javax.inject.Named;
 import java.time.LocalDateTime;
 
+import static org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory.ONE_HOUR;
+
 public class ArtifactsModule extends PrivateModule
 {
     private static final String UPDATE_MASTER_REVISIONS_SCHEDULER = "refreshVersionArtifacts-master-revisions-scheduler";
     private static final String UPDATE_VERSIONS_SCHEDULER = "refreshVersionArtifacts-versions-scheduler";
-
+    private static final String MISMATCH_VERSIONS_SCHEDULE = "versions-mismatch-schedule";
+    private static final String MISMATCH_VERSIONS_FIX_SCHEDULE = "fix-versions-mismatch-schedule";
 
     @Override
     protected void configure()
@@ -106,6 +109,15 @@ public class ArtifactsModule extends PrivateModule
     boolean initRevisions(SchedulesFactory schedulesFactory,ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
         schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusMinutes(20), configuration.getLatestUpdateIntervalInMillis(),false, artifactsRefreshService::refreshAllProjectRevisionsArtifacts);
+        return true;
+    }
+
+    @Provides
+    @Singleton
+    @Named("fix-versions-mismatch")
+    boolean initFixVersionsMismatchDaemon(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService,ArtifactRepositoryProviderConfiguration configuration)
+    {
+        schedulesFactory.register(MISMATCH_VERSIONS_FIX_SCHEDULE, LocalDateTime.now().plusMinutes(10), configuration.getFixVersionsMismatchIntervalInMillis() * ONE_HOUR, false,artifactsRefreshService::refreshProjectsVersionMismatches);
         return true;
     }
 }

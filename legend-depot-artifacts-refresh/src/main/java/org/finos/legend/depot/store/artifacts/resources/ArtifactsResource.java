@@ -17,6 +17,7 @@ package org.finos.legend.depot.store.artifacts.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
@@ -24,6 +25,7 @@ import org.finos.legend.depot.domain.entity.VersionRevision;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
+import org.finos.legend.depot.store.artifacts.domain.status.VersionMismatch;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
@@ -39,12 +41,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Path("")
 @Api("Artifacts")
 public class ArtifactsResource extends BaseAuthorisedResource
 {
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final String ARTIFACTS_RESOURCE = "Artifacts";
     private final ArtifactsRefreshService artifactsRefreshService;
     private final ManageRefreshStatusService refreshStatusService;
@@ -72,12 +77,19 @@ public class ArtifactsResource extends BaseAuthorisedResource
             @QueryParam("groupId") String group,
             @QueryParam("artifactId") String artifact,
             @QueryParam("versionId") String version,
-            @QueryParam("running") Boolean running)
+            @QueryParam("running") Boolean running,
+            @QueryParam("startTimeFrom")
+            @ApiParam("entries that started refresh from this date yyyy-MM-dd HH:mm:ss") String startTimeFrom,
+            @QueryParam("startTimeTo")
+            @ApiParam("entries that started refresh to this date yyyy-MM-dd HH:mm:ss (default is now)") String startTimeTo
+    )
     {
-        return handle(ResourceLoggingAndTracing.STORE_STATUS, () -> refreshStatusService.find(entityType, group, artifact, version, running));
+        LocalDateTime fromStatTime = startTimeFrom == null ? null : LocalDateTime.parse(startTimeFrom, DATE_TIME_FORMATTER);
+        LocalDateTime toStartTime = startTimeTo == null ? LocalDateTime.now() : LocalDateTime.parse(startTimeTo, DATE_TIME_FORMATTER);
+        return handle(ResourceLoggingAndTracing.STORE_STATUS, () -> refreshStatusService.find(entityType, group, artifact, version, running,fromStatTime,toStartTime));
     }
 
-    @PUT
+    @DELETE
     @Path("/artifactsRefreshStatus/{id}")
     @ApiOperation("reset by id")
     @Produces(MediaType.APPLICATION_JSON)
@@ -195,5 +207,28 @@ public class ArtifactsResource extends BaseAuthorisedResource
                                                        @PathParam("artifactId") String artifactId)
     {
         return handle(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId, () -> artifactsRefreshService.getRepositoryVersions(groupId, artifactId));
+    }
+
+    @GET
+    @Path("/artifacts/versions/mismatch")
+    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<VersionMismatch> getVersionMissMatches()
+    {
+        return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES, () -> this.artifactsRefreshService.findVersionsMismatches());
+    }
+
+    @PUT
+    @Path("/artifacts/versions/mismatch")
+    @ApiOperation(ResourceLoggingAndTracing.FIX_PROJECT_CACHE_MISMATCHES)
+    @Produces(MediaType.APPLICATION_JSON)
+    public MetadataEventResponse fixVersionMissMatches()
+    {
+        return handle(ResourceLoggingAndTracing.FIX_PROJECT_CACHE_MISMATCHES, () ->
+        {
+            validateUser();
+            return this.artifactsRefreshService.refreshProjectsVersionMismatches();
+        });
+
     }
 }

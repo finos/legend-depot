@@ -51,16 +51,16 @@ public final class SchedulesFactory
         return manageSchedulesService.getAll();
     }
 
-    public void register(String name, LocalDateTime start, long interval, boolean parallelRun, Supplier<Object> function)
+    public void register(String name, LocalDateTime start, long intervalInMiliseconds, boolean parallelRun, Supplier<Object> function)
     {
         TimerTask task = createTask(name, function);
-        schedulesBuffer.put(name, Tuples.pair(task, new ScheduleInfo(name, interval, parallelRun)));
-        new Timer().scheduleAtFixedRate(task, java.sql.Date.from(start.atZone(ZoneId.systemDefault()).toInstant()), interval);
+        schedulesBuffer.put(name, Tuples.pair(task, new ScheduleInfo(name, intervalInMiliseconds, parallelRun)));
+        new Timer().scheduleAtFixedRate(task, java.sql.Date.from(start.atZone(ZoneId.systemDefault()).toInstant()), intervalInMiliseconds);
         Optional<ScheduleInfo> existingInfo = manageSchedulesService.get(name);
 
         ScheduleInfo info = existingInfo.orElseGet(() -> new ScheduleInfo(name));
         info.allowMultipleRuns = parallelRun;
-        info.frequency = interval;
+        info.frequency = intervalInMiliseconds;
         manageSchedulesService.createOrUpdate(info);
     }
 

@@ -16,7 +16,6 @@
 package org.finos.legend.depot.store.artifacts.services;
 
 import org.apache.commons.codec.digest.DigestUtils;
-
 import org.apache.maven.model.Model;
 import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
@@ -35,6 +34,7 @@ import org.finos.legend.depot.store.artifacts.api.ProjectVersionArtifactsHandler
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.domain.ArtifactDetail;
 import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
+import org.finos.legend.depot.store.artifacts.domain.status.VersionMismatch;
 import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
 import org.finos.legend.depot.store.metrics.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.services.TracerFactory;
@@ -49,6 +49,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +58,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
@@ -476,4 +478,54 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     {
         return repository.findVersions(groupId,artifactId).stream().map(VersionId::toVersionIdString).collect(Collectors.toList());
     }
+
+    @Override
+    public MetadataEventResponse refreshProjectsVersionMismatches()
+    {
+        MetadataEventResponse response = new MetadataEventResponse();
+        Stream<VersionMismatch> projectsWithVersionMismatches = findVersionsMismatches().stream().filter(r -> !r.versionsNotInCache.isEmpty());
+        projectsWithVersionMismatches.forEach(vm ->
+                {
+                        vm.versionsNotInCache.forEach(missingVersion ->
+                        {
+                            String message = String.format("fixing version-mismatch: %s %s %s ",vm.groupId, vm.artifactId, missingVersion);
+                            LOGGER.info(message);
+                            response.addMessage(message);
+                            response.combine(refreshProjectVersionArtifacts(vm.groupId,vm.artifactId,missingVersion,true));
+                        }
+                        );
+                    }
+                );
+        LOGGER.info("Finished fixing mismatched versions");
+        return response;
+    }
+
+    @Override
+    public List<VersionMismatch> findVersionsMismatches()
+    {
+        List<VersionMismatch> versionMismatches = new ArrayList<>();
+        projects.getAll().forEach(p ->
+        {
+            List<String> repositoryVersions = new ArrayList<>(getRepositoryVersions(p.getGroupId(), p.getArtifactId()));
+            Collections.sort(repositoryVersions);
+            //check versions not in cache
+            List<String> versionsNotInCache = new ArrayList<>(repositoryVersions);
+            versionsNotInCache.removeAll(p.getVersions());
+            //chek versions not in repo
+            List<String> versionsNotInRepo = new ArrayList<>(p.getVersions());
+            versionsNotInRepo.removeAll(repositoryVersions);
+
+            if (!versionsNotInCache.isEmpty() || !versionsNotInRepo.isEmpty())
+            {
+                versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache, versionsNotInRepo));
+                LOGGER.info("version-mismatch found for {} {} {} : notInCache [{}], notInRepo [{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache,versionsNotInRepo);
+            }
+
+        });
+        return versionMismatches;
+    }
+
+
+
+
 }
