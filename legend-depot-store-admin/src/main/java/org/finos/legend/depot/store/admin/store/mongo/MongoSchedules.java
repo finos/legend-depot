@@ -23,20 +23,22 @@ import org.bson.conversions.Bson;
 import org.finos.legend.depot.store.admin.api.ManageSchedulesService;
 import org.finos.legend.depot.store.admin.services.schedules.ScheduleInfo;
 import org.finos.legend.depot.store.mongo.BaseMongo;
-import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
 import java.util.Optional;
 
+import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.exists;
 
 public class MongoSchedules extends BaseMongo<ScheduleInfo> implements ManageSchedulesService
 {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MongoSchedules.class);
     private static final String SCHEDULES_COLLECTION = "schedules";
     public static final String JOB_ID = "jobId";
+    private static final String RUNNING = "running";
+    private static final String DISABLED = "disabled";
 
 
     @Inject
@@ -77,6 +79,26 @@ public class MongoSchedules extends BaseMongo<ScheduleInfo> implements ManageSch
         return super.getAllStoredEntities();
     }
 
+    @Override
+    public List<ScheduleInfo> find(Boolean running, Boolean disabled)
+    {
+        Bson filter = exists(JOB_ID);
+        if (running != null)
+        {
+            filter = and(filter, eq(RUNNING, running));
+        }
+        if (disabled != null)
+        {
+            filter = and(filter, eq(DISABLED, disabled));
+        }
+        return super.find(filter);
+    }
+
+    @Override
+    public void delete(String jobId)
+    {
+        super.delete(eq(JOB_ID, jobId));
+    }
 
     private ScheduleInfo getScheduleInfo(String jobId)
     {
@@ -113,15 +135,12 @@ public class MongoSchedules extends BaseMongo<ScheduleInfo> implements ManageSch
     }
 
     @Override
-    public void toggleAll(boolean toggle)
+    public void toggleDisableAll(boolean toggle)
     {
-        synchronized (ScheduleInfo.class)
-        {
             getAll().stream().forEach(info ->
             {
-                toggleRunning(info.jobId,toggle);
+                toggleDisable(info.jobId,toggle);
             });
-        }
     }
 
 }

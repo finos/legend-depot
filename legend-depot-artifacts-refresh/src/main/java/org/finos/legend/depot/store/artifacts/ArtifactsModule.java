@@ -99,7 +99,7 @@ public class ArtifactsModule extends PrivateModule
     @Named("update-versions")
     boolean initVersions(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(UPDATE_VERSIONS_SCHEDULER, LocalDateTime.now().plusMinutes(40), configuration.getVersionsUpdateIntervalInMillis(), false,artifactsRefreshService::refreshAllProjectsVersionsArtifacts);
+        schedulesFactory.register(UPDATE_VERSIONS_SCHEDULER, LocalDateTime.now().plusHours(2), configuration.getVersionsUpdateIntervalInMillis(), false,artifactsRefreshService::refreshAllProjectsVersionsArtifacts);
         return true;
     }
 
@@ -108,7 +108,7 @@ public class ArtifactsModule extends PrivateModule
     @Named("update-revisions")
     boolean initRevisions(SchedulesFactory schedulesFactory,ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusMinutes(20), configuration.getLatestUpdateIntervalInMillis(),false, artifactsRefreshService::refreshAllProjectRevisionsArtifacts);
+        schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusHours(1), configuration.getLatestUpdateIntervalInMillis(),false, artifactsRefreshService::refreshAllProjectRevisionsArtifacts);
         return true;
     }
 
@@ -117,7 +117,7 @@ public class ArtifactsModule extends PrivateModule
     @Named("fix-versions-mismatch")
     boolean initFixVersionsMismatchDaemon(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService,ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(MISMATCH_VERSIONS_FIX_SCHEDULE, LocalDateTime.now().plusMinutes(10), configuration.getFixVersionsMismatchIntervalInMillis() * ONE_HOUR, false,artifactsRefreshService::refreshProjectsVersionMismatches);
+        schedulesFactory.register(MISMATCH_VERSIONS_FIX_SCHEDULE, LocalDateTime.now().plusMinutes(5), configuration.getFixVersionsMismatchIntervalInMillis() * ONE_HOUR, false,artifactsRefreshService::refreshProjectsVersionMismatches);
         return true;
     }
 }

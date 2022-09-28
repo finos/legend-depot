@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import org.finos.legend.depot.store.admin.api.ManageSchedulesService;
 import org.finos.legend.depot.store.admin.api.ManageStoreService;
 import org.finos.legend.depot.store.admin.resources.AdminResource;
+import org.finos.legend.depot.store.admin.resources.SchedulesResource;
 import org.finos.legend.depot.store.admin.services.ManageStoreServiceImpl;
 import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.admin.store.mongo.MongoAdminStore;
@@ -36,8 +37,10 @@ public class StoreAdminModule extends PrivateModule
         bind(MongoSchedules.class);
         bind(ManageSchedulesService.class).to(MongoSchedules.class);
         bind(ManageStoreService.class).to(ManageStoreServiceImpl.class);
+        bind(SchedulesResource.class);
 
         expose(AdminResource.class);
+        expose(SchedulesResource.class);
         expose(ManageStoreService.class);
         expose(SchedulesFactory.class);
 

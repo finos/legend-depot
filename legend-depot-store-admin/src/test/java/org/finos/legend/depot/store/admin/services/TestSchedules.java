@@ -49,18 +49,18 @@ public class TestSchedules extends TestStoreMongo
 
         Assert.assertTrue(schedulesService.getAll().isEmpty());
         schedulesFactory.register("joba", LocalDateTime.now().plusHours(1), 100000, false, () -> "hello");
-        List<ScheduleInfo> scheduleInfoList = schedulesFactory.printStats();
+        List<ScheduleInfo> scheduleInfoList = schedulesFactory.find();
         Assert.assertNotNull(scheduleInfoList);
         Assert.assertEquals(1, scheduleInfoList.size());
         Assert.assertEquals("joba", scheduleInfoList.get(0).getJobId());
 
         schedulesFactory.run("joba");
-        Assert.assertEquals(1, schedulesFactory.printStats().size());
-        Assert.assertEquals("hello", schedulesFactory.printStats().get(0).getMessage());
-        Assert.assertEquals(100000, schedulesFactory.printStats().get(0).getFrequency());
+        Assert.assertEquals(1, schedulesFactory.find().size());
+        Assert.assertEquals("hello", schedulesFactory.find().get(0).getMessage());
+        Assert.assertEquals(100000, schedulesFactory.find().get(0).getFrequency());
 
         schedulesFactory.register("joba", LocalDateTime.now().plusHours(1), 100000, false, () -> "hello");
-        Assert.assertEquals(1, schedulesFactory.printStats().size());
+        Assert.assertEquals(1, schedulesFactory.find().size());
     }
 
     @Test
@@ -72,5 +72,15 @@ public class TestSchedules extends TestStoreMongo
         schedulesFactory.toggleRunning("job1", false);
         Assert.assertFalse(schedulesService.get("job1").get().running.get());
 
+    }
+
+    @Test
+    public void testDisabledAllToggle()
+    {
+        schedulesFactory.register("job1", LocalDateTime.now(), 100000, false, () -> "hello toggles");
+        schedulesFactory.register("job2", LocalDateTime.now(), 100000, false, () -> "hello toggles again");
+        Assert.assertEquals(2, schedulesService.find(null,Boolean.FALSE).size());
+        schedulesFactory.toggleDisableAll(true);
+        Assert.assertEquals(2, schedulesService.find(null,Boolean.TRUE).size());
     }
 }
