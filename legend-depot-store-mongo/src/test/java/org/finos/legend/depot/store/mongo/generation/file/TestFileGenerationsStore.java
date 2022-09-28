@@ -94,7 +94,7 @@ public class TestFileGenerationsStore extends TestStoreMongo
     public void loadData()
     {
         setUpFileGenerationFromFile(this.getClass().getClassLoader().getResource("data/file-generations.json"));
-        Assert.assertEquals(9, generations.getAll().size());
+        Assert.assertEquals(11, generations.getAll().size());
     }
 
 
@@ -102,23 +102,26 @@ public class TestFileGenerationsStore extends TestStoreMongo
     public void canQueryByVersion()
     {
         List<StoredFileGeneration> result = generations.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3");
-        Assert.assertEquals(9, result.size());
+        Assert.assertEquals(11, result.size());
 
         Assert.assertEquals(0, generations.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "12.3.2").size());
 
     }
 
     @Test
-    public void canQueryByGeneration()
+    public void canQueryByElementPath()
     {
-        List<StoredFileGeneration> result = generations.findByPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "com::avrogen");
+        List<StoredFileGeneration> result = generations.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "com::avrogen");
         Assert.assertEquals(3, result.size());
 
-        Assert.assertEquals(0, generations.findByPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "12.3.2", "com::avrogen").size());
-        Assert.assertEquals(0, generations.findByPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT, "com::jsonGen").size());
+        Assert.assertEquals(0, generations.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "12.3.2", "com::avrogen").size());
+        Assert.assertEquals(0, generations.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT, "com::jsonGen").size());
 
-        List<StoredFileGeneration> result2 = generations.findByPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "com::avrogen");
+        List<StoredFileGeneration> result2 = generations.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "com::avrogen");
         Assert.assertEquals(3, result2.size());
+
+        List<StoredFileGeneration> result3 = generations.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "com::MyElementPath");
+        Assert.assertEquals(1, result3.size());
     }
 
     @Test
@@ -133,13 +136,12 @@ public class TestFileGenerationsStore extends TestStoreMongo
     }
 
     @Test
-    public void canQueryByGenerationPath()
+    public void canQueryByGenerationFilePath()
     {
-
         Assert.assertTrue(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assert.assertTrue(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "/examples/generated/test/other/MyOutput.json").isPresent());
         Assert.assertFalse(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "0.01.1", "/examples/metadata/test/ClientBasic.avro").isPresent());
         Assert.assertFalse(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT, "com/finos/sdgashdf").isPresent());
-
     }
 
 }

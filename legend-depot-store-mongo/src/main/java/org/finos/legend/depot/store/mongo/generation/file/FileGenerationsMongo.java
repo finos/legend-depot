@@ -84,13 +84,13 @@ public class FileGenerationsMongo extends BaseMongo<StoredFileGeneration> implem
     }
 
     @Override
-    public List<StoredFileGeneration> findByPath(String groupId, String artifactId, String versionId, String generationPath)
+    public List<StoredFileGeneration> findByElementPath(String groupId, String artifactId, String versionId, String generationPath)
     {
         return find(and(getArtifactAndVersionFilter(groupId, artifactId, versionId), eq(GENERATION_PATH, generationPath)));
     }
 
     @Override
-    public Optional<StoredFileGeneration> findByFile(String groupId, String artifactId, String versionId, String filePath)
+    public Optional<StoredFileGeneration> findByFilePath(String groupId, String artifactId, String versionId, String filePath)
     {
         return findOne(and(getArtifactAndVersionFilter(groupId, artifactId, versionId), eq(FILE_PATH, filePath)));
     }

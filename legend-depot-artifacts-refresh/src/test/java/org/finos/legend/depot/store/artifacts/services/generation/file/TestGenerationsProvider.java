@@ -96,7 +96,7 @@ public class TestGenerationsProvider extends TestStoreMongo
         Assert.assertFalse(response.hasErrors());
         List<StoredFileGeneration> fileGenerations = generations.getAll();
         Assert.assertNotNull(fileGenerations);
-        Assert.assertEquals(12, fileGenerations.size());
+        Assert.assertEquals(14, fileGenerations.size());
 
     }
 
@@ -112,7 +112,7 @@ public class TestGenerationsProvider extends TestStoreMongo
         Assert.assertFalse(response.hasErrors());
         List<StoredFileGeneration> fileGenerations = generations.getAll();
         Assert.assertNotNull(fileGenerations);
-        Assert.assertEquals(10, fileGenerations.size());
+        Assert.assertEquals(12, fileGenerations.size());
 
     }
 
@@ -128,7 +128,7 @@ public class TestGenerationsProvider extends TestStoreMongo
         Assert.assertFalse(response.hasErrors());
         List<StoredFileGeneration> fileGenerations = generations.getAll();
         Assert.assertNotNull(fileGenerations);
-        Assert.assertEquals(10, fileGenerations.size());
+        Assert.assertEquals(12, fileGenerations.size());
 
         Assert.assertEquals(4, generations.findByType(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "java").size());
     }

@@ -49,11 +49,11 @@ public class ResourceLoggingAndTracing
     public static final String GET_REVISION_FILE_GENERATION_ENTITIES = "get revision generation entities";
     public static final String GET_VERSION_FILE_GENERATION_ENTITIES = "get version generation entities";
     public static final String GET_REVISION_FILE_GENERATION = "get revision file generations";
-    public static final String GET_REVISION_FILE_GENERATION_BY_PATH = "get revision file generations by path";
+    public static final String GET_REVISION_FILE_GENERATION_BY_ELEMENT_PATH = "get revision file generations by element path";
     public static final String GET_REVISION_FILE_GENERATION_BY_FILEPATH = "get revision file generations by file";
     public static final String GET_VERSION_FILE_GENERATION = "get version file generations";
-    public static final String GET_VERSION_FILE_GENERATION_BY_PATH = "get version file generations by path";
-    public static final String GET_VERSION_FILE_GENERATION_BY_FILEPATH = "get revision file generations by file";
+    public static final String GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH = "get version file generations by element path";
+    public static final String GET_VERSION_FILE_GENERATION_BY_FILEPATH = "get version file generations by file";
     public static final String GET_ALL_EVENTS_IN_QUEUE = "get all queue events";
     public static final String FIND_PAST_EVENTS = "find past events";
     public static final String ENQUEUE_EVENT = "enqueue event";

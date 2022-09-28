@@ -30,8 +30,8 @@ public interface FileGenerations
 
     List<StoredFileGeneration> findByType(String groupId, String artifactId,String versionId, String type);
 
-    List<StoredFileGeneration> findByPath(String groupId, String artifactId, String versionId, String generationPath);
+    List<StoredFileGeneration> findByElementPath(String groupId, String artifactId, String versionId, String generationPath);
 
-    Optional<StoredFileGeneration> findByFile(String groupId, String artifactId, String versionId, String filePath);
+    Optional<StoredFileGeneration> findByFilePath(String groupId, String artifactId, String versionId, String filePath);
 
 }

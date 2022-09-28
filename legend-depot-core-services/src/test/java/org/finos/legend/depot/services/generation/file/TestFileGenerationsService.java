@@ -53,14 +53,24 @@ public class TestFileGenerationsService extends TestStoreMongo
             Assert.assertNotNull(data);
             data.forEach(gen ->
             {
-                FileGeneration generation = new FileGeneration(gen.getPath().replace("examples_avrogen/", ""), gen.getContent());
-                generations.createOrUpdate(new StoredFileGeneration("group.test", "test", VersionValidator.MASTER_SNAPSHOT, "examples::avrogen", AVRO, generation));
-                generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.1", "examples::avrogen", AVRO, generation));
-                generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.0", "examples::avrogen", AVRO, generation));
-                generations.createOrUpdate(new StoredFileGeneration("group.test.otherproject", "test", "1.0.0", "examples::avrogen1", AVRO, generation));
+                if (gen.getPath().startsWith("/examples/metadata"))
+                {
+                    FileGeneration generation = new FileGeneration(gen.getPath(), gen.getContent());
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test",  VersionValidator.MASTER_SNAPSHOT, null, null, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.0", "examples::metadata::test::ClientBasic", null, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test.otherproject", "test", "1.0.0", "examples::metadata::test::ClientBasic", null, generation));
+                }
+                else
+                {
+                    FileGeneration generation = new FileGeneration(gen.getPath().replace("examples_avrogen/", ""), gen.getContent());
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test", VersionValidator.MASTER_SNAPSHOT, "examples::avrogen", AVRO, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.1", "examples::avrogen", AVRO, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.0", "examples::avrogen", AVRO, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test.otherproject", "test", "1.0.0", "examples::avrogen1", AVRO, generation));
+                }
             });
 
-            Assert.assertEquals(48, generations.getAll().size());
+            Assert.assertEquals(54, generations.getAll().size());
         }
     }
 
@@ -69,54 +79,55 @@ public class TestFileGenerationsService extends TestStoreMongo
     {
 
         service.deleteLatest("group.test", "test");
-        Assert.assertEquals(36, generations.getAll().size());
+        Assert.assertEquals(40, generations.getAll().size());
         service.delete("group.test.otherproject", "test", "1.0.0");
-        Assert.assertEquals(24, generations.getAll().size());
+        Assert.assertEquals(26, generations.getAll().size());
         service.delete("group.test", "test", "1.1.0");
-        Assert.assertEquals(24, generations.getAll().size());
-    }
+        Assert.assertEquals(26, generations.getAll().size());
 
+    }
 
     @Test
     public void canQueryFileGenerationEntities()
     {
 
-        List<FileGeneration> gens = service.getLatestFileGenerations("group.test", "test");
-        Assert.assertEquals(12, gens.size());
+        List<FileGeneration> generations = service.getLatestFileGenerations("group.test", "test");
+        Assert.assertEquals(14, generations.size());
 
         List<FileGeneration> gens1 = service.getFileGenerations("group.test", "test", "1.0.0");
-        Assert.assertEquals(12, gens1.size());
+        Assert.assertEquals(14, gens1.size());
 
         List<FileGeneration> gens2 = service.getFileGenerations("group.test.other", "test", "1.0.0");
         Assert.assertTrue(gens2.isEmpty());
     }
 
-
     @Test
-    public void canQueryFileGenerationEntitiesByPath()
+    public void canQueryFileGenerationEntitiesByElementPath()
     {
-
-        Assert.assertEquals(12, service.getFileGenerationsByPath("group.test", "test", "1.0.0", "examples::avrogen").size());
-        Assert.assertTrue(service.getFileGenerationsByPath("group.test", "test", "1.0.0", "examples::avrogen1").isEmpty());
-
+        Assert.assertEquals(12, service.getFileGenerationsByElementPath("group.test", "test", "1.0.0", "examples::avrogen").size());
+        Assert.assertTrue(service.getFileGenerationsByElementPath("group.test", "test", "1.0.0", "examples::avrogen1").isEmpty());
+        Assert.assertEquals(2, service.getFileGenerationsByElementPath("group.test", "test", "1.0.0", "examples::metadata::test::ClientBasic").size());
     }
 
 
     @Test
-    public void canQueryFileGenerationEntitiesByFile()
+    public void canQueryFileGenerationEntitiesByFilePath()
     {
+        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
+        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
+        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test.otherproject", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
 
-        Assert.assertTrue(service.getFileGenerationsByFile("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
-        Assert.assertTrue(service.getFileGenerationsByFile("group.test.otherproject", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
-        Assert.assertFalse(service.getFileGenerationsByFile("group.test", "test", "1.0.0", "bad").isPresent());
-
+        Assert.assertFalse(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "bad").isPresent());
+        Assert.assertFalse(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/DND.txt").isPresent());
     }
-
 
     @Test
     public void canQueryFileGenerationEntitiesByFileContent()
     {
-        Assert.assertTrue(service.getFileGenerationContentByFile("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
-        Assert.assertTrue(service.getLatestFileGenerationContentByFile("group.test", "test",  "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
+        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
+        Assert.assertTrue(service.getLatestFileGenerationContentByFilePath("group.test", "test",  "/examples/metadata/test/ClientBasic.avro").isPresent());
     }
 }
