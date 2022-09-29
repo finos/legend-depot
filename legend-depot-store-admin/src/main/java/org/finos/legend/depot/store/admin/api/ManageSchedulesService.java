@@ -27,13 +27,15 @@ public interface ManageSchedulesService
 
     List<ScheduleInfo> getAll();
 
+    List<ScheduleInfo> find(Boolean running, Boolean disabled);
+
     void toggleDisable(String jobId, boolean toggle);
 
     void toggleRunning(String jobId, boolean toggle);
 
-    void toggleAll(boolean toggle);
+    void toggleDisableAll(boolean toggle);
 
     ScheduleInfo createOrUpdate(ScheduleInfo scheduleInfo);
 
-
+    void delete(String jobId);
 }

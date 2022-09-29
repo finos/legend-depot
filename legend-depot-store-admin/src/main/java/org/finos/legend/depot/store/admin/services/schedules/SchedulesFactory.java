@@ -46,9 +46,14 @@ public final class SchedulesFactory
         this.manageSchedulesService = manageSchedulesService;
     }
 
-    public List<ScheduleInfo> printStats()
+    public List<ScheduleInfo> find()
     {
-        return manageSchedulesService.getAll();
+        return find(null,null);
+    }
+
+    public List<ScheduleInfo> find(Boolean running, Boolean disabled)
+    {
+        return manageSchedulesService.find(running,disabled);
     }
 
     public void register(String name, LocalDateTime start, long intervalInMiliseconds, boolean parallelRun, Supplier<Object> function)
@@ -62,6 +67,12 @@ public final class SchedulesFactory
         info.allowMultipleRuns = parallelRun;
         info.frequency = intervalInMiliseconds;
         manageSchedulesService.createOrUpdate(info);
+    }
+
+    public void deRegister(String name)
+    {
+        this.schedulesBuffer.remove(name);
+        this.manageSchedulesService.delete(name);
     }
 
     public void run(String jobId)
@@ -81,7 +92,7 @@ public final class SchedulesFactory
 
     public void toggleDisableAll(boolean toggle)
     {
-        manageSchedulesService.toggleAll(toggle);
+        manageSchedulesService.toggleDisableAll(toggle);
     }
 
     private TimerTask createTask(String id, Supplier<Object> f)

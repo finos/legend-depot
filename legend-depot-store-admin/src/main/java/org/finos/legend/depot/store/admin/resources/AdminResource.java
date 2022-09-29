@@ -20,14 +20,10 @@ import io.swagger.annotations.ApiOperation;
 import org.bson.Document;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
-import org.finos.legend.depot.store.admin.api.ManageSchedulesService;
 import org.finos.legend.depot.store.admin.api.ManageStoreService;
-import org.finos.legend.depot.store.admin.services.schedules.ScheduleInfo;
-import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,9 +33,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.security.Principal;
 import java.util.List;
@@ -54,8 +47,6 @@ public class AdminResource extends BaseAuthorisedResource
     private final UpdateEntities entitiesService;
     private final UpdateFileGenerations fileGenerations;
     private final ManageStoreService manageStoreService;
-    private final SchedulesFactory schedulesFactory;
-    private final ManageSchedulesService manageSchedulesService;
 
     @Inject
     protected AdminResource(UpdateProjects projects,
@@ -63,15 +54,13 @@ public class AdminResource extends BaseAuthorisedResource
                             UpdateFileGenerations fileGenerations,
                             ManageStoreService manageStoreService,
                             AuthorisationProvider authorisationProvider,
-                            @Named("requestPrincipal") Provider<Principal> principalProvider, SchedulesFactory schedulesFactory, ManageSchedulesService manageSchedulesService)
+                            @Named("requestPrincipal") Provider<Principal> principalProvider)
     {
         super(authorisationProvider, principalProvider);
         this.projects = projects;
         this.entitiesService = entities;
         this.fileGenerations = fileGenerations;
         this.manageStoreService = manageStoreService;
-        this.schedulesFactory = schedulesFactory;
-        this.manageSchedulesService = manageSchedulesService;
     }
 
     @Override
@@ -152,86 +141,6 @@ public class AdminResource extends BaseAuthorisedResource
         return manageStoreService.getAllIndexes();
     }
 
-
-    @GET
-    @Path("/schedules")
-    @ApiOperation(ResourceLoggingAndTracing.SCHEDULES_STATUS)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<ScheduleInfo> getSchedulerStatus()
-    {
-        return handle(ResourceLoggingAndTracing.SCHEDULES_STATUS, schedulesFactory::printStats);
-    }
-
-    @PUT
-    @Path("/schedules/{jobId}")
-    @ApiOperation(ResourceLoggingAndTracing.TRIGGER_SCHEDULE)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response forceScheduler(@PathParam("jobId") String jobId)
-    {
-        return handle(ResourceLoggingAndTracing.TRIGGER_SCHEDULE, () ->
-        {
-            validateUser();
-            schedulesFactory.run(jobId);
-            return Response.noContent().build();
-        });
-    }
-
-    @PUT
-    @Path("/schedules")
-    @ApiOperation(ResourceLoggingAndTracing.TRIGGER_SCHEDULE)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response registerSchedule(ScheduleInfo info)
-    {
-        return handle(ResourceLoggingAndTracing.UPDATE_SCHEDULE, () ->
-        {
-            validateUser();
-            manageSchedulesService.createOrUpdate(info);
-            return Response.noContent().build();
-        });
-    }
-
-    @PUT
-    @Path("/schedules/{jobId}/disable/{toggle}")
-    @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULE)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response toggleScheduler(@PathParam("jobId") String jobId, @PathParam("toggle") boolean toggle)
-    {
-        return handle(ResourceLoggingAndTracing.TOGGLE_SCHEDULE, () ->
-        {
-            validateUser();
-            schedulesFactory.toggleDisable(jobId, toggle);
-            return Response.noContent().build();
-        });
-    }
-
-    @PUT
-    @Path("/schedules/{jobId}/running/{toggle}")
-    @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULE)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response toggleRunningScheduler(@PathParam("jobId") String jobId, @PathParam("toggle") boolean toggle)
-    {
-        return handle(ResourceLoggingAndTracing.TOGGLE_SCHEDULE, () ->
-        {
-            validateUser();
-            schedulesFactory.toggleRunning(jobId, toggle);
-            return Response.noContent().build();
-        });
-    }
-
-    @PUT
-    @Path("/schedules/all/disable/{toggle}")
-    @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULE)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response toggleScheduler(@PathParam("toggle") boolean toggle)
-    {
-        return handle(ResourceLoggingAndTracing.TOGGLE_SCHEDULE, () ->
-        {
-            validateUser();
-            schedulesFactory.toggleDisableAll(toggle);
-            return Response.noContent().build();
-        });
-    }
 
 
 }
