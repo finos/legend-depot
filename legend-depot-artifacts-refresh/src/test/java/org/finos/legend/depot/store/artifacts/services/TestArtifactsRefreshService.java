@@ -170,7 +170,12 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
         Assert.assertEquals(0, projectsStore.findByProjectId(PROJECT_B).get(0).getDependencies().size());
 
-        Assert.assertEquals(3, fileGenerationsStore.findByPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "examples::avrogen").size());
+        Assert.assertEquals(12, fileGenerationsStore.getAll().size());
+        Assert.assertEquals(3, fileGenerationsStore.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "examples::avrogen").size());
+        Assert.assertEquals(2, fileGenerationsStore.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "examples::metadata::test::ClientBasic").size());
+        Assert.assertTrue(fileGenerationsStore.findByFilePath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
+        Assert.assertEquals("My Output1",  fileGenerationsStore.findByFilePath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").get().getFile().getContent());
+
     }
 
     @Test
@@ -350,7 +355,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         String versionId = "2.0.0";
         artifactsRefreshService.refreshProjectVersionArtifacts(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
         Assert.assertEquals(18, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-        Assert.assertEquals(10, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assert.assertEquals(12, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
 
         artifactsRefreshService.delete(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
         Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());

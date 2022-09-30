@@ -1,5 +1,29 @@
 [
   {
+    "id": "604a224b952ac3ff3cbe319810",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.3",
+    "path": null,
+    "type": null,
+    "file": {
+      "content": "Some output",
+      "path": "/examples/generated/test/other/MyOutput.json"
+    }
+  },
+  {
+    "id": "604a224b952ac3ff3cbe319810",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.3",
+    "path": "com::MyElementPath",
+    "type": null,
+    "file": {
+      "content": "Some output",
+      "path": "/examples/generated/test/MyOutput.json"
+    }
+  },
+  {
     "id": "604a224b952ac3ff3cbe3198",
     "groupId": "examples.metadata",
     "artifactId": "test",

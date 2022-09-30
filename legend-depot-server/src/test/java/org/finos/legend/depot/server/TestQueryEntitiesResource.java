@@ -104,7 +104,7 @@ public class TestQueryEntitiesResource extends TestBaseServices
 
 
     @Test
-    public void canGetEntityByPath()
+    public void canGetEntityByElementPath()
     {
         Entity entity = entitiesResource.getEntity("examples.metadata", "test", "2.3.0", "examples::metadata::test::TestProfile").get();
         Assert.assertNotNull(entity);

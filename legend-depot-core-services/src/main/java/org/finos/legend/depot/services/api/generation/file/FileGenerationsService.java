@@ -40,28 +40,28 @@ public interface FileGenerationsService
 
     List<FileGeneration> getFileGenerations(String groupId, String artifactId, String versionId);
 
-    default List<FileGeneration> getLatestFileGenerationsByPath(String groupId, String artifactId, String path)
+    default List<FileGeneration> getLatestFileGenerationsByElementPath(String groupId, String artifactId, String elementPath)
     {
-        return getFileGenerationsByPath(groupId, artifactId, MASTER_SNAPSHOT, path);
+        return getFileGenerationsByElementPath(groupId, artifactId, MASTER_SNAPSHOT, elementPath);
     }
 
-    List<FileGeneration> getFileGenerationsByPath(String groupId, String artifactId, String versionId, String path);
+    List<FileGeneration> getFileGenerationsByElementPath(String groupId, String artifactId, String versionId, String elementPath);
 
-    default Optional<FileGeneration> getLatestFileGenerationsByFile(String groupId, String artifactId, String file)
+    default Optional<FileGeneration> getLatestFileGenerationsByFilePath(String groupId, String artifactId, String filePath)
     {
-        return getFileGenerationsByFile(groupId, artifactId, MASTER_SNAPSHOT, file);
+        return getFileGenerationsByFilePath(groupId, artifactId, MASTER_SNAPSHOT, filePath);
     }
 
-    Optional<FileGeneration> getFileGenerationsByFile(String groupId, String artifactId, String versionsId, String file);
+    Optional<FileGeneration> getFileGenerationsByFilePath(String groupId, String artifactId, String versionsId, String filePath);
 
-    default  Optional<String> getFileGenerationContentByFile(String groupId, String artifactId, String versionsId, String file)
+    default  Optional<String> getFileGenerationContentByFilePath(String groupId, String artifactId, String versionsId, String filePath)
     {
-        return  getFileGenerationsByFile(groupId,artifactId,versionsId,file).map(o -> o.getContent());
+        return  getFileGenerationsByFilePath(groupId,artifactId,versionsId,filePath).map(o -> o.getContent());
     }
 
-    default Optional<String> getLatestFileGenerationContentByFile(String groupId, String artifactId, String file)
+    default Optional<String> getLatestFileGenerationContentByFilePath(String groupId, String artifactId, String filePath)
     {
-        return getFileGenerationContentByFile(groupId, artifactId, MASTER_SNAPSHOT, file);
+        return getFileGenerationContentByFilePath(groupId, artifactId, MASTER_SNAPSHOT, filePath);
     }
 
 }

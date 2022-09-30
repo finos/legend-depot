@@ -36,7 +36,7 @@ public class TestFileGenerationLoader
     {
         List<FileGeneration> generations = FileGenerationLoader.newFileGenerationsLoader(new File(filePath.toURI())).getAllFileGenerations().collect(Collectors.toList());
         Assert.assertNotNull(generations);
-        Assert.assertEquals(12, generations.size());
+        Assert.assertEquals(14, generations.size());
         FileGeneration generation = generations.get(0);
         Assert.assertFalse(generation.getContent().isEmpty());
     }

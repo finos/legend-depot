@@ -72,16 +72,16 @@ public class FileGenerationsServiceImpl implements FileGenerationsService, Manag
     }
 
     @Override
-    public List<FileGeneration> getFileGenerationsByPath(String groupId, String artifactId, String versionId, String path)
+    public List<FileGeneration> getFileGenerationsByElementPath(String groupId, String artifactId, String versionId, String elementPath)
     {
-        return fileGenerations.findByPath(groupId, artifactId, versionId, path).stream().map(StoredFileGeneration::getFile).collect(Collectors.toList());
+        return fileGenerations.findByElementPath(groupId, artifactId, versionId, elementPath).stream().map(StoredFileGeneration::getFile).collect(Collectors.toList());
     }
 
     @Override
-    public Optional<FileGeneration> getFileGenerationsByFile(String groupId, String artifactId, String versionId, String file)
+    public Optional<FileGeneration> getFileGenerationsByFilePath(String groupId, String artifactId, String versionId, String filePath)
     {
 
-        Optional<StoredFileGeneration> found = fileGenerations.findByFile(groupId, artifactId, versionId, file);
+        Optional<StoredFileGeneration> found = fileGenerations.findByFilePath(groupId, artifactId, versionId, filePath);
         return found.map(StoredFileGeneration::getFile);
     }
 
