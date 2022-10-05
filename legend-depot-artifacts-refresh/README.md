@@ -20,7 +20,7 @@ You will have to provide config details of such implementation under the artifac
 
 
 ```sh
-http://127.0.0.1:8076/depot-store/api/swagger#/Artifacts/getRepositoryVersions
+http://127.0.0.1:6201/depot-store/api/swagger#/Artifacts/getRepositoryVersions
 
 you will have to provide the groupid and artifactid for your model project
 it should return the versions that have been publidhed for your model project
