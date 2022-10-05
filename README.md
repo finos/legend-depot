@@ -21,7 +21,7 @@ In order to start the `Depot Server` and `Depot Store Server`, follow the instru
 #### Setup Gitlab OAuth
 
 Follow the instructions [here](https://legend.finos.org/docs/getting-started/installation-guide#maven-install) to set up `Gitlab authentication`
-Add following callback url to config: `http://127.0.0.1:8076/depot-store/callback`
+Add following callback url to config: `http://127.0.0.1:6201/depot-store/callback`
 
 > Certain store APIs required elevated permissions, add your `Gitlab handle` to `authorisedIdentities.json`
 
@@ -36,7 +36,7 @@ Add following callback url to config: `http://127.0.0.1:8076/depot-store/callbac
 java -cp $SHADED_JAR_PATH org.finos.legend.depot.store.server.LegendDepotStoreServer server $CONFIG_DIR/config.json
 ```
 
-- Test by opening http://127.0.0.1:8076/depot-store/api/info or the `Swagger` [page](http://127.0.0.1:8076/depot-store/api/swagger)
+- Test by opening http://127.0.0.1:6201/depot-store/api/info or the `Swagger` [page](http://127.0.0.1:6201/depot-store/api/swagger)
 
 #### Depot Server
 
@@ -47,7 +47,7 @@ java -cp $SHADED_JAR_PATH org.finos.legend.depot.store.server.LegendDepotStoreSe
 java -cp $SHADED_JAR_PATH org.finos.legend.depot.server.LegendDepotServer server $CONFIG_DIR/config.json
 ```
 
-- Test by opening http://127.0.0.1:8075/depot/api/info or the `Swagger` [page](http://127.0.0.1:8075/depot/api/swagger)
+- Test by opening http://127.0.0.1:6200/depot/api/info or the `Swagger` [page](http://127.0.0.1:6200/depot/api/swagger)
 
 
 ### Register metadata projects with Depot Store Server

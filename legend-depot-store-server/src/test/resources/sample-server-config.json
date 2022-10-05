@@ -7,7 +7,7 @@
     "adminContextPath": "/admin",
     "connector": {
       "type": "http",
-      "port": 8076,
+      "port": 6201,
       "maxRequestHeaderSize": "32KiB"
     },
     "gzip": {
