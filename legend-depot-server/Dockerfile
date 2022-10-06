@@ -14,7 +14,7 @@
 
 FROM openjdk:11.0.16-bullseye
 COPY target/legend-depot-server-*.jar /app/bin/
-CMD java -cp /app/bin/*-shaded.jar \
+CMD java -cp /config:/app/bin/*-shaded.jar \
 -XX:+ExitOnOutOfMemoryError \
 -XX:MaxRAMPercentage=60 \
 -Xss4M \
