@@ -20,6 +20,8 @@ import com.codahale.metrics.health.HealthCheck;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import io.dropwizard.Application;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -34,13 +36,10 @@ import org.finos.legend.depot.tracing.configuration.PrometheusMetricsProviderCon
 import org.finos.legend.depot.tracing.configuration.TracingAuthenticationProviderConfiguration;
 import org.finos.legend.sdlc.server.error.LegendSDLCServerExceptionMapper;
 import org.finos.legend.server.pac4j.LegendPac4jBundle;
-import org.finos.legend.server.pac4j.LegendPac4jConfiguration;
 import org.finos.legend.server.shared.bundles.ChainFixingFilterHandler;
 import org.finos.legend.server.shared.bundles.HostnameHeaderBundle;
 import org.finos.legend.server.shared.bundles.OpenTracingBundle;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
-import io.dropwizard.configuration.SubstitutingSourceProvider;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -63,7 +62,7 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
     {
 
         bootstrap.addBundle(new HostnameHeaderBundle());
-        bootstrap.addBundle(new LegendPac4jBundle<>(this::buildPac4jConfig));
+        bootstrap.addBundle(new LegendPac4jBundle<>(ServersConfiguration::getPac4jConfiguration));
         bootstrap.addBundle(new SwaggerBundle<ServersConfiguration>()
         {
             @Override
@@ -134,15 +133,6 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
     {
         new OpenTracingBundle().run(environment);
     }
-
-    private LegendPac4jConfiguration buildPac4jConfig(T config)
-    {
-        LegendPac4jConfiguration pac4j = config.getPac4jConfiguration();
-        pac4j.setMongoDb(config.getMongoConfiguration().database);
-        pac4j.setMongoUri(config.getMongoConfiguration().url);
-        return pac4j;
-    }
-
 
     private void initialisePrometheusMetrics(Environment environment)
     {
