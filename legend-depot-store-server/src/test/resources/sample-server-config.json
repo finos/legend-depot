@@ -1,6 +1,7 @@
 {
   "applicationName": "Depot Store Manager API",
   "deployment": "DEV",
+  "sessionCookie": "LEGEND_DEPOT_STORE_JSESSIONID",
   "server": {
     "type": "simple",
     "applicationContextPath": "/",

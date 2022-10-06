@@ -30,6 +30,12 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ServersConfiguration extends Configuration
 {
+
+    // This can be set to avoid Jetty session cookie name collision between multiple servers running on `localhost` during development
+    // See https://stackoverflow.com/questions/16789495/two-applications-on-the-same-server-use-the-same-jsessionid
+    @JsonProperty("sessionCookie")
+    private String sessionCookie;
+
     @NotNull
     @JsonProperty("applicationName")
     private String applicationName;
@@ -80,6 +86,11 @@ public class ServersConfiguration extends Configuration
     public void setOpenTracingConfiguration(OpenTracingConfiguration openTracingConfiguration)
     {
         this.openTracingConfiguration = openTracingConfiguration;
+    }
+
+    public String getSessionCookie()
+    {
+        return sessionCookie;
     }
 
     public String getApplicationName()
