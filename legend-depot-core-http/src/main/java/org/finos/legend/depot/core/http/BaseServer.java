@@ -92,7 +92,12 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
     @Override
     public void run(T configuration, Environment environment)
     {
-        environment.servlets().setSessionHandler(new SessionHandler());
+        SessionHandler sessionHandler = new SessionHandler();
+        if (configuration.getSessionCookie() != null)
+        {
+            sessionHandler.setSessionCookie(configuration.getSessionCookie());
+        }
+        environment.servlets().setSessionHandler(sessionHandler);
 
         if (configuration.getFilterPriorities() != null)
         {
