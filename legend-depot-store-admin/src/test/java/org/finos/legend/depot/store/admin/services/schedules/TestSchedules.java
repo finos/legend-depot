@@ -14,13 +14,12 @@
 //
 
 
-package org.finos.legend.depot.store.admin.services;
+package org.finos.legend.depot.store.admin.services.schedules;
 
 import org.finos.legend.depot.store.admin.api.ManageSchedulesService;
-import org.finos.legend.depot.store.admin.services.schedules.ScheduleInfo;
-import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.admin.store.mongo.MongoSchedules;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,36 +36,43 @@ public class TestSchedules extends TestStoreMongo
     @Before
     public void setUp()
     {
-        this.mongoProvider.drop();
         schedulesService = new MongoSchedules(mongoProvider);
         schedulesFactory = new SchedulesFactory(schedulesService);
         Assert.assertTrue(schedulesService.getAll().isEmpty());
+        Assert.assertTrue(schedulesFactory.schedulesBuffer.isEmpty());
+    }
+
+    @After
+    public void tearDown()
+    {
+        this.mongoProvider.drop();
+        schedulesFactory.timer.cancel();
+        schedulesFactory.timer.purge();
     }
 
     @Test
     public void testSchedules()
     {
-
         Assert.assertTrue(schedulesService.getAll().isEmpty());
-        schedulesFactory.register("joba", LocalDateTime.now().plusHours(1), 100000, false, () -> "hello");
+        Assert.assertTrue(schedulesFactory.find().isEmpty());
+        schedulesFactory.register("joba", LocalDateTime.now().plusHours(24), 100000, false, () -> "hello");
         List<ScheduleInfo> scheduleInfoList = schedulesFactory.find();
         Assert.assertNotNull(scheduleInfoList);
-        Assert.assertEquals(1, scheduleInfoList.size());
-        Assert.assertEquals("joba", scheduleInfoList.get(0).getJobId());
+        Assert.assertTrue(scheduleInfoList.stream().anyMatch(s -> s.jobId.equals("joba")));
 
         schedulesFactory.run("joba");
         Assert.assertEquals(1, schedulesFactory.find().size());
         Assert.assertEquals("hello", schedulesFactory.find().get(0).getMessage());
         Assert.assertEquals(100000, schedulesFactory.find().get(0).getFrequency());
 
-        schedulesFactory.register("joba", LocalDateTime.now().plusHours(1), 100000, false, () -> "hello");
+        schedulesFactory.register("joba", LocalDateTime.now().plusHours(12), 100000000, false, () -> "hello again");
         Assert.assertEquals(1, schedulesFactory.find().size());
     }
 
     @Test
     public void testRunningToggles()
     {
-        schedulesFactory.register("job1", LocalDateTime.now(), 100000, false, () -> "hello toggles");
+        schedulesFactory.register("job1", LocalDateTime.now().plusHours(24), 10000000, false, () -> "hello toggles");
         schedulesFactory.toggleRunning("job1", true);
         Assert.assertTrue(schedulesService.get("job1").get().running.get());
         schedulesFactory.toggleRunning("job1", false);

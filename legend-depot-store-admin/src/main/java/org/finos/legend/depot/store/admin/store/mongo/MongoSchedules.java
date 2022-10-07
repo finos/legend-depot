@@ -118,7 +118,7 @@ public class MongoSchedules extends BaseMongo<ScheduleInfo> implements ManageSch
         synchronized (ScheduleInfo.class)
         {
             ScheduleInfo info = getScheduleInfo(jobId);
-            info.disabled.getAndSet(toggle);
+            info.disabled.compareAndSet(!toggle,toggle);
             createOrUpdate(info);
         }
     }
@@ -129,7 +129,7 @@ public class MongoSchedules extends BaseMongo<ScheduleInfo> implements ManageSch
         synchronized (ScheduleInfo.class)
         {
             ScheduleInfo info = getScheduleInfo(jobId);
-            info.running.getAndSet(toggle);
+            info.running.compareAndSet(!toggle,toggle);
             createOrUpdate(info);
         }
     }
@@ -137,10 +137,13 @@ public class MongoSchedules extends BaseMongo<ScheduleInfo> implements ManageSch
     @Override
     public void toggleDisableAll(boolean toggle)
     {
+        synchronized (ScheduleInfo.class)
+        {
             getAll().stream().forEach(info ->
             {
-                toggleDisable(info.jobId,toggle);
+                toggleDisable(info.jobId, toggle);
             });
+        }
     }
 
 }

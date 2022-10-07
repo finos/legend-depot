@@ -41,11 +41,11 @@ import java.util.List;
 
 public abstract class TestStoreMongo
 {
-    private static MongoServer server = new MongoServer(new MemoryBackend());
-    private static MongoClient mongoClient = new MongoClient(new ServerAddress(server.bind()));
+    private MongoServer server = new MongoServer(new MemoryBackend());
+    private MongoClient mongoClient = new MongoClient(new ServerAddress(server.bind()));
     protected MongoDatabase mongoProvider = mongoClient.getDatabase("test-db");
 
-    protected static MongoClient getMongoClient()
+    protected  MongoClient getMongoClient()
     {
         return mongoClient;
     }
