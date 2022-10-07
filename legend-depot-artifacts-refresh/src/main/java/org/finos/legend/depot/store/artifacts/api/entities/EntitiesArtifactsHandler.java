@@ -15,9 +15,9 @@
 
 package org.finos.legend.depot.store.artifacts.api.entities;
 
-import org.finos.legend.depot.store.artifacts.api.ProjectVersionArtifactsHandler;
+import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 
-public interface EntitiesVersionArtifactsHandler extends ProjectVersionArtifactsHandler
+public interface EntitiesArtifactsHandler extends ProjectArtifactsHandler
 {
 
 }

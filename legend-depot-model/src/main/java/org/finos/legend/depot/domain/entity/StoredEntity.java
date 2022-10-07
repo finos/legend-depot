@@ -29,8 +29,6 @@ import java.util.regex.Pattern;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoredEntity extends BaseDomain implements HasIdentifier
 {
-
-    public static final Pattern VERSION_PATTERN = Pattern.compile("::v(X|[0-9]*)_(X|[0-9]*)_(X|[0-9]*)::");
     @NotNull
     @JsonProperty
     private String versionId;
@@ -53,18 +51,11 @@ public class StoredEntity extends BaseDomain implements HasIdentifier
         this.entity = entity;
     }
 
-    public StoredEntity(String groupId, String artifactId, String versionId, EntityDefinition entity)
+    StoredEntity(String groupId, String artifactId, String versionId,boolean versionedEntity)
     {
         super(groupId, artifactId);
         this.versionId = versionId;
-        this.versionedEntity = VERSION_PATTERN.matcher(entity.getPath()).reset().find();
-        this.entity = entity;
-    }
-
-    StoredEntity(String groupId, String artifactId, String versionId)
-    {
-        super(groupId, artifactId);
-        this.versionId = versionId;
+        this.versionedEntity = versionedEntity;
     }
 
     @Override

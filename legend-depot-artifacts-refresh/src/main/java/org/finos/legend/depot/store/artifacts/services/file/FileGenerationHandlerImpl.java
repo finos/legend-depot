@@ -23,11 +23,13 @@ import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.store.artifacts.ArtifactLoadingException;
-import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsProvider;
+import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsHandler;
+import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.finos.legend.sdlc.serialization.EntityLoader;
 import org.slf4j.Logger;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +42,7 @@ import java.util.Set;
 
 import static org.finos.legend.depot.domain.generation.file.FileGeneration.GENERATION_CONFIGURATION;
 
-public abstract class BaseFileGenerationHandler
+public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandler
 {
 
     public static final String TYPE = "type";
@@ -50,23 +52,26 @@ public abstract class BaseFileGenerationHandler
     public static final String UNDERSCORE = "_";
     public static final String VERSIONED_ENTITIES = "versioned-entities";
     public static final String BLANK = "";
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BaseFileGenerationHandler.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(FileGenerationHandlerImpl.class);
     protected final ManageFileGenerationsService generations;
-    private final FileGenerationsProvider provider;
+    private final FileGenerationsArtifactsProvider provider;
     private final ArtifactRepository repository;
 
 
-    protected BaseFileGenerationHandler(ArtifactRepository repository, FileGenerationsProvider provider, ManageFileGenerationsService generations)
+    @Inject
+    public FileGenerationHandlerImpl(ArtifactRepository repository, FileGenerationsArtifactsProvider provider, ManageFileGenerationsService generations)
     {
         this.repository = repository;
         this.provider = provider;
         this.generations = generations;
     }
 
+
+
     public MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId, List<File> files)
     {
         MetadataEventResponse response = new MetadataEventResponse();
-        List<Entity> projectEntities = getAllEntities(project.getGroupId(), project.getArtifactId(), versionId);
+        List<Entity> projectEntities = getAllNonVersionedEntities(project.getGroupId(), project.getArtifactId(), versionId);
         List<Entity> fileGenerationEntities = filterEntitiesByFileGenerationEntities(projectEntities);
         List<FileGeneration> generatedFiles = provider.loadArtifacts(files);
 
@@ -121,11 +126,10 @@ public abstract class BaseFileGenerationHandler
     }
 
 
-    private List<Entity> getAllEntities(String groupId, String artifactId, String versionId)
+    private List<Entity> getAllNonVersionedEntities(String groupId, String artifactId, String versionId)
     {
         List<File> files = repository.findFiles(ArtifactType.ENTITIES, groupId, artifactId, versionId);
-        return files.stream().filter(file -> isEntitiesArtifactFile(versionId, file)).findFirst()
-            .map(file -> EntityLoader.newEntityLoader(file).getAllEntities().collect(Collectors.toList())).orElse(Collections.emptyList());
+        return files.stream().findFirst().map(file -> EntityLoader.newEntityLoader(file).getAllEntities().collect(Collectors.toList())).orElse(Collections.emptyList());
     }
 
     private List<Entity> filterEntitiesByFileGenerationEntities(List<Entity> entities)
@@ -133,9 +137,9 @@ public abstract class BaseFileGenerationHandler
         return entities.stream().filter(en -> en.getClassifierPath().equalsIgnoreCase(GENERATION_CONFIGURATION)).collect(Collectors.toList());
     }
 
-    private boolean isEntitiesArtifactFile(String versionId, File file)
+    @Override
+    public void delete(String groupId,String artifactId,String versionId)
     {
-        String entitiesFileName = "entities-" + versionId;
-        return file.getName().contains(entitiesFileName) && !file.getName().contains(VERSIONED_ENTITIES);
+        generations.delete(groupId,artifactId, versionId);
     }
 }

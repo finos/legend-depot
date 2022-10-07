@@ -18,7 +18,7 @@ package org.finos.legend.depot.store.artifacts.services.file;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.store.artifacts.ArtifactLoadingException;
-import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsProvider;
+import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationLoader;
 
 import javax.inject.Inject;
@@ -27,23 +27,22 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
-public class FileGenerationsProviderImpl implements FileGenerationsProvider
+public class FileGenerationsProvider implements FileGenerationsArtifactsProvider
 {
-    public static final ArtifactType FILE_GENERATION = ArtifactType.FILE_GENERATIONS;
-
     @Inject
-    public FileGenerationsProviderImpl()
+    public FileGenerationsProvider()
     {
         super();
     }
 
     @Override
-    public List<FileGeneration> loadArtifacts(List<File> files)
+    public List<FileGeneration> loadArtifactsForType(Stream<File> files)
     {
         List<FileGeneration> generations = new ArrayList<>();
-        files.stream().filter(this::isGenerationFile).forEach(f ->
+        files.forEach(f ->
         {
             try (FileGenerationLoader loader = FileGenerationLoader.newFileGenerationsLoader(f))
             {
@@ -58,7 +57,8 @@ public class FileGenerationsProviderImpl implements FileGenerationsProvider
         return generations;
     }
 
-    private boolean isGenerationFile(File file)
+    @Override
+    public boolean matchesArtifactType(File file)
     {
         return file.getName().contains(ArtifactType.FILE_GENERATIONS.getModuleName());
     }
@@ -66,7 +66,7 @@ public class FileGenerationsProviderImpl implements FileGenerationsProvider
     @Override
     public ArtifactType getType()
     {
-        return FILE_GENERATION;
+        return ArtifactType.FILE_GENERATIONS;
     }
 
 }

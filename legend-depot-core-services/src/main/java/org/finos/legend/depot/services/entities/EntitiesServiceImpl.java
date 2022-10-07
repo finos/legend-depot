@@ -108,9 +108,9 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     }
 
     @Override
-    public MetadataEventResponse delete(String groupId, String artifactId, String versionId)
+    public MetadataEventResponse delete(String groupId, String artifactId, String versionId,boolean versioned)
     {
-        return new MetadataEventResponse().combine(entities.delete(groupId, artifactId, versionId));
+        return new MetadataEventResponse().combine(entities.delete(groupId, artifactId, versionId,versioned));
     }
 
     @Override

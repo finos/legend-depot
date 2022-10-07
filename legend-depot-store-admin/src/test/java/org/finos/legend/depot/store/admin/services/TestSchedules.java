@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class TestSchedules extends TestStoreMongo
@@ -51,16 +52,16 @@ public class TestSchedules extends TestStoreMongo
         schedulesFactory.register("joba", LocalDateTime.now().plusHours(1), 100000, false, () -> "hello");
         List<ScheduleInfo> scheduleInfoList = schedulesFactory.find();
         Assert.assertNotNull(scheduleInfoList);
-        Assert.assertEquals(1, scheduleInfoList.size());
+        Assert.assertEquals(scheduleInfoList.stream().map(s -> s.jobId).collect(Collectors.toList()).toString(), 1, scheduleInfoList.size());
         Assert.assertEquals("joba", scheduleInfoList.get(0).getJobId());
 
         schedulesFactory.run("joba");
-        Assert.assertEquals(1, schedulesFactory.find().size());
+        Assert.assertEquals(scheduleInfoList.toString(),1, schedulesFactory.find().size());
         Assert.assertEquals("hello", schedulesFactory.find().get(0).getMessage());
         Assert.assertEquals(100000, schedulesFactory.find().get(0).getFrequency());
 
         schedulesFactory.register("joba", LocalDateTime.now().plusHours(1), 100000, false, () -> "hello");
-        Assert.assertEquals(1, schedulesFactory.find().size());
+        Assert.assertEquals(scheduleInfoList.toString(), 1,schedulesFactory.find().size());
     }
 
     @Test

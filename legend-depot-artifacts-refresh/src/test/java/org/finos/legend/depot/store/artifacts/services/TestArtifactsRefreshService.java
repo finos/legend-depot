@@ -33,12 +33,14 @@ import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
-import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsProvider;
+import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntityProvider;
-import org.finos.legend.depot.store.artifacts.services.file.FileGenerationVersionsHandler;
-import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProviderImpl;
+import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntitiesHandlerImpl;
+import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntityProvider;
+import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandlerImpl;
+import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvider;
 import org.finos.legend.depot.store.artifacts.store.mongo.ArtifactsMongo;
 import org.finos.legend.depot.store.artifacts.store.mongo.MongoRefreshStatus;
 import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
@@ -76,7 +78,8 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected ManageRefreshStatusService refreshStatusStore = new MongoRefreshStatus(mongoProvider);
 
     protected EntityArtifactsProvider entitiesProvider = new EntityProvider();
-    protected FileGenerationsProvider fileGenerationsProvider = new FileGenerationsProviderImpl();
+    protected VersionedEntityProvider versionedEntityProvider = new VersionedEntityProvider();
+    protected FileGenerationsArtifactsProvider fileGenerationsProvider = new FileGenerationsProvider();
 
     protected ArtifactRepository repository = new TestMavenArtifactsRepository();
     protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(new ProjectsServiceImpl(projectsStore), refreshStatusStore, repository, artifacts, new IncludeProjectPropertiesConfiguration(properties));
@@ -85,8 +88,9 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     @Before
     public void setUpData()
     {
-        ArtifactResolverFactory.registerVersionUpdater(ArtifactType.ENTITIES, new EntitiesHandlerImpl(new EntitiesServiceImpl(entitiesStore, projectsStore), entitiesProvider));
-        ArtifactResolverFactory.registerVersionUpdater(ArtifactType.FILE_GENERATIONS, new FileGenerationVersionsHandler(repository, fileGenerationsProvider, new FileGenerationsServiceImpl(fileGenerationsStore, entitiesStore)));
+        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(new EntitiesServiceImpl(entitiesStore, projectsStore), entitiesProvider));
+        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new FileGenerationsServiceImpl(fileGenerationsStore, entitiesStore)));
+        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new VersionedEntitiesHandlerImpl(new EntitiesServiceImpl(entitiesStore, projectsStore), versionedEntityProvider));
 
         projectsStore.createOrUpdate(new ProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID));
         projectsStore.createOrUpdate(new ProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID));
@@ -103,6 +107,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         ProjectData projectData = projectsStore.find(TEST_GROUP_ID, "art101").get();
         List<File> files = repository.findFiles(ArtifactType.ENTITIES, projectData.getGroupId(), projectData.getArtifactId(), MASTER_SNAPSHOT);
         Assert.assertNotNull(files);
+        Assert.assertEquals(1,files.size());
         MetadataEventResponse response = artifactsRefreshService.refreshProjectVersionArtifacts(TEST_GROUP_ID, "art101", MASTER_SNAPSHOT, true);
         Assert.assertNotNull(response);
         Assert.assertTrue(refreshStatusStore.find(VersionRevision.VERSIONS, TEST_GROUP_ID, "art101", MASTER_SNAPSHOT, true).isEmpty());
@@ -181,8 +186,6 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     @Test
     public void canRefreshAllVersionForProject()
     {
-
-
         ProjectData projectData = projectsStore.findByProjectId(PROJECT_A).get(0);
         Assert.assertTrue(entitiesStore.getAllStoredEntities().isEmpty());
         projectData.setVersions(Collections.emptyList());
@@ -282,7 +285,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
 
         List<StoredEntity> all = entitiesStore.getAllStoredEntities();
         Assert.assertNotNull(all);
-        Assert.assertEquals(40, all.size());
+        Assert.assertEquals(42, all.size());
 
         List<Entity> entityList = entitiesStore.getAllLatestEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID);
         Assert.assertNotNull(entityList);
@@ -290,8 +293,8 @@ public class TestArtifactsRefreshService extends TestStoreMongo
 
         List<Entity> entityList2 = entitiesStore.getAllLatestEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID);
         Assert.assertNotNull(entityList2);
-        Assert.assertEquals(2, entityList2.size());
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, MASTER_SNAPSHOT).size());
+        Assert.assertEquals(4, entityList2.size());
+        Assert.assertEquals(4, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, MASTER_SNAPSHOT).size());
         Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
         Assert.assertEquals(1, entitiesStore.getEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0", false).size());
 
@@ -337,7 +340,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertEquals(0, project.getVersions().size());
         Assert.assertEquals(0, project.getDependencies().size());
 
-        Assert.assertEquals(2, repository.findDependencies(ArtifactType.ENTITIES, TEST_GROUP_ID, "test", "2.0.0").size());
+        Assert.assertEquals(1, repository.findDependenciesByArtifactType(ArtifactType.ENTITIES, TEST_GROUP_ID, "test", "2.0.0").size());
         Assert.assertEquals(0, entitiesStore.getStoredEntities(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID).size());
         Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "2.0.0", true).size());
         Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0", true).size());
@@ -355,10 +358,13 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         String versionId = "2.0.0";
         artifactsRefreshService.refreshProjectVersionArtifacts(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
         Assert.assertEquals(18, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assert.assertEquals(9, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true).size());
+        Assert.assertEquals(9, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false).size());
         Assert.assertEquals(12, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
 
         artifactsRefreshService.delete(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false).size());
+        Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true).size());
         Assert.assertEquals(0, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
         Assert.assertFalse(projectsStore.findByProjectId(PROJECT_A).get(0).getVersions().contains(versionId));
     }
@@ -379,5 +385,15 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertFalse(response.hasErrors());
     }
 
+    @Test
+    public void canLoadEntitiesWithVersionInPackageName()
+    {
+        MetadataEventResponse response = artifactsRefreshService.refreshProjectVersionArtifacts(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, MASTER_SNAPSHOT);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(4, entitiesStore.getStoredEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, MASTER_SNAPSHOT).size());
+        Assert.assertEquals(2, entitiesStore.getEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, MASTER_SNAPSHOT,false).size());
+        Assert.assertEquals(2, entitiesStore.getEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, MASTER_SNAPSHOT,true).size());
+
+    }
 
 }

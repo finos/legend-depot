@@ -68,7 +68,7 @@ public class VoidArtifactRepositoryProvider implements ArtifactRepository
     }
 
     @Override
-    public Set<ArtifactDependency> findDependencies(ArtifactType type, String groupId, String artifactId, String versionId)
+    public Set<ArtifactDependency> findDependenciesByArtifactType(ArtifactType type, String groupId, String artifactId, String versionId)
     {
         return Collections.emptySet();
     }

@@ -15,8 +15,8 @@
 
 package org.finos.legend.depot.store.artifacts.services.entities;
 
+import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
@@ -26,7 +26,6 @@ import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -56,22 +55,12 @@ public abstract class AbstractEntityRefreshHandlerImpl
     }
 
 
-    List<StoredEntity> transformVersionedEntities(ProjectData project, String versionId, List<Entity> entityList)
-    {
-        List<StoredEntity> versionedEntities = new ArrayList<>();
-        for (Entity entity : entityList)
-        {
-            EntityDefinition entityDefinition = new EntityDefinition(entity.getPath(), entity.getClassifierPath(), entity.getContent());
-            StoredEntity storedEntity = new StoredEntity(project.getGroupId(), project.getArtifactId(), versionId, entityDefinition);
-            versionedEntities.add(storedEntity);
-        }
-        return versionedEntities;
-    }
+    abstract List<StoredEntity> transformVersionedEntities(ProjectData project, String versionId, List<Entity> entityList);
 
 
-    public void delete(String groupId, String artifactId, String versionId)
+    protected void delete(String groupId, String artifactId, String versionId,boolean versioned)
     {
-        getEntitiesApi().delete(groupId, artifactId, versionId);
+        getEntitiesApi().delete(groupId, artifactId, versionId,versioned);
     }
 
 
@@ -89,16 +78,16 @@ public abstract class AbstractEntityRefreshHandlerImpl
         List<Entity> entityList = getEntities(files);
         if (entityList != null && !entityList.isEmpty())
         {
-            String message = String.format("[%s]: found [%s] entities for %s ", project.getProjectId(), entityList.size(), gavCoordinates);
+            String message = String.format("[%s]: found [%s] %s for %s ", project.getProjectId(), entityList.size(), this.entitiesProvider.getType(), gavCoordinates);
             getLOGGER().info(message);
             response.addMessage(message);
-            List<StoredEntity> versionedEntities = transformVersionedEntities(project, versionId, entityList);
+            List<StoredEntity> storedEntities = transformVersionedEntities(project, versionId, entityList);
             if (versionId.equals(VersionValidator.MASTER_SNAPSHOT))
             {
-                getEntitiesApi().deleteLatest(project.getGroupId(), project.getArtifactId());
+                getEntitiesApi().deleteLatest(project.getGroupId(), project.getArtifactId(),this.entitiesProvider.getType().equals(ArtifactType.VERSIONED_ENTITIES));
                 getLOGGER().info("removed old entities for {} - {} ", project.getProjectId(), gavCoordinates);
             }
-            response.combine(getEntitiesApi().createOrUpdate(versionedEntities));
+            response.combine(getEntitiesApi().createOrUpdate(storedEntities));
         }
 
         return response;

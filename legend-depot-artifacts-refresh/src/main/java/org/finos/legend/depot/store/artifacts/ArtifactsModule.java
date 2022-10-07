@@ -22,10 +22,12 @@ import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProvide
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
-import org.finos.legend.depot.store.artifacts.api.entities.EntitiesVersionArtifactsHandler;
+import org.finos.legend.depot.store.artifacts.api.entities.EntitiesArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
-import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsProvider;
-import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsVersionArtifactsHandler;
+import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntitiesArtifactsHandler;
+import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntityArtifactsProvider;
+import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
+import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.api.status.RefreshStatusService;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactsResource;
@@ -33,8 +35,10 @@ import org.finos.legend.depot.store.artifacts.services.ArtifactResolverFactory;
 import org.finos.legend.depot.store.artifacts.services.ArtifactsRefreshServiceImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntityProvider;
-import org.finos.legend.depot.store.artifacts.services.file.FileGenerationVersionsHandler;
-import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProviderImpl;
+import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntitiesHandlerImpl;
+import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntityProvider;
+import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandlerImpl;
+import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvider;
 import org.finos.legend.depot.store.artifacts.store.mongo.ArtifactsMongo;
 import org.finos.legend.depot.store.artifacts.store.mongo.MongoRefreshStatus;
 import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
@@ -48,7 +52,6 @@ public class ArtifactsModule extends PrivateModule
 {
     private static final String UPDATE_MASTER_REVISIONS_SCHEDULER = "refreshVersionArtifacts-master-revisions-scheduler";
     private static final String UPDATE_VERSIONS_SCHEDULER = "refreshVersionArtifacts-versions-scheduler";
-    private static final String MISMATCH_VERSIONS_SCHEDULE = "versions-mismatch-schedule";
     private static final String MISMATCH_VERSIONS_FIX_SCHEDULE = "fix-versions-mismatch-schedule";
 
     @Override
@@ -59,15 +62,19 @@ public class ArtifactsModule extends PrivateModule
         bind(ManageRefreshStatusService.class).to(MongoRefreshStatus.class);
         bind(RefreshStatusService.class).to(MongoRefreshStatus.class);
 
-        bind(EntitiesVersionArtifactsHandler.class).to(EntitiesHandlerImpl.class);
+        bind(EntitiesArtifactsHandler.class).to(EntitiesHandlerImpl.class);
         bind(EntityArtifactsProvider.class).to(EntityProvider.class);
 
-        bind(FileGenerationsVersionArtifactsHandler.class).to(FileGenerationVersionsHandler.class);
-        bind(FileGenerationsProvider.class).to(FileGenerationsProviderImpl.class);
+        bind(VersionedEntitiesArtifactsHandler.class).to(VersionedEntitiesHandlerImpl.class);
+        bind(VersionedEntityArtifactsProvider.class).to(VersionedEntityProvider.class);
+
+        bind(FileGenerationsArtifactsHandler.class).to(FileGenerationHandlerImpl.class);
+        bind(FileGenerationsArtifactsProvider.class).to(FileGenerationsProvider.class);
 
         bind(ArtifactsRefreshService.class).to(ArtifactsRefreshServiceImpl.class);
 
         expose(EntityArtifactsProvider.class);
+        expose(VersionedEntityArtifactsProvider.class);
         expose(ArtifactsRefreshService.class);
 
         expose(ManageRefreshStatusService.class);
@@ -78,18 +85,27 @@ public class ArtifactsModule extends PrivateModule
     @Provides
     @Named("entityRefresh")
     @Singleton
-    boolean registerEntityRefresh(EntitiesVersionArtifactsHandler versionArtifactsHandler)
+    boolean registerEntityRefresh(EntitiesArtifactsHandler versionArtifactsHandler)
     {
-        ArtifactResolverFactory.registerVersionUpdater(ArtifactType.ENTITIES, versionArtifactsHandler);
+        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.ENTITIES, versionArtifactsHandler);
+        return true;
+    }
+
+    @Provides
+    @Named("versionedEntityRefresh")
+    @Singleton
+    boolean registerVersionedEntityRefresh(VersionedEntitiesArtifactsHandler versionedEntitiesArtifactsHandler)
+    {
+        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, versionedEntitiesArtifactsHandler);
         return true;
     }
 
     @Provides
     @Named("fileGenerationRefresh")
     @Singleton
-    boolean registerFileGenerationRefresh(FileGenerationsVersionArtifactsHandler versionArtifactsHandler)
+    boolean registerFileGenerationRefresh(FileGenerationsArtifactsHandler versionArtifactsHandler)
     {
-        ArtifactResolverFactory.registerVersionUpdater(ArtifactType.FILE_GENERATIONS, versionArtifactsHandler);
+        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, versionArtifactsHandler);
         return true;
     }
 

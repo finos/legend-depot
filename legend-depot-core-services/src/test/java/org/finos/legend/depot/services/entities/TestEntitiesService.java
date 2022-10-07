@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -117,13 +118,29 @@ public class TestEntitiesService extends TestBaseServices
     public void canGetOrphanedEntities()
     {
         entitiesService.createOrUpdate(Arrays.asList(
-                new StoredEntity("example.one", "orphaned", "1.0.0", new EntityDefinition("la", "la", null)),
-                new StoredEntity("example.two", "orphaned", "1.0.1", new EntityDefinition("lala", "la", null))
+                new StoredEntity("example.one", "orphaned", "1.0.0", false,new EntityDefinition("la", "la", null)),
+                new StoredEntity("example.two", "orphaned", "1.0.1", false,new EntityDefinition("lala", "la", null))
         ));
 
         List<Pair<String, String>> orphaned = entitiesService.getOrphanedStoredEntities();
         Assert.assertEquals(2, orphaned.size());
         Assert.assertTrue(orphaned.contains(Tuples.pair("example.one", "orphaned")));
         Assert.assertTrue(orphaned.contains(Tuples.pair("example.two", "orphaned")));
+    }
+
+    @Test
+    public void canQueryEntitiesWithVersionInPackage()
+    {
+        loadEntities("PROD-D", "1.0.0");
+        String pkgName = "examples::metadata::test::dependency::v1_2_3";
+        Assert.assertEquals(4, entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").size());
+        entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").stream().allMatch(e -> e.getEntity().getPath().startsWith(pkgName));;
+        entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").stream().allMatch(e -> ((String)e.getEntity().getContent().get("package")).startsWith(pkgName));;
+
+        Assert.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","1.0.0",true).size());
+        Assert.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","1.0.0",false).size());
+        Assert.assertEquals(2, entitiesService.getEntitiesByPackage("examples.metadata","test1","1.0.0",pkgName,false, Collections.EMPTY_SET,true).size());
+        Assert.assertEquals(0, entitiesService.getEntitiesByPackage("examples.metadata","test1","1.0.0",pkgName,true, Collections.EMPTY_SET,true).size());
+
     }
 }

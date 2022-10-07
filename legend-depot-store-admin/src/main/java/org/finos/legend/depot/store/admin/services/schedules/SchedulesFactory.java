@@ -16,7 +16,9 @@
 package org.finos.legend.depot.store.admin.services.schedules;
 
 import org.eclipse.collections.api.factory.Maps;
+import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.map.mutable.SynchronizedMutableMap;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.finos.legend.depot.store.admin.api.ManageSchedulesService;
 import org.slf4j.Logger;
@@ -37,7 +39,7 @@ public final class SchedulesFactory
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SchedulesFactory.class);
     public static final long ONE_HOUR   = 60 * 60 * 1000L;
-    private final Map<String, Pair<TimerTask, ScheduleInfo>> schedulesBuffer = Maps.mutable.empty();
+    final SynchronizedMutableMap<String, Pair<TimerTask, ScheduleInfo>> schedulesBuffer = new SynchronizedMutableMap<String, Pair<TimerTask, ScheduleInfo>>(Maps.mutable.empty());
 
     private final ManageSchedulesService manageSchedulesService;
 

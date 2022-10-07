@@ -27,14 +27,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Singleton
 public class EntityProvider implements EntityArtifactsProvider
 {
-
-    public static final ArtifactType ENTITIES = ArtifactType.ENTITIES;
-
     @Inject
     public EntityProvider()
     {
@@ -44,11 +42,11 @@ public class EntityProvider implements EntityArtifactsProvider
     @Override
     public ArtifactType getType()
     {
-        return ENTITIES;
+        return ArtifactType.ENTITIES;
     }
 
     @Override
-    public List<Entity> loadArtifacts(List<File> files)
+    public List<Entity> loadArtifactsForType(Stream<File> files)
     {
         List<Entity> entities = new ArrayList<>();
         files.forEach(f ->
@@ -64,5 +62,11 @@ public class EntityProvider implements EntityArtifactsProvider
             }
         });
         return entities;
+    }
+
+    @Override
+    public boolean matchesArtifactType(File file)
+    {
+        return file.getName().contains(getType().getModuleName()) && !file.getName().contains(ArtifactType.VERSIONED_ENTITIES.getModuleName());
     }
 }

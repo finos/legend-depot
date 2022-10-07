@@ -30,7 +30,7 @@ import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
-import org.finos.legend.depot.store.artifacts.api.ProjectVersionArtifactsHandler;
+import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.domain.ArtifactDetail;
 import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
@@ -102,7 +102,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 
     private List<ArtifactType> getSupportedArtifactTypes()
     {
-        return Arrays.asList(ArtifactType.ENTITIES, ArtifactType.FILE_GENERATIONS);
+        return Arrays.asList(ArtifactType.ENTITIES, ArtifactType.VERSIONED_ENTITIES,ArtifactType.FILE_GENERATIONS);
     }
 
     private MetadataEventResponse handleRefresh(VersionRevision type, String groupId, String artifactId, String version, Supplier<MetadataEventResponse> functionToExecute)
@@ -329,7 +329,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     private MetadataEventResponse executeVersionRefresh(ArtifactType artifactType, ProjectData projectData, String versionId, boolean fullUpdate)
     {
         MetadataEventResponse response = new MetadataEventResponse();
-        ProjectVersionArtifactsHandler versionsRefresh = ArtifactResolverFactory.getVersionRefresher(artifactType);
+        ProjectArtifactsHandler versionsRefresh = ArtifactResolverFactory.getArtifactHandler(artifactType);
         if (versionsRefresh != null)
         {
             List<File> files = findFiles(artifactType, projectData, versionId, fullUpdate);
@@ -412,7 +412,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     {
         getSupportedArtifactTypes().forEach(artifactType ->
         {
-            ProjectVersionArtifactsHandler versionsRefresh = ArtifactResolverFactory.getVersionRefresher(artifactType);
+            ProjectArtifactsHandler versionsRefresh = ArtifactResolverFactory.getArtifactHandler(artifactType);
             if (versionsRefresh != null)
             {
                 versionsRefresh.delete(groupId, artifactId, versionId);
