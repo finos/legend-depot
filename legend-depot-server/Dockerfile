@@ -15,7 +15,7 @@
 FROM openjdk:11.0.16-bullseye
 COPY target/legend-depot-server-*.jar /app/bin/
 COPY src/main/resources/docker/config /config
-CMD java -cp /config/:/app/bin/*-shaded.jar \
+CMD java -cp /config/:/app/bin/* \
 -XX:+ExitOnOutOfMemoryError \
 -XX:MaxRAMPercentage=60 \
 -Xss4M \
