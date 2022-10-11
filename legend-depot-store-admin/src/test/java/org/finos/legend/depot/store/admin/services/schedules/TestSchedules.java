@@ -83,10 +83,14 @@ public class TestSchedules extends TestStoreMongo
     @Test
     public void testDisabledAllToggle()
     {
-        schedulesFactory.register("job1", LocalDateTime.now(), 100000, false, () -> "hello toggles");
-        schedulesFactory.register("job2", LocalDateTime.now(), 100000, false, () -> "hello toggles again");
-        Assert.assertEquals(2, schedulesService.find(null,Boolean.FALSE).size());
+        schedulesFactory.register("job3", LocalDateTime.now().plusHours(10), 100000, false, () -> "hello toggles");
+        schedulesFactory.register("job4", LocalDateTime.now().plusHours(10), 100000, false, () -> "hello toggles again");
+        schedulesFactory.toggleDisableAll(false);
+        Assert.assertTrue(schedulesFactory.find().stream().allMatch(j -> !j.disabled.get()));
         schedulesFactory.toggleDisableAll(true);
-        Assert.assertEquals(2, schedulesService.find(null,Boolean.TRUE).size());
+        List<ScheduleInfo> scheduleInfoList = schedulesFactory.find();
+        Assert.assertNotNull(scheduleInfoList);
+        Assert.assertTrue(scheduleInfoList.stream().anyMatch(s -> s.jobId.equals("job3")));
+        Assert.assertTrue(scheduleInfoList.stream().anyMatch(s -> s.jobId.equals("job4")));
     }
 }
