@@ -16,6 +16,7 @@
 package org.finos.legend.depot.store.admin.services.schedules;
 
 import org.eclipse.collections.api.factory.Maps;
+import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.map.mutable.SynchronizedMutableMap;
 import org.eclipse.collections.impl.tuple.Tuples;

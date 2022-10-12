@@ -63,6 +63,7 @@ public class MavenArtifactRepository implements ArtifactRepository
     private static final String GROUP = "group";
     private static final String ARTIFACT = "artifact";
     private static final String ALL_VERSIONS_SCOPE = ":[0.0,)";
+    public static final String SEPARATOR = "-";
     private final MavenXpp3Reader mavenReader = new MavenXpp3Reader();
     private final String settingsLocation;
     private String localRepository;
@@ -151,22 +152,22 @@ public class MavenArtifactRepository implements ArtifactRepository
     @Override
     public List<File> findFiles(ArtifactType type, String group, String artifactId, String version)
     {
-        LOGGER.info("resolving {} for {}:{}-{}", type, group, artifactId, version);
-        List<String> artifacts = getModulesFromPOM(type, group, artifactId, version);
+        LOGGER.info("resolving files for [{}] artifacts [{}{}{}]", type, group, artifactId, version);
+        List<String> modulesWithArtifacts = getModulesFromPOM(type, group, artifactId, version);
         List<File> foundFiles = new ArrayList<>();
         try
         {
-            artifacts.forEach(artifact ->
+            modulesWithArtifacts.forEach(artifactModule ->
             {
-                File[] artifactFiles = resolveArtifactFilesFromRepository(group, artifact, version);
+                File[] artifactFiles = resolveArtifactFilesFromRepository(group, artifactModule, version);
                 foundFiles.addAll(Arrays.asList(artifactFiles));
             });
         }
         catch (NoResolvedResultException ex)
         {
-            LOGGER.error("could not resolver {} {} {} {}", group, artifactId, version, ex.getMessage());
+            LOGGER.error("could not resolve file for [{}] artifacts [{}{}{}] : [{}]", type, group, artifactId, version, ex.getMessage());
         }
-        LOGGER.info("found {} files for {}:{}-{} : {}", type, group, artifactId, version, foundFiles.size());
+        LOGGER.info("found [{}] files for [{}] artifacts [{}{}{}]",foundFiles.size(), type, group, artifactId, version);
         return foundFiles;
     }
 
@@ -175,19 +176,19 @@ public class MavenArtifactRepository implements ArtifactRepository
     public List<File> findDependenciesFiles(ArtifactType type, String group, String artifact, String version)
     {
         List<File> files = new ArrayList<>();
-        findDependencies(type, group, artifact, version).forEach(dep ->
+        findDependenciesByArtifactType(type, group, artifact, version).forEach(dep ->
                 files.addAll(Arrays.asList(resolveArtifactFilesFromRepository(group, dep.getArtifactId(), dep.getVersion()))));
         return files;
     }
 
     @Override
-    public Set<ArtifactDependency> findDependencies(ArtifactType type, String groupId, String artifactId, String versionId)
+    public Set<ArtifactDependency> findDependenciesByArtifactType(ArtifactType type, String groupId, String artifactId, String versionId)
     {
-
         List<Dependency> dependencies = new ArrayList<>();
+        String moduleName = artifactId + SEPARATOR + type.getModuleName();
         getModulesFromPOM(type, groupId, artifactId, versionId)
                 .stream()
-                .filter(mod -> mod.endsWith(type.getModuleName()))
+                .filter(mod -> mod.equals(moduleName))
                 .forEach(mod -> dependencies.addAll(getPOM(groupId, mod, versionId).getDependencies()));
         return dependencies.stream().filter(dep -> dep.getArtifactId().endsWith(type.getModuleName())).map(dep -> new ArtifactDependency(dep.getGroupId(), dep.getArtifactId(), dep.getVersion())).collect(Collectors.toSet());
     }
@@ -196,10 +197,10 @@ public class MavenArtifactRepository implements ArtifactRepository
     public Set<ArtifactDependency> findDependencies(String groupId, String artifactId, String versionId)
     {
         Set<ArtifactDependency> dependencies = new HashSet<>();
-        List<String> modules = getModulesFromPOM(ArtifactType.ENTITIES, groupId, artifactId, versionId);
-        if (!modules.isEmpty())
+        List<String> modulesWithEntities = getModulesFromPOM(ArtifactType.ENTITIES, groupId, artifactId, versionId);
+        if (!modulesWithEntities.isEmpty())
         {
-            modules.forEach(module ->
+            modulesWithEntities.forEach(module ->
             {
                 Model modulePom = getPOM(groupId, module, versionId);
                 List<Dependency> moduleDependencies = modulePom.getDependencies().stream().filter(dep -> dep.getVersion() != null).collect(Collectors.toList());
@@ -231,20 +232,20 @@ public class MavenArtifactRepository implements ArtifactRepository
     }
 
     @Override
-    public List<String> getModulesFromPOM(ArtifactType type, String group, String artifact, String version)
+    public List<String> getModulesFromPOM(ArtifactType type, String groupId, String artifactId, String versionId)
     {
-        LOGGER.info("trying to resolveArtifacts pom file {}.{}-{}", group, artifact, version);
-        Model model = getPOM(group, artifact, version);
+        LOGGER.info("resolving module [{}] artifacts [{}{}{}] from pom",type,groupId, artifactId, versionId);
+        Model model = getPOM(groupId, artifactId, versionId);
         List<String> modules = new ArrayList<>();
         if (model.getModules().isEmpty())
         {
-            modules.add(artifact);
+            modules.add(artifactId);
         }
         else
         {
-            modules.addAll(model.getModules().stream().filter(mod -> mod.endsWith(type.getModuleName())).collect(Collectors.toList()));
+            modules.addAll(model.getModules().stream().filter(moduleName -> moduleName.equals(artifactId + SEPARATOR + type.getModuleName())).collect(Collectors.toList()));
         }
-        LOGGER.info("modules {}", modules);
+        LOGGER.info("found {[}] modules [{}] artifacts [{}{}{}]  from pom",modules,type,groupId, artifactId, versionId);
         return modules;
     }
 
@@ -300,7 +301,7 @@ public class MavenArtifactRepository implements ArtifactRepository
         {
             String groupArtifactVersionRange = gavCoordinates(group, artifact, scope);
             final MavenVersionRangeResult versionRangeResult = getResolver().resolveVersionRange(groupArtifactVersionRange);
-            LOGGER.info("resolveVersionsFromRepository {}:{}-{} , Version data: [{}]", group, artifact, scope, versionRangeResult);
+            LOGGER.info("resolveVersionsFromRepository {}{}{} , Version data: [{}]", group, artifact, scope, versionRangeResult);
             for (MavenCoordinate coordinate : versionRangeResult.getVersions())
             {
                 if (VersionValidator.isValidReleaseVersion(coordinate.getVersion()))

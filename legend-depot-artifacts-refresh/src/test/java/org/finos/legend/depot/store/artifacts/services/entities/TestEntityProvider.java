@@ -57,7 +57,7 @@ public class TestEntityProvider
 
         List<Entity> entities = artifactProvider.loadArtifacts(getFiles(TEST_GROUP_ID, "test", "2.0.0"));
         Assert.assertNotNull(entities);
-        Assert.assertEquals(18, entities.size());
+        Assert.assertEquals(9, entities.size());
 
     }
 
@@ -65,11 +65,19 @@ public class TestEntityProvider
     @Test
     public void canResolveDependencies()
     {
-        Set<ArtifactDependency> dependencies = repository.findDependencies(ArtifactType.ENTITIES, TEST_GROUP_ID, "test", "2.0.0");
-        Assert.assertEquals(2, dependencies.size());
+        Set<ArtifactDependency> dependencies = repository.findDependenciesByArtifactType(ArtifactType.ENTITIES, TEST_GROUP_ID, "test", "2.0.0");
+        Assert.assertEquals(1, dependencies.size());
         List<File> files = repository.findDependenciesFiles(ArtifactType.ENTITIES, TEST_GROUP_ID, "test", "2.0.0");
         Assert.assertNotNull(files);
-        Assert.assertEquals(2, files.size());
+        Assert.assertEquals(1, files.size());
+
+        Set<ArtifactDependency> dependenciesForVersionedEntities = repository.findDependenciesByArtifactType(ArtifactType.VERSIONED_ENTITIES, TEST_GROUP_ID, "test", "2.0.0");
+        Assert.assertEquals(1, dependenciesForVersionedEntities.size());
+        List<File> versionedEntitiesFiles = repository.findDependenciesFiles(ArtifactType.ENTITIES, TEST_GROUP_ID, "test", "2.0.0");
+        Assert.assertNotNull(versionedEntitiesFiles);
+        Assert.assertEquals(1, versionedEntitiesFiles.size());
+
+
     }
 
 }

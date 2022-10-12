@@ -39,7 +39,7 @@ public interface ArtifactRepository
 
     List<File> findDependenciesFiles(ArtifactType type, String group, String artifact, String version);
 
-    Set<ArtifactDependency> findDependencies(ArtifactType type, String groupId, String artifactId, String versionId);
+    Set<ArtifactDependency> findDependenciesByArtifactType(ArtifactType type, String groupId, String artifactId, String versionId);
 
     Set<ArtifactDependency> findDependencies(String groupId, String artifactId, String versionId);
 

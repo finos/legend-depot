@@ -13,25 +13,8 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.artifacts.api;
+package org.finos.legend.depot.store.artifacts.api.entities;
 
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-
-import java.io.File;
-import java.util.List;
-import java.util.stream.Stream;
-
-public interface ArtifactLoader<T>
+public interface VersionedEntitiesArtifactsHandler extends EntitiesArtifactsHandler
 {
-    ArtifactType getType();
-
-    boolean matchesArtifactType(File file);
-
-    default List<T> loadArtifacts(List<File> files)
-    {
-        return loadArtifactsForType(files.stream().filter(file -> matchesArtifactType(file)));
-    }
-
-    List<T> loadArtifactsForType(Stream<File> files);
-
 }

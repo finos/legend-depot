@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.domain.entity.StoredEntity.VERSION_PATTERN;
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 
@@ -142,27 +141,5 @@ public class TestQueryVersions extends TestStoreMongo
         Assert.assertTrue(allPaths.stream().noneMatch(ent -> ent.contains("v2_2_0")));
     }
 
-    @Test
-    public void versioned()
-    {
-
-        Pattern p = VERSION_PATTERN;
-        Assert.assertFalse(p.matcher("sample::mapping::ProductToProductMapping").reset().find());
-
-        Assert.assertFalse(p.matcher("sample::mapping::vendors::ProductToProductMapping").reset().find());
-
-        Assert.assertTrue(p.matcher("sample::products::v0_3_4::product::Mapping").reset().find());
-
-        Assert.assertTrue(p.matcher("sample::products::vX_X_X::product::Mapping").reset().find());
-
-        Assert.assertTrue(p.matcher("sample::products::vendors::v1_3_4::sample::MappingOne").reset().find());
-
-        Assert.assertTrue(p.matcher("sample::products::vendors::v1_33_4::products:ClassOne").reset().find());
-
-        Assert.assertTrue(p.matcher("sample::products::vendors::v0_42_3::products::ClassTwo").reset().find());
-
-        Assert.assertTrue(p.matcher("sample::products::vendors::v1_33_4::products::ClassThree").find());
-
-    }
 
 }
