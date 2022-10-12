@@ -22,7 +22,7 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import java.io.File;
 import java.util.List;
 
-public interface ProjectVersionArtifactsHandler
+public interface ProjectArtifactsHandler
 {
 
     MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId, List<File> files);

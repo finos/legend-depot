@@ -67,7 +67,6 @@ import static com.mongodb.client.model.Filters.regex;
 import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.currentDate;
 import static com.mongodb.client.model.Updates.set;
-import static org.finos.legend.depot.domain.entity.StoredEntity.VERSION_PATTERN;
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, UpdateEntities
@@ -161,7 +160,7 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
                 set(GROUP_ID, entity.getGroupId()),
                 set(ARTIFACT_ID, entity.getArtifactId()),
                 set(VERSION_ID, entity.getVersionId()),
-                set(VERSIONED_ENTITY, VERSION_PATTERN.matcher(entity.getEntity().getPath()).reset().find()),
+                set(VERSIONED_ENTITY, entity.isVersionedEntity()),
                 set(ENTITY_PATH, entity.getEntity().getPath()),
                 set(ENTITY_CLASSIFIER_PATH, entity.getEntity().getClassifierPath()),
                 set(ENTITY_CONTENT, entity.getEntity().getContent()),
@@ -350,7 +349,7 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         query.forEach((Consumer<Document>)doc ->
         {
             Map<String, Object> entity = (Map<String, Object>)doc.get(ENTITY);
-            result.add(new StoredEntityOverview(doc.getString(GROUP_ID), doc.getString(ARTIFACT_ID), doc.getString(VERSION_ID), (String)entity.get(PATH), (String)entity.get(CLASSIFIER_PATH)));
+            result.add(new StoredEntityOverview(doc.getString(GROUP_ID), doc.getString(ARTIFACT_ID), doc.getString(VERSION_ID), doc.getBoolean(VERSIONED_ENTITY),(String)entity.get(PATH), (String)entity.get(CLASSIFIER_PATH)));
         });
         return result;
     }
@@ -415,9 +414,9 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
 
 
     @Override
-    public StoreOperationResult delete(String groupId, String artifactId, String versionId)
+    public StoreOperationResult delete(String groupId, String artifactId, String versionId,boolean versioned)
     {
-        Bson filter = getArtifactAndVersionFilter(groupId, artifactId, versionId);
+        Bson filter = and(eq(VERSIONED_ENTITY, versioned),getArtifactAndVersionFilter(groupId, artifactId, versionId));
         DeleteResult result = getCollection().deleteMany(filter);
         return new StoreOperationResult(0, 0, result.getDeletedCount(), Collections.emptyList());
     }

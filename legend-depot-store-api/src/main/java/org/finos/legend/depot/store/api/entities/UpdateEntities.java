@@ -31,11 +31,11 @@ public interface UpdateEntities extends Entities
 
     StoreOperationResult deleteAll(String groupId, String artifactId);
 
-    StoreOperationResult delete(String groupId, String artifactId, String versionId);
+    StoreOperationResult delete(String groupId, String artifactId, String versionId,boolean versioned);
 
-    default void deleteLatest(String groupId, String artifactId)
+    default void deleteLatest(String groupId, String artifactId,boolean versioned)
     {
-        delete(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT);
+        delete(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT,versioned);
     }
 
     List<StoredEntity> getStoredEntities(String groupId, String artifactId);

@@ -15,46 +15,32 @@
 
 package org.finos.legend.depot.store.artifacts.services.entities;
 
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectData;
-import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
-import org.finos.legend.depot.store.artifacts.api.entities.EntitiesArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
+import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntitiesArtifactsHandler;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import javax.inject.Inject;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EntitiesHandlerImpl extends AbstractEntityRefreshHandlerImpl implements EntitiesArtifactsHandler
+public class VersionedEntitiesHandlerImpl extends EntitiesHandlerImpl implements VersionedEntitiesArtifactsHandler
 {
     @Inject
-    public EntitiesHandlerImpl(ManageEntitiesService entitiesService, EntityArtifactsProvider artifactProvider)
+    public VersionedEntitiesHandlerImpl(ManageEntitiesService entitiesService, EntityArtifactsProvider artifactProvider)
     {
         super(entitiesService, artifactProvider);
     }
 
     @Override
-    public MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId, List<File> files)
-    {
-        return super.refreshVersionArtifacts(project, versionId, files);
-    }
-
-    @Override
-    public MetadataEventResponse refreshProjectRevisionArtifacts(ProjectData project, List<File> files)
-    {
-        return super.refreshVersionArtifacts(project, VersionValidator.MASTER_SNAPSHOT, files);
-    }
-
-    @Override
     public void delete(String groupId, String artifactId, String versionId)
     {
-       super.delete(groupId,artifactId,versionId,false);
+        super.delete(groupId, artifactId, versionId, true);
     }
+
 
     @Override
     List<StoredEntity> transformVersionedEntities(ProjectData project, String versionId, List<Entity> entityList)
@@ -63,7 +49,7 @@ public class EntitiesHandlerImpl extends AbstractEntityRefreshHandlerImpl implem
         for (Entity entity : entityList)
         {
             EntityDefinition entityDefinition = new EntityDefinition(entity.getPath(), entity.getClassifierPath(), entity.getContent());
-            StoredEntity storedEntity = new StoredEntity(project.getGroupId(), project.getArtifactId(), versionId, false,entityDefinition);
+            StoredEntity storedEntity = new StoredEntity(project.getGroupId(), project.getArtifactId(), versionId, true,entityDefinition);
             versionedEntities.add(storedEntity);
         }
         return versionedEntities;

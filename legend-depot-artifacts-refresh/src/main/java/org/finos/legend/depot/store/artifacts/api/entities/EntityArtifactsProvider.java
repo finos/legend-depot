@@ -20,5 +20,4 @@ import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 public interface EntityArtifactsProvider extends ArtifactLoader<Entity>
 {
-
 }

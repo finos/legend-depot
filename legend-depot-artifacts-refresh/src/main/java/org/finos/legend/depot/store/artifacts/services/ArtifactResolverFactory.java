@@ -16,7 +16,7 @@
 package org.finos.legend.depot.store.artifacts.services;
 
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.store.artifacts.api.ProjectVersionArtifactsHandler;
+import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 
 import javax.inject.Singleton;
 import java.util.EnumMap;
@@ -25,19 +25,19 @@ import java.util.EnumMap;
 public class ArtifactResolverFactory
 {
     private static final ArtifactResolverFactory instance = new ArtifactResolverFactory();
-    private final EnumMap<ArtifactType, ProjectVersionArtifactsHandler> versionsProviders = new EnumMap<>(ArtifactType.class);
+    private final EnumMap<ArtifactType, ProjectArtifactsHandler> artifactHandlers = new EnumMap<>(ArtifactType.class);
 
     private ArtifactResolverFactory()
     {
     }
 
-    public static void registerVersionUpdater(ArtifactType artifactType, ProjectVersionArtifactsHandler provider)
+    public static void registerArtifactHandler(ArtifactType artifactType, ProjectArtifactsHandler provider)
     {
-        instance.versionsProviders.put(artifactType, provider);
+        instance.artifactHandlers.put(artifactType, provider);
     }
 
-    public static ProjectVersionArtifactsHandler getVersionRefresher(ArtifactType artifactType)
+    public static ProjectArtifactsHandler getArtifactHandler(ArtifactType artifactType)
     {
-        return instance.versionsProviders.get(artifactType);
+        return instance.artifactHandlers.get(artifactType);
     }
 }

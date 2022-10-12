@@ -15,9 +15,9 @@
 
 package org.finos.legend.depot.store.artifacts.api.generation.file;
 
-import org.finos.legend.depot.domain.generation.file.FileGeneration;
-import org.finos.legend.depot.store.artifacts.api.ArtifactLoader;
+import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 
-public interface FileGenerationsProvider extends ArtifactLoader<FileGeneration>
+public interface FileGenerationsArtifactsHandler extends ProjectArtifactsHandler
 {
+
 }

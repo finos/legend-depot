@@ -17,7 +17,7 @@ package org.finos.legend.depot.artifacts.repository.domain;
 
 public enum ArtifactType
 {
-    ENTITIES("entities"), FILE_GENERATIONS("file-generation");
+    ENTITIES("entities"), VERSIONED_ENTITIES("versioned-entities"),FILE_GENERATIONS("file-generation");
     private final String moduleName;
 
     ArtifactType(String moduleName)

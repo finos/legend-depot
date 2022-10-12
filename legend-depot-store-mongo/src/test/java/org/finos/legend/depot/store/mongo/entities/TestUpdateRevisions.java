@@ -108,7 +108,7 @@ public class TestUpdateRevisions extends TestStoreMongo
         Assert.assertEquals(changes, ((Map)doc.get(EntitiesMongo.ENTITY)).get("classifierPath"));
         Assert.assertEquals("changed::change", ((Map)((Map)doc.get(EntitiesMongo.ENTITY)).get("content")).get("package"));
 
-        revisionsMongo.deleteLatest(entity.getGroupId(),entity.getArtifactId());
+        revisionsMongo.deleteLatest(entity.getGroupId(),entity.getArtifactId(),entity.isVersionedEntity());
 
         Assert.assertTrue(revisionsMongo.getStoredEntities(entity.getGroupId(),entity.getArtifactId()).isEmpty());
 
@@ -147,7 +147,9 @@ public class TestUpdateRevisions extends TestStoreMongo
         setUpEntitiesDataFromFile(ENTITIES_FILE);
         long count = revisionsMongo.getRevisionEntityCount("examples.metadata","test");
         Assert.assertEquals(8, count);
-        revisionsMongo.deleteLatest("examples.metadata","test");
+        revisionsMongo.deleteLatest("examples.metadata","test",false);
+        Assert.assertEquals(4, revisionsMongo.getRevisionEntityCount("examples.metadata","test"));
+        revisionsMongo.deleteLatest("examples.metadata","test",true);
         Assert.assertEquals(0, revisionsMongo.getRevisionEntityCount("examples.metadata","test"));
     }
 }
