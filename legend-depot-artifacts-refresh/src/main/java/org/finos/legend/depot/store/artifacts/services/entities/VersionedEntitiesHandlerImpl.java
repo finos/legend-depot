@@ -21,6 +21,7 @@ import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntitiesArtifactsHandler;
+import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntityArtifactsProvider;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import javax.inject.Inject;
@@ -30,9 +31,9 @@ import java.util.List;
 public class VersionedEntitiesHandlerImpl extends EntitiesHandlerImpl implements VersionedEntitiesArtifactsHandler
 {
     @Inject
-    public VersionedEntitiesHandlerImpl(ManageEntitiesService entitiesService, EntityArtifactsProvider artifactProvider)
+    public VersionedEntitiesHandlerImpl(ManageEntitiesService entitiesService, VersionedEntityArtifactsProvider artifactProvider)
     {
-        super(entitiesService, artifactProvider);
+        super(entitiesService, (EntityArtifactsProvider) artifactProvider);
     }
 
     @Override
