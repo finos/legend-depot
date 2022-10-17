@@ -131,19 +131,12 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 
     }
 
-
-    private void decorateSpanWithProjectInfo(ProjectData projectConfiguration)
+    private void decorateSpanWithVersionInfo(String groupId,String artifactId, String versionId)
     {
-        decorateSpanWithProjectInfo(projectConfiguration.getProjectId(), projectConfiguration.getGroupId(),
-                projectConfiguration.getArtifactId());
-    }
-
-    private void decorateSpanWithProjectInfo(String projectId, String groupId, String artifact)
-    {
-        Map<String, String> tags = new HashMap<>();
-        tags.put("projectId", projectId);
+        Map<String, String> tags = new HashMap<>();  
         tags.put("groupId", groupId);
-        tags.put("artifactId", artifact);
+        tags.put("artifactId", artifactId);
+        tags.put("versionId", versionId);
         TracerFactory.get().decorateSpan(tags);
     }
 
@@ -256,7 +249,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     {
         return TracerFactory.get().executeWithTrace(label, () ->
         {
-            decorateSpanWithProjectInfo(groupId, artifactId, version);
+            decorateSpanWithVersionInfo(groupId, artifactId, version);
             return handleRefresh(type, groupId, artifactId, version, functionToExecute);
         });
     }
@@ -344,7 +337,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 () ->
                 {
                     MetadataEventResponse response = new MetadataEventResponse();
-                    decorateSpanWithProjectInfo(project);
+                    decorateSpanWithVersionInfo(project.getGroupId(),project.getArtifactId(),ALL);
                     String projectArtifacts = String.format("%s,%s,%s", project.getProjectId(), project.getGroupId(), project.getArtifactId());
                     if (repository.areValidCoordinates(project.getGroupId(), project.getArtifactId()))
                     {
