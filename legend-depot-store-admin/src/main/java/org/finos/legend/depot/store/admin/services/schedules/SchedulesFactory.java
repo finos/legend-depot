@@ -38,7 +38,6 @@ import java.util.function.Supplier;
 public final class SchedulesFactory
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SchedulesFactory.class);
-    public static final long ONE_HOUR   = 60 * 60 * 1000L;
     final SynchronizedMutableMap<String, Pair<TimerTask, ScheduleInfo>> schedulesBuffer;
     final Timer timer = new Timer();
     private final ManageSchedulesService manageSchedulesService;
