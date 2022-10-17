@@ -31,6 +31,11 @@ public interface Projects
 
     List<ProjectData> getAll();
 
+    /**
+     * NOTE: page starting from 1
+     */
+    List<ProjectData> getProjects(int page, int pageSize);
+
     List<ProjectData> findByProjectId(String projectId);
 
     Optional<ProjectData> find(String groupId, String artifactId);
