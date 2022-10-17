@@ -96,15 +96,15 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     }
 
     @Override
-    public List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
+    public List<StoredEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary, boolean versioned)
     {
-        return entities.findLatestEntitiesByClassifier(classifier, summary, versioned);
+        return entities.findLatestEntitiesByClassifier(classifier, search, limit, summary, versioned);
     }
 
     @Override
-    public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
+    public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary, boolean versioned)
     {
-        return entities.findReleasedEntitiesByClassifier(classifier, summary, versioned);
+        return entities.findReleasedEntitiesByClassifier(classifier, search, projectVersions, limit, summary, versioned);
     }
 
     @Override

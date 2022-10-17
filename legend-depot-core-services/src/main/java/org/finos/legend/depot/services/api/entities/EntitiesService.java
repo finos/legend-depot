@@ -18,6 +18,7 @@ package org.finos.legend.depot.services.api.entities;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.version.Scope;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import java.util.Arrays;
@@ -63,7 +64,7 @@ public interface EntitiesService
         return getDependenciesEntities(groupId, artifactId, MASTER_SNAPSHOT, versioned, transitive, includeOrigin);
     }
 
-    List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary, boolean versioned);
+    List<StoredEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary, boolean versioned);
 
-    List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary, boolean versioned);
+    List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary, boolean versioned);
 }
