@@ -86,7 +86,6 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     public static final String PATH = "path";
     public static final String ENTITY_PACKAGE = "entity.content.package";
     public static final String VERSIONED_ENTITY = "versionedEntity";
-    private static final int MAX_NUMBER_ENTITIES = 100;
 
 
     public final boolean transactionMode;
@@ -373,7 +372,11 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         {
             filters.add(Filters.regex(ENTITY_PATH, Pattern.quote(search), "i"));
         }
-        return transform(summary, executeFind(and(filters)).limit(Math.min(MAX_NUMBER_ENTITIES, limit == null ? Integer.MAX_VALUE : limit)));
+        if (limit != null)
+        {
+            return transform(summary, executeFind(and(filters)).limit(limit));
+        }
+        return transform(summary, executeFind(and(filters)));
     }
 
     @Override
@@ -387,7 +390,11 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         {
             filters.add(Filters.regex(ENTITY_PATH, Pattern.quote(search), "i"));
         }
-        return transform(summary, executeFind(and(filters)).limit(Math.min(MAX_NUMBER_ENTITIES, limit == null ? Integer.MAX_VALUE : limit)));
+        if (limit != null)
+        {
+            return transform(summary, executeFind(and(filters)).limit(limit));
+        }
+        return transform(summary, executeFind(and(filters)));
     }
 
     public List<StoredEntity> findEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
