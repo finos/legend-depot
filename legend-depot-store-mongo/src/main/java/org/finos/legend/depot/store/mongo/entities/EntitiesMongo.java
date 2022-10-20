@@ -397,6 +397,18 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         return transform(summary, executeFind(and(filters)));
     }
 
+    @Override
+    public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary, boolean versionedEntities)
+    {
+        return transform(summary, executeFind(and(and(eq(ENTITY_CLASSIFIER_PATH, classifier), eq(VERSIONED_ENTITY, versionedEntities)), ne(VERSION_ID, MASTER_SNAPSHOT))));
+    }
+
+    @Override
+    public List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
+    {
+        return transform(summary, executeFind(and(and(eq(ENTITY_CLASSIFIER_PATH, classifier), eq(VERSION_ID, MASTER_SNAPSHOT)), eq(VERSIONED_ENTITY, versioned))));
+    }
+
     public List<StoredEntity> findEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
     {
         return transform(summary, executeFind(and(eq(ENTITY_CLASSIFIER_PATH, classifier), eq(VERSIONED_ENTITY, versioned))));

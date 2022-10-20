@@ -67,4 +67,8 @@ public interface EntitiesService
     List<StoredEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary, boolean versioned);
 
     List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary, boolean versioned);
+
+    List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary, boolean versioned);
+
+    List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary, boolean versioned);
 }

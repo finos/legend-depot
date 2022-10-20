@@ -22,5 +22,5 @@ import java.util.List;
 
 public interface EntityClassifierService
 {
-    List<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Scope scope, Integer limit);
+    List<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit, Scope scope, boolean summary, boolean versioned);
 }

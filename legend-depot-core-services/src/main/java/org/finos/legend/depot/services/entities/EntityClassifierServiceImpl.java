@@ -53,11 +53,11 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
     }
 
     @Override
-    public List<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Scope scope, Integer limit)
+    public List<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit, Scope scope, boolean summary, boolean versioned)
     {
         if (Scope.SNAPSHOT.equals(scope))
         {
-            return this.entities.findLatestEntitiesByClassifier(classifierPath, search, limit, false, false);
+            return this.entities.findLatestEntitiesByClassifier(classifierPath, search, limit, summary, versioned);
         }
         List<StoredEntity> result = new ArrayList<>();
         int PAGE_SIZE = 100;
@@ -65,7 +65,7 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
         List<ProjectVersion> projectVersions = this.getProjectsInfo(currentPage, PAGE_SIZE);
         while (!projectVersions.isEmpty())
         {
-            List<StoredEntity> entities = this.entities.findReleasedEntitiesByClassifier(classifierPath, search, projectVersions, limit, false, false);
+            List<StoredEntity> entities = this.entities.findReleasedEntitiesByClassifier(classifierPath, search, projectVersions, limit, summary, versioned);
             result.addAll(entities);
             if (limit != null && result.size() >= limit)
             {

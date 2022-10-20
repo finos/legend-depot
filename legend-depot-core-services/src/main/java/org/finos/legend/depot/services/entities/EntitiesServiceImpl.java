@@ -108,6 +108,18 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     }
 
     @Override
+    public List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
+    {
+        return entities.findLatestEntitiesByClassifier(classifier, summary, versioned);
+    }
+
+    @Override
+    public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
+    {
+        return entities.findReleasedEntitiesByClassifier(classifier, summary, versioned);
+    }
+
+    @Override
     public MetadataEventResponse delete(String groupId, String artifactId, String versionId,boolean versioned)
     {
         return new MetadataEventResponse().combine(entities.delete(groupId, artifactId, versionId,versioned));
