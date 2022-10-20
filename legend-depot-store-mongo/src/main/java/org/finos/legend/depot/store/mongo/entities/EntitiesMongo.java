@@ -27,7 +27,6 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -35,11 +34,9 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.depot.domain.EntityValidator;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.entity.StoredEntityOverview;
-import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.status.StoreOperationResult;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.entities.Entities;
@@ -59,13 +56,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.ne;
 import static com.mongodb.client.model.Filters.regex;
@@ -343,6 +338,7 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         return entities.collect(Collectors.toList());
     }
 
+
     protected List<StoredEntity> transform(boolean summary, FindIterable query)
     {
         if (!summary)
@@ -350,56 +346,30 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
             return convert(query);
         }
         List<StoredEntity> result = new ArrayList<>();
-        query.forEach((Consumer<Document>) doc ->
+        query.forEach((Consumer<Document>)doc ->
         {
-            Map<String, Object> entity = (Map<String, Object>) doc.get(ENTITY);
-            result.add(new StoredEntityOverview(doc.getString(GROUP_ID), doc.getString(ARTIFACT_ID), doc.getString(VERSION_ID), doc.getBoolean(VERSIONED_ENTITY), (String) entity.get(PATH), (String) entity.get(CLASSIFIER_PATH)));
+            Map<String, Object> entity = (Map<String, Object>)doc.get(ENTITY);
+            result.add(new StoredEntityOverview(doc.getString(GROUP_ID), doc.getString(ARTIFACT_ID), doc.getString(VERSION_ID), doc.getBoolean(VERSIONED_ENTITY),(String)entity.get(PATH), (String)entity.get(CLASSIFIER_PATH)));
         });
         return result;
     }
 
     @Override
-    public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary, boolean versioned)
+    public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary, boolean versionedEntities)
     {
-        List<Bson> filters = new ArrayList<>();
-        filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
-        filters.add(eq(VERSIONED_ENTITY, versioned));
-        if (projectVersions != null && !projectVersions.isEmpty())
-        {
-            filters.add(or(ListIterate.collect(projectVersions, projectVersion -> getArtifactAndVersionFilter(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()))));
-        }
-        if (search != null)
-        {
-            filters.add(Filters.regex(ENTITY_PATH, Pattern.quote(search), "i"));
-        }
-        if (limit != null)
-        {
-            return transform(summary, executeFind(and(filters)).limit(limit));
-        }
-        return transform(summary, executeFind(and(filters)));
+        return transform(summary, executeFind(and(and(eq(ENTITY_CLASSIFIER_PATH, classifier), eq(VERSIONED_ENTITY, versionedEntities)), ne(VERSION_ID, MASTER_SNAPSHOT))));
     }
 
-    @Override
-    public List<StoredEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary, boolean versioned)
-    {
-        List<Bson> filters = new ArrayList<>();
-        filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
-        filters.add(eq(VERSIONED_ENTITY, versioned));
-        filters.add(eq(VERSION_ID, MASTER_SNAPSHOT));
-        if (search != null)
-        {
-            filters.add(Filters.regex(ENTITY_PATH, Pattern.quote(search), "i"));
-        }
-        if (limit != null)
-        {
-            return transform(summary, executeFind(and(filters)).limit(limit));
-        }
-        return transform(summary, executeFind(and(filters)));
-    }
 
     public List<StoredEntity> findEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
     {
         return transform(summary, executeFind(and(eq(ENTITY_CLASSIFIER_PATH, classifier), eq(VERSIONED_ENTITY, versioned))));
+    }
+
+    @Override
+    public List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
+    {
+        return transform(summary, executeFind(and(and(eq(ENTITY_CLASSIFIER_PATH, classifier), eq(VERSION_ID, MASTER_SNAPSHOT)), eq(VERSIONED_ENTITY, versioned))));
     }
 
     @Override
@@ -444,9 +414,9 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
 
 
     @Override
-    public StoreOperationResult delete(String groupId, String artifactId, String versionId, boolean versioned)
+    public StoreOperationResult delete(String groupId, String artifactId, String versionId,boolean versioned)
     {
-        Bson filter = and(eq(VERSIONED_ENTITY, versioned), getArtifactAndVersionFilter(groupId, artifactId, versionId));
+        Bson filter = and(eq(VERSIONED_ENTITY, versioned),getArtifactAndVersionFilter(groupId, artifactId, versionId));
         DeleteResult result = getCollection().deleteMany(filter);
         return new StoreOperationResult(0, 0, result.getDeletedCount(), Collections.emptyList());
     }
@@ -497,10 +467,10 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
                 Projections.include(GROUP_ID, ARTIFACT_ID),
                 Projections.computed("coordinate", new BasicDBObject("$concat", concat))));
 
-        getCollection().aggregate(Arrays.asList(allCoordinates, group("$coordinate"))).forEach((Consumer<Document>) document ->
+        getCollection().aggregate(Arrays.asList(allCoordinates, group("$coordinate"))).forEach((Consumer<Document>)document ->
                 {
-                    StringTokenizer tokenizer = new StringTokenizer(document.getString("_id"), ":");
-                    result.add(Tuples.pair(tokenizer.nextToken(), tokenizer.nextToken()));
+                    StringTokenizer tokenizer = new StringTokenizer(document.getString("_id"),":");
+                    result.add(Tuples.pair(tokenizer.nextToken(),tokenizer.nextToken()));
                 }
         );
         return result;

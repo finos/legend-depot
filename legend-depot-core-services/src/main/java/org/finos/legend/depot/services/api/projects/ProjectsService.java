@@ -28,12 +28,8 @@ import java.util.Set;
 
 public interface ProjectsService
 {
-    List<ProjectData> getAll();
 
-    /**
-     * NOTE: page starting from 1
-     */
-    List<ProjectData> getProjects(int page, int pageSize);
+    List<ProjectData> getAll();
 
     List<ProjectData> findByProjectId(String projectId);
 

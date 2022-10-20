@@ -147,13 +147,6 @@ public abstract class BaseMongo<T extends HasIdentifier>
         return result;
     }
 
-    public List<T> getStoredEntitiesByPage(int page, int pageSize)
-    {
-        List<T> result = new ArrayList<>();
-        getCollection().find().skip(Math.max(page - 1, 0) * pageSize).limit(pageSize).forEach((Consumer<Document>)doc -> result.add(convert(doc, documentClass)));
-        return result;
-    }
-
     public <T> T convert(Document document, Class<T> clazz)
     {
         if (document == null)

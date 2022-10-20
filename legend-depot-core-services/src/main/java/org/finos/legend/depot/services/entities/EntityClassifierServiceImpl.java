@@ -15,9 +15,8 @@
 
 package org.finos.legend.depot.services.entities;
 
-import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.depot.domain.entity.StoredEntity;
-import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.version.Scope;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
@@ -26,9 +25,11 @@ import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EntityClassifierServiceImpl implements EntityClassifierService
 {
@@ -43,41 +44,40 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
         this.entities = versions;
     }
 
-    private List<ProjectVersion> getProjectsInfo(int page, int pageSize)
-    {
-        return ListIterate.collect(projects.getProjects(page, pageSize), projectData ->
-        {
-            VersionId latestVersion = projectData.getLatestVersion().orElse(null);
-            return new ProjectVersion(projectData.getGroupId(), projectData.getArtifactId(), latestVersion != null ? latestVersion.toVersionIdString() : null);
-        }).select(info -> info.getVersionId() != null);
-    }
-
     @Override
-    public List<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Scope scope, Integer limit)
+    public Set<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Scope scope, Integer limit)
     {
+        Stream<StoredEntity> entities;
         if (Scope.SNAPSHOT.equals(scope))
         {
-            return this.entities.findLatestEntitiesByClassifier(classifierPath, search, limit, false, false);
+            entities = this.entities.findLatestEntitiesByClassifier(classifierPath, false, false).stream();
         }
-        List<StoredEntity> result = new ArrayList<>();
-        int PAGE_SIZE = 100;
-        int currentPage = 1;
-        List<ProjectVersion> projectVersions = this.getProjectsInfo(currentPage, PAGE_SIZE);
-        while (!projectVersions.isEmpty())
+        else
         {
-            List<StoredEntity> entities = this.entities.findReleasedEntitiesByClassifier(classifierPath, search, projectVersions, limit, false, false);
-            result.addAll(entities);
-            if (limit != null && result.size() >= limit)
+            entities = this.entities.findReleasedEntitiesByClassifier(classifierPath, false, false).stream();
+            Map<String, Optional<VersionId>> latestVersions = projects.getAll().stream().collect(Collectors.toMap(k -> k.getGroupId() + ":" + k.getArtifactId(), ProjectData::getLatestVersion));
+
+            LOGGER.info("getting entities by latest version classifier path {} ", classifierPath);
+            entities = entities.filter(ent ->
             {
-                break;
-            }
-            currentPage++;
-            projectVersions = this.getProjectsInfo(currentPage, PAGE_SIZE);
+                Optional<VersionId> version = latestVersions.get(ent.getGroupId() + ":" + ent.getArtifactId());
+                return version.isPresent() && version.get().toVersionIdString().equals(ent.getVersionId());
+            });
         }
+        entities = entities.distinct();
+        LOGGER.info("finished getting entities by classifier path {} ", classifierPath);
+
+        if (search != null)
+        {
+            LOGGER.info("getting entities by search string {} ", search);
+            entities = entities.filter(entity -> entity.getEntity().getPath().contains(search));
+        }
+
         if (limit != null)
         {
-            result = result.stream().limit(limit).collect(Collectors.toList());
+            entities = entities.limit(limit);
         }
-        return result;
+
+        return entities.collect(Collectors.toSet());
     }
 }

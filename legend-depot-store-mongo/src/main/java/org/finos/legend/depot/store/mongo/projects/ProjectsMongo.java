@@ -114,11 +114,6 @@ public class ProjectsMongo extends BaseMongo<ProjectData> implements Projects, U
         return getAllStoredEntities();
     }
 
-    @Override
-    public List<ProjectData> getProjects(int page, int pageSize)
-    {
-        return getStoredEntitiesByPage(page, pageSize);
-    }
 
     @Override
     public Optional<ProjectData> find(String groupId, String artifactId)
