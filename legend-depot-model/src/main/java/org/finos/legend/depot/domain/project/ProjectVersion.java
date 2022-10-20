@@ -40,7 +40,6 @@ public class ProjectVersion extends BaseDomain
         return versionId;
     }
 
-
     @Override
     public boolean equals(Object obj)
     {

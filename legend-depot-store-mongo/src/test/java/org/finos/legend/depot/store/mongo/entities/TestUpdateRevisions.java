@@ -61,7 +61,7 @@ public class TestUpdateRevisions extends TestStoreMongo
     }
 
     @Test
-    public void updatingSameEntityDoesNotCreateAnewONe()
+    public void updatingSameEntityDoesNotCreateANewOne()
     {
         List<StoredEntity> entitiesList = readEntitiesFile(ENTITIES_FILE);
         Assert.assertNotNull(entitiesList);
@@ -101,7 +101,7 @@ public class TestUpdateRevisions extends TestStoreMongo
         StoredEntity updated = new StoredEntity(entity.getGroupId(),entity.getArtifactId(),entity.getVersionId(), entity.isVersionedEntity(), entityDefinition);
         revisionsMongo.newOrUpdate(null, updated);
 
-        Document doc = (Document)revisionsMongo.getCollection().find().iterator().next();
+        Document doc = (Document) revisionsMongo.getCollection().find().iterator().next();
         Assert.assertNotNull(doc);
         
         Assert.assertEquals(entity.getVersionId(), doc.getString(EntitiesMongo.VERSION_ID));
@@ -132,7 +132,7 @@ public class TestUpdateRevisions extends TestStoreMongo
     public void canQueryByClassifier()
     {
         setUpEntitiesDataFromFile(ENTITIES_FILE);
-        List<StoredEntity> entities = revisionsMongo.findLatestEntitiesByClassifier("meta::pure::metamodel::type::Class", true, true);
+        List<StoredEntity> entities = revisionsMongo.findLatestEntitiesByClassifier("meta::pure::metamodel::type::Class", null, null, true, true);
         Assert.assertNotNull(entities);
         Assert.assertEquals(2, entities.size());
         for (StoredEntity entity : entities)

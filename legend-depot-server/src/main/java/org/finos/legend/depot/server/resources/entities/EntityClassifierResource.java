@@ -31,7 +31,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.Set;
+import java.util.List;
 
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_ENTITIES_BY_CLASSIFIER_PATH;
 
@@ -54,11 +54,13 @@ public class EntityClassifierResource extends BaseResource
     // graph built in depot server.
     @ApiOperation(value = GET_ENTITIES_BY_CLASSIFIER_PATH, hidden = true)
     @Produces(MediaType.APPLICATION_JSON)
-    public Set<StoredEntity> getEntities(@PathParam("classifierPath") @ApiParam("The classifier path of the entities") String classifierPath,
-                                         @QueryParam("search") @ApiParam("The search string that the entity path contains") String search,
-                                         @QueryParam("scope") @ApiParam("Whether to return entities for the latest released version or snapshot") @DefaultValue("RELEASES") Scope scope,
-                                         @QueryParam("limit") @ApiParam("Limit the number of entities returned") Integer limit)
+    public List<StoredEntity> getEntities(@PathParam("classifierPath") @ApiParam("The classifier path of the entities") String classifierPath,
+                                          @QueryParam("search") @ApiParam("The search string that the entity path contains") String search,
+                                          @QueryParam("scope") @ApiParam("Whether to return entities for the latest released version or snapshot") @DefaultValue("RELEASES") Scope scope,
+                                          @QueryParam("limit") @ApiParam("Limit the number of entities returned") Integer limit,
+                                          @QueryParam("summary") @DefaultValue("false") @ApiParam("Whether to return the summary view of the ENTITIES or the full entity") boolean summary,
+                                          @QueryParam("versioned") @DefaultValue("false") @ApiParam("Whether to return the ENTITIES with version in entity path") boolean versioned)
     {
-        return handle(GET_ENTITIES_BY_CLASSIFIER_PATH, () -> this.graphService.getEntitiesByClassifierPath(classifierPath, search, scope, limit));
+        return handle(GET_ENTITIES_BY_CLASSIFIER_PATH, () -> this.graphService.getEntitiesByClassifierPath(classifierPath, search, limit, scope, summary, versioned));
     }
 }

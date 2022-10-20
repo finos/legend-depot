@@ -63,6 +63,12 @@ public class ProjectsServiceImpl implements ManageProjectsService
     }
 
     @Override
+    public List<ProjectData> getProjects(int page, int pageSize)
+    {
+        return projects.getProjects(page, pageSize);
+    }
+
+    @Override
     public List<ProjectData> findByProjectId(String id)
     {
         return projects.findByProjectId(id);
