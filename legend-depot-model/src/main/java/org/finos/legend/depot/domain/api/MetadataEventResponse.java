@@ -88,8 +88,11 @@ public class MetadataEventResponse
 
     public MetadataEventResponse combine(MetadataEventResponse eventResponse)
     {
-        this.errors.addAll(eventResponse.getErrors());
-        this.addMessages(eventResponse.getMessages());
+        if (eventResponse != null)
+        {
+            this.errors.addAll(eventResponse.getErrors());
+            this.addMessages(eventResponse.getMessages());
+        }
         return this;
     }
 }

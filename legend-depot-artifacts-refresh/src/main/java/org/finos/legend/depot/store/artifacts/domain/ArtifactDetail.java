@@ -15,19 +15,13 @@
 
 package org.finos.legend.depot.store.artifacts.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.finos.legend.depot.domain.HasIdentifier;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ArtifactDetail implements HasIdentifier
 {
-
-    public static final String SEPARATOR = "::";
-    private String id;
-    private String artifactType;
-    private String groupId;
-    private String artifactId;
-    private String versionId;
     private String checkSum;
     private String path;
 
@@ -41,71 +35,6 @@ public class ArtifactDetail implements HasIdentifier
         this.checkSum = checkSum;
     }
 
-    public ArtifactDetail(String type, String group, String artifact, String version, String path)
-    {
-        this.artifactType = type;
-        this.groupId = group;
-        this.artifactId = artifact;
-        this.versionId = version;
-        this.path = path;
-    }
-
-    public static String getGavCoordinates(String group, String artifact, String version)
-    {
-        return group + SEPARATOR + artifact + SEPARATOR + version;
-    }
-
-    @Override
-    public String getId()
-    {
-        return this.id;
-    }
-
-    public void setId(String id)
-    {
-        this.id = id;
-    }
-
-    public String getArtifactType()
-    {
-        return artifactType;
-    }
-
-    public void setArtifactType(String artifactType)
-    {
-        this.artifactType = artifactType;
-    }
-
-    public String getGroupId()
-    {
-        return groupId;
-    }
-
-    public void setGroupId(String groupId)
-    {
-        this.groupId = groupId;
-    }
-
-    public String getArtifactId()
-    {
-        return artifactId;
-    }
-
-    public void setArtifactId(String artifactId)
-    {
-        this.artifactId = artifactId;
-    }
-
-    public String getVersionId()
-    {
-        return versionId;
-    }
-
-    public void setVersionId(String versionId)
-    {
-        this.versionId = versionId;
-    }
-
     public String getCheckSum()
     {
         return checkSum;
@@ -117,11 +46,6 @@ public class ArtifactDetail implements HasIdentifier
         return this;
     }
 
-    public String getGavCoordinates()
-    {
-        return this.groupId + SEPARATOR + this.getArtifactId() + SEPARATOR + this.getVersionId();
-    }
-
     public String getPath()
     {
         return this.path;
@@ -131,5 +55,12 @@ public class ArtifactDetail implements HasIdentifier
     {
         this.path = newPath;
         return this;
+    }
+
+    @Override
+    @JsonIgnore
+    public String getId()
+    {
+        return null;
     }
 }

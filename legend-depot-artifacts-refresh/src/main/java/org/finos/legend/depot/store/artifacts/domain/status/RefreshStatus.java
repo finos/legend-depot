@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.artifacts.domain.status;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.finos.legend.depot.domain.HasIdentifier;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
@@ -24,8 +25,6 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RefreshStatus implements HasIdentifier
 {
-
-    private String id;
     private String type;
     private String groupId;
     private String artifactId;
@@ -48,9 +47,10 @@ public class RefreshStatus implements HasIdentifier
         this.versionId = version;
     }
 
+    @JsonIgnore
     public String getId()
     {
-        return id;
+        return null;
     }
 
     public String getType()
@@ -129,31 +129,27 @@ public class RefreshStatus implements HasIdentifier
     }
 
 
-    public RefreshStatus withRunning(boolean running)
-    {
-        this.running = running;
-        if (running)
-        {
-            this.startTime = new Date();
-            this.duration = 0;
-        }
-        else
-        {
-            this.lastRun = new Date();
-            this.duration = lastRun.getTime() - startTime.getTime();
-        }
-        return this;
-    }
-
-    public RefreshStatus withResponse(MetadataEventResponse response)
-    {
-        this.response = response;
-        return this;
-    }
-
     public RefreshStatus withStartTime(Date startTime)
     {
         this.startTime = startTime;
+        return this;
+    }
+
+    public RefreshStatus startRunning()
+    {
+        this.running = true;
+        this.startTime = new Date();
+        this.duration = 0;
+        this.response = new MetadataEventResponse();
+        return this;
+    }
+
+    public RefreshStatus stopRunning(MetadataEventResponse response)
+    {
+        this.running = false;
+        this.lastRun = new Date();
+        this.duration = lastRun.getTime() - startTime.getTime();
+        this.response = this.response != null ? this.response.combine(response) : response;
         return this;
     }
 }

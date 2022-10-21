@@ -27,45 +27,42 @@ import java.util.Optional;
 public class TestArtifactMongo extends TestStoreMongo
 {
 
-    private static final String ENTITY = "entity";
+    private static final String FILE_PATH = "path/to/entity/jar/entity.jar";
 
 
     @Test
     public void canStoreArtifactsInformation()
     {
-        ArtifactDetail detail = new ArtifactDetail(ENTITY, "examples.metadata", "test", VersionValidator.MASTER_SNAPSHOT, "lala");
+        ArtifactDetail detail = new ArtifactDetail(FILE_PATH, "lala");
 
         UpdateArtifacts artifacts = new ArtifactsMongo(this.mongoProvider);
         ArtifactDetail result = artifacts.createOrUpdate(detail);
         Assert.assertNotNull(result);
 
-        Optional<ArtifactDetail> artifact = artifacts.find(ENTITY, detail.getGroupId(), detail.getArtifactId(), detail.getVersionId(), "lala");
+        Optional<ArtifactDetail> artifact = artifacts.find(FILE_PATH);
         Assert.assertTrue(artifact.isPresent());
-        Assert.assertEquals("examples.metadata", artifact.get().getGroupId());
-        Assert.assertEquals("lala", artifact.get().getPath());
+        Assert.assertEquals(FILE_PATH, artifact.get().getPath());
 
     }
 
     @Test
     public void canUpdateArtifactsInformation()
     {
-        ArtifactDetail detail = new ArtifactDetail(ENTITY, "examples.metadata", "test", VersionValidator.MASTER_SNAPSHOT, "lala");
+        ArtifactDetail detail = new ArtifactDetail(FILE_PATH,null);
 
         UpdateArtifacts artifacts = new ArtifactsMongo(this.mongoProvider);
         ArtifactDetail result = artifacts.createOrUpdate(detail);
         Assert.assertNotNull(result);
-        Optional<ArtifactDetail> artifact = artifacts.find(ENTITY, detail.getGroupId(), detail.getArtifactId(), detail.getVersionId(), "lala");
+        Optional<ArtifactDetail> artifact = artifacts.find(FILE_PATH);
         Assert.assertNotNull(artifact);
-        Assert.assertEquals("examples.metadata", artifact.get().getGroupId());
-        Assert.assertEquals("lala", artifact.get().getPath());
+        Assert.assertEquals(FILE_PATH, artifact.get().getPath());
         Assert.assertNull(artifact.get().getCheckSum());
 
         ArtifactDetail result1 = artifacts.createOrUpdate(detail.setCheckSum("laalalala"));
         Assert.assertNotNull(result1);
-        Optional<ArtifactDetail> artifact1 = artifacts.find(ENTITY, detail.getGroupId(), detail.getArtifactId(), detail.getVersionId(), "lala");
+        Optional<ArtifactDetail> artifact1 = artifacts.find(FILE_PATH);
         Assert.assertNotNull(artifact);
-        Assert.assertEquals("examples.metadata", artifact1.get().getGroupId());
-        Assert.assertEquals("lala", artifact1.get().getPath());
+        Assert.assertEquals(FILE_PATH, artifact1.get().getPath());
         Assert.assertEquals("laalalala", artifact1.get().getCheckSum());
 
     }
