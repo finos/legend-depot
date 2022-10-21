@@ -35,15 +35,15 @@ public class TestMongoStatus extends TestStoreMongo
     public void testStatus()
     {
         Assert.assertEquals(0, refreshStatus.getCollection().countDocuments());
-        refreshStatus.createOrUpdate(refreshStatus.get(VersionRevision.VERSIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").withRunning(true));
+        refreshStatus.createOrUpdate(refreshStatus.get(VersionRevision.VERSIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").startRunning());
         Assert.assertEquals(1, refreshStatus.getCollection().countDocuments());
-        refreshStatus.createOrUpdate(refreshStatus.get(VersionRevision.VERSIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").withRunning(false));
+        refreshStatus.createOrUpdate(refreshStatus.get(VersionRevision.VERSIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").stopRunning(null));
         Assert.assertEquals(1, refreshStatus.getCollection().countDocuments());
 
         Assert.assertNotNull(refreshStatus.get(VersionRevision.VERSIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0"));
         Assert.assertFalse(refreshStatus.get(VersionRevision.VERSIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").isRunning());
 
-        refreshStatus.createOrUpdate(refreshStatus.get(VersionRevision.REVISIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").withRunning(true));
+        refreshStatus.createOrUpdate(refreshStatus.get(VersionRevision.REVISIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").startRunning());
         Assert.assertEquals(2, refreshStatus.getCollection().countDocuments());
         Assert.assertNotNull(refreshStatus.get(VersionRevision.REVISIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0"));
         Assert.assertTrue(refreshStatus.get(VersionRevision.REVISIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").isRunning());

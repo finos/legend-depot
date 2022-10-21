@@ -33,7 +33,6 @@ public class ArtifactsMongo extends BaseMongo<ArtifactDetail> implements UpdateA
 {
     private static final String MONGO_ARTIFACTS = "artifacts";
     private static final String PATH = "path";
-    private static final String ARTIFACT_TYPE = "artifactType";
 
     @Inject
     public ArtifactsMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -44,7 +43,7 @@ public class ArtifactsMongo extends BaseMongo<ArtifactDetail> implements UpdateA
     @Override
     public boolean createIndexesIfAbsent()
     {
-        return createIndexIfAbsent("type-groupId-artifactId-versionId", ARTIFACT_TYPE, GROUP_ID, ARTIFACT_ID, VERSION_ID);
+        return createIndexIfAbsent("path", PATH);
     }
 
     @Override
@@ -56,19 +55,13 @@ public class ArtifactsMongo extends BaseMongo<ArtifactDetail> implements UpdateA
     @Override
     protected Bson getKeyFilter(ArtifactDetail data)
     {
-        return Filters.and(Filters.and(Filters.and(Filters.and(Filters.eq(ARTIFACT_TYPE, data.getArtifactType()), Filters.eq(BaseMongo.GROUP_ID, data.getGroupId()), Filters.eq(BaseMongo.ARTIFACT_ID, data.getArtifactId())), Filters.eq(BaseMongo.VERSION_ID, data.getVersionId())), Filters.eq(PATH, data.getPath())));
+        return Filters.eq(PATH, data.getPath());
     }
 
     @Override
     protected void validateNewData(ArtifactDetail data)
     {
         //no specific validation
-    }
-
-    @Override
-    public Optional<ArtifactDetail> find(String type, String groupId, String artifactId, String versionId, String path)
-    {
-        return findOne(getKeyFilter(new ArtifactDetail(type, groupId, artifactId, versionId, path)));
     }
 
     @Override

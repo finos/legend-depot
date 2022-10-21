@@ -66,7 +66,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
 
     private String getGAVCoordinates(ProjectData projectConfig, String versionId)
     {
-        return String.format("%s:%s:%s", projectConfig.getGroupId(), projectConfig.getArtifactId(), versionId);
+        return String.format("%s-%s-%s", projectConfig.getGroupId(), projectConfig.getArtifactId(), versionId);
     }
 
 
@@ -78,14 +78,14 @@ public abstract class AbstractEntityRefreshHandlerImpl
         List<Entity> entityList = getEntities(files);
         if (entityList != null && !entityList.isEmpty())
         {
-            String message = String.format("[%s]: found [%s] %s for %s ", project.getProjectId(), entityList.size(), this.entitiesProvider.getType(), gavCoordinates);
+            String message = String.format("[%s]: found [%s] %s for [%s] ", project.getProjectId(), entityList.size(), this.entitiesProvider.getType(), gavCoordinates);
             getLOGGER().info(message);
             response.addMessage(message);
             List<StoredEntity> storedEntities = transformVersionedEntities(project, versionId, entityList);
             if (versionId.equals(VersionValidator.MASTER_SNAPSHOT))
             {
                 getEntitiesApi().deleteLatest(project.getGroupId(), project.getArtifactId(),this.entitiesProvider.getType().equals(ArtifactType.VERSIONED_ENTITIES));
-                getLOGGER().info("removed old entities for {} - {} ", project.getProjectId(), gavCoordinates);
+                getLOGGER().info("[{}]: removed entities for [{}] ", project.getProjectId(), gavCoordinates);
             }
             response.combine(getEntitiesApi().createOrUpdate(storedEntities));
         }

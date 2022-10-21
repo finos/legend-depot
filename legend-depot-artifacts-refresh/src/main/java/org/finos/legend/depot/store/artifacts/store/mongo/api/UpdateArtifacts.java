@@ -23,8 +23,6 @@ public interface UpdateArtifacts
 {
     ArtifactDetail createOrUpdate(ArtifactDetail detail);
 
-    Optional<ArtifactDetail> find(String type, String groupId, String artifactId, String versionId, String path);
-
     Optional<ArtifactDetail> find(String path);
 
     boolean createIndexesIfAbsent();
