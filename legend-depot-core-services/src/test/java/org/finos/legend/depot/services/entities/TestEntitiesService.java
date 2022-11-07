@@ -39,7 +39,7 @@ public class TestEntitiesService extends TestBaseServices
 {
 
 
-    protected ManageEntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, projectsStore);
+    protected ManageEntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, projectsService);
 
     @Before
     public void setUpData()

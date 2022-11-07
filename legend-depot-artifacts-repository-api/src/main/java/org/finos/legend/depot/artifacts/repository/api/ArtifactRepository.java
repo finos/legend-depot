@@ -33,7 +33,7 @@ public interface ArtifactRepository
 
     List<String> getModulesFromPOM(ArtifactType type, String group, String artifact, String version);
 
-    List<VersionId> findVersions(String group, String artifact);
+    List<VersionId> findVersions(String group, String artifact) throws ArtifactRepositoryException;
 
     List<File> findFiles(ArtifactType type, String group, String artifact, String version);
 

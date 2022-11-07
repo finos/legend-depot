@@ -26,8 +26,8 @@ import org.finos.legend.depot.store.artifacts.api.entities.EntitiesArtifactsHand
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntitiesArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntityArtifactsProvider;
-import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsHandler;
+import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.api.status.RefreshStatusService;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactsResource;
@@ -50,7 +50,7 @@ public class ArtifactsModule extends PrivateModule
 {
     private static final String UPDATE_MASTER_REVISIONS_SCHEDULER = "refreshVersionArtifacts-master-revisions-scheduler";
     private static final String UPDATE_VERSIONS_SCHEDULER = "refreshVersionArtifacts-versions-scheduler";
-    private static final String MISMATCH_VERSIONS_FIX_SCHEDULE = "fix-versions-mismatch-schedule";
+    private static final String FIX_MISSING_VERSIONS_SCHEDULE = "fix-missing-versions-schedule";
 
     @Override
     protected void configure()
@@ -113,7 +113,7 @@ public class ArtifactsModule extends PrivateModule
     @Named("update-versions")
     boolean initVersions(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(UPDATE_VERSIONS_SCHEDULER, LocalDateTime.now().plusHours(2), configuration.getVersionsUpdateIntervalInMillis(), false,artifactsRefreshService::refreshAllProjectsVersionsArtifacts);
+        schedulesFactory.register(UPDATE_VERSIONS_SCHEDULER, LocalDateTime.now().plusHours(2), configuration.getVersionsUpdateIntervalInMillis(), false,artifactsRefreshService::refreshAllVersionsForAllProjects);
         return true;
     }
 
@@ -122,16 +122,16 @@ public class ArtifactsModule extends PrivateModule
     @Named("update-revisions")
     boolean initRevisions(SchedulesFactory schedulesFactory,ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusHours(1), configuration.getLatestUpdateIntervalInMillis(),false, artifactsRefreshService::refreshAllProjectRevisionsArtifacts);
+        schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusHours(1), configuration.getLatestUpdateIntervalInMillis(),false, artifactsRefreshService::refreshMasterSnapshotForAllProjects);
         return true;
     }
 
     @Provides
     @Singleton
-    @Named("fix-versions-mismatch")
+    @Named("update-missing-versions")
     boolean initFixVersionsMismatchDaemon(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService,ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(MISMATCH_VERSIONS_FIX_SCHEDULE, LocalDateTime.now().plusMinutes(5), configuration.getFixVersionsMismatchIntervalInMillis(), false,artifactsRefreshService::refreshProjectsVersionMismatches);
+        schedulesFactory.register(FIX_MISSING_VERSIONS_SCHEDULE, LocalDateTime.now().plusMinutes(5), configuration.getFixVersionsMismatchIntervalInMillis(), false,artifactsRefreshService::refreshProjectsWithMissingVersions);
         return true;
     }
 }

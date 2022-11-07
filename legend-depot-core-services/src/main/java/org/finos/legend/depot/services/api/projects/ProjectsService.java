@@ -18,8 +18,8 @@ package org.finos.legend.depot.services.api.projects;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionDependencies;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +38,8 @@ public interface ProjectsService
     List<ProjectData> findByProjectId(String projectId);
 
     List<String> getVersions(String groupId, String artifactId);
+
+    Optional<VersionId> getLatestVersion(String groupId, String artifactId);
 
     Optional<ProjectData> find(String groupId, String artifactId);
 

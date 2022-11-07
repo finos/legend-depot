@@ -72,7 +72,10 @@ public class ResourceLoggingAndTracing
     public static final String REPOSITORY_PROJECT_VERSIONS = "repo versions";
     public static final String GET_PROJECT_CACHE_MISMATCHES = "version mismatch";
     public static final String UPDATE_SCHEDULE = "update schedule";
-    public static final String FIX_PROJECT_CACHE_MISMATCHES = "fix version mismatch";
+    public static final String FIX_MISSING_VERSIONS = "fix missing versions";
+    public static final String FIND_EVENT_BY_ID = "find event";
+    public static final String GET_EVENT_IN_QUEUE = "find event in queue";
+    public static final String DELETE_SCHEDULE = "delete schedule";
 
 
     private ResourceLoggingAndTracing()

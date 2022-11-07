@@ -16,15 +16,9 @@
 package org.finos.legend.depot.store.api.projects;
 
 import org.finos.legend.depot.domain.project.ProjectData;
-import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
-import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface Projects
 {
@@ -41,19 +35,5 @@ public interface Projects
     Optional<ProjectData> find(String groupId, String artifactId);
 
     List<String> getVersions(String groupId, String artifactId);
-
-    Optional<VersionId> getLatestVersion(String groupId, String artifactId);
-
-    Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, boolean transitive);
-
-    default Set<ProjectVersion> getDependencies(String groupId, String artifactId, String versionId, boolean transitive)
-    {
-        return getDependencies(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)), transitive);
-    }
-
-    ProjectDependencyInfo getProjectDependencyInfo(List<ProjectVersion> projectVersions);
-
-    List<ProjectVersionPlatformDependency> getDependentProjects(String groupId, String artifactId, String versionId);
-
 
 }

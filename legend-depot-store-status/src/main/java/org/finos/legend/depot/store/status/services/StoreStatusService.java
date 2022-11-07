@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.status.services;
 
-import org.finos.legend.depot.domain.entity.VersionRevision;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.projects.Projects;
@@ -37,16 +36,14 @@ public class StoreStatusService
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(StoreStatusService.class);
     private final Projects projectApi;
     private final Entities entities;
-    private final ArtifactsRefreshService artifactsRefreshService;
     private final RefreshStatusService statusService;
     private final ManageQueryMetrics queryMetrics;
 
     @Inject
-    public StoreStatusService(Projects projectApi, Entities versions, ArtifactsRefreshService artifactsRefreshService, RefreshStatusService statusService, ManageQueryMetrics queryMetrics)
+    public StoreStatusService(Projects projectApi, Entities versions,RefreshStatusService statusService, ManageQueryMetrics queryMetrics)
     {
         this.projectApi = projectApi;
         this.entities = versions;
-        this.artifactsRefreshService = artifactsRefreshService;
         this.statusService = statusService;
         this.queryMetrics = queryMetrics;
     }
@@ -87,7 +84,7 @@ public class StoreStatusService
         versions.forEach(v ->
         {
             StoreStatus.VersionStatus versionStatus = new StoreStatus.VersionStatus(groupId, artifactId, v);
-            RefreshStatus updateStatus = statusService.get(VersionRevision.VERSIONS, groupId, artifactId, v);
+            RefreshStatus updateStatus = statusService.get(groupId, artifactId, v);
             Optional<VersionQuerySummary> versionQueryCounter = queryMetrics.getSummary(groupId, artifactId, v);
             if (versionQueryCounter.isPresent())
             {
@@ -101,7 +98,7 @@ public class StoreStatusService
         });
 
         StoreStatus.MasterRevisionStatus masterRevisionStatus = new StoreStatus.MasterRevisionStatus(groupId, artifactId);
-        RefreshStatus revisionsUpdateStatus = statusService.get(VersionRevision.REVISIONS, groupId, artifactId, VersionValidator.MASTER_SNAPSHOT);
+        RefreshStatus revisionsUpdateStatus = statusService.get(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT);
         masterRevisionStatus.lastUpdated = revisionsUpdateStatus.getLastRun();
         masterRevisionStatus.updating = revisionsUpdateStatus.isRunning();
         masterRevisionStatus.url = String.format("/projects/%s/%s/revisions/latest", groupId, artifactId);

@@ -31,7 +31,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 @Path("")
-@Api("File Generations")
+@Api("Generations")
 public class ManageFileGenerationsResource extends BaseResource
 {
     private final ManageFileGenerationsService generationsService;

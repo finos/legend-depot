@@ -17,6 +17,7 @@ package org.finos.legend.depot.services.projects;
 
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
+import org.finos.legend.depot.domain.project.ProjectProperty;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionDependencies;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
@@ -27,6 +28,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -182,6 +184,40 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertTrue(dependencyList3.contains(new ProjectVersionPlatformDependency("examples.metadata", "test-dependencies", "1.0.0", new ProjectVersion("example.services.test", "test", "1.0.0"), Collections.emptyList())));
         Assert.assertTrue(dependencyList3.contains(new ProjectVersionPlatformDependency("examples.metadata", "test-dependencies", "1.0.0", new ProjectVersion("example.services.test", "test", "2.0.0"), Collections.emptyList())));
         Assert.assertFalse(dependencyList3.contains(new ProjectVersionPlatformDependency("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
+
+    }
+
+    @Test
+    public void canUpdateProjectWithProperties()
+    {
+        Optional<ProjectData> project = projectsService.find("examples.metadata", "test");
+        Assert.assertNotNull(project);
+        project.get().addProperties(Arrays.asList(new ProjectProperty("legend.version", "0.0.0", "2.0.1")));
+        project.get().addProperties(Arrays.asList(new ProjectProperty("legend.version", "0.0.0", "2.3.1")));
+        project.get().addProperties(Arrays.asList(new ProjectProperty("legend.version", "0.0.0", "2.0.1")));
+        projectsService.createOrUpdate(project.get());
+        Optional<ProjectData> updatedProject = projectsService.find("examples.metadata", "test");
+        Assert.assertEquals(2, updatedProject.get().getProperties().size());
+        Assert.assertEquals(1, updatedProject.get().getPropertiesForProjectVersionID("2.0.1").size());
+        Assert.assertEquals(2, projectsService.getDependentProjects("examples.metadata", "test-dependencies", "1.0.0").size());
+
+        updatedProject.get().addDependency(new ProjectVersionDependency("examples.metadata", "test", "2.0.1", new ProjectVersion("examples.metadata", "test-dependencies", "3.0.0")));
+        projectsService.createOrUpdate(updatedProject.get());
+        List<ProjectVersionPlatformDependency> dependantProjectsList = projectsService.getDependentProjects("examples.metadata", "test-dependencies", "all");
+        Assert.assertEquals(3, dependantProjectsList.size());
+        Assert.assertTrue(dependantProjectsList.contains(new ProjectVersionPlatformDependency("examples.metadata","test",  "2.0.1", new ProjectVersion("examples.metadata","test-dependencies", "3.0.0"), Arrays.asList(new ProjectProperty("legend.version", "0.0.0", "2.0.1")))));
+
+    }
+
+    @Test
+    public void canGetLatestVersionForProject()
+    {
+        List<String> fullVersions = projectsService.find("examples.metadata", "test").get().getVersions();
+        Assert.assertNotNull(fullVersions);
+        Assert.assertEquals(2, fullVersions.size());
+
+        Assert.assertTrue(projectsService.getLatestVersion("examples.metadata", "test").isPresent());
+        Assert.assertEquals("2.3.1", projectsService.getLatestVersion("examples.metadata", "test").get().toVersionIdString());
 
     }
 }

@@ -20,32 +20,41 @@ import org.finos.legend.depot.store.artifacts.domain.status.VersionMismatch;
 
 import java.util.List;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public interface ArtifactsRefreshService
 {
-
-    MetadataEventResponse refreshProjectRevisionArtifacts(String groupId, String artifactId);
-
-    MetadataEventResponse refreshAllProjectRevisionsArtifacts();
-
-    MetadataEventResponse refreshAllProjectsVersionsArtifacts(boolean fullUpdate);
-
-    MetadataEventResponse refreshProjectVersionArtifacts(String groupId, String artifactId, String versionId, boolean fullUpdate);
-
-    MetadataEventResponse refreshProjectVersionsArtifacts(String groupId, String artifactId, boolean fullUpdate);
-
-    default MetadataEventResponse refreshAllProjectsVersionsArtifacts()
+    default MetadataEventResponse refreshMasterSnapshotForProject(String groupId, String artifactId, boolean fullUpdate)
     {
-        return refreshAllProjectsVersionsArtifacts(false);
+        return refreshVersionForProject(groupId,artifactId,MASTER_SNAPSHOT,fullUpdate);
     }
 
-    default MetadataEventResponse refreshProjectVersionsArtifacts(String groupId, String artifactId)
+    MetadataEventResponse refreshMasterSnapshotForAllProjects(boolean fullUpdate);
+
+    default MetadataEventResponse refreshMasterSnapshotForAllProjects()
     {
-        return refreshProjectVersionsArtifacts(groupId, artifactId, false);
+        return  refreshMasterSnapshotForAllProjects(false);
     }
 
-    default MetadataEventResponse refreshProjectVersionArtifacts(String groupId, String artifactId, String versionId)
+    MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean fullUpdate);
+
+    default MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId)
     {
-        return refreshProjectVersionArtifacts(groupId, artifactId, versionId, false);
+        return refreshVersionForProject(groupId, artifactId, versionId, false);
+    }
+
+    MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate);
+
+    default MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId)
+    {
+        return refreshAllVersionsForProject(groupId,artifactId,false);
+    }
+
+    MetadataEventResponse refreshAllVersionsForAllProjects(boolean fullUpdate);
+
+    default MetadataEventResponse refreshAllVersionsForAllProjects()
+    {
+        return refreshAllVersionsForAllProjects(false);
     }
 
     MetadataEventResponse retireLeastRecentlyUsedVersions(int numberOfDays);
@@ -56,11 +65,7 @@ public interface ArtifactsRefreshService
 
     boolean createIndexesIfAbsent();
 
-    List<String> getRepositoryVersions(String groupId, String artifactId);
-
-    MetadataEventResponse refreshAllProjectArtifacts(String groupId, String artifactId);
-
     List<VersionMismatch> findVersionsMismatches();
 
-    MetadataEventResponse refreshProjectsVersionMismatches();
+    MetadataEventResponse refreshProjectsWithMissingVersions();
 }

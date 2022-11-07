@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.artifacts.store.mongo;
 
-import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.artifacts.domain.ArtifactDetail;
 import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;

@@ -17,19 +17,13 @@ package org.finos.legend.depot.store.mongo.projects;
 
 import org.bson.Document;
 import org.finos.legend.depot.domain.project.ProjectData;
-import org.finos.legend.depot.domain.project.ProjectProperty;
-import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionDependency;
-import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 
@@ -143,27 +137,7 @@ public class TestUpdateProjectApi extends TestStoreMongo
         Assert.assertEquals(3, projectsAPI.findByProjectId("PROD-A").get(0).getVersions().size());
     }
 
-    @Test
-    public void canUpdateProjectWithProperties()
-    {
-        Optional<ProjectData> project = projectsAPI.find("examples.metadata", "test");
-        Assert.assertNotNull(project);
-        project.get().addProperties(Arrays.asList(new ProjectProperty("legend.version", "0.0.0", "2.0.1")));
-        project.get().addProperties(Arrays.asList(new ProjectProperty("legend.version", "0.0.0", "2.3.1")));
-        project.get().addProperties(Arrays.asList(new ProjectProperty("legend.version", "0.0.0", "2.0.1")));
-        projectsAPI.createOrUpdate(project.get());
-        Optional<ProjectData> updatedProject = projectsAPI.find("examples.metadata", "test");
-        Assert.assertEquals(2, updatedProject.get().getProperties().size());
-        Assert.assertEquals(1, updatedProject.get().getPropertiesForProjectVersionID("2.0.1").size());
-        Assert.assertEquals(2, projectsAPI.getDependentProjects("examples.metadata", "test-dependencies", "1.0.0").size());
 
-        updatedProject.get().addDependency(new ProjectVersionDependency("examples.metadata", "test", "2.0.1", new ProjectVersion("examples.metadata", "test-dependencies", "3.0.0")));
-        projectsAPI.createOrUpdate(updatedProject.get());
-        List<ProjectVersionPlatformDependency> dependantProjectsList = projectsAPI.getDependentProjects("examples.metadata", "test-dependencies", "all");
-        Assert.assertEquals(3, dependantProjectsList.size());
-        Assert.assertTrue(dependantProjectsList.contains(new ProjectVersionPlatformDependency("examples.metadata","test",  "2.0.1", new ProjectVersion("examples.metadata","test-dependencies", "3.0.0"), Arrays.asList(new ProjectProperty("legend.version", "0.0.0", "2.0.1")))));
-
-    }
 
     @Test
     public void onlyInsertIfAbsent()

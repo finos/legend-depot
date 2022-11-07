@@ -76,7 +76,7 @@
         <!-- Legend dependency versions -->
         <legend.engine.version>3.21.1</legend.engine.version>
         <legend.sdlc.version>0.99.1</legend.sdlc.version>
-        <legend.shared.version>0.22.5</legend.shared.version>
+        <legend.shared.version>0.22.6</legend.shared.version>
 
         <!-- Dependency versions -->
         <apache.httpcomponents.client.version>4.5.13</apache.httpcomponents.client.version>
@@ -631,6 +631,14 @@
                     <exclusion>
                         <groupId>org.finos.legend.shared</groupId>
                         <artifactId>legend-shared-pac4j-kerberos</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.finos.legend.shared</groupId>
+                        <artifactId>legend-shared-pac4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.finos.legend.shared</groupId>
+                        <artifactId>legend-shared-server</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>

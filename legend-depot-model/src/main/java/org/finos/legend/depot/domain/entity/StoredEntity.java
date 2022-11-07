@@ -24,7 +24,6 @@ import org.finos.legend.depot.domain.BaseDomain;
 import org.finos.legend.depot.domain.HasIdentifier;
 
 import javax.validation.constraints.NotNull;
-import java.util.regex.Pattern;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoredEntity extends BaseDomain implements HasIdentifier

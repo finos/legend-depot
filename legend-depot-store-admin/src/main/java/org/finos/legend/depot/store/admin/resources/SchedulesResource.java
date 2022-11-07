@@ -90,11 +90,11 @@ public class SchedulesResource extends BaseAuthorisedResource
 
     @DELETE
     @Path("/schedules/{jobId}")
-    @ApiOperation(ResourceLoggingAndTracing.TRIGGER_SCHEDULE)
+    @ApiOperation(ResourceLoggingAndTracing.DELETE_SCHEDULE)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteScheduler(@PathParam("jobId") String jobId)
     {
-        return handle(ResourceLoggingAndTracing.TRIGGER_SCHEDULE, () ->
+        return handle(ResourceLoggingAndTracing.DELETE_SCHEDULE, () ->
         {
             validateUser();
             schedulesFactory.deRegister(jobId);

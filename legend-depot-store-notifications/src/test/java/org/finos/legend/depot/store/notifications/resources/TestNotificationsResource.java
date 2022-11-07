@@ -16,9 +16,7 @@
 package org.finos.legend.depot.store.notifications.resources;
 
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
-import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;

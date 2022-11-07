@@ -57,6 +57,12 @@ public class MetadataEventResponse
         return messages;
     }
 
+    public MetadataEventResponse addError(String message)
+    {
+        this.errors.add(message);
+        return this;
+    }
+
     public MetadataEventResponse addMessage(String message)
     {
         this.messages.add(message);
@@ -81,8 +87,11 @@ public class MetadataEventResponse
 
     public MetadataEventResponse combine(StoreOperationResult storeResult)
     {
-        this.errors.addAll(storeResult.getErrors());
-        addMessage(storeResult.toString());
+        if (storeResult != null)
+        {
+            this.errors.addAll(storeResult.getErrors());
+            addMessage(storeResult.toString());
+        }
         return this;
     }
 

@@ -41,11 +41,6 @@ public interface ManageEntitiesService extends EntitiesService
 
     MetadataEventResponse delete(String groupId, String artifactId, String versionId,boolean versioned);
 
-    default void deleteLatest(String groupId, String artifactId, boolean versioned)
-    {
-        delete(groupId, artifactId, MASTER_SNAPSHOT,versioned);
-    }
-
     MetadataEventResponse createOrUpdate(List<StoredEntity> versionedEntities);
 
     List<Pair<String, String>> getOrphanedStoredEntities();

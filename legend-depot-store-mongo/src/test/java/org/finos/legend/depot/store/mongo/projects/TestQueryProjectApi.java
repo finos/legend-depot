@@ -87,17 +87,5 @@ public class TestQueryProjectApi extends TestStoreMongo
 
     }
 
-    @Test
-    public void canGetLatestVersionForProject()
-    {
-        List<String> fullVersions = projectsAPI.find("examples.metadata", "test").get().getVersions();
-        Assert.assertNotNull(fullVersions);
-        Assert.assertEquals(2, fullVersions.size());
-
-        Assert.assertTrue(projectsAPI.getLatestVersion("examples.metadata", "test").isPresent());
-        Assert.assertEquals("2.3.1", projectsAPI.getLatestVersion("examples.metadata", "test").get().toVersionIdString());
-
-    }
-
 
 }

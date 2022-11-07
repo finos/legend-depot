@@ -18,10 +18,11 @@ package org.finos.legend.depot.store.artifacts.resources;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.entity.VersionRevision;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
@@ -44,6 +45,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("")
 @Api("Artifacts")
@@ -52,6 +54,7 @@ public class ArtifactsResource extends BaseAuthorisedResource
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final String ARTIFACTS_RESOURCE = "Artifacts";
     private final ArtifactsRefreshService artifactsRefreshService;
+    private final ArtifactRepository artifactRepository;
     private final ManageRefreshStatusService refreshStatusService;
 
 
@@ -59,11 +62,12 @@ public class ArtifactsResource extends BaseAuthorisedResource
     public ArtifactsResource(ArtifactsRefreshService artifactsRefreshService,
                              ManageRefreshStatusService updateStatusService,
                              AuthorisationProvider authorisationProvider,
-                             @Named("requestPrincipal") Provider<Principal> principalProvider)
+                             @Named("requestPrincipal") Provider<Principal> principalProvider, ArtifactRepository artifactRepository)
     {
         super(authorisationProvider, principalProvider);
         this.artifactsRefreshService = artifactsRefreshService;
         this.refreshStatusService = updateStatusService;
+        this.artifactRepository = artifactRepository;
     }
 
 
@@ -72,7 +76,6 @@ public class ArtifactsResource extends BaseAuthorisedResource
     @ApiOperation("get updateStatusService information")
     @Produces(MediaType.APPLICATION_JSON)
     public List<RefreshStatus> getStatus(
-            @QueryParam("entityType") VersionRevision entityType,
             @QueryParam("project") String project,
             @QueryParam("groupId") String group,
             @QueryParam("artifactId") String artifact,
@@ -86,7 +89,7 @@ public class ArtifactsResource extends BaseAuthorisedResource
     {
         LocalDateTime fromStatTime = startTimeFrom == null ? null : LocalDateTime.parse(startTimeFrom, DATE_TIME_FORMATTER);
         LocalDateTime toStartTime = startTimeTo == null ? LocalDateTime.now() : LocalDateTime.parse(startTimeTo, DATE_TIME_FORMATTER);
-        return handle(ResourceLoggingAndTracing.STORE_STATUS, () -> refreshStatusService.find(entityType, group, artifact, version, running,fromStatTime,toStartTime));
+        return handle(ResourceLoggingAndTracing.STORE_STATUS, () -> refreshStatusService.find(group, artifact, version, running,fromStatTime,toStartTime));
     }
 
     @DELETE
@@ -112,7 +115,7 @@ public class ArtifactsResource extends BaseAuthorisedResource
                                                       @PathParam("artifactId") String artifactId,
                                                       @PathParam("versionId") String versionId)
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_VERSION, ResourceLoggingAndTracing.UPDATE_VERSION + groupId + artifactId + versionId, () -> artifactsRefreshService.refreshProjectVersionArtifacts(groupId, artifactId, versionId, true));
+        return handle(ResourceLoggingAndTracing.UPDATE_VERSION, ResourceLoggingAndTracing.UPDATE_VERSION + groupId + artifactId + versionId, () -> artifactsRefreshService.refreshVersionForProject(groupId, artifactId, versionId, true));
     }
 
     @PUT
@@ -122,7 +125,7 @@ public class ArtifactsResource extends BaseAuthorisedResource
     public MetadataEventResponse updateProjectVersions(@PathParam("groupId") String groupId,
                                                        @PathParam("artifactId") String artifactId)
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS, ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS + groupId + artifactId, () -> artifactsRefreshService.refreshProjectVersionsArtifacts(groupId, artifactId, true));
+        return handle(ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS, ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS + groupId + artifactId, () -> artifactsRefreshService.refreshAllVersionsForProject(groupId, artifactId, true));
     }
 
     @PUT
@@ -132,7 +135,7 @@ public class ArtifactsResource extends BaseAuthorisedResource
     public MetadataEventResponse refreshRevision(@PathParam("groupId") String groupId,
                                                  @PathParam("artifactId") String artifactId)
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION, ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION + groupId + artifactId, () -> artifactsRefreshService.refreshProjectRevisionArtifacts(groupId, artifactId));
+        return handle(ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION, ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION + groupId + artifactId, () -> artifactsRefreshService.refreshMasterSnapshotForProject(groupId, artifactId,true));
     }
 
     @PUT
@@ -144,7 +147,7 @@ public class ArtifactsResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.UPDATE_ALL_VERSIONS, () ->
         {
             validateUser();
-            return artifactsRefreshService.refreshAllProjectsVersionsArtifacts(true);
+            return artifactsRefreshService.refreshAllVersionsForAllProjects(true);
         });
     }
 
@@ -157,7 +160,7 @@ public class ArtifactsResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.UPDATE_ALL_MASTER_REVISIONS, () ->
         {
             validateUser();
-            return artifactsRefreshService.refreshAllProjectRevisionsArtifacts();
+            return artifactsRefreshService.refreshMasterSnapshotForAllProjects(true);
         });
     }
 
@@ -204,10 +207,22 @@ public class ArtifactsResource extends BaseAuthorisedResource
     @ApiOperation(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
     public List<String> getRepositoryVersions(@PathParam("groupId") String groupId,
-                                                       @PathParam("artifactId") String artifactId)
+                                                 @PathParam("artifactId") String artifactId)
     {
-        return handle(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId, () -> artifactsRefreshService.getRepositoryVersions(groupId, artifactId));
+        return handle(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId,
+                () ->
+                {
+                    try
+                    {
+                        return artifactRepository.findVersions(groupId, artifactId).stream().map(v -> v.toVersionIdString()).collect(Collectors.toList());
+                    }
+                    catch (ArtifactRepositoryException e)
+                    {
+                        throw new RuntimeException(e.getMessage());
+                    }
+                });
     }
+
 
     @GET
     @Path("/artifacts/versions/mismatch")
@@ -219,15 +234,15 @@ public class ArtifactsResource extends BaseAuthorisedResource
     }
 
     @PUT
-    @Path("/artifacts/versions/mismatch")
-    @ApiOperation(ResourceLoggingAndTracing.FIX_PROJECT_CACHE_MISMATCHES)
+    @Path("/artifactsRefresh/versions/missing")
+    @ApiOperation(ResourceLoggingAndTracing.FIX_MISSING_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataEventResponse fixVersionMissMatches()
     {
-        return handle(ResourceLoggingAndTracing.FIX_PROJECT_CACHE_MISMATCHES, () ->
+        return handle(ResourceLoggingAndTracing.FIX_MISSING_VERSIONS, () ->
         {
             validateUser();
-            return this.artifactsRefreshService.refreshProjectsVersionMismatches();
+            return this.artifactsRefreshService.refreshProjectsWithMissingVersions();
         });
 
     }

@@ -25,6 +25,7 @@ import org.finos.legend.depot.store.mongo.core.ConnectionFactory;
 import org.finos.legend.depot.store.mongo.core.MongoConfiguration;
 import org.finos.legend.depot.store.mongo.core.MongoNonTracingConnectionFactory;
 import org.finos.legend.depot.store.mongo.core.MongoTracingConnectionFactory;
+import org.finos.legend.depot.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 
 import javax.inject.Named;
@@ -42,9 +43,9 @@ public class StoreMongoModule extends PrivateModule
 
     @Provides
     @Singleton
-    ConnectionFactory getConnectionFactory(@Named("applicationName") String applicationName, MongoConfiguration configuration, TracerFactory tracerFactory)
+    ConnectionFactory getConnectionFactory(@Named("applicationName") String applicationName, MongoConfiguration configuration, OpenTracingConfiguration openTracingConfiguration, TracerFactory tracerFactory)
     {
-        if (tracerFactory != null && tracerFactory.isTracingEnabled())
+        if (openTracingConfiguration.isEnabled())
         {
             return new MongoTracingConnectionFactory(applicationName, configuration, tracerFactory.getTracer());
         }
