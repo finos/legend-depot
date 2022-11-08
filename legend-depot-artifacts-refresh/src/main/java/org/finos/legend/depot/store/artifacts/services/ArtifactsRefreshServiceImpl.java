@@ -107,7 +107,6 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 
     private MetadataEventResponse handleRefresh(String groupId, String artifactId, String version, Supplier<MetadataEventResponse> functionToExecute)
     {
-
         MetadataEventResponse response = new MetadataEventResponse();
         getLOGGER().info("Starting [{}{}{}] refresh", groupId, artifactId, version);
         RefreshStatus storeStatus = store.get(groupId, artifactId, version);
@@ -488,8 +487,10 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         return executeWithTrace("refreshProjectsWithMissingVersions",ALL, ALL, MISSING, () ->
         {
             MetadataEventResponse response = new MetadataEventResponse();
-            Stream<VersionMismatch> projectsWithMissingVersions = findVersionsMismatches().stream().filter(r -> !r.versionsNotInCache.isEmpty());
-            LOGGER.info("Starting fixing [{}] projects with missing versions", projectsWithMissingVersions.count());
+            List<VersionMismatch> projectsWithMissingVersions = findVersionsMismatches().stream().filter(r -> !r.versionsNotInCache.isEmpty()).collect(Collectors.toList());
+            String countInfo = String.format("Starting fixing [%s] projects with missing versions",projectsWithMissingVersions.size());
+            LOGGER.info(countInfo);
+            response.addMessage(countInfo);
             AtomicInteger totalMissingVersions = new AtomicInteger();
             AtomicInteger totalMissingVersionsFixed = new AtomicInteger();
             projectsWithMissingVersions.forEach(vm ->

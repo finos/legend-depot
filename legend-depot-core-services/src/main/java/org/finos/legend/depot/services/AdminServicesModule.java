@@ -16,6 +16,8 @@
 package org.finos.legend.depot.services;
 
 import com.google.inject.PrivateModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
@@ -23,6 +25,7 @@ import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.generation.file.FileGenerationsServiceImpl;
+import org.finos.legend.depot.services.projects.DependenciesCache;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
@@ -32,6 +35,8 @@ import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
+
+import javax.inject.Named;
 
 public class AdminServicesModule extends PrivateModule
 {
@@ -44,6 +49,7 @@ public class AdminServicesModule extends PrivateModule
         bind(UpdateEntities.class).to(EntitiesMongo.class);
         bind(UpdateFileGenerations.class).to(FileGenerationsMongo.class);
 
+        bind(DependenciesCache.class);
         bind(ProjectsService.class).to(ProjectsServiceImpl.class);
         bind(ManageProjectsService.class).to(ProjectsServiceImpl.class);
         bind(ManageEntitiesService.class).to(EntitiesServiceImpl.class);
@@ -60,5 +66,13 @@ public class AdminServicesModule extends PrivateModule
         expose(UpdateFileGenerations.class);
         expose(Projects.class);
         expose(UpdateProjects.class);
+    }
+
+    @Provides
+    @Named("dependencyCache")
+    @Singleton
+    DependenciesCache initialiseDependencyCache(Projects projects)
+    {
+        return new DependenciesCache(projects);
     }
 }

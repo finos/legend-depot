@@ -39,7 +39,7 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class TestProjectsService extends TestBaseServices
 {
 
-    protected ManageProjectsService projectsService = new ProjectsServiceImpl(projectsStore);
+    protected ManageProjectsService projectsService = new ProjectsServiceImpl(projectsStore, new DependenciesCache(projectsStore));
 
     @Before
     public void setUpData()

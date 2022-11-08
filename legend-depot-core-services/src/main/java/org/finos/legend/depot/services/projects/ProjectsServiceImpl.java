@@ -42,10 +42,19 @@ public class ProjectsServiceImpl implements ManageProjectsService
 
     private final UpdateProjects projects;
 
+    private final DependenciesCache dependenciesCache;
+
     @Inject
+    public ProjectsServiceImpl(UpdateProjects projects, DependenciesCache dependenciesCache)
+    {
+        this.projects = projects;
+        this.dependenciesCache = dependenciesCache;
+    }
+
     public ProjectsServiceImpl(UpdateProjects projects)
     {
         this.projects = projects;
+        this.dependenciesCache = new DependenciesCache(projects);
     }
 
     @Override
@@ -96,13 +105,11 @@ public class ProjectsServiceImpl implements ManageProjectsService
         return projects.find(groupId, artifactId);
     }
 
-
     @Override
     public Optional<VersionId> getLatestVersion(String groupId, String artifactId)
     {
         return getProject(groupId,artifactId).getLatestVersion();
     }
-
 
     @Override
     public Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, boolean transitive)
@@ -112,15 +119,14 @@ public class ProjectsServiceImpl implements ManageProjectsService
         {
             ProjectData projectData = getProject(pv.getGroupId(), pv.getArtifactId());
             List<ProjectVersionDependency> projectVersionDependencies = projectData.getDependencies(pv.getVersionId());
-            if (transitive)
-            {
-                projectVersionDependencies.forEach(dep -> dependencies.addAll(getDependencies(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId(), true)));
-            }
             projectVersionDependencies.forEach(dep -> dependencies.add(dep.getDependency()));
+            if (transitive && !projectVersionDependencies.isEmpty())
+            {
+                dependencies.addAll(dependenciesCache.getTransitiveDependencies(pv));
+            }
         });
         return dependencies;
     }
-
 
     public Set<ProjectVersionDependencies> getDependencyTree(List<ProjectVersion> projectVersions, String parentPath, Set<ProjectVersionDependencies> fullDependencies)
     {

@@ -30,11 +30,16 @@ public class MongoConfiguration
     @JsonProperty
     public String url;
 
+    @NotNull
+    @JsonProperty
+    public boolean tracing;
+
     @JsonCreator
-    public MongoConfiguration(@JsonProperty("database") String database, @JsonProperty("url") String url)
+    public MongoConfiguration(@JsonProperty("database") String database, @JsonProperty("url") String url,@JsonProperty("tracing") boolean tracing)
     {
         this.database = database;
         this.url = url;
+        this.tracing = tracing;
     }
 
     public String getDatabase()
@@ -45,5 +50,10 @@ public class MongoConfiguration
     public String getUrl()
     {
         return url;
+    }
+
+    public boolean isTracingEnabled()
+    {
+        return tracing;
     }
 }

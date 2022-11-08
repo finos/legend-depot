@@ -15,10 +15,6 @@
 
 package org.finos.legend.depot.services;
 
-import org.finos.legend.depot.services.api.entities.EntitiesService;
-import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
-import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
@@ -28,12 +24,8 @@ import org.junit.Before;
 
 public class TestBaseServices extends TestStoreMongo
 {
-
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
-
-    protected ManageProjectsService projectsService = new ProjectsServiceImpl(projectsStore);
-    protected EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, projectsService);
 
     @Before
     public void setUpData()

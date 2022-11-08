@@ -16,6 +16,8 @@
 package org.finos.legend.depot.services;
 
 import com.google.inject.PrivateModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
@@ -23,6 +25,7 @@ import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.entities.EntityClassifierServiceImpl;
 import org.finos.legend.depot.services.generation.file.FileGenerationsServiceImpl;
+import org.finos.legend.depot.services.projects.DependenciesCache;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
@@ -34,11 +37,14 @@ import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 
+import javax.inject.Named;
+
 public class ReadOnlyServicesModule extends PrivateModule
 {
     @Override
     protected void configure()
     {
+
         bind(Projects.class).to(ProjectsMongo.class);
         bind(Entities.class).to(EntitiesMongo.class);
         bind(UpdateEntities.class).to(EntitiesMongo.class);
@@ -46,6 +52,7 @@ public class ReadOnlyServicesModule extends PrivateModule
         bind(FileGenerations.class).to(FileGenerationsMongo.class);
         bind(UpdateFileGenerations.class).to(FileGenerationsMongo.class);
 
+        bind(DependenciesCache.class);
         bind(EntitiesService.class).to(EntitiesServiceImpl.class);
         bind(EntityClassifierService.class).to(EntityClassifierServiceImpl.class);
         bind(ProjectsService.class).to(ProjectsServiceImpl.class);
@@ -55,5 +62,14 @@ public class ReadOnlyServicesModule extends PrivateModule
         expose(EntitiesService.class);
         expose(EntityClassifierService.class);
         expose(FileGenerationsService.class);
+        expose(DependenciesCache.class);
+    }
+
+    @Provides
+    @Named("dependencyCache")
+    @Singleton
+    DependenciesCache initialiseDependencyCache(Projects projects)
+    {
+        return new DependenciesCache(projects);
     }
 }

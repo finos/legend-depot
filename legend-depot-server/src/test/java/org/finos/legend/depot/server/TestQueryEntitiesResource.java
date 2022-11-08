@@ -17,6 +17,8 @@ package org.finos.legend.depot.server;
 
 import org.finos.legend.depot.server.resources.entities.EntitiesResource;
 import org.finos.legend.depot.services.TestBaseServices;
+import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
+import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.metrics.QueryMetricsContainer;
 import org.finos.legend.depot.store.metrics.store.mongo.MongoQueryMetrics;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -33,7 +35,7 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 
 public class TestQueryEntitiesResource extends TestBaseServices
 {
-    private EntitiesResource entitiesResource = new EntitiesResource(entitiesService);
+    private EntitiesResource entitiesResource = new EntitiesResource(new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projectsStore)));
     private MongoQueryMetrics queryMetrics = new MongoQueryMetrics(mongoProvider);
 
     @Before

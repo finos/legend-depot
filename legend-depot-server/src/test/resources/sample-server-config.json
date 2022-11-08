@@ -32,7 +32,8 @@
   },
   "mongo": {
     "url": "mongodb://127.0.0.1:27017",
-    "database": "depot-dev"
+    "database": "depot-dev",
+    "tracing": false
   },
   "openTracing": {
     "openTracingUri": "URL here",
