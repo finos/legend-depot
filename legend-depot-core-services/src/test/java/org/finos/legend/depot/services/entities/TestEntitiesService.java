@@ -25,6 +25,7 @@ import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
+import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,8 +39,7 @@ import java.util.function.Predicate;
 public class TestEntitiesService extends TestBaseServices
 {
 
-
-    protected ManageEntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, projectsService);
+    protected ManageEntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsStore));
 
     @Before
     public void setUpData()

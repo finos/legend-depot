@@ -17,6 +17,7 @@ package org.finos.legend.depot.server;
 
 import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.services.TestBaseServices;
+import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ import java.util.List;
 public class TestProjectsResource extends TestBaseServices
 {
 
-    private ProjectsResource projects = new ProjectsResource(projectsService);
+    private ProjectsResource projects = new ProjectsResource(new ProjectsServiceImpl(projectsStore));
 
     @Test
     public void canQueryVersionsForProjectGA()

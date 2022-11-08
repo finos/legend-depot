@@ -113,10 +113,10 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
 
     public boolean createIndexesIfAbsent()
     {
-        createIndexIfAbsent("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID,VERSIONED_ENTITY);
+        createIndexIfAbsent("groupId-artifactId-versionId-versioned", GROUP_ID, ARTIFACT_ID, VERSION_ID,VERSIONED_ENTITY);
         createIndexIfAbsent("groupId-artifactId-versionId-entityPath", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH);
         createIndexIfAbsent("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE);
-        createIndexIfAbsent("groupId-artifactId-hashed", GROUP_ID, ARTIFACT_ID,VERSIONED_ENTITY);
+        createIndexIfAbsent("groupId-artifactId-hashed", GROUP_ID, ARTIFACT_ID);
         createIndexIfAbsent("entity-classifier", ENTITY_CLASSIFIER_PATH);
         return true;
 

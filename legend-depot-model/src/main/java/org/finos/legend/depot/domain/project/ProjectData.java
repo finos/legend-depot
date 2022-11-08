@@ -26,6 +26,7 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -150,7 +151,7 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
     @JsonIgnore
     public List<ProjectVersionDependency> getDependencies(String version)
     {
-        return dependencies.parallelStream().filter(dependency -> dependency.getVersionId().equals(version)).collect(Collectors.toList());
+        return dependencies.stream().filter(dependency -> dependency.getVersionId().equals(version)).collect(Collectors.toList());
     }
 
     public void addDependencies(List<ProjectVersionDependency> dependencies)
@@ -192,4 +193,9 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
         propertyList.stream().filter(property -> !properties.contains(property)).forEach(property -> this.properties.add(property));
     }
 
+    public ProjectData withVersions(String... versionIds)
+    {
+        this.versions.addAll(Arrays.asList(versionIds));
+        return this;
+    }
 }

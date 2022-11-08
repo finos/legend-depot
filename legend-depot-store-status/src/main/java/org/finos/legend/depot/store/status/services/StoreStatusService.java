@@ -18,7 +18,6 @@ package org.finos.legend.depot.store.status.services;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.projects.Projects;
-import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.status.RefreshStatusService;
 import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
 import org.finos.legend.depot.store.metrics.api.ManageQueryMetrics;
@@ -33,7 +32,6 @@ import java.util.Optional;
 
 public class StoreStatusService
 {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(StoreStatusService.class);
     private final Projects projectApi;
     private final Entities entities;
     private final RefreshStatusService statusService;

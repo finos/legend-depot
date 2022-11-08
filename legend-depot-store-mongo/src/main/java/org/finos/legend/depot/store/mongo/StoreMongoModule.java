@@ -43,15 +43,15 @@ public class StoreMongoModule extends PrivateModule
 
     @Provides
     @Singleton
-    ConnectionFactory getConnectionFactory(@Named("applicationName") String applicationName, MongoConfiguration configuration, OpenTracingConfiguration openTracingConfiguration, TracerFactory tracerFactory)
+    ConnectionFactory getConnectionFactory(@Named("applicationName") String applicationName, MongoConfiguration mongoConfiguration, OpenTracingConfiguration openTracingConfiguration, TracerFactory tracerFactory)
     {
-        if (openTracingConfiguration.isEnabled())
+        if (openTracingConfiguration.isEnabled() && mongoConfiguration.isTracingEnabled())
         {
-            return new MongoTracingConnectionFactory(applicationName, configuration, tracerFactory.getTracer());
+            return new MongoTracingConnectionFactory(applicationName, mongoConfiguration, tracerFactory.getTracer());
         }
         else
         {
-            return new MongoNonTracingConnectionFactory(applicationName, configuration);
+            return new MongoNonTracingConnectionFactory(applicationName, mongoConfiguration);
         }
     }
 

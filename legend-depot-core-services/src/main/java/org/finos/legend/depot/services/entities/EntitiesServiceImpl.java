@@ -30,17 +30,21 @@ import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesService
 {
-
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(EntitiesServiceImpl.class);
+    public static final String CALCULATE_PROJECT_DEPENDENCIES = "calculateProjectDependencies";
+    public static final String RETRIEVE_DEPENDENCY_ENTITIES = "retrieveDependencyEntities";
     private final UpdateEntities entities;
     private final ProjectsService projects;
 
@@ -85,7 +89,7 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     @Override
     public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean versioned, boolean transitive, boolean includeOrigin)
     {
-        Set<ProjectVersion> dependencies = (Set<ProjectVersion>) executeWithTrace("calculateProjectDependencies", () ->
+        Set<ProjectVersion> dependencies = (Set<ProjectVersion>) executeWithTrace(CALCULATE_PROJECT_DEPENDENCIES, () ->
         {
             Set<ProjectVersion> deps = projects.getDependencies(projectDependencies, transitive);
             if (includeOrigin)
@@ -95,15 +99,19 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
             return deps;
         });
         TracerFactory.get().log(String.format("dependencies: [%s] ",dependencies.size()));
-        return (List<ProjectVersionEntities>) executeWithTrace("retrieveEntities", () ->
+        LOGGER.info("finished calculating [{}] dependencies",dependencies.size());
+        return  (List<ProjectVersionEntities>) executeWithTrace(RETRIEVE_DEPENDENCY_ENTITIES, () ->
         {
             MutableList<ProjectVersionEntities> depEntities = FastList.newList();
-            ParallelIterate.forEach(dependencies,dep ->
+            final AtomicInteger totalEntities = new AtomicInteger();
+            ParallelIterate.forEach(dependencies, dep ->
             {
-                List<EntityDefinition> deps = entities.getStoredEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), versioned).parallelStream().map(StoredEntity::getEntity).collect(Collectors.toList());
+                List<EntityDefinition> deps = entities.getStoredEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), versioned).stream().map(StoredEntity::getEntity).collect(Collectors.toList());
                 depEntities.add(new ProjectVersionEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), versioned, deps));
+                totalEntities.addAndGet(deps.size());
+                TracerFactory.get().log(String.format("Total [%s-%s-%s]: [%s] entities",dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(),deps.size()));
             });
-            TracerFactory.get().log(String.format("Total: [%s] entities",depEntities.size()));
+            TracerFactory.get().log(String.format("Total [%s]: [%s] entities",depEntities.size(),totalEntities));
             return depEntities;
         });
     }
