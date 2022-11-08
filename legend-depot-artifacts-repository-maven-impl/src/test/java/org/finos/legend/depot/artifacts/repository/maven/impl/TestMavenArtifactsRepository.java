@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class TestMavenArtifactsRepository extends MavenArtifactRepository implem
     @Override
     public List<VersionId> findVersions(String group, String artifact)
     {
-        return TESTING_VERSIONS.get(group + DOT + artifact);
+        return TESTING_VERSIONS.getOrDefault(group + DOT + artifact, Collections.emptyList());
     }
 
     @Override

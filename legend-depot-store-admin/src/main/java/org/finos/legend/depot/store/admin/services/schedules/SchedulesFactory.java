@@ -16,7 +16,6 @@
 package org.finos.legend.depot.store.admin.services.schedules;
 
 import org.eclipse.collections.api.factory.Maps;
-import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.map.mutable.SynchronizedMutableMap;
 import org.eclipse.collections.impl.tuple.Tuples;
@@ -26,9 +25,7 @@ import org.slf4j.Logger;
 import javax.inject.Singleton;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -132,7 +129,7 @@ public final class SchedulesFactory
         long t = System.currentTimeMillis();
         try
         {
-            this.manageSchedulesService.createOrUpdate(scheduleInfo.withRunning(true));
+            this.manageSchedulesService.createOrUpdate(scheduleInfo.startRunning(t));
             scheduleInfo.message = functionToExecute.get();
         }
         catch (Exception e)
@@ -142,9 +139,7 @@ public final class SchedulesFactory
         }
         finally
         {
-            scheduleInfo.lastExecuted = new Date();
-            scheduleInfo.lastExecutionDuration = System.currentTimeMillis() - t;
-            this.manageSchedulesService.createOrUpdate(scheduleInfo.withRunning(false));
+            this.manageSchedulesService.createOrUpdate(scheduleInfo.stopRunning());
             LOGGER.info("Finished {} ", jobId);
         }
     }

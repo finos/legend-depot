@@ -54,11 +54,6 @@ public final class TracerFactory
         return INSTANCE;
     }
 
-    public synchronized boolean isTracingEnabled()
-    {
-        return isEnabled;
-    }
-
     public synchronized Tracer getTracer()
     {
         return tracer;
@@ -124,12 +119,30 @@ public final class TracerFactory
         }
     }
 
-    public void decorateSpan(Map<String, String> tags)
+    public void addTags(Map<String, String> tags)
     {
         Span currentSpan = GlobalTracer.get().activeSpan();
         if (currentSpan != null)
         {
             tags.keySet().forEach(key -> currentSpan.setTag(key, tags.get(key)));
+        }
+    }
+
+    public void addLog(Map<String, String> tags)
+    {
+        Span currentSpan = GlobalTracer.get().activeSpan();
+        if (currentSpan != null)
+        {
+            currentSpan.log(tags);
+        }
+    }
+
+    public void log(String value)
+    {
+        Span currentSpan = GlobalTracer.get().activeSpan();
+        if (currentSpan != null)
+        {
+            currentSpan.log(value);
         }
     }
 

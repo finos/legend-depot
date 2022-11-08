@@ -67,9 +67,18 @@ public class ScheduleInfo implements HasIdentifier
         return id;
     }
 
-    public ScheduleInfo withRunning(boolean running)
+    public ScheduleInfo startRunning(long startTime)
     {
-        this.running.getAndSet(running);
+        this.running.getAndSet(true);
+        this.lastExecuted = new Date(startTime);
+        this.lastExecutionDuration = 0;
+        return this;
+    }
+
+    public ScheduleInfo stopRunning()
+    {
+        this.running.getAndSet(false);
+        this.lastExecutionDuration = System.currentTimeMillis() - this.lastExecuted.getTime();
         return this;
     }
 

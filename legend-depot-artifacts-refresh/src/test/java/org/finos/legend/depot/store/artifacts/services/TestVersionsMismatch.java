@@ -16,6 +16,7 @@
 package org.finos.legend.depot.store.artifacts.services;
 
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
@@ -42,7 +43,7 @@ public class TestVersionsMismatch extends TestStoreMongo
 
 
     @Before
-    public void setup()
+    public void setup() throws ArtifactRepositoryException
     {
         ProjectData testProjectA = new ProjectData("PROD-A","examples.metadata", "test1");
         testProjectA.getVersions().add("2.2.0");

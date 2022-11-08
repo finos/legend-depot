@@ -20,6 +20,7 @@ import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.generation.file.FileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
@@ -43,12 +44,14 @@ public class AdminServicesModule extends PrivateModule
         bind(UpdateEntities.class).to(EntitiesMongo.class);
         bind(UpdateFileGenerations.class).to(FileGenerationsMongo.class);
 
+        bind(ProjectsService.class).to(ProjectsServiceImpl.class);
         bind(ManageProjectsService.class).to(ProjectsServiceImpl.class);
         bind(ManageEntitiesService.class).to(EntitiesServiceImpl.class);
         bind(FileGenerationsService.class).to(FileGenerationsServiceImpl.class);
         bind(ManageFileGenerationsService.class).to(FileGenerationsServiceImpl.class);
 
         expose(ManageProjectsService.class);
+        expose(ProjectsService.class);
         expose(ManageEntitiesService.class);
         expose(ManageFileGenerationsService.class);
 

@@ -22,7 +22,7 @@ public interface ManageRefreshStatusService extends RefreshStatusService
 
     RefreshStatus createOrUpdate(RefreshStatus storeStatus);
 
-    void delete(String entityType);
+    void delete(String statusId);
 
     boolean createIndexesIfAbsent();
 }

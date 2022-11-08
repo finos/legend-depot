@@ -59,11 +59,12 @@ public class TestNotificationManager extends TestStoreMongo
     {
         projectsStore.createOrUpdate(new ProjectData("PROD-B", TEST_GROUP_ID, "test-dependencies"));
         projectsStore.createOrUpdate(new ProjectData(TEST_PROJECT_ID, TEST_GROUP_ID, "test"));
-        when(artifactsRefreshService.refreshProjectVersionArtifacts(TEST_GROUP_ID, "test", VERSION_ID, false)).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
-        when(artifactsRefreshService.refreshProjectVersionsArtifacts(TEST_GROUP_ID, "test", true)).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
-        when(artifactsRefreshService.refreshProjectVersionsArtifacts(TEST_GROUP_ID, "test-dependencies", true)).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
-        when(artifactsRefreshService.refreshAllProjectArtifacts(TEST_GROUP_ID, "test")).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
-        when(artifactsRefreshService.refreshAllProjectArtifacts(TEST_GROUP_ID, "test-dependencies")).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
+        when(artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, "test", VERSION_ID, false)).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
+        when(artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, "test", true)).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
+        when(artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, "test-dependencies", true)).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
+        when(artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, "test")).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
+        when(artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, "test-dependencies")).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
+        when(artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,"test","10.0.0",false)).thenThrow(new IllegalArgumentException("version does not exists"));
     }
 
     protected MetadataEventResponse loadEntities(String projectId, String versionId)
@@ -131,5 +132,15 @@ public class TestNotificationManager extends TestStoreMongo
         Assert.assertEquals(MetadataEventStatus.SUCCESS, events.get(0).getStatus());
     }
 
+
+    @Test
+    public void processNewVersionEventForNonExistingVersion()
+    {
+        MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "10.0.0");
+        eventsManager.handleEvent(event);
+        Assert.assertFalse(queue.getAll().isEmpty());
+        MetadataNotification response = queue.getFirstInQueue().get();
+        Assert.assertTrue(response.getStatus().equals(MetadataEventStatus.RETRY));
+    }
 
 }

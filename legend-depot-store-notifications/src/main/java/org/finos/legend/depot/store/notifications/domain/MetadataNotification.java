@@ -96,9 +96,9 @@ public class MetadataNotification implements HasIdentifier
         this(projectId, groupId, artifactId, versionId, new Date(), null, MetadataEventStatus.NEW, new ArrayList<>(), false, 0, DEFAULT_MAX_RETRIES);
     }
 
-    public MetadataNotification(String projectId, String groupId, String artifactId, String versionId, int maxRetries)
+    public MetadataNotification(String projectId, String groupId, String artifactId, String versionId, boolean fullUpdate,int maxRetries)
     {
-        this(projectId, groupId, artifactId, versionId, new Date(), null, MetadataEventStatus.NEW, new ArrayList<>(), false, 0, maxRetries);
+        this(projectId, groupId, artifactId, versionId, new Date(), null, MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate, 0, maxRetries);
     }
 
 

@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.artifacts.store.mongo;
 
-import org.finos.legend.depot.domain.entity.VersionRevision;
 import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.junit.Assert;
@@ -23,6 +22,8 @@ import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public class TestMongoStatus extends TestStoreMongo
 {
@@ -35,28 +36,28 @@ public class TestMongoStatus extends TestStoreMongo
     public void testStatus()
     {
         Assert.assertEquals(0, refreshStatus.getCollection().countDocuments());
-        refreshStatus.createOrUpdate(refreshStatus.get(VersionRevision.VERSIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").startRunning());
+        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").startRunning());
         Assert.assertEquals(1, refreshStatus.getCollection().countDocuments());
-        refreshStatus.createOrUpdate(refreshStatus.get(VersionRevision.VERSIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").stopRunning(null));
+        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").stopRunning(null));
         Assert.assertEquals(1, refreshStatus.getCollection().countDocuments());
 
-        Assert.assertNotNull(refreshStatus.get(VersionRevision.VERSIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0"));
-        Assert.assertFalse(refreshStatus.get(VersionRevision.VERSIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").isRunning());
+        Assert.assertNotNull(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0"));
+        Assert.assertFalse(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").isRunning());
 
-        refreshStatus.createOrUpdate(refreshStatus.get(VersionRevision.REVISIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").startRunning());
+        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).startRunning());
         Assert.assertEquals(2, refreshStatus.getCollection().countDocuments());
-        Assert.assertNotNull(refreshStatus.get(VersionRevision.REVISIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0"));
-        Assert.assertTrue(refreshStatus.get(VersionRevision.REVISIONS, TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").isRunning());
+        Assert.assertNotNull(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0"));
+        Assert.assertTrue(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).isRunning());
 
     }
 
     @Test
     public void canRetrieveStatusFromToDate()
     {
-        RefreshStatus status1 = new RefreshStatus(VersionRevision.VERSIONS.name(), "test1.org", "TEST", "1.0.0");
-        RefreshStatus status2 = new RefreshStatus(VersionRevision.VERSIONS.name(), "test2.org", "TEST", "1.0.0");
-        RefreshStatus status3 = new RefreshStatus(VersionRevision.VERSIONS.name(), "test3.org", "TEST", "1.0.0");
-        RefreshStatus status4 = new RefreshStatus(VersionRevision.VERSIONS.name(), "test4.org", "TEST", "1.0.0");
+        RefreshStatus status1 = new RefreshStatus("test1.org", "TEST", "1.0.0");
+        RefreshStatus status2 = new RefreshStatus("test2.org", "TEST", "1.0.0");
+        RefreshStatus status3 = new RefreshStatus("test3.org", "TEST", "1.0.0");
+        RefreshStatus status4 = new RefreshStatus("test4.org", "TEST", "1.0.0");
 
         LocalDateTime aPointInTime = LocalDateTime.of(2022, 9, 12, 12, 0).minusDays(12);
         refreshStatus.createOrUpdate(status1.withStartTime(toDate(aPointInTime)));
@@ -64,19 +65,19 @@ public class TestMongoStatus extends TestStoreMongo
         refreshStatus.createOrUpdate(status3.withStartTime(toDate(aPointInTime.plusHours(1).plusMinutes(22))));
         refreshStatus.createOrUpdate(status4.withStartTime(toDate(aPointInTime.plusHours(2).plusMinutes(35))));
 
-        List<RefreshStatus> allstatuss = refreshStatus.find(null,null,null,null,null);
+        List<RefreshStatus> allstatuss = refreshStatus.find(null,null,null,null);
         Assert.assertNotNull(allstatuss);
         Assert.assertEquals(4, allstatuss.size());
-        List<RefreshStatus> statusesBeforeLunch = refreshStatus.find(null,null,null,null,null,aPointInTime.toLocalDate().atStartOfDay(), aPointInTime);
+        List<RefreshStatus> statusesBeforeLunch = refreshStatus.find(null,null,null,null,aPointInTime.toLocalDate().atStartOfDay(), aPointInTime);
         Assert.assertNotNull(statusesBeforeLunch);
         Assert.assertEquals(1, statusesBeforeLunch.size());
         Assert.assertEquals("test1.org", statusesBeforeLunch.get(0).getGroupId());
 
-        List<RefreshStatus> afterLunch = refreshStatus.find(null,null,null,null,null,aPointInTime.withHour(12).withMinute(0).withSecond(1), null);
+        List<RefreshStatus> afterLunch = refreshStatus.find(null,null,null,null,aPointInTime.withHour(12).withMinute(0).withSecond(1), null);
         Assert.assertNotNull(afterLunch);
         Assert.assertEquals(3, afterLunch.size());
 
-        List<RefreshStatus> statusInBetween = refreshStatus.find(null,null,null,null,null,aPointInTime.plusHours(1).plusMinutes(1),aPointInTime.plusHours(2));
+        List<RefreshStatus> statusInBetween = refreshStatus.find(null,null,null,null,aPointInTime.plusHours(1).plusMinutes(1),aPointInTime.plusHours(2));
         Assert.assertNotNull(statusInBetween);
         Assert.assertEquals(1, statusInBetween.size());
         Assert.assertEquals("test3.org", statusInBetween.get(0).getGroupId());

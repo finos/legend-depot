@@ -150,7 +150,7 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
     @JsonIgnore
     public List<ProjectVersionDependency> getDependencies(String version)
     {
-        return dependencies.stream().filter(dependency -> dependency.getVersionId().equals(version)).collect(Collectors.toList());
+        return dependencies.parallelStream().filter(dependency -> dependency.getVersionId().equals(version)).collect(Collectors.toList());
     }
 
     public void addDependencies(List<ProjectVersionDependency> dependencies)

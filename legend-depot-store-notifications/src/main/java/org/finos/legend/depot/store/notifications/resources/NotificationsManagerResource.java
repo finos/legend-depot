@@ -22,7 +22,6 @@ import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
@@ -86,6 +85,15 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     }
 
     @GET
+    @Path("/notifications/{eventId}")
+    @ApiOperation(ResourceLoggingAndTracing.FIND_EVENT_BY_ID)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Optional<MetadataNotification> getNotificationById(@PathParam("eventId") String eventId)
+    {
+        return handle(ResourceLoggingAndTracing.FIND_EVENT_BY_ID, () -> eventsApi.get(eventId));
+    }
+
+    @GET
     @Path("/queuesRefreshAllVersions")
     @ApiOperation(ResourceLoggingAndTracing.ENQUEUE_REFRESH_ALL_EVENT)
     @Produces(MediaType.TEXT_PLAIN)
@@ -102,6 +110,15 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     public List<MetadataNotification> getAllEventsInQueue()
     {
         return handle(ResourceLoggingAndTracing.GET_ALL_EVENTS_IN_QUEUE, queue::getAll);
+    }
+
+    @GET
+    @Path("/queue/{eventId}")
+    @ApiOperation(ResourceLoggingAndTracing.GET_EVENT_IN_QUEUE)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Optional<MetadataNotification> geEventsInQueue(@PathParam("eventId") String eventId)
+    {
+        return handle(ResourceLoggingAndTracing.GET_EVENT_IN_QUEUE, () -> queue.getAll().stream().filter(e -> eventId.equals(eventId))).findFirst();
     }
 
 
@@ -133,7 +150,9 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     protected String pushToQueue(String projectId, String groupId, String artifactId, String versionId, int maxRetries)
     {
         validateMavenCoordinates(projectId, groupId, artifactId);
-        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId, maxRetries);
+        //we create a notification event with fullUpdate flag set to false(ie partial update)
+        //this means, it will only process changed jar files and will only handle those entities,etc
+        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId, false,maxRetries);
         return queue.push(event);
     }
 

@@ -18,7 +18,6 @@ package org.finos.legend.depot.services.api.entities;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.version.Scope;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import java.util.Arrays;

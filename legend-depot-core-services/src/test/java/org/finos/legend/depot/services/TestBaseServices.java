@@ -33,7 +33,7 @@ public class TestBaseServices extends TestStoreMongo
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
 
     protected ManageProjectsService projectsService = new ProjectsServiceImpl(projectsStore);
-    protected EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, projectsStore);
+    protected EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, projectsService);
 
     @Before
     public void setUpData()

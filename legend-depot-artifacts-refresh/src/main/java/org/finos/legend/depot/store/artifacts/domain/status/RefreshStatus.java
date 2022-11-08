@@ -25,7 +25,6 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RefreshStatus implements HasIdentifier
 {
-    private String type;
     private String groupId;
     private String artifactId;
     private String versionId;
@@ -39,9 +38,8 @@ public class RefreshStatus implements HasIdentifier
     {
     }
 
-    public RefreshStatus(String type, String groupId, String artifactId, String version)
+    public RefreshStatus(String groupId, String artifactId, String version)
     {
-        this.type = type;
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.versionId = version;
@@ -51,16 +49,6 @@ public class RefreshStatus implements HasIdentifier
     public String getId()
     {
         return null;
-    }
-
-    public String getType()
-    {
-        return type;
-    }
-
-    public void setType(String type)
-    {
-        this.type = type;
     }
 
     public String getGroupId()

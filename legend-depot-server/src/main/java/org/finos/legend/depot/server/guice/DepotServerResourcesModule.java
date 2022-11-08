@@ -19,8 +19,8 @@ import com.google.inject.PrivateModule;
 import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.server.resources.dependencies.DependenciesResource;
 import org.finos.legend.depot.server.resources.entities.EntitiesResource;
-import org.finos.legend.depot.server.resources.file.FileGenerationsResource;
 import org.finos.legend.depot.server.resources.entities.EntityClassifierResource;
+import org.finos.legend.depot.server.resources.file.FileGenerationsResource;
 
 public class DepotServerResourcesModule extends PrivateModule
 {

@@ -95,7 +95,7 @@ public final class NotificationsQueueManager
                 queue.push(new MetadataNotification(p.getProjectId(), p.getGroupId(), p.getArtifactId(), ALL, true)));
     }
 
-    private void handleEvent(MetadataNotification event)
+    void handleEvent(MetadataNotification event)
     {
         if (!isValidEvent(event))
         {
@@ -113,22 +113,39 @@ public final class NotificationsQueueManager
         {
             projects.createOrUpdate(new ProjectData(event.getProjectId(), event.getGroupId(), event.getArtifactId()));
         }
+        MetadataEventResponse response = null;
+        try
+        {
+            response = ALL.equalsIgnoreCase(event.getVersionId()) ?
+                    artifactsRefreshService.refreshAllVersionsForProject(event.getGroupId(), event.getArtifactId(),event.isFullUpdate()) :
+                    artifactsRefreshService.refreshVersionForProject(event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.isFullUpdate());
 
-        MetadataEventResponse response = ALL.equalsIgnoreCase(event.getVersionId()) ?
-                artifactsRefreshService.refreshAllProjectArtifacts(event.getGroupId(), event.getArtifactId()) :
-                artifactsRefreshService.refreshProjectVersionArtifacts(event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.isFullUpdate());
+        }
+         catch (Exception e)
+        {
+            if (response != null)
+            {
+                 response.addError(e.getMessage());
+            }
+            else
+            {
+                response =  new MetadataEventResponse().addError(e.getMessage());
+            }
+        }
         if (response != null)
         {
             if (response.hasErrors())
             {
                 queue.push(event.increaseRetries().setStatus(MetadataEventStatus.RETRY).addErrors(response.getErrors()));
+                LOGGER.info("event completed with errors [{}]", response.getErrors());
             }
             else
             {
                 events.complete(event.completedSuccessfully());
+                LOGGER.info("event completed successfully");
             }
         }
-        LOGGER.info("event completed with status {}", event.getStatus());
+
 
     }
 

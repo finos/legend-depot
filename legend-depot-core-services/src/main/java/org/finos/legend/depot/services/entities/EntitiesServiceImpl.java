@@ -15,7 +15,10 @@
 
 package org.finos.legend.depot.services.entities;
 
+import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.list.mutable.FastList;
+import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
@@ -23,26 +26,27 @@ import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
-import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesService
 {
 
     private final UpdateEntities entities;
-    private final UpdateProjects projects;
+    private final ProjectsService projects;
 
 
     @Inject
-    public EntitiesServiceImpl(UpdateEntities entities, UpdateProjects projects)
+    public EntitiesServiceImpl(UpdateEntities entities, ProjectsService projects)
     {
         this.entities = entities;
         this.projects = projects;
@@ -81,18 +85,27 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     @Override
     public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean versioned, boolean transitive, boolean includeOrigin)
     {
-        Set<ProjectVersion> dependencies = projects.getDependencies(projectDependencies, transitive);
-        if (includeOrigin)
+        Set<ProjectVersion> dependencies = (Set<ProjectVersion>) executeWithTrace("calculateProjectDependencies", () ->
         {
-            dependencies.addAll(projectDependencies);
-        }
-        List<ProjectVersionEntities> depEntities = new ArrayList<>();
-        dependencies.parallelStream().forEach(dep ->
-        {
-            List<EntityDefinition> deps = entities.getStoredEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), versioned).stream().map(StoredEntity::getEntity).collect(Collectors.toList());
-            depEntities.add(new ProjectVersionEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), versioned, deps));
+            Set<ProjectVersion> deps = projects.getDependencies(projectDependencies, transitive);
+            if (includeOrigin)
+            {
+                deps.addAll(projectDependencies);
+            }
+            return deps;
         });
-        return depEntities;
+        TracerFactory.get().log(String.format("dependencies: [%s] ",dependencies.size()));
+        return (List<ProjectVersionEntities>) executeWithTrace("retrieveEntities", () ->
+        {
+            MutableList<ProjectVersionEntities> depEntities = FastList.newList();
+            ParallelIterate.forEach(dependencies,dep ->
+            {
+                List<EntityDefinition> deps = entities.getStoredEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), versioned).parallelStream().map(StoredEntity::getEntity).collect(Collectors.toList());
+                depEntities.add(new ProjectVersionEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), versioned, deps));
+            });
+            TracerFactory.get().log(String.format("Total: [%s] entities",depEntities.size()));
+            return depEntities;
+        });
     }
 
     @Override
@@ -120,9 +133,9 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     }
 
     @Override
-    public MetadataEventResponse delete(String groupId, String artifactId, String versionId,boolean versioned)
+    public MetadataEventResponse delete(String groupId, String artifactId, String versionId, boolean versioned)
     {
-        return new MetadataEventResponse().combine(entities.delete(groupId, artifactId, versionId,versioned));
+        return new MetadataEventResponse().combine(entities.delete(groupId, artifactId, versionId, versioned));
     }
 
     @Override
@@ -142,5 +155,10 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     {
         List<Pair<String, String>> allArtifacts = entities.getStoredEntitiesCoordinates();
         return allArtifacts.stream().filter(art -> !projects.find(art.getOne(), art.getTwo()).isPresent()).collect(Collectors.toList());
+    }
+
+    private Object executeWithTrace(String label, Supplier<Object> functionToExecute)
+    {
+        return TracerFactory.get().executeWithTrace(label, () -> functionToExecute.get());
     }
 }

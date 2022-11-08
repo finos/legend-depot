@@ -16,7 +16,6 @@
 package org.finos.legend.depot.store.artifacts.services.entities;
 
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntityArtifactsProvider;
 
 import javax.inject.Inject;

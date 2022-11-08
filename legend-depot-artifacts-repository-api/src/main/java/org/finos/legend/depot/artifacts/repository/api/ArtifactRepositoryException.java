@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.artifacts.repository.api;
 
-public class ArtifactRepositoryException extends RuntimeException
+public class ArtifactRepositoryException extends Exception
 {
     public ArtifactRepositoryException(String message)
     {

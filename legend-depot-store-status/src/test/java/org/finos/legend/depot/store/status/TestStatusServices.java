@@ -40,8 +40,7 @@ public class TestStatusServices extends TestStoreMongo
     private MongoQueryMetrics queryMetrics = new MongoQueryMetrics(mongoProvider);
     private UpdateProjects projects = new ProjectsMongo(mongoProvider);
     private UpdateEntities entities = new EntitiesMongo(mongoProvider);
-    private ArtifactsRefreshService artifactsRefreshService = mock(ArtifactsRefreshService.class);
-    private StoreStatusService statusService = new StoreStatusService(projects, entities, artifactsRefreshService, refreshStatus, queryMetrics);
+    private StoreStatusService statusService = new StoreStatusService(projects, entities, refreshStatus, queryMetrics);
 
     @Before
     public void setup()

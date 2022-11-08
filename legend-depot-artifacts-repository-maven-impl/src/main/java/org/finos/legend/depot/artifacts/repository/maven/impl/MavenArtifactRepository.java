@@ -53,6 +53,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class MavenArtifactRepository implements ArtifactRepository
@@ -60,8 +61,9 @@ public class MavenArtifactRepository implements ArtifactRepository
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MavenArtifactRepository.class);
     private static final String EMPTY_STRING = "";
     private static final String GAV_SEP = ":";
-    private static final String GROUP = "group";
-    private static final String ARTIFACT = "artifact";
+    private static final String GROUP_ID = "groupId";
+    private static final String ARTIFACT_ID = "artifactId";
+    public static final String VERSION_ID = "versionId";
     private static final String ALL_VERSIONS_SCOPE = ":[0.0,)";
     public static final String SEPARATOR = "-";
     private final MavenXpp3Reader mavenReader = new MavenXpp3Reader();
@@ -83,7 +85,7 @@ public class MavenArtifactRepository implements ArtifactRepository
         }
         else
         {
-            throw new IllegalArgumentException("cannot initialise repository , please provide a settings file");
+            throw new IllegalArgumentException("cannot initialise repository, please provide a settings file");
         }
     }
 
@@ -113,7 +115,7 @@ public class MavenArtifactRepository implements ArtifactRepository
         catch (Exception e)
         {
             LOGGER.error("could not initialise settings.xml {}", e.getMessage());
-            throw new ArtifactRepositoryException(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -133,20 +135,6 @@ public class MavenArtifactRepository implements ArtifactRepository
         return group != null && artifact != null
                 && !group.contains(GAV_SEP)
                 && !artifact.contains(GAV_SEP);
-    }
-
-    @Override
-    public List<VersionId> findVersions(String group, String artifact)
-    {
-        return TracerFactory.get().executeWithTrace("resolveVersionsFromRepository",
-                () ->
-                {
-                    Map<String, String> tags = new HashMap<>();
-                    tags.put(GROUP, group);
-                    tags.put(ARTIFACT, artifact);
-                    TracerFactory.get().decorateSpan(tags);
-                    return resolveVersionsFromRepository(group, artifact, ALL_VERSIONS_SCOPE);
-                });
     }
 
     @Override
@@ -286,41 +274,54 @@ public class MavenArtifactRepository implements ArtifactRepository
 
     protected File[] resolveArtifactFilesFromRepository(String group, String artifact, String version)
     {
-        return getResolver().resolve(gavCoordinates(group, artifact, version)).withoutTransitivity().asFile();
+        return (File[]) executeWithTrace("resolveArtifactFilesFromRepository",group,artifact,version,() -> getResolver().resolve(gavCoordinates(group, artifact, version)).withoutTransitivity().asFile());
     }
 
     protected URL[] resolvePOMFromRepository(String group, String artifact, String version)
     {
-        return getResolver().resolve(gavCoordinates(group, artifact, PackagingType.POM, version)).withoutTransitivity().as(URL.class);
+        return (URL[]) executeWithTrace("resolvePOMFromRepository",group,artifact,version, () -> getResolver().resolve(gavCoordinates(group, artifact, PackagingType.POM, version)).withoutTransitivity().as(URL.class));
     }
 
-    private List<VersionId> resolveVersionsFromRepository(String group, String artifact, String scope)
+    @Override
+    public List<VersionId> findVersions(String group, String artifact) throws ArtifactRepositoryException
     {
-        List<VersionId> result = new ArrayList<>();
-        try
-        {
-            String groupArtifactVersionRange = gavCoordinates(group, artifact, scope);
-            final MavenVersionRangeResult versionRangeResult = getResolver().resolveVersionRange(groupArtifactVersionRange);
-            LOGGER.info("resolveVersionsFromRepository {}{}{} , Version data: [{}]", group, artifact, scope, versionRangeResult);
-            for (MavenCoordinate coordinate : versionRangeResult.getVersions())
+            List<VersionId> result = new ArrayList<>();
+            try
             {
-                if (VersionValidator.isValidReleaseVersion(coordinate.getVersion()))
+                String groupArtifactVersionRange = gavCoordinates(group, artifact, ALL_VERSIONS_SCOPE);
+                final MavenVersionRangeResult versionRangeResult = (MavenVersionRangeResult) executeWithTrace("resolveVersionsFromRepository",group,artifact,"ALL",() -> getResolver().resolveVersionRange(groupArtifactVersionRange));
+                LOGGER.info("resolveVersionsFromRepository {}{}{} , Version data: [{}]", group, artifact, ALL_VERSIONS_SCOPE, versionRangeResult);
+                for (MavenCoordinate coordinate : versionRangeResult.getVersions())
                 {
-                    result.add(VersionId.parseVersionId(coordinate.getVersion()));
+                    if (VersionValidator.isValidReleaseVersion(coordinate.getVersion()))
+                    {
+                        result.add(VersionId.parseVersionId(coordinate.getVersion()));
+                    }
                 }
             }
-        }
-        catch (VersionResolutionException ex)
-        {
-            LOGGER.error(String.format("Error resolveVersionsFromRepository %s: %s-%s version resolution issue", group, artifact, scope), ex.getMessage());
-        }
-        catch (Exception e)
-        {
-            LOGGER.error("unknown error executing resolveVersionsFromRepository", e);
-            throw new ArtifactRepositoryException(e.getMessage());
-        }
-        Collections.sort(result);
-        return result;
+            catch (VersionResolutionException ex)
+            {
+                LOGGER.error(String.format("Error resolveVersionsFromRepository %s-%s version resolution issue", group, artifact), ex.getMessage());
+            }
+            catch (Exception e)
+            {
+                LOGGER.error("unknown error executing resolveVersionsFromRepository", e);
+                throw new ArtifactRepositoryException(e.getMessage());
+            }
+            Collections.sort(result);
+            return result;
     }
 
+    private Object executeWithTrace(String label, String groupId, String artifactId, String version, Supplier<Object> functionToExecute)
+    {
+        return TracerFactory.get().executeWithTrace(label, () ->
+        {
+            Map<String, String> tags = new HashMap<>();
+            tags.put(GROUP_ID, groupId);
+            tags.put(ARTIFACT_ID, artifactId);
+            tags.put(VERSION_ID, version);
+            TracerFactory.get().addTags(tags);
+            return functionToExecute.get();
+        });
+    }
 }
