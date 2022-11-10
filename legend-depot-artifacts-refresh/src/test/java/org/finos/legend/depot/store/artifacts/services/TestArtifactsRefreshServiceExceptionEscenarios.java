@@ -16,8 +16,11 @@
 package org.finos.legend.depot.store.artifacts.services;
 
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
+import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.maven.impl.TestMavenArtifactsRepository;
+import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
@@ -43,20 +46,24 @@ import org.finos.legend.depot.store.artifacts.store.mongo.ArtifactsMongo;
 import org.finos.legend.depot.store.artifacts.store.mongo.MongoRefreshStatus;
 import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
-public class TestArtifactsRefreshServiceExeptionEscenarios extends TestStoreMongo
+public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMongo
 {
 
     public static final String TEST_GROUP_ID = "examples.metadata";
@@ -72,29 +79,36 @@ public class TestArtifactsRefreshServiceExeptionEscenarios extends TestStoreMong
     protected VersionedEntityProvider versionedEntityProvider = new VersionedEntityProvider();
     protected FileGenerationsArtifactsProvider fileGenerationsProvider = new FileGenerationsProvider();
 
-    protected ArtifactRepository repository = new TestMavenArtifactsRepository();
+    protected ArtifactRepository repository = mock(ArtifactRepository.class);
     protected UpdateProjects mongoProjects = mock(UpdateProjects.class);
     protected ManageProjectsService projectsService = new ProjectsServiceImpl(mongoProjects);
     protected UpdateEntities mongoEntities = mock(UpdateEntities.class);
     protected ManageEntitiesService entitiesService = new EntitiesServiceImpl(mongoEntities,projectsService);
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);
-    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repository, artifacts, new IncludeProjectPropertiesConfiguration(properties));
+    protected RepositoryServices repositoryServices = mock(RepositoryServices.class);
+    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repository, repositoryServices, artifacts, new IncludeProjectPropertiesConfiguration(properties));
 
 
     @Before
-    public void setUpData()
+    public void setUpData() throws ArtifactRepositoryException
     {
         ArtifactResolverFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
         ArtifactResolverFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new EntitiesHandlerImpl(entitiesService, versionedEntityProvider));
         ArtifactResolverFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new FileGenerationsServiceImpl(mongoGenerations, mongoEntities)));
 
-        List<ProjectData> projects = Arrays.asList(new ProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID),new ProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID));
+        List<ProjectData> projects = Arrays.asList(new ProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID),
+                                                   new ProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID),
+                                                   new ProjectData("C", TEST_GROUP_ID, "C"));
         when(mongoProjects.getAll()).thenReturn(projects);
         when(mongoProjects.find(TEST_GROUP_ID,TEST_ARTIFACT_ID)).thenReturn(Optional.of(new ProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID)));
+        when(mongoProjects.find(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID)).thenReturn(Optional.of(new ProjectData(PROJECT_B,TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID)));
+        when(repository.findVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID)).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
+        when(repository.findVersions(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID)).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
+        when(repository.findVersions(TEST_GROUP_ID,"c")).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
     }
 
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void cannotFindProject()
     {
         MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject("test.test","missing.project","1.0.0",true);
@@ -102,16 +116,19 @@ public class TestArtifactsRefreshServiceExeptionEscenarios extends TestStoreMong
         Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
         Assert.assertEquals("Project does not exists for test.test-missing.project", response.getErrors().get(0));
 
-
     }
 
     @Test
     public void cannotFindDependentProject()
     {
+      Set<ArtifactDependency> deps = new HashSet<>();
+      deps.add(new ArtifactDependency(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID,"1.0.0"));
+      deps.add(new ArtifactDependency(TEST_GROUP_ID,"c","1.0.0"));
+      when(repository.findDependencies(TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0")).thenReturn(deps);
       MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0",true);
       Assert.assertNotNull(response);
       Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
-      Assert.assertEquals("Could not find dependent project: [examples.metadata-test-dependencies-1.0.0]", response.getErrors().get(0));
+      Assert.assertEquals("Could not find dependent project: [examples.metadata-c]", response.getErrors().get(0));
     }
 
     @Test

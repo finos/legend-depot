@@ -18,15 +18,12 @@ package org.finos.legend.depot.store.artifacts.resources;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
-import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
-import org.finos.legend.depot.store.artifacts.domain.status.VersionMismatch;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
@@ -45,7 +42,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Path("")
 @Api("Artifacts")
@@ -54,7 +51,6 @@ public class ArtifactsResource extends BaseAuthorisedResource
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final String ARTIFACTS_RESOURCE = "Artifacts";
     private final ArtifactsRefreshService artifactsRefreshService;
-    private final ArtifactRepository artifactRepository;
     private final ManageRefreshStatusService refreshStatusService;
 
 
@@ -62,17 +58,16 @@ public class ArtifactsResource extends BaseAuthorisedResource
     public ArtifactsResource(ArtifactsRefreshService artifactsRefreshService,
                              ManageRefreshStatusService updateStatusService,
                              AuthorisationProvider authorisationProvider,
-                             @Named("requestPrincipal") Provider<Principal> principalProvider, ArtifactRepository artifactRepository)
+                             @Named("requestPrincipal") Provider<Principal> principalProvider)
     {
         super(authorisationProvider, principalProvider);
         this.artifactsRefreshService = artifactsRefreshService;
         this.refreshStatusService = updateStatusService;
-        this.artifactRepository = artifactRepository;
     }
 
 
     @GET
-    @Path("/artifactsRefreshStatus")
+    @Path("/artifactsRefresh/status")
     @ApiOperation("get updateStatusService information")
     @Produces(MediaType.APPLICATION_JSON)
     public List<RefreshStatus> getStatus(
@@ -81,6 +76,7 @@ public class ArtifactsResource extends BaseAuthorisedResource
             @QueryParam("artifactId") String artifact,
             @QueryParam("versionId") String version,
             @QueryParam("running") Boolean running,
+            @QueryParam("success") Boolean success,
             @QueryParam("startTimeFrom")
             @ApiParam("entries that started refresh from this date yyyy-MM-dd HH:mm:ss") String startTimeFrom,
             @QueryParam("startTimeTo")
@@ -89,7 +85,7 @@ public class ArtifactsResource extends BaseAuthorisedResource
     {
         LocalDateTime fromStatTime = startTimeFrom == null ? null : LocalDateTime.parse(startTimeFrom, DATE_TIME_FORMATTER);
         LocalDateTime toStartTime = startTimeTo == null ? LocalDateTime.now() : LocalDateTime.parse(startTimeTo, DATE_TIME_FORMATTER);
-        return handle(ResourceLoggingAndTracing.STORE_STATUS, () -> refreshStatusService.find(group, artifact, version, running,fromStatTime,toStartTime));
+        return handle(ResourceLoggingAndTracing.STORE_STATUS, () -> refreshStatusService.find(group, artifact, version, running, success, fromStatTime,toStartTime));
     }
 
     @DELETE
@@ -202,36 +198,6 @@ public class ArtifactsResource extends BaseAuthorisedResource
         return ARTIFACTS_RESOURCE;
     }
 
-    @GET
-    @Path("/artifacts/{groupId}/{artifactId}/versions")
-    @ApiOperation(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<String> getRepositoryVersions(@PathParam("groupId") String groupId,
-                                                 @PathParam("artifactId") String artifactId)
-    {
-        return handle(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId,
-                () ->
-                {
-                    try
-                    {
-                        return artifactRepository.findVersions(groupId, artifactId).stream().map(v -> v.toVersionIdString()).collect(Collectors.toList());
-                    }
-                    catch (ArtifactRepositoryException e)
-                    {
-                        throw new RuntimeException(e.getMessage());
-                    }
-                });
-    }
-
-
-    @GET
-    @Path("/artifacts/versions/mismatch")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<VersionMismatch> getVersionMissMatches()
-    {
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES, () -> this.artifactsRefreshService.findVersionsMismatches());
-    }
 
     @PUT
     @Path("/artifactsRefresh/versions/missing")

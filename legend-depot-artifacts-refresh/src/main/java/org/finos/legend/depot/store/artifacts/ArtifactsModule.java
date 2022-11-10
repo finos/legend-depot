@@ -31,6 +31,7 @@ import org.finos.legend.depot.store.artifacts.api.generation.file.FileGeneration
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.api.status.RefreshStatusService;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactsResource;
+import org.finos.legend.depot.artifacts.repository.resources.RepositoryResource;
 import org.finos.legend.depot.store.artifacts.services.ArtifactResolverFactory;
 import org.finos.legend.depot.store.artifacts.services.ArtifactsRefreshServiceImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerImpl;

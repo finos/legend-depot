@@ -17,6 +17,10 @@ package org.finos.legend.depot.store.artifacts.domain.status;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsExclude;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.HasIdentifier;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 
@@ -25,13 +29,22 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RefreshStatus implements HasIdentifier
 {
+    @JsonProperty
     private String groupId;
+    @JsonProperty
     private String artifactId;
+    @JsonProperty
     private String versionId;
-    private boolean running = false;
+    @JsonProperty
+    private boolean running;
+    @JsonProperty
+    @EqualsExclude
     private MetadataEventResponse response;
+    @JsonProperty
     private Date lastRun;
+    @JsonProperty
     private Date startTime;
+    @JsonProperty
     private long duration;
 
     public RefreshStatus()
@@ -116,7 +129,6 @@ public class RefreshStatus implements HasIdentifier
         this.duration = duration;
     }
 
-
     public RefreshStatus withStartTime(Date startTime)
     {
         this.startTime = startTime;
@@ -136,8 +148,24 @@ public class RefreshStatus implements HasIdentifier
     {
         this.running = false;
         this.lastRun = new Date();
-        this.duration = lastRun.getTime() - startTime.getTime();
+        if (this.startTime != null)
+        {
+            this.duration = lastRun.getTime() - startTime.getTime();
+        }
         this.response = this.response != null ? this.response.combine(response) : response;
         return this;
     }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
 }
