@@ -13,14 +13,17 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.artifacts.domain.status;
+package org.finos.legend.depot.artifacts.repository.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsExclude;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VersionMismatch
@@ -35,35 +38,35 @@ public class VersionMismatch
     public List<String> versionsNotInCache = new ArrayList<>();
     @JsonProperty
     public List<String> versionsNotInRepo = new ArrayList<>();
+    @JsonProperty
+    @EqualsExclude
+    public List<String> errors = new ArrayList<>();
 
 
-    public VersionMismatch(String projectId, String groupId, String artifactId, List<String> versionsNotInCache, List<String> versionsNotInRepo)
+    public VersionMismatch(String projectId, String groupId, String artifactId, List<String> versionsNotInCache, List<String> versionsNotInRepo,List<String> errors)
     {
         this.projectId = projectId;
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.versionsNotInCache.addAll(versionsNotInCache);
         this.versionsNotInRepo.addAll(versionsNotInRepo);
+        this.errors.addAll(errors);
+    }
+
+    public VersionMismatch(String projectId, String groupId, String artifactId, List<String> versionsNotInCache, List<String> versionsNotInRepo)
+    {
+        this(projectId,groupId,artifactId,versionsNotInCache,versionsNotInRepo, Collections.emptyList());
     }
 
     @Override
-    public boolean equals(Object o)
+    public boolean equals(Object obj)
     {
-        if (this == o)
-        {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass())
-        {
-            return false;
-        }
-        VersionMismatch that = (VersionMismatch) o;
-        return Objects.equals(projectId, that.projectId) && Objects.equals(groupId, that.groupId) && Objects.equals(artifactId, that.artifactId);
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(projectId, groupId, artifactId);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 }

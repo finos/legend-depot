@@ -16,9 +16,6 @@
 package org.finos.legend.depot.store.artifacts.api;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.store.artifacts.domain.status.VersionMismatch;
-
-import java.util.List;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
@@ -64,8 +61,6 @@ public interface ArtifactsRefreshService
     void delete(String groupId, String artifactId, String versionId);
 
     boolean createIndexesIfAbsent();
-
-    List<VersionMismatch> findVersionsMismatches();
 
     MetadataEventResponse refreshProjectsWithMissingVersions();
 }

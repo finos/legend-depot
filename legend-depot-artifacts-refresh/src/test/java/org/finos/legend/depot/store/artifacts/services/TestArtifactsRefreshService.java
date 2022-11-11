@@ -19,6 +19,7 @@ import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.maven.impl.TestMavenArtifactsRepository;
+import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.domain.entity.StoredEntity;
@@ -63,6 +64,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.mockito.Mockito.mock;
 
 
 public class TestArtifactsRefreshService extends TestStoreMongo
@@ -86,7 +88,8 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected FileGenerationsArtifactsProvider fileGenerationsProvider = new FileGenerationsProvider();
 
     protected ArtifactRepository repository = new TestMavenArtifactsRepository();
-    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repository, artifacts, new IncludeProjectPropertiesConfiguration(properties));
+    protected RepositoryServices repositoryServices = mock(RepositoryServices.class);
+    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repository, repositoryServices, artifacts, new IncludeProjectPropertiesConfiguration(properties));
 
     protected ManageEntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, projectsService);
 

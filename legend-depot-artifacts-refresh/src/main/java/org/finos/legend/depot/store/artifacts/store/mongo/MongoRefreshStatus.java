@@ -21,6 +21,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
 import org.finos.legend.depot.store.mongo.BaseMongo;
@@ -47,6 +48,7 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
 
     private static final String RUNNING = "running";
     private static final String STAR_TIME = "startTime";
+    private static final String RESPONSE_STATUS = "response.status";
 
     @Inject
     public MongoRefreshStatus(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -62,7 +64,9 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
     @Override
     public boolean createIndexesIfAbsent()
     {
-        return createIndexIfAbsent("type-groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID);
+        createIndexIfAbsent("running",RUNNING);
+        createIndexIfAbsent("status",RESPONSE_STATUS);
+        return createIndexIfAbsent("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID);
     }
 
     @Override
@@ -77,8 +81,10 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
         //no specific validation
     }
 
+
+
     @Override
-    public List<RefreshStatus> find(String groupId, String artifactId, String version, Boolean running, LocalDateTime fromStartTime,LocalDateTime toStartTime)
+    public List<RefreshStatus> find(String groupId, String artifactId, String version, Boolean running, Boolean success, LocalDateTime fromStartTime,LocalDateTime toStartTime)
     {
         Bson filter = exists(GROUP_ID);
         if (groupId != null)
@@ -96,6 +102,10 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
         if (running != null)
         {
             filter = and(filter, eq(RUNNING, running));
+        }
+        if (success != null)
+        {
+            filter = and(filter, eq(RESPONSE_STATUS, success ? MetadataEventStatus.SUCCESS.name() : MetadataEventStatus.FAILED.name()));
         }
         if (fromStartTime != null)
         {

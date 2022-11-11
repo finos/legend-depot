@@ -17,6 +17,7 @@ package org.finos.legend.depot.store.server;
 
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import io.dropwizard.setup.Bootstrap;
+import org.finos.legend.depot.artifacts.repository.RepositoryModule;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.core.authorisation.AuthorisationModule;
 import org.finos.legend.depot.core.http.BaseServer;
@@ -71,6 +72,7 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 .modules(new DepotStoreResourcesModule())
                 .modules(new StoreStatusModule())
                 .modules(new ArtifactsModule())
+                .modules(new RepositoryModule())
                 .modules(new TracingModule())
                 .modules(new MetricsModule())
                 .modules(new NotificationsModule())

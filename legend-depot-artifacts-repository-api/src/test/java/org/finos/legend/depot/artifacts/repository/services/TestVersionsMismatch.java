@@ -13,16 +13,14 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.artifacts.services;
+package org.finos.legend.depot.artifacts.repository.services;
 
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
-import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
-import org.finos.legend.depot.store.artifacts.domain.status.VersionMismatch;
-import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,12 +33,11 @@ import java.util.List;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TestVersionsMismatch extends TestStoreMongo
+public class TestVersionsMismatch
 {
-    protected ManageProjectsService projectsStore = mock(ManageProjectsService.class);
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
-    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsStore, null, repository, null, new IncludeProjectPropertiesConfiguration(Collections.emptyList()));
-
+    protected ProjectsService projects = mock(ProjectsService.class);
+    protected RepositoryServices repositoryServices = new RepositoryServices(repository,projects);
 
     @Before
     public void setup() throws ArtifactRepositoryException
@@ -55,7 +52,7 @@ public class TestVersionsMismatch extends TestStoreMongo
         ProjectData testProjectD = new ProjectData("PROD-D","examples.metadata", "test4");
         testProjectD.getVersions().add("0.0.1");
 
-        when(projectsStore.getAll()).thenReturn(Arrays.asList(testProjectA,testProjectB,testProjectC,testProjectD));
+        when(projects.getAll()).thenReturn(Arrays.asList(testProjectA,testProjectB,testProjectC,testProjectD));
         when(repository.findVersions("examples.metadata", "test1")).thenReturn(Arrays.asList(VersionId.parseVersionId("2.2.0"),VersionId.parseVersionId("2.3.0"), VersionId.parseVersionId("2.3.1")));
         when(repository.findVersions("examples.metadata", "test2")).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.1")));
         when(repository.findVersions("examples.metadata", "test3")).thenReturn(Collections.emptyList());
@@ -66,7 +63,7 @@ public class TestVersionsMismatch extends TestStoreMongo
     public void getVersionsMismatch()
     {
 
-        List<VersionMismatch> counts = artifactsRefreshService.findVersionsMismatches();
+        List<VersionMismatch> counts = repositoryServices.findVersionsMismatches();
         Assert.assertNotNull(counts);
         Assert.assertEquals(3, counts.size());
         Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-A")).count());
@@ -81,6 +78,26 @@ public class TestVersionsMismatch extends TestStoreMongo
         Assert.assertEquals("1.0.0", prodB.versionsNotInRepo.get(0));
         VersionMismatch prodC = counts.stream().filter(p -> p.projectId.equals("PROD-C")).findFirst().get();
         Assert.assertEquals("2.0.1", prodC.versionsNotInRepo.get(0));
+
+
+    }
+
+    @Test
+    public void getVersionsMismatchWithExceptions() throws ArtifactRepositoryException
+    {
+        when(repository.findVersions("examples.metadata", "test4")).thenThrow(new ArtifactRepositoryException("not found"));
+
+        List<VersionMismatch> counts = repositoryServices.findVersionsMismatches();
+        Assert.assertNotNull(counts);
+        Assert.assertEquals(4, counts.size());
+        Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-A")).count());
+        Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-B")).count());
+        Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-C")).count());
+        Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-D")).count());
+
+        VersionMismatch prodD = counts.stream().filter(p -> p.projectId.equals("PROD-D")).findFirst().get();
+        Assert.assertFalse(prodD.errors.isEmpty());
+
 
 
     }
