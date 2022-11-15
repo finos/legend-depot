@@ -24,15 +24,20 @@ public interface RefreshStatusService
 {
     RefreshStatus get(String groupId, String artifactId, String version);
 
-    List<RefreshStatus> find(String groupId, String artifactId, String version, Boolean running, Boolean success, LocalDateTime startTimeFrom,LocalDateTime startTimeTo);
+    List<RefreshStatus> find(String groupId, String artifactId, String version, String parentEventId,Boolean running, Boolean success, LocalDateTime startTimeFrom,LocalDateTime startTimeTo);
 
     default List<RefreshStatus> getAll()
     {
-        return find(null,null,null,null,null,null,null);
+        return find(null,null,null,null,null,null,null,null);
+    }
+
+    default List<RefreshStatus> find(String groupId, String artifactId, String version)
+    {
+        return  find(groupId,artifactId,version,null,null,null,null,null);
     }
 
     default List<RefreshStatus> find(String groupId, String artifactId, String version, Boolean running)
     {
-        return  find(groupId,artifactId,version,running,null,null,null);
+        return  find(groupId,artifactId,version,null,running,null,null,null);
     }
 }

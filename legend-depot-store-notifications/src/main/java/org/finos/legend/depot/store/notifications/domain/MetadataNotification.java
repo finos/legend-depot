@@ -19,6 +19,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsExclude;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.HasIdentifier;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 
@@ -30,9 +33,12 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetadataNotification implements HasIdentifier
 {
-    public static final int DEFAULT_MAX_RETRIES = 5;
+    public static final int DEFAULT_MAX_RETRIES = 3;
+    @EqualsExclude
     private String id;
+    @EqualsExclude
     private String eventId;
+    private String parentEventId;
     @NotNull
     private String projectId;
     @NotNull
@@ -55,6 +61,7 @@ public class MetadataNotification implements HasIdentifier
                                 @JsonProperty(value = "version") String version,
                                 @JsonProperty(value = "lastUpdated") Date lastUpdated,
                                 @JsonProperty(value = "eventId") String eventId,
+                                @JsonProperty(value = "parentEvent") String parentEventId,
                                 @JsonProperty(value = "status") MetadataEventStatus status,
                                 @JsonProperty(value = "errors") List<String> errors,
                                 @JsonProperty(value = "fullUpdate") boolean fullUpdate,
@@ -67,6 +74,7 @@ public class MetadataNotification implements HasIdentifier
         this.versionId = version;
         this.maxRetries = maxRetries;
         this.eventId = eventId;
+        this.parentEventId = parentEventId;
         this.lastUpdated = lastUpdated;
         this.status = status;
         this.errors = errors;
@@ -78,7 +86,7 @@ public class MetadataNotification implements HasIdentifier
                                 String groupId,
                                 String artifactId)
     {
-        this(projectId, groupId, artifactId, null, new Date(), null, MetadataEventStatus.NEW, new ArrayList<>(), false, 0, DEFAULT_MAX_RETRIES);
+        this(projectId, groupId, artifactId, null, new Date(), null, null, MetadataEventStatus.NEW, new ArrayList<>(), false, 0, DEFAULT_MAX_RETRIES);
     }
 
 
@@ -88,17 +96,22 @@ public class MetadataNotification implements HasIdentifier
                                 String versionId,
                                 boolean fullUpdate)
     {
-        this(projectId, groupId, artifactId, versionId, new Date(), null, MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate, 0, DEFAULT_MAX_RETRIES);
+        this(projectId, groupId, artifactId, versionId, new Date(), null, null,MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate, 0, DEFAULT_MAX_RETRIES);
     }
 
     public MetadataNotification(String projectId, String groupId, String artifactId, String versionId)
     {
-        this(projectId, groupId, artifactId, versionId, new Date(), null, MetadataEventStatus.NEW, new ArrayList<>(), false, 0, DEFAULT_MAX_RETRIES);
+        this(projectId, groupId, artifactId, versionId, new Date(), null, null, MetadataEventStatus.NEW, new ArrayList<>(), false, 0, DEFAULT_MAX_RETRIES);
     }
 
     public MetadataNotification(String projectId, String groupId, String artifactId, String versionId, boolean fullUpdate,int maxRetries)
     {
-        this(projectId, groupId, artifactId, versionId, new Date(), null, MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate, 0, maxRetries);
+        this(projectId, groupId, artifactId, versionId, new Date(), null, null,MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate, 0, maxRetries);
+    }
+
+    public MetadataNotification(String projectId,String groupId, String artifactId, String versionId, boolean fullUpdate, String parentEvent)
+    {
+        this(projectId, groupId, artifactId, versionId, new Date(), null, parentEvent,MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate, 0, DEFAULT_MAX_RETRIES);
     }
 
 
@@ -191,6 +204,16 @@ public class MetadataNotification implements HasIdentifier
         return this;
     }
 
+    public String getParentEventId()
+    {
+        return parentEventId;
+    }
+
+    public void setParentEventId(String parentEventId)
+    {
+        this.parentEventId = parentEventId;
+    }
+
     public MetadataNotification increaseRetries()
     {
         this.retries++;
@@ -222,19 +245,28 @@ public class MetadataNotification implements HasIdentifier
 
     public MetadataNotification addErrors(List<String> errors)
     {
+        if (this.errors == null)
+        {
+            this.errors = new ArrayList<>();
+        }
         this.errors.addAll(errors);
         return this;
     }
 
     public MetadataNotification addError(String error)
     {
+        if (this.errors == null)
+        {
+            this.errors = new ArrayList<>();
+        }
         errors.add(error);
         return this;
     }
 
     public MetadataNotification failEvent(String error)
     {
-        errors.add(error);
+
+        this.addError(error);
         this.status = MetadataEventStatus.FAILED;
         return this;
     }
@@ -265,4 +297,17 @@ public class MetadataNotification implements HasIdentifier
     {
         return maxRetries;
     }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
 }

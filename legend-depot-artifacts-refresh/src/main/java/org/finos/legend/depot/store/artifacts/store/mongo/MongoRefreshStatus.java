@@ -49,6 +49,7 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
     private static final String RUNNING = "running";
     private static final String STAR_TIME = "startTime";
     private static final String RESPONSE_STATUS = "response.status";
+    private static final String PARENT_EVENT = "parentEventId";
 
     @Inject
     public MongoRefreshStatus(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -82,9 +83,8 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
     }
 
 
-
     @Override
-    public List<RefreshStatus> find(String groupId, String artifactId, String version, Boolean running, Boolean success, LocalDateTime fromStartTime,LocalDateTime toStartTime)
+    public List<RefreshStatus> find(String groupId, String artifactId, String version, String parentEventId, Boolean running, Boolean success, LocalDateTime fromStartTime,LocalDateTime toStartTime)
     {
         Bson filter = exists(GROUP_ID);
         if (groupId != null)
@@ -98,6 +98,10 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
         if (version != null)
         {
             filter = and(filter, eq(VERSION_ID, version));
+        }
+        if (parentEventId != null)
+        {
+            filter = and(filter, eq(PARENT_EVENT, parentEventId));
         }
         if (running != null)
         {

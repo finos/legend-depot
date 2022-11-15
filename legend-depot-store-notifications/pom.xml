@@ -31,8 +31,25 @@
         <!-- DEPOT -->
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-artifacts-refresh</artifactId>
+            <artifactId>legend-depot-model</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-admin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-tracing</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-http</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-store-mongo</artifactId>

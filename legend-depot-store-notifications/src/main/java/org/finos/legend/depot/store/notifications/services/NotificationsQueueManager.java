@@ -15,14 +15,13 @@
 
 package org.finos.legend.depot.store.notifications.services;
 
-import org.finos.legend.depot.domain.EntityValidator;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.domain.project.ProjectData;
-import org.finos.legend.depot.domain.version.VersionValidator;
-import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.Notifications;
+import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
@@ -30,28 +29,29 @@ import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
-public final class NotificationsQueueManager
+public final class NotificationsQueueManager implements NotificationsManager
 {
-
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(NotificationsQueueManager.class);
-    public static final String ALL = "all";
-    private final ManageProjectsService projects;
     private final Notifications events;
     private final Queue queue;
-    private final ArtifactsRefreshService artifactsRefreshService;
+    private final NotificationEventHandler eventHandler;
+    private final ProjectsService projectsService;
 
     @Inject
-    public NotificationsQueueManager(Notifications events, Queue queue, ManageProjectsService projects, ArtifactsRefreshService artifactsRefreshService)
+    public NotificationsQueueManager(ProjectsService projectsService, Notifications events, Queue queue, NotificationEventHandler eventHandler)
     {
         this.events = events;
         this.queue = queue;
-        this.projects = projects;
-        this.artifactsRefreshService = artifactsRefreshService;
+        this.eventHandler = eventHandler;
+        this.projectsService = projectsService;
     }
 
-    public int run()
+
+    public int handle()
     {
         return TracerFactory.get().executeWithTrace(ResourceLoggingAndTracing.HANDLE_EVENTS_IN_QUEUE, () -> handleEvents(queue.getFirstInQueue()));
     }
@@ -68,91 +68,97 @@ public final class NotificationsQueueManager
             }
             else
             {
-                if (isAllProjectsVersionsEvent(event))
-                {
-                    handleRefreshAllEvent();
-                }
-                else
-                {
-                    handleEvent(event);
-                }
+                handleEvent(event);
             }
-
             LOGGER.info("Finished processing events");
             return 1;
         }
         return 0;
     }
 
-    private boolean isAllProjectsVersionsEvent(MetadataNotification event)
-    {
-        return ALL.equalsIgnoreCase(event.getVersionId()) && ALL.equalsIgnoreCase(event.getGroupId()) && ALL.equalsIgnoreCase(event.getArtifactId());
-    }
-
-    private void handleRefreshAllEvent()
-    {
-        projects.getAll().forEach(p ->
-                queue.push(new MetadataNotification(p.getProjectId(), p.getGroupId(), p.getArtifactId(), ALL, true)));
-    }
 
     void handleEvent(MetadataNotification event)
     {
-        if (!isValidEvent(event))
+        List<String> validationErrors = eventHandler.validateEvent(event);
+        if (!validationErrors.isEmpty())
         {
-            events.completeWithOutRetry(event.failEvent("Invalid project configuration provided"));
-            return;
-        }
-        if (!ALL.equalsIgnoreCase(event.getVersionId()) && !VersionValidator.isValid(event.getVersionId()))
-        {
-            events.completeWithOutRetry(event.failEvent(String.format("Invalid versionId %s provided ", event.getVersionId())));
+            events.completeWithOutRetry(event.failEvent(String.join(",",validationErrors)));
             return;
         }
 
-        Optional<ProjectData> existingProject = projects.find(event.getGroupId(), event.getArtifactId());
-        if (!existingProject.isPresent())
-        {
-            projects.createOrUpdate(new ProjectData(event.getProjectId(), event.getGroupId(), event.getArtifactId()));
-        }
-        MetadataEventResponse response = null;
+        MetadataEventResponse response = new MetadataEventResponse();
         try
         {
-            response = ALL.equalsIgnoreCase(event.getVersionId()) ?
-                    artifactsRefreshService.refreshAllVersionsForProject(event.getGroupId(), event.getArtifactId(),event.isFullUpdate()) :
-                    artifactsRefreshService.refreshVersionForProject(event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.isFullUpdate());
-
+            response.combine(eventHandler.handleEvent(event));
         }
-         catch (Exception e)
+        catch (Exception e)
         {
-            if (response != null)
-            {
-                 response.addError(e.getMessage());
-            }
-            else
-            {
-                response =  new MetadataEventResponse().addError(e.getMessage());
-            }
+            response.addError(e.getMessage());
+
         }
-        if (response != null)
+        if (response.hasErrors())
         {
-            if (response.hasErrors())
-            {
-                queue.push(event.increaseRetries().setStatus(MetadataEventStatus.RETRY).addErrors(response.getErrors()));
-                LOGGER.info("event completed with errors [{}]", response.getErrors());
-            }
-            else
-            {
-                events.complete(event.completedSuccessfully());
-                LOGGER.info("event completed successfully");
-            }
+            queue.push(event.increaseRetries().setStatus(MetadataEventStatus.RETRY).addErrors(response.getErrors()));
+            LOGGER.info("event completed with errors [{}]", response.getErrors());
         }
-
-
+        else
+        {
+            events.complete(event.completedSuccessfully());
+            LOGGER.info("event completed successfully");
+        }
     }
 
-
-    private boolean isValidEvent(MetadataNotification event)
+    private void validateMavenCoordinates(String projectId, String groupId, String artifactId)
     {
-        return EntityValidator.isValidGroupId(event.getGroupId())
-                && EntityValidator.isValidArtifactId(event.getArtifactId());
+        Optional<ProjectData> project = projectsService.find(groupId, artifactId);
+        if (project.isPresent() && !project.get().getProjectId().equals(projectId))
+        {
+            throw new IllegalArgumentException(String.format("%s:%s coordinates already registered with project %s", groupId, artifactId, project.get().getProjectId()));
+        }
+    }
+
+    @Override
+    public String notify(String projectId, String groupId, String artifactId, String versionId, boolean fullUpdate, int maxRetries)
+    {
+        validateMavenCoordinates(projectId, groupId, artifactId);
+        //we create a notification event with fullUpdate flag set to false(ie partial update)
+        //this means, it will only process changed jar files and will only handle those entities,etc
+        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId, false,maxRetries);
+        return queue.push(event);
+    }
+
+    @Override
+    public List<MetadataNotification> findProcessedEvents(LocalDateTime from, LocalDateTime to)
+    {
+        return this.events.find(from,to);
+    }
+
+    @Override
+    public Optional<MetadataNotification> getProcessedEvent(String eventId)
+    {
+        return this.events.get(eventId);
+    }
+
+    @Override
+    public List<MetadataNotification> getAllInQueue()
+    {
+        return this.queue.getAll();
+    }
+
+    @Override
+    public Optional<MetadataNotification> findInQueue(String eventId)
+    {
+        return this.queue.get(eventId);
+    }
+
+    public void handleAll()
+    {
+        Optional<MetadataNotification> event = queue.getFirstInQueue();
+        do
+        {
+            handleEvents(event);
+            event = queue.getFirstInQueue();
+        }
+        while (event.isPresent());
     }
 }

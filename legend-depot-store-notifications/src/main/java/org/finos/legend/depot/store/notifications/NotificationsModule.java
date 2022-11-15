@@ -18,10 +18,11 @@ package org.finos.legend.depot.store.notifications;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
-import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
+import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.Notifications;
+import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
 import org.finos.legend.depot.store.notifications.resources.NotificationsManagerResource;
@@ -46,17 +47,18 @@ public class NotificationsModule extends PrivateModule
 
         expose(Notifications.class);
         expose(Queue.class);
+        expose(NotificationsManager.class);
         expose(NotificationsManagerResource.class);
     }
 
     @Provides
     @Singleton
     @Named("queue-observer")
-    boolean initQueue(SchedulesFactory schedulesFactory, QueueManagerConfiguration config, ManageProjectsService projects, Notifications events, Queue queue, ArtifactsRefreshService artifactsRefreshService)
+    NotificationsManager initQueue(SchedulesFactory schedulesFactory, QueueManagerConfiguration config, ProjectsService projectsService, Notifications events, Queue queue, NotificationEventHandler notificationHandler)
     {
-        NotificationsQueueManager eventsQueueManager = new NotificationsQueueManager(events, queue, projects, artifactsRefreshService);
-        schedulesFactory.register(QUEUE_OBSERVER, LocalDateTime.now().plusNanos(config.getQueueDelay() * 1000000L), config.getQueueInterval(), true, eventsQueueManager::run);
-        return true;
+        NotificationsManager eventsQueueManager = new NotificationsQueueManager(projectsService, events, queue, notificationHandler);
+        schedulesFactory.register(QUEUE_OBSERVER, LocalDateTime.now().plusNanos(config.getQueueDelay() * 1000000L), config.getQueueInterval(), true, eventsQueueManager::handle);
+        return eventsQueueManager;
     }
 
 }

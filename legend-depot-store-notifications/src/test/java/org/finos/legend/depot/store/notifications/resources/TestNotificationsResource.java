@@ -15,31 +15,34 @@
 
 package org.finos.legend.depot.store.notifications.resources;
 
-import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
+import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
+import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.store.notifications.services.NotificationsQueueManager;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.QueueMongo;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.inject.Provider;
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static org.mockito.Mockito.mock;
 
 
 public class TestNotificationsResource extends TestStoreMongo
 {
-
     public static final String VERSION = "1.0.0";
     private final NotificationsMongo eventsMongo = new NotificationsMongo(mongoProvider);
     private final Queue queue = new QueueMongo(mongoProvider);
     private final ManageProjectsService projectsService = new ProjectsServiceImpl(new ProjectsMongo(mongoProvider));
+    private final NotificationEventHandler handler = mock(NotificationEventHandler.class);
+    private final NotificationsManager notificationsManager = new NotificationsQueueManager(projectsService,eventsMongo,queue,handler);
 
     @Test
     public void canRetrieveEventsByDate()
@@ -55,7 +58,7 @@ public class TestNotificationsResource extends TestStoreMongo
         eventsMongo.insert(event2.setLastUpdated(toDate(aPointInTime.plusHours(1))));
         eventsMongo.insert(event3.setLastUpdated(toDate(aPointInTime.plusHours(2))));
         eventsMongo.insert(event4.setLastUpdated(toDate(aPointInTime.plusHours(2).plusMinutes(35))));
-        NotificationsManagerResource resource = new NotificationsManagerResource(projectsService, eventsMongo, queue, new MockAuthorisationProvider(), null);
+        NotificationsManagerResource resource = new NotificationsManagerResource(notificationsManager);
 
         List<MetadataNotification> allEvents = resource.getAllEvents(aPointInTime.minusDays(100).format(NotificationsManagerResource.DATE_TIME_FORMATTER), null);
         Assert.assertNotNull(allEvents);
@@ -67,27 +70,4 @@ public class TestNotificationsResource extends TestStoreMongo
         Assert.assertEquals(2, afterLunch.size());
     }
 
-    @Test
-    public void refreshAll()
-    {
-        NotificationsManagerResource resource = new NotificationsManagerResource(projectsService, eventsMongo, queue, new MockAuthorisationProvider(), null);
-
-        resource.queueRefreshAllEvent();
-
-
-        LocalDateTime lunchTime = LocalDateTime.parse("2019-01-01 12:00:00", NotificationsManagerResource.DATE_TIME_FORMATTER);
-        List<MetadataNotification> afterLunch = resource.getAllEvents(lunchTime.format(NotificationsManagerResource.DATE_TIME_FORMATTER), null);
-        Assert.assertNotNull(afterLunch);
-        Assert.assertEquals(1, resource.getAllEventsInQueue().size());
-    }
-
-
-    private static class MockAuthorisationProvider implements AuthorisationProvider
-    {
-        @Override
-        public void authorise(Provider<Principal> principalProvider, String role)
-        {
-            role.equalsIgnoreCase("Notifications");
-        }
-    }
 }

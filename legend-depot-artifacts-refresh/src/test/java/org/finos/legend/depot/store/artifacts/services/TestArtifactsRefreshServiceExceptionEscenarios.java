@@ -19,7 +19,6 @@ import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.artifacts.repository.maven.impl.TestMavenArtifactsRepository;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
@@ -46,6 +45,8 @@ import org.finos.legend.depot.store.artifacts.store.mongo.ArtifactsMongo;
 import org.finos.legend.depot.store.artifacts.store.mongo.MongoRefreshStatus;
 import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.finos.legend.depot.store.notifications.api.Queue;
+import org.finos.legend.depot.store.notifications.store.mongo.QueueMongo;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.Assert;
 import org.junit.Before;
@@ -53,7 +54,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -86,7 +86,8 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     protected ManageEntitiesService entitiesService = new EntitiesServiceImpl(mongoEntities,projectsService);
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);
     protected RepositoryServices repositoryServices = mock(RepositoryServices.class);
-    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repository, repositoryServices, artifacts, new IncludeProjectPropertiesConfiguration(properties));
+    protected Queue queue = new QueueMongo(mongoProvider);
+    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repository, repositoryServices, artifacts, queue, new IncludeProjectPropertiesConfiguration(properties));
 
 
     @Before

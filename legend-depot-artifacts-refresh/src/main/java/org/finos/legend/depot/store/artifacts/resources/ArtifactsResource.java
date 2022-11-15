@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -75,6 +76,8 @@ public class ArtifactsResource extends BaseAuthorisedResource
             @QueryParam("groupId") String group,
             @QueryParam("artifactId") String artifact,
             @QueryParam("versionId") String version,
+            @QueryParam("parentEventId")
+            @ApiParam("refresh could be started by another event, eg refresh all cache versions") String parentId,
             @QueryParam("running") Boolean running,
             @QueryParam("success") Boolean success,
             @QueryParam("startTimeFrom")
@@ -85,7 +88,7 @@ public class ArtifactsResource extends BaseAuthorisedResource
     {
         LocalDateTime fromStatTime = startTimeFrom == null ? null : LocalDateTime.parse(startTimeFrom, DATE_TIME_FORMATTER);
         LocalDateTime toStartTime = startTimeTo == null ? LocalDateTime.now() : LocalDateTime.parse(startTimeTo, DATE_TIME_FORMATTER);
-        return handle(ResourceLoggingAndTracing.STORE_STATUS, () -> refreshStatusService.find(group, artifact, version, running, success, fromStatTime,toStartTime));
+        return handle(ResourceLoggingAndTracing.STORE_STATUS, () -> refreshStatusService.find(group, artifact, version, parentId,running, success, fromStatTime,toStartTime));
     }
 
     @DELETE
@@ -109,19 +112,21 @@ public class ArtifactsResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataEventResponse updateProjectVersion(@PathParam("groupId") String groupId,
                                                       @PathParam("artifactId") String artifactId,
-                                                      @PathParam("versionId") String versionId)
+                                                      @PathParam("versionId") String versionId,
+                                                      @QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to force refresh and its dependencies") boolean fullUpdate)
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_VERSION, ResourceLoggingAndTracing.UPDATE_VERSION + groupId + artifactId + versionId, () -> artifactsRefreshService.refreshVersionForProject(groupId, artifactId, versionId, true));
+        return handle(ResourceLoggingAndTracing.UPDATE_VERSION, ResourceLoggingAndTracing.UPDATE_VERSION + groupId + artifactId + versionId, () -> artifactsRefreshService.refreshVersionForProject(groupId, artifactId, versionId, fullUpdate));
     }
 
     @PUT
     @Path("/artifactsRefresh/{groupId}/{artifactId}/versions")
     @ApiOperation(ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse updateProjectVersions(@PathParam("groupId") String groupId,
-                                                       @PathParam("artifactId") String artifactId)
+    public MetadataEventResponse updateAllProjectVersions(@PathParam("groupId") String groupId,
+                                                       @PathParam("artifactId") String artifactId,
+                                                       @QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to force refresh and its dependencies") boolean fullUpdate)
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS, ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS + groupId + artifactId, () -> artifactsRefreshService.refreshAllVersionsForProject(groupId, artifactId, true));
+        return handle(ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS, ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS + groupId + artifactId, () -> artifactsRefreshService.refreshAllVersionsForProject(groupId, artifactId, fullUpdate));
     }
 
     @PUT
@@ -129,34 +134,36 @@ public class ArtifactsResource extends BaseAuthorisedResource
     @ApiOperation(ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION)
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataEventResponse refreshRevision(@PathParam("groupId") String groupId,
-                                                 @PathParam("artifactId") String artifactId)
+                                                 @PathParam("artifactId") String artifactId,
+                                                 @QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to force refresh and its dependencies") boolean fullUpdate)
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION, ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION + groupId + artifactId, () -> artifactsRefreshService.refreshMasterSnapshotForProject(groupId, artifactId,true));
+        return handle(ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION, ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION + groupId + artifactId, () -> artifactsRefreshService.refreshMasterSnapshotForProject(groupId, artifactId,fullUpdate));
     }
 
     @PUT
     @Path("/artifactsRefresh/versions")
     @ApiOperation(ResourceLoggingAndTracing.UPDATE_ALL_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse updateAllVersions()
+    public MetadataEventResponse updateAllVersions(@QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to force refresh and its dependencies") boolean fullUpdate)
     {
         return handle(ResourceLoggingAndTracing.UPDATE_ALL_VERSIONS, () ->
         {
             validateUser();
-            return artifactsRefreshService.refreshAllVersionsForAllProjects(true);
+            return artifactsRefreshService.refreshAllVersionsForAllProjects(fullUpdate);
         });
     }
+
 
     @PUT
     @Path("/artifactsRefresh/latest")
     @ApiOperation(ResourceLoggingAndTracing.UPDATE_ALL_MASTER_REVISIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse refreshAllLatestRevisions()
+    public MetadataEventResponse refreshAllLatestRevisions(@QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to force refresh and its dependencies") boolean fullUpdate)
     {
         return handle(ResourceLoggingAndTracing.UPDATE_ALL_MASTER_REVISIONS, () ->
         {
             validateUser();
-            return artifactsRefreshService.refreshMasterSnapshotForAllProjects(true);
+            return artifactsRefreshService.refreshMasterSnapshotForAllProjects(fullUpdate);
         });
     }
 
