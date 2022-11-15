@@ -41,6 +41,7 @@ public class NotificationsModule extends PrivateModule
     protected void configure()
     {
 
+        bind(NotificationsManager.class).to(NotificationsQueueManager.class);
         bind(Notifications.class).to(NotificationsMongo.class);
         bind(Queue.class).to(QueueMongo.class);
         bind(NotificationsManagerResource.class);
@@ -54,9 +55,9 @@ public class NotificationsModule extends PrivateModule
     @Provides
     @Singleton
     @Named("queue-observer")
-    NotificationsManager initQueue(SchedulesFactory schedulesFactory, QueueManagerConfiguration config, ProjectsService projectsService, Notifications events, Queue queue, NotificationEventHandler notificationHandler)
+    NotificationsQueueManager initQueue(SchedulesFactory schedulesFactory, QueueManagerConfiguration config, ProjectsService projectsService, Notifications events, Queue queue, NotificationEventHandler notificationHandler)
     {
-        NotificationsManager eventsQueueManager = new NotificationsQueueManager(projectsService, events, queue, notificationHandler);
+        NotificationsQueueManager eventsQueueManager = new NotificationsQueueManager(projectsService, events, queue, notificationHandler);
         schedulesFactory.register(QUEUE_OBSERVER, LocalDateTime.now().plusNanos(config.getQueueDelay() * 1000000L), config.getQueueInterval(), true, eventsQueueManager::handle);
         return eventsQueueManager;
     }
