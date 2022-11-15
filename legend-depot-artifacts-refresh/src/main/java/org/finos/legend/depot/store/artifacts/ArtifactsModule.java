@@ -31,7 +31,7 @@ import org.finos.legend.depot.store.artifacts.api.generation.file.FileGeneration
 import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
 import org.finos.legend.depot.store.artifacts.api.status.RefreshStatusService;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactsResource;
-import org.finos.legend.depot.artifacts.repository.resources.RepositoryResource;
+import org.finos.legend.depot.store.artifacts.services.ArtifactRefreshEventHandler;
 import org.finos.legend.depot.store.artifacts.services.ArtifactResolverFactory;
 import org.finos.legend.depot.store.artifacts.services.ArtifactsRefreshServiceImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerImpl;
@@ -43,6 +43,7 @@ import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvi
 import org.finos.legend.depot.store.artifacts.store.mongo.ArtifactsMongo;
 import org.finos.legend.depot.store.artifacts.store.mongo.MongoRefreshStatus;
 import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
+import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 
 import javax.inject.Named;
 import java.time.LocalDateTime;
@@ -71,6 +72,7 @@ public class ArtifactsModule extends PrivateModule
         bind(FileGenerationsArtifactsProvider.class).to(FileGenerationsProvider.class);
 
         bind(ArtifactsRefreshService.class).to(ArtifactsRefreshServiceImpl.class);
+        bind(NotificationEventHandler.class).to(ArtifactRefreshEventHandler.class);
 
         expose(EntityArtifactsProvider.class);
         expose(VersionedEntityArtifactsProvider.class);
@@ -78,6 +80,7 @@ public class ArtifactsModule extends PrivateModule
 
         expose(ManageRefreshStatusService.class);
         expose(RefreshStatusService.class);
+        expose(NotificationEventHandler.class);
         expose(ArtifactsResource.class);
     }
 
@@ -114,7 +117,7 @@ public class ArtifactsModule extends PrivateModule
     @Named("update-versions")
     boolean initVersions(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(UPDATE_VERSIONS_SCHEDULER, LocalDateTime.now().plusHours(2), configuration.getVersionsUpdateIntervalInMillis(), false,artifactsRefreshService::refreshAllVersionsForAllProjects);
+        schedulesFactory.register(UPDATE_VERSIONS_SCHEDULER, LocalDateTime.now().plusHours(2), configuration.getVersionsUpdateIntervalInMillis(), false,() -> artifactsRefreshService.refreshAllVersionsForAllProjects(false));
         return true;
     }
 
@@ -123,7 +126,7 @@ public class ArtifactsModule extends PrivateModule
     @Named("update-revisions")
     boolean initRevisions(SchedulesFactory schedulesFactory,ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusHours(1), configuration.getLatestUpdateIntervalInMillis(),false, artifactsRefreshService::refreshMasterSnapshotForAllProjects);
+        schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusHours(1), configuration.getLatestUpdateIntervalInMillis(),false, () -> artifactsRefreshService.refreshMasterSnapshotForAllProjects(false));
         return true;
     }
 

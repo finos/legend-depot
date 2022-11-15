@@ -22,6 +22,7 @@ import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface ArtifactRepository

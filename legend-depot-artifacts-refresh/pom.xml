@@ -59,6 +59,10 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-notifications</artifactId>
+        </dependency>
         <!-- DEPOT -->
 
         <!-- SDLC -->

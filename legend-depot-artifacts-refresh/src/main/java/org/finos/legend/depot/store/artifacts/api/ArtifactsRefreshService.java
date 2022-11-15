@@ -28,31 +28,13 @@ public interface ArtifactsRefreshService
 
     MetadataEventResponse refreshMasterSnapshotForAllProjects(boolean fullUpdate);
 
-    default MetadataEventResponse refreshMasterSnapshotForAllProjects()
-    {
-        return  refreshMasterSnapshotForAllProjects(false);
-    }
-
     MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean fullUpdate);
 
-    default MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId)
-    {
-        return refreshVersionForProject(groupId, artifactId, versionId, false);
-    }
+    MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean fullUpdate, String parentEventId);
 
     MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate);
 
-    default MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId)
-    {
-        return refreshAllVersionsForProject(groupId,artifactId,false);
-    }
-
     MetadataEventResponse refreshAllVersionsForAllProjects(boolean fullUpdate);
-
-    default MetadataEventResponse refreshAllVersionsForAllProjects()
-    {
-        return refreshAllVersionsForAllProjects(false);
-    }
 
     MetadataEventResponse retireLeastRecentlyUsedVersions(int numberOfDays);
 
@@ -63,4 +45,5 @@ public interface ArtifactsRefreshService
     boolean createIndexesIfAbsent();
 
     MetadataEventResponse refreshProjectsWithMissingVersions();
-}
+
+  }

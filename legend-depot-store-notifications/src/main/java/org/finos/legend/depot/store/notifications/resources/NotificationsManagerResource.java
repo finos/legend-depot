@@ -18,19 +18,12 @@ package org.finos.legend.depot.store.notifications.resources;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
-import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
-import org.finos.legend.depot.domain.project.ProjectData;
-import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.store.notifications.api.Notifications;
-import org.finos.legend.depot.store.notifications.api.Queue;
+import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
-import org.finos.legend.depot.store.notifications.domain.RefreshAllMetadataNotification;
+import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -38,7 +31,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -46,28 +38,17 @@ import java.util.Optional;
 
 @Path("")
 @Api("Notifications")
-public class NotificationsManagerResource extends BaseAuthorisedResource
+public class NotificationsManagerResource extends BaseResource
 {
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-    private final Notifications eventsApi;
-    private final Queue queue;
-    private final ManageProjectsService projectsService;
+    private final NotificationsManager notificationsManager;
 
     @Inject
-    protected NotificationsManagerResource(ManageProjectsService projectsService, Notifications events, Queue queue, AuthorisationProvider authorisationProvider, @Named("requestPrincipal") Provider<Principal> principalProvider)
+    protected NotificationsManagerResource(NotificationsManager notificationsManager)
     {
-        super(authorisationProvider, principalProvider);
-        this.projectsService = projectsService;
-        this.eventsApi = events;
-        this.queue = queue;
-    }
-
-    @Override
-    protected String getResourceName()
-    {
-        return "Notifications";
+        super();
+        this.notificationsManager = notificationsManager;
     }
 
     @GET
@@ -80,7 +61,7 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
                                                    @ApiParam("include  up to this date yyyy-MM-dd HH:mm:ss (default is now)") String to)
     {
         return handle(ResourceLoggingAndTracing.FIND_PAST_EVENTS, () ->
-                eventsApi.find(from == null ? null : LocalDateTime.parse(from, DATE_TIME_FORMATTER),
+                notificationsManager.findProcessedEvents(from == null ? null : LocalDateTime.parse(from, DATE_TIME_FORMATTER),
                         to == null ? null : LocalDateTime.parse(to, DATE_TIME_FORMATTER)));
     }
 
@@ -90,17 +71,7 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<MetadataNotification> getNotificationById(@PathParam("eventId") String eventId)
     {
-        return handle(ResourceLoggingAndTracing.FIND_EVENT_BY_ID, () -> eventsApi.get(eventId));
-    }
-
-    @GET
-    @Path("/queuesRefreshAllVersions")
-    @ApiOperation(ResourceLoggingAndTracing.ENQUEUE_REFRESH_ALL_EVENT)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String queueRefreshAllEvent()
-    {
-        validateUser();
-        return handle(ResourceLoggingAndTracing.ENQUEUE_REFRESH_ALL_EVENT, () -> queue.push(new RefreshAllMetadataNotification()));
+        return handle(ResourceLoggingAndTracing.FIND_EVENT_BY_ID, () -> notificationsManager.getProcessedEvent(eventId));
     }
 
     @GET
@@ -109,7 +80,7 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<MetadataNotification> getAllEventsInQueue()
     {
-        return handle(ResourceLoggingAndTracing.GET_ALL_EVENTS_IN_QUEUE, queue::getAll);
+        return handle(ResourceLoggingAndTracing.GET_ALL_EVENTS_IN_QUEUE, notificationsManager::getAllInQueue);
     }
 
     @GET
@@ -118,7 +89,7 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<MetadataNotification> geEventsInQueue(@PathParam("eventId") String eventId)
     {
-        return handle(ResourceLoggingAndTracing.GET_EVENT_IN_QUEUE, () -> queue.getAll().stream().filter(e -> eventId.equals(eventId))).findFirst();
+        return handle(ResourceLoggingAndTracing.GET_EVENT_IN_QUEUE, () -> this.notificationsManager.findInQueue(eventId));
     }
 
 
@@ -131,30 +102,10 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
                              @PathParam("artifactId") String artifactId,
                              @PathParam("versionId") String versionId,
                              @QueryParam("maxRetries")
-                             @DefaultValue("5")
+                             @DefaultValue("3")
                              @ApiParam("Whether to retry operation if it fails") int maxRetries)
     {
-        return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> pushToQueue(projectId, groupId, artifactId, versionId, maxRetries));
+        return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId,false, maxRetries));
     }
-
-    private void validateMavenCoordinates(String projectId, String groupId, String artifactId)
-    {
-        Optional<ProjectData> project = projectsService.find(groupId, artifactId);
-        if (project.isPresent() && !project.get().getProjectId().equals(projectId))
-        {
-            throw new IllegalArgumentException(String.format("%s:%s coordinates already registered with project %s", groupId, artifactId, project.get().getProjectId()));
-        }
-    }
-
-
-    protected String pushToQueue(String projectId, String groupId, String artifactId, String versionId, int maxRetries)
-    {
-        validateMavenCoordinates(projectId, groupId, artifactId);
-        //we create a notification event with fullUpdate flag set to false(ie partial update)
-        //this means, it will only process changed jar files and will only handle those entities,etc
-        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId, false,maxRetries);
-        return queue.push(event);
-    }
-
 
 }

@@ -23,7 +23,6 @@ import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
 import org.finos.legend.depot.store.metrics.api.ManageQueryMetrics;
 import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
 import org.finos.legend.depot.store.status.domain.StoreStatus;
-import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.Collections;

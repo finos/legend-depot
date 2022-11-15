@@ -13,16 +13,16 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.notifications.domain;
+package org.finos.legend.depot.store.notifications.api;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class RefreshAllMetadataNotification extends MetadataNotification
+import java.util.List;
+
+public interface NotificationEventHandler
 {
+    MetadataEventResponse handleEvent(MetadataNotification event);
 
-    public RefreshAllMetadataNotification()
-    {
-        super("all", "all", "all","all",true);
-    }
+    List<String> validateEvent(MetadataNotification event);
 }

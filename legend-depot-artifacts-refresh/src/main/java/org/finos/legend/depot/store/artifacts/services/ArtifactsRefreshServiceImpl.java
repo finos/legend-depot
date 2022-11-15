@@ -38,6 +38,8 @@ import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
 import org.finos.legend.depot.store.metrics.QueryMetricsContainer;
+import org.finos.legend.depot.store.notifications.api.Queue;
+import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
@@ -68,23 +70,30 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     private static final String ALL = "all";
     private static final String MISSING = "missing";
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ArtifactsRefreshServiceImpl.class);
+    private static final String REFRESH_ALL_VERSIONS_FOR_ALL_PROJECTS = "refreshAllVersionsForAllProjects";
+    private static final String REFRESH_MASTER_SNAPSHOT_FOR_ALL_PROJECTS = "refreshMasterSnapshotForAllProjects";
+    private static final String REFRESH_ALL_VERSIONS_FOR_PROJECT = "refreshAllVersionsForProject";
+    private static final String REFRESH_PROJECTS_WITH_MISSING_VERSIONS = "refreshProjectsWithMissingVersions";
+    private static final String REFRESH_PROJECT_VERSION_ARTIFACTS = "refreshProjectVersionArtifacts";
 
     private final ManageProjectsService projects;
     private final ManageRefreshStatusService store;
     private final ArtifactRepository repository;
     private final RepositoryServices repositoryServices;
     private final UpdateArtifacts artifacts;
+    private final Queue workQueue;
     private final List<String> projectProperties;
 
 
     @Inject
-    public ArtifactsRefreshServiceImpl(ManageProjectsService projects, ManageRefreshStatusService store, ArtifactRepository repository, RepositoryServices repositoryServices, UpdateArtifacts artifacts, IncludeProjectPropertiesConfiguration includePropertyConfig)
+    public ArtifactsRefreshServiceImpl(ManageProjectsService projects, ManageRefreshStatusService store, ArtifactRepository repository, RepositoryServices repositoryServices, UpdateArtifacts artifacts, Queue refreshWorkQueue, IncludeProjectPropertiesConfiguration includePropertyConfig)
     {
         this.projects = projects;
         this.store = store;
         this.repository = repository;
         this.repositoryServices = repositoryServices;
         this.artifacts = artifacts;
+        this.workQueue = refreshWorkQueue;
         this.projectProperties = includePropertyConfig.getProperties();
         try
         {
@@ -106,7 +115,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         return Arrays.asList(ArtifactType.ENTITIES, ArtifactType.VERSIONED_ENTITIES,ArtifactType.FILE_GENERATIONS);
     }
 
-    private MetadataEventResponse handleRefresh(String groupId, String artifactId, String version, Supplier<MetadataEventResponse> functionToExecute)
+    private MetadataEventResponse handleRefresh(String groupId, String artifactId, String version, String parentEventId, Supplier<MetadataEventResponse> functionToExecute)
     {
         MetadataEventResponse response = new MetadataEventResponse();
         getLOGGER().info("Starting [{}{}{}] refresh", groupId, artifactId, version);
@@ -118,6 +127,10 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         }
         try
         {
+            if (parentEventId != null)
+            {
+                storeStatus.setParentEventId(parentEventId);
+            }
             storeStatus = store.createOrUpdate(storeStatus.startRunning());
             response = functionToExecute.get();
             storeStatus = store.createOrUpdate(storeStatus.stopRunning(response));
@@ -167,48 +180,84 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     @Override
     public MetadataEventResponse  refreshAllVersionsForAllProjects(boolean fullUpdate)
     {
-        return executeWithTrace("refreshAllVersionsForAllProjects",ALL, ALL, ALL, () ->
+        return executeWithTrace(REFRESH_ALL_VERSIONS_FOR_ALL_PROJECTS,ALL, ALL, ALL, () ->
                 {
                     MetadataEventResponse result = new MetadataEventResponse();
-                    ParallelIterate.forEach(getProjects(), p -> result.combine(refreshAllVersionsForProject(p, fullUpdate)));
+                    String parentEvent = buildParentEventId(ALL, ALL, ALL);
+                    result.addMessage(String.format("Parent event: %s",parentEvent));
+                    ParallelIterate.forEach(getProjects(),project -> result.combine(refreshAllVersionsForProject(project,fullUpdate,parentEvent)));
                     return result;
                 }
         );
     }
-
+    
     @Override
     public MetadataEventResponse refreshMasterSnapshotForAllProjects(boolean fullUpdate)
     {
-        return executeWithTrace("refreshMasterSnapshotForAllProjects", ALL, ALL, MASTER_SNAPSHOT, () ->
+        return executeWithTrace(REFRESH_MASTER_SNAPSHOT_FOR_ALL_PROJECTS, ALL, ALL, MASTER_SNAPSHOT, () ->
                 {
                     MetadataEventResponse result = new MetadataEventResponse();
-                    ParallelIterate.forEach(getProjects(), project -> result.combine(refreshVersionForProject(project,MASTER_SNAPSHOT,fullUpdate)));
+                    String parentEvent =  buildParentEventId(ALL, ALL, MASTER_SNAPSHOT);
+                    result.addMessage(String.format("Parent event: %s",parentEvent));
+                    ParallelIterate.forEach(getProjects(), project -> result.addMessage(queueWorkToRefreshProjectVersion(project, MASTER_SNAPSHOT, fullUpdate, parentEvent)));
                     return result;
                 }
         );
     }
 
     @Override
+    public MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate)
+    {
+        MetadataEventResponse result = new MetadataEventResponse();
+        result.combine(validateInput(groupId,artifactId,ALL));
+        if (!result.hasErrors())
+        {
+            String parentEvent = buildParentEventId(groupId, artifactId,ALL);
+            result.addMessage(String.format("Parent event: %s", parentEvent));
+            result.combine(refreshAllVersionsForProject(getProject(groupId, artifactId), fullUpdate, parentEvent));
+            result.combine(refreshVersionForProject(groupId, artifactId, MASTER_SNAPSHOT, fullUpdate, parentEvent));
+        }
+        return result;
+    }
+
+    private String buildParentEventId(String groupId, String artifactId, String versionId)
+    {
+        return groupId + "-" + artifactId + "-" + versionId;
+    }
+
+    private String queueWorkToRefreshProjectVersion(ProjectData projectData, String versionId, boolean fullUpdate, String parentEvent)
+    {
+        return this.workQueue.push(new MetadataNotification(projectData.getProjectId(),projectData.getGroupId(),projectData.getArtifactId(),versionId,fullUpdate,parentEvent));
+    }
+    
+    @Override
     public MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean fullUpdate)
     {
+       return refreshVersionForProject(groupId, artifactId, versionId, fullUpdate,null);
+    }
+
+    @Override
+    public MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean fullUpdate, String parentEventId)
+    {
         MetadataEventResponse response = new MetadataEventResponse();
-        response.combine(validateInput(groupId, artifactId, versionId, response));
+        response.combine(validateInput(groupId,artifactId,versionId));
         if (response.hasErrors())
         {
             return response;
         }
-        return response.combine(refreshVersionForProject(getProject(groupId, artifactId), versionId, fullUpdate));
+        return refreshVersionForProject(getProject(groupId, artifactId), versionId, fullUpdate, parentEventId);
     }
 
-    private MetadataEventResponse validateInput(String groupId, String artifactId, String versionId, MetadataEventResponse response)
+    private MetadataEventResponse validateInput(String groupId, String artifactId, String versionId)
     {
+        MetadataEventResponse response = new MetadataEventResponse();
         if (!this.projects.find(groupId, artifactId).isPresent())
         {
             response.addError(String.format("Project does not exists for %s-%s", groupId, artifactId));
         }
         else
         {
-            if (!MASTER_SNAPSHOT.equals(versionId))
+            if (!MASTER_SNAPSHOT.equals(versionId) && !ALL.equals(versionId))
             {
                 try
                 {
@@ -228,20 +277,14 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         return response;
     }
 
-    @Override
-    public MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate)
-    {
-            ProjectData projectData = getProject(groupId,artifactId);
-            MetadataEventResponse response = refreshAllVersionsForProject(projectData,fullUpdate);
-            return response.combine(refreshMasterSnapshotForProject(groupId,artifactId, fullUpdate));
-    }
 
-    private MetadataEventResponse refreshVersionForProject(ProjectData project, String versionId, boolean fullUpdate)
+    private MetadataEventResponse refreshVersionForProject(ProjectData project, String versionId, boolean fullUpdate,String parentEventId)
     {
-        return executeWithTrace("refreshProjectVersionArtifacts", project.getGroupId(), project.getArtifactId(), versionId, () ->
+        return executeWithTrace(REFRESH_PROJECT_VERSION_ARTIFACTS, project.getGroupId(), project.getArtifactId(), versionId, parentEventId, () ->
         {
             MetadataEventResponse response = new MetadataEventResponse();
-            response.addMessage(String.format("Processing [%s-%s-%s] fullUpdate? [%s]", project.getGroupId(), project.getArtifactId(), versionId, fullUpdate));
+            response.combine(validateInput(project.getGroupId(),project.getArtifactId(),versionId));
+            response.addMessage(String.format("Processing [%s-%s-%s] fullUpdate? [%s] parent:[%s]", project.getGroupId(), project.getArtifactId(), versionId, fullUpdate, parentEventId));
             getSupportedArtifactTypes().forEach(artifactType -> response.combine(executeVersionRefresh(artifactType, project, versionId, fullUpdate)));
             if (!response.hasErrors())
             {
@@ -250,8 +293,11 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 latestProjectData.ifPresent(p ->
                 {
                     List<ProjectVersionDependency> newDependencies = calculateDependencies(project.getGroupId(), project.getArtifactId(), versionId);
-                    response.combine(refreshDependencies(newDependencies,fullUpdate));
-                    LOGGER.info("Finished updating {} dependencies for [{}{}{}]", project.getDependencies(versionId).size(), project.getGroupId(), project.getArtifactId(), versionId);
+                    if (fullUpdate)
+                    {
+                        response.combine(refreshDependencies(newDependencies,fullUpdate,parentEventId));
+                        LOGGER.info("Finished updating {} dependencies for [{}{}{}]", project.getDependencies(versionId).size(), project.getGroupId(), project.getArtifactId(), versionId);
+                    }
                     if (!response.hasErrors())
                     {
                         if (!versionId.equals(MASTER_SNAPSHOT))
@@ -281,10 +327,15 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 
     private MetadataEventResponse executeWithTrace(String label, String groupId, String artifactId, String version, Supplier<MetadataEventResponse> functionToExecute)
     {
+        return executeWithTrace(label, groupId, artifactId, version, null, functionToExecute);
+    }
+
+    private MetadataEventResponse executeWithTrace(String label, String groupId, String artifactId, String version, String parentEventId, Supplier<MetadataEventResponse> functionToExecute)
+    {
         return TracerFactory.get().executeWithTrace(label, () ->
         {
             decorateSpanWithVersionInfo(groupId, artifactId, version);
-            return handleRefresh(groupId, artifactId, version, functionToExecute);
+            return handleRefresh(groupId, artifactId, version, parentEventId, functionToExecute);
         });
     }
 
@@ -303,9 +354,8 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         }
         return projectPropertyList;
     }
-
-
-    private MetadataEventResponse refreshDependencies(List<ProjectVersionDependency> dependencies,boolean fullUpdate)
+    
+    private MetadataEventResponse refreshDependencies(List<ProjectVersionDependency> dependencies,boolean fullUpdate,String parentEventId)
     {
         MetadataEventResponse response = new MetadataEventResponse();
         dependencies.stream().forEach(dependency ->
@@ -317,7 +367,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 String projectCoordinates = String.format("[%s-%s-%s]", dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersionId());
                 String dependencyCoordinates = String.format("[%s-%s-%s]", dependency.getDependency().getGroupId(), dependency.getDependency().getArtifactId(), dependency.getDependency().getVersionId());
                 response.addMessage(String.format("Processing dependency %s -> %s", projectCoordinates, dependencyCoordinates));
-                response.combine(refreshVersionForProject(dependentProject,dependency.getDependency().getVersionId(), fullUpdate));
+                response.combine(refreshVersionForProject(dependentProject,dependency.getDependency().getVersionId(), fullUpdate,parentEventId));
                 if (response.hasErrors())
                 {
                     return;
@@ -356,10 +406,10 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         return response;
     }
 
-    private MetadataEventResponse refreshAllVersionsForProject(ProjectData project, boolean fullUpdate)
+    private MetadataEventResponse refreshAllVersionsForProject(ProjectData project, boolean fullUpdate,String parentEvent)
     {
-        return handleRefresh(project.getGroupId(), project.getArtifactId(), ALL,
-                () ->
+        String parentEventId = parentEvent == null ? project.getGroupId() + project.getArtifactId() + ALL : parentEvent;
+        return handleRefresh(project.getGroupId(), project.getArtifactId(), ALL, parentEventId, () ->
                 {
                     MetadataEventResponse response = new MetadataEventResponse();
                     decorateSpanWithVersionInfo(project.getGroupId(),project.getArtifactId(),ALL);
@@ -389,7 +439,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                                 versionsToUpdate.removeAll(project.getVersionIds());
                             }
                             getLOGGER().info(String.format("%s found [%s] new versions: [%s]", projectArtifacts, versionsToUpdate.size(), versionsToUpdate));
-                            versionsToUpdate.forEach(v -> response.combine(refreshVersionForProject(project, v.toVersionIdString(), fullUpdate)));
+                            versionsToUpdate.forEach(v -> response.combine(refreshVersionForProject(project, v.toVersionIdString(), fullUpdate, parentEventId)));
                             response.addMessage(String.format("%s: [%s-%s] found [%s] new versions", project.getProjectId(),
                                     project.getGroupId(),
                                     project.getArtifactId(),
@@ -504,7 +554,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     @Override
     public MetadataEventResponse refreshProjectsWithMissingVersions()
     {
-        return executeWithTrace("refreshProjectsWithMissingVersions",ALL, ALL, MISSING, () ->
+        return executeWithTrace(REFRESH_PROJECTS_WITH_MISSING_VERSIONS,ALL, ALL, MISSING, () ->
         {
             MetadataEventResponse response = new MetadataEventResponse();
             List<VersionMismatch> projectsWithMissingVersions = this.repositoryServices.findVersionsMismatches().stream().filter(r -> !r.versionsNotInCache.isEmpty()).collect(Collectors.toList());

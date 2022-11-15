@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.artifacts.domain.status;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -29,12 +28,15 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RefreshStatus implements HasIdentifier
 {
+    private String id;
     @JsonProperty
     private String groupId;
     @JsonProperty
     private String artifactId;
     @JsonProperty
     private String versionId;
+    @JsonProperty
+    private String parentEventId;
     @JsonProperty
     private boolean running;
     @JsonProperty
@@ -58,10 +60,9 @@ public class RefreshStatus implements HasIdentifier
         this.versionId = version;
     }
 
-    @JsonIgnore
     public String getId()
     {
-        return null;
+        return id;
     }
 
     public String getGroupId()
@@ -127,6 +128,16 @@ public class RefreshStatus implements HasIdentifier
     public void setDuration(long duration)
     {
         this.duration = duration;
+    }
+
+    public String getParentEventId()
+    {
+        return parentEventId;
+    }
+
+    public void setParentEventId(String parentEventId)
+    {
+        this.parentEventId = parentEventId;
     }
 
     public RefreshStatus withStartTime(Date startTime)
