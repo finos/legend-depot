@@ -47,6 +47,7 @@ public class MetadataNotification implements HasIdentifier
     private String artifactId;
     private String versionId;
     private boolean fullUpdate;
+    private boolean transitive;
     private int retries;
     private Date lastUpdated;
     private int maxRetries;
@@ -65,6 +66,7 @@ public class MetadataNotification implements HasIdentifier
                                 @JsonProperty(value = "status") MetadataEventStatus status,
                                 @JsonProperty(value = "errors") List<String> errors,
                                 @JsonProperty(value = "fullUpdate") boolean fullUpdate,
+                                @JsonProperty(value = "transitive") boolean transitive,
                                 @JsonProperty(value = "retries") int retries,
                                 @JsonProperty(value = "maxRetries") int maxRetries)
     {
@@ -80,40 +82,33 @@ public class MetadataNotification implements HasIdentifier
         this.errors = errors;
         this.retries = retries;
         this.fullUpdate = fullUpdate;
+        this.transitive = transitive;
     }
-
-    public MetadataNotification(String projectId,
-                                String groupId,
-                                String artifactId)
-    {
-        this(projectId, groupId, artifactId, null, new Date(), null, null, MetadataEventStatus.NEW, new ArrayList<>(), false, 0, DEFAULT_MAX_RETRIES);
-    }
-
 
     public MetadataNotification(String projectId,
                                 String groupId,
                                 String artifactId,
                                 String versionId,
-                                boolean fullUpdate)
+                                boolean fullUpdate,
+                                boolean transitive)
     {
-        this(projectId, groupId, artifactId, versionId, new Date(), null, null,MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate, 0, DEFAULT_MAX_RETRIES);
+        this(projectId, groupId, artifactId, versionId, new Date(), null, null,MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate,transitive, 0, DEFAULT_MAX_RETRIES);
     }
 
     public MetadataNotification(String projectId, String groupId, String artifactId, String versionId)
     {
-        this(projectId, groupId, artifactId, versionId, new Date(), null, null, MetadataEventStatus.NEW, new ArrayList<>(), false, 0, DEFAULT_MAX_RETRIES);
+        this(projectId, groupId, artifactId, versionId, new Date(), null, null, MetadataEventStatus.NEW, new ArrayList<>(), false,false, 0, DEFAULT_MAX_RETRIES);
     }
 
-    public MetadataNotification(String projectId, String groupId, String artifactId, String versionId, boolean fullUpdate,int maxRetries)
+    public MetadataNotification(String projectId, String groupId, String artifactId, String versionId, boolean fullUpdate, boolean transitive,int maxRetries)
     {
-        this(projectId, groupId, artifactId, versionId, new Date(), null, null,MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate, 0, maxRetries);
+        this(projectId, groupId, artifactId, versionId, new Date(), null, null,MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate,transitive, 0, maxRetries);
     }
 
-    public MetadataNotification(String projectId,String groupId, String artifactId, String versionId, boolean fullUpdate, String parentEvent)
+    public MetadataNotification(String projectId,String groupId, String artifactId, String versionId, boolean fullUpdate,boolean transitive, String parentEvent)
     {
-        this(projectId, groupId, artifactId, versionId, new Date(), null, parentEvent,MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate, 0, DEFAULT_MAX_RETRIES);
+        this(projectId, groupId, artifactId, versionId, new Date(), null, parentEvent,MetadataEventStatus.NEW, new ArrayList<>(), fullUpdate,transitive, 0, DEFAULT_MAX_RETRIES);
     }
-
 
     public String getId()
     {
@@ -212,6 +207,31 @@ public class MetadataNotification implements HasIdentifier
     public void setParentEventId(String parentEventId)
     {
         this.parentEventId = parentEventId;
+    }
+
+    public void setFullUpdate(boolean fullUpdate)
+    {
+        this.fullUpdate = fullUpdate;
+    }
+
+    public boolean isTransitive()
+    {
+        return transitive;
+    }
+
+    public void setTransitive(boolean transitive)
+    {
+        this.transitive = transitive;
+    }
+
+    public void setMaxRetries(int maxRetries)
+    {
+        this.maxRetries = maxRetries;
+    }
+
+    public void setErrors(List<String> errors)
+    {
+        this.errors = errors;
     }
 
     public MetadataNotification increaseRetries()

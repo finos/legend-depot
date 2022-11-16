@@ -43,6 +43,8 @@ public interface ProjectsService
 
     Optional<ProjectData> find(String groupId, String artifactId);
 
+    boolean exists(String groupId, String artifactId, String versionId);
+
     default Set<ProjectVersion> getDependencies(String groupId, String artifactId, String versionId, boolean transitive)
     {
         return getDependencies(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)), transitive);
@@ -58,4 +60,5 @@ public interface ProjectsService
     }
 
     List<ProjectVersionPlatformDependency> getDependentProjects(String groupId, String artifactId, String versionId);
+
 }

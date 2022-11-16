@@ -198,4 +198,10 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
         this.versions.addAll(Arrays.asList(versionIds));
         return this;
     }
+
+    @JsonIgnore
+    public Optional<String> getVersion(String versionId)
+    {
+        return this.versions.stream().filter(v -> v.equals(versionId)).findFirst();
+    }
 }

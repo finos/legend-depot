@@ -21,20 +21,20 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 
 public interface ArtifactsRefreshService
 {
-    default MetadataEventResponse refreshMasterSnapshotForProject(String groupId, String artifactId, boolean fullUpdate)
+    MetadataEventResponse refreshMasterSnapshotForAllProjects(boolean fullUpdate, boolean transitive,String parentEventId);
+
+    default MetadataEventResponse refreshMasterSnapshotForProject(String groupId, String artifactId, boolean fullUpdate, boolean transitive,String parentEventId)
     {
-        return refreshVersionForProject(groupId,artifactId,MASTER_SNAPSHOT,fullUpdate);
+        return refreshVersionForProject(groupId,artifactId,MASTER_SNAPSHOT,fullUpdate,transitive,parentEventId);
     }
 
-    MetadataEventResponse refreshMasterSnapshotForAllProjects(boolean fullUpdate);
+    MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean fullUpdate, boolean transitive, String parentEventId);
 
-    MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean fullUpdate);
+    MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate,boolean transitive, String parentEventId);
 
-    MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean fullUpdate, String parentEventId);
+    MetadataEventResponse refreshAllVersionsForAllProjects(boolean fullUpdate,boolean transitive, String parentEventId);
 
-    MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate);
-
-    MetadataEventResponse refreshAllVersionsForAllProjects(boolean fullUpdate);
+    MetadataEventResponse refreshProjectsWithMissingVersions(boolean fullUpdate,boolean transitive, String parentEventId);
 
     MetadataEventResponse retireLeastRecentlyUsedVersions(int numberOfDays);
 
@@ -43,7 +43,4 @@ public interface ArtifactsRefreshService
     void delete(String groupId, String artifactId, String versionId);
 
     boolean createIndexesIfAbsent();
-
-    MetadataEventResponse refreshProjectsWithMissingVersions();
-
   }

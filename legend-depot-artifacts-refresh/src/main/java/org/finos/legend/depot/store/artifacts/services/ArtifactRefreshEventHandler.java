@@ -54,7 +54,7 @@ public class ArtifactRefreshEventHandler implements NotificationEventHandler
             projects.createOrUpdate(newProject);
             response.addMessage(String.format("New project %s created %s-%s", newProject.getProjectId(), newProject.getGroupId(), newProject.getArtifactId()));
         }
-        return response.combine(artifactsRefreshService.refreshVersionForProject(event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.isFullUpdate(),event.getParentEventId()));
+        return response.combine(artifactsRefreshService.refreshVersionForProject(event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.isFullUpdate(),event.isTransitive(),event.getParentEventId()));
     }
 
     @Override

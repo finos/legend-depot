@@ -106,6 +106,12 @@ public class ProjectsServiceImpl implements ManageProjectsService
     }
 
     @Override
+    public boolean exists(String groupId, String artifactId, String versionId)
+    {
+        return this.find(groupId,artifactId).orElse(new ProjectData()).getVersions().contains(versionId);
+    }
+
+    @Override
     public Optional<VersionId> getLatestVersion(String groupId, String artifactId)
     {
         return getProject(groupId,artifactId).getLatestVersion();

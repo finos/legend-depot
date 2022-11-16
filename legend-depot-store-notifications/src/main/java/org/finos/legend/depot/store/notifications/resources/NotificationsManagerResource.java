@@ -105,7 +105,7 @@ public class NotificationsManagerResource extends BaseResource
                              @DefaultValue("3")
                              @ApiParam("Whether to retry operation if it fails") int maxRetries)
     {
-        return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId,false, maxRetries));
+        return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId, maxRetries));
     }
 
 }

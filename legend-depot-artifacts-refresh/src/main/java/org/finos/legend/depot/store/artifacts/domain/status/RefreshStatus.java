@@ -135,9 +135,10 @@ public class RefreshStatus implements HasIdentifier
         return parentEventId;
     }
 
-    public void setParentEventId(String parentEventId)
+    public RefreshStatus setParentEventId(String parentEventId)
     {
         this.parentEventId = parentEventId;
+        return this;
     }
 
     public RefreshStatus withStartTime(Date startTime)

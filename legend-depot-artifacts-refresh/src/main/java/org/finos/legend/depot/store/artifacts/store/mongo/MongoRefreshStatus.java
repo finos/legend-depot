@@ -66,6 +66,7 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
     public boolean createIndexesIfAbsent()
     {
         createIndexIfAbsent("running",RUNNING);
+        createIndexIfAbsent("parentId",PARENT_EVENT);
         createIndexIfAbsent("status",RESPONSE_STATUS);
         return createIndexIfAbsent("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID);
     }

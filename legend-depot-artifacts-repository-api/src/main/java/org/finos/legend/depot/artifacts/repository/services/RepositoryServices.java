@@ -15,17 +15,23 @@
 
 package org.finos.legend.depot.artifacts.repository.services;
 
+import org.apache.maven.model.Model;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
+import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
+import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RepositoryServices
@@ -73,5 +79,30 @@ public class RepositoryServices
             }
         });
         return versionMismatches;
+    }
+
+    public List<VersionId> findVersions(String groupId, String artifactId) throws ArtifactRepositoryException
+    {
+        return this.repository.findVersions(groupId,artifactId);
+    }
+
+    public Set<ArtifactDependency> findDependencies(String groupId, String artifactId, String versionId)
+    {
+        return this.repository.findDependencies(groupId, artifactId, versionId);
+    }
+
+    public Model getPOM(String groupId, String artifactId, String versionId)
+    {
+        return repository.getPOM(groupId, artifactId, versionId);
+    }
+
+    public boolean areValidCoordinates(String groupId, String artifactId)
+    {
+        return this.repository.areValidCoordinates(groupId, artifactId);
+    }
+
+    public List<File> findFiles(ArtifactType type, String groupId, String artifactId, String versionId)
+    {
+        return this.repository.findFiles(type, groupId, artifactId, versionId);
     }
 }

@@ -118,12 +118,12 @@ public final class NotificationsQueueManager implements NotificationsManager
     }
 
     @Override
-    public String notify(String projectId, String groupId, String artifactId, String versionId, boolean fullUpdate, int maxRetries)
+    public String notify(String projectId, String groupId, String artifactId, String versionId, int maxRetries)
     {
         validateMavenCoordinates(projectId, groupId, artifactId);
-        //we create a notification event with fullUpdate flag set to false(ie partial update)
+        //we create a notification event with fullUpdate/transitive flag set to false(ie partial update)
         //this means, it will only process changed jar files and will only handle those entities,etc
-        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId, false,maxRetries);
+        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId, false,false,maxRetries);
         return queue.push(event);
     }
 

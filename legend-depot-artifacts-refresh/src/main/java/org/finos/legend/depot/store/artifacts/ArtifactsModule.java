@@ -117,7 +117,7 @@ public class ArtifactsModule extends PrivateModule
     @Named("update-versions")
     boolean initVersions(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(UPDATE_VERSIONS_SCHEDULER, LocalDateTime.now().plusHours(2), configuration.getVersionsUpdateIntervalInMillis(), false,() -> artifactsRefreshService.refreshAllVersionsForAllProjects(false));
+        schedulesFactory.register(UPDATE_VERSIONS_SCHEDULER, LocalDateTime.now().plusHours(2), configuration.getVersionsUpdateIntervalInMillis(), false,() -> artifactsRefreshService.refreshAllVersionsForAllProjects(false,false,UPDATE_VERSIONS_SCHEDULER));
         return true;
     }
 
@@ -126,7 +126,7 @@ public class ArtifactsModule extends PrivateModule
     @Named("update-revisions")
     boolean initRevisions(SchedulesFactory schedulesFactory,ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusHours(1), configuration.getLatestUpdateIntervalInMillis(),false, () -> artifactsRefreshService.refreshMasterSnapshotForAllProjects(false));
+        schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusHours(1), configuration.getLatestUpdateIntervalInMillis(),false, () -> artifactsRefreshService.refreshMasterSnapshotForAllProjects(false,false,UPDATE_MASTER_REVISIONS_SCHEDULER));
         return true;
     }
 
@@ -135,7 +135,7 @@ public class ArtifactsModule extends PrivateModule
     @Named("update-missing-versions")
     boolean initFixVersionsMismatchDaemon(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService,ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(FIX_MISSING_VERSIONS_SCHEDULE, LocalDateTime.now().plusMinutes(5), configuration.getFixVersionsMismatchIntervalInMillis(), false,artifactsRefreshService::refreshProjectsWithMissingVersions);
+        schedulesFactory.register(FIX_MISSING_VERSIONS_SCHEDULE, LocalDateTime.now().plusMinutes(5), configuration.getFixVersionsMismatchIntervalInMillis(), false,() -> artifactsRefreshService.refreshProjectsWithMissingVersions(false,false,FIX_MISSING_VERSIONS_SCHEDULE));
         return true;
     }
 }

@@ -98,6 +98,21 @@ public class TestMongoStatus extends TestStoreMongo
         Assert.assertEquals("1.0.0",refreshStatus.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,null,null,null,true,null,null).get(0).getVersionId());
         Assert.assertEquals("1.0.1",refreshStatus.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,null,null,null,false,null,null).get(0).getVersionId());
 
+    }
+
+
+    @Test
+    public void testFindByParentId()
+    {
+        Assert.assertEquals(0, refreshStatus.getCollection().countDocuments());
+        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.0").setParentEventId("test"));
+        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.1").setParentEventId("test"));
+        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.2").setParentEventId("test"));
+        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.3").setParentEventId("test1"));
+        Assert.assertEquals(4, refreshStatus.getCollection().countDocuments());
+
+        Assert.assertEquals(3,refreshStatus.find(null,null,null,"test",null,null,null,null).size());
+        Assert.assertEquals(1,refreshStatus.find(null,null,null,"test1",null,null,null,null).size());
 
 
     }

@@ -48,7 +48,6 @@ public class NotificationsModule extends PrivateModule
 
         expose(Notifications.class);
         expose(Queue.class);
-        expose(NotificationsManager.class);
         expose(NotificationsManagerResource.class);
     }
 
