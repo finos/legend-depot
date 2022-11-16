@@ -33,5 +33,5 @@ public interface NotificationsManager
 
     Optional<MetadataNotification> findInQueue(String eventId);
 
-    String notify(String projectId, String groupId, String artifactId, String versionId, boolean fullUpdate, int maxRetries);
+    String notify(String projectId, String groupId, String artifactId, String versionId, int maxRetries);
 }

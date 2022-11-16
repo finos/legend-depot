@@ -29,6 +29,7 @@ import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.QueueMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,10 +57,17 @@ public class TestNotificationManager extends TestStoreMongo
     public void setUpData()
     {
         projectsStore.createOrUpdate(new ProjectData(TEST_PROJECT_ID, TEST_GROUP_ID, "test"));
-        when(notificationEventHandler.handleEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID, "test", VERSION_ID, false))).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
-        when(notificationEventHandler.handleEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID,"test","10.0.0",false))).thenReturn(new MetadataEventResponse());
-        when(notificationEventHandler.validateEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID,"test","10.0.0",false))).thenReturn(Arrays.asList("bad version"));
+        when(notificationEventHandler.handleEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID, "test", VERSION_ID, false,false))).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
+        when(notificationEventHandler.handleEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID,"test","10.0.0",false,false))).thenReturn(new MetadataEventResponse());
+        when(notificationEventHandler.validateEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID,"test","10.0.0",false,false))).thenReturn(Arrays.asList("bad version"));
     }
+
+    @After
+    public void tearDown()
+    {
+      mongoProvider.drop();
+    }
+
 
     protected MetadataEventResponse loadEntities(String projectId, String versionId)
     {
@@ -73,17 +81,6 @@ public class TestNotificationManager extends TestStoreMongo
             return null;
         }
         return new MetadataEventResponse();
-    }
-
-    @Test
-    public void createProjectIfAbsent()
-    {
-//        Assert.assertEquals(2, projectsService.getAll().size());
-//        MetadataNotification event = new MetadataNotification("PROD-A1", TEST_GROUP_ID, "test1", VERSION_ID);
-//        queue.push(event);
-//        eventsManager.run();
-//        Assert.assertEquals(3, projectsService.getAll().size());
-
     }
 
     @Test
@@ -117,7 +114,7 @@ public class TestNotificationManager extends TestStoreMongo
     @Test
     public void processNewVersionEventForNonExistingVersion()
     {
-        MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "10.0.0",false);
+        MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "10.0.0");
         eventsManager.handleEvent(event);
         Assert.assertTrue(queue.getAll().isEmpty());
         MetadataNotification response = eventsMongo.getAll().get(0);
@@ -127,7 +124,7 @@ public class TestNotificationManager extends TestStoreMongo
     @Test
     public void testRetry()
     {
-        MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "2.3.1",false);
+        MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "2.3.1");
         queue.push(event);
         when(notificationEventHandler.handleEvent(queue.getAllStoredEntities().get(0))).thenReturn(new MetadataEventResponse().addError("i have failed, need to retry"));
 

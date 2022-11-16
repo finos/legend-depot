@@ -48,6 +48,7 @@ import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.store.notifications.store.mongo.QueueMongo;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -71,6 +72,7 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     public static final String TEST_DEPENDENCIES_ARTIFACT_ID = "test-dependencies";
     public static final String PROJECT_A = "PROD-1";
     public static final String PROJECT_B = "PROD-2";
+    static final String PARENT_EVENT_ID = "unit-test";
     protected UpdateArtifacts artifacts = new ArtifactsMongo(mongoProvider);
     protected List<String> properties = Arrays.asList("[a-zA-Z0-9]+.version");
     protected ManageRefreshStatusService refreshStatusStore = new MongoRefreshStatus(mongoProvider);
@@ -85,9 +87,9 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     protected UpdateEntities mongoEntities = mock(UpdateEntities.class);
     protected ManageEntitiesService entitiesService = new EntitiesServiceImpl(mongoEntities,projectsService);
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);
-    protected RepositoryServices repositoryServices = mock(RepositoryServices.class);
+    protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
     protected Queue queue = new QueueMongo(mongoProvider);
-    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repository, repositoryServices, artifacts, queue, new IncludeProjectPropertiesConfiguration(properties));
+    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repositoryServices, artifacts, queue, new IncludeProjectPropertiesConfiguration(properties));
 
 
     @Before
@@ -108,14 +110,19 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
         when(repository.findVersions(TEST_GROUP_ID,"c")).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
     }
 
+    @After
+    public void afterTest()
+    {
+        Assert.assertTrue("should not have events in queue",queue.getAll().isEmpty());
+    }
 
     @Test
     public void cannotFindProject()
     {
-        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject("test.test","missing.project","1.0.0",true);
+        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject("test.test","missing.project","1.0.0",true,true, PARENT_EVENT_ID);
         Assert.assertNotNull(response);
         Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
-        Assert.assertEquals("Project does not exists for test.test-missing.project", response.getErrors().get(0));
+        Assert.assertEquals("No Project found for test.test-missing.project", response.getErrors().get(0));
 
     }
 
@@ -126,10 +133,10 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
       deps.add(new ArtifactDependency(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID,"1.0.0"));
       deps.add(new ArtifactDependency(TEST_GROUP_ID,"c","1.0.0"));
       when(repository.findDependencies(TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0")).thenReturn(deps);
-      MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0",true);
+      MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0",true,false,PARENT_EVENT_ID);
       Assert.assertNotNull(response);
       Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
-      Assert.assertEquals("Could not find dependent project: [examples.metadata-c]", response.getErrors().get(0));
+      Assert.assertEquals("Dependency examples.metadata-c-1.0.0 not found in store", response.getErrors().get(0));
     }
 
     @Test
@@ -138,7 +145,7 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     {
         when(mongoProjects.find(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID)).thenReturn(Optional.of(new ProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID)));
 
-        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID,"1.0.0",true);
+        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID,"1.0.0",true,true,PARENT_EVENT_ID);
         Assert.assertNotNull(response);
         Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
         Assert.assertEquals("Could not find dependent project: [examples.metadata-test-dependencies-1.0.0]", response.getErrors().get(0));
