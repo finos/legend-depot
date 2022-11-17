@@ -59,18 +59,21 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     @Override
     public List<Entity> getEntities(String groupId, String artifactId, String versionId, boolean versioned)
     {
+        this.projects.checkExists(groupId, artifactId, versionId);
         return entities.getEntities(groupId, artifactId, versionId, versioned);
     }
 
     @Override
     public Optional<Entity> getEntity(String groupId, String artifactId, String versionId, String entityPath)
     {
+        this.projects.checkExists(groupId, artifactId, versionId);
         return entities.getEntity(groupId, artifactId, versionId, entityPath);
     }
 
     @Override
     public List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, boolean versioned, Set<String> classifierPaths, boolean includeSubPackages)
     {
+        this.projects.checkExists(groupId, artifactId, versionId);
         return entities.getEntitiesByPackage(groupId, artifactId, versionId, packageName, versioned, classifierPaths, includeSubPackages);
     }
 
@@ -143,12 +146,14 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     @Override
     public MetadataEventResponse delete(String groupId, String artifactId, String versionId, boolean versioned)
     {
+        this.projects.checkExists(groupId, artifactId, versionId);
         return new MetadataEventResponse().combine(entities.delete(groupId, artifactId, versionId, versioned));
     }
 
     @Override
     public MetadataEventResponse deleteAll(String groupId, String artifactId)
     {
+        this.projects.checkExists(groupId, artifactId);
         return new MetadataEventResponse().combine(entities.deleteAll(groupId, artifactId));
     }
 

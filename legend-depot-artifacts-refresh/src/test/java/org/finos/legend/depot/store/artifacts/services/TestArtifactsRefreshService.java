@@ -106,7 +106,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void setUpData()
     {
         ArtifactResolverFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
-        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new FileGenerationsServiceImpl(fileGenerationsStore, entitiesStore)));
+        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new FileGenerationsServiceImpl(fileGenerationsStore, entitiesStore, projectsService)));
         ArtifactResolverFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new VersionedEntitiesHandlerImpl(new EntitiesServiceImpl(entitiesStore, projectsService), versionedEntityProvider));
 
         projectsStore.createOrUpdate(new ProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID));
@@ -433,7 +433,8 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void canDeleteVersion()
     {
         String versionId = "2.0.0";
-        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true,false,PARENT_EVENT_ID);
+        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true,true,PARENT_EVENT_ID);
+        Assert.assertFalse(response.hasErrors());
         notificationsQueueManager.handleAll();
 
         Assert.assertEquals(18, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());

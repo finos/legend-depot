@@ -25,6 +25,7 @@ import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.generation.file.FileGenerationsServiceImpl;
+import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
@@ -40,6 +41,10 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 public class TestGenerationsProvider extends TestStoreMongo
@@ -50,14 +55,14 @@ public class TestGenerationsProvider extends TestStoreMongo
     public static final String TEST_ARTIFACT_ID = "test";
     private final ArtifactRepository repository = new TestMavenArtifactsRepository();
     private FileGenerationsArtifactsProvider fileGenerationsProvider = new FileGenerationsProvider();
-    private final UpdateProjects projects = new ProjectsMongo(mongoProvider);
+    private final UpdateProjects projects = mock(UpdateProjects.class);
     private final UpdateEntities entities = new EntitiesMongo(mongoProvider);
-    private final ManageFileGenerationsService generations = new FileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities);
+    private final ManageFileGenerationsService generations = new FileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities, new ProjectsServiceImpl(projects));
 
     @Before
     public void setup()
     {
-        projects.createOrUpdate(new ProjectData(PRODUCT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID));
+       when(projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID)).thenReturn(Optional.of(new ProjectData(PRODUCT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID).withVersions("2.0.0")));
     }
 
     private List<File> getFiles(String versionId)
@@ -125,6 +130,7 @@ public class TestGenerationsProvider extends TestStoreMongo
         ProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
         MetadataEventResponse response = handler.refreshProjectVersionArtifacts(projectData, "2.0.0", getFiles("2.0.0"));
         Assert.assertNotNull(response);
+
         Assert.assertFalse(response.hasErrors());
         List<StoredFileGeneration> fileGenerations = generations.getAll();
         Assert.assertNotNull(fileGenerations);
@@ -133,4 +139,9 @@ public class TestGenerationsProvider extends TestStoreMongo
         Assert.assertEquals(4, generations.findByType(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "java").size());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void canGetGenerationsForNonExistentVersion()
+    {
+        generations.getFileGenerations(TEST_GROUP_ID,TEST_ARTIFACT_ID,"10.0.0");
+    }
 }

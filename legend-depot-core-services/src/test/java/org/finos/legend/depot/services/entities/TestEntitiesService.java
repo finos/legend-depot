@@ -131,7 +131,9 @@ public class TestEntitiesService extends TestBaseServices
     @Test
     public void canQueryEntitiesWithVersionInPackage()
     {
+        projectsStore.createOrUpdate(new ProjectData("PROD-D","examples.metadata","test1").withVersions("1.0.0"));
         loadEntities("PROD-D", "1.0.0");
+
         String pkgName = "examples::metadata::test::dependency::v1_2_3";
         Assert.assertEquals(4, entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").size());
         entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").stream().allMatch(e -> e.getEntity().getPath().startsWith(pkgName));;

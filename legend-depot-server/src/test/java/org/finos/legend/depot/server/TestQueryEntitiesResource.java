@@ -15,10 +15,13 @@
 
 package org.finos.legend.depot.server;
 
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.server.resources.entities.EntitiesResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.metrics.QueryMetricsContainer;
 import org.finos.legend.depot.store.metrics.store.mongo.MongoQueryMetrics;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -29,14 +32,23 @@ import org.junit.Test;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TestQueryEntitiesResource extends TestBaseServices
 {
-    private EntitiesResource entitiesResource = new EntitiesResource(new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projectsStore)));
+    private UpdateProjects projects = mock(UpdateProjects.class);
+    private EntitiesResource entitiesResource = new EntitiesResource(new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projects)));
     private MongoQueryMetrics queryMetrics = new MongoQueryMetrics(mongoProvider);
+
+    static
+    {
+        JerseyGuiceUtils.install((s, serviceLocator) -> null);
+    }
 
     @Before
     public void setupMetadata()
@@ -46,6 +58,8 @@ public class TestQueryEntitiesResource extends TestBaseServices
         queryMetrics.getCollection().drop();
         loadEntities("PROD-A", "2.3.0");
         loadEntities("PROD-A", MASTER_SNAPSHOT);
+        when(projects.find("examples.metadata","test")).thenReturn(Optional.of(new ProjectData("mock","examples.metadata","test").withVersions("2.3.0")));
+        when(projects.find("example.services.test", "test")).thenReturn(Optional.of(new ProjectData("mock","example.services.test", "test").withVersions("1.0.1")));
     }
 
     @After

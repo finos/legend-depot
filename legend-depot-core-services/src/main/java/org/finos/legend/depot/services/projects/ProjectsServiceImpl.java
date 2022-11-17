@@ -36,6 +36,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public class ProjectsServiceImpl implements ManageProjectsService
 {
     private static final String PATH_DELIMITER = ">";
@@ -109,6 +111,29 @@ public class ProjectsServiceImpl implements ManageProjectsService
     public boolean exists(String groupId, String artifactId, String versionId)
     {
         return this.find(groupId,artifactId).orElse(new ProjectData()).getVersions().contains(versionId);
+    }
+
+    @Override
+    public void checkExists(String groupId, String artifactId) throws IllegalArgumentException
+    {
+        checkExists(groupId, artifactId,null);
+    }
+
+    @Override
+    public void checkExists(String groupId, String artifactId, String versionId) throws IllegalArgumentException
+    {
+        Optional<ProjectData> projectData = this.projects.find(groupId,artifactId);
+        if (projectData.isPresent())
+        {
+            if (versionId != null && !versionId.equals(MASTER_SNAPSHOT) && !projectData.get().getVersions().stream().anyMatch(v -> v.equals(versionId)))
+            {
+                throw new IllegalArgumentException(String.format("No version found for %s-%s-%s",groupId,artifactId,versionId));
+            }
+        }
+        else
+        {
+            throw new IllegalArgumentException(String.format("No project found for %s-%s",groupId,artifactId));
+        }
     }
 
     @Override
