@@ -97,7 +97,7 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     {
         ArtifactResolverFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
         ArtifactResolverFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new EntitiesHandlerImpl(entitiesService, versionedEntityProvider));
-        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new FileGenerationsServiceImpl(mongoGenerations, mongoEntities)));
+        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new FileGenerationsServiceImpl(mongoGenerations, mongoEntities, projectsService)));
 
         List<ProjectData> projects = Arrays.asList(new ProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID),
                                                    new ProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID),

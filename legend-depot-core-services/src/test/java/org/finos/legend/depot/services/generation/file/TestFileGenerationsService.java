@@ -17,10 +17,14 @@ package org.finos.legend.depot.services.generation.file;
 
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
+import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
+import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationLoader;
@@ -32,7 +36,11 @@ import org.junit.Test;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TestFileGenerationsService extends TestStoreMongo
 {
@@ -41,7 +49,9 @@ public class TestFileGenerationsService extends TestStoreMongo
     private static final URL filePath = TestFileGenerationsService.class.getClassLoader().getResource("file-generation/test-file-generation-master-SNAPSHOT.jar");
     protected Entities entities = new EntitiesMongo(mongoProvider);
     private UpdateFileGenerations generations = new FileGenerationsMongo(mongoProvider);
-    private ManageFileGenerationsService service = new FileGenerationsServiceImpl(generations, entities);
+    UpdateProjects projectStore = mock(UpdateProjects.class);
+    private ProjectsService projectsService = new ProjectsServiceImpl(projectStore);
+    private ManageFileGenerationsService service = new FileGenerationsServiceImpl(generations, entities, projectsService);
 
     @Before
     public void loadData() throws Exception
@@ -72,6 +82,10 @@ public class TestFileGenerationsService extends TestStoreMongo
 
             Assert.assertEquals(54, generations.getAll().size());
         }
+
+        when(projectStore.find("group.test","test")).thenReturn(Optional.of(new ProjectData("mock","group-test","test").withVersions("1.0.0")));
+        when(projectStore.find("i.dont","exist")).thenReturn(Optional.empty());
+        when(projectStore.find("group.test.otherproject", "test")).thenReturn(Optional.of(new ProjectData("mock","group-test","test").withVersions("1.0.0")));
     }
 
     @Test
@@ -82,7 +96,15 @@ public class TestFileGenerationsService extends TestStoreMongo
         Assert.assertEquals(40, generations.getAll().size());
         service.delete("group.test.otherproject", "test", "1.0.0");
         Assert.assertEquals(26, generations.getAll().size());
-        service.delete("group.test", "test", "1.1.0");
+        try
+        {
+            service.delete("group.test", "test", "1.1.0");
+            Assert.fail("exception expected");
+        }
+        catch (IllegalArgumentException e)
+        {
+            Assert.assertTrue(true);
+        }
         Assert.assertEquals(26, generations.getAll().size());
 
     }
@@ -97,8 +119,15 @@ public class TestFileGenerationsService extends TestStoreMongo
         List<FileGeneration> gens1 = service.getFileGenerations("group.test", "test", "1.0.0");
         Assert.assertEquals(14, gens1.size());
 
-        List<FileGeneration> gens2 = service.getFileGenerations("group.test.other", "test", "1.0.0");
-        Assert.assertTrue(gens2.isEmpty());
+        try
+        {
+            List<FileGeneration> gens2 = service.getFileGenerations("group.test.other", "test", "1.0.0");
+            Assert.fail("Exception expected");
+        }
+        catch (IllegalArgumentException e)
+        {
+            Assert.assertTrue(true);
+        }
     }
 
     @Test
@@ -129,5 +158,17 @@ public class TestFileGenerationsService extends TestStoreMongo
         Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
         Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
         Assert.assertTrue(service.getLatestFileGenerationContentByFilePath("group.test", "test",  "/examples/metadata/test/ClientBasic.avro").isPresent());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void cantGetGenerationsForNonExistentProject()
+    {
+        service.getFileGenerations("i.dont","exist","version");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void cantGetGenerationsForNonExistentVersion()
+    {
+        service.getFileGenerations("group.test","test","10.0.0");
     }
 }
