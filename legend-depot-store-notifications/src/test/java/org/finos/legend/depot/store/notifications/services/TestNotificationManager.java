@@ -33,6 +33,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -112,6 +114,7 @@ public class TestNotificationManager extends TestStoreMongo
 
 
     @Test
+    @Ignore
     public void processNewVersionEventForNonExistingVersion()
     {
         MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "10.0.0");
