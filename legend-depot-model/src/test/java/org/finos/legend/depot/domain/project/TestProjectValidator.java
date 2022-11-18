@@ -30,7 +30,7 @@ public class TestProjectValidator
         Assert.assertFalse(EntityValidator.isValidGroupId(""));
         Assert.assertFalse(EntityValidator.isValidGroupId("this is not a good one"));
         Assert.assertFalse(EntityValidator.isValidGroupId("this.is.starting.well but not ending well"));
-        Assert.assertFalse(EntityValidator.isValidGroupId("string"));
+        Assert.assertTrue(EntityValidator.isValidGroupId("singleWordNoDots"));
     }
 
     @Test
@@ -39,6 +39,6 @@ public class TestProjectValidator
         Assert.assertTrue(EntityValidator.isValidArtifactId("test"));
         Assert.assertTrue(EntityValidator.isValidArtifactId("test-other"));
         Assert.assertFalse(EntityValidator.isValidArtifactId(""));
-        Assert.assertFalse(EntityValidator.isValidArtifactId("string"));
+        Assert.assertFalse(EntityValidator.isValidArtifactId("singleWordNoDots"));
     }
 }
