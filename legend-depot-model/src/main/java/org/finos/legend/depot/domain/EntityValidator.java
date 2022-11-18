@@ -17,13 +17,12 @@ package org.finos.legend.depot.domain;
 
 import org.finos.legend.depot.domain.project.ProjectData;
 
+import javax.lang.model.SourceVersion;
 import java.util.regex.Pattern;
 
 public class EntityValidator
 {
-    public static final Pattern GROUP_ID_PATTERN = Pattern.compile("^\\S+\\.\\S+$");
-    public static final Pattern ARTIFACT_ID_PATTERN = Pattern.compile("^\\S+$");
-    private static final String STRING = "string";
+    public static final Pattern VALID_ARTIFACT_ID_PATTERN = Pattern.compile("[a-z][a-z\\d_]*+(-[a-z][a-z\\d_]*+)*+");
 
     private EntityValidator()
     {
@@ -36,13 +35,11 @@ public class EntityValidator
 
     public static boolean isValidArtifactId(String artifactId)
     {
-        return artifactId != null && !STRING.equals(artifactId) && ARTIFACT_ID_PATTERN.matcher(artifactId).matches();
+        return artifactId != null && !artifactId.isEmpty() && VALID_ARTIFACT_ID_PATTERN.matcher(artifactId).matches();
     }
 
     public static boolean isValidGroupId(String groupId)
     {
-        return groupId != null && GROUP_ID_PATTERN.matcher(groupId).matches();
+        return groupId != null && !groupId.isEmpty() && SourceVersion.isName(groupId);
     }
-
-
 }
