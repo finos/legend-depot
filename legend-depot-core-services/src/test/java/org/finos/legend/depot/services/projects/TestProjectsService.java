@@ -112,7 +112,7 @@ public class TestProjectsService extends TestBaseServices
     {
 
         // PROD-123 -> PROD-19481
-        ProjectData newProject = new ProjectData("PROD-123", "example.group", "test.dups");
+        ProjectData newProject = new ProjectData("PROD-123", "example.group", "test-dups");
         newProject.addVersion("1.0.0");
         newProject.addDependency(new ProjectVersionDependency("examples.group", "test.dups", "1.0.0", new ProjectVersion("example.services.test", "test", "1.0.0")));
         projectsStore.createOrUpdate(newProject);
