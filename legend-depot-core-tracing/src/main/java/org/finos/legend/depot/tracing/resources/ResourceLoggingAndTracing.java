@@ -37,7 +37,7 @@ public class ResourceLoggingAndTracing
     public static final String GET_REVISION_DEPENDENCY_ENTITIES = "get latest dependencies entities";
     public static final String GET_VERSION_STORE_ENTITIES = "get stored version entities";
     public static final String DELETE_STORE_ENTITIES = "delete entities";
-    public static final String GET_VERSION_ENTITIES_AS_PMCD = "get version entities as PMCD";
+    public static final String GET_VERSION_ENTITIES_AS_PMCD = "get version entities as Pure model context data";
     public static final String GET_VERSION_ENTITY = "get version entity";
     public static final String GET_VERSION_ENTITIES_BY_PACKAGE = "get version entities by package";
     public static final String GET_VERSIONS = "get versions";

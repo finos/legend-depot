@@ -17,7 +17,6 @@ package org.finos.legend.depot.core.http;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheck;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -34,6 +33,7 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.finos.legend.depot.tracing.configuration.PrometheusMetricsProviderConfiguration;
 import org.finos.legend.depot.tracing.configuration.TracingAuthenticationProviderConfiguration;
+import org.finos.legend.engine.protocol.pure.v1.PureProtocolObjectMapperFactory;
 import org.finos.legend.sdlc.server.error.LegendSDLCServerExceptionMapper;
 import org.finos.legend.server.pac4j.LegendPac4jBundle;
 import org.finos.legend.server.shared.bundles.ChainFixingFilterHandler;
@@ -46,10 +46,10 @@ import javax.servlet.FilterRegistration;
 import java.text.SimpleDateFormat;
 import java.util.EnumSet;
 
+import static org.finos.legend.depot.core.http.BaseServerJacksonProvider.SIMPLE_DATE_FORMAT;
+
 public abstract class BaseServer<T extends ServersConfiguration> extends Application<T>
 {
-
-    public static final String SIMPLE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private final String urlPattern;
 
     protected BaseServer(String urlPattern)
@@ -60,7 +60,6 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
     @Override
     public void initialize(Bootstrap<T> bootstrap)
     {
-
         bootstrap.addBundle(new HostnameHeaderBundle());
         bootstrap.addBundle(new LegendPac4jBundle<>(ServersConfiguration::getPac4jConfiguration));
         bootstrap.addBundle(new SwaggerBundle<ServersConfiguration>()
@@ -74,15 +73,11 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
 
         // Enable variable substitution with environment variables
         bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(true)));
-
         bootstrap.getObjectMapper().setDateFormat(new SimpleDateFormat(SIMPLE_DATE_FORMAT));
-
         bootstrap.addBundle(buildGuiceBundle());
 
         TracingAuthenticationProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
-
         PrometheusMetricsProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
-
     }
 
     protected abstract GuiceBundle<T> buildGuiceBundle();
@@ -108,7 +103,7 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
             environment.jersey().setUrlPattern(urlPattern);
         }
         environment.jersey().register(MultiPartFeature.class);
-        environment.jersey().register(JacksonJaxbJsonProvider.class);
+        environment.jersey().register(BaseServerJacksonProvider.class);
         environment.jersey().register(new LegendSDLCServerExceptionMapper());
         environment.jersey().register(new JsonProcessingExceptionMapper(true));
 
@@ -122,11 +117,8 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
         });
 
         initialiseCors(environment);
-
         initialisePrometheusMetrics(environment);
-
         initialiseOpenTracing(environment);
-
     }
 
     private void initialiseOpenTracing(Environment environment)
@@ -152,5 +144,4 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
         corsFilter.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, "false");
         corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "*");
     }
-
 }
