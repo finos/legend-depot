@@ -1,0 +1,150 @@
+[
+  {
+    "id": null,
+    "groupId": "test.legend",
+    "artifactId": "blank-prod",
+    "versionId": "2.0.0",
+    "versionedEntity": true,
+    "entity": {
+      "path": "service::SomeService",
+      "classifierPath": "meta::legend::service::metamodel::Service",
+      "content": {
+        "_type": "service",
+        "autoActivateUpdates": true,
+        "documentation": "",
+        "execution": {
+          "_type": "pureMultiExecution",
+          "executionKey": "env",
+          "executionParameters": [
+            {
+              "key": "PROD",
+              "mapping": "mapping::SomeMapping",
+              "runtime": {
+                "_type": "runtimePointer",
+                "runtime": "runtime::H2Runtime"
+              }
+            },
+            {
+              "key": "DEV",
+              "mapping": "mapping::SomeMapping",
+              "runtime": {
+                "_type": "runtimePointer",
+                "runtime": "runtime::H2Runtime"
+              }
+            }
+          ],
+          "func": {
+            "_type": "lambda",
+            "body": [
+              {
+                "_type": "func",
+                "function": "project",
+                "parameters": [
+                  {
+                    "_type": "func",
+                    "function": "getAll",
+                    "parameters": [
+                      {
+                        "_type": "packageableElementPtr",
+                        "fullPath": "domain::COVIDData"
+                      }
+                    ]
+                  },
+                  {
+                    "_type": "collection",
+                    "multiplicity": {
+                      "lowerBound": 1,
+                      "upperBound": 1
+                    },
+                    "values": [
+                      {
+                        "_type": "lambda",
+                        "body": [
+                          {
+                            "_type": "property",
+                            "parameters": [
+                              {
+                                "_type": "var",
+                                "name": "x"
+                              }
+                            ],
+                            "property": "cases"
+                          }
+                        ],
+                        "parameters": [
+                          {
+                            "_type": "var",
+                            "name": "x"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "_type": "collection",
+                    "multiplicity": {
+                      "lowerBound": 1,
+                      "upperBound": 1
+                    },
+                    "values": [
+                      {
+                        "_type": "string",
+                        "multiplicity": {
+                          "lowerBound": 1,
+                          "upperBound": 1
+                        },
+                        "values": [
+                          "Cases"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "parameters": []
+          }
+        },
+        "name": "SomeService",
+        "owners": [
+          "anonymous",
+          "akphi"
+        ],
+        "package": "service",
+        "pattern": "/9566f101-2108-408f-863f-6d7e154dc17a",
+        "stereotypes": [],
+        "taggedValues": []
+      }
+    }
+  },
+  {
+    "id": null,
+    "groupId": "test.legend",
+    "artifactId": "blank-prod",
+    "versionId": "2.0.0",
+    "versionedEntity": true,
+    "entity": {
+      "path": "test::legend::blank_prod::v2_0_0::blank::Person",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "content": {
+        "_type": "class",
+        "constraints": [],
+        "name": "Person",
+        "originalMilestonedProperties": [],
+        "package": "test::legend::blank_prod::v2_0_0::blank",
+        "properties": [],
+        "qualifiedProperties": [],
+        "sourceInformation": {
+          "endColumn": 1,
+          "endLine": 3,
+          "sourceId": "",
+          "startColumn": 1,
+          "startLine": 1
+        },
+        "stereotypes": [],
+        "superTypes": [],
+        "taggedValues": []
+      }
+    }
+  }
+]

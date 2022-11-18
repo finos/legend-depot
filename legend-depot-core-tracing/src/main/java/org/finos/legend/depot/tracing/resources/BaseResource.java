@@ -25,7 +25,6 @@ import java.util.function.Supplier;
 
 public class BaseResource
 {
-
     private Logger getLogger()
     {
         return LoggerFactory.getLogger(this.getClass());

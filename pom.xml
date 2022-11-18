@@ -38,6 +38,7 @@
         <module>legend-depot-test-reports</module>
 
         <module>legend-depot-model</module>
+        <module>legend-depot-pure-model-context</module>
 
         <module>legend-depot-store-mongo</module>
         <module>legend-depot-store-admin</module>
@@ -76,7 +77,7 @@
         <!-- Legend dependency versions -->
         <legend.engine.version>3.23.2</legend.engine.version>
         <legend.sdlc.version>0.101.0</legend.sdlc.version>
-        <legend.shared.version>0.22.6</legend.shared.version>
+        <legend.shared.version>0.23.3</legend.shared.version>
 
         <!-- Dependency versions -->
         <apache.httpcomponents.client.version>4.5.13</apache.httpcomponents.client.version>
@@ -98,6 +99,7 @@
         <hk2.version>2.5.0-b32</hk2.version>
         <hibernate.validator.version>5.4.2.Final</hibernate.validator.version>
         <jackson.version>2.10.5</jackson.version>
+        <jackson.databind.version>2.10.5.1</jackson.databind.version>
         <javassist.version>3.21.0-GA</javassist.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
         <javax.ws.rs.version>2.1.1</javax.ws.rs.version>
@@ -381,6 +383,11 @@
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-pure-model-context</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
                 <artifactId>legend-depot-store-mongo</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -603,6 +610,25 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>org.finos.legend.engine</groupId>
+                <artifactId>legend-engine-extensions-collection-generation</artifactId>
+                <version>${legend.engine.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.pac4j</groupId>
+                        <artifactId>pac4j-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.h2database</groupId>
+                        <artifactId>h2</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-text</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <!-- ENGINE-->
 
             <!--SDLC-->
@@ -610,6 +636,17 @@
                 <groupId>org.finos.legend.sdlc</groupId>
                 <artifactId>legend-sdlc-model</artifactId>
                 <version>${legend.sdlc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.sdlc</groupId>
+                <artifactId>legend-sdlc-protocol-pure</artifactId>
+                <version>${legend.sdlc.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-text</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.sdlc</groupId>
@@ -943,6 +980,11 @@
                 <version>${swagger-ui-dist.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
                 <version>${jackson.version}</version>
@@ -955,7 +997,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
+                <version>${jackson.databind.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.module</groupId>
