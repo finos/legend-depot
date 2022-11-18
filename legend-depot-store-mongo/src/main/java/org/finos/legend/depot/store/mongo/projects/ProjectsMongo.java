@@ -81,7 +81,7 @@ public class ProjectsMongo extends BaseMongo<ProjectData> implements Projects, U
     {
         if (!EntityValidator.isValid(data))
         {
-            throw new IllegalArgumentException(String.format("invalid groupId [%s] or artifactId [%s]", data.getGroupId() ,data.getArtifactId()));
+            throw new IllegalArgumentException(String.format("invalid groupId [%s] or artifactId [%s]",data.getGroupId(),data.getArtifactId()));
         }
         Optional<ProjectData> projectData = find(data.getGroupId(), data.getArtifactId());
         if (projectData.isPresent() && (data.getId() == null || !data.getId().equals(projectData.get().getId())))
