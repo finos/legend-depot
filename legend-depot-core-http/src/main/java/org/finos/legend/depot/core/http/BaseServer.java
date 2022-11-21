@@ -17,7 +17,7 @@ package org.finos.legend.depot.core.http;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheck;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
+import com.google.inject.Module;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -45,6 +45,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import java.text.SimpleDateFormat;
 import java.util.EnumSet;
+import java.util.List;
 
 public abstract class BaseServer<T extends ServersConfiguration> extends Application<T>
 {
@@ -85,8 +86,9 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
 
     }
 
-    protected abstract GuiceBundle<T> buildGuiceBundle();
+    protected abstract List<Module> getServerModules();
 
+    protected abstract GuiceBundle<T> buildGuiceBundle(List<Module> modules);
 
     @Override
     public void run(T configuration, Environment environment)

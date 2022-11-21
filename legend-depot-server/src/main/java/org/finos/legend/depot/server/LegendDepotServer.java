@@ -25,6 +25,9 @@ import org.finos.legend.depot.services.ReadOnlyServicesModule;
 import org.finos.legend.depot.store.mongo.StoreMongoModule;
 import org.finos.legend.depot.tracing.TracingModule;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
 {
     public LegendDepotServer()
@@ -44,17 +47,19 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
 
 
     @Override
-    protected GuiceBundle<DepotServerConfiguration> buildGuiceBundle()
+    protected GuiceBundle<DepotServerConfiguration> buildGuiceBundle(List<Module> modules)
     {
+        return GuiceBundle.defaultBuilder(DepotServerConfiguration.class).modules(modules).build();
+    }
 
-        return GuiceBundle.defaultBuilder(DepotServerConfiguration.class)
-                .modules(new InfoPageModule())
-                .modules(new DepotServerModule())
-                .modules(new DepotServerResourcesModule())
-                .modules(new StoreMongoModule())
-                .modules(new ReadOnlyServicesModule())
-                .modules(new TracingModule())
-                .build();
+    protected List<Module> getServerModules()
+    {
+       return Arrays.asList(new InfoPageModule(),
+                            new DepotServerModule(),
+                            new DepotServerResourcesModule(),
+                            new StoreMongoModule(),
+                            new ReadOnlyServicesModule(),
+                            new TracingModule());
     }
 
 }
