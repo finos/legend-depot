@@ -78,7 +78,7 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
 
         bootstrap.getObjectMapper().setDateFormat(new SimpleDateFormat(SIMPLE_DATE_FORMAT));
 
-        bootstrap.addBundle(buildGuiceBundle());
+        bootstrap.addBundle(buildGuiceBundle(getServerModules()));
 
         TracingAuthenticationProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
 
