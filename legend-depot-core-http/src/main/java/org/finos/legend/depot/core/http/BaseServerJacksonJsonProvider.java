@@ -16,19 +16,18 @@
 package org.finos.legend.depot.core.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
-import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 import javax.ws.rs.ext.ContextResolver;
 import java.text.SimpleDateFormat;
 
-public class BaseServerJacksonProvider extends JacksonJaxbJsonProvider implements ContextResolver<ObjectMapper>
+public class BaseServerJacksonJsonProvider extends JacksonJsonProvider implements ContextResolver<ObjectMapper>
 {
     public static final String SIMPLE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     protected final ObjectMapper objectMapper;
 
-    public BaseServerJacksonProvider()
+    public BaseServerJacksonJsonProvider()
     {
         objectMapper = new ObjectMapper().setDateFormat(new SimpleDateFormat(SIMPLE_DATE_FORMAT));
     }

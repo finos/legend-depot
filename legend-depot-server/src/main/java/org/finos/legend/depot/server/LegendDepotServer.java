@@ -62,6 +62,6 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
     public void run(DepotServerConfiguration configuration, Environment environment)
     {
         super.run(configuration, environment);
-        environment.jersey().register(LegendDepotServerJacksonProvider.class);
+        environment.jersey().register(LegendDepotServerJacksonJsonProvider.class);
     }
 }

@@ -33,7 +33,6 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.finos.legend.depot.tracing.configuration.PrometheusMetricsProviderConfiguration;
 import org.finos.legend.depot.tracing.configuration.TracingAuthenticationProviderConfiguration;
-import org.finos.legend.engine.protocol.pure.v1.PureProtocolObjectMapperFactory;
 import org.finos.legend.sdlc.server.error.LegendSDLCServerExceptionMapper;
 import org.finos.legend.server.pac4j.LegendPac4jBundle;
 import org.finos.legend.server.shared.bundles.ChainFixingFilterHandler;
@@ -46,7 +45,7 @@ import javax.servlet.FilterRegistration;
 import java.text.SimpleDateFormat;
 import java.util.EnumSet;
 
-import static org.finos.legend.depot.core.http.BaseServerJacksonProvider.SIMPLE_DATE_FORMAT;
+import static org.finos.legend.depot.core.http.BaseServerJacksonJsonProvider.SIMPLE_DATE_FORMAT;
 
 public abstract class BaseServer<T extends ServersConfiguration> extends Application<T>
 {
@@ -103,7 +102,7 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
             environment.jersey().setUrlPattern(urlPattern);
         }
         environment.jersey().register(MultiPartFeature.class);
-        environment.jersey().register(BaseServerJacksonProvider.class);
+        environment.jersey().register(BaseServerJacksonJsonProvider.class);
         environment.jersey().register(new LegendSDLCServerExceptionMapper());
         environment.jersey().register(new JsonProcessingExceptionMapper(true));
 

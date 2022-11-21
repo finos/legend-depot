@@ -16,15 +16,15 @@
 package org.finos.legend.depot.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.finos.legend.depot.core.http.BaseServerJacksonProvider;
+import org.finos.legend.depot.core.http.BaseServerJacksonJsonProvider;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.shared.core.ObjectMapperFactory;
 
-public class LegendDepotServerJacksonProvider extends BaseServerJacksonProvider
+public class LegendDepotServerJacksonJsonProvider extends BaseServerJacksonJsonProvider
 {
     private final ObjectMapper pmcdMapper;
 
-    public LegendDepotServerJacksonProvider()
+    public LegendDepotServerJacksonJsonProvider()
     {
         pmcdMapper = ObjectMapperFactory.getNewStandardObjectMapperWithPureProtocolExtensionSupports();
     }
