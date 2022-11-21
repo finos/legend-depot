@@ -110,7 +110,6 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
             environment.jersey().setUrlPattern(urlPattern);
         }
         environment.jersey().register(MultiPartFeature.class);
-        environment.jersey().register(JacksonJaxbJsonProvider.class);
         environment.jersey().register(new LegendSDLCServerExceptionMapper());
         environment.jersey().register(new JsonProcessingExceptionMapper(true));
 
