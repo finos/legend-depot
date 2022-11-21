@@ -42,10 +42,7 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
-import java.text.SimpleDateFormat;
 import java.util.EnumSet;
-
-import static org.finos.legend.depot.core.http.BaseServerJacksonJsonProvider.SIMPLE_DATE_FORMAT;
 
 public abstract class BaseServer<T extends ServersConfiguration> extends Application<T>
 {
@@ -72,7 +69,6 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
 
         // Enable variable substitution with environment variables
         bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(true)));
-        bootstrap.getObjectMapper().setDateFormat(new SimpleDateFormat(SIMPLE_DATE_FORMAT));
         bootstrap.addBundle(buildGuiceBundle());
 
         TracingAuthenticationProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
@@ -102,7 +98,6 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
             environment.jersey().setUrlPattern(urlPattern);
         }
         environment.jersey().register(MultiPartFeature.class);
-        environment.jersey().register(BaseServerJacksonJsonProvider.class);
         environment.jersey().register(new LegendSDLCServerExceptionMapper());
         environment.jersey().register(new JsonProcessingExceptionMapper(true));
 

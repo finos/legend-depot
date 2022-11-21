@@ -16,16 +16,20 @@
 package org.finos.legend.depot.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.finos.legend.depot.core.http.BaseServerJacksonJsonProvider;
+import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.shared.core.ObjectMapperFactory;
 
-public class LegendDepotServerJacksonJsonProvider extends BaseServerJacksonJsonProvider
+import javax.ws.rs.ext.ContextResolver;
+
+public class LegendDepotServerJacksonJsonProvider extends JacksonJsonProvider implements ContextResolver<ObjectMapper>
 {
+    private final ObjectMapper objectMapper;
     private final ObjectMapper pmcdMapper;
 
     public LegendDepotServerJacksonJsonProvider()
     {
+        objectMapper = new ObjectMapper();
         pmcdMapper = ObjectMapperFactory.getNewStandardObjectMapperWithPureProtocolExtensionSupports();
     }
 

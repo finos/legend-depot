@@ -13,23 +13,26 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.core.http;
+package org.finos.legend.depot.store.server;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 import javax.ws.rs.ext.ContextResolver;
 import java.text.SimpleDateFormat;
 
-public class BaseServerJacksonJsonProvider extends JacksonJsonProvider implements ContextResolver<ObjectMapper>
+public class LegendDepotStoreServerJacksonJsonProvider extends JacksonJsonProvider implements ContextResolver<ObjectMapper>
 {
     public static final String SIMPLE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-    protected final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    public BaseServerJacksonJsonProvider()
+    public LegendDepotStoreServerJacksonJsonProvider()
     {
-        objectMapper = new ObjectMapper().setDateFormat(new SimpleDateFormat(SIMPLE_DATE_FORMAT));
+        objectMapper = new ObjectMapper()
+                .setDateFormat(new SimpleDateFormat(SIMPLE_DATE_FORMAT))
+                .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
     }
 
     @Override
