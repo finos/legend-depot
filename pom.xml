@@ -627,6 +627,10 @@
                         <groupId>org.apache.commons</groupId>
                         <artifactId>commons-text</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.finos.legend.engine</groupId>
+                        <artifactId>legend-engine-xt-persistence-test-runner</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <!-- ENGINE-->

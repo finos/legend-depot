@@ -96,6 +96,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected ArtifactRepository repository = new TestMavenArtifactsRepository();
     protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
     protected Queue queue = new QueueMongo(mongoProvider);
+
     protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repositoryServices, artifacts, queue, new IncludeProjectPropertiesConfiguration(properties));
     protected NotificationEventHandler eventHandler = new ArtifactRefreshEventHandler(projectsService,artifactsRefreshService);
 

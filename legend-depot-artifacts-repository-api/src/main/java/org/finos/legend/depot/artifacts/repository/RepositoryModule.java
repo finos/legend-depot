@@ -16,11 +16,27 @@
 package org.finos.legend.depot.artifacts.repository;
 
 import com.google.inject.PrivateModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import org.finos.legend.depot.artifacts.repository.resources.RepositoryResource;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
+import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
+import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
+
+import javax.inject.Named;
+import java.time.LocalDateTime;
+
+import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.MISSING_STORE_VERSIONS;
+import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.REPO_EXCEPTIONS;
+import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.REPO_VERSIONS;
+import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.MISSING_REPO_VERSIONS;
+import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.STORE_VERSIONS;
 
 public class RepositoryModule extends PrivateModule
 {
+
+    private static final String REPOSITORY_METRICS_SCHEDULE = "repository-metrics-schedule";
+
     @Override
     protected void configure()
     {
@@ -28,5 +44,20 @@ public class RepositoryModule extends PrivateModule
        bind(RepositoryServices.class);
        expose(RepositoryResource.class);
        expose(RepositoryServices.class);
+    }
+
+
+    @Provides
+    @Named("repository-metrics")
+    @Singleton
+    boolean registerMetrics(SchedulesFactory schedulesFactory, PrometheusMetricsHandler metricsHandler, RepositoryServices repositoryServices)
+    {
+        metricsHandler.registerGauge(REPO_VERSIONS, REPO_VERSIONS);
+        metricsHandler.registerGauge(STORE_VERSIONS, STORE_VERSIONS);
+        metricsHandler.registerGauge(MISSING_REPO_VERSIONS, MISSING_REPO_VERSIONS);
+        metricsHandler.registerGauge(MISSING_STORE_VERSIONS, MISSING_STORE_VERSIONS);
+        metricsHandler.registerCounter(REPO_EXCEPTIONS, REPO_EXCEPTIONS);
+        schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, LocalDateTime.now().plusMinutes(5), 5 * 60 * 60 * 1000, false,repositoryServices::findVersionsMismatches);
+        return true;
     }
 }

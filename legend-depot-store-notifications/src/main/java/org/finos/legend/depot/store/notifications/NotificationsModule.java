@@ -29,13 +29,20 @@ import org.finos.legend.depot.store.notifications.resources.NotificationsManager
 import org.finos.legend.depot.store.notifications.services.NotificationsQueueManager;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.QueueMongo;
+import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
 import javax.inject.Named;
 import java.time.LocalDateTime;
 
+import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.NOTIFICATIONS_COUNTER;
+import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.NOTIFICATIONS_COUNTER_HELP;
+import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.QUEUE_WAITING;
+import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.QUEUE_WAITING_HELP;
+
 public class NotificationsModule extends PrivateModule
 {
     private static final String QUEUE_OBSERVER = "queue-observer";
+    private static final String NOTIFICATION_METRICS_SCHEDULE = "notification-metrics-schedule";
 
     @Override
     protected void configure()
@@ -59,6 +66,17 @@ public class NotificationsModule extends PrivateModule
         NotificationsQueueManager eventsQueueManager = new NotificationsQueueManager(projectsService, events, queue, notificationHandler);
         schedulesFactory.register(QUEUE_OBSERVER, LocalDateTime.now().plusNanos(config.getQueueDelay() * 1000000L), config.getQueueInterval(), true, eventsQueueManager::handle);
         return eventsQueueManager;
+    }
+
+    @Provides
+    @Named("notifications-metrics")
+    @Singleton
+    boolean registerMetrics(PrometheusMetricsHandler metricsHandler,SchedulesFactory schedulesFactory, @Named("queue-observer") NotificationsQueueManager eventsQueueManager)
+    {
+        metricsHandler.registerCounter(NOTIFICATIONS_COUNTER, NOTIFICATIONS_COUNTER_HELP);
+        metricsHandler.registerGauge(QUEUE_WAITING, QUEUE_WAITING_HELP);
+        schedulesFactory.register(NOTIFICATION_METRICS_SCHEDULE, LocalDateTime.now().plusSeconds(1), 15000L, false, eventsQueueManager::waitingOnQueue);
+        return true;
     }
 
 }

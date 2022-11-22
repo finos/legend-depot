@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.tracing.resources;
 
-import org.finos.legend.depot.tracing.services.PrometheusMetricsFactory;
+import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +25,11 @@ import java.util.function.Supplier;
 
 public class BaseResource
 {
+    public BaseResource()
+    {
+        PrometheusMetricsFactory.getInstance().registerResourceApis(this);
+    }
+
     private Logger getLogger()
     {
         return LoggerFactory.getLogger(this.getClass());
@@ -44,7 +49,7 @@ public class BaseResource
         return builder.toString();
     }
 
-    private <T> T handleLogging(String metricsLabel, String logsLabel, Supplier<T> supplier)
+    private <T> T handleWithLogging(String resourceAPIMetricName, String logsLabel, Supplier<T> supplier)
     {
         Logger logger = this.getLogger();
         boolean isInfoLogging = logger.isInfoEnabled();
@@ -59,7 +64,7 @@ public class BaseResource
         {
             T result = supplier.get();
             long end = System.nanoTime();
-            PrometheusMetricsFactory.get().observe(metricsLabel, start, end);
+            PrometheusMetricsFactory.getInstance().observe(resourceAPIMetricName, start, end);
             if (isInfoLogging)
             {
                 duration = end - start;
@@ -70,7 +75,7 @@ public class BaseResource
         }
         catch (Exception var15)
         {
-            PrometheusMetricsFactory.get().observeError(metricsLabel);
+            PrometheusMetricsFactory.getInstance().incrementErrorCount(resourceAPIMetricName);
             if (logger.isErrorEnabled())
             {
                 duration = System.nanoTime() - start;
@@ -80,11 +85,11 @@ public class BaseResource
         }
     }
 
-    protected <T> T handle(String metricsLabel, String label, Supplier<T> supplier)
+    protected <T> T handle(String resourceAPIMetricName, String label, Supplier<T> supplier)
     {
         try
         {
-            return TracerFactory.get().executeWithTrace(label, () -> handleLogging(metricsLabel, label, supplier));
+            return TracerFactory.get().executeWithTrace(label, () -> handleWithLogging(resourceAPIMetricName, label, supplier));
         }
         catch (Exception e)
         {

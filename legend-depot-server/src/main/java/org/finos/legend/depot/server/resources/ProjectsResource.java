@@ -64,7 +64,7 @@ public class ProjectsResource extends BaseResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions")
-    @ApiOperation("get all versions for given project")
+    @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
     public List<String> getVersions(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
     {

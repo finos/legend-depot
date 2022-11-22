@@ -13,37 +13,38 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.tracing.services;
+package org.finos.legend.depot.tracing.services.prometheus;
 
+import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
-import org.finos.legend.depot.tracing.configuration.PrometheusMetricsHandler;
 
 import javax.inject.Singleton;
 
 @Singleton
 public final class PrometheusMetricsFactory
 {
+    private static PrometheusMetricsHandler INSTANCE;
 
-    private static final PrometheusMetricsFactory INSTANCE = new PrometheusMetricsFactory();
-    private static PrometheusMetricsHandler metricsHandler = new VoidPrometheusMetricsHandler();
-
-    private PrometheusMetricsFactory()
+    public static PrometheusMetricsHandler getInstance()
     {
-    }
-
-    public static PrometheusMetricsFactory configure(PrometheusConfiguration configuration)
-    {
-        if (configuration != null && configuration.isEnabled())
+        if (INSTANCE == null)
         {
-            metricsHandler = configuration.getPrometheusMetricsHandler();
+            INSTANCE = configure(null);
         }
         return INSTANCE;
-
     }
 
-    public static synchronized PrometheusMetricsHandler get()
+    public static PrometheusMetricsHandler configure(PrometheusConfiguration configuration)
     {
-        return metricsHandler;
+        if (configuration != null && configuration.isEnabled() && configuration.getMetricsHandler() != null)
+        {
+            INSTANCE = configuration.getMetricsHandler();
+        }
+        else
+        {
+            INSTANCE = new VoidPrometheusMetricsHandler();
+        }
+        return INSTANCE;
     }
 
 }

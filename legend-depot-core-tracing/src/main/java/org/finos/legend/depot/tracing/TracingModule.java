@@ -18,9 +18,10 @@ package org.finos.legend.depot.tracing;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 import org.finos.legend.depot.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
-import org.finos.legend.depot.tracing.services.PrometheusMetricsFactory;
+import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 
 public class TracingModule extends PrivateModule
@@ -30,7 +31,7 @@ public class TracingModule extends PrivateModule
     protected void configure()
     {
         expose(TracerFactory.class);
-        expose(PrometheusMetricsFactory.class);
+        expose(PrometheusMetricsHandler.class);
     }
 
     @Provides
@@ -43,7 +44,7 @@ public class TracingModule extends PrivateModule
 
     @Provides
     @Singleton
-    public PrometheusMetricsFactory initialisePrometheusMetricsHandler(PrometheusConfiguration configuration)
+    public PrometheusMetricsHandler initialisePrometheusMetrics(PrometheusConfiguration configuration)
     {
         return PrometheusMetricsFactory.configure(configuration);
     }
