@@ -1,0 +1,150 @@
+[
+  {
+    "id": null,
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "3.0.0",
+    "versionedEntity": true,
+    "entity": {
+      "path": "test::legend::metadata::test::v3_0_0::com::test",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "content": {
+        "_type": "class",
+        "name": "test",
+        "package": "test::legend::metadata::test::v3_0_0::com"
+      }
+    }
+  },
+  {
+    "id": null,
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "3.0.0",
+    "versionedEntity": true,
+    "entity": {
+      "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::ClassWithDependency",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "content": {
+        "_type": "class",
+        "name": "ClassWithDependency",
+        "package": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test",
+        "properties": [
+          {
+            "multiplicity": {
+              "lowerBound": 1,
+              "upperBound": 1
+            },
+            "name": "Name",
+            "type": "String"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": null,
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "3.0.0",
+    "versionedEntity": true,
+    "entity": {
+      "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "content": {
+        "_type": "profile",
+        "name": "TestProfile",
+        "package": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test"
+      }
+    }
+  },
+  {
+    "id": null,
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "3.0.0",
+    "versionedEntity": true,
+    "entity": {
+      "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::ClientBasic",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "content": {
+        "_type": "class",
+        "name": "ClientBasic",
+        "package": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test",
+        "properties": [
+          {
+            "multiplicity": {
+              "lowerBound": 1,
+              "upperBound": 1
+            },
+            "name": "Name",
+            "type": "String"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 1,
+              "upperBound": 1
+            },
+            "name": "EntityId",
+            "type": "Integer"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 1,
+              "upperBound": 1
+            },
+            "name": "IsActive",
+            "type": "Boolean"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 1,
+              "upperBound": 1
+            },
+            "name": "RiskScore",
+            "type": "Float"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 1,
+              "upperBound": 1
+            },
+            "name": "IncorporationDate",
+            "type": "StrictDate"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 0,
+              "upperBound": 1
+            },
+            "name": "OptionalAlternativeName",
+            "type": "String"
+          },
+          {
+            "multiplicity": {
+              "lowerBound": 0,
+              "upperBound": 1
+            },
+            "name": "newProperty",
+            "type": "String"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": null,
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "3.0.0",
+    "versionedEntity": true,
+    "entity": {
+      "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::subpackage::TestProfileTwo",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "content": {
+        "_type": "profile",
+        "name": "TestProfileTwo",
+        "package": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::subpackage"
+      }
+    }
+  }
+]

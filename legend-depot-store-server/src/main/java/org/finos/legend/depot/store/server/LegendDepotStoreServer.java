@@ -17,6 +17,7 @@ package org.finos.legend.depot.store.server;
 
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
 import org.finos.legend.depot.artifacts.repository.RepositoryModule;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.core.authorisation.AuthorisationModule;
@@ -79,4 +80,11 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 .build();
     }
 
+
+    @Override
+    public void run(DepotStoreServerConfiguration configuration, Environment environment)
+    {
+        super.run(configuration, environment);
+        environment.jersey().register(LegendDepotStoreServerJacksonJsonProvider.class);
+    }
 }
