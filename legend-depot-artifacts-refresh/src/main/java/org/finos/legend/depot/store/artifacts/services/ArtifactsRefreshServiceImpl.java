@@ -39,6 +39,7 @@ import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
 import org.finos.legend.depot.store.metrics.QueryMetricsContainer;
 import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
@@ -74,7 +75,15 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     private static final String REFRESH_ALL_VERSIONS_FOR_PROJECT = "refreshAllVersionsForProject";
     private static final String REFRESH_PROJECTS_WITH_MISSING_VERSIONS = "refreshProjectsWithMissingVersions";
     private static final String REFRESH_PROJECT_VERSION_ARTIFACTS = "refreshProjectVersionArtifacts";
-    public static final String SEPARATOR = "-";
+    private static final String SEPARATOR = "-";
+    private static final String GROUP_ID = "groupId";
+    private static final String ARTIFACT_ID = "artifactId";
+    private static final String VERSION_ID = "versionId";
+
+    public static final String VERSION_REFRESH_COUNTER = "versionRefresh";
+    public static final String VERSION_REFRESH_DURATION = "versionRefresh_duration";
+    public static final String VERSION_REFRESH_DURATION_HELP = "version refresh duration";
+    public static final String TOTAL_NUMBER_OF_VERSIONS_REFRESH = "total number of versions refresh";
 
     private final ManageProjectsService projects;
     private final ManageRefreshStatusService store;
@@ -93,6 +102,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         this.artifacts = artifacts;
         this.workQueue = refreshWorkQueue;
         this.projectProperties = includePropertyConfig.getProperties();
+
         try
         {
             MessageDigest.getInstance("SHA-256");
@@ -131,21 +141,22 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             {
                 storeStatus.setParentEventId(parentEventId);
             }
+            PrometheusMetricsFactory.getInstance().incrementCount(VERSION_REFRESH_COUNTER);
             storeStatus = store.createOrUpdate(storeStatus.startRunning());
             response = functionToExecute.get();
-            storeStatus = store.createOrUpdate(storeStatus.stopRunning(response));
-            getLOGGER().info("Finished [{}{}{}] refresh", groupId, artifactId, version);
         }
         catch (Exception e)
         {
             String message = String.format("Error refreshing [%s-%s-%s] : %s",groupId,artifactId,version,e.getMessage());
             storeStatus.getResponse().addError(message);
             response.addMessage(message);
-            LOGGER.error("Error refreshing ",e);
+            PrometheusMetricsFactory.getInstance().incrementErrorCount(VERSION_REFRESH_COUNTER);
+            LOGGER.error("Error refreshing [{}{}{}] : {} ",groupId,artifactId,version,e);
         }
         finally
         {
             store.createOrUpdate(storeStatus.stopRunning(response));
+            getLOGGER().info("Finished [{}{}{}] refresh", groupId, artifactId, version);
         }
         return response;
     }
@@ -153,9 +164,9 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     private void decorateSpanWithVersionInfo(String groupId,String artifactId, String versionId)
     {
         Map<String, String> tags = new HashMap<>();  
-        tags.put("groupId", groupId);
-        tags.put("artifactId", artifactId);
-        tags.put("versionId", versionId);
+        tags.put(GROUP_ID, groupId);
+        tags.put(ARTIFACT_ID, artifactId);
+        tags.put(VERSION_ID, versionId);
         TracerFactory.get().addTags(tags);
     }
 
@@ -285,32 +296,35 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         return executeWithTrace(REFRESH_PROJECT_VERSION_ARTIFACTS, project.getGroupId(), project.getArtifactId(), versionId, parentEventId, () ->
         {
             MetadataEventResponse response = new MetadataEventResponse();
+            long refreshStartTime = System.currentTimeMillis();
             response.combine(validateInput(project.getGroupId(),project.getArtifactId(),versionId));
             response.addMessage(String.format("Processing [%s-%s-%s] fullUpdate/transitive? [%s/%s] parent:[%s]", project.getGroupId(), project.getArtifactId(), versionId, fullUpdate, transitive,parentEventId));
             getSupportedArtifactTypes().forEach(artifactType -> response.combine(executeVersionRefresh(artifactType, project, versionId,fullUpdate)));
             if (!response.hasErrors())
             {
                 QueryMetricsContainer.record(project.getGroupId(), project.getArtifactId(), versionId);
-                Optional<ProjectData> latestProjectData = projects.find(project.getGroupId(), project.getArtifactId());
-                latestProjectData.ifPresent(p ->
+                List<ProjectVersionDependency> newDependencies = calculateDependencies(project.getGroupId(), project.getArtifactId(), versionId);
+                if (transitive)
                 {
-                    List<ProjectVersionDependency> newDependencies = calculateDependencies(project.getGroupId(), project.getArtifactId(), versionId);
-                    if (transitive)
+                    response.combine(refreshDependencies(newDependencies,fullUpdate,transitive,parentEventId));
+                    LOGGER.info("Finished updating {} dependencies for [{}{}{}]", project.getDependencies(versionId).size(), project.getGroupId(), project.getArtifactId(), versionId);
+                }
+                else
+                {
+                    newDependencies.stream().forEach(dep ->
                     {
-                        response.combine(refreshDependencies(newDependencies,fullUpdate,transitive,parentEventId));
-                        LOGGER.info("Finished updating {} dependencies for [{}{}{}]", project.getDependencies(versionId).size(), project.getGroupId(), project.getArtifactId(), versionId);
-                    }
-                    else
-                    {
-                        newDependencies.stream().forEach(dep ->
+                        if (!projects.exists(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId()))
                         {
-                            if (!projects.exists(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId()))
-                            {
-                                response.addError(String.format("Dependency %s-%s-%s not found in store", dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId()));
-                            }
-                        });
-                    }
-                    if (!response.hasErrors())
+                            String missingDepError = String.format("Dependency %s-%s-%s not found in store", dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId());
+                            response.addError(missingDepError);
+                            LOGGER.error(missingDepError);
+                        }
+                    });
+                }
+                if (!response.hasErrors())
+                {
+                    Optional<ProjectData> latestProjectData = projects.find(project.getGroupId(), project.getArtifactId());
+                    latestProjectData.ifPresent(p ->
                     {
                         if (!versionId.equals(MASTER_SNAPSHOT))
                         {
@@ -320,9 +334,11 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                         p.getDependencies(versionId).forEach(p::removeDependency);
                         p.addDependencies(newDependencies);
                         projects.createOrUpdate(p);
-                    }
-                });
+                    });
+                }
             }
+            long refreshEndTime = System.currentTimeMillis();
+            PrometheusMetricsFactory.getInstance().observeHistogram(VERSION_REFRESH_DURATION,refreshStartTime,refreshEndTime);
             return response;
         });
     }

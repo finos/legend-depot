@@ -22,6 +22,7 @@ import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
@@ -38,6 +39,12 @@ public class RepositoryServices
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(RepositoryServices.class);
 
+    public static final String REPO_VERSIONS = "repo_versions";
+    public static final String STORE_VERSIONS = "store_versions";
+    public static final String MISSING_REPO_VERSIONS = "missing_repo_versions";
+    public static final String MISSING_STORE_VERSIONS = "missing_store_versions";
+    public static final String REPO_EXCEPTIONS = "repo_exceptions";
+
     private final ArtifactRepository repository;
     private final ProjectsService projects;
 
@@ -51,14 +58,21 @@ public class RepositoryServices
     public List<VersionMismatch> findVersionsMismatches()
     {
         List<VersionMismatch> versionMismatches = new ArrayList<>();
+        PrometheusMetricsFactory.getInstance().setGauge(REPO_VERSIONS,0);
+        PrometheusMetricsFactory.getInstance().setGauge(STORE_VERSIONS,0);
+        PrometheusMetricsFactory.getInstance().setGauge(MISSING_REPO_VERSIONS,0);
+        PrometheusMetricsFactory.getInstance().setGauge(MISSING_STORE_VERSIONS,0);
+
         projects.getAll().forEach(p ->
         {
             try
             {
                     List<String> repositoryVersions = repository.findVersions(p.getGroupId(), p.getArtifactId()).stream().map(v -> v.toVersionIdString()).collect(Collectors.toList());
+                    PrometheusMetricsFactory.getInstance().increaseGauge(REPO_VERSIONS,repositoryVersions.size());
                     Collections.sort(repositoryVersions);
                     //check versions not in cache
                     List<String> versionsNotInCache = new ArrayList<>(repositoryVersions);
+                    PrometheusMetricsFactory.getInstance().increaseGauge(STORE_VERSIONS,p.getVersions().size());
                     versionsNotInCache.removeAll(p.getVersions());
                     //check versions not in repo
                     List<String> versionsNotInRepo = new ArrayList<>(p.getVersions());
@@ -66,6 +80,8 @@ public class RepositoryServices
 
                     if (!versionsNotInCache.isEmpty() || !versionsNotInRepo.isEmpty())
                     {
+                        PrometheusMetricsFactory.getInstance().increaseGauge(MISSING_REPO_VERSIONS,versionsNotInCache.size());
+                        PrometheusMetricsFactory.getInstance().increaseGauge(MISSING_STORE_VERSIONS,versionsNotInRepo.size());
                         versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache, versionsNotInRepo));
                         LOGGER.info("version-mismatch found for {} {} {} : notInCache [{}], notInRepo [{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache, versionsNotInRepo);
                     }
@@ -76,6 +92,7 @@ public class RepositoryServices
                 String message = String.format("Could not get versions for %s:%s exception: %s ",p.getGroupId(),p.getArtifactId(),e.getMessage());
                 LOGGER.error(message);
                 versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), Collections.emptyList(), Collections.emptyList(), Arrays.asList(message)));
+                PrometheusMetricsFactory.getInstance().incrementErrorCount(REPO_EXCEPTIONS);
             }
         });
         return versionMismatches;

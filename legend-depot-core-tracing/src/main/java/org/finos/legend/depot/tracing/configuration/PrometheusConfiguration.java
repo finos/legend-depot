@@ -16,6 +16,7 @@
 package org.finos.legend.depot.tracing.configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
 public class PrometheusConfiguration
 {
@@ -23,10 +24,17 @@ public class PrometheusConfiguration
     private boolean enabled = false;
 
     @JsonProperty
-    private String prefix;
+    private PrometheusMetricsHandler metricsHandler;
 
-    @JsonProperty
-    private PrometheusMetricsHandler prometheusMetricsHandler;
+    public PrometheusConfiguration()
+    {
+    }
+
+    public PrometheusConfiguration(boolean enabled, PrometheusMetricsHandler metricsHandler)
+    {
+        this.enabled = enabled;
+        this.metricsHandler = metricsHandler;
+    }
 
     public boolean isEnabled()
     {
@@ -38,23 +46,13 @@ public class PrometheusConfiguration
         this.enabled = enabled;
     }
 
-    public String getPrefix()
+    public PrometheusMetricsHandler getMetricsHandler()
     {
-        return prefix;
+        return metricsHandler;
     }
 
-    public void setPrefix(String prefix)
+    public void setMetricsHandler(PrometheusMetricsHandler metricsHandler)
     {
-        this.prefix = prefix;
-    }
-
-    public PrometheusMetricsHandler getPrometheusMetricsHandler()
-    {
-        return prometheusMetricsHandler;
-    }
-
-    public void setPrometheusMetricsHandler(PrometheusMetricsHandler prometheusMetricsHandler)
-    {
-        this.prometheusMetricsHandler = prometheusMetricsHandler;
+        this.metricsHandler = metricsHandler;
     }
 }

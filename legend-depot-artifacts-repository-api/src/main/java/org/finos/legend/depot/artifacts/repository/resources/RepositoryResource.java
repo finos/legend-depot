@@ -46,8 +46,6 @@ public class RepositoryResource extends BaseResource
         this.artifactRepository = artifactRepository;
     }
 
-
-
     @GET
     @Path("/repository/versions/{groupId}/{artifactId}")
     @ApiOperation(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)

@@ -66,6 +66,12 @@ public class QueueMongo extends BaseMongo<MetadataNotification> implements Queue
         //no specific validation
     }
 
+    @Override
+    public long size()
+    {
+        return getCollection().count();
+    }
+
     public String push(MetadataNotification event)
     {
         MetadataNotification result = createOrUpdate(event);

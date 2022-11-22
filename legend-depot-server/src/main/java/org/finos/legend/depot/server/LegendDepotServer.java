@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.server;
 
+import com.google.inject.Module;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import io.dropwizard.setup.Environment;
 import org.finos.legend.depot.core.http.BaseServer;
@@ -26,6 +27,9 @@ import org.finos.legend.depot.server.pure.model.context.PureModelContextModule;
 import org.finos.legend.depot.services.ReadOnlyServicesModule;
 import org.finos.legend.depot.store.mongo.StoreMongoModule;
 import org.finos.legend.depot.tracing.TracingModule;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
 {
@@ -44,18 +48,21 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
         new LegendDepotServer().run(args);
     }
 
-    @Override
-    protected GuiceBundle<DepotServerConfiguration> buildGuiceBundle()
+    protected List<Module> getServerModules()
     {
-        return GuiceBundle.defaultBuilder(DepotServerConfiguration.class)
-                .modules(new InfoPageModule())
-                .modules(new DepotServerModule())
-                .modules(new DepotServerResourcesModule())
-                .modules(new PureModelContextModule())
-                .modules(new StoreMongoModule())
-                .modules(new ReadOnlyServicesModule())
-                .modules(new TracingModule())
-                .build();
+        return Arrays.asList(new InfoPageModule(),
+                new DepotServerModule(),
+                new DepotServerResourcesModule(),
+                new PureModelContextModule(),
+                new StoreMongoModule(),
+                new ReadOnlyServicesModule(),
+                new TracingModule());
+    }
+
+    @Override
+    protected GuiceBundle<DepotServerConfiguration> buildGuiceBundle(List<Module> serverModules)
+    {
+        return GuiceBundle.defaultBuilder(DepotServerConfiguration.class).modules(serverModules).build();
     }
 
     @Override

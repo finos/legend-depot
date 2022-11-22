@@ -26,6 +26,7 @@ import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 import org.finos.legend.depot.tracing.services.TracerFactory;
+import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -36,6 +37,11 @@ import java.util.Optional;
 public final class NotificationsQueueManager implements NotificationsManager
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(NotificationsQueueManager.class);
+    public static final String NOTIFICATIONS_COUNTER = "notifications";
+    public static final String NOTIFICATIONS_COUNTER_HELP = "total notifications received";
+    public static final String QUEUE_WAITING = "queue_waiting";
+    public static final String QUEUE_WAITING_HELP = "waiting in queue";
+
     private final Notifications events;
     private final Queue queue;
     private final NotificationEventHandler eventHandler;
@@ -83,6 +89,7 @@ public final class NotificationsQueueManager implements NotificationsManager
         if (!validationErrors.isEmpty())
         {
             events.completeWithOutRetry(event.failEvent(String.join(",",validationErrors)));
+            PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
             return;
         }
 
@@ -100,6 +107,7 @@ public final class NotificationsQueueManager implements NotificationsManager
         {
             queue.push(event.increaseRetries().setStatus(MetadataEventStatus.RETRY).addErrors(response.getErrors()));
             LOGGER.info("event completed with errors [{}]", response.getErrors());
+            PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
         }
         else
         {
@@ -120,6 +128,7 @@ public final class NotificationsQueueManager implements NotificationsManager
     @Override
     public String notify(String projectId, String groupId, String artifactId, String versionId, int maxRetries)
     {
+        PrometheusMetricsFactory.getInstance().incrementCount(NOTIFICATIONS_COUNTER);
         validateMavenCoordinates(projectId, groupId, artifactId);
         //we create a notification event with fullUpdate/transitive flag set to false(ie partial update)
         //this means, it will only process changed jar files and will only handle those entities,etc
@@ -160,5 +169,12 @@ public final class NotificationsQueueManager implements NotificationsManager
             event = queue.getFirstInQueue();
         }
         while (event.isPresent());
+    }
+
+    public long waitingOnQueue()
+    {
+        long waiting = this.queue.size();
+        PrometheusMetricsFactory.getInstance().setGauge(QUEUE_WAITING,waiting);
+        return waiting;
     }
 }

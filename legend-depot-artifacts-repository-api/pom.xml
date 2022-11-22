@@ -69,5 +69,9 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-admin</artifactId>
+        </dependency>
     </dependencies>
 </project>

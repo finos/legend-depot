@@ -33,4 +33,5 @@ public interface Queue
 
     String push(MetadataNotification metadataEvent);
 
+    long size();
 }

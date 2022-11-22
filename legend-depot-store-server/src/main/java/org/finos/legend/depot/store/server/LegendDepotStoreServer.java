@@ -15,6 +15,8 @@
 
 package org.finos.legend.depot.store.server;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.inject.Module;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -34,6 +36,9 @@ import org.finos.legend.depot.store.notifications.NotificationsModule;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
 import org.finos.legend.depot.store.status.StoreStatusModule;
 import org.finos.legend.depot.tracing.TracingModule;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfiguration>
 {
@@ -60,24 +65,30 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
         ArtifactRepositoryProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
     }
 
+
     @Override
-    protected GuiceBundle<DepotStoreServerConfiguration> buildGuiceBundle()
+    protected List<Module> getServerModules()
     {
-        return GuiceBundle.defaultBuilder(DepotStoreServerConfiguration.class)
-                .modules(new InfoPageModule())
-                .modules(new StoreAdminModule())
-                .modules(new AuthorisationModule())
-                .modules(new StoreMongoModule())
-                .modules(new AdminServicesModule())
-                .modules(new DepotStoreServerModule())
-                .modules(new DepotStoreResourcesModule())
-                .modules(new StoreStatusModule())
-                .modules(new ArtifactsModule())
-                .modules(new RepositoryModule())
-                .modules(new TracingModule())
-                .modules(new MetricsModule())
-                .modules(new NotificationsModule())
-                .build();
+        return Arrays.asList(
+                new InfoPageModule(),
+                new StoreAdminModule(),
+                new AuthorisationModule(),
+                new StoreMongoModule(),
+                new AdminServicesModule(),
+                new DepotStoreServerModule(),
+                new DepotStoreResourcesModule(),
+                new StoreStatusModule(),
+                new ArtifactsModule(),
+                new RepositoryModule(),
+                new TracingModule(),
+                new MetricsModule(),
+                new NotificationsModule());
+    }
+
+    @Override
+    protected GuiceBundle<DepotStoreServerConfiguration> buildGuiceBundle(List<Module> serverModules)
+    {
+        return GuiceBundle.defaultBuilder(DepotStoreServerConfiguration.class).modules(serverModules).build();
     }
 
 

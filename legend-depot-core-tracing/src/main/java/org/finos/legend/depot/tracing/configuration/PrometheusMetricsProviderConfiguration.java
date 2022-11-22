@@ -17,6 +17,7 @@ package org.finos.legend.depot.tracing.configuration;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
 public abstract class PrometheusMetricsProviderConfiguration
 {

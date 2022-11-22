@@ -66,10 +66,9 @@ public class ResourceLoggingAndTracing
     public static final String GET_PROJECT_CACHE_STATUS = "project cache status";
     public static final String GET_VERSIONS_BY_LAST_USED = "versions last used";
     public static final String TOGGLE_SCHEDULE = "toggle schedule";
-    public static final String ENQUEUE_REFRESH_ALL_EVENT = "queue refresh all";
     public static final String ORPHAN_STORE_ENTITIES = "get orphaned entities";
     public static final String GET_ENTITIES_BY_CLASSIFIER_PATH = "get entities by classifier path";
-    public static final String REPOSITORY_PROJECT_VERSIONS = "repo versions";
+    public static final String REPOSITORY_PROJECT_VERSIONS = "repo project versions";
     public static final String GET_PROJECT_CACHE_MISMATCHES = "version mismatch";
     public static final String UPDATE_SCHEDULE = "update schedule";
     public static final String FIX_MISSING_VERSIONS = "fix missing versions";

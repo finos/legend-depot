@@ -44,6 +44,7 @@ import org.finos.legend.depot.store.artifacts.store.mongo.ArtifactsMongo;
 import org.finos.legend.depot.store.artifacts.store.mongo.MongoRefreshStatus;
 import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
+import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
 import javax.inject.Named;
 import java.time.LocalDateTime;
@@ -83,6 +84,18 @@ public class ArtifactsModule extends PrivateModule
         expose(NotificationEventHandler.class);
         expose(ArtifactsResource.class);
     }
+
+
+    @Provides
+    @Named("artifact-refresh-metrics")
+    @Singleton
+    boolean registerMetrics(PrometheusMetricsHandler metricsHandler)
+    {
+        metricsHandler.registerCounter(ArtifactsRefreshServiceImpl.VERSION_REFRESH_COUNTER, ArtifactsRefreshServiceImpl.TOTAL_NUMBER_OF_VERSIONS_REFRESH);
+        metricsHandler.registerHistogram(ArtifactsRefreshServiceImpl.VERSION_REFRESH_DURATION, ArtifactsRefreshServiceImpl.VERSION_REFRESH_DURATION_HELP);
+        return true;
+    }
+
 
     @Provides
     @Named("entityRefresh")
