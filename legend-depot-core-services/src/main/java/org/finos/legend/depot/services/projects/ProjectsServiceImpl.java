@@ -15,6 +15,8 @@
 
 package org.finos.legend.depot.services.projects;
 
+import java.util.Map;
+import java.util.function.Function;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
@@ -159,7 +161,7 @@ public class ProjectsServiceImpl implements ManageProjectsService
         return dependencies;
     }
 
-    public Set<ProjectVersionDependencies> getDependencyTree(List<ProjectVersion> projectVersions, String parentPath, Set<ProjectVersionDependencies> fullDependencies)
+    public Set<ProjectVersionDependencies> getDependencyTree(List<ProjectVersion> projectVersions, String parentPath, Set<ProjectVersionDependencies> fullDependencies, Map<String, ProjectData> projectDataMap)
     {
         Set<ProjectVersionDependencies> rootTree = new HashSet<>();
         projectVersions.forEach(projectVersion ->
@@ -168,11 +170,11 @@ public class ProjectsServiceImpl implements ManageProjectsService
             fullDependencies.add(projectVersionDependencyTree);
             String fullPath = (parentPath == null ? "" : parentPath + PATH_DELIMITER) + projectVersionDependencyTree.getGav();
             projectVersionDependencyTree.setPath(fullPath);
-            ProjectData projectData = getProject(projectVersion.getGroupId(), projectVersion.getArtifactId());
+            ProjectData projectData = projectDataMap.get(projectVersion.getGroupId() + projectVersion.getArtifactId());
             List<ProjectVersionDependency> projectVersionDependencies = projectData.getDependencies(projectVersion.getVersionId());
             projectVersionDependencies.forEach(dep ->
                     projectVersionDependencyTree.getDependencies().addAll(
-                            getDependencyTree(Collections.singletonList(new ProjectVersion(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId())), fullPath, fullDependencies)
+                            getDependencyTree(Collections.singletonList(new ProjectVersion(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId())), fullPath, fullDependencies, projectDataMap)
                     )
             );
             rootTree.add(projectVersionDependencyTree);
@@ -183,7 +185,9 @@ public class ProjectsServiceImpl implements ManageProjectsService
     public ProjectDependencyInfo getProjectDependencyInfo(List<ProjectVersion> projectVersions)
     {
         Set<ProjectVersionDependencies> dependencyLine = new HashSet<>();
-        Set<ProjectVersionDependencies> dependencyTree = getDependencyTree(projectVersions, null, dependencyLine);
+        List<ProjectData> allProject = this.getAll();
+        Map<String, ProjectData> projectDataMap = allProject.stream().collect(Collectors.toMap(p -> p.getGroupId() + p.getArtifactId(), Function.identity()));
+        Set<ProjectVersionDependencies> dependencyTree = getDependencyTree(projectVersions, null, dependencyLine, projectDataMap);
 
         // Calculate conflicts
         // 1.collect dependency projects
