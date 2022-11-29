@@ -48,12 +48,14 @@ public class TestPureModelContextService extends TestBaseServices
     ProjectsService projectsService = new ProjectsServiceImpl(projectsStore);
     private final PureModelContextService service = new PureModelContextServiceImpl(new EntitiesServiceImpl(entitiesStore, projectsService), projectsService);
 
+
     @Before
     public void setupMetadata()
     {
+        Assert.assertEquals(3, projectsService.getAll().size());
+        setUpProjectsFromFile(projects);
         setUpEntitiesDataFromFile(versionedEntities);
         setUpEntitiesDataFromFile(revisionEntities);
-        setUpProjectsFromFile(projects);
         setUpEntitiesDataFromFile(entities_16538);
         setUpEntitiesDataFromFile(entities_10357);
         setUpEntitiesDataFromFile(entities_10855);

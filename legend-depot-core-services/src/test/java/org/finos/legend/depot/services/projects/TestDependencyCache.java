@@ -15,14 +15,21 @@
 
 package org.finos.legend.depot.services.projects;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.bson.Document;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.services.TestBaseServices;
+import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.net.URL;
 
 public class TestDependencyCache extends TestBaseServices
 {
@@ -170,5 +177,50 @@ public class TestDependencyCache extends TestBaseServices
         Assert.assertEquals(5,dependenciesCache.transitiveDependencies.size());
         Assert.assertEquals(3,dependenciesCache.transitiveDependencies.get(masterSNAPSHOTVersion).size());
 
+    }
+
+    @Test
+    public void errorInitialisingDupProjects()
+    {
+        setUpProjectsFromFile(TestStoreMongo.class.getClassLoader().getResource("data/dupProjects.json"));
+        Assert.assertEquals(5, projectsStore.getAll().size());
+        Assert.assertEquals("PROD-CCC", projectsStore.find("example.services.Test", "Test").get().getProjectId());
+        try
+        {
+
+            Assert.assertEquals("PROD-A", projectsStore.find("examples.metadata", "test").get().getProjectId());
+            Assert.fail();
+        }
+        catch (Exception e)
+        {
+            Assert.assertTrue(true);
+        }
+        try
+        {
+            DependenciesCache dependenciesCache = new DependenciesCache(projectsStore);
+            Assert.fail();
+            Assert.assertNotNull(dependenciesCache);
+        }
+        catch (Exception e)
+        {
+            Assert.assertTrue(true);
+        }
+
+    }
+
+
+    protected void setUpProjectsFromFile(URL projectConfigFile)
+    {
+        readProjectConfigsFile(projectConfigFile).forEach(project ->
+        {
+            try
+            {
+                getMongoClient().getDatabase(mongoProvider.getName()).getCollection(ProjectsMongo.MONGO_PROJECTS).insertOne(Document.parse(new ObjectMapper().writeValueAsString(project)));
+            }
+            catch (JsonProcessingException e)
+            {
+                Assert.fail("an error has occurred loading test project " + e.getMessage());
+            }
+        });
     }
 }
