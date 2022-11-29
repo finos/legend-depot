@@ -185,6 +185,9 @@ public class ProjectsServiceImpl implements ManageProjectsService
     public ProjectDependencyInfo getProjectDependencyInfo(List<ProjectVersion> projectVersions)
     {
         Set<ProjectVersionDependencies> dependencyLine = new HashSet<>();
+        // To improve performance we will fetch project data once for all projects
+        // then use this when getting project dependencies.
+        // To further improve we can cache projectData just like we do with `transitiveDependencies`
         List<ProjectData> allProject = this.getAll();
         Map<String, ProjectData> projectDataMap = allProject.stream().collect(Collectors.toMap(p -> p.getGroupId() + p.getArtifactId(), Function.identity()));
         Set<ProjectVersionDependencies> dependencyTree = getDependencyTree(projectVersions, null, dependencyLine, projectDataMap);
