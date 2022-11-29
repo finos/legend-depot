@@ -1,96 +1,5 @@
 [
   {
-    "id": "5ddfe76e1be057d75cd04e0b",
-    "projectId": "PROD-10855",
-    "groupId": "examples.metadata",
-    "artifactId": "test-dependencies",
-    "versions": [
-      "1.0.0",
-      "2.0.0"
-    ],
-    "dependencies": [],
-    "latestVersion": "2.0.0"
-  },
-  {
-    "id": "5ddfe76e1be057d75cd04e13",
-    "projectId": "PROD-10357",
-    "groupId": "examples.metadata",
-    "artifactId": "test",
-    "versions": [
-      "1.0.0",
-      "2.0.0",
-      "2.1.0",
-      "2.2.0",
-      "2.3.0",
-      "2.3.1",
-      "2.3.2",
-      "2.3.3",
-      "3.0.0"
-    ],
-    "dependencies": [
-      {
-        "groupId": "examples.metadata",
-        "artifactId": "test",
-        "versionId": "2.3.0",
-        "dependency": {
-          "projectId": "PROD-10855",
-          "versionId": "1.0.0"
-        }
-      },
-      {
-        "groupId": "examples.metadata",
-        "artifactId": "test",
-        "versionId": "2.3.1",
-        "dependency": {
-          "groupId": "examples.metadata",
-          "artifactId": "test-dependencies",
-          "versionId": "1.0.0"
-        }
-      },
-      {
-        "groupId": "examples.metadata",
-        "artifactId": "test",
-        "versionId": "2.3.2",
-        "dependency": {
-          "groupId": "examples.metadata",
-          "artifactId": "test-dependencies",
-          "versionId": "1.0.0"
-        }
-      },
-      {
-        "groupId": "examples.metadata",
-        "artifactId": "test",
-        "versionId": "2.3.3",
-        "dependency": {
-          "groupId": "examples.metadata",
-          "artifactId": "test-dependencies",
-          "versionId": "1.0.0"
-        }
-      },
-      {
-        "groupId": "examples.metadata",
-        "artifactId": "test",
-        "versionId": "3.0.0",
-        "dependency": {
-          "groupId": "examples.metadata",
-          "artifactId": "test-dependencies",
-          "versionId": "2.0.0"
-        }
-      },
-      {
-        "groupId": "examples.metadata",
-        "artifactId": "test",
-        "versionId": "master-SNAPSHOT",
-        "dependency": {
-          "groupId": "examples.metadata",
-          "artifactId": "test-dependencies",
-          "versionId": "2.0.0"
-        }
-      }
-    ],
-    "latestVersion": "3.0.0"
-  },
-  {
     "id": "60995951584b4249cc13760b",
     "projectId": "PROD-16538",
     "groupId": "test.legend",
@@ -100,7 +9,8 @@
     ],
     "dependencies": [
       {
-        "projectId": "PROD-16538",
+        "groupId": "test.legend",
+        "artifactId": "blank-prod",
         "versionId": "2.0.0",
         "dependency": {
           "groupId": "examples.metadata",

@@ -52,10 +52,18 @@ public final class DependenciesCache
 
     private void initCache()
     {
-        List<ProjectData> allProject = projectsService.getAll();
-        Stream<ProjectVersion> allProjectVersions = allProject.stream().flatMap(p -> p.getVersions().stream().map(v -> new ProjectVersion(p.getGroupId(), p.getArtifactId(), v)));
-        Map<String, ProjectData> projectDataMap = allProject.stream().collect(Collectors.toMap(p -> p.getGroupId() + p.getArtifactId(), Function.identity()));
-        allProjectVersions.forEach(pv -> transitiveDependencies.put(pv, calculateTransitiveDependencies(pv, projectDataMap)));
+        try
+        {
+            List<ProjectData> allProject = projectsService.getAll();
+            Stream<ProjectVersion> allProjectVersions = allProject.stream().flatMap(p -> p.getVersions().stream().map(v -> new ProjectVersion(p.getGroupId(), p.getArtifactId(), v)));
+            Map<String, ProjectData> projectDataMap = allProject.stream().collect(Collectors.toMap(p -> p.getGroupId() + p.getArtifactId(), Function.identity()));
+            allProjectVersions.forEach(pv -> transitiveDependencies.put(pv, calculateTransitiveDependencies(pv, projectDataMap)));
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Could not initialise dependencies cache {}",e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     private Function2<String,String,ProjectData> getProjectDataFromStore()

@@ -114,6 +114,39 @@ public class TestUpdateProjectApi extends TestStoreMongo
         }
     }
 
+    @Test
+    public void coordinatesAreCaseSensitive()
+    {
+        Assert.assertEquals(3, projectsAPI.getAll().size());
+
+        ProjectData projectConfiguration = new ProjectData("PROD-123", TEST_GROUP_ID, "test121");
+        projectsAPI.createOrUpdate(projectConfiguration);
+        Assert.assertEquals(4, projectsAPI.getAll().size());
+
+        ProjectData projectConfiguration2 = new ProjectData("PROD-124", "some.Examples", "test121");
+        try
+        {
+          Assert.assertNotNull(projectsAPI.createOrUpdate(projectConfiguration2));
+          Assert.assertEquals(5, projectsAPI.getAll().size());
+        }
+        catch (Exception e)
+        {
+            Assert.fail("not duplicate coordinates, different in case");
+        }
+
+        ProjectData newData = projectsAPI.createOrUpdate(new ProjectData("PROD-124", "some.Examples", "test122"));
+        newData.setArtifactId("test121");
+
+        try
+        {
+            projectsAPI.createOrUpdate(newData);
+            Assert.fail("cant create duplicate coordinates");
+        }
+        catch (Exception e)
+        {
+            Assert.assertTrue(e.getMessage().contains("Duplicate"));
+        }
+    }
 
     @Test
     public void canUpdateProject()

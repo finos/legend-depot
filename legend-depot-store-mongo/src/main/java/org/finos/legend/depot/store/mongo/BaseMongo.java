@@ -214,6 +214,10 @@ public abstract class BaseMongo<T extends HasIdentifier>
     protected Optional<T> findOne(Bson filter)
     {
         List<T> result = convert(getCollection().find(filter));
+        if (!result.isEmpty() && result.size() > 1)
+        {
+            throw new IllegalStateException(String.format(" Found more than one match %s in collection %s",filter.toString(),getCollection().getNamespace().getCollectionName()));
+        }
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
 
