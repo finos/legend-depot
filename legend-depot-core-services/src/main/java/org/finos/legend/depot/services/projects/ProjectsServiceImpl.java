@@ -15,6 +15,8 @@
 
 package org.finos.legend.depot.services.projects;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
@@ -128,7 +130,7 @@ public class ProjectsServiceImpl implements ManageProjectsService
         return dependencies;
     }
 
-    public Set<ProjectVersionDependencies> getDependencyTree(List<ProjectVersion> projectVersions, String parentPath, Set<ProjectVersionDependencies> fullDependencies)
+    public Set<ProjectVersionDependencies> getDependencyTree(List<ProjectVersion> projectVersions, String parentPath, Set<ProjectVersionDependencies> fullDependencies, Map<String, ProjectData> projectDataMap)
     {
         Set<ProjectVersionDependencies> rootTree = new HashSet<>();
         projectVersions.forEach(projectVersion ->
@@ -137,11 +139,18 @@ public class ProjectsServiceImpl implements ManageProjectsService
             fullDependencies.add(projectVersionDependencyTree);
             String fullPath = (parentPath == null ? "" : parentPath + PATH_DELIMITER) + projectVersionDependencyTree.getGav();
             projectVersionDependencyTree.setPath(fullPath);
-            ProjectData projectData = getProject(projectVersion.getGroupId(), projectVersion.getArtifactId());
+            String projectCoordinates = projectVersion.getGroupId() + projectVersion.getArtifactId();
+            if (!projectDataMap.containsKey(projectCoordinates))
+            {
+                // only fetch project if we haven't fetched it already
+                ProjectData project = getProject(projectVersion.getGroupId(), projectVersion.getArtifactId());
+                projectDataMap.put(projectCoordinates, project);
+            }
+            ProjectData projectData = projectDataMap.get(projectCoordinates);
             List<ProjectVersionDependency> projectVersionDependencies = projectData.getDependencies(projectVersion.getVersionId());
             projectVersionDependencies.forEach(dep ->
                     projectVersionDependencyTree.getDependencies().addAll(
-                            getDependencyTree(Collections.singletonList(new ProjectVersion(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId())), fullPath, fullDependencies)
+                            getDependencyTree(Collections.singletonList(new ProjectVersion(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId())), fullPath, fullDependencies, projectDataMap)
                     )
             );
             rootTree.add(projectVersionDependencyTree);
@@ -152,7 +161,8 @@ public class ProjectsServiceImpl implements ManageProjectsService
     public ProjectDependencyInfo getProjectDependencyInfo(List<ProjectVersion> projectVersions)
     {
         Set<ProjectVersionDependencies> dependencyLine = new HashSet<>();
-        Set<ProjectVersionDependencies> dependencyTree = getDependencyTree(projectVersions, null, dependencyLine);
+        Map<String, ProjectData> projectDataMap = new HashMap<>();
+        Set<ProjectVersionDependencies> dependencyTree = getDependencyTree(projectVersions, null, dependencyLine, projectDataMap);
 
         // Calculate conflicts
         // 1.collect dependency projects
