@@ -31,6 +31,7 @@ import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -46,6 +47,12 @@ public class QueueMongo extends BaseMongo<MetadataNotification> implements Queue
     public QueueMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
     {
         super(databaseProvider, MetadataNotification.class, new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY));
+    }
+
+    @Override
+    protected boolean createIndexIfAbsent(String indexName, String... fieldNames)
+    {
+        return createIndexIfAbsent("eventId", "eventId");
     }
 
     @Override
@@ -74,6 +81,7 @@ public class QueueMongo extends BaseMongo<MetadataNotification> implements Queue
 
     public String push(MetadataNotification event)
     {
+        event.setLastUpdated(new Date());
         MetadataNotification result = createOrUpdate(event);
         if (result.getEventId() == null)
         {

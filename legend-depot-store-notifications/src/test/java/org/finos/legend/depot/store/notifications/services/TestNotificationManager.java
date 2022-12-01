@@ -58,9 +58,9 @@ public class TestNotificationManager extends TestStoreMongo
     public void setUpData()
     {
         projectsStore.createOrUpdate(new ProjectData(TEST_PROJECT_ID, TEST_GROUP_ID, "test"));
-        when(notificationEventHandler.handleEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID, "test", VERSION_ID, false,false))).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
-        when(notificationEventHandler.handleEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID,"test","10.0.0",false,false))).thenReturn(new MetadataEventResponse());
-        when(notificationEventHandler.validateEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID,"test","10.0.0",false,false))).thenReturn(Arrays.asList("bad version"));
+        when(notificationEventHandler.handleEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID, "test", VERSION_ID))).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
+        when(notificationEventHandler.handleEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID,"test","10.0.0"))).thenReturn(new MetadataEventResponse());
+        when(notificationEventHandler.validateEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID,"test","10.0.0"))).thenReturn(Arrays.asList("bad version"));
     }
 
     @After
@@ -128,12 +128,13 @@ public class TestNotificationManager extends TestStoreMongo
     {
         MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "2.3.1");
         queue.push(event);
+        Assert.assertFalse(queue.getAll().isEmpty());
         when(notificationEventHandler.handleEvent(queue.getAllStoredEntities().get(0))).thenReturn(new MetadataEventResponse().addError("i have failed, need to retry"));
 
         eventsManager.handle();
         Assert.assertFalse(queue.getAll().isEmpty());
         MetadataNotification response = queue.getFirstInQueue().get();
-        Assert.assertTrue(response.getStatus().equals(MetadataEventStatus.RETRY));
+        Assert.assertTrue(response.getStatus().equals(MetadataEventStatus.FAILED));
     }
 
 }

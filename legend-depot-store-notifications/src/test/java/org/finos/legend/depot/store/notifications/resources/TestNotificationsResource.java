@@ -60,12 +60,12 @@ public class TestNotificationsResource extends TestStoreMongo
         eventsMongo.insert(event4.setLastUpdated(toDate(aPointInTime.plusHours(2).plusMinutes(35))));
         NotificationsManagerResource resource = new NotificationsManagerResource(notificationsManager);
 
-        List<MetadataNotification> allEvents = resource.getAllEvents(aPointInTime.minusDays(100).format(NotificationsManagerResource.DATE_TIME_FORMATTER), null);
+        List<MetadataNotification> allEvents = resource.getPastEventNotifications(null,null,null,null,null,aPointInTime.minusDays(100).format(NotificationsManagerResource.DATE_TIME_FORMATTER), null);
         Assert.assertNotNull(allEvents);
         Assert.assertEquals(4, allEvents.size());
 
         LocalDateTime lunchTime = LocalDateTime.parse("2019-01-01 12:00:00", NotificationsManagerResource.DATE_TIME_FORMATTER);
-        List<MetadataNotification> afterLunch = resource.getAllEvents(lunchTime.format(NotificationsManagerResource.DATE_TIME_FORMATTER), null);
+        List<MetadataNotification> afterLunch = resource.getPastEventNotifications(null,null,null,null,null,lunchTime.format(NotificationsManagerResource.DATE_TIME_FORMATTER), null);
         Assert.assertNotNull(afterLunch);
         Assert.assertEquals(2, afterLunch.size());
     }

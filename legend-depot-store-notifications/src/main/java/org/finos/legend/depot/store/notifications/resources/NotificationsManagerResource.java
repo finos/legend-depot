@@ -55,13 +55,19 @@ public class NotificationsManagerResource extends BaseResource
     @Path("/notifications")
     @ApiOperation(ResourceLoggingAndTracing.FIND_PAST_EVENTS)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<MetadataNotification> getAllEvents(@QueryParam("from")
+    public List<MetadataNotification> getPastEventNotifications(
+                                                   @QueryParam("groupId") String group,
+                                                   @QueryParam("artifactId") String artifact,
+                                                   @QueryParam("versionId") String version,
+                                                   @QueryParam("parentEventId") @ApiParam("refresh could be started by another event, eg refresh all cache versions") String parentId,
+                                                   @QueryParam("success") Boolean success,
+                                                   @QueryParam("from")
                                                    @ApiParam("query from this date yyyy-MM-dd HH:mm:ss (default is 30 minutes prior)") String from,
                                                    @QueryParam("to")
                                                    @ApiParam("include  up to this date yyyy-MM-dd HH:mm:ss (default is now)") String to)
     {
         return handle(ResourceLoggingAndTracing.FIND_PAST_EVENTS, () ->
-                notificationsManager.findProcessedEvents(from == null ? null : LocalDateTime.parse(from, DATE_TIME_FORMATTER),
+                notificationsManager.findProcessedEvents(group,artifact,version,parentId,success,from == null ? null : LocalDateTime.parse(from, DATE_TIME_FORMATTER),
                         to == null ? null : LocalDateTime.parse(to, DATE_TIME_FORMATTER)));
     }
 
@@ -100,12 +106,9 @@ public class NotificationsManagerResource extends BaseResource
     public String queueEvent(@PathParam("projectId") String projectId,
                              @PathParam("groupId") String groupId,
                              @PathParam("artifactId") String artifactId,
-                             @PathParam("versionId") String versionId,
-                             @QueryParam("maxRetries")
-                             @DefaultValue("3")
-                             @ApiParam("Whether to retry operation if it fails") int maxRetries)
+                             @PathParam("versionId") String versionId)
     {
-        return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId, maxRetries));
+        return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId));
     }
 
 }

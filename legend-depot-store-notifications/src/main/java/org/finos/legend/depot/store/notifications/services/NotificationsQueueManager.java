@@ -69,8 +69,9 @@ public final class NotificationsQueueManager implements NotificationsManager
             MetadataNotification event = foundEvent.get();
             if (event.retriesExceeded())
             {
-                events.complete(event.failEvent("Max number of tries exceed"));
-                LOGGER.info(" event has exceeded maximum retries {}", event.getEventId());
+                event.getResponse().addError("Max number of retries exceed");
+                events.complete(event);
+                LOGGER.info("{} event has exceeded {} maximum retries", event.getEventId(),event.getMaxRetries());
             }
             else
             {
@@ -88,7 +89,8 @@ public final class NotificationsQueueManager implements NotificationsManager
         List<String> validationErrors = eventHandler.validateEvent(event);
         if (!validationErrors.isEmpty())
         {
-            events.completeWithOutRetry(event.failEvent(String.join(",",validationErrors)));
+            event.addError(String.join(",",validationErrors));
+            events.complete(event);
             PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
             return;
         }
@@ -105,13 +107,13 @@ public final class NotificationsQueueManager implements NotificationsManager
         }
         if (response.hasErrors())
         {
-            queue.push(event.increaseRetries().setStatus(MetadataEventStatus.RETRY).addErrors(response.getErrors()));
+            queue.push(event.increaseRetries().setResponse(response));
             LOGGER.info("event completed with errors [{}]", response.getErrors());
             PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
         }
         else
         {
-            events.complete(event.completedSuccessfully());
+            events.complete(event.setResponse(response));
             LOGGER.info("event completed successfully");
         }
     }
@@ -126,20 +128,20 @@ public final class NotificationsQueueManager implements NotificationsManager
     }
 
     @Override
-    public String notify(String projectId, String groupId, String artifactId, String versionId, int maxRetries)
+    public String notify(String projectId, String groupId, String artifactId, String versionId)
     {
         PrometheusMetricsFactory.getInstance().incrementCount(NOTIFICATIONS_COUNTER);
         validateMavenCoordinates(projectId, groupId, artifactId);
         //we create a notification event with fullUpdate/transitive flag set to false(ie partial update)
         //this means, it will only process changed jar files and will only handle those entities,etc
-        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId, false,false,maxRetries);
+        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId,false,false, null);
         return queue.push(event);
     }
 
     @Override
-    public List<MetadataNotification> findProcessedEvents(LocalDateTime from, LocalDateTime to)
+    public List<MetadataNotification> findProcessedEvents(String group, String artifact, String version, String parentId, Boolean success, LocalDateTime from, LocalDateTime to)
     {
-        return this.events.find(from,to);
+        return this.events.find(group,artifact,version,parentId,success,from,to);
     }
 
     @Override
