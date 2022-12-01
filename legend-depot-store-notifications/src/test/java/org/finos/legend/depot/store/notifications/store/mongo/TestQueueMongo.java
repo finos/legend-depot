@@ -56,7 +56,7 @@ public class TestQueueMongo extends TestStoreMongo
         Assert.assertEquals(4, eventList.size());
         for (MetadataNotification ev : eventList)
         {
-            eventsMongo.complete(ev.completedSuccessfully());
+            eventsMongo.complete(ev);
         }
 
         List<MetadataNotification> eventList2 = eventsMongo.getAll();
@@ -142,7 +142,7 @@ public class TestQueueMongo extends TestStoreMongo
     public void canStoreErrors()
     {
         MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST,VERSION);
-        queue.push(event.failEvent().addError("this is an error"));
+        queue.push(event.addError("this is an error"));
 
         List<MetadataNotification> eventList = queue.getAll();
         Assert.assertNotNull(eventList);
@@ -173,11 +173,11 @@ public class TestQueueMongo extends TestStoreMongo
         List<MetadataNotification> allEvents = eventsMongo.getAll();
         Assert.assertNotNull(allEvents);
         Assert.assertEquals(4, allEvents.size());
-        List<MetadataNotification> eventsBeforeLunch = eventsMongo.find(aPointInTime.toLocalDate().atStartOfDay(), aPointInTime);
+        List<MetadataNotification> eventsBeforeLunch = eventsMongo.find(null,null,null,null,null,aPointInTime.toLocalDate().atStartOfDay(), aPointInTime);
         Assert.assertNotNull(eventsBeforeLunch);
         Assert.assertEquals(1, eventsBeforeLunch.size());
 
-        List<MetadataNotification> afterLunch = eventsMongo.find(aPointInTime.withHour(12).withMinute(0).withSecond(1), null);
+        List<MetadataNotification> afterLunch = eventsMongo.find(null,null,null,null,null,aPointInTime.withHour(12).withMinute(0).withSecond(1), null);
         Assert.assertNotNull(afterLunch);
         Assert.assertEquals(3, afterLunch.size());
     }

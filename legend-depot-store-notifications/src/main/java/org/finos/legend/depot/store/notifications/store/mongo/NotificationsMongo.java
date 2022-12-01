@@ -23,6 +23,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.store.mongo.BaseMongo;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
@@ -37,6 +38,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import static com.mongodb.client.model.Filters.and;
+import static com.mongodb.client.model.Filters.eq;
+
 
 public class NotificationsMongo extends BaseMongo<MetadataNotification> implements Notifications
 {
@@ -44,6 +48,8 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
 
     private static final String EVENT_ID = "eventId";
     private static final String LAST_UPDATED = "lastUpdated";
+    private static final String PARENT_EVENT = "parentEventId";
+    private static final String RESPONSE_STATUS = "status";
 
     @Inject
     public NotificationsMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -55,6 +61,16 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
     protected MongoCollection getCollection()
     {
         return getMongoCollection(EVENTS);
+    }
+
+
+    @Override
+    protected boolean createIndexIfAbsent(String indexName, String... fieldNames)
+    {
+        createIndexIfAbsent("parentId",PARENT_EVENT);
+        createIndexIfAbsent("status",RESPONSE_STATUS);
+        createIndexIfAbsent("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID);
+        return createIndexIfAbsent("eventId", EVENT_ID);
     }
 
     @Override
@@ -82,7 +98,7 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
 
 
     @Override
-    public List<MetadataNotification> find(LocalDateTime fromDate, LocalDateTime toDate)
+    public List<MetadataNotification> find(String groupId, String artifactId, String version, String parentEventId, Boolean success, LocalDateTime fromDate, LocalDateTime toDate)
     {
         MongoCollection<Document> events = getCollection();
         LocalDateTime from = LocalDateTime.now().minusMinutes(30);
@@ -95,9 +111,16 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
         {
             to = toDate;
         }
-        Bson dateFilter = Filters.and(Filters.gte(LAST_UPDATED, toTime(from)), Filters.lte(LAST_UPDATED, toTime(to)));
+
+        Bson filter = Filters.and(Filters.gte(LAST_UPDATED, toTime(from)), Filters.lte(LAST_UPDATED, toTime(to)));
+        filter = groupId != null ? and(filter, eq(GROUP_ID, groupId)) : filter;
+        filter = artifactId != null ? and(filter, eq(ARTIFACT_ID, artifactId)) : filter;
+        filter = version != null ? and(filter, eq(VERSION_ID, version)) : filter;
+        filter = parentEventId != null ? and(filter, eq(PARENT_EVENT, parentEventId)) : filter;
+        filter = success != null ? and(filter, eq(RESPONSE_STATUS, (success ? MetadataEventStatus.SUCCESS.name() : MetadataEventStatus.FAILED.name()))) : filter;
+
         List<MetadataNotification> result = new ArrayList<>();
-        events.find(dateFilter).sort(Sorts.descending(LAST_UPDATED)).forEach((Consumer<Document>)doc -> result.add(convert(doc, MetadataNotification.class)));
+        events.find(filter).sort(Sorts.descending(LAST_UPDATED)).forEach((Consumer<Document>)doc -> result.add(convert(doc, MetadataNotification.class)));
         return result;
     }
 
@@ -117,10 +140,4 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
         createOrUpdate(event.setLastUpdated(new Date()));
     }
 
-    @Override
-    public void completeWithOutRetry(MetadataNotification metadataEvent)
-    {
-        metadataEvent.setRetries(MetadataNotification.DEFAULT_MAX_RETRIES);
-        complete(metadataEvent);
-    }
 }

@@ -28,11 +28,10 @@ public interface Notifications
 
     Optional<MetadataNotification> get(String eventId);
 
-    List<MetadataNotification> find(LocalDateTime fromDate, LocalDateTime toDate);
+    List<MetadataNotification> find(String group, String artifact, String version, String parentId, Boolean success, LocalDateTime fromDate, LocalDateTime toDate);
 
     void insert(MetadataNotification metadataEvent);
 
     void complete(MetadataNotification metadataEvent);
 
-    void completeWithOutRetry(MetadataNotification metadataEvent);
 }

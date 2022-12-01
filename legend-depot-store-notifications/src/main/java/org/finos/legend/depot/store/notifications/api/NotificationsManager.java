@@ -25,7 +25,7 @@ public interface NotificationsManager
 {
     int handle();
 
-    List<MetadataNotification> findProcessedEvents(LocalDateTime localDateTime, LocalDateTime localDateTime1);
+    List<MetadataNotification> findProcessedEvents(String group, String artifact, String version, String parentId, Boolean success, LocalDateTime localDateTime, LocalDateTime localDateTime1);
 
     Optional<MetadataNotification> getProcessedEvent(String eventId);
 
@@ -33,5 +33,5 @@ public interface NotificationsManager
 
     Optional<MetadataNotification> findInQueue(String eventId);
 
-    String notify(String projectId, String groupId, String artifactId, String versionId, int maxRetries);
+    String notify(String projectId, String groupId, String artifactId, String versionId);
 }

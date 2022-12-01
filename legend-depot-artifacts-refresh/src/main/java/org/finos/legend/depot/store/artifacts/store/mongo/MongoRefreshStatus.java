@@ -83,43 +83,17 @@ public class MongoRefreshStatus extends BaseMongo<RefreshStatus> implements Mana
         //no specific validation
     }
 
-
     @Override
     public List<RefreshStatus> find(String groupId, String artifactId, String version, String parentEventId, Boolean running, Boolean success, LocalDateTime fromStartTime,LocalDateTime toStartTime)
     {
-        Bson filter = exists(GROUP_ID);
-        if (groupId != null)
-        {
-            filter = and(filter, eq(GROUP_ID, groupId));
-        }
-        if (artifactId != null)
-        {
-            filter = and(filter, eq(ARTIFACT_ID, artifactId));
-        }
-        if (version != null)
-        {
-            filter = and(filter, eq(VERSION_ID, version));
-        }
-        if (parentEventId != null)
-        {
-            filter = and(filter, eq(PARENT_EVENT, parentEventId));
-        }
-        if (running != null)
-        {
-            filter = and(filter, eq(RUNNING, running));
-        }
-        if (success != null)
-        {
-            filter = and(filter, eq(RESPONSE_STATUS, success ? MetadataEventStatus.SUCCESS.name() : MetadataEventStatus.FAILED.name()));
-        }
-        if (fromStartTime != null)
-        {
-            filter = and(filter, gte(STAR_TIME, toTime(fromStartTime)));
-        }
-        if (toStartTime != null)
-        {
-            filter = and(filter, lte(STAR_TIME, toTime(toStartTime)));
-        }
+        Bson filter = groupId != null ? eq(GROUP_ID, groupId) : exists(GROUP_ID);
+        filter = artifactId != null ? and(filter, eq(ARTIFACT_ID, artifactId)) : filter;
+        filter = version != null ? and(filter, eq(VERSION_ID, version)) : filter;
+        filter = parentEventId != null ? and(filter, eq(PARENT_EVENT, parentEventId)) : filter;
+        filter = running != null ? and(filter, eq(RUNNING, running)) : filter;
+        filter = success != null ? and(filter, eq(RESPONSE_STATUS, (success ? MetadataEventStatus.SUCCESS.name() : MetadataEventStatus.FAILED.name()))) : filter;
+        filter = toStartTime != null ? and(filter,lte(STAR_TIME, toTime(toStartTime))) : filter;
+        filter = fromStartTime != null ? and(filter, gte(STAR_TIME, toTime(fromStartTime))) : filter;
         return find(filter);
     }
 
