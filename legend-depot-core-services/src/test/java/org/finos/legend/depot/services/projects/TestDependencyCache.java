@@ -53,12 +53,13 @@ public class TestDependencyCache extends TestBaseServices
         Assert.assertTrue(dependenciesCache.transitiveDependencies.isEmpty());
     }
 
-    private  void seedTestData()
+    private void seedTestData()
     {
         ProjectData projectA = new ProjectData("a", TEST_GROUP,"artifacta").withVersions("1.0.0","2.0.0");
         ProjectData projectB = new ProjectData("b", TEST_GROUP,"artifactb").withVersions("1.0.0");
         ProjectData projectC = new ProjectData("c", TEST_GROUP,"artifactc").withVersions("1.0.0");
         projectA.addDependency(new ProjectVersionDependency(TEST_GROUP, "artifacta", "2.0.0", new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0")));
+        projectA.addDependency(new ProjectVersionDependency(TEST_GROUP, "artifacta", "1.0.0", new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0")));
         projectB.addDependency(new ProjectVersionDependency(TEST_GROUP, "artifactb", "1.0.0", new ProjectVersion(TEST_GROUP, "artifactc", "1.0.0")));
 
         projectsStore.createOrUpdate(projectA);
@@ -94,6 +95,34 @@ public class TestDependencyCache extends TestBaseServices
         Assert.assertFalse(dependenciesCache.transitiveDependencies.isEmpty());
         Assert.assertEquals(5, dependenciesCache.transitiveDependencies.size());
         Assert.assertTrue(dependenciesCache.transitiveDependencies.keySet().stream().anyMatch(pv -> pv.equals(new ProjectVersion(TEST_GROUP,"artifactd","1.0.0"))));
+    }
+
+    @Test
+    public void getDependenciesForNewProjectVersionWithSameDependencies()
+    {
+        seedTestData();
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsStore);
+        ProjectData projectD = new ProjectData("d", TEST_GROUP,"artifactd").withVersions("1.0.0");
+        projectsStore.createOrUpdate(projectD);
+        dependenciesCache.getTransitiveDependencies(new ProjectVersion(TEST_GROUP,"artifactd","1.0.0"));
+        Assert.assertEquals(3,dependenciesCache.absentKeys.get());
+        Assert.assertFalse(dependenciesCache.transitiveDependencies.isEmpty());
+        Assert.assertEquals(5, dependenciesCache.transitiveDependencies.size());
+        Assert.assertTrue(dependenciesCache.transitiveDependencies.keySet().stream().anyMatch(pv -> pv.equals(new ProjectVersion(TEST_GROUP,"artifactd","1.0.0"))));
+
+        //add new version with same dependencies it should hit the cache.
+        ProjectData prodA = projectsStore.find(TEST_GROUP,"artifacta").get();
+        prodA.addVersion("2.0.1");
+        prodA.addDependency(new ProjectVersionDependency(TEST_GROUP, "artifacta", "2.0.1", new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0")));
+        projectsStore.createOrUpdate(prodA);
+        Assert.assertEquals(5, dependenciesCache.transitiveDependencies.size());
+
+        dependenciesCache.getTransitiveDependencies(new ProjectVersion(TEST_GROUP,"artifacta","2.0.1"));
+        Assert.assertEquals(6, dependenciesCache.transitiveDependencies.size());
+        Assert.assertTrue(dependenciesCache.transitiveDependencies.keySet().stream().anyMatch(pv -> pv.equals(new ProjectVersion(TEST_GROUP,"artifacta","2.0.1"))));
+        Assert.assertEquals(4,dependenciesCache.absentKeys.get());
+
+
     }
 
     @Test
@@ -174,7 +203,7 @@ public class TestDependencyCache extends TestBaseServices
 
         dependenciesCache.getTransitiveDependencies(masterSNAPSHOTVersion);
 
-        Assert.assertEquals(5,dependenciesCache.transitiveDependencies.size());
+        Assert.assertEquals(6,dependenciesCache.transitiveDependencies.size());
         Assert.assertEquals(3,dependenciesCache.transitiveDependencies.get(masterSNAPSHOTVersion).size());
 
     }

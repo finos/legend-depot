@@ -55,16 +55,16 @@ public final class SchedulesFactory
         return manageSchedulesService.find(running,disabled);
     }
 
-    public void register(String name, LocalDateTime start, long intervalInMiliseconds, boolean parallelRun, Supplier<Object> function)
+    public void register(String name, LocalDateTime start, long intervalInMilliseconds, boolean parallelRun, Supplier<Object> function)
     {
         TimerTask task = createTask(name, function);
-        schedulesBuffer.put(name, Tuples.pair(task, new ScheduleInfo(name, intervalInMiliseconds, parallelRun)));
-        timer.scheduleAtFixedRate(task, java.sql.Date.from(start.atZone(ZoneId.systemDefault()).toInstant()), intervalInMiliseconds);
+        schedulesBuffer.put(name, Tuples.pair(task, new ScheduleInfo(name, intervalInMilliseconds, parallelRun)));
+        timer.scheduleAtFixedRate(task, java.sql.Date.from(start.atZone(ZoneId.systemDefault()).toInstant()), intervalInMilliseconds);
         Optional<ScheduleInfo> existingInfo = manageSchedulesService.get(name);
 
         ScheduleInfo info = existingInfo.orElseGet(() -> new ScheduleInfo(name));
         info.allowMultipleRuns = parallelRun;
-        info.frequency = intervalInMiliseconds;
+        info.frequency = intervalInMilliseconds;
         manageSchedulesService.createOrUpdate(info);
     }
 
@@ -122,7 +122,7 @@ public final class SchedulesFactory
         }
         if (!scheduleInfo.allowMultipleRuns && scheduleInfo.running.get())
         {
-            LOGGER.info("Other instance is running, skipping {}  ", jobId);
+            LOGGER.info("Other instance is running, skipping {}", jobId);
             return;
 
         }

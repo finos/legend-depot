@@ -18,6 +18,7 @@ package org.finos.legend.depot.services;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
@@ -52,7 +53,6 @@ public class ReadOnlyServicesModule extends PrivateModule
         bind(FileGenerations.class).to(FileGenerationsMongo.class);
         bind(UpdateFileGenerations.class).to(FileGenerationsMongo.class);
 
-        bind(DependenciesCache.class);
         bind(EntitiesService.class).to(EntitiesServiceImpl.class);
         bind(EntityClassifierService.class).to(EntityClassifierServiceImpl.class);
         bind(ProjectsService.class).to(ProjectsServiceImpl.class);
@@ -62,13 +62,13 @@ public class ReadOnlyServicesModule extends PrivateModule
         expose(EntitiesService.class);
         expose(EntityClassifierService.class);
         expose(FileGenerationsService.class);
-        expose(DependenciesCache.class);
+        expose(DependenciesCache.class).annotatedWith(Names.named("dependencyCache"));
     }
 
     @Provides
     @Named("dependencyCache")
     @Singleton
-    DependenciesCache initialiseDependencyCache(Projects projects)
+    public DependenciesCache initialiseDependencyCache(Projects projects)
     {
         return new DependenciesCache(projects);
     }
