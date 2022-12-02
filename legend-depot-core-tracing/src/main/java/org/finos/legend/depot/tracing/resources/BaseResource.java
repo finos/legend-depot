@@ -54,7 +54,7 @@ public class BaseResource
         Logger logger = this.getLogger();
         boolean isInfoLogging = logger.isInfoEnabled();
         String sanitizedDescription = isInfoLogging ? logsLabel : null;
-        long start = System.nanoTime();
+        long start = System.currentTimeMillis();
         if (isInfoLogging)
         {
             logger.info("Starting {}", sanitizedDescription);
@@ -63,12 +63,12 @@ public class BaseResource
         try
         {
             T result = supplier.get();
-            long end = System.nanoTime();
+            long end = System.currentTimeMillis();
             PrometheusMetricsFactory.getInstance().observe(resourceAPIMetricName, start, end);
             if (isInfoLogging)
             {
                 duration = end - start;
-                String builder = "Finished " + sanitizedDescription + " (" + duration + "s)";
+                String builder = "Finished " + sanitizedDescription + " (" + duration + "ms)";
                 logger.info(builder);
             }
             return result;

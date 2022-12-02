@@ -134,7 +134,7 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
     @Override
     public void observe(String summaryName, long start, long end)
     {
-        this.allSummaries.getIfAbsentPutWithKey(getKeyName(summaryName),(key) -> buildSummary(summaryName, summaryName + DURATION)).observe((double)(end - start));
+        this.allSummaries.getIfAbsentPutWithKey(getKeyName(summaryName),(key) -> buildSummary(summaryName, summaryName + DURATION)).observe((end - start) / 1000f);
     }
 
     @Override

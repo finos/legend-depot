@@ -291,7 +291,7 @@ public class MavenArtifactRepository implements ArtifactRepository
             {
                 String groupArtifactVersionRange = gavCoordinates(group, artifact, ALL_VERSIONS_SCOPE);
                 final MavenVersionRangeResult versionRangeResult = (MavenVersionRangeResult) executeWithTrace("resolveVersionsFromRepository",group,artifact,"ALL",() -> getResolver().resolveVersionRange(groupArtifactVersionRange));
-                LOGGER.info("resolveVersionsFromRepository {}{}{} , Version data: [{}]", group, artifact, ALL_VERSIONS_SCOPE, versionRangeResult);
+                LOGGER.debug("resolveVersionsFromRepository {}{}{} , Version data: [{}]", group, artifact, ALL_VERSIONS_SCOPE, versionRangeResult);
                 for (MavenCoordinate coordinate : versionRangeResult.getVersions())
                 {
                     if (VersionValidator.isValidReleaseVersion(coordinate.getVersion()))

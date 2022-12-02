@@ -30,6 +30,7 @@ import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,7 +50,7 @@ public class ProjectsServiceImpl implements ManageProjectsService
     private final DependenciesCache dependenciesCache;
 
     @Inject
-    public ProjectsServiceImpl(UpdateProjects projects, DependenciesCache dependenciesCache)
+    public ProjectsServiceImpl(UpdateProjects projects, @Named("dependencyCache") DependenciesCache dependenciesCache)
     {
         this.projects = projects;
         this.dependenciesCache = dependenciesCache;

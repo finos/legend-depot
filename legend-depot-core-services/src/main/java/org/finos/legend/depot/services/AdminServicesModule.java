@@ -18,6 +18,7 @@ package org.finos.legend.depot.services;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
@@ -49,7 +50,6 @@ public class AdminServicesModule extends PrivateModule
         bind(UpdateEntities.class).to(EntitiesMongo.class);
         bind(UpdateFileGenerations.class).to(FileGenerationsMongo.class);
 
-        bind(DependenciesCache.class);
         bind(ProjectsService.class).to(ProjectsServiceImpl.class);
         bind(ManageProjectsService.class).to(ProjectsServiceImpl.class);
         bind(ManageEntitiesService.class).to(EntitiesServiceImpl.class);
@@ -66,6 +66,7 @@ public class AdminServicesModule extends PrivateModule
         expose(UpdateFileGenerations.class);
         expose(Projects.class);
         expose(UpdateProjects.class);
+        expose(DependenciesCache.class).annotatedWith(Names.named("dependencyCache"));
     }
 
     @Provides
