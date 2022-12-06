@@ -20,14 +20,15 @@ import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 
 import javax.inject.Singleton;
 import java.util.EnumMap;
+import java.util.Set;
 
 @Singleton
-public class ArtifactResolverFactory
+public class ArtifactHandlerFactory
 {
-    private static final ArtifactResolverFactory instance = new ArtifactResolverFactory();
+    private static final ArtifactHandlerFactory instance = new ArtifactHandlerFactory();
     private final EnumMap<ArtifactType, ProjectArtifactsHandler> artifactHandlers = new EnumMap<>(ArtifactType.class);
 
-    private ArtifactResolverFactory()
+    private ArtifactHandlerFactory()
     {
     }
 
@@ -39,5 +40,10 @@ public class ArtifactResolverFactory
     public static ProjectArtifactsHandler getArtifactHandler(ArtifactType artifactType)
     {
         return instance.artifactHandlers.get(artifactType);
+    }
+
+    public static Set<ArtifactType> getSupportedTypes()
+    {
+        return instance.artifactHandlers.keySet();
     }
 }

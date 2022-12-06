@@ -35,9 +35,9 @@ public class VersionMismatch
     @JsonProperty
     public String artifactId;
     @JsonProperty
-    public List<String> versionsNotInCache = new ArrayList<>();
+    public List<String> versionsNotInStore = new ArrayList<>();
     @JsonProperty
-    public List<String> versionsNotInRepo = new ArrayList<>();
+    public List<String> versionsNotInRepository = new ArrayList<>();
     @JsonProperty
     @EqualsExclude
     public List<String> errors = new ArrayList<>();
@@ -48,8 +48,8 @@ public class VersionMismatch
         this.projectId = projectId;
         this.groupId = groupId;
         this.artifactId = artifactId;
-        this.versionsNotInCache.addAll(versionsNotInCache);
-        this.versionsNotInRepo.addAll(versionsNotInRepo);
+        this.versionsNotInStore.addAll(versionsNotInCache);
+        this.versionsNotInRepository.addAll(versionsNotInRepo);
         this.errors.addAll(errors);
     }
 

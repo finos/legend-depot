@@ -51,7 +51,6 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -118,9 +117,9 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         return LOGGER;
     }
 
-    private List<ArtifactType> getSupportedArtifactTypes()
+    private Set<ArtifactType> getSupportedArtifactTypes()
     {
-        return Arrays.asList(ArtifactType.ENTITIES, ArtifactType.VERSIONED_ENTITIES,ArtifactType.FILE_GENERATIONS);
+        return ArtifactHandlerFactory.getSupportedTypes();
     }
 
     private MetadataEventResponse handleRefresh(String groupId, String artifactId, String version, String parentEventId, Supplier<MetadataEventResponse> functionToExecute)
@@ -417,7 +416,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     private MetadataEventResponse executeVersionRefresh(ArtifactType artifactType, ProjectData projectData, String versionId, boolean fullUpdate)
     {
         MetadataEventResponse response = new MetadataEventResponse();
-        ProjectArtifactsHandler refreshHandler = ArtifactResolverFactory.getArtifactHandler(artifactType);
+        ProjectArtifactsHandler refreshHandler = ArtifactHandlerFactory.getArtifactHandler(artifactType);
         if (refreshHandler != null)
         {
             List<File> files = findArtifactFiles(artifactType, projectData, versionId, fullUpdate);
@@ -457,21 +456,22 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 response.addError(e.getMessage());
                 return response;
             }
-            List<VersionId> versionsToUpdate = new ArrayList<>();
-            if (repoVersions != null)
+
+            if (repoVersions != null && !repoVersions.isEmpty())
             {
-                versionsToUpdate.addAll(repoVersions);
-            }
-            if (!versionsToUpdate.isEmpty())
-            {
-                if (!fullUpdate && project.getVersions() != null && !project.getVersions().isEmpty())
+                List<VersionId> candidateVersions;
+                if (!fullUpdate && project.getLatestVersion().isPresent())
                 {
-                    versionsToUpdate.removeAll(project.getVersionIds());
+                    candidateVersions = repoVersions.stream().filter(v -> v.compareTo(project.getLatestVersion().get()) > 1).collect(Collectors.toList());
                 }
-                String versionInfoMessage = String.format("%s found [%s] versions to update: %s", projectArtifacts, versionsToUpdate.size(), versionsToUpdate);
+                else
+                {
+                    candidateVersions  = repoVersions;
+                }
+                String versionInfoMessage = String.format("%s found [%s] versions to update: %s", projectArtifacts, candidateVersions.size(), candidateVersions);
                 getLOGGER().info(versionInfoMessage);
                 response.addMessage(versionInfoMessage);
-                versionsToUpdate.forEach(v -> response.addMessage(queueWorkToRefreshProjectVersion(project, v.toVersionIdString(), fullUpdate, transitive, parentEventId)));
+                candidateVersions.forEach(v -> response.addMessage(queueWorkToRefreshProjectVersion(project, v.toVersionIdString(), fullUpdate, transitive, parentEventId)));
                 LOGGER.info("Finished processing all versions {}{}", project.getGroupId(), project.getArtifactId());
             }
         }
@@ -515,66 +515,6 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     }
 
     @Override
-    public void delete(String groupId, String artifactId, String versionId)
-    {
-        getSupportedArtifactTypes().forEach(artifactType ->
-        {
-            ProjectArtifactsHandler versionsRefresh = ArtifactResolverFactory.getArtifactHandler(artifactType);
-            if (versionsRefresh != null)
-            {
-                versionsRefresh.delete(groupId, artifactId, versionId);
-            }
-        });
-        ProjectData project = getProject(groupId, artifactId);
-        project.removeVersion(versionId);
-        projects.createOrUpdate(project);
-    }
-
-    @Override
-    public MetadataEventResponse retireOldProjectVersions(int versionsToKeep)
-    {
-        getLOGGER().info("Start purging versions for all projects");
-        MetadataEventResponse response = new MetadataEventResponse();
-        List<ProjectData> allProjects = getProjects();
-        ParallelIterate.forEach(allProjects, project ->
-        {
-            MetadataEventResponse res = purgeProjectVersions(project, versionsToKeep);
-            response.combine(res);
-        });
-        response.addMessage(String.format("Total %s projects ", allProjects.size()));
-        getLOGGER().info("Finished purging versions for all projects");
-        if (!response.getErrors().isEmpty())
-        {
-            String errors = String.join(",\n", response.getErrors());
-            getLOGGER().error(errors);
-        }
-        return response;
-    }
-
-    private MetadataEventResponse purgeProjectVersions(ProjectData project, int versionsToKeep)
-    {
-        MetadataEventResponse response = new MetadataEventResponse();
-        List<VersionId> versionIds = project.getVersionsOrdered();
-        int numberOfVersions = versionIds.size();
-        while (versionIds.size() > versionsToKeep)
-        {
-            VersionId versionId = versionIds.get(0);
-            delete(project.getGroupId(), project.getArtifactId(), versionId.toVersionIdString());
-            versionIds.remove(versionId);
-            project.removeVersion(versionId.toVersionIdString());
-        }
-        projects.createOrUpdate(project);
-        response.addMessage(String.format("%s purged %s version", project.getProjectId(), numberOfVersions - versionIds.size()));
-        return response;
-    }
-
-    @Override
-    public MetadataEventResponse retireLeastRecentlyUsedVersions(int numberOfDays)
-    {
-        return null;
-    }
-
-    @Override
     public boolean createIndexesIfAbsent()
     {
         return artifacts.createIndexesIfAbsent();
@@ -588,14 +528,14 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         {
             MetadataEventResponse response = new MetadataEventResponse();
             String parentEventId = buildParentEventId(ALL, ALL,MISSING,parentEvent);
-            List<VersionMismatch> projectsWithMissingVersions = this.repositoryServices.findVersionsMismatches().stream().filter(r -> !r.versionsNotInCache.isEmpty()).collect(Collectors.toList());
+            List<VersionMismatch> projectsWithMissingVersions = this.repositoryServices.findVersionsMismatches().stream().filter(r -> !r.versionsNotInStore.isEmpty()).collect(Collectors.toList());
             String countInfo = String.format("Starting fixing [%s] projects with missing versions",projectsWithMissingVersions.size());
             LOGGER.info(countInfo);
             response.addMessage(countInfo);
             AtomicInteger totalMissingVersions = new AtomicInteger();
             projectsWithMissingVersions.forEach(vm ->
                     {
-                        vm.versionsNotInCache.forEach(missingVersion ->
+                        vm.versionsNotInStore.forEach(missingVersion ->
                                 {
                                     try
                                     {

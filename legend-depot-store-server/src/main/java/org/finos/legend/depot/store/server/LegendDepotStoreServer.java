@@ -28,6 +28,8 @@ import org.finos.legend.depot.core.http.resources.InfoPageModule;
 import org.finos.legend.depot.services.AdminServicesModule;
 import org.finos.legend.depot.store.admin.StoreAdminModule;
 import org.finos.legend.depot.store.artifacts.ArtifactsModule;
+import org.finos.legend.depot.store.artifacts.ArtifactsRefreshModule;
+import org.finos.legend.depot.store.artifacts.purge.ArtifactsPurgeModule;
 import org.finos.legend.depot.store.guice.DepotStoreResourcesModule;
 import org.finos.legend.depot.store.guice.DepotStoreServerModule;
 import org.finos.legend.depot.store.metrics.MetricsModule;
@@ -79,6 +81,8 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new DepotStoreResourcesModule(),
                 new StoreStatusModule(),
                 new ArtifactsModule(),
+                new ArtifactsRefreshModule(),
+                new ArtifactsPurgeModule(),
                 new RepositoryModule(),
                 new TracingModule(),
                 new MetricsModule(),

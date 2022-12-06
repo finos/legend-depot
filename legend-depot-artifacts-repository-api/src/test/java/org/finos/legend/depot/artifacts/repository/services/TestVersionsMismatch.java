@@ -18,7 +18,6 @@ package org.finos.legend.depot.artifacts.repository.services;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.domain.project.ProjectData;
-import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
@@ -71,13 +70,13 @@ public class TestVersionsMismatch
         Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-C")).count());
 
         VersionMismatch prodA = counts.stream().filter(p -> p.projectId.equals("PROD-A")).findFirst().get();
-        Assert.assertEquals(1, prodA.versionsNotInCache.size());
-        Assert.assertEquals("2.3.1", prodA.versionsNotInCache.get(0));
+        Assert.assertEquals(1, prodA.versionsNotInStore.size());
+        Assert.assertEquals("2.3.1", prodA.versionsNotInStore.get(0));
         VersionMismatch prodB = counts.stream().filter(p -> p.projectId.equals("PROD-B")).findFirst().get();
-        Assert.assertEquals("1.0.1", prodB.versionsNotInCache.get(0));
-        Assert.assertEquals("1.0.0", prodB.versionsNotInRepo.get(0));
+        Assert.assertEquals("1.0.1", prodB.versionsNotInStore.get(0));
+        Assert.assertEquals("1.0.0", prodB.versionsNotInRepository.get(0));
         VersionMismatch prodC = counts.stream().filter(p -> p.projectId.equals("PROD-C")).findFirst().get();
-        Assert.assertEquals("2.0.1", prodC.versionsNotInRepo.get(0));
+        Assert.assertEquals("2.0.1", prodC.versionsNotInRepository.get(0));
 
 
     }

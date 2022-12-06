@@ -1,5 +1,7 @@
 {
-  "Artifacts": [
+  "ArtifactsPurge": [
+  ],
+  "ArtifactsRefresh": [
   ],
   "Store Administration": [
   ],

@@ -36,11 +36,5 @@ public interface ArtifactsRefreshService
 
     MetadataEventResponse refreshProjectsWithMissingVersions(boolean fullUpdate,boolean transitive, String parentEventId);
 
-    MetadataEventResponse retireLeastRecentlyUsedVersions(int numberOfDays);
-
-    MetadataEventResponse retireOldProjectVersions(int versionsToKeep);
-
-    void delete(String groupId, String artifactId, String versionId);
-
     boolean createIndexesIfAbsent();
   }

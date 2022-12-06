@@ -52,6 +52,7 @@
         <module>legend-depot-core-authorisation</module>
 
         <module>legend-depot-artifacts-refresh</module>
+        <module>legend-depot-artifacts-purge</module>
         <module>legend-depot-artifacts-repository-api</module>
         <module>legend-depot-artifacts-repository-maven-impl</module>
 
@@ -434,6 +435,11 @@
             <dependency>
                 <groupId>org.finos.legend.depot</groupId>
                 <artifactId>legend-depot-artifacts-refresh</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-artifacts-purge</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
