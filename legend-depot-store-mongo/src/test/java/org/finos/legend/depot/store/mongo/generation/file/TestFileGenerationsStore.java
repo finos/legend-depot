@@ -15,11 +15,6 @@
 
 package org.finos.legend.depot.store.mongo.generation.file;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.client.MongoCollection;
-import org.bson.Document;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
@@ -27,8 +22,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
@@ -39,55 +32,6 @@ public class TestFileGenerationsStore extends TestStoreMongo
     private UpdateFileGenerations generations = new FileGenerationsMongo(mongoProvider);
     private static String TEST_GROUP_ID = "examples.metadata";
     private static String TEST_ARTIFACT_ID = "test";
-
-
-    private List<StoredFileGeneration> readGenerationsFile(URL fileName)
-    {
-        try
-        {
-            InputStream stream = fileName.openStream();
-            String jsonInput = new java.util.Scanner(stream).useDelimiter("\\A").next();
-
-            List<StoredFileGeneration> generations = new ObjectMapper().readValue(jsonInput, new TypeReference<List<StoredFileGeneration>>()
-            {
-            });
-            Assert.assertNotNull("testing file" + fileName.getFile(), generations);
-            return generations;
-        }
-        catch (Exception e)
-        {
-            Assert.fail("an error has occurred loading test metadata" + e.getMessage());
-        }
-        return null;
-    }
-
-    private void setUpFileGenerationFromFile(URL generationsData)
-    {
-        try
-        {
-            readGenerationsFile(generationsData).forEach(project ->
-            {
-                try
-                {
-                    getMongoFileGnerations().insertOne(Document.parse(new ObjectMapper().writeValueAsString(project)));
-                }
-                catch (JsonProcessingException e)
-                {
-                    Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
-                }
-            });
-            Assert.assertNotNull(getMongoFileGnerations());
-        }
-        catch (Exception e)
-        {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
-        }
-    }
-
-    private MongoCollection getMongoFileGnerations()
-    {
-        return getMongoDatabase().getCollection(FileGenerationsMongo.COLLECTION);
-    }
 
 
     @Before

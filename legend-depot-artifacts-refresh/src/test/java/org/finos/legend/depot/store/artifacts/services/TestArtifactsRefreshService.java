@@ -106,9 +106,9 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     @Before
     public void setUpData()
     {
-        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
-        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new FileGenerationsServiceImpl(fileGenerationsStore, entitiesStore, projectsService)));
-        ArtifactResolverFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new VersionedEntitiesHandlerImpl(new EntitiesServiceImpl(entitiesStore, projectsService), versionedEntityProvider));
+        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
+        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new FileGenerationsServiceImpl(fileGenerationsStore, entitiesStore, projectsService)));
+        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new VersionedEntitiesHandlerImpl(new EntitiesServiceImpl(entitiesStore, projectsService), versionedEntityProvider));
 
         projectsStore.createOrUpdate(new ProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID));
         projectsStore.createOrUpdate(new ProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID));
@@ -262,6 +262,34 @@ public class TestArtifactsRefreshService extends TestStoreMongo
 
     }
 
+    @Test
+    public void partialRefreshAllVersionForProjectOnlyRefreshLatest()
+    {
+        artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, true,true,PARENT_EVENT_ID);
+        Assert.assertEquals(4,notificationsQueueManager.getAllInQueue().size());
+        notificationsQueueManager.handleAll();
+
+        ProjectData projectData = projectsService.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).get();
+        List<String> versions = projectData.getVersions();
+        Assert.assertEquals(2, versions.size());
+        Assert.assertEquals("2.0.0",projectData.getLatestVersion().get().toVersionIdString());
+
+
+        projectData.removeVersion("1.0.0");
+        projectsStore.createOrUpdate(projectData);
+        Assert.assertEquals("2.0.0",projectsService.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().getLatestVersion().get().toVersionIdString());
+
+        artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, false,false,PARENT_EVENT_ID);
+        Assert.assertEquals("2.0.0",projectsService.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().getLatestVersion().get().toVersionIdString());
+        Assert.assertEquals(0,notificationsQueueManager.getAllInQueue().size());
+
+        projectData.removeVersion("2.0.0");
+        projectsStore.createOrUpdate(projectData);
+        artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, false,false,PARENT_EVENT_ID);
+        Assert.assertEquals(2,notificationsQueueManager.getAllInQueue().size());
+        notificationsQueueManager.handleAll();
+
+    }
 
     @Test
     public void canRefreshAllVersionsAllProjects()
@@ -379,34 +407,6 @@ public class TestArtifactsRefreshService extends TestStoreMongo
 
     }
 
-
-    @Test
-    public void canPurgeOldVersions()
-    {
-
-        artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0",false,true,PARENT_EVENT_ID);
-        artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0",false,true,PARENT_EVENT_ID);
-        notificationsQueueManager.handleAll();
-
-        ProjectData project = projectsStore.findByProjectId(PROJECT_A).get(0);
-        Assert.assertNotNull(project);
-        List<VersionId> projectVersions = project.getVersionsOrdered();
-        Assert.assertEquals(2, projectVersions.size());
-        Assert.assertEquals("1.0.0", projectVersions.get(0).toVersionIdString());
-        Assert.assertEquals("2.0.0", projectsService.getLatestVersion(TEST_GROUP_ID, TEST_ARTIFACT_ID).get().toVersionIdString());
-
-        Assert.assertEquals(9, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0", false).size());
-        artifactsRefreshService.retireOldProjectVersions(1);
-
-
-        ProjectData after = projectsStore.findByProjectId(PROJECT_A).get(0);
-        Assert.assertNotNull(after);
-        List<VersionId> afterVersionsOrdered = after.getVersionsOrdered();
-        Assert.assertEquals(1, afterVersionsOrdered.size());
-        Assert.assertFalse(after.getVersions().contains("1.0.0"));
-        Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0", false).size());
-    }
-
     @Test
     public void dependenciesAreLoadedCorrectly()
     {
@@ -430,25 +430,6 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertEquals(1, projectsStore.findByProjectId(PROJECT_A).get(0).getDependencies().size());
     }
 
-    @Test
-    public void canDeleteVersion()
-    {
-        String versionId = "2.0.0";
-        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true,true,PARENT_EVENT_ID);
-        Assert.assertFalse(response.hasErrors());
-        notificationsQueueManager.handleAll();
-
-        Assert.assertEquals(18, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-        Assert.assertEquals(9, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true).size());
-        Assert.assertEquals(9, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false).size());
-        Assert.assertEquals(12, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-
-        artifactsRefreshService.delete(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
-        Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false).size());
-        Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true).size());
-        Assert.assertEquals(0, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-        Assert.assertFalse(projectsStore.findByProjectId(PROJECT_A).get(0).getVersions().contains(versionId));
-    }
 
     @Test
     public void cantRefreshANonExistingVersion()

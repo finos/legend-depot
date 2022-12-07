@@ -1,0 +1,39 @@
+[
+  {
+    "id": null,
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.0.0",
+    "path": null,
+    "type": null,
+    "file": {
+      "content": "Some output",
+      "path": "/examples/generated/test/other/MyOutput.json"
+    }
+  },
+  {
+    "id": null,
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.2.0",
+    "path": null,
+    "type": null,
+    "file": {
+      "content": "Some output",
+      "path": "/examples/generated/test/other/MyOutput.json"
+    }
+  },
+  {
+    "id": null,
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.0",
+    "path": null,
+    "type": null,
+    "file": {
+      "content": "Some output",
+      "path": "/examples/generated/test/other/MyOutput.json"
+    }
+  }
+
+]

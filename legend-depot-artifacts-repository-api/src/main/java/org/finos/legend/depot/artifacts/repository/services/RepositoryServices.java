@@ -83,11 +83,11 @@ public class RepositoryServices
                         PrometheusMetricsFactory.getInstance().increaseGauge(MISSING_REPO_VERSIONS,versionsNotInCache.size());
                         PrometheusMetricsFactory.getInstance().increaseGauge(MISSING_STORE_VERSIONS,versionsNotInRepo.size());
                         versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache, versionsNotInRepo));
-                        LOGGER.info("version-mismatch found for {} {} {} : notInCache [{}], notInRepo [{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache, versionsNotInRepo);
+                        LOGGER.info("version-mismatch found for {} {} {} : notInStore[{}], notInRepository [{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache, versionsNotInRepo);
                     }
 
             }
-            catch (ArtifactRepositoryException e)
+            catch (Exception e)
             {
                 String message = String.format("Could not get versions for %s:%s exception: %s ",p.getGroupId(),p.getArtifactId(),e.getMessage());
                 LOGGER.error(message);
