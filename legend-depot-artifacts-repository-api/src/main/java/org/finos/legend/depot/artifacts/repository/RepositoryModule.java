@@ -57,7 +57,7 @@ public class RepositoryModule extends PrivateModule
         metricsHandler.registerGauge(MISSING_REPO_VERSIONS, MISSING_REPO_VERSIONS);
         metricsHandler.registerGauge(MISSING_STORE_VERSIONS, MISSING_STORE_VERSIONS);
         metricsHandler.registerCounter(REPO_EXCEPTIONS, REPO_EXCEPTIONS);
-        schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, LocalDateTime.now().plusMinutes(5), 5 * 60 * 60 * 1000, false,repositoryServices::findVersionsMismatches);
+        schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, LocalDateTime.now().plusMinutes(5), 300000, false,repositoryServices::findVersionsMismatches);
         return true;
     }
 }
