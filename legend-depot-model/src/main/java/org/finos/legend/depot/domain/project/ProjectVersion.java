@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.domain.project;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -50,5 +51,11 @@ public class ProjectVersion extends BaseDomain
     public int hashCode()
     {
         return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @JsonIgnore
+    public String getGav()
+    {
+        return String.format("%s:%s:%s", this.getGroupId(), getArtifactId(), this.getVersionId());
     }
 }
