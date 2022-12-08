@@ -15,19 +15,21 @@
 
 package org.finos.legend.depot.services.projects;
 
+import org.eclipse.collections.api.map.MutableMap;
 import org.finos.legend.depot.domain.project.ProjectData;
-import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.ProjectProperty;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionDependencies;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.validation.constraints.AssertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -90,21 +92,44 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertFalse(projectsService.getDependencies("examples.metadata", "test", "2.3.1", false).contains(new ProjectVersion("example.services.test", "test", "1.0.0")));
 
         // Dependency Tree
-        ProjectDependencyInfo dependencyInfo = projectsService.getProjectDependencyInfo("examples.metadata", "test", "2.3.1");
-        Set<ProjectVersionDependencies> dependencyTree = dependencyInfo.getTree();
-        Assert.assertEquals(1, dependencyTree.size());
-        Set<ProjectVersionDependencies> projectVersionDependencies = dependencyTree.iterator().next().getDependencies();
-        Assert.assertEquals(1, projectVersionDependencies.size());
-        ProjectVersionDependencies projectVersionDependencies1 = projectVersionDependencies.iterator().next();
-        Assert.assertEquals(projectVersionDependencies1.getGroupId(), "examples.metadata");
-        Assert.assertEquals(projectVersionDependencies1.getArtifactId(), "test-dependencies");
-        Assert.assertEquals(projectVersionDependencies1.getVersionId(), "1.0.0");
-        Set<ProjectVersionDependencies> dependencies1 = projectVersionDependencies1.getDependencies();
-        Assert.assertEquals(1, dependencies1.size());
-        ProjectVersionDependencies projectVersionDependencies2 = dependencies1.iterator().next();
-        Assert.assertEquals(projectVersionDependencies2.getGroupId(), "example.services.test");
-        Assert.assertEquals(projectVersionDependencies2.getArtifactId(), "test");
-        Assert.assertEquals(projectVersionDependencies2.getVersionId(), "1.0.0");
+        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReport("examples.metadata", "test", "2.3.1");
+        ProjectDependencyReport.SerializedGraph graph = dependencyReport.getGraph();
+        MutableMap<String, ProjectDependencyVersionNode> nodes = graph.getNodes();
+        Assert.assertEquals(nodes.size(), 3);
+        Assert.assertEquals(graph.getRootNodes().size(), 1);
+        String rootId = graph.getRootNodes().iterator().next();
+        Assert.assertEquals("examples.metadata:test:2.3.1", rootId);
+
+        ProjectDependencyVersionNode  versionNodeA = nodes.get(rootId);
+        Assert.assertNotNull(versionNodeA);
+        Assert.assertEquals("examples.metadata", versionNodeA.getGroupId());
+        Assert.assertEquals("test", versionNodeA.getArtifactId());
+        Assert.assertEquals("2.3.1", versionNodeA.getVersionId());
+        Assert.assertEquals("PROD-A", versionNodeA.getProjectId());
+        Assert.assertEquals(versionNodeA.getForwardEdges().size(), 1);
+        Assert.assertEquals(versionNodeA.getBackEdges().size(), 0);
+
+        ProjectDependencyVersionNode versionNodeB = graph.getNodes().get(versionNodeA.getForwardEdges().iterator().next());
+        Assert.assertNotNull(versionNodeB);
+        Assert.assertEquals("examples.metadata", versionNodeB.getGroupId());
+        Assert.assertEquals("test-dependencies", versionNodeB.getArtifactId());
+        Assert.assertEquals("1.0.0", versionNodeB.getVersionId());
+        Assert.assertEquals("PROD-B", versionNodeB.getProjectId());
+        Assert.assertEquals(1, versionNodeB.getForwardEdges().size());
+        Assert.assertEquals(1, versionNodeB.getBackEdges().size());
+        Assert.assertEquals(versionNodeA.getId(), versionNodeB.getBackEdges().iterator().next());
+
+        ProjectDependencyVersionNode versionNodeC = graph.getNodes().get(versionNodeB.getForwardEdges().iterator().next());
+        Assert.assertNotNull(versionNodeC);
+        Assert.assertEquals("example.services.test", versionNodeC.getGroupId());
+        Assert.assertEquals("test", versionNodeC.getArtifactId());
+        Assert.assertEquals("1.0.0", versionNodeC.getVersionId());
+        Assert.assertEquals("PROD-C", versionNodeC.getProjectId());
+        Assert.assertEquals(0, versionNodeC.getForwardEdges().size());
+        Assert.assertEquals(1, versionNodeC.getBackEdges().size());
+        Assert.assertEquals(versionNodeB.getId(), versionNodeC.getBackEdges().iterator().next());
+
+        Assert.assertEquals(0, dependencyReport.getConflicts().size());
     }
 
     @Test

@@ -15,16 +15,16 @@
 
 package org.finos.legend.depot.services.projects;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.eclipse.collections.api.factory.Sets;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectData;
-import org.finos.legend.depot.domain.project.ProjectDependencyInfo;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraph;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraphWalkerContext;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionConflict;
-import org.finos.legend.depot.domain.project.ProjectVersionDependencies;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
@@ -32,7 +32,6 @@ import org.finos.legend.sdlc.domain.model.version.VersionId;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -162,77 +161,69 @@ public class ProjectsServiceImpl implements ManageProjectsService
         return dependencies;
     }
 
-    public Set<ProjectVersionDependencies> getDependencyTree(List<ProjectVersion> projectVersions, String parentPath, Set<ProjectVersionDependencies> fullDependencies, Map<String, ProjectData> projectDataMap)
+    public void buildDependencyGraph(ProjectDependencyGraph graph, ProjectVersion parent, List<ProjectVersion> children, ProjectDependencyGraphWalkerContext context)
     {
-        Set<ProjectVersionDependencies> rootTree = new HashSet<>();
-        projectVersions.forEach(projectVersion ->
+        children.forEach(projectVersion ->
         {
-            ProjectVersionDependencies projectVersionDependencyTree = new ProjectVersionDependencies(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId());
-            fullDependencies.add(projectVersionDependencyTree);
-            String fullPath = (parentPath == null ? "" : parentPath + PATH_DELIMITER) + projectVersionDependencyTree.getGav();
-            projectVersionDependencyTree.setPath(fullPath);
-            String projectCoordinates = projectVersion.getGroupId() + projectVersion.getArtifactId();
-            if (!projectDataMap.containsKey(projectCoordinates))
+            if (!graph.hasNode(projectVersion))
             {
-                // only fetch project if we haven't fetched it already
-                ProjectData project = getProject(projectVersion.getGroupId(), projectVersion.getArtifactId());
-                projectDataMap.put(projectCoordinates, project);
+                graph.addNode(projectVersion, parent);
+                context.addVersionToProject(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion);
+                if (!context.getProjectVersionToDependencyMap().containsKey(projectVersion))
+                {
+                    ProjectData projectData =  context.getProjectDataPutIfAbsent(projectVersion.getGroupId(), projectVersion.getArtifactId(),() -> getProject(projectVersion.getGroupId(), projectVersion.getArtifactId()));
+                    context.getProjectVersionToDependencyMap().putIfAbsent(projectVersion, projectData.getDependencies(projectVersion.getVersionId()).stream().map(ProjectVersionDependency::getDependency).collect(Collectors.toList()));
+                }
+                List<ProjectVersion> dependencies = context.getProjectVersionToDependencyMap().get(projectVersion);
+                dependencies.forEach(child -> graph.setEdges(projectVersion, child));
+                buildDependencyGraph(graph, projectVersion, dependencies, context);
             }
-            ProjectData projectData = projectDataMap.get(projectCoordinates);
-            List<ProjectVersionDependency> projectVersionDependencies = projectData.getDependencies(projectVersion.getVersionId());
-            projectVersionDependencies.forEach(dep ->
-                    projectVersionDependencyTree.getDependencies().addAll(
-                            getDependencyTree(Collections.singletonList(new ProjectVersion(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId())), fullPath, fullDependencies, projectDataMap)
-                    )
-            );
-            rootTree.add(projectVersionDependencyTree);
         });
-        return rootTree;
     }
 
-    public ProjectDependencyInfo getProjectDependencyInfo(List<ProjectVersion> projectVersions)
+    public ProjectDependencyReport getProjectDependencyReport(List<ProjectVersion> projectDependencyVersions)
     {
-        Set<ProjectVersionDependencies> dependencyLine = new HashSet<>();
-        Map<String, ProjectData> projectDataMap = new HashMap<>();
-        Set<ProjectVersionDependencies> dependencyTree = getDependencyTree(projectVersions, null, dependencyLine, projectDataMap);
+        ProjectDependencyGraph graph = new ProjectDependencyGraph();
+        ProjectDependencyGraphWalkerContext  graphWalkerContext =  new ProjectDependencyGraphWalkerContext();
+        buildDependencyGraph(graph, null, projectDependencyVersions, graphWalkerContext);
+        return buildReportFromGraph(graph,graphWalkerContext);
+    }
 
-        // Calculate conflicts
-        // 1.collect dependency projects
-        Set<ProjectVersionConflict> projectVersionConflicts = new HashSet<>();
-        for (ProjectVersionDependencies dependency : dependencyLine)
+    public ProjectDependencyReport buildReportFromGraph(ProjectDependencyGraph dependencyGraph, ProjectDependencyGraphWalkerContext graphWalkerContext)
+    {
+        ProjectDependencyReport report = new ProjectDependencyReport();
+        ProjectDependencyReport.SerializedGraph graph = report.getGraph();
+
+        dependencyGraph.getNodes().forEach(projectVersion ->
         {
-            projectVersionConflicts.add(new ProjectVersionConflict(dependency.getGroupId(), dependency.getArtifactId()));
-        }
-        // 2. add conflicts if more than one versions
-        for (ProjectVersionConflict projectVersionConflict : projectVersionConflicts)
-        {
-            Set<String> versions = new HashSet<>();
-            Set<ProjectVersionDependencies> correspondingDependencies = new HashSet<>();
-            dependencyLine.forEach(dependency ->
+            // add node
+            ProjectDependencyVersionNode versionNode = ProjectDependencyVersionNode.buildFromProjectVersion(projectVersion);
+            graph.getNodes().putIfAbsent(versionNode.getId(), versionNode);
+            ProjectData projectData = graphWalkerContext.getProjectData(versionNode.getGroupId(), versionNode.getArtifactId());
+            if (projectData != null)
             {
-                if (dependency.getGroupId().equals(projectVersionConflict.getGroupId()) && dependency.getArtifactId().equals(projectVersionConflict.getArtifactId()))
-                {
-                    versions.add(dependency.getVersionId());
-                    correspondingDependencies.add(dependency);
-                }
-            });
-            // Initialize Conflicts if more than one person per project
+                versionNode.setProjectId(projectData.getProjectId());
+            }
+            // forward edges
+            dependencyGraph.getForwardEdges().getIfAbsentValue(projectVersion, Sets.mutable.empty()).forEach(forwardNode -> versionNode.getForwardEdges().add(forwardNode.getGav()));
+            // back edges
+            dependencyGraph.getBackEdges().getIfAbsentValue(projectVersion, Sets.mutable.empty()).forEach(backEdge -> versionNode.getBackEdges().add(backEdge.getGav()));
+        });
+        // add root nodes
+        dependencyGraph.getRootNodes().forEach(rootNode -> graph.getRootNodes().add(rootNode.getGav()));
+
+        // conflicts
+        graphWalkerContext.getProjectToVersions().forEach((key, versions) ->
+        {
             if (versions.size() > 1)
             {
-                projectVersionConflict.initConflicts();
-                projectVersionConflict.initVersions();
-                correspondingDependencies.forEach(dependency ->
-                {
-                    projectVersionConflict.getConflictPaths().add(dependency.getPath());
-                    projectVersionConflict.getVersions().add(dependency.getVersionId());
-                });
+                Set<String> conflictingVersions = Sets.mutable.empty();
+                conflictingVersions.addAll(versions.stream().map(ProjectVersion::getGav).collect(Collectors.toList()));
+                report.addConflict(key.getGroupId(), key.getArtifactId(), conflictingVersions);
             }
-        }
-        projectVersionConflicts.removeIf(s -> s.getConflictPaths() == null || s.getConflictPaths().isEmpty());
-        return new ProjectDependencyInfo(dependencyTree, projectVersionConflicts);
+        });
+        return report;
     }
-
-
 
     @Override
     public List<ProjectVersionPlatformDependency> getDependentProjects(String groupId, String artifactId, String versionId)
