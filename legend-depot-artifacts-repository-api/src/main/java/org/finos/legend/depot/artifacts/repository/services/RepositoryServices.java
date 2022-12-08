@@ -83,7 +83,7 @@ public class RepositoryServices
                         PrometheusMetricsFactory.getInstance().increaseGauge(MISSING_REPO_VERSIONS,versionsNotInStore.size());
                         PrometheusMetricsFactory.getInstance().increaseGauge(MISSING_STORE_VERSIONS,versionsNotInRepo.size());
                         versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInStore, versionsNotInRepo));
-                        LOGGER.info("version-mismatch found for {} {} {} : notInStore[{}], notInRepository [{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInCache, versionsNotInRepo);
+                        LOGGER.info("version-mismatch found for {} {} {} : notInStore[{}], notInRepository [{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInStore, versionsNotInRepo);
                     }
 
             }
