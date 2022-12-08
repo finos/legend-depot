@@ -47,6 +47,7 @@ import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.mongo.BaseMongo;
 import org.finos.legend.depot.store.mongo.MongoStoreErrors;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -76,6 +77,7 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 
 public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, UpdateEntities
 {
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(EntitiesMongo.class);
     public static final String ENTITIES_VERSIONS = "entities";
 
     public static final String ENTITY = "entity";
@@ -460,6 +462,7 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     {
         Bson filter = and(eq(VERSIONED_ENTITY, versioned), getArtifactAndVersionFilter(groupId, artifactId, versionId));
         DeleteResult result = getCollection().deleteMany(filter);
+        LOGGER.info("delete result {}-{}-{} {} :{}",groupId,artifactId,versionId,versioned,result);
         return new StoreOperationResult(0, 0, result.getDeletedCount(), Collections.emptyList());
     }
 
@@ -468,6 +471,7 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     {
         Bson filter = getArtifactFilter(groupId, artifactId);
         DeleteResult result = getCollection().deleteMany(filter);
+        LOGGER.info("deleteAll result {}-{} :{}",groupId,artifactId,result);
         return new StoreOperationResult(0, 0, result.getDeletedCount(), Collections.emptyList());
     }
 

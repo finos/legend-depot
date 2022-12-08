@@ -225,6 +225,7 @@ public abstract class BaseMongo<T extends HasIdentifier>
     protected boolean delete(Bson key)
     {
         DeleteResult deleteResult = getCollection().deleteMany(key);
+        LOGGER.info("delete result {} :{}",getCollection().getNamespace().getCollectionName(),deleteResult);
         return deleteResult.wasAcknowledged();
     }
 }
