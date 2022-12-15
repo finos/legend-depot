@@ -46,12 +46,7 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
 {
     public LegendDepotStoreServer()
     {
-        this("/depot-store/api/*");
-    }
-
-    public LegendDepotStoreServer(String urlPattern)
-    {
-        super(urlPattern);
+        super();
     }
 
     public static void main(String... args) throws Exception

@@ -2,6 +2,7 @@
   "applicationName": "Legend Depot API",
   "deployment": "DEV",
   "sessionCookie": "LEGEND_DEPOT_JSESSIONID",
+  "urlPattern": "/depot/api/*",
   "server": {
     "type": "simple",
     "applicationContextPath": "/",
