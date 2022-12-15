@@ -46,13 +46,6 @@ public class ReadOnlyServicesModule extends PrivateModule
     protected void configure()
     {
 
-        bind(Projects.class).to(ProjectsMongo.class);
-        bind(Entities.class).to(EntitiesMongo.class);
-        bind(UpdateEntities.class).to(EntitiesMongo.class);
-        bind(UpdateProjects.class).to(ProjectsMongo.class);
-        bind(FileGenerations.class).to(FileGenerationsMongo.class);
-        bind(UpdateFileGenerations.class).to(FileGenerationsMongo.class);
-
         bind(EntitiesService.class).to(EntitiesServiceImpl.class);
         bind(EntityClassifierService.class).to(EntityClassifierServiceImpl.class);
         bind(ProjectsService.class).to(ProjectsServiceImpl.class);

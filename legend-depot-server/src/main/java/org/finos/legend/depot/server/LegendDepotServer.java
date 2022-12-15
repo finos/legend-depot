@@ -25,6 +25,8 @@ import org.finos.legend.depot.server.guice.DepotServerModule;
 import org.finos.legend.depot.server.guice.DepotServerResourcesModule;
 import org.finos.legend.depot.server.pure.model.context.PureModelContextModule;
 import org.finos.legend.depot.services.ReadOnlyServicesModule;
+import org.finos.legend.depot.store.mongo.ManageMongoModule;
+import org.finos.legend.depot.store.mongo.ReadMongoModule;
 import org.finos.legend.depot.store.mongo.StoreMongoModule;
 import org.finos.legend.depot.tracing.TracingModule;
 
@@ -51,6 +53,8 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
                 new PureModelContextModule(),
                 new StoreMongoModule(),
                 new ReadOnlyServicesModule(),
+                new ReadMongoModule(),
+                new ManageMongoModule(),
                 new TracingModule());
     }
 
