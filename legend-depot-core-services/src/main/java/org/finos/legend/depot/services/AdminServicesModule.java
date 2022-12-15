@@ -44,12 +44,6 @@ public class AdminServicesModule extends PrivateModule
     @Override
     protected void configure()
     {
-        bind(Projects.class).to(ProjectsMongo.class);
-        bind(UpdateProjects.class).to(ProjectsMongo.class);
-        bind(Entities.class).to(EntitiesMongo.class);
-        bind(UpdateEntities.class).to(EntitiesMongo.class);
-        bind(UpdateFileGenerations.class).to(FileGenerationsMongo.class);
-
         bind(ProjectsService.class).to(ProjectsServiceImpl.class);
         bind(ManageProjectsService.class).to(ProjectsServiceImpl.class);
         bind(ManageEntitiesService.class).to(EntitiesServiceImpl.class);

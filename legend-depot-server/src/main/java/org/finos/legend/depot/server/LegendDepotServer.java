@@ -25,6 +25,8 @@ import org.finos.legend.depot.server.guice.DepotServerModule;
 import org.finos.legend.depot.server.guice.DepotServerResourcesModule;
 import org.finos.legend.depot.server.pure.model.context.PureModelContextModule;
 import org.finos.legend.depot.services.ReadOnlyServicesModule;
+import org.finos.legend.depot.store.mongo.ManageMongoModule;
+import org.finos.legend.depot.store.mongo.ReadMongoModule;
 import org.finos.legend.depot.store.mongo.StoreMongoModule;
 import org.finos.legend.depot.tracing.TracingModule;
 
@@ -35,12 +37,7 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
 {
     public LegendDepotServer()
     {
-        this("/depot/api/*");
-    }
-
-    public LegendDepotServer(String urlPattern)
-    {
-        super(urlPattern);
+        super();
     }
 
     public static void main(String... args) throws Exception
@@ -56,6 +53,8 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
                 new PureModelContextModule(),
                 new StoreMongoModule(),
                 new ReadOnlyServicesModule(),
+                new ReadMongoModule(),
+                new ManageMongoModule(),
                 new TracingModule());
     }
 

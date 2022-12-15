@@ -63,6 +63,9 @@ public class ServersConfiguration extends Configuration
     @JsonProperty("prometheus")
     private PrometheusConfiguration prometheusConfiguration;
 
+    @JsonProperty("urlPattern")
+    private String urlPattern;
+
     public String getDeployment()
     {
         return deployment;
@@ -121,5 +124,10 @@ public class ServersConfiguration extends Configuration
     public void setPrometheusConfiguration(PrometheusConfiguration prometheusConfiguration)
     {
         this.prometheusConfiguration = prometheusConfiguration;
+    }
+
+    public String getUrlPattern()
+    {
+        return this.urlPattern;
     }
 }

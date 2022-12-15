@@ -33,6 +33,8 @@ import org.finos.legend.depot.store.artifacts.purge.ArtifactsPurgeModule;
 import org.finos.legend.depot.store.guice.DepotStoreResourcesModule;
 import org.finos.legend.depot.store.guice.DepotStoreServerModule;
 import org.finos.legend.depot.store.metrics.MetricsModule;
+import org.finos.legend.depot.store.mongo.ManageMongoModule;
+import org.finos.legend.depot.store.mongo.ReadMongoModule;
 import org.finos.legend.depot.store.mongo.StoreMongoModule;
 import org.finos.legend.depot.store.notifications.NotificationsModule;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
@@ -46,12 +48,7 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
 {
     public LegendDepotStoreServer()
     {
-        this("/depot-store/api/*");
-    }
-
-    public LegendDepotStoreServer(String urlPattern)
-    {
-        super(urlPattern);
+        super();
     }
 
     public static void main(String... args) throws Exception
@@ -77,6 +74,8 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new AuthorisationModule(),
                 new StoreMongoModule(),
                 new AdminServicesModule(),
+                new ReadMongoModule(),
+                new ManageMongoModule(),
                 new DepotStoreServerModule(),
                 new DepotStoreResourcesModule(),
                 new StoreStatusModule(),

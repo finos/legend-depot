@@ -48,11 +48,8 @@ import java.util.List;
 
 public abstract class BaseServer<T extends ServersConfiguration> extends Application<T>
 {
-    private final String urlPattern;
-
-    protected BaseServer(String urlPattern)
+    protected BaseServer()
     {
-        this.urlPattern = urlPattern;
     }
 
     @Override
@@ -97,9 +94,9 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
             ChainFixingFilterHandler.apply(environment.getApplicationContext(), configuration.getFilterPriorities());
         }
 
-        if (urlPattern != null && !urlPattern.isEmpty())
+        if (configuration.getUrlPattern() != null && !configuration.getUrlPattern().isEmpty())
         {
-            environment.jersey().setUrlPattern(urlPattern);
+            environment.jersey().setUrlPattern(configuration.getUrlPattern());
         }
         environment.jersey().register(MultiPartFeature.class);
         environment.jersey().register(new LegendSDLCServerExceptionMapper());
