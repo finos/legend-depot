@@ -24,8 +24,7 @@ import java.util.stream.Stream;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 
-public abstract class BaseVersionMongo<T extends HasIdentifier>
-{
+public abstract class BaseVersionMongo<T extends HasIdentifier> {
     public static final String LAST_MODIFIED = "lastModified";
     public static final String GROUP_ID = "groupId";
     public static final String ARTIFACT_ID = "artifactId";
@@ -42,127 +41,103 @@ public abstract class BaseVersionMongo<T extends HasIdentifier>
     private final Class<T> documentClass;
 
 
-    public BaseVersionMongo(MongoDatabase databaseProvider, Class<T> documentClass)
-    {
+    public BaseVersionMongo(MongoDatabase databaseProvider, Class<T> documentClass) {
         this.mongoDatabase = databaseProvider;
         this.documentClass = documentClass;
         objectMapper = new ObjectMapper();
     }
 
-    public BaseVersionMongo(MongoDatabase databaseProvider, Class<T> documentClass, ObjectMapper mapper)
-    {
+    public BaseVersionMongo(MongoDatabase databaseProvider, Class<T> documentClass, ObjectMapper mapper) {
         this.mongoDatabase = databaseProvider;
         this.documentClass = documentClass;
         objectMapper = mapper;
     }
 
-    public static <T extends HasIdentifier> Document buildDocument(T object)
-    {
-        try
-        {
+    public static <T extends HasIdentifier> Document buildDocument(T object) {
+        try {
             Document doc = Document.parse(new ObjectMapper().writeValueAsString(object));
-            if (object.getId() != null && !object.getId().isEmpty())
-            {
+            if (object.getId() != null && !object.getId().isEmpty()) {
                 doc.put(ID_FIELD, new ObjectId(object.getId()));
                 doc.remove(ID);
             }
             return doc;
-        }
-        catch (JsonProcessingException e)
-        {
+        } catch (JsonProcessingException e) {
             LOGGER.error("Error serializing document to json", e);
             throw new StoreException("Error serializing dataset to json");
         }
     }
 
-    public MongoDatabase getDatabase()
-    {
+    public MongoDatabase getDatabase() {
         return mongoDatabase;
     }
 
-    protected MongoCollection getMongoCollection(String col)
-    {
+    protected MongoCollection getMongoCollection(String col) {
         return getDatabase().getCollection(col);
     }
 
-    protected boolean hasNoApplicationIndexes(MongoCollection col)
-    {
+    protected boolean hasNoApplicationIndexes(MongoCollection col) {
         Stream<Document> indexes = getIndexes(col);
         return indexes.allMatch(index -> index.getString(INDEX_NAME).equals(ID_INDEX));
     }
 
-    protected Stream<Document> getIndexes(MongoCollection collection)
-    {
+    protected Stream<Document> getIndexes(MongoCollection collection) {
         List<Document> indexes = new ArrayList<>();
-        collection.listIndexes().forEach((Consumer<Document>)indexes::add);
+        collection.listIndexes().forEach((Consumer<Document>) indexes::add);
         return indexes.stream();
     }
 
     protected abstract MongoCollection getCollection();
 
 
-    protected Bson getArtifactAndVersionFilter(String groupId, String artifactId, String versionId)
-    {
+    protected Bson getArtifactAndVersionFilter(String groupId, String artifactId, String versionId) {
         return and(eq(VERSION_ID, versionId),
                 and(eq(GROUP_ID, groupId),
-                        eq(ARTIFACT_ID, artifactId)));
+                        and(eq(ARTIFACT_ID, artifactId))));
     }
 
-    protected Bson getArtifactFilter(String groupId, String artifactId)
-    {
-        return and(eq(GROUP_ID, groupId), eq(ARTIFACT_ID, artifactId));
+    protected Bson getArtifactFilter(String groupId, String artifactId, String versionId) {
+        return and(eq(GROUP_ID, groupId), eq(ARTIFACT_ID, artifactId), eq(VERSION_ID, versionId));
     }
 
-    public T createOrUpdate(T data)
-    {
+    public T createOrUpdate(T data) {
         validateNewData(data);
         Bson keyFilter = getKeyFilter(data);
-        Document result = (Document)getCollection().findOneAndReplace(keyFilter, buildDocument(data), FIND_ONE_AND_REPLACE_OPTIONS);
+        Document result = (Document) getCollection().findOneAndReplace(keyFilter, buildDocument(data), FIND_ONE_AND_REPLACE_OPTIONS);
         return convert(result, documentClass);
     }
 
-    public List<T> getAllStoredEntities()
-    {
+    public List<T> getAllStoredEntities() {
         List<T> result = new ArrayList<>();
-        getCollection().find().forEach((Consumer<Document>)doc -> result.add(convert(doc, documentClass)));
+        getCollection().find().forEach((Consumer<Document>) doc -> result.add(convert(doc, documentClass)));
         return result;
     }
 
-    public List<T> getStoredEntitiesByPage(int page, int pageSize)
-    {
+    public List<T> getStoredEntitiesByPage(int page, int pageSize) {
         List<T> result = new ArrayList<>();
-        getCollection().find().skip(Math.max(page - 1, 0) * pageSize).limit(pageSize).forEach((Consumer<Document>)doc -> result.add(convert(doc, documentClass)));
+        getCollection().find().skip(Math.max(page - 1, 0) * pageSize).limit(pageSize).forEach((Consumer<Document>) doc -> result.add(convert(doc, documentClass)));
         return result;
     }
 
-    public <T> T convert(Document document, Class<T> clazz)
-    {
-        if (document == null)
-        {
+    public <T> T convert(Document document, Class<T> clazz) {
+        if (document == null) {
             return null;
         }
         ObjectId id = document.getObjectId(ID_FIELD);
-        if (id != null)
-        {
+        if (id != null) {
             document.remove(ID_FIELD);
             document.put(ID, id.toHexString());
         }
-        try
-        {
+        try {
             return this.objectMapper.convertValue(document, clazz);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             LOGGER.error(String.format("error converting document (%s) to class %s. reason: %s", Objects.requireNonNull(id).toString(), clazz.getSimpleName(), e.getMessage()));
             return null;
         }
     }
 
-    protected boolean createIndexIfAbsent(String indexName,String... fieldNames)
-    {
+    protected boolean createIndexIfAbsent(String indexName, String... fieldNames) {
         List<Document> indexes = getIndexes(getCollection()).collect(Collectors.toList());
-        if (indexes.stream().noneMatch(i -> i.getString(INDEX_NAME).equals(indexName)))
-        {
+        if (indexes.stream().noneMatch(i -> i.getString(INDEX_NAME).equals(indexName))) {
             IndexOptions indexOptions = new IndexOptions().name(indexName);
             getCollection().createIndex(Indexes.ascending(fieldNames), indexOptions);
         }
@@ -174,39 +149,33 @@ public abstract class BaseVersionMongo<T extends HasIdentifier>
 
     protected abstract void validateNewData(T data);
 
-    protected List<T> find(Bson filter)
-    {
+    protected List<T> find(Bson filter) {
         return convert(getCollection().find(filter));
     }
 
-    protected FindIterable executeFind(Bson filter)
-    {
+    protected FindIterable executeFind(Bson filter) {
         return getCollection().find(filter);
     }
 
 
-    protected List<T> convert(FindIterable iterable)
-    {
+    protected List<T> convert(FindIterable iterable) {
         List<T> result = new ArrayList<>();
-        iterable.forEach((Consumer<Document>)doc -> result.add(convert(doc, documentClass)));
+        iterable.forEach((Consumer<Document>) doc -> result.add(convert(doc, documentClass)));
         return result;
     }
 
-    protected Optional<T> findOne(Bson filter)
-    {
+    protected Optional<T> findOne(Bson filter) {
         List<T> result = convert(getCollection().find(filter));
-        if (!result.isEmpty() && result.size() > 1)
-        {
-            throw new IllegalStateException(String.format(" Found more than one match %s in collection %s",filter.toString(),getCollection().getNamespace().getCollectionName()));
+        if (!result.isEmpty() && result.size() > 1) {
+            throw new IllegalStateException(String.format(" Found more than one match %s in collection %s", filter.toString(), getCollection().getNamespace().getCollectionName()));
         }
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
 
 
-    protected boolean delete(Bson key)
-    {
+    protected boolean delete(Bson key) {
         DeleteResult deleteResult = getCollection().deleteMany(key);
-        LOGGER.info("delete result {} :{}",getCollection().getNamespace().getCollectionName(),deleteResult);
+        LOGGER.info("delete result {} :{}", getCollection().getNamespace().getCollectionName(), deleteResult);
         return deleteResult.wasAcknowledged();
     }
 }
