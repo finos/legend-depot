@@ -25,6 +25,7 @@ import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.ProjectProperty;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
@@ -169,6 +170,18 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         ProjectData updatedProjectData = projectsStore.find(TEST_GROUP_ID, "art101").get();
         Assert.assertEquals(1, updatedProjectData.getPropertiesForProjectVersionID(MASTER_SNAPSHOT).size());
         Assert.assertEquals("0.0.0", updatedProjectData.getPropertiesForProjectVersionID(MASTER_SNAPSHOT).get(0).getValue());
+    }
+
+    @Test
+    public void canRefreshMasterSnapshotArtifactWithProjectProperties()
+    {
+        ProjectData projectData = new ProjectData("PROD-18385", TEST_GROUP_ID, "art101");
+        ProjectProperty originalProperty = new ProjectProperty("legend.version", "0.0.0", MASTER_SNAPSHOT);
+        projectData.addProperties(Collections.singletonList(originalProperty));
+        Assert.assertEquals(projectData.getPropertiesForProjectVersionID(MASTER_SNAPSHOT).get(0), originalProperty);
+        ProjectProperty updatedProperty = new ProjectProperty("legend.version", "1.0.0", MASTER_SNAPSHOT);
+        ((ArtifactsRefreshServiceImpl)artifactsRefreshService).refreshProjectProperties(projectData, MASTER_SNAPSHOT, Collections.singletonList(updatedProperty));
+        Assert.assertEquals(projectData.getPropertiesForProjectVersionID(MASTER_SNAPSHOT).get(0), updatedProperty);
     }
 
     @Test
