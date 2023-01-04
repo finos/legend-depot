@@ -98,7 +98,8 @@
     "org.finos.legend.depot.artifacts.repository.maven.impl.MavenArtifactRepositoryConfiguration": {
       "settingsLocation": "/config/settings.xml",
       "versionsUpdateIntervalInMillis": 3600000,
-      "latestUpdateIntervalInMillis": 3600000
+      "latestUpdateIntervalInMillis": 3600000,
+      "deleteVersionInRepoIntervalInMillis": 3600000
     }
   },
   "includeProjectPropertiesConfiguration": {

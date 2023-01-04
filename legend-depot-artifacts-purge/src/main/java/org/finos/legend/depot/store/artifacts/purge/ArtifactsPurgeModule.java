@@ -45,7 +45,7 @@ public class ArtifactsPurgeModule extends PrivateModule
     @Named("delete-versions-not-in-repository")
     boolean initDeleteVersionsNotInRepository(SchedulesFactory schedulesFactory, ArtifactsPurgeService purgeService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(DELETE_VERSIONS_NOT_IN_REPO, LocalDateTime.now().plusSeconds(configuration.getVersionsUpdateIntervalInMillis() / 1000), configuration.getFixVersionsMismatchIntervalInMillis(), false,() -> purgeService.deleteVersionsNotInRepository());
+        schedulesFactory.register(DELETE_VERSIONS_NOT_IN_REPO, LocalDateTime.now().plusSeconds(configuration.getDeleteVersionInRepoIntervalInMillis() / 1000), configuration.getDeleteVersionInRepoIntervalInMillis(), false,() -> purgeService.deleteVersionsNotInRepository());
         return true;
     }
 }
