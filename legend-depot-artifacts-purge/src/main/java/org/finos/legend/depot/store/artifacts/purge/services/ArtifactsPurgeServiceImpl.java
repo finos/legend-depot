@@ -117,12 +117,12 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     public MetadataEventResponse deleteVersionMismatches(List<VersionMismatch> versionMismatch)
     {
         MetadataEventResponse response = new MetadataEventResponse();
-        versionMismatch.stream().forEach(mismatch ->
+        versionMismatch.forEach(mismatch ->
                 {
-                      mismatch.versionsNotInRepository.stream().forEach(version ->
+                      mismatch.versionsNotInRepository.forEach(version ->
                       {
                           delete(mismatch.groupId, mismatch.artifactId, version);
-                          response.addMessage(String.format("%s-%s-%s removed", mismatch.groupId, mismatch.artifactId, version));
+                          response.addMessage(String.format("%s-%s-%s deleted", mismatch.groupId, mismatch.artifactId, version));
                       });
                 }
         );
@@ -150,14 +150,14 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
                     delete(project.getGroupId(), project.getArtifactId(), versionId.toVersionIdString());
                     versionIds.remove(versionId);
                     project.removeVersion(versionId.toVersionIdString());
-                    response.addMessage(String.format("%s-%s-%s removed", project.getGroupId(), project.getArtifactId(), versionId.toVersionIdString()));
+                    response.addMessage(String.format("%s-%s-%s evicted", project.getGroupId(), project.getArtifactId(), versionId.toVersionIdString()));
                 }
                 projects.createOrUpdate(project);
-                response.addMessage(String.format("%s-%s removed %s versions", project.getGroupId(), project.getArtifactId(), numberOfVersions - versionIds.size()));
+                response.addMessage(String.format("%s-%s evicted %s versions", project.getGroupId(), project.getArtifactId(), numberOfVersions - versionIds.size()));
             }
             catch (Exception e)
             {
-                 String errorMessage = String.format(" Error removing old versions %s-%s %s",project.getGroupId(),project.getArtifactId(),e.getMessage());
+                 String errorMessage = String.format(" Error evicting old versions %s-%s %s",project.getGroupId(),project.getArtifactId(),e.getMessage());
                  LOGGER.error(errorMessage);
                  response.addError(errorMessage);
                  PrometheusMetricsFactory.getInstance().incrementErrorCount(VERSION_PURGE_COUNTER);
