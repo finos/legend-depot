@@ -103,7 +103,8 @@
       "settingsLocation": "legend-depot-store-server/src/test/resources/sample-repository-settings.xml",
       "versionsUpdateIntervalInMillis": 7200000,
       "latestUpdateIntervalInMillis": 3600000,
-      "fixVersionsMismatchIntervalInMillis": 360000
+      "fixVersionsMismatchIntervalInMillis": 360000,
+      "deleteVersionInRepoIntervalInMillis": 7200000
     }
   },
   "includeProjectPropertiesConfiguration": {

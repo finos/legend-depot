@@ -16,6 +16,8 @@
 package org.finos.legend.depot.store.artifacts.purge.services;
 
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
+import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
+import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
@@ -34,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.PURGE_VERSION;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.EVICT_VERSION;
 
 
 public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
@@ -46,15 +48,17 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     private static final String VERSION_ID = "versionId";
 
     public static final String VERSION_PURGE_COUNTER = "versionPurge";
-    private static final String PURGE_OLDEST = "purge_old";
+    private static final String EVICT_OLDEST = "evict_old";
 
     private final ManageProjectsService projects;
+    private final RepositoryServices repository;
 
 
     @Inject
-    public ArtifactsPurgeServiceImpl(ManageProjectsService projects)
+    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, RepositoryServices repository)
     {
         this.projects = projects;
+        this.repository = repository;
     }
 
 
@@ -86,7 +90,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     public void delete(String groupId, String artifactId, String versionId)
     {
         decorateSpanWithVersionInfo(groupId, artifactId, versionId);
-        TracerFactory.get().executeWithTrace(PURGE_VERSION, () ->
+        TracerFactory.get().executeWithTrace(EVICT_VERSION, () ->
         {
             getSupportedArtifactTypes().forEach(artifactType ->
             {
@@ -104,14 +108,36 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     }
 
     @Override
-    public MetadataEventResponse deleteOldestProjectVersions(String groupId, String artifactId, int versionsToKeep)
+    public MetadataEventResponse deleteVersionsNotInRepository()
     {
-        return deleteOldestProjectVersions(getProject(groupId, artifactId),versionsToKeep);
+        List<VersionMismatch> versionMismatch = repository.findVersionsMismatches();
+        return deleteVersionsNotInRepository(versionMismatch);
     }
 
-    private MetadataEventResponse deleteOldestProjectVersions(ProjectData project, int versionsToKeep)
+    public MetadataEventResponse deleteVersionsNotInRepository(List<VersionMismatch> versionMismatch)
     {
-        return TracerFactory.get().executeWithTrace(PURGE_OLDEST, () ->
+        MetadataEventResponse response = new MetadataEventResponse();
+        versionMismatch.forEach(mismatch ->
+                {
+                      mismatch.versionsNotInRepository.forEach(version ->
+                      {
+                          delete(mismatch.groupId, mismatch.artifactId, version);
+                          response.addMessage(String.format("%s-%s-%s deleted", mismatch.groupId, mismatch.artifactId, version));
+                      });
+                }
+        );
+        return response;
+    }
+
+    @Override
+    public MetadataEventResponse evictOldestProjectVersions(String groupId, String artifactId, int versionsToKeep)
+    {
+        return evictOldestProjectVersions(getProject(groupId, artifactId),versionsToKeep);
+    }
+
+    private MetadataEventResponse evictOldestProjectVersions(ProjectData project, int versionsToKeep)
+    {
+        return TracerFactory.get().executeWithTrace(EVICT_OLDEST, () ->
         {
             MetadataEventResponse response = new MetadataEventResponse();
             List<VersionId> versionIds = project.getVersionsOrdered();
@@ -124,15 +150,14 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
                     delete(project.getGroupId(), project.getArtifactId(), versionId.toVersionIdString());
                     versionIds.remove(versionId);
                     project.removeVersion(versionId.toVersionIdString());
-                    response.addMessage(String.format("%s-%s-%s purge", project.getGroupId(), project.getArtifactId(), versionId.toVersionIdString()));
-                    PrometheusMetricsFactory.getInstance().incrementCount(VERSION_PURGE_COUNTER);
+                    response.addMessage(String.format("%s-%s-%s evicted", project.getGroupId(), project.getArtifactId(), versionId.toVersionIdString()));
                 }
                 projects.createOrUpdate(project);
-                response.addMessage(String.format("%s-%s purged %s versions", project.getGroupId(), project.getArtifactId(), numberOfVersions - versionIds.size()));
+                response.addMessage(String.format("%s-%s evicted %s versions", project.getGroupId(), project.getArtifactId(), numberOfVersions - versionIds.size()));
             }
             catch (Exception e)
             {
-                 String errorMessage = String.format(" Error purging old versions %s-%s %s",project.getGroupId(),project.getArtifactId(),e.getMessage());
+                 String errorMessage = String.format(" Error evicting old versions %s-%s %s",project.getGroupId(),project.getArtifactId(),e.getMessage());
                  LOGGER.error(errorMessage);
                  response.addError(errorMessage);
                  PrometheusMetricsFactory.getInstance().incrementErrorCount(VERSION_PURGE_COUNTER);
@@ -142,7 +167,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     }
 
     @Override
-    public MetadataEventResponse deleteLeastRecentlyUsedVersions(int numberOfDays)
+    public MetadataEventResponse evictLeastRecentlyUsedVersions(int numberOfDays)
     {
         throw new UnsupportedOperationException("not implemented yet");
     }

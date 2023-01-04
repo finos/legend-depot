@@ -19,10 +19,12 @@ import org.finos.legend.depot.domain.api.MetadataEventResponse;
 
 public interface ArtifactsPurgeService
 {
-    MetadataEventResponse deleteLeastRecentlyUsedVersions(int numberOfDays);
+    MetadataEventResponse evictLeastRecentlyUsedVersions(int numberOfDays);
 
-    MetadataEventResponse deleteOldestProjectVersions(String groupId, String artifactId, int versionsToKeep);
+    MetadataEventResponse evictOldestProjectVersions(String groupId, String artifactId, int versionsToKeep);
 
     void delete(String groupId, String artifactId, String versionId);
+
+    MetadataEventResponse deleteVersionsNotInRepository();
 
   }

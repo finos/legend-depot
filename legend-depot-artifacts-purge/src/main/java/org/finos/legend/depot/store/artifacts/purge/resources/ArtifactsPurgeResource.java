@@ -52,15 +52,15 @@ public class ArtifactsPurgeResource extends BaseAuthorisedResource
 
 
     @DELETE
-    @Path("/artifactDelete/{groupId}/{artifactId}/versions/{versionId}")
-    @ApiOperation(ResourceLoggingAndTracing.PURGE_VERSION)
+    @Path("/artifactEviction/{groupId}/{artifactId}/versions/{versionId}")
+    @ApiOperation(ResourceLoggingAndTracing.EVICT_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse purgeVersion(@PathParam("groupId") String groupId,
+    public MetadataEventResponse evictVersion(@PathParam("groupId") String groupId,
                                               @PathParam("artifactId") String artifactId,
                                               @PathParam("versionId") String versionId)
     {
 
-        return handle(ResourceLoggingAndTracing.PURGE_VERSION, () ->
+        return handle(ResourceLoggingAndTracing.EVICT_VERSION, () ->
         {
             validateUser();
             artifactsPurgeService.delete(groupId, artifactId, versionId);
@@ -70,18 +70,32 @@ public class ArtifactsPurgeResource extends BaseAuthorisedResource
 
 
     @DELETE
-    @Path("/artifactDelete/{groupId}/{artifactId}/old/{keepVersions}")
-    @ApiOperation(ResourceLoggingAndTracing.PURGE_OLD_VERSIONS)
+    @Path("/artifactEviction/{groupId}/{artifactId}/old/{keepVersions}")
+    @ApiOperation(ResourceLoggingAndTracing.EVICT_OLD_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse purgeOldVersions(@PathParam("groupId") String groupId,
-                                              @PathParam("artifactId") String artifactId,
+    public MetadataEventResponse evictOldVersions(@PathParam("groupId") String groupId,
+                                                  @PathParam("artifactId") String artifactId,
                                                   @PathParam("keepVersions") int versionsToKeep)
     {
 
-        return handle(ResourceLoggingAndTracing.PURGE_OLD_VERSIONS, () ->
+        return handle(ResourceLoggingAndTracing.EVICT_OLD_VERSIONS, () ->
         {
             validateUser();
-            return artifactsPurgeService.deleteOldestProjectVersions(groupId, artifactId,versionsToKeep);
+            return artifactsPurgeService.evictOldestProjectVersions(groupId, artifactId,versionsToKeep);
+        });
+    }
+
+    @DELETE
+    @Path("/artifactDelete/versionsNotInRepository")
+    @ApiOperation(ResourceLoggingAndTracing.DELETE_VERSIONS_NOT_IN_REPO)
+    @Produces(MediaType.APPLICATION_JSON)
+    public MetadataEventResponse deleteVersionsNotInRepository()
+    {
+
+        return handle(ResourceLoggingAndTracing.DELETE_VERSIONS_NOT_IN_REPO, () ->
+        {
+            validateUser();
+            return artifactsPurgeService.deleteVersionsNotInRepository();
         });
     }
 

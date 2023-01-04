@@ -44,8 +44,9 @@ public class ResourceLoggingAndTracing
     public static final String UPDATE_ALL_VERSIONS = "refresh all versions";
     public static final String UPDATE_VERSION = "refresh version";
     public static final String UPDATE_ALL_PROJECT_VERSIONS = "refresh all project versions";
-    public static final String PURGE_OLD_VERSIONS = "purge old versions";
-    public static final String PURGE_VERSION = "purge version";
+    public static final String EVICT_OLD_VERSIONS = "evict old versions";
+    public static final String DELETE_VERSIONS_NOT_IN_REPO = "delete versions not present in repository";
+    public static final String EVICT_VERSION = "evict version";
     public static final String GET_REVISION_FILE_GENERATION_ENTITIES = "get revision generation entities";
     public static final String GET_VERSION_FILE_GENERATION_ENTITIES = "get version generation entities";
     public static final String GET_REVISION_FILE_GENERATION = "get revision file generations";

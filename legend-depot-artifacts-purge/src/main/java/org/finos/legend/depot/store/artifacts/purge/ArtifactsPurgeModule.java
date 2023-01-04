@@ -16,12 +16,21 @@
 package org.finos.legend.depot.store.artifacts.purge;
 
 import com.google.inject.PrivateModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
+import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.artifacts.purge.api.ArtifactsPurgeService;
 import org.finos.legend.depot.store.artifacts.purge.resources.ArtifactsPurgeResource;
 import org.finos.legend.depot.store.artifacts.purge.services.ArtifactsPurgeServiceImpl;
 
+import java.time.LocalDateTime;
+
 public class ArtifactsPurgeModule extends PrivateModule
 {
+    private static final String DELETE_VERSIONS_NOT_IN_REPO = "delete-versions-not-in-repository-schedule";
+
     @Override
     protected void configure()
     {
@@ -29,5 +38,14 @@ public class ArtifactsPurgeModule extends PrivateModule
         expose(ArtifactsPurgeResource.class);
 
         bind(ArtifactsPurgeService.class).to(ArtifactsPurgeServiceImpl.class);
+    }
+
+    @Provides
+    @Singleton
+    @Named("delete-versions-not-in-repository")
+    boolean initDeleteVersionsNotInRepository(SchedulesFactory schedulesFactory, ArtifactsPurgeService purgeService, ArtifactRepositoryProviderConfiguration configuration)
+    {
+        schedulesFactory.register(DELETE_VERSIONS_NOT_IN_REPO, LocalDateTime.now().plusSeconds(configuration.getDeleteVersionInRepoIntervalInMillis() / 1000), configuration.getDeleteVersionInRepoIntervalInMillis(), false,() -> purgeService.deleteVersionsNotInRepository());
+        return true;
     }
 }

@@ -33,6 +33,9 @@ public abstract class ArtifactRepositoryProviderConfiguration
     @JsonProperty
     long fixVersionsMismatchIntervalInMillis = 1 * ONE_HOUR;
 
+    @JsonProperty
+    long deleteVersionInRepoIntervalInMillis = 12 * ONE_HOUR;
+
     protected ArtifactRepositoryProviderConfiguration(String name)
     {
         this.name = name;
@@ -72,6 +75,11 @@ public abstract class ArtifactRepositoryProviderConfiguration
     public long getFixVersionsMismatchIntervalInMillis()
     {
         return fixVersionsMismatchIntervalInMillis;
+    }
+
+    public long getDeleteVersionInRepoIntervalInMillis()
+    {
+        return deleteVersionInRepoIntervalInMillis;
     }
 
     public abstract ArtifactRepository initialiseArtifactRepositoryProvider();
