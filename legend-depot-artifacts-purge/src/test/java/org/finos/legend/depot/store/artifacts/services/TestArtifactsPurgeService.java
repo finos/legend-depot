@@ -183,7 +183,7 @@ public class TestArtifactsPurgeService extends TestStoreMongo
         Assert.assertEquals(projectData.getVersions().size(), 3);
         Assert.assertEquals(3, fileGenerationsStore.getAll().size());
         //deleting the version not present in the repository
-        ((ArtifactsPurgeServiceImpl)purgeService).deleteVersionMismatches(Collections.singletonList(versionMismatch));
+        ((ArtifactsPurgeServiceImpl)purgeService).deleteVersionsNotInRepository(Collections.singletonList(versionMismatch));
         ProjectData updatedProjectData = projectsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).get();
         Assert.assertEquals(updatedProjectData.getVersions().size(), 2);
         Assert.assertEquals(updatedProjectData.getVersions(), Arrays.asList("2.2.0", "2.3.0"));

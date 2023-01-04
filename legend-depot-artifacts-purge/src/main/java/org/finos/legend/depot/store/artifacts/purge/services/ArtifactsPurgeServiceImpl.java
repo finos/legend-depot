@@ -111,10 +111,10 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     public MetadataEventResponse deleteVersionsNotInRepository()
     {
         List<VersionMismatch> versionMismatch = repository.findVersionsMismatches();
-        return deleteVersionMismatches(versionMismatch);
+        return deleteVersionsNotInRepository(versionMismatch);
     }
 
-    public MetadataEventResponse deleteVersionMismatches(List<VersionMismatch> versionMismatch)
+    public MetadataEventResponse deleteVersionsNotInRepository(List<VersionMismatch> versionMismatch)
     {
         MetadataEventResponse response = new MetadataEventResponse();
         versionMismatch.forEach(mismatch ->
