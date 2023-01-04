@@ -323,22 +323,24 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 if (!response.hasErrors())
                 {
                     Optional<ProjectData> latestProjectData = projects.find(project.getGroupId(), project.getArtifactId());
-                    latestProjectData.ifPresent(p ->
-                    {
-                        if (!versionId.equals(MASTER_SNAPSHOT))
-                        {
-                            p.addVersion(versionId);
-                        }
-                        p.addProperties(refreshProjectProperties(p, versionId));
-                        p.getDependencies(versionId).forEach(p::removeDependency);
-                        p.addDependencies(newDependencies);
-                        projects.createOrUpdate(p);
-                    });
+                    refreshProjectData(versionId, newDependencies, latestProjectData);
                 }
             }
             long refreshEndTime = System.currentTimeMillis();
             PrometheusMetricsFactory.getInstance().observeHistogram(VERSION_REFRESH_DURATION,refreshStartTime,refreshEndTime);
             return response;
+        });
+    }
+
+    private void refreshProjectData(String versionId, List<ProjectVersionDependency> newDependencies, Optional<ProjectData> latestProjectData)
+    {
+        latestProjectData.ifPresent(p ->
+        {
+            p.addVersion(versionId);
+            refreshProjectProperties(p, versionId, extractProjectPropertiesForVersion(p, versionId));
+            p.getDependencies(versionId).forEach(p::removeDependency);
+            p.addDependencies(newDependencies);
+            projects.createOrUpdate(p);
         });
     }
 
@@ -366,26 +368,35 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         });
     }
 
-    private List<ProjectProperty> refreshProjectProperties(ProjectData project, String versionId)
+    void refreshProjectProperties(ProjectData project, String versionId, List<ProjectProperty> projectPropertyList)
+    {
+        if (versionId.equals(MASTER_SNAPSHOT))
+       {
+           project.removePropertiesForProjectVersionID(versionId);
+       }
+       project.addProperties(projectPropertyList);
+    }
+
+    private List<ProjectProperty> extractProjectPropertiesForVersion(ProjectData project, String versionId)
     {
         List<ProjectProperty> projectPropertyList = new ArrayList<>();
         Model model = this.repositoryServices.getPOM(project.getGroupId(), project.getArtifactId(), versionId);
-       if (model != null)
-       {
-           Enumeration<?> propertyNames = model.getProperties().keys();
+        if (model != null)
+        {
+            Enumeration<?> propertyNames = model.getProperties().keys();
 
-           while (propertyNames.hasMoreElements())
-           {
-               String propertyName = propertyNames.nextElement().toString();
-               if (projectProperties.contains(propertyName) || projectProperties.stream().anyMatch(propertyName::matches))
-               {
-                   projectPropertyList.add(new ProjectProperty(propertyName, model.getProperties().getProperty(propertyName), versionId));
-               }
-           }
-       }
+            while (propertyNames.hasMoreElements())
+            {
+                String propertyName = propertyNames.nextElement().toString();
+                if (projectProperties.contains(propertyName) || projectProperties.stream().anyMatch(propertyName::matches))
+                {
+                    projectPropertyList.add(new ProjectProperty(propertyName, model.getProperties().getProperty(propertyName), versionId));
+                }
+            }
+        }
         return projectPropertyList;
     }
-    
+
     private MetadataEventResponse refreshDependencies(List<ProjectVersionDependency> dependencies,boolean fullUpdate,boolean transitive,String parentEventId)
     {
         MetadataEventResponse response = new MetadataEventResponse();

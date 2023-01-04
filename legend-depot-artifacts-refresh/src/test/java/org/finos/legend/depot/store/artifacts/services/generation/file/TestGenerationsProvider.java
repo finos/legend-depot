@@ -34,12 +34,13 @@ import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvi
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
-import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -103,6 +104,22 @@ public class TestGenerationsProvider extends TestStoreMongo
         Assert.assertNotNull(fileGenerations);
         Assert.assertEquals(14, fileGenerations.size());
 
+    }
+
+    @Test
+    public void canRefreshRevisionWithChangeInGenerations()
+    {
+        URL filePath = this.getClass().getClassLoader().getResource("repository/examples/metadata/test-file-generation/master-SNAPSHOT/test-file-generation-new-master-SNAPSHOT.jar");
+        Assert.assertTrue(generations.getAll().isEmpty());
+        FileGenerationHandlerImpl handler = new FileGenerationHandlerImpl(repository, fileGenerationsProvider, generations);
+        ProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
+        //deleted one generation as part of new master snapshot version
+        MetadataEventResponse response = handler.refreshProjectRevisionArtifacts(projectData, Arrays.asList(new File(filePath.getFile())));
+        Assert.assertNotNull(response);
+        Assert.assertFalse(response.hasErrors());
+        List<StoredFileGeneration> fileGenerations = generations.getAll();
+        Assert.assertNotNull(fileGenerations);
+        Assert.assertEquals(13, fileGenerations.size());
     }
 
     @Test

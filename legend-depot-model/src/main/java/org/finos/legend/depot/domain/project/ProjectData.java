@@ -193,6 +193,11 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
         propertyList.stream().filter(property -> !properties.contains(property)).forEach(property -> this.properties.add(property));
     }
 
+    public void removePropertiesForProjectVersionID(String versionId)
+    {
+        this.properties.removeAll(getPropertiesForProjectVersionID(versionId));
+    }
+
     public ProjectData withVersions(String... versionIds)
     {
         this.versions.addAll(Arrays.asList(versionIds));
