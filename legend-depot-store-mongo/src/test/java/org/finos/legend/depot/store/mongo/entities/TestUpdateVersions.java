@@ -25,10 +25,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class TestUpdateVersions extends TestStoreMongo
 {
@@ -48,7 +46,7 @@ public class TestUpdateVersions extends TestStoreMongo
         Assert.assertEquals(1, result.getInsertedCount());
         Assert.assertEquals(0, result.getModifiedCount());
 
-        MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.ENTITIES_VERSIONS);
+        MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
         Assert.assertNotNull(entities);
         Assert.assertEquals(1, entities.countDocuments());
         Document doc = (Document)entities.find().iterator().next();
@@ -70,7 +68,7 @@ public class TestUpdateVersions extends TestStoreMongo
         Assert.assertEquals(1, result.getInsertedCount());
         Assert.assertEquals(0, result.getModifiedCount());
 
-        MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.ENTITIES_VERSIONS);
+        MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
         Assert.assertNotNull(entities);
         Assert.assertEquals(1, entities.countDocuments());
         Document doc = (Document)entities.find().iterator().next();
@@ -83,7 +81,7 @@ public class TestUpdateVersions extends TestStoreMongo
         Assert.assertEquals(0, result2.getInsertedCount());
         Assert.assertEquals(1, result2.getModifiedCount());
 
-        MongoCollection entities1 = getMongoDatabase().getCollection(EntitiesMongo.ENTITIES_VERSIONS);
+        MongoCollection entities1 = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
         Assert.assertNotNull(entities1);
         Assert.assertEquals(1, entities1.countDocuments());
         Document doc1 = (Document)entities.find().iterator().next();
@@ -132,16 +130,4 @@ public class TestUpdateVersions extends TestStoreMongo
         Assert.assertEquals(0, versionsMongo.getEntityCount("examples.metadata", "test"));
     }
 
-    @Test
-    public void canCreateIndexesIfAbsent()
-    {
-        List<Document> indexes = new ArrayList<>();
-        this.mongoProvider.getCollection(EntitiesMongo.ENTITIES_VERSIONS).listIndexes().forEach((Consumer<Document>)indexes::add);
-        boolean result = versionsMongo.createIndexesIfAbsent();
-        Assert.assertTrue(result);
-        List indexes1 = new ArrayList();
-        this.mongoProvider.getCollection(EntitiesMongo.ENTITIES_VERSIONS).listIndexes().forEach((Consumer<Document>)indexes1::add);
-        Assert.assertFalse(indexes1.isEmpty());
-        Assert.assertEquals(6, indexes1.size());
-    }
 }

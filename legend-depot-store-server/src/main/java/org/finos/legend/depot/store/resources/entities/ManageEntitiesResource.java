@@ -64,7 +64,7 @@ public class ManageEntitiesResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<StoredEntity> getEntities(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
     {
-
+        validateUser();
         return handle(ResourceLoggingAndTracing.GET_VERSION_STORE_ENTITIES, () -> entitiesService.getStoredEntities(groupId, artifactId));
     }
 
@@ -74,7 +74,7 @@ public class ManageEntitiesResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<StoredEntity> getEntities(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") String versionId)
     {
-
+        validateUser();
         return handle(ResourceLoggingAndTracing.GET_VERSION_STORE_ENTITIES, () -> entitiesService.getStoredEntities(groupId, artifactId, versionId));
     }
 

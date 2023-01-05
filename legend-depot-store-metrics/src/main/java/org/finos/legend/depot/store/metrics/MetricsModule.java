@@ -18,10 +18,8 @@ package org.finos.legend.depot.store.metrics;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
-import org.finos.legend.depot.store.metrics.api.ManageQueryMetrics;
-import org.finos.legend.depot.store.metrics.resources.StoreMetricsResource;
-import org.finos.legend.depot.store.metrics.store.mongo.MongoQueryMetrics;
+import org.finos.legend.depot.schedules.services.SchedulesFactory;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 
 import javax.inject.Named;
 import java.time.LocalDateTime;
@@ -31,18 +29,15 @@ public class MetricsModule extends PrivateModule
     @Override
     protected void configure()
     {
-        bind(StoreMetricsResource.class);
-        bind(ManageQueryMetrics.class).to(MongoQueryMetrics.class);
-
-        expose(ManageQueryMetrics.class);
-        expose(StoreMetricsResource.class);
+        bind(QueryMetricsHandler.class);
+        expose(QueryMetricsHandler.class);
     }
 
 
     @Provides
     @Singleton
     @Named("persist-metrics")
-    boolean scheduleMetricsPersistence(SchedulesFactory schedulesFactory, ManageQueryMetrics queryMetrics)
+    boolean scheduleMetricsPersistence(SchedulesFactory schedulesFactory, QueryMetricsHandler queryMetrics)
     {
         schedulesFactory.register("persist-metrics", LocalDateTime.now().plusSeconds(30), 5 * 60 * 1000L, true, () ->
         {

@@ -85,12 +85,12 @@ public abstract class TestStoreMongo
 
     private MongoCollection getMongoProjects()
     {
-        return getMongoDatabase().getCollection(ProjectsMongo.MONGO_PROJECTS);
+        return getMongoDatabase().getCollection(ProjectsMongo.COLLECTION);
     }
 
     private MongoCollection getMongoEntities()
     {
-        return getMongoDatabase().getCollection(EntitiesMongo.ENTITIES_VERSIONS);
+        return getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
     }
 
     protected List<StoredEntity> readEntitiesFile(URL fileName)

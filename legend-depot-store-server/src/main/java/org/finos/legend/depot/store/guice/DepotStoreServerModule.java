@@ -16,14 +16,22 @@
 package org.finos.legend.depot.store.guice;
 
 import com.google.inject.Binder;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.artifacts.repository.api.VoidArtifactRepositoryProvider;
 import org.finos.legend.depot.core.http.guice.BaseModule;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
+import org.finos.legend.depot.schedules.services.SchedulesFactory;
+import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
 import org.slf4j.Logger;
+
+import javax.inject.Named;
+import java.time.LocalDateTime;
 
 public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfiguration>
 {
@@ -82,5 +90,17 @@ public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfigura
         return new VoidArtifactRepositoryProvider(configuration);
     }
 
+    @Provides
+    @Singleton
+    @Named("storage-metrics")
+    boolean scheduleStorageMetrics(SchedulesFactory schedulesFactory, StorageMetrics storageMetrics)
+    {
+        schedulesFactory.register("storage-metrics", LocalDateTime.now().plusMinutes(5), 5 * 60 * 1000L, false, () ->
+        {
+            storageMetrics.reportMetrics();
+            return true;
+        });
+        return true;
+    }
 
 }

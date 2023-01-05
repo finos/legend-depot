@@ -24,10 +24,11 @@ import org.finos.legend.depot.server.configuration.DepotServerConfiguration;
 import org.finos.legend.depot.server.guice.DepotServerModule;
 import org.finos.legend.depot.server.guice.DepotServerResourcesModule;
 import org.finos.legend.depot.server.pure.model.context.PureModelContextModule;
-import org.finos.legend.depot.services.ReadOnlyServicesModule;
-import org.finos.legend.depot.store.mongo.ManageMongoModule;
-import org.finos.legend.depot.store.mongo.ReadMongoModule;
-import org.finos.legend.depot.store.mongo.StoreMongoModule;
+import org.finos.legend.depot.services.ReadDataServicesModule;
+import org.finos.legend.depot.schedules.SchedulesModule;
+import org.finos.legend.depot.store.metrics.MetricsModule;
+import org.finos.legend.depot.store.mongo.DataStoreMongoModule;
+import org.finos.legend.depot.store.mongo.admin.AdminDataStoreMongoModule;
 import org.finos.legend.depot.tracing.TracingModule;
 
 import java.util.Arrays;
@@ -50,11 +51,12 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
         return Arrays.asList(new InfoPageModule(),
                 new DepotServerModule(),
                 new DepotServerResourcesModule(),
+                new ReadDataServicesModule(),
+                new DataStoreMongoModule(),
                 new PureModelContextModule(),
-                new StoreMongoModule(),
-                new ReadOnlyServicesModule(),
-                new ReadMongoModule(),
-                new ManageMongoModule(),
+                new AdminDataStoreMongoModule(),
+                new MetricsModule(),
+                new SchedulesModule(),
                 new TracingModule());
     }
 

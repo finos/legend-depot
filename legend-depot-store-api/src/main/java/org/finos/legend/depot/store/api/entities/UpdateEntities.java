@@ -27,8 +27,6 @@ public interface UpdateEntities extends Entities
 
     StoreOperationResult createOrUpdate(List<StoredEntity> versionedEntities);
 
-    boolean createIndexesIfAbsent();
-
     StoreOperationResult deleteAll(String groupId, String artifactId);
 
     StoreOperationResult delete(String groupId, String artifactId, String versionId,boolean versioned);
@@ -41,8 +39,6 @@ public interface UpdateEntities extends Entities
     List<StoredEntity> getStoredEntities(String groupId, String artifactId);
 
     List<StoredEntity> getStoredEntities(String groupId, String artifactId, String versionId);
-
-    List<StoredEntity> getStoredEntities(String groupId, String artifactId, String versionId, boolean versioned);
 
     List<Pair<String, String>> getStoredEntitiesCoordinates();
 }

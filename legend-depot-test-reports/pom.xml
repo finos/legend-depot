@@ -101,6 +101,16 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-schedules</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-store-notifications</artifactId>
             <exclusions>
                 <exclusion>
@@ -151,7 +161,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-admin</artifactId>
+            <artifactId>legend-depot-core-schedules</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>

@@ -16,16 +16,16 @@
 package org.finos.legend.depot.services.projects;
 
 import org.eclipse.collections.api.factory.Sets;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectData;
-import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraph;
-import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraphWalkerContext;
-import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraph;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraphWalkerContext;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
-import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
@@ -40,16 +40,15 @@ import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
-public class ProjectsServiceImpl implements ManageProjectsService
+public class ProjectsServiceImpl implements ProjectsService
 {
-    private static final String PATH_DELIMITER = ">";
 
-    private final UpdateProjects projects;
+    private final Projects projects;
 
     private final DependenciesCache dependenciesCache;
 
     @Inject
-    public ProjectsServiceImpl(UpdateProjects projects, @Named("dependencyCache") DependenciesCache dependenciesCache)
+    public ProjectsServiceImpl(Projects projects, @Named("dependencyCache") DependenciesCache dependenciesCache)
     {
         this.projects = projects;
         this.dependenciesCache = dependenciesCache;
@@ -59,24 +58,6 @@ public class ProjectsServiceImpl implements ManageProjectsService
     {
         this.projects = projects;
         this.dependenciesCache = new DependenciesCache(projects);
-    }
-
-    @Override
-    public ProjectData createOrUpdate(ProjectData projectData)
-    {
-        return projects.createOrUpdate(projectData);
-    }
-
-    @Override
-    public MetadataEventResponse delete(String groupId, String artifactId)
-    {
-        return projects.delete(groupId, artifactId);
-    }
-
-    @Override
-    public MetadataEventResponse delete(String projectId)
-    {
-        return projects.deleteByProjectId(projectId);
     }
 
     @Override

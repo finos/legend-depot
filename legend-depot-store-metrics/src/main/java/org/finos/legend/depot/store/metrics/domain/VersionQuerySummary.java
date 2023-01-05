@@ -16,6 +16,7 @@
 package org.finos.legend.depot.store.metrics.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryCounter;
 
 import java.util.Date;
 

@@ -36,5 +36,4 @@ public interface ArtifactsRefreshService
 
     MetadataEventResponse refreshProjectsWithMissingVersions(boolean fullUpdate,boolean transitive, String parentEventId);
 
-    boolean createIndexesIfAbsent();
   }

@@ -17,14 +17,16 @@ package org.finos.legend.depot.store.mongo.generation.file;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexModel;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.depot.store.api.generation.file.FileGenerations;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
-import org.finos.legend.depot.store.mongo.BaseMongo;
+import org.finos.legend.depot.store.mongo.core.BaseMongo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,10 +59,9 @@ public class FileGenerationsMongo extends BaseMongo<StoredFileGeneration> implem
         return getAllStoredEntities();
     }
 
-    @Override
-    public boolean createIndexesIfAbsent()
+    public static List<IndexModel> buildIndexes()
     {
-        return createIndexIfAbsent("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID);
+        return Arrays.asList(buildIndex("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID));
     }
 
     @Override

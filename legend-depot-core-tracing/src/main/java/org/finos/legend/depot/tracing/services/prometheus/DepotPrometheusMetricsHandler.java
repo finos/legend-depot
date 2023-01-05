@@ -163,7 +163,7 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
     }
 
     @Override
-    public void setGauge(String gaugeName, long value)
+    public void setGauge(String gaugeName, double value)
     {
         this.allGauges.getIfAbsentPutWithKey(getKeyName(gaugeName),(key) -> buildGauge(gaugeName,gaugeName + GAUGE)).set(value);
     }

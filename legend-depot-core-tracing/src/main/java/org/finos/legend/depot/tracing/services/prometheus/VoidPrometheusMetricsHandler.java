@@ -52,7 +52,7 @@ public class VoidPrometheusMetricsHandler implements PrometheusMetricsHandler
     }
 
     @Override
-    public void setGauge(String queueWaiting, long waiting)
+    public void setGauge(String name, double value)
     {
     }
 

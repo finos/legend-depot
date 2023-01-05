@@ -19,9 +19,9 @@ import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
-import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.entities.Entities;
+import org.finos.legend.depot.store.api.generation.file.FileGenerations;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
@@ -32,33 +32,22 @@ import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.generation.file.FileGeneration.GENERATION_CONFIGURATION;
 
-public class FileGenerationsServiceImpl implements FileGenerationsService, ManageFileGenerationsService
+public class FileGenerationsServiceImpl implements FileGenerationsService
 {
 
-    private final UpdateFileGenerations fileGenerations;
+    private final FileGenerations fileGenerations;
     private final Entities entities;
-    private final ProjectsService projects;
+    protected final ProjectsService projects;
 
 
     @Inject
-    public FileGenerationsServiceImpl(UpdateFileGenerations fileGenerations, Entities entities, ProjectsService projectsService)
+    public FileGenerationsServiceImpl(FileGenerations fileGenerations, Entities entities, ProjectsService projectsService)
     {
         this.fileGenerations = fileGenerations;
         this.entities = entities;
         this.projects = projectsService;
     }
 
-    @Override
-    public List<StoredFileGeneration> getAll()
-    {
-        return fileGenerations.getAll();
-    }
-
-    @Override
-    public void createOrUpdate(StoredFileGeneration storedFileGeneration)
-    {
-        fileGenerations.createOrUpdate(storedFileGeneration);
-    }
 
     @Override
     public List<Entity> getGenerations(String groupId, String artifactId, String versionId)
@@ -88,26 +77,5 @@ public class FileGenerationsServiceImpl implements FileGenerationsService, Manag
         this.projects.checkExists(groupId, artifactId, versionId);
         Optional<StoredFileGeneration> found = fileGenerations.findByFilePath(groupId, artifactId, versionId, filePath);
         return found.map(StoredFileGeneration::getFile);
-    }
-
-    @Override
-    public List<StoredFileGeneration> getStoredFileGenerations(String groupId, String artifactId, String versionId)
-    {
-        this.projects.checkExists(groupId, artifactId, versionId);
-        return fileGenerations.find(groupId, artifactId, versionId);
-    }
-
-    @Override
-    public List<StoredFileGeneration> findByType(String groupId, String artifactId, String versionId, String type)
-    {
-        this.projects.checkExists(groupId, artifactId, versionId);
-        return fileGenerations.findByType(groupId, artifactId, versionId, type);
-    }
-
-    @Override
-    public void delete(String groupId, String artifactId, String versionId)
-    {
-        this.projects.checkExists(groupId, artifactId, versionId);
-        fileGenerations.delete(groupId, artifactId, versionId);
     }
 }

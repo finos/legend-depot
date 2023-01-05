@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
-import org.finos.legend.depot.store.metrics.QueryMetricsContainer;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 

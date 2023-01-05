@@ -28,6 +28,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.IndexModel;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -44,8 +45,8 @@ import org.finos.legend.depot.domain.status.StoreOperationResult;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
-import org.finos.legend.depot.store.mongo.BaseMongo;
-import org.finos.legend.depot.store.mongo.MongoStoreErrors;
+import org.finos.legend.depot.store.mongo.core.BaseMongo;
+import org.finos.legend.depot.store.mongo.core.MongoStoreErrors;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.slf4j.Logger;
 
@@ -66,9 +67,9 @@ import java.util.stream.Stream;
 
 import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.ne;
+import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Filters.regex;
 import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.currentDate;
@@ -78,7 +79,7 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, UpdateEntities
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(EntitiesMongo.class);
-    public static final String ENTITIES_VERSIONS = "entities";
+    public static final String COLLECTION = "entities";
 
     public static final String ENTITY = "entity";
     public static final String ENTITY_CLASSIFIER_PATH = "entity.classifierPath";
@@ -113,21 +114,22 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         this(mongoProvider, null, false);
     }
 
-    public boolean createIndexesIfAbsent()
-    {
-        createIndexIfAbsent("groupId-artifactId-versionId-versioned", GROUP_ID, ARTIFACT_ID, VERSION_ID,VERSIONED_ENTITY);
-        createIndexIfAbsent("groupId-artifactId-versionId-entityPath", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH);
-        createIndexIfAbsent("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE);
-        createIndexIfAbsent("groupId-artifactId-hashed", GROUP_ID, ARTIFACT_ID);
-        createIndexIfAbsent("entity-classifier", ENTITY_CLASSIFIER_PATH);
-        return true;
 
+
+    public static List<IndexModel> buildIndexes()
+    {
+        return Arrays.asList(buildIndex("groupId-artifactId-versionId-versioned", GROUP_ID, ARTIFACT_ID, VERSION_ID,VERSIONED_ENTITY),
+        buildIndex("groupId-artifactId-versionId-entityPath", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH),
+        buildIndex("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE),
+        buildIndex("groupId-artifactId-hashed", GROUP_ID, ARTIFACT_ID),
+        buildIndex("entity-classifier", ENTITY_CLASSIFIER_PATH)
+        );
     }
 
     @Override
     protected MongoCollection getCollection()
     {
-        return getMongoCollection(ENTITIES_VERSIONS);
+        return getMongoCollection(COLLECTION);
     }
 
     @Override

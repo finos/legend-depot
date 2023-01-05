@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
-import org.finos.legend.depot.store.metrics.QueryMetricsContainer;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 

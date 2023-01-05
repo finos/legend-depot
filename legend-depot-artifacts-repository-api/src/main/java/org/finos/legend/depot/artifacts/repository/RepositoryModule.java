@@ -20,7 +20,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.finos.legend.depot.artifacts.repository.resources.RepositoryResource;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
-import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
+import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
 import javax.inject.Named;

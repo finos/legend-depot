@@ -22,8 +22,9 @@ import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
-import org.finos.legend.depot.store.metrics.QueryMetricsContainer;
-import org.finos.legend.depot.store.metrics.store.mongo.MongoQueryMetrics;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
+import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.After;
 import org.junit.Assert;
@@ -43,7 +44,8 @@ public class TestQueryEntitiesResource extends TestBaseServices
 {
     private UpdateProjects projects = mock(UpdateProjects.class);
     private EntitiesResource entitiesResource = new EntitiesResource(new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projects)));
-    private MongoQueryMetrics queryMetrics = new MongoQueryMetrics(mongoProvider);
+    private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
+    private QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metricsStore);
 
     static
     {
@@ -55,7 +57,7 @@ public class TestQueryEntitiesResource extends TestBaseServices
     {
         super.setUpData();
         QueryMetricsContainer.flush();
-        queryMetrics.getCollection().drop();
+        metricsStore.getCollection().drop();
         loadEntities("PROD-A", "2.3.0");
         loadEntities("PROD-A", MASTER_SNAPSHOT);
         when(projects.find("examples.metadata","test")).thenReturn(Optional.of(new ProjectData("mock","examples.metadata","test").withVersions("2.3.0")));
@@ -65,7 +67,7 @@ public class TestQueryEntitiesResource extends TestBaseServices
     @After
     public void tearDown()
     {
-        queryMetrics.getCollection().drop();
+        metricsStore.getCollection().drop();
         QueryMetricsContainer.flush();
     }
 
@@ -99,7 +101,7 @@ public class TestQueryEntitiesResource extends TestBaseServices
     @Test
     public void canGetMetrics() throws InterruptedException
     {
-        Assert.assertTrue(queryMetrics.getAllStoredEntities().isEmpty());
+        Assert.assertTrue(metricsStore.getAllStoredEntities().isEmpty());
         Assert.assertEquals(0, QueryMetricsContainer.getMetrics("examples.metadata", "test", "2.3.0").size());
 
         entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", false, null, true);
@@ -113,9 +115,9 @@ public class TestQueryEntitiesResource extends TestBaseServices
 
         QueryMetricsContainer.getMetrics("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime();
 
-        queryMetrics.persistMetrics();
+        metricsHandler.persistMetrics();
 
-        Assert.assertEquals(2, queryMetrics.getAllStoredEntities().size());
+        Assert.assertEquals(2, metricsStore.getAllStoredEntities().size());
     }
 
 

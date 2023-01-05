@@ -41,7 +41,7 @@
         <module>legend-depot-pure-model-context</module>
 
         <module>legend-depot-store-mongo</module>
-        <module>legend-depot-store-admin</module>
+        <module>legend-depot-core-schedules</module>
         <module>legend-depot-store-status</module>
         <module>legend-depot-store-metrics</module>
         <module>legend-depot-store-notifications</module>
@@ -394,7 +394,7 @@
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.depot</groupId>
-                <artifactId>legend-depot-store-admin</artifactId>
+                <artifactId>legend-depot-core-schedules</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

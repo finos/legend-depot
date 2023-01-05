@@ -18,15 +18,14 @@ package org.finos.legend.depot.store.artifacts.services;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
-import org.finos.legend.depot.artifacts.repository.maven.impl.TestMavenArtifactsRepository;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
-import org.finos.legend.depot.services.generation.file.FileGenerationsServiceImpl;
-import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
+import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
+import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
@@ -41,7 +40,6 @@ import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvi
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
-
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.Assert;
@@ -63,12 +61,12 @@ public class TestArtifactsPurgeService extends TestStoreMongo
     public static final String TEST_ARTIFACT_ID = "test";
 
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
-    protected ManageProjectsService projectsService = new ProjectsServiceImpl(projectsStore);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsStore);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     protected UpdateFileGenerations fileGenerationsStore = new FileGenerationsMongo(mongoProvider);
-    protected ArtifactRepository repository = new TestMavenArtifactsRepository();
+    protected ArtifactRepository repository = mock(ArtifactRepository.class);
     protected RepositoryServices repositoryServices = new RepositoryServices(repository, projectsService);
-    protected ManageEntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, projectsService);
+    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, projectsService);
     protected ArtifactsPurgeService purgeService = new ArtifactsPurgeServiceImpl(projectsService, repositoryServices);
 
 
@@ -77,8 +75,8 @@ public class TestArtifactsPurgeService extends TestStoreMongo
     public void setUpData()
     {
         ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, mock(EntityProvider.class)));
-        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(mock(ArtifactRepository.class), mock(FileGenerationsProvider.class), new FileGenerationsServiceImpl(fileGenerationsStore, entitiesStore, projectsService)));
-        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new VersionedEntitiesHandlerImpl(new EntitiesServiceImpl(entitiesStore, projectsService), mock(VersionedEntityProvider.class)));
+        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(mock(ArtifactRepository.class), mock(FileGenerationsProvider.class), new ManageFileGenerationsServiceImpl(fileGenerationsStore, entitiesStore, projectsService)));
+        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new VersionedEntitiesHandlerImpl(entitiesService, mock(VersionedEntityProvider.class)));
 
         setUpProjectsFromFile(TestArtifactsPurgeService.class.getClassLoader().getResource("data/projects.json"));
         Assert.assertEquals(3, projectsStore.getAll().size());

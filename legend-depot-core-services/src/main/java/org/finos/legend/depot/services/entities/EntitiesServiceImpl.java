@@ -16,18 +16,15 @@
 package org.finos.legend.depot.services.entities;
 
 import org.eclipse.collections.api.list.MutableList;
-import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.parallel.ParallelIterate;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
-import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.store.api.entities.UpdateEntities;
+import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.slf4j.Logger;
@@ -40,17 +37,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesService
+public class EntitiesServiceImpl implements EntitiesService
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(EntitiesServiceImpl.class);
     public static final String CALCULATE_PROJECT_DEPENDENCIES = "calculateProjectDependencies";
     public static final String RETRIEVE_DEPENDENCY_ENTITIES = "retrieveDependencyEntities";
-    private final UpdateEntities entities;
-    private final ProjectsService projects;
+    private final Entities entities;
+    protected final ProjectsService projects;
 
 
     @Inject
-    public EntitiesServiceImpl(UpdateEntities entities, ProjectsService projects)
+    public EntitiesServiceImpl(Entities entities, ProjectsService projects)
     {
         this.entities = entities;
         this.projects = projects;
@@ -75,18 +72,6 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     {
         this.projects.checkExists(groupId, artifactId, versionId);
         return entities.getEntitiesByPackage(groupId, artifactId, versionId, packageName, versioned, classifierPaths, includeSubPackages);
-    }
-
-    @Override
-    public List<StoredEntity> getStoredEntities(String groupId, String artifactId)
-    {
-        return entities.getStoredEntities(groupId, artifactId);
-    }
-
-    @Override
-    public List<StoredEntity> getStoredEntities(String groupId, String artifactId, String versionId)
-    {
-        return entities.getStoredEntities(groupId, artifactId, versionId);
     }
 
     @Override
@@ -141,33 +126,6 @@ public class EntitiesServiceImpl implements ManageEntitiesService, EntitiesServi
     public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
     {
         return entities.findReleasedEntitiesByClassifier(classifier, summary, versioned);
-    }
-
-    @Override
-    public MetadataEventResponse delete(String groupId, String artifactId, String versionId, boolean versioned)
-    {
-        this.projects.checkExists(groupId, artifactId, versionId);
-        return new MetadataEventResponse().combine(entities.delete(groupId, artifactId, versionId, versioned));
-    }
-
-    @Override
-    public MetadataEventResponse deleteAll(String groupId, String artifactId)
-    {
-        this.projects.checkExists(groupId, artifactId);
-        return new MetadataEventResponse().combine(entities.deleteAll(groupId, artifactId));
-    }
-
-    @Override
-    public MetadataEventResponse createOrUpdate(List<StoredEntity> versionedEntities)
-    {
-        return new MetadataEventResponse().combine(entities.createOrUpdate(versionedEntities));
-    }
-
-    @Override
-    public List<Pair<String, String>> getOrphanedStoredEntities()
-    {
-        List<Pair<String, String>> allArtifacts = entities.getStoredEntitiesCoordinates();
-        return allArtifacts.stream().filter(art -> !projects.find(art.getOne(), art.getTwo()).isPresent()).collect(Collectors.toList());
     }
 
     private Object executeWithTrace(String label, Supplier<Object> functionToExecute)

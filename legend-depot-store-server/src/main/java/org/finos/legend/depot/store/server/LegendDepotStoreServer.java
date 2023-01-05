@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.server;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.inject.Module;
 import com.hubspot.dropwizard.guicier.GuiceBundle;
 import io.dropwizard.setup.Bootstrap;
@@ -25,17 +24,16 @@ import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProvide
 import org.finos.legend.depot.core.authorisation.AuthorisationModule;
 import org.finos.legend.depot.core.http.BaseServer;
 import org.finos.legend.depot.core.http.resources.InfoPageModule;
-import org.finos.legend.depot.services.AdminServicesModule;
-import org.finos.legend.depot.store.admin.StoreAdminModule;
-import org.finos.legend.depot.store.artifacts.ArtifactsModule;
+import org.finos.legend.depot.services.ManageServicesModule;
+import org.finos.legend.depot.schedules.AdminSchedulesModule;
+import org.finos.legend.depot.store.artifacts.ArtifactsHandlersModule;
 import org.finos.legend.depot.store.artifacts.ArtifactsRefreshModule;
 import org.finos.legend.depot.store.artifacts.purge.ArtifactsPurgeModule;
 import org.finos.legend.depot.store.guice.DepotStoreResourcesModule;
 import org.finos.legend.depot.store.guice.DepotStoreServerModule;
-import org.finos.legend.depot.store.metrics.MetricsModule;
-import org.finos.legend.depot.store.mongo.ManageMongoModule;
-import org.finos.legend.depot.store.mongo.ReadMongoModule;
-import org.finos.legend.depot.store.mongo.StoreMongoModule;
+import org.finos.legend.depot.store.metrics.AdminMetricsModule;
+import org.finos.legend.depot.store.mongo.admin.ManageAdminDataStoreMongoModule;
+import org.finos.legend.depot.store.mongo.ManageDataStoreMongoModule;
 import org.finos.legend.depot.store.notifications.NotificationsModule;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
 import org.finos.legend.depot.store.status.StoreStatusModule;
@@ -70,21 +68,20 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
     {
         return Arrays.asList(
                 new InfoPageModule(),
-                new StoreAdminModule(),
-                new AuthorisationModule(),
-                new StoreMongoModule(),
-                new AdminServicesModule(),
-                new ReadMongoModule(),
-                new ManageMongoModule(),
                 new DepotStoreServerModule(),
                 new DepotStoreResourcesModule(),
+                new ManageServicesModule(),
+                new ManageDataStoreMongoModule(),
+                new ManageAdminDataStoreMongoModule(),
                 new StoreStatusModule(),
-                new ArtifactsModule(),
+                new AdminSchedulesModule(),
+                new AdminMetricsModule(),
+                new AuthorisationModule(),
+                new ArtifactsHandlersModule(),
                 new ArtifactsRefreshModule(),
                 new ArtifactsPurgeModule(),
                 new RepositoryModule(),
                 new TracingModule(),
-                new MetricsModule(),
                 new NotificationsModule());
     }
 

@@ -39,7 +39,7 @@ import java.util.function.Predicate;
 public class TestEntitiesService extends TestBaseServices
 {
 
-    protected ManageEntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsStore));
+    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsStore));
 
     @Before
     public void setUpData()

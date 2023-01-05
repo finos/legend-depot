@@ -20,7 +20,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
-import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
+import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.store.artifacts.purge.api.ArtifactsPurgeService;
 import org.finos.legend.depot.store.artifacts.purge.resources.ArtifactsPurgeResource;
 import org.finos.legend.depot.store.artifacts.purge.services.ArtifactsPurgeServiceImpl;
