@@ -19,16 +19,11 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
-import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
+import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
-import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
-import org.finos.legend.depot.store.artifacts.api.status.RefreshStatusService;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactsRefreshResource;
 import org.finos.legend.depot.store.artifacts.services.ArtifactRefreshEventHandler;
 import org.finos.legend.depot.store.artifacts.services.ArtifactsRefreshServiceImpl;
-import org.finos.legend.depot.store.artifacts.store.mongo.ArtifactsMongo;
-import org.finos.legend.depot.store.artifacts.store.mongo.MongoRefreshStatus;
-import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
@@ -46,16 +41,10 @@ public class ArtifactsRefreshModule extends PrivateModule
     {
         bind(ArtifactsRefreshResource.class);
 
-        bind(UpdateArtifacts.class).to(ArtifactsMongo.class);
-        bind(ManageRefreshStatusService.class).to(MongoRefreshStatus.class);
-        bind(RefreshStatusService.class).to(MongoRefreshStatus.class);
-
         bind(ArtifactsRefreshService.class).to(ArtifactsRefreshServiceImpl.class);
         bind(NotificationEventHandler.class).to(ArtifactRefreshEventHandler.class);
 
         expose(ArtifactsRefreshService.class);
-        expose(ManageRefreshStatusService.class);
-        expose(RefreshStatusService.class);
         expose(NotificationEventHandler.class);
         expose(ArtifactsRefreshResource.class);
     }

@@ -32,7 +32,7 @@ public class MavenArtifactRepositoryConfiguration extends ArtifactRepositoryProv
     @JsonCreator
     public MavenArtifactRepositoryConfiguration(@JsonProperty("settingsLocation") String settingsLocation)
     {
-        super("OneUnsecuredArtifactRepository");
+        super("MavenArtifactRepositoryConfiguration");
         this.settingsLocation = settingsLocation;
     }
 
@@ -50,7 +50,7 @@ public class MavenArtifactRepositoryConfiguration extends ArtifactRepositoryProv
     @Override
     public String toString()
     {
-        return "OneUnsecuredArtifactRepositoryConfiguration{" +
+        return "MavenArtifactRepositoryConfiguration{" +
                 "name='" + super.getName() + '\'' +
                 "settings='" + this.settingsLocation + '\'' +
                 '}';

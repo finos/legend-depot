@@ -31,8 +31,11 @@
         <!-- DEPOT -->
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-admin</artifactId>
-            <scope>compile</scope>
+            <artifactId>legend-depot-store-mongo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-schedules</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>

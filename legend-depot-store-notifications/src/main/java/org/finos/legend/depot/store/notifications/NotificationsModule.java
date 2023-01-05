@@ -19,7 +19,7 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.store.admin.services.schedules.SchedulesFactory;
+import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
@@ -27,8 +27,10 @@ import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
 import org.finos.legend.depot.store.notifications.resources.NotificationsManagerResource;
 import org.finos.legend.depot.store.notifications.services.NotificationsQueueManager;
+import org.finos.legend.depot.store.notifications.store.api.NotificationsStore;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
-import org.finos.legend.depot.store.notifications.store.mongo.QueueMongo;
+import org.finos.legend.depot.store.notifications.store.mongo.NotificationsQueueMongo;
+import org.finos.legend.depot.store.notifications.store.mongo.NotificationsStoreImpl;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
 import javax.inject.Named;
@@ -50,7 +52,8 @@ public class NotificationsModule extends PrivateModule
 
         bind(NotificationsManager.class).to(NotificationsQueueManager.class);
         bind(Notifications.class).to(NotificationsMongo.class);
-        bind(Queue.class).to(QueueMongo.class);
+        bind(Queue.class).to(NotificationsQueueMongo.class);
+        bind(NotificationsStore.class).to(NotificationsStoreImpl.class);
         bind(NotificationsManagerResource.class);
 
         expose(Notifications.class);

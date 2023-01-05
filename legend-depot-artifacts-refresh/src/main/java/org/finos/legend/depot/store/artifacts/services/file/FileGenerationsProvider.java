@@ -17,9 +17,9 @@ package org.finos.legend.depot.store.artifacts.services.file;
 
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
+import org.finos.legend.depot.services.generation.file.FileGenerationLoader;
 import org.finos.legend.depot.store.artifacts.ArtifactLoadingException;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
-import org.finos.legend.depot.store.mongo.generation.file.FileGenerationLoader;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

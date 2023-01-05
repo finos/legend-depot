@@ -17,9 +17,10 @@ package org.finos.legend.depot.store.status;
 
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
-import org.finos.legend.depot.store.artifacts.store.mongo.MongoRefreshStatus;
-import org.finos.legend.depot.store.metrics.QueryMetricsContainer;
-import org.finos.legend.depot.store.metrics.store.mongo.MongoQueryMetrics;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
+import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
+import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
@@ -33,11 +34,12 @@ import org.junit.Test;
 public class TestStatusServices extends TestStoreMongo
 {
 
-    private MongoRefreshStatus refreshStatus = new MongoRefreshStatus(mongoProvider);
-    private MongoQueryMetrics queryMetrics = new MongoQueryMetrics(mongoProvider);
+    private ArtifactsRefreshStatusMongo refreshStatus = new ArtifactsRefreshStatusMongo(mongoProvider);
+    private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
+    private QueryMetricsHandler queryMetricsHandler = new QueryMetricsHandler(metricsStore);
     private UpdateProjects projects = new ProjectsMongo(mongoProvider);
     private UpdateEntities entities = new EntitiesMongo(mongoProvider);
-    private StoreStatusService statusService = new StoreStatusService(projects, entities, refreshStatus, queryMetrics);
+    private StoreStatusService statusService = new StoreStatusService(projects, entities, refreshStatus, queryMetricsHandler);
 
     @Before
     public void setup()
@@ -47,19 +49,19 @@ public class TestStatusServices extends TestStoreMongo
         setUpEntitiesDataFromFile(TestStoreMongo.class.getClassLoader().getResource("data/revision-entities.json"));
 
         QueryMetricsContainer.flush();
-        queryMetrics.getCollection().drop();
+        metricsStore.getCollection().drop();
         QueryMetricsContainer.record("examples.metadata", "test", "2.2.0");
         QueryMetricsContainer.record("examples.metadata", "test", "2.2.0");
         QueryMetricsContainer.record("examples.metadata", "test", "2.2.0");
         QueryMetricsContainer.record("examples.metadata", "test", "1.0.0");
-        queryMetrics.persistMetrics();
+        queryMetricsHandler.persistMetrics();
     }
 
     @After
     public void tearDown()
     {
         QueryMetricsContainer.flush();
-        queryMetrics.getCollection().drop();
+        metricsStore.getCollection().drop();
     }
 
     @Test

@@ -16,7 +16,9 @@
 package org.finos.legend.depot.store.metrics;
 
 import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
-import org.finos.legend.depot.store.metrics.store.mongo.MongoQueryMetrics;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
+import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.junit.After;
 import org.junit.Assert;
@@ -30,8 +32,8 @@ import java.util.concurrent.TimeUnit;
 public class TestMetricsServices extends TestStoreMongo
 {
 
-    private MongoQueryMetrics queryMetrics = new MongoQueryMetrics(mongoProvider);
-
+    private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
+    private QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metricsStore);
 
     @Before
     public void setup() throws InterruptedException
@@ -41,20 +43,20 @@ public class TestMetricsServices extends TestStoreMongo
         setUpEntitiesDataFromFile(TestStoreMongo.class.getClassLoader().getResource("data/revision-entities.json"));
 
         QueryMetricsContainer.flush();
-        queryMetrics.getCollection().drop();
+        metricsStore.getCollection().drop();
         QueryMetricsContainer.record("group1", "art1", "2.2.0");
         QueryMetricsContainer.record("group1", "art1", "2.2.0");
         QueryMetricsContainer.record("group1", "art1", "2.2.0");
         TimeUnit.SECONDS.sleep(1);
         QueryMetricsContainer.record("group1", "art1", "1.0.0");
-        queryMetrics.persistMetrics();
+        metricsHandler.persistMetrics();
     }
 
     @After
     public void tearDown()
     {
         QueryMetricsContainer.flush();
-        queryMetrics.getCollection().drop();
+        metricsStore.getCollection().drop();
     }
 
 
@@ -62,7 +64,7 @@ public class TestMetricsServices extends TestStoreMongo
     public void canGetMetricsSummary()
     {
 
-        Optional<VersionQuerySummary> metrics = queryMetrics.getSummary("group1", "art1", "2.2.0");
+        Optional<VersionQuerySummary> metrics = metricsHandler.getSummary("group1", "art1", "2.2.0");
         Assert.assertTrue(metrics.isPresent());
         Assert.assertEquals("2.2.0", metrics.get().getVersionId());
         Assert.assertEquals(3, metrics.get().getQueryCount());
@@ -72,8 +74,8 @@ public class TestMetricsServices extends TestStoreMongo
     @Test
     public void canGetMostRecentlyQueriedMetrics()
     {
-        Assert.assertEquals(4, queryMetrics.getAllStoredEntities().size());
-        List<VersionQuerySummary> metrics = queryMetrics.getSummaryByProjectVersion();
+        Assert.assertEquals(4, metricsStore.getAllStoredEntities().size());
+        List<VersionQuerySummary> metrics = metricsHandler.getSummaryByProjectVersion();
         Assert.assertEquals(2, metrics.size());
         Assert.assertEquals("1.0.0", metrics.get(0).getVersionId());
         Assert.assertEquals("2.2.0", metrics.get(1).getVersionId());

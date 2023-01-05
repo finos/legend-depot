@@ -27,7 +27,6 @@ import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
-import org.finos.legend.depot.store.mongo.generation.file.FileGenerationLoader;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,7 +50,7 @@ public class TestFileGenerationsService extends TestStoreMongo
     private UpdateFileGenerations generations = new FileGenerationsMongo(mongoProvider);
     UpdateProjects projectStore = mock(UpdateProjects.class);
     private ProjectsService projectsService = new ProjectsServiceImpl(projectStore);
-    private ManageFileGenerationsService service = new FileGenerationsServiceImpl(generations, entities, projectsService);
+    private ManageFileGenerationsService service = new ManageFileGenerationsServiceImpl(generations, entities, projectsService);
 
     @Before
     public void loadData() throws Exception

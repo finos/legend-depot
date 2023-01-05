@@ -35,7 +35,7 @@ public class TestQueueMongo extends TestStoreMongo
     public static final String TESTPROJECT_1 = "testproject1";
     public static final String TESTPROJECT_2 = "testproject2";
     public static final String TEST = "test";
-    private Queue queue = new QueueMongo(mongoProvider);
+    private Queue queue = new NotificationsQueueMongo(mongoProvider);
     private Notifications eventsMongo = new NotificationsMongo(mongoProvider);
 
     @Test

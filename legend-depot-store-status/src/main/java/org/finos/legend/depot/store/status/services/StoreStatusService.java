@@ -18,10 +18,10 @@ package org.finos.legend.depot.store.status.services;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.projects.Projects;
-import org.finos.legend.depot.store.artifacts.api.status.RefreshStatusService;
-import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
-import org.finos.legend.depot.store.metrics.api.ManageQueryMetrics;
+import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
+import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.status.domain.StoreStatus;
 
 import javax.inject.Inject;
@@ -33,16 +33,16 @@ public class StoreStatusService
 {
     private final Projects projectApi;
     private final Entities entities;
-    private final RefreshStatusService statusService;
-    private final ManageQueryMetrics queryMetrics;
+    private final RefreshStatusStore statusService;
+    private final QueryMetricsHandler queryMetricsHandler;
 
     @Inject
-    public StoreStatusService(Projects projectApi, Entities versions,RefreshStatusService statusService, ManageQueryMetrics queryMetrics)
+    public StoreStatusService(Projects projectApi, Entities versions, RefreshStatusStore statusService, QueryMetricsHandler queryMetrics)
     {
         this.projectApi = projectApi;
         this.entities = versions;
         this.statusService = statusService;
-        this.queryMetrics = queryMetrics;
+        this.queryMetricsHandler = queryMetrics;
     }
 
     public StoreStatus getStatus()
@@ -82,7 +82,7 @@ public class StoreStatusService
         {
             StoreStatus.VersionStatus versionStatus = new StoreStatus.VersionStatus(groupId, artifactId, v);
             RefreshStatus updateStatus = statusService.get(groupId, artifactId, v);
-            Optional<VersionQuerySummary> versionQueryCounter = queryMetrics.getSummary(groupId, artifactId, v);
+            Optional<VersionQuerySummary> versionQueryCounter = queryMetricsHandler.getSummary(groupId, artifactId, v);
             if (versionQueryCounter.isPresent())
             {
                 versionStatus.queryCount = versionQueryCounter.get().getQueryCount();
@@ -107,7 +107,7 @@ public class StoreStatusService
 
     public List<VersionQuerySummary> summaryByProjectVersion()
     {
-        return queryMetrics.getSummaryByProjectVersion();
+        return queryMetricsHandler.getSummaryByProjectVersion();
     }
 
 

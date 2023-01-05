@@ -244,7 +244,7 @@ public class TestDependencyCache extends TestBaseServices
         {
             try
             {
-                getMongoClient().getDatabase(mongoProvider.getName()).getCollection(ProjectsMongo.MONGO_PROJECTS).insertOne(Document.parse(new ObjectMapper().writeValueAsString(project)));
+                getMongoClient().getDatabase(mongoProvider.getName()).getCollection(ProjectsMongo.COLLECTION).insertOne(Document.parse(new ObjectMapper().writeValueAsString(project)));
             }
             catch (JsonProcessingException e)
             {

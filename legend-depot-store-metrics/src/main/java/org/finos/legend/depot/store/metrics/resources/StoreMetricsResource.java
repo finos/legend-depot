@@ -17,8 +17,8 @@ package org.finos.legend.depot.store.metrics.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.finos.legend.depot.store.metrics.api.ManageQueryMetrics;
 import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
@@ -34,10 +34,10 @@ import java.util.List;
 public class StoreMetricsResource extends BaseResource
 {
 
-    private final ManageQueryMetrics queryMetrics;
+    private final QueryMetricsHandler queryMetrics;
 
     @Inject
-    public StoreMetricsResource(ManageQueryMetrics queryMetrics)
+    public StoreMetricsResource(QueryMetricsHandler queryMetrics)
     {
         this.queryMetrics = queryMetrics;
     }

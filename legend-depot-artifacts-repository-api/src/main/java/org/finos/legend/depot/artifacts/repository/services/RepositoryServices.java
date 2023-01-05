@@ -62,6 +62,7 @@ public class RepositoryServices
         PrometheusMetricsFactory.getInstance().setGauge(STORE_VERSIONS,0);
         PrometheusMetricsFactory.getInstance().setGauge(MISSING_REPO_VERSIONS,0);
         PrometheusMetricsFactory.getInstance().setGauge(MISSING_STORE_VERSIONS,0);
+        PrometheusMetricsFactory.getInstance().setGauge(REPO_EXCEPTIONS,0);
 
         projects.getAll().forEach(p ->
         {

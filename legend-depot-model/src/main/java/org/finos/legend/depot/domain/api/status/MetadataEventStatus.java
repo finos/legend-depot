@@ -17,8 +17,6 @@ package org.finos.legend.depot.domain.api.status;
 
 public enum MetadataEventStatus
 {
-    NEW,
-    RETRY,
     SUCCESS,
     FAILED
 }

@@ -10,7 +10,7 @@ The Legend Depot servers provide a rich `REST API` allowing users to query metad
 Legend Depot has two main components:
 - **Depot Server:** provides read only metadata query REST API
 - **Depot Store Server:** manages internal metadata cache and sources it from maven style repository where models artifacts have been published.
-
+ 
 ## Getting started
 
 ### Development setup

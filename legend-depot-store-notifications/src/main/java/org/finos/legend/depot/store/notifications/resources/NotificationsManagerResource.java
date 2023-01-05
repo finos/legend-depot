@@ -18,19 +18,24 @@ package org.finos.legend.depot.store.notifications.resources;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
+import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
-import org.finos.legend.depot.tracing.resources.BaseResource;
+import org.finos.legend.depot.store.notifications.store.api.NotificationsStore;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
+import javax.inject.Named;
+import javax.inject.Provider;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -38,17 +43,34 @@ import java.util.Optional;
 
 @Path("")
 @Api("Notifications")
-public class NotificationsManagerResource extends BaseResource
+public class NotificationsManagerResource extends BaseAuthorisedResource
 {
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final NotificationsManager notificationsManager;
+    private final NotificationsStore notificationsStore;
 
     @Inject
-    protected NotificationsManagerResource(NotificationsManager notificationsManager)
+    protected NotificationsManagerResource(NotificationsManager notificationsManager,
+                                           NotificationsStore notificationsStore, AuthorisationProvider authorisationProvider,
+                                           @Named("requestPrincipal") Provider<Principal> principalProvider)
     {
-        super();
+        super(authorisationProvider, principalProvider);
         this.notificationsManager = notificationsManager;
+        this.notificationsStore = notificationsStore;
+    }
+
+    NotificationsManagerResource(NotificationsManager notificationsManager)
+    {
+        super(null,null);
+        this.notificationsManager = notificationsManager;
+        this.notificationsStore = null;
+    }
+
+    @Override
+    protected String getResourceName()
+    {
+        return "Notifications";
     }
 
     @GET
@@ -111,4 +133,17 @@ public class NotificationsManagerResource extends BaseResource
         return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId));
     }
 
+    @PUT
+    @Path("/notifications/indexes")
+    @ApiOperation("createIndexes if absent")
+    public List<String> createIndexesIfAbsent()
+    {
+        validateUser();
+        return handle("Create indexes", this::createIndexes);
+    }
+
+    private List<String> createIndexes()
+    {
+        return notificationsStore.createIndexes();
+    }
 }

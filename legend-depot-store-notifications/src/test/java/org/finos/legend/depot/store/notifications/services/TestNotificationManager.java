@@ -27,13 +27,13 @@ import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
-import org.finos.legend.depot.store.notifications.store.mongo.QueueMongo;
+import org.finos.legend.depot.store.notifications.store.mongo.NotificationsQueueMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +50,7 @@ public class TestNotificationManager extends TestStoreMongo
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     private final NotificationsMongo eventsMongo = new NotificationsMongo(mongoProvider);
-    private final QueueMongo queue = new QueueMongo(mongoProvider);
+    private final NotificationsQueueMongo queue = new NotificationsQueueMongo(mongoProvider);
     private final NotificationEventHandler notificationEventHandler = mock(NotificationEventHandler.class);
     private final NotificationsQueueManager eventsManager = new NotificationsQueueManager(new ProjectsServiceImpl(projectsStore), eventsMongo, queue, notificationEventHandler);
 

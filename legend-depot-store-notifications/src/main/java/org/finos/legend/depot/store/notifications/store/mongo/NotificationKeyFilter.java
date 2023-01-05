@@ -18,7 +18,7 @@ package org.finos.legend.depot.store.notifications.store.mongo;
 import com.mongodb.client.model.Filters;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
-import org.finos.legend.depot.store.mongo.BaseMongo;
+import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 
 class NotificationKeyFilter
@@ -29,7 +29,7 @@ class NotificationKeyFilter
 
     public static Bson getFilter(MetadataNotification notification)
     {
-        return notification.getEventId() != null ? Filters.eq(QueueMongo.OBJECT_ID, new ObjectId(notification.getEventId())) :
+        return notification.getEventId() != null ? Filters.eq(BaseMongo.ID_FIELD, new ObjectId(notification.getEventId())) :
                 Filters.and(Filters.and(Filters.and(Filters.and(Filters.eq("projectId", notification.getProjectId()),
                         Filters.eq(BaseMongo.GROUP_ID, notification.getGroupId())),
                         Filters.eq(BaseMongo.ARTIFACT_ID, notification.getArtifactId())),

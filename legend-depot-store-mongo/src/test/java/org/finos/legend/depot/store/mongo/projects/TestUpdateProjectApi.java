@@ -15,16 +15,13 @@
 
 package org.finos.legend.depot.store.mongo.projects;
 
-import org.bson.Document;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 
 public class TestUpdateProjectApi extends TestStoreMongo
@@ -63,22 +60,6 @@ public class TestUpdateProjectApi extends TestStoreMongo
         projectsAPI.createOrUpdate(projectConfiguration);
     }
 
-    @Test
-    public void canCreateIndexesIfAbsent()
-    {
-        List<Document> indexes = new ArrayList<>();
-        this.mongoProvider.getCollection(ProjectsMongo.MONGO_PROJECTS).listIndexes().forEach((Consumer<Document>)indexes::add);
-        Assert.assertFalse(indexes.isEmpty());
-        Assert.assertEquals(1, indexes.size());
-        Assert.assertEquals("_id_", indexes.get(0).getString("name"));
-
-        boolean result = projectsAPI.createIndexesIfAbsent();
-        Assert.assertTrue(result);
-        List indexes1 = new ArrayList();
-        this.mongoProvider.getCollection(ProjectsMongo.MONGO_PROJECTS).listIndexes().forEach((Consumer<Document>)indexes1::add);
-        Assert.assertFalse(indexes1.isEmpty());
-        Assert.assertEquals(2, indexes1.size());
-    }
 
     @Test
     public void canCreateUpdateProjectsWithSameCoordinates()

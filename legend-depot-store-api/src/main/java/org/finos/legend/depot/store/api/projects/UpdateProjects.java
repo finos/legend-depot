@@ -23,8 +23,6 @@ public interface UpdateProjects extends Projects
 
     ProjectData createOrUpdate(ProjectData projectData);
 
-    boolean createIndexesIfAbsent();
-
     MetadataEventResponse delete(String groupId, String artifactId);
 
     MetadataEventResponse deleteByProjectId(String projectId);

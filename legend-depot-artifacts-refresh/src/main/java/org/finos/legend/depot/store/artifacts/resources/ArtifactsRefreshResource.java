@@ -21,9 +21,9 @@ import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
+import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
-import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
-import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
@@ -52,12 +52,12 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final String ARTIFACTS_RESOURCE = "ArtifactsRefresh";
     private final ArtifactsRefreshService artifactsRefreshService;
-    private final ManageRefreshStatusService refreshStatusService;
+    private final RefreshStatusStore refreshStatusService;
 
 
     @Inject
     public ArtifactsRefreshResource(ArtifactsRefreshService artifactsRefreshService,
-                                    ManageRefreshStatusService updateStatusService,
+                                    RefreshStatusStore updateStatusService,
                                     AuthorisationProvider authorisationProvider,
                                     @Named("requestPrincipal") Provider<Principal> principalProvider)
     {
@@ -172,20 +172,6 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
         });
     }
 
-    @PUT
-    @Path("/artifactRefresh/indexes")
-    @ApiOperation("createIndexes if absent")
-    public boolean createIndexesIfAbsent()
-    {
-        return handle("Create indexes", this::createIndexes);
-    }
-
-    private boolean createIndexes()
-    {
-        validateUser();
-        return artifactsRefreshService.createIndexesIfAbsent()
-                && refreshStatusService.createIndexesIfAbsent();
-    }
 
     @Override
     protected String getResourceName()

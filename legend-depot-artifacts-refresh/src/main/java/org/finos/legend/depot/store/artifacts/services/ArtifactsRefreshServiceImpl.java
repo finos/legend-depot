@@ -21,6 +21,7 @@ import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
+import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
@@ -29,18 +30,16 @@ import org.finos.legend.depot.domain.project.ProjectProperty;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
+import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
+import org.finos.legend.depot.store.admin.domain.artifacts.ArtifactFile;
+import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
-import org.finos.legend.depot.store.artifacts.api.status.ManageRefreshStatusService;
-import org.finos.legend.depot.store.artifacts.domain.ArtifactDetail;
-import org.finos.legend.depot.store.artifacts.domain.status.RefreshStatus;
-import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
-import org.finos.legend.depot.store.artifacts.store.mongo.api.UpdateArtifacts;
-import org.finos.legend.depot.store.metrics.QueryMetricsContainer;
 import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
-import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.depot.tracing.services.TracerFactory;
+import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
@@ -85,15 +84,15 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     public static final String TOTAL_NUMBER_OF_VERSIONS_REFRESH = "total number of versions refresh";
 
     private final ManageProjectsService projects;
-    private final ManageRefreshStatusService store;
+    private final RefreshStatusStore store;
     private final RepositoryServices repositoryServices;
-    private final UpdateArtifacts artifacts;
+    private final ArtifactsFilesStore artifacts;
     private final Queue workQueue;
     private final List<String> projectProperties;
 
 
     @Inject
-    public ArtifactsRefreshServiceImpl(ManageProjectsService projects, ManageRefreshStatusService store, RepositoryServices repositoryServices, UpdateArtifacts artifacts, Queue refreshWorkQueue, IncludeProjectPropertiesConfiguration includePropertyConfig)
+    public ArtifactsRefreshServiceImpl(ManageProjectsService projects, RefreshStatusStore store, RepositoryServices repositoryServices, ArtifactsFilesStore artifacts, Queue refreshWorkQueue, IncludeProjectPropertiesConfiguration includePropertyConfig)
     {
         this.projects = projects;
         this.store = store;
@@ -301,7 +300,6 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             getSupportedArtifactTypes().forEach(artifactType -> response.combine(executeVersionRefresh(artifactType, project, versionId,fullUpdate)));
             if (!response.hasErrors())
             {
-                QueryMetricsContainer.record(project.getGroupId(), project.getArtifactId(), versionId);
                 List<ProjectVersionDependency> newDependencies = calculateDependencies(project.getGroupId(), project.getArtifactId(), versionId);
                 if (transitive)
                 {
@@ -505,7 +503,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     private boolean artifactFileHasChangedOrNotBeenProcessed(File file)
     {
         String filePath = file.getPath();
-        Optional<ArtifactDetail> artifactDetails = this.artifacts.find(filePath);
+        Optional<ArtifactFile> artifactDetails = this.artifacts.find(filePath);
         try
         {
             String fileCheckSum = DigestUtils.sha256Hex(new FileInputStream(filePath));
@@ -513,7 +511,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             {
                 LOGGER.info("loading artifacts from updated file: {}", filePath);
                 LOGGER.info("file check sum: {}", fileCheckSum);
-                this.artifacts.createOrUpdate(new ArtifactDetail(filePath, fileCheckSum));
+                this.artifacts.createOrUpdate(new ArtifactFile(filePath, fileCheckSum));
                 return true;
             }
         }
@@ -523,12 +521,6 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             return true;
         }
         return false;
-    }
-
-    @Override
-    public boolean createIndexesIfAbsent()
-    {
-        return artifacts.createIndexesIfAbsent();
     }
 
 

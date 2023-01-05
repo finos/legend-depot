@@ -20,11 +20,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.IndexModel;
 import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
-import org.finos.legend.depot.store.mongo.BaseMongo;
+import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 
@@ -33,6 +34,7 @@ import javax.inject.Named;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +46,7 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class NotificationsMongo extends BaseMongo<MetadataNotification> implements Notifications
 {
-    public static final String EVENTS = "notifications";
+    static final String COLLECTION = "notifications";
 
     private static final String EVENT_ID = "eventId";
     private static final String LAST_UPDATED = "lastUpdated";
@@ -60,17 +62,18 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
     @Override
     protected MongoCollection getCollection()
     {
-        return getMongoCollection(EVENTS);
+        return getMongoCollection(COLLECTION);
     }
 
 
-    @Override
-    protected boolean createIndexIfAbsent(String indexName, String... fieldNames)
+
+    public static List<IndexModel> buildIndexes()
     {
-        createIndexIfAbsent("parentId",PARENT_EVENT);
-        createIndexIfAbsent("status",RESPONSE_STATUS);
-        createIndexIfAbsent("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID);
-        return createIndexIfAbsent("eventId", EVENT_ID);
+        return Arrays.asList(
+        buildIndex("parentId",PARENT_EVENT),
+        buildIndex("status",RESPONSE_STATUS),
+        buildIndex("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID),
+        buildIndex("eventId", EVENT_ID));
     }
 
     @Override

@@ -28,10 +28,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class TestUpdateRevisions extends TestStoreMongo
 {
@@ -51,7 +49,7 @@ public class TestUpdateRevisions extends TestStoreMongo
         Assert.assertEquals(1, result.getInsertedCount());
         Assert.assertEquals(0, result.getModifiedCount());
 
-        MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.ENTITIES_VERSIONS);
+        MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
         Assert.assertNotNull(entities);
         Assert.assertEquals(1, entities.countDocuments());
         Document doc = (Document)entities.find().iterator().next();
@@ -114,19 +112,6 @@ public class TestUpdateRevisions extends TestStoreMongo
 
     }
 
-    @Test
-    public void canCreateIndexesIfAbsent()
-    {
-        List<Document> indexes = new ArrayList();
-        this.mongoProvider.getCollection(EntitiesMongo.ENTITIES_VERSIONS).listIndexes().forEach((Consumer<Document>)indexes::add);
-
-        boolean result = revisionsMongo.createIndexesIfAbsent();
-        Assert.assertTrue(result);
-        List indexes1 = new ArrayList();
-        this.mongoProvider.getCollection(EntitiesMongo.ENTITIES_VERSIONS).listIndexes().forEach((Consumer<Document>)indexes1::add);
-        Assert.assertFalse(indexes1.isEmpty());
-        Assert.assertEquals(6, indexes1.size());
-    }
 
     @Test
     public void canQueryByClassifier()

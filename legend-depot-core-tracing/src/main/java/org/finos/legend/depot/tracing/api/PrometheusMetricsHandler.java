@@ -33,7 +33,7 @@ public interface PrometheusMetricsHandler
 
     void incrementErrorCount(String counter);
 
-    void setGauge(String queueWaiting, long value);
+    void setGauge(String name, double value);
 
     void registerGauge(String name, String help);
 

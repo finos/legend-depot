@@ -24,5 +24,4 @@ public interface UpdateFileGenerations extends FileGenerations
 
     boolean delete(String groupId, String artifactId, String versionId);
 
-    boolean createIndexesIfAbsent();
 }
