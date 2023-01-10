@@ -25,9 +25,9 @@ import org.finos.legend.depot.core.http.guice.BaseModule;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
+
 import org.slf4j.Logger;
 
 import javax.inject.Named;
@@ -95,6 +95,7 @@ public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfigura
     @Named("storage-metrics")
     boolean scheduleStorageMetrics(SchedulesFactory schedulesFactory, StorageMetrics storageMetrics)
     {
+        storageMetrics.init();
         schedulesFactory.register("storage-metrics", LocalDateTime.now().plusMinutes(5), 5 * 60 * 1000L, false, () ->
         {
             storageMetrics.reportMetrics();

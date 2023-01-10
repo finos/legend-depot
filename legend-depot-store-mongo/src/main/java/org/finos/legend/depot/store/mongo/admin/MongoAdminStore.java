@@ -82,4 +82,14 @@ public class MongoAdminStore
         results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsRefreshStatusMongo.COLLECTION,ArtifactsRefreshStatusMongo.buildIndexes()));
         return results;
     }
+
+    public Document runCommand(Document document)
+    {
+        return mongoDatabase.runCommand(document);
+    }
+
+    public String getName()
+    {
+        return mongoDatabase.getName();
+    }
 }
