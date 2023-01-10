@@ -40,7 +40,7 @@ public class TestMongoAdminStore extends TestStoreMongo
         List indexes1 = new ArrayList();
         this.mongoProvider.getCollection(EntitiesMongo.COLLECTION).listIndexes().forEach((Consumer<Document>)indexes1::add);
         Assert.assertFalse(indexes1.isEmpty());
-        Assert.assertEquals(6, indexes1.size());
+        Assert.assertEquals(5, indexes1.size());
     }
 
 

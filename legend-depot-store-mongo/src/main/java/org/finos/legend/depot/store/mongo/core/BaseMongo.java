@@ -181,7 +181,12 @@ public abstract class BaseMongo<T extends HasIdentifier>
 
     protected static IndexModel buildIndex(String indexName, String... fieldNames)
     {
-        IndexOptions indexOptions = new IndexOptions().name(indexName);
+        return buildIndex(indexName, false, fieldNames);
+    }
+
+    protected static IndexModel buildIndex(String indexName,boolean isUnique, String... fieldNames)
+    {
+        IndexOptions indexOptions = new IndexOptions().unique(isUnique).name(indexName);
         Bson index = Indexes.ascending(fieldNames);
         return new IndexModel(index,indexOptions);
     }

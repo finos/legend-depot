@@ -61,7 +61,7 @@ public class FileGenerationsMongo extends BaseMongo<StoredFileGeneration> implem
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID));
+        return Arrays.asList(buildIndex("groupId-artifactId-versionId-filePath", true, GROUP_ID, ARTIFACT_ID, VERSION_ID, FILE_PATH));
     }
 
     @Override
