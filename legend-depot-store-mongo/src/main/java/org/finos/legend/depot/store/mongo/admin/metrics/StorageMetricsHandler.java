@@ -17,35 +17,41 @@ package org.finos.legend.depot.store.mongo.admin.metrics;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
-import org.bson.json.JsonMode;
-import org.bson.json.JsonWriterSettings;
 import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
+import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
-import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class StorageMetricsHandler implements StorageMetrics
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(StorageMetricsHandler.class);
     private static final int SCALE = 1024;
-    public static final PrometheusMetricsHandler PROMETHEUS_METRICS_HANDLER = PrometheusMetricsFactory.getInstance();
-    private final MongoDatabase mongoDatabase;
+    private final MongoAdminStore adminStore;
+    private final PrometheusMetricsHandler metricsHandler;
 
     @Inject
-    public StorageMetricsHandler(@Named("mongoDatabase") MongoDatabase mongoDatabase)
+    public StorageMetricsHandler(MongoAdminStore adminStore, PrometheusMetricsHandler metricsHandler)
     {
-        this.mongoDatabase = mongoDatabase;
+        this.adminStore = adminStore;
+        this.metricsHandler = metricsHandler;
+    }
+
+    @Override
+    public void init()
+    {
+        metricsHandler.registerGauge("storage_collectionSize","collection size",Arrays.asList("collectionName"));
+        metricsHandler.registerGauge("storage_objectCount","object count",Arrays.asList("collectionName"));
+        metricsHandler.registerGauge("storage_indexCount","index count",Arrays.asList("collectionName"));
+        metricsHandler.registerGauge("storage_indexSize","index size",Arrays.asList("collectionName"));
+        metricsHandler.registerGauge("storage_storageSize", "storage size",Arrays.asList("collectionName"));
+        metricsHandler.registerGauge("storage_avgSize","avg size",Arrays.asList("collectionName"));
     }
 
     @Override
@@ -54,37 +60,37 @@ public class StorageMetricsHandler implements StorageMetrics
         DbStats dbStats = getDbStats();
          if (dbStats != null)
          {
-             dbStats.logMetrics();
+             logMetrics(dbStats);
          }
-         getCollectionsStats().forEach(stats -> stats.logMetrics());
+         getCollectionsStats().forEach(stats -> logMetrics(stats));
     }
 
     private DbStats getDbStats()
     {
-        Document document = mongoDatabase.runCommand(new Document("dbStats", 1).append("scale",SCALE));
+        Document document = adminStore.runCommand(new Document("dbStats", 1).append("scale",SCALE));
         try
         {
             return new ObjectMapper().convertValue(document, DbStats.class);
         }
         catch (Exception e)
         {
-            LOGGER.error("Error Logging DBStats  for " + mongoDatabase.getName(), e);
+            LOGGER.error("Error Logging DBStats  for " + adminStore.getName(), e);
         }
         return null;
     }
 
-
     private List<CollectionStats> getCollectionsStats()
     {
         List<CollectionStats> results = new ArrayList<>();
-        for (String collectionName : mongoDatabase.listCollectionNames())
+        for (String collectionName : adminStore.getAllCollections())
         {
             try
             {
-                Document document = mongoDatabase.runCommand(new Document("collStats", collectionName).append("scale",SCALE));
+                Document document = adminStore.runCommand(new Document("collStats", collectionName).append("scale",SCALE));
                 CollectionStats stats = new ObjectMapper().convertValue(document, CollectionStats.class);
                 if (stats != null)
                 {
+                    stats.collectionName = collectionName;
                     results.add(stats);
                 }
             }
@@ -94,7 +100,26 @@ public class StorageMetricsHandler implements StorageMetrics
             }
         }
         return results;
+    }
 
+    private void logMetrics(DbStats dbStats)
+    {
+        this.metricsHandler.setGauge("store_indexes_count",dbStats.indexes);
+        this.metricsHandler.setGauge("store_object_count",dbStats.objectCount);
+        this.metricsHandler.setGauge("store_avg_doc_size_kb", dbStats.averageDocSize.intValue());
+        this.metricsHandler.setGauge("store_data_size_gb", dbStats.uncompressedDataSize.intValue() / 1000000);
+        this.metricsHandler.setGauge("store_storage_size_gb", dbStats.storageSize.intValue() / 1000000);
+        this.metricsHandler.setGauge("store_index_size_gb", dbStats.indexSize.intValue() / 1000000);
+    }
+
+    private void logMetrics(CollectionStats stats)
+    {
+        this.metricsHandler.setGauge("storage_collectionSize",stats.collectionSize, Arrays.asList(stats.collectionName));
+        this.metricsHandler.setGauge("storage_objectCount",stats.documentCount, Arrays.asList(stats.collectionName));
+        this.metricsHandler.setGauge("storage_indexCount",stats.numberOfIndexes, Arrays.asList(stats.collectionName));
+        this.metricsHandler.setGauge("storage_indexSize",stats.indexSize / 1000000000, Arrays.asList(stats.collectionName));
+        this.metricsHandler.setGauge("storage_storageSize",stats.storageSize / 1000000000, Arrays.asList(stats.collectionName));
+        this.metricsHandler.setGauge("storage_avgSize",stats.averageDocSize / 1000, Arrays.asList(stats.collectionName));
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -118,18 +143,6 @@ public class StorageMetricsHandler implements StorageMetrics
         @JsonProperty("indexSize")
         Double indexSize = Double.valueOf(0.0);
 
-
-        public void logMetrics()
-        {
-
-            PROMETHEUS_METRICS_HANDLER.setGauge("store_indexes_count",this.indexes);
-            PROMETHEUS_METRICS_HANDLER.setGauge("store_object_count",this.objectCount);
-            PROMETHEUS_METRICS_HANDLER.setGauge("store_avg_doc_size_kb", this.averageDocSize.intValue());
-            PROMETHEUS_METRICS_HANDLER.setGauge("store_data_size_gb", this.uncompressedDataSize.intValue() / 1000000);
-            PROMETHEUS_METRICS_HANDLER.setGauge("store_storage_size_gb", this.storageSize.intValue() / 1000000);
-            PROMETHEUS_METRICS_HANDLER.setGauge("store_index_size_gb", this.indexSize.intValue() / 1000000);
-
-        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -156,15 +169,6 @@ public class StorageMetricsHandler implements StorageMetrics
         @JsonProperty("totalIndexSize")
         Double indexSize = Double.valueOf(0.0);
 
-        public void logMetrics()
-        {
-            PROMETHEUS_METRICS_HANDLER.setGauge(this.collectionName + "_collectionSize",collectionSize);
-            PROMETHEUS_METRICS_HANDLER.setGauge(this.collectionName + "_objectCount",documentCount);
-            PROMETHEUS_METRICS_HANDLER.setGauge(this.collectionName + "_indexCount",numberOfIndexes);
-            PROMETHEUS_METRICS_HANDLER.setGauge(this.collectionName + "_indexSize",indexSize / 1000000000);
-            PROMETHEUS_METRICS_HANDLER.setGauge(this.collectionName + "_storageSize",storageSize / 1000000000);
-            PROMETHEUS_METRICS_HANDLER.setGauge(this.collectionName + "_avgSize",averageDocSize / 1000);
-        }
     }
 
 }

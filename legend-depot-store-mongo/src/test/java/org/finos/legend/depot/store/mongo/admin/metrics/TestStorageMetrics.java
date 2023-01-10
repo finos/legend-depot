@@ -16,11 +16,13 @@
 package org.finos.legend.depot.store.mongo.admin.metrics;
 
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
+import org.finos.legend.depot.tracing.services.prometheus.VoidPrometheusMetricsHandler;
 import org.junit.Test;
 
 public class TestStorageMetrics extends TestStoreMongo
 {
-    private final StorageMetricsHandler metricsHandler = new StorageMetricsHandler(mongoProvider);
+    private final StorageMetricsHandler metricsHandler = new StorageMetricsHandler(new MongoAdminStore(mongoProvider),new VoidPrometheusMetricsHandler());
 
     @Test
     public void canGetDbMetrics()

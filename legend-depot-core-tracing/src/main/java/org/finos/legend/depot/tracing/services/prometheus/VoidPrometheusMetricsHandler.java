@@ -18,6 +18,8 @@ package org.finos.legend.depot.tracing.services.prometheus;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 
+import java.util.List;
+
 
 public class VoidPrometheusMetricsHandler implements PrometheusMetricsHandler
 {
@@ -63,6 +65,16 @@ public class VoidPrometheusMetricsHandler implements PrometheusMetricsHandler
 
     @Override
     public void increaseGauge(String name, int value)
+    {
+    }
+
+    @Override
+    public void setGauge(String name, double value, List<String> labelValues)
+    {
+    }
+
+    @Override
+    public void registerGauge(String name, String help, List<String> labelNames)
     {
     }
 

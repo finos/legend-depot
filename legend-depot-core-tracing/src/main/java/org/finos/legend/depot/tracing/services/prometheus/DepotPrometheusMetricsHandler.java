@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.collections.api.map.ConcurrentMutableMap;
@@ -77,6 +78,7 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
     {
         return name.replace("/", METRIC_SEPARATOR)
                 .replace("-", METRIC_SEPARATOR)
+                .replace(".", METRIC_SEPARATOR)
                 .replace("{", "").replace("}", "")
                 .replaceAll(" ", METRIC_SEPARATOR);
     }
@@ -96,9 +98,19 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
         return Summary.build(getKeyName(name),getHelpMessage(name, helpMessage)).quantile(0.5D, 0.05D).quantile(0.9D, 0.01D).quantile(0.99D, 0.001D).register();
     }
 
-    private Gauge buildGauge(String name, String helpMessage)
+    private Gauge buildGauge(String name, String helpMessage, List<String> labelNames)
     {
-        return Gauge.build(getKeyName(name),getHelpMessage(name, helpMessage)).register();
+        Gauge.Builder builder = Gauge.build(getKeyName(name),getHelpMessage(name, helpMessage));
+        if (!labelNames.isEmpty())
+        {
+            builder.labelNames(labelNames.toArray(new String[0]));
+        }
+        return builder.register();
+    }
+
+    private Gauge buildGauge(String gaugeName, String helpMessage)
+    {
+        return this.buildGauge(gaugeName,helpMessage,Collections.emptyList());
     }
 
     private Histogram buildHistogram(String name, String helpMessage)
@@ -159,13 +171,30 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
     @Override
     public void registerGauge(String gaugeName,String helpMessage)
     {
-        this.allGauges.getIfAbsentPutWithKey(getKeyName(gaugeName),(key) -> buildGauge(gaugeName,helpMessage));
+        this.allGauges.getIfAbsentPutWithKey(getKeyName(gaugeName),(key) -> buildGauge(gaugeName,helpMessage, Collections.emptyList()));
+    }
+
+
+    @Override
+    public void registerGauge(String gaugeName, String help, List<String> labelNames)
+    {
+        this.allGauges.getIfAbsentPutWithKey(getKeyName(gaugeName),(key) -> buildGauge(gaugeName,help,labelNames));
     }
 
     @Override
     public void setGauge(String gaugeName, double value)
     {
         this.allGauges.getIfAbsentPutWithKey(getKeyName(gaugeName),(key) -> buildGauge(gaugeName,gaugeName + GAUGE)).set(value);
+    }
+
+    @Override
+    public void setGauge(String gaugeName, double value, List<String> labelValues)
+    {
+        if (this.allGauges.get(getKeyName(gaugeName)) == null)
+        {
+            throw new UnsupportedOperationException("Please register the gauge first if you need labels");
+        }
+        this.allGauges.get(getKeyName(gaugeName)).labels(labelValues.toArray(new String[0])).set(value);
     }
 
     @Override
