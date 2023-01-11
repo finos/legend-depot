@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -116,7 +117,7 @@ public abstract class BaseMongo<T extends HasIdentifier>
         MongoCollection mongoCollection = mongoDatabase.getCollection(collection);
         List<String> existingIndexes = getIndexes(mongoCollection);
         List<IndexModel> newIndexes =  candidateIndexes.stream().filter(i -> !existingIndexes.contains(i.getOptions().getName())).collect(Collectors.toList());
-        return !newIndexes.isEmpty() ? mongoCollection.createIndexes(newIndexes) : new ArrayList<>();
+        return !newIndexes.isEmpty() ? mongoCollection.createIndexes(newIndexes) : Collections.EMPTY_LIST;
     }
 
     protected abstract MongoCollection getCollection();
