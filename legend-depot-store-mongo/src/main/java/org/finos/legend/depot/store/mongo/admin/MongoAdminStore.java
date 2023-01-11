@@ -20,6 +20,7 @@ import org.bson.Document;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
+import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 
 import javax.inject.Inject;
@@ -76,7 +77,7 @@ public class MongoAdminStore
         List<String> results = new ArrayList<>();
         results.addAll(createIndexesIfAbsent(mongoDatabase,ProjectsMongo.COLLECTION,ProjectsMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,EntitiesMongo.COLLECTION,EntitiesMongo.buildIndexes()));
-        results.addAll(createIndexesIfAbsent(mongoDatabase,EntitiesMongo.COLLECTION,EntitiesMongo.buildIndexes()));
+        results.addAll(createIndexesIfAbsent(mongoDatabase,FileGenerationsMongo.COLLECTION,FileGenerationsMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsFilesMongo.COLLECTION,ArtifactsFilesMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsRefreshStatusMongo.COLLECTION,ArtifactsRefreshStatusMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsRefreshStatusMongo.COLLECTION,ArtifactsRefreshStatusMongo.buildIndexes()));
