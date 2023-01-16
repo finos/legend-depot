@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.mongo.resources;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.bson.Document;
@@ -25,12 +26,15 @@ import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.security.Principal;
 import java.util.List;
@@ -128,6 +132,16 @@ public class StoreAdministrationResource extends BaseAuthorisedResource
         return manageStoreService.getAllIndexes();
     }
 
+    @GET
+    @Path("/collections/pipeline/{collectionName}")
+    @ApiOperation("run collection pipeline")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response runPipeline(@PathParam("collectionName") String collectionMame, @QueryParam("pipeline") String jsonPipeline) throws JsonProcessingException
+    {
+        validateUser();
+        return Response.ok().entity(this.manageStoreService.runPipeline(collectionMame,jsonPipeline)).build();
+    }
 
 
 }

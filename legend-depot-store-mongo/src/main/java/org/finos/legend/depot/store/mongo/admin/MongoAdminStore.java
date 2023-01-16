@@ -15,6 +15,9 @@
 
 package org.finos.legend.depot.store.mongo.admin;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
@@ -87,6 +90,22 @@ public class MongoAdminStore
     public Document runCommand(Document document)
     {
         return mongoDatabase.runCommand(document);
+    }
+
+    public List<Document> runPipeline(String collectionName, List<Document> pipeline)
+    {
+        List<Document> documents = new ArrayList<>();
+        mongoDatabase.getCollection(collectionName).aggregate(pipeline).forEach((Consumer<? super Document>) doc ->
+        {
+            documents.add(doc);
+        });
+        return documents;
+    }
+
+    public List<Document> runPipeline(String collectionName, String jsonPipeline) throws JsonProcessingException
+    {
+        List<Document> pipeline =  new ObjectMapper().readValue(jsonPipeline, new TypeReference<List<Document>>(){});;
+         return runPipeline(collectionName,pipeline);
     }
 
     public String getName()

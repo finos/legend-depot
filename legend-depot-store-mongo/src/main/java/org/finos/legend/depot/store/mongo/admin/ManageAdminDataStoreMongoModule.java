@@ -25,8 +25,7 @@ import org.finos.legend.depot.store.mongo.resources.StoreAdministrationResource;
 
 public class ManageAdminDataStoreMongoModule extends AdminDataStoreMongoModule
 {
-    private static final String STORAGE_METRICS_SCHEDULE = "storage-metrics-schedule";
-
+  
     @Override
     protected void configure()
     {
@@ -41,5 +40,6 @@ public class ManageAdminDataStoreMongoModule extends AdminDataStoreMongoModule
         expose(RefreshStatusStore.class);
         expose(ArtifactsFilesStore.class);
         expose(StorageMetrics.class);
+        expose(MongoAdminStore.class);
     }
 }
