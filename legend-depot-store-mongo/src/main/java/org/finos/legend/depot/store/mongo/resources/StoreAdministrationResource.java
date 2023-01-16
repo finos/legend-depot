@@ -139,6 +139,7 @@ public class StoreAdministrationResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public Response runPipeline(@PathParam("collectionName") String collectionMame, @QueryParam("pipeline") String jsonPipeline) throws JsonProcessingException
     {
+        validateUser();
         return Response.ok().entity(this.manageStoreService.runPipeline(collectionMame,jsonPipeline)).build();
     }
 
