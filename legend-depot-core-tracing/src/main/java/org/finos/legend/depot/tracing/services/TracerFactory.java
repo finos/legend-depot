@@ -164,8 +164,8 @@ public final class TracerFactory
             map.put(Fields.MESSAGE, e.getMessage());
             currentSpan.log(map);
             String traceId = currentSpan.context().toTraceId();
-            String trace = traceId.isEmpty() ? "" : ". TraceId: " + traceId;
-            throw new TracingException(trace, e);
+            String message = String.format("[%s] failed with error:[%s] (TraceId: [%s])",label,e.getMessage(),traceId);
+            throw new TracingException(message, e);
         }
         finally
         {
