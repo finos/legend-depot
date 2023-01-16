@@ -310,7 +310,11 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 {
                     newDependencies.stream().forEach(dep ->
                     {
-                        if (!projects.exists(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId()))
+                        try
+                        {
+                            projects.checkExists(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId());
+                        }
+                        catch (IllegalArgumentException exception)
                         {
                             String missingDepError = String.format("Dependency %s-%s-%s not found in store", dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId());
                             response.addError(missingDepError);
