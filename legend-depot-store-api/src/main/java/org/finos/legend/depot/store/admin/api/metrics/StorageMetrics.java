@@ -17,7 +17,7 @@ package org.finos.legend.depot.store.admin.api.metrics;
 
 public interface StorageMetrics
 {
-    void reportMetrics();
+    Object reportMetrics();
 
     void init();
 }

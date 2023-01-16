@@ -46,23 +46,32 @@ public class StorageMetricsHandler implements StorageMetrics
     @Override
     public void init()
     {
-        metricsHandler.registerGauge("storage_collectionSize","collection size",Arrays.asList("collectionName"));
-        metricsHandler.registerGauge("storage_objectCount","object count",Arrays.asList("collectionName"));
-        metricsHandler.registerGauge("storage_indexCount","index count",Arrays.asList("collectionName"));
-        metricsHandler.registerGauge("storage_indexSize","index size",Arrays.asList("collectionName"));
-        metricsHandler.registerGauge("storage_storageSize", "storage size",Arrays.asList("collectionName"));
-        metricsHandler.registerGauge("storage_avgSize","avg size",Arrays.asList("collectionName"));
+
+        this.metricsHandler.registerGauge("storage_data_size_kb", "data size");
+        this.metricsHandler.registerGauge("storage_storage_size_kb", "storage size");
+        this.metricsHandler.registerGauge("storage_index_size_kb", "index size");
+
+        this.metricsHandler.registerGauge("storage_collectionSize","collection size",Arrays.asList("collectionName"));
+        this.metricsHandler.registerGauge("storage_objectCount","object count",Arrays.asList("collectionName"));
+        this.metricsHandler.registerGauge("storage_indexCount","index count",Arrays.asList("collectionName"));
+        this.metricsHandler.registerGauge("storage_indexSize","index size",Arrays.asList("collectionName"));
+        this.metricsHandler.registerGauge("storage_storageSize", "storage size",Arrays.asList("collectionName"));
+        this.metricsHandler.registerGauge("storage_avgSize","avg size",Arrays.asList("collectionName"));
     }
 
     @Override
-    public void reportMetrics()
+    public Object reportMetrics()
     {
-        DbStats dbStats = getDbStats();
-         if (dbStats != null)
+        StorageStats stats = new StorageStats();
+        stats.dbStats = getDbStats();
+
+         if (stats.dbStats != null)
          {
-             logMetrics(dbStats);
+             logMetrics(stats.dbStats);
          }
-         getCollectionsStats().forEach(stats -> logMetrics(stats));
+         stats.collectionStats = getCollectionsStats();
+         stats.collectionStats.forEach(collStats -> logMetrics(collStats));
+         return stats;
     }
 
     private DbStats getDbStats()
@@ -104,12 +113,9 @@ public class StorageMetricsHandler implements StorageMetrics
 
     private void logMetrics(DbStats dbStats)
     {
-        this.metricsHandler.setGauge("store_indexes_count",dbStats.indexes);
-        this.metricsHandler.setGauge("store_object_count",dbStats.objectCount);
-        this.metricsHandler.setGauge("store_avg_doc_size_kb", dbStats.averageDocSize.intValue());
-        this.metricsHandler.setGauge("store_data_size_gb", dbStats.uncompressedDataSize.intValue() / 1000000);
-        this.metricsHandler.setGauge("store_storage_size_gb", dbStats.storageSize.intValue() / 1000000);
-        this.metricsHandler.setGauge("store_index_size_gb", dbStats.indexSize.intValue() / 1000000);
+        this.metricsHandler.setGauge("storage_data_size_kb", dbStats.uncompressedDataSize);
+        this.metricsHandler.setGauge("storage_storage_size_kb", dbStats.storageSize);
+        this.metricsHandler.setGauge("storage_index_size_kb", dbStats.indexSize);
     }
 
     private void logMetrics(CollectionStats stats)
@@ -117,13 +123,22 @@ public class StorageMetricsHandler implements StorageMetrics
         this.metricsHandler.setGauge("storage_collectionSize",stats.collectionSize, Arrays.asList(stats.collectionName));
         this.metricsHandler.setGauge("storage_objectCount",stats.documentCount, Arrays.asList(stats.collectionName));
         this.metricsHandler.setGauge("storage_indexCount",stats.numberOfIndexes, Arrays.asList(stats.collectionName));
-        this.metricsHandler.setGauge("storage_indexSize",stats.indexSize / 1000000000, Arrays.asList(stats.collectionName));
-        this.metricsHandler.setGauge("storage_storageSize",stats.storageSize / 1000000000, Arrays.asList(stats.collectionName));
-        this.metricsHandler.setGauge("storage_avgSize",stats.averageDocSize / 1000, Arrays.asList(stats.collectionName));
+        this.metricsHandler.setGauge("storage_indexSize",stats.indexSize, Arrays.asList(stats.collectionName));
+        this.metricsHandler.setGauge("storage_storageSize",stats.storageSize, Arrays.asList(stats.collectionName));
+        this.metricsHandler.setGauge("storage_avgSize",stats.averageDocSize, Arrays.asList(stats.collectionName));
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class DbStats
+    public static class StorageStats
+    {
+        @JsonProperty()
+        DbStats dbStats;
+        @JsonProperty()
+        List<CollectionStats> collectionStats;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class DbStats
     {
         @JsonProperty("objects")
         Integer objectCount;
@@ -146,7 +161,7 @@ public class StorageMetricsHandler implements StorageMetrics
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class CollectionStats
+    public static class CollectionStats
     {
         @JsonProperty("ns")
         String collectionName;
