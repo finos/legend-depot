@@ -42,9 +42,9 @@ public class TestQueueMongo extends TestStoreMongo
     public void canStoreEvents()
     {
         MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST,VERSION);
-        MetadataNotification event1 = new MetadataNotification(TESTPROJECT_1, TEST, TEST,VERSION);
-        MetadataNotification event2 = new MetadataNotification(TESTPROJECT_2, TEST, TEST,"1.0.1");
-        MetadataNotification event3 = new MetadataNotification(TESTPROJECT_2, TEST, TEST, VERSION);
+        MetadataNotification event1 = new MetadataNotification(TESTPROJECT_1, TEST, "test1",VERSION);
+        MetadataNotification event2 = new MetadataNotification(TESTPROJECT_2, TEST, "test2","1.0.1");
+        MetadataNotification event3 = new MetadataNotification(TESTPROJECT_2, TEST, "test2", VERSION);
         queue.push(event);
         queue.push(event1);
         queue.push(event2);
@@ -109,9 +109,9 @@ public class TestQueueMongo extends TestStoreMongo
     public void canQueryContentsOfQueue()
     {
         MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST,VERSION);
-        MetadataNotification event1 = new MetadataNotification(TESTPROJECT_1, TEST, TEST,VERSION);
-        MetadataNotification event2 = new MetadataNotification(TESTPROJECT_2, TEST, TEST,"1.0.1");
-        MetadataNotification event3 = new MetadataNotification(TESTPROJECT_2, TEST, TEST, VERSION);
+        MetadataNotification event1 = new MetadataNotification(TESTPROJECT_1, TEST, "test1",VERSION);
+        MetadataNotification event2 = new MetadataNotification(TESTPROJECT_2, TEST, "test2","1.0.1");
+        MetadataNotification event3 = new MetadataNotification(TESTPROJECT_2, TEST, "test2", VERSION);
         queue.push(event);
         queue.push(event1);
         queue.push(event2);
@@ -198,7 +198,7 @@ public class TestQueueMongo extends TestStoreMongo
     public void canGetFirstInQueue()
     {
         MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST,VERSION);
-        MetadataNotification event1 = new MetadataNotification(TESTPROJECT_2, TEST, TEST,VERSION);
+        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1");
         queue.push(event);
         queue.push(event1);
 

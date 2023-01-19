@@ -61,16 +61,6 @@ public class StatusStoreResource extends BaseResource
     }
 
     @GET
-    @Path("/status/counts/{groupId}/{artifactId}/version/{versionId}")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_STATUS)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Deprecated
-    public StoreStatus.DocumentCounts getDeprecatedVersionCounts(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") String versionId)
-    {
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_STATUS, () -> this.statusService.getDocumentCounts(groupId, artifactId, versionId));
-    }
-
-    @GET
     @Path("/status/counts/{groupId}/{artifactId}/versions/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_STATUS)
     @Produces(MediaType.APPLICATION_JSON)
@@ -96,7 +86,5 @@ public class StatusStoreResource extends BaseResource
     {
         return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_STATUS, () -> this.statusService.getProjectStatus(groupId, artifactId));
     }
-
-
 
 }

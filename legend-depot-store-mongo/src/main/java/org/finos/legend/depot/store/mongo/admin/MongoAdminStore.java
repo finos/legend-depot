@@ -22,6 +22,7 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
+import org.finos.legend.depot.store.mongo.admin.schedules.SchedulesMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
@@ -29,7 +30,9 @@ import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.finos.legend.depot.store.mongo.core.BaseMongo.createIndexesIfAbsent;
@@ -57,14 +60,14 @@ public class MongoAdminStore
         return collections;
     }
 
-    public List<Document> getAllIndexes()
+    public Map<String,List<Document>> getAllIndexes()
     {
-        List<Document> result = new ArrayList<>();
+        Map<String,List<Document>> result = new HashMap<>();
         getAllCollections().forEach(col ->
         {
             List<Document> indexes = new ArrayList<>();
             mongoDatabase.getCollection(col).listIndexes().forEach((Consumer<Document>)indexes::add);
-            result.addAll(indexes);
+            result.put(col,indexes);
         });
         return result;
     }
@@ -83,7 +86,7 @@ public class MongoAdminStore
         results.addAll(createIndexesIfAbsent(mongoDatabase,FileGenerationsMongo.COLLECTION,FileGenerationsMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsFilesMongo.COLLECTION,ArtifactsFilesMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsRefreshStatusMongo.COLLECTION,ArtifactsRefreshStatusMongo.buildIndexes()));
-        results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsRefreshStatusMongo.COLLECTION,ArtifactsRefreshStatusMongo.buildIndexes()));
+        results.addAll(createIndexesIfAbsent(mongoDatabase,SchedulesMongo.COLLECTION,SchedulesMongo.buildIndexes()));
         return results;
     }
 

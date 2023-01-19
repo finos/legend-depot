@@ -118,10 +118,10 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("groupId-artifactId-versionId-versioned", GROUP_ID, ARTIFACT_ID, VERSION_ID,VERSIONED_ENTITY),
+        return Arrays.asList(buildIndex("versioned-groupId-artifactId-versionId-versioned", VERSIONED_ENTITY,GROUP_ID, ARTIFACT_ID, VERSION_ID),
         buildIndex("groupId-artifactId-versionId-entityPath", true, GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH),
         buildIndex("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE),
-        buildIndex("entity-classifier", ENTITY_CLASSIFIER_PATH)
+        buildIndex("versioned-entity-classifier", VERSIONED_ENTITY,ENTITY_CLASSIFIER_PATH)
         );
     }
 

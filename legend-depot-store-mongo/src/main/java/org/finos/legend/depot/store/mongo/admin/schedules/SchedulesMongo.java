@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexModel;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.store.admin.api.schedules.SchedulesStore;
 import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInfo;
@@ -26,6 +27,7 @@ import org.finos.legend.depot.store.mongo.core.BaseMongo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,7 +37,7 @@ import static com.mongodb.client.model.Filters.exists;
 
 public class SchedulesMongo extends BaseMongo<ScheduleInfo> implements SchedulesStore
 {
-    private static final String SCHEDULES_COLLECTION = "schedules";
+    public static final String COLLECTION = "schedules";
     public static final String JOB_ID = "jobId";
     private static final String RUNNING = "running";
     private static final String DISABLED = "disabled";
@@ -56,7 +58,7 @@ public class SchedulesMongo extends BaseMongo<ScheduleInfo> implements Schedules
     @Override
     protected MongoCollection getCollection()
     {
-        return getMongoCollection(SCHEDULES_COLLECTION);
+        return getMongoCollection(COLLECTION);
     }
 
     @Override
@@ -101,4 +103,8 @@ public class SchedulesMongo extends BaseMongo<ScheduleInfo> implements Schedules
     }
 
 
+    public static List<IndexModel> buildIndexes()
+    {
+        return Arrays.asList(buildIndex("jobid", JOB_ID));
+    }
 }
