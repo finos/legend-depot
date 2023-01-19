@@ -30,9 +30,9 @@ class NotificationKeyFilter
     public static Bson getFilter(MetadataNotification notification)
     {
         return notification.getEventId() != null ? Filters.eq(BaseMongo.ID_FIELD, new ObjectId(notification.getEventId())) :
-                Filters.and(Filters.and(Filters.and(Filters.and(Filters.eq("projectId", notification.getProjectId()),
+                Filters.and(Filters.and(
                         Filters.eq(BaseMongo.GROUP_ID, notification.getGroupId())),
-                        Filters.eq(BaseMongo.ARTIFACT_ID, notification.getArtifactId())),
-                        Filters.eq(BaseMongo.VERSION_ID, notification.getVersionId())));
+                        Filters.eq(BaseMongo.ARTIFACT_ID, notification.getArtifactId()),
+                        Filters.eq(BaseMongo.VERSION_ID, notification.getVersionId()));
     }
 }

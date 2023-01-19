@@ -28,8 +28,7 @@ import javax.validation.constraints.NotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoredFileGeneration extends BaseDomain implements HasIdentifier
 {
-    @JsonProperty
-    private String id;
+
     @JsonProperty
     @NotNull
     private String versionId;
@@ -58,7 +57,7 @@ public class StoredFileGeneration extends BaseDomain implements HasIdentifier
     @Override
     public String getId()
     {
-        return id;
+        return "";
     }
 
     public String getVersionId()

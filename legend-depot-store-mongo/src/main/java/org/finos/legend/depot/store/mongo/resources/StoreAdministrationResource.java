@@ -38,6 +38,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @Path("")
 @Api("Store Administration")
@@ -66,7 +67,7 @@ public class StoreAdministrationResource extends BaseAuthorisedResource
     @GET
     @Path("/indexes")
     @ApiOperation("get indexes")
-    public List<Document> getIndexed()
+    public Map<String,List<Document>> getIndexed()
     {
         return handle("Get indexes", this::getAllIndexes);
     }
@@ -127,7 +128,7 @@ public class StoreAdministrationResource extends BaseAuthorisedResource
         return manageStoreService.getAllCollections();
     }
 
-    private List<Document> getAllIndexes()
+    private Map<String, List<Document>> getAllIndexes()
     {
         return manageStoreService.getAllIndexes();
     }

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
+import com.mongodb.client.model.IndexOptions;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
@@ -35,6 +36,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
@@ -69,6 +71,7 @@ public class ArtifactsRefreshStatusMongo extends BaseMongo<RefreshStatus> implem
     {
         return Arrays.asList(
         buildIndex("running",RUNNING),
+        buildIndex("remove-old-entries",new IndexOptions().expireAfter(7L, TimeUnit.DAYS),STAR_TIME),
         buildIndex("parentId",PARENT_EVENT),
         buildIndex("status",RESPONSE_STATUS),
         buildIndex("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID));

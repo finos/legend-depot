@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.in;
 
 public abstract class BaseMongo<T extends HasIdentifier>
 {
@@ -188,8 +189,13 @@ public abstract class BaseMongo<T extends HasIdentifier>
     protected static IndexModel buildIndex(String indexName,boolean isUnique, String... fieldNames)
     {
         IndexOptions indexOptions = new IndexOptions().unique(isUnique).name(indexName);
+        return buildIndex(indexName,indexOptions,fieldNames);
+    }
+
+    protected static IndexModel buildIndex(String indexName,IndexOptions indexOptions, String... fieldNames)
+    {
         Bson index = Indexes.ascending(fieldNames);
-        return new IndexModel(index,indexOptions);
+        return new IndexModel(index,  indexOptions.name(indexName));
     }
 
     protected abstract Bson getKeyFilter(T data);

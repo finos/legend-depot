@@ -21,6 +21,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexModel;
+import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -38,6 +39,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static com.mongodb.client.model.Filters.and;
@@ -72,6 +74,7 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
         return Arrays.asList(
         buildIndex("parentId",PARENT_EVENT),
         buildIndex("status",RESPONSE_STATUS),
+        buildIndex("remove-old-entries",new IndexOptions().expireAfter(60L, TimeUnit.DAYS),LAST_UPDATED),
         buildIndex("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID),
         buildIndex("eventId", EVENT_ID));
     }
