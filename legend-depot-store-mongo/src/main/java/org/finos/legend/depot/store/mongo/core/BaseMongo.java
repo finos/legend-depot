@@ -118,7 +118,19 @@ public abstract class BaseMongo<T extends HasIdentifier>
         MongoCollection mongoCollection = mongoDatabase.getCollection(collection);
         List<String> existingIndexes = getIndexes(mongoCollection);
         List<IndexModel> newIndexes =  candidateIndexes.stream().filter(i -> !existingIndexes.contains(i.getOptions().getName())).collect(Collectors.toList());
-        return !newIndexes.isEmpty() ? mongoCollection.createIndexes(newIndexes) : Collections.EMPTY_LIST;
+        if(!newIndexes.isEmpty())
+        {
+            try
+            {
+                return mongoCollection.createIndexes(newIndexes);
+            }
+            catch (Exception e)
+            {
+                return Arrays.asList(e.getMessage());
+            }
+        }
+        return Collections.EMPTY_LIST;
+
     }
 
     protected abstract MongoCollection getCollection();
