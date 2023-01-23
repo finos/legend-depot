@@ -18,8 +18,8 @@ package org.finos.legend.depot.store.notifications;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
@@ -45,6 +45,7 @@ public class NotificationsModule extends PrivateModule
 {
     private static final String QUEUE_OBSERVER = "queue-observer";
     private static final String NOTIFICATION_METRICS_SCHEDULE = "notification-metrics-schedule";
+    private static final String CLEANUP_NOTIFICATIONS_SCHEDULE = "clean-notifications-schedule";
 
     @Override
     protected void configure()
@@ -79,6 +80,15 @@ public class NotificationsModule extends PrivateModule
         metricsHandler.registerCounter(NOTIFICATIONS_COUNTER, NOTIFICATIONS_COUNTER_HELP);
         metricsHandler.registerGauge(QUEUE_WAITING, QUEUE_WAITING_HELP);
         schedulesFactory.register(NOTIFICATION_METRICS_SCHEDULE, LocalDateTime.now().plusSeconds(1), 15000L, false, eventsQueueManager::waitingOnQueue);
+        return true;
+    }
+
+    @Provides
+    @Named("clean-old-notifications")
+    @Singleton
+    boolean notificationsCleanUp(SchedulesFactory schedulesFactory, @Named("queue-observer") NotificationsQueueManager eventsQueueManager)
+    {
+        schedulesFactory.register(CLEANUP_NOTIFICATIONS_SCHEDULE, LocalDateTime.now().plusSeconds(1), 12 * 3600000, false, () -> eventsQueueManager.deleteOldNotifications(60));
         return true;
     }
 

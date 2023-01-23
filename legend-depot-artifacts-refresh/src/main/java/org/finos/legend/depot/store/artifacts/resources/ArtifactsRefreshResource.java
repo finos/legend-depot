@@ -77,7 +77,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
             @QueryParam("artifactId") String artifact,
             @QueryParam("versionId") String version,
             @QueryParam("parentEventId")
-            @ApiParam("refresh could be started by another event, eg refresh all cache versions") String parentId,
+            @ApiParam("refresh could be started by another event, eg refresh all store versions") String parentId,
             @QueryParam("running") Boolean running,
             @QueryParam("success") Boolean success,
             @QueryParam("startTimeFrom")

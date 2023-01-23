@@ -66,8 +66,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
@@ -525,6 +528,24 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, "art1011", versionId,false,false,PARENT_EVENT_ID);
         Assert.assertNotNull(response);
         Assert.assertEquals(response.getStatus(),MetadataEventStatus.FAILED);
+    }
+
+    @Test
+    public void canDeleteOldStatuses()
+    {
+        RefreshStatus status1 = new RefreshStatus("test","artifact","2.0.0");
+        RefreshStatus status2 = new RefreshStatus("test","artifact","1.0.0");
+        status1.setStartTime(Date.from(LocalDateTime.now().minusDays(12).atZone(ZoneId.systemDefault()).toInstant()));
+        status2.setStartTime(Date.from(LocalDateTime.now().minusDays(2).atZone(ZoneId.systemDefault()).toInstant()));
+        refreshStatusStore.createOrUpdate(status1);
+        refreshStatusStore.createOrUpdate(status2);
+        Assert.assertEquals(2, refreshStatusStore.getAll().size());
+        artifactsRefreshService.deleteOldRefreshStatuses(10);
+        Assert.assertEquals(1, refreshStatusStore.getAll().size());
+        artifactsRefreshService.deleteOldRefreshStatuses(1);
+        Assert.assertEquals(0, refreshStatusStore.getAll().size());
+
+
     }
 
 }

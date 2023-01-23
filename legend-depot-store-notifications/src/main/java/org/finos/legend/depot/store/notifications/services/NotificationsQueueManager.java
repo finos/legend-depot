@@ -31,8 +31,10 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public final class NotificationsQueueManager implements NotificationsManager
 {
@@ -160,6 +162,16 @@ public final class NotificationsQueueManager implements NotificationsManager
     public Optional<MetadataNotification> findInQueue(String eventId)
     {
         return this.queue.get(eventId);
+    }
+
+    @Override
+    public long deleteOldNotifications(long days)
+    {
+        LocalDateTime timeToLive = LocalDateTime.now().minusDays(days);
+        List<MetadataNotification> notifications = this.events.find(null,null,null,null,null,null,timeToLive);
+        notifications.forEach(notification -> this.events.delete(notification.getId()));
+        LOGGER.info("deleted [{}] notifications older than [{}] days",notifications.size(),days);
+        return notifications.size();
     }
 
     public void handleAll()

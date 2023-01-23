@@ -71,7 +71,7 @@ public class ArtifactsRefreshStatusMongo extends BaseMongo<RefreshStatus> implem
     {
         return Arrays.asList(
         buildIndex("running",RUNNING),
-        buildIndex("remove-old-entries",new IndexOptions().expireAfter(7L, TimeUnit.DAYS),STAR_TIME),
+        buildIndex("startTime",STAR_TIME),
         buildIndex("parentId",PARENT_EVENT),
         buildIndex("status",RESPONSE_STATUS),
         buildIndex("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID));
