@@ -87,6 +87,7 @@ public class MongoAdminStore
         results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsFilesMongo.COLLECTION,ArtifactsFilesMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsRefreshStatusMongo.COLLECTION,ArtifactsRefreshStatusMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,SchedulesMongo.COLLECTION,SchedulesMongo.buildIndexes()));
+        results.addAll(createIndexesIfAbsent(mongoDatabase,QueryMetricsMongo.COLLECTION,QueryMetricsMongo.buildIndexes()));
         return results;
     }
 
