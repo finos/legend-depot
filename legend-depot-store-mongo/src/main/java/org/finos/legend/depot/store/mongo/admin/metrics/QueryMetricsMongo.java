@@ -25,10 +25,12 @@ import org.bson.conversions.Bson;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryCounter;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
+import com.mongodb.client.model.IndexModel;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
+import java.util.Arrays;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
