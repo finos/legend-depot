@@ -89,8 +89,8 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
                                                    @ApiParam("include  up to this date yyyy-MM-dd HH:mm:ss (default is now)") String to)
     {
         return handle(ResourceLoggingAndTracing.FIND_PAST_EVENTS, () ->
-                notificationsManager.findProcessedEvents(group,artifact,version,parentId,success,from == null ? null : LocalDateTime.parse(from, DATE_TIME_FORMATTER),
-                        to == null ? null : LocalDateTime.parse(to, DATE_TIME_FORMATTER)));
+                notificationsManager.findProcessedEvents(group,artifact,version,parentId,success,from == null ?  LocalDateTime.now().minusMinutes(30) : LocalDateTime.parse(from, DATE_TIME_FORMATTER),
+                        to == null ? LocalDateTime.now() : LocalDateTime.parse(to, DATE_TIME_FORMATTER)));
     }
 
     @GET

@@ -18,8 +18,10 @@ package org.finos.legend.depot.store.notifications.api;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public interface NotificationsManager
 {
@@ -34,4 +36,6 @@ public interface NotificationsManager
     Optional<MetadataNotification> findInQueue(String eventId);
 
     String notify(String projectId, String groupId, String artifactId, String versionId);
+
+    long deleteOldNotifications(long days);
 }

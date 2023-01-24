@@ -35,7 +35,10 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
@@ -135,6 +138,23 @@ public class TestNotificationManager extends TestStoreMongo
         Assert.assertFalse(queue.getAll().isEmpty());
         MetadataNotification response = queue.getFirstInQueue().get();
         Assert.assertTrue(response.getStatus().equals(MetadataEventStatus.FAILED));
+    }
+
+    @Test
+    public void testDeleteOldNotifications()
+    {
+        MetadataNotification ev1 = new MetadataNotification("prod-123","test","artifacts","1.0.0");
+        ev1.setEventId("609a5af62ccc9300c2e02581");
+        ev1.setLastUpdated(Date.from(LocalDateTime.now().minusDays(12).atZone(ZoneId.systemDefault()).toInstant()));
+        eventsMongo.insert(ev1);
+        MetadataNotification ev2 = new MetadataNotification("prod-123","test","artifacts","2.0.0");
+        ev2.setEventId("609a631a2ccc9300c2edafb8");
+        eventsMongo.insert(ev2);
+
+        Assert.assertEquals(2,eventsMongo.getAll().size());
+
+        eventsManager.deleteOldNotifications(10);
+        Assert.assertEquals(1,eventsMongo.getAll().size());
     }
 
 }

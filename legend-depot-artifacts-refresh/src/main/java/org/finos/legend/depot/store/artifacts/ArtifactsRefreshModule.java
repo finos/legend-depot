@@ -32,9 +32,10 @@ import java.time.LocalDateTime;
 
 public class ArtifactsRefreshModule extends PrivateModule
 {
-    private static final String UPDATE_MASTER_REVISIONS_SCHEDULER = "refreshVersionArtifacts-master-revisions-scheduler";
-    private static final String UPDATE_VERSIONS_SCHEDULER = "refreshVersionArtifacts-versions-scheduler";
+    private static final String UPDATE_MASTER_REVISIONS_SCHEDULER = "refreshVersionArtifacts-master-revisions-schedule";
+    private static final String UPDATE_VERSIONS_SCHEDULER = "refreshVersionArtifacts-versions-schedule";
     private static final String FIX_MISSING_VERSIONS_SCHEDULE = "fix-missing-versions-schedule";
+    private static final String CLEANUP_REFRESH_SCHEDULE = "clean-refresh-status-schedule";
 
     @Override
     protected void configure()
@@ -85,6 +86,15 @@ public class ArtifactsRefreshModule extends PrivateModule
     boolean initFixVersionsMismatchDaemon(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService,ArtifactRepositoryProviderConfiguration configuration)
     {
         schedulesFactory.register(FIX_MISSING_VERSIONS_SCHEDULE, LocalDateTime.now().plusSeconds(configuration.getFixVersionsMismatchIntervalInMillis() / 1000), configuration.getFixVersionsMismatchIntervalInMillis(), false,() -> artifactsRefreshService.refreshProjectsWithMissingVersions(false,false,FIX_MISSING_VERSIONS_SCHEDULE));
+        return true;
+    }
+
+    @Provides
+    @Singleton
+    @Named("cleanup-refresh-status")
+    boolean cleanUpSchedule(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService,ArtifactRepositoryProviderConfiguration configuration)
+    {
+        schedulesFactory.register(CLEANUP_REFRESH_SCHEDULE,LocalDateTime.now().plusMinutes(60),12 * 3600000,false,() -> artifactsRefreshService.deleteOldRefreshStatuses(7));
         return true;
     }
 }

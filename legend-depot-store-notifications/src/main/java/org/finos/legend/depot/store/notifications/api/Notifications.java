@@ -26,7 +26,7 @@ public interface Notifications
 
     List<MetadataNotification> getAll();
 
-    Optional<MetadataNotification> get(String eventId);
+    Optional<MetadataNotification> get(String notificationId);
 
     List<MetadataNotification> find(String group, String artifact, String version, String parentId, Boolean success, LocalDateTime fromDate, LocalDateTime toDate);
 
@@ -34,4 +34,5 @@ public interface Notifications
 
     void complete(MetadataNotification metadataEvent);
 
+    void delete(String id);
 }

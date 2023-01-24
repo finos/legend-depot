@@ -36,4 +36,5 @@ public interface ArtifactsRefreshService
 
     MetadataEventResponse refreshProjectsWithMissingVersions(boolean fullUpdate,boolean transitive, String parentEventId);
 
-  }
+    long deleteOldRefreshStatuses(int days);
+}

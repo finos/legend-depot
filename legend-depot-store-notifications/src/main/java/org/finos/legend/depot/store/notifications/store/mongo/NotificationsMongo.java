@@ -44,6 +44,7 @@ import java.util.function.Consumer;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
 
 
 public class NotificationsMongo extends BaseMongo<MetadataNotification> implements Notifications
@@ -74,7 +75,7 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
         return Arrays.asList(
         buildIndex("parentId",PARENT_EVENT),
         buildIndex("status",RESPONSE_STATUS),
-        buildIndex("remove-old-entries",new IndexOptions().expireAfter(60L, TimeUnit.DAYS),LAST_UPDATED),
+        buildIndex("lastUpdated",LAST_UPDATED),
         buildIndex("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID),
         buildIndex("eventId", EVENT_ID));
     }
@@ -107,18 +108,14 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
     public List<MetadataNotification> find(String groupId, String artifactId, String version, String parentEventId, Boolean success, LocalDateTime fromDate, LocalDateTime toDate)
     {
         MongoCollection<Document> events = getCollection();
-        LocalDateTime from = LocalDateTime.now().minusMinutes(30);
         LocalDateTime to = LocalDateTime.now();
-        if (fromDate != null)
-        {
-            from = fromDate;
-        }
         if (toDate != null)
         {
             to = toDate;
         }
 
-        Bson filter = Filters.and(Filters.gte(LAST_UPDATED, toTime(from)), Filters.lte(LAST_UPDATED, toTime(to)));
+        Bson filter = Filters.lte(LAST_UPDATED, toTime(to));
+        filter = fromDate != null ? and(filter, gte(LAST_UPDATED, toTime(fromDate))) : filter;
         filter = groupId != null ? and(filter, eq(GROUP_ID, groupId)) : filter;
         filter = artifactId != null ? and(filter, eq(ARTIFACT_ID, artifactId)) : filter;
         filter = version != null ? and(filter, eq(VERSION_ID, version)) : filter;
@@ -146,4 +143,9 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
         createOrUpdate(event.setLastUpdated(new Date()));
     }
 
+    @Override
+    public void delete(String id)
+    {
+       super.delete(Filters.eq(EVENT_ID,id));
+    }
 }

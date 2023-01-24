@@ -49,6 +49,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -564,5 +565,15 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             LOGGER.info("Fixed [{}] missing versions",totalMissingVersions);
             return response;
         });
+    }
+
+    @Override
+    public long deleteOldRefreshStatuses(int days)
+    {
+        LocalDateTime timeToLive = LocalDateTime.now().minusDays(days);
+        List<RefreshStatus> refreshStatuses = this.store.find(null,null,null,null,null,null,null,timeToLive);
+        refreshStatuses.forEach(status -> this.store.delete(status.getId()));
+        LOGGER.info("deleted [{}] statuses older than [{}] days",refreshStatuses.size(),days);
+        return refreshStatuses.size();
     }
 }
