@@ -37,7 +37,7 @@ import static com.mongodb.client.model.Filters.eq;
 public class QueryMetricsMongo extends BaseMongo<VersionQueryCounter> implements QueryMetricsStore
 {
 
-    private static final String COLLECTION = "query-metrics";
+    public static final String COLLECTION = "query-metrics";
 
 
     @Inject
@@ -87,5 +87,8 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryCounter> implements
         //no specific validation
     }
 
-
+    public static List<IndexModel> buildIndexes()
+    {
+        return Arrays.asList(buildIndex("group-artifact-version", GROUP_ID,ARTIFACT_ID,VERSION_ID));
+    }
 }
