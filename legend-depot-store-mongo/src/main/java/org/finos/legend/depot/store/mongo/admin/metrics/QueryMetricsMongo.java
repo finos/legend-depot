@@ -25,10 +25,12 @@ import org.bson.conversions.Bson;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryCounter;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
+import com.mongodb.client.model.IndexModel;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
+import java.util.Arrays;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
@@ -37,7 +39,7 @@ import static com.mongodb.client.model.Filters.eq;
 public class QueryMetricsMongo extends BaseMongo<VersionQueryCounter> implements QueryMetricsStore
 {
 
-    private static final String COLLECTION = "query-metrics";
+    public static final String COLLECTION = "query-metrics";
 
 
     @Inject
@@ -87,5 +89,8 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryCounter> implements
         //no specific validation
     }
 
-
+    public static List<IndexModel> buildIndexes()
+    {
+        return Arrays.asList(buildIndex("group-artifact-version", GROUP_ID,ARTIFACT_ID,VERSION_ID));
+    }
 }
