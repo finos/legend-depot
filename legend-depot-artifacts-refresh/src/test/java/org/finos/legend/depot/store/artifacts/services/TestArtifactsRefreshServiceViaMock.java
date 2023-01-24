@@ -114,12 +114,22 @@ public class TestArtifactsRefreshServiceViaMock extends TestStoreMongo
     }
 
     @Test
-    public void canRefreshVersionWithMasterSnapshotDependency()
+    public void canRefreshMasterWithMasterSnapshotDependency()
+    {
+        Set<ArtifactDependency> artifactDependency = Collections.singleton(new ArtifactDependency(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "master-SNAPSHOT"));
+        when(repositoryServices.findDependencies(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT")).thenReturn(artifactDependency);
+        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT", false, false, PARENT_EVENT_ID);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
+    }
+
+    @Test
+    public void cantRefreshVersionWithMasterDependencies()
     {
         Set<ArtifactDependency> artifactDependency = Collections.singleton(new ArtifactDependency(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "master-SNAPSHOT"));
         when(repositoryServices.findDependencies(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0")).thenReturn(artifactDependency);
         MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0", false, false, PARENT_EVENT_ID);
         Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
+        Assert.assertEquals(MetadataEventStatus.FAILED, response.getStatus());
     }
 }
