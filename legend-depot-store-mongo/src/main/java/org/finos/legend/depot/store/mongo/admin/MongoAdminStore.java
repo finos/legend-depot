@@ -26,6 +26,7 @@ import org.finos.legend.depot.store.mongo.admin.schedules.SchedulesMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
+import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
