@@ -310,15 +310,24 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 {
                     newDependencies.stream().forEach(dep ->
                     {
-                        try
+                        if (!dep.getVersionId().equals(MASTER_SNAPSHOT) && dep.getDependency().getVersionId().equals(MASTER_SNAPSHOT))
                         {
-                            projects.checkExists(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId());
+                            String illegalDepError = String.format("Snapshot dependency %s-%s-%s not allowed in versions", dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId());
+                            response.addError(illegalDepError);
+                            LOGGER.error(illegalDepError);
                         }
-                        catch (IllegalArgumentException exception)
+                        else
                         {
-                            String missingDepError = String.format("Dependency %s-%s-%s not found in store", dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId());
-                            response.addError(missingDepError);
-                            LOGGER.error(missingDepError);
+                            try
+                            {
+                                projects.checkExists(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId());
+                            }
+                            catch (IllegalArgumentException exception)
+                            {
+                                String missingDepError = String.format("Dependency %s-%s-%s not found in store", dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId());
+                                response.addError(missingDepError);
+                                LOGGER.error(missingDepError);
+                            }
                         }
                     });
                 }
