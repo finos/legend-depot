@@ -148,12 +148,15 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         {
             String message = String.format("Error refreshing [%s-%s-%s] : %s",groupId,artifactId,version,e.getMessage());
             response.addError(message);
-            PrometheusMetricsFactory.getInstance().incrementErrorCount(VERSION_REFRESH_COUNTER);
             LOGGER.error("Error refreshing [{}{}{}] : {} ",groupId,artifactId,version,e);
         }
         finally
         {
             store.createOrUpdate(storeStatus.stopRunning(response));
+            if (response.hasErrors())
+            {
+                PrometheusMetricsFactory.getInstance().incrementErrorCount(VERSION_REFRESH_COUNTER);
+            }
             getLOGGER().info("Finished [{}{}{}] refresh", groupId, artifactId, version);
         }
         return response;
