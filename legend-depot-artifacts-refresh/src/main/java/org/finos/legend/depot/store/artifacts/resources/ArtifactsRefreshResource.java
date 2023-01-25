@@ -116,7 +116,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
                                                       @QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to force refresh of processed jar files, versions ,etc") boolean fullUpdate,
                                                       @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to refresh its dependencies") boolean transitive)
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_VERSION, ResourceLoggingAndTracing.UPDATE_VERSION + groupId + artifactId + versionId, () -> artifactsRefreshService.refreshVersionForProject(groupId, artifactId, versionId, fullUpdate,transitive,groupId+"-"+artifactId+"_"+ResourceLoggingAndTracing.UPDATE_VERSION));
+        return handle(ResourceLoggingAndTracing.UPDATE_VERSION, ResourceLoggingAndTracing.UPDATE_VERSION + groupId + artifactId + versionId, () -> artifactsRefreshService.refreshVersionForProject(groupId, artifactId, versionId, fullUpdate,transitive,groupId + "-" + artifactId + "_" + ResourceLoggingAndTracing.UPDATE_VERSION));
     }
 
     @PUT
@@ -128,7 +128,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
                                                        @QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to force refresh of processed jar files, versions ,etc") boolean fullUpdate,
                                                        @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to refresh its dependencies") boolean transitive)
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS, ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS + groupId + artifactId, () -> artifactsRefreshService.refreshAllVersionsForProject(groupId, artifactId, fullUpdate,transitive,groupId+"-"+artifactId+ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS));
+        return handle(ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS, ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS + groupId + artifactId, () -> artifactsRefreshService.refreshAllVersionsForProject(groupId, artifactId, fullUpdate,transitive,groupId + "-" + artifactId + ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS));
     }
 
     @PUT
@@ -140,7 +140,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
                                                  @QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to force refresh of processed jar files, versions ,etc") boolean fullUpdate,
                                                  @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to refresh its dependencies") boolean transitive)
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION, ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION + groupId + artifactId, () -> artifactsRefreshService.refreshMasterSnapshotForProject(groupId, artifactId,fullUpdate,transitive,groupId+"-"+artifactId+ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION));
+        return handle(ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION, ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION + groupId + artifactId, () -> artifactsRefreshService.refreshMasterSnapshotForProject(groupId, artifactId,fullUpdate,transitive,groupId + "-" + artifactId + ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION));
     }
 
     @PUT
