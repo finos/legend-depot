@@ -86,7 +86,7 @@ public class TestArtifactsRefreshServiceViaMock extends TestStoreMongo
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);
     protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
-    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repositoryServices, artifacts, queue, new IncludeProjectPropertiesConfiguration(properties));
+    protected ArtifactsRefreshServiceImpl artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repositoryServices, artifacts, queue, new IncludeProjectPropertiesConfiguration(properties));
 
 
     @Before
@@ -131,5 +131,14 @@ public class TestArtifactsRefreshServiceViaMock extends TestStoreMongo
         MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0", false, false, PARENT_EVENT_ID);
         Assert.assertNotNull(response);
         Assert.assertEquals(MetadataEventStatus.FAILED, response.getStatus());
+    }
+    
+    @Test
+    public void canCalculateCandidateVersionsToUpdate()
+    {
+        List<VersionId> repoVersions = Arrays.asList(VersionId.parseVersionId("1.0.0"),VersionId.parseVersionId("2.0.0"));
+        VersionId latest = VersionId.parseVersionId("1.0.0");
+        List<VersionId> candidates = artifactsRefreshService.calculateCandidateVersions(repoVersions,latest);
+        Assert.assertEquals("2.0.0",candidates.get(0).toVersionIdString());
     }
 }

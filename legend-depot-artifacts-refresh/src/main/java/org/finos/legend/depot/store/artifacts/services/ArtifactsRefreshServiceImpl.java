@@ -487,7 +487,8 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 List<VersionId> candidateVersions;
                 if (!fullUpdate && project.getLatestVersion().isPresent())
                 {
-                    candidateVersions = repoVersions.stream().filter(v -> v.compareTo(project.getLatestVersion().get()) > 1).collect(Collectors.toList());
+                    VersionId latest = project.getLatestVersion().get();
+                    candidateVersions = calculateCandidateVersions(repoVersions, latest);
                 }
                 else
                 {
@@ -508,6 +509,11 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         }
         return response;
 
+    }
+    
+    List<VersionId> calculateCandidateVersions(List<VersionId> repoVersions, VersionId latest)
+    {
+        return repoVersions.stream().filter(v -> v.compareTo(latest) > 0).collect(Collectors.toList());
     }
 
     private List<File> findArtifactFiles(ArtifactType type, ProjectData project, String versionId, boolean includeUnchangedFiles)
