@@ -27,6 +27,7 @@ import org.finos.legend.depot.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.engine.shared.core.operational.prometheus.TracingExports;
 import org.finos.legend.opentracing.JerseyClientSender;
 import org.finos.legend.opentracing.OpenTracing;
+import org.slf4j.Logger;
 import zipkin2.reporter.InMemoryReporterMetrics;
 
 import javax.inject.Singleton;
@@ -41,9 +42,9 @@ import java.util.logging.LogManager;
 public final class TracerFactory
 {
     private static final TracerFactory INSTANCE = new TracerFactory();
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TracerFactory.class);
     public static final String DEFAULT_SERVICE_NAME = "legend-depot";
     private static Tracer tracer = NoopTracerFactory.create();
-    private static boolean isEnabled = false;
 
     private TracerFactory()
     {
@@ -82,6 +83,7 @@ public final class TracerFactory
             }
             catch (Exception e)
             {
+                LOGGER.error("tracing configuration failed",e);
                 throw new TracingException("Invalid openTracingUri provided", e);
             }
         }
@@ -156,15 +158,27 @@ public final class TracerFactory
         }
         catch (Exception e)
         {
+          
             Span currentSpan = GlobalTracer.get().activeSpan();
-            Tags.ERROR.set(currentSpan, true);
-            Map<String, String> map = new HashMap<>();
-            map.put(Fields.EVENT, "error");
-            map.put(Fields.ERROR_OBJECT, e.toString());
-            map.put(Fields.MESSAGE, e.getMessage());
-            currentSpan.log(map);
-            String traceId = currentSpan.context().toTraceId();
-            String message = String.format("[%s] failed with error:[%s] (TraceId: [%s])",label,e.getMessage(),traceId);
+            String message;
+            if (currentSpan != null)
+            {
+                Tags.ERROR.set(currentSpan, true);
+                Map<String, String> map = new HashMap<>();
+                map.put(Fields.EVENT, "error");
+                map.put(Fields.ERROR_OBJECT, e.toString());
+                map.put(Fields.MESSAGE, e.getMessage());
+                currentSpan.log(map);
+                String traceId = currentSpan.context().toTraceId();
+                message = String.format("[%s] failed with error:[%s] (TraceId: [%s])", label, e.getMessage(), traceId);
+                LOGGER.error(message);
+            }
+            else
+            {
+                message = String.format("[%s] failed with error:[%s])", label, e.getMessage());
+                LOGGER.error(message);
+                LOGGER.error("{} ( TraceId: current span not found)",message);
+            }
             throw new TracingException(message, e);
         }
         finally
