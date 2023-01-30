@@ -55,7 +55,7 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("eventId", "eventId"));
+        return Arrays.asList(buildIndex("createdAt", "createdAt"));
     }
 
     @Override
