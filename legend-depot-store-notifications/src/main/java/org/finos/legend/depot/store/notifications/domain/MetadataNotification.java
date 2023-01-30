@@ -33,26 +33,41 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetadataNotification implements HasIdentifier
 {
-    public static final int DEFAULT_MAX_RETRIES = 3;
+    public static final int DEFAULT_MAX_RETRIES = 2;
     @EqualsExclude
+    @JsonProperty
     private String id;
     @EqualsExclude
+    @JsonProperty
     private String eventId;
+    @JsonProperty
     private String parentEventId;
     @NotNull
+    @JsonProperty
     private String projectId;
     @NotNull
+    @JsonProperty
     private String groupId;
     @NotNull
+    @JsonProperty
     private String artifactId;
     @NotNull
+    @JsonProperty
     private String versionId;
+    @JsonProperty
     private boolean fullUpdate;
+    @JsonProperty
     private boolean transitive;
+    @JsonProperty
     private int retries;
+    @JsonProperty
+    private Date createdAt;
+    @JsonProperty
     private Date lastUpdated;
+    @JsonProperty
     private int maxRetries;
     @EqualsExclude
+    @JsonProperty
     private MetadataEventResponse response;
 
 
@@ -62,6 +77,7 @@ public class MetadataNotification implements HasIdentifier
                                 @JsonProperty(value = "artifactId") String artifactId,
                                 @JsonProperty(value = "version") String version,
                                 @JsonProperty(value = "lastUpdated") Date lastUpdated,
+                                @JsonProperty(value = "createdAt") Date createdAt,
                                 @JsonProperty(value = "eventId") String eventId,
                                 @JsonProperty(value = "parentEvent") String parentEventId,
                                 @JsonProperty(value = "response") MetadataEventResponse response,
@@ -77,6 +93,7 @@ public class MetadataNotification implements HasIdentifier
         this.eventId = eventId;
         this.parentEventId = parentEventId;
         this.lastUpdated = lastUpdated;
+        this.createdAt = createdAt;
         this.maxRetries = maxRetries != null ? maxRetries : DEFAULT_MAX_RETRIES;
         this.response = response != null ? response : new MetadataEventResponse();
         this.retries = retries != null ? retries : 0;
@@ -86,12 +103,12 @@ public class MetadataNotification implements HasIdentifier
 
     public MetadataNotification(String projectId, String groupId, String artifactId, String versionId)
     {
-        this(projectId, groupId, artifactId, versionId, null, null, null, null, null,null, null, null);
+        this(projectId, groupId, artifactId, versionId, null,null, null, null, null, null,null, null, null);
     }
 
     public MetadataNotification(String projectId,String groupId, String artifactId, String versionId, Boolean fullUpdate,Boolean transitive, String parentEvent)
     {
-        this(projectId, groupId, artifactId, versionId, null, null, parentEvent,null,fullUpdate,transitive, null, null);
+        this(projectId, groupId, artifactId, versionId, null,null, null, parentEvent,null,fullUpdate,transitive, null, null);
     }
 
     public String getId()
@@ -180,6 +197,35 @@ public class MetadataNotification implements HasIdentifier
         return parentEventId;
     }
 
+    public void setParentEventId(String parentEventId)
+    {
+        this.parentEventId = parentEventId;
+    }
+
+    public void setFullUpdate(boolean fullUpdate)
+    {
+        this.fullUpdate = fullUpdate;
+    }
+
+    public void setTransitive(boolean transitive)
+    {
+        this.transitive = transitive;
+    }
+
+    public Date getCreatedAt()
+    {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt)
+    {
+        this.createdAt = createdAt;
+    }
+
+    public void setMaxRetries(int maxRetries)
+    {
+        this.maxRetries = maxRetries;
+    }
 
     public boolean isTransitive()
     {

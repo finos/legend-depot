@@ -20,7 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndDeleteOptions;
 import com.mongodb.client.model.IndexModel;
+import com.mongodb.client.model.Sorts;
 import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -77,12 +79,16 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
     @Override
     public long size()
     {
-        return getCollection().count();
+        return getCollection().countDocuments();
     }
 
     public String push(MetadataNotification event)
     {
         event.setLastUpdated(new Date());
+        if (event.getCreatedAt() == null)
+        {
+            event.setCreatedAt(new Date());
+        }
         MetadataNotification result = createOrUpdate(event);
         if (result.getEventId() == null)
         {
@@ -110,7 +116,7 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
     @Override
     public Optional<MetadataNotification> getFirstInQueue()
     {
-        Document first = (Document)getCollection().findOneAndDelete(Filters.exists(GROUP_ID));
+        Document first = (Document)getCollection().findOneAndDelete(Filters.exists("_id"),new FindOneAndDeleteOptions().sort(Sorts.ascending("createdAt")));
         if (first != null)
         {
             return Optional.of(convert(first, MetadataNotification.class));

@@ -39,7 +39,7 @@ public class MetricsModule extends PrivateModule
     @Named("persist-metrics")
     boolean scheduleMetricsPersistence(SchedulesFactory schedulesFactory, QueryMetricsHandler queryMetrics)
     {
-        schedulesFactory.register("persist-metrics", LocalDateTime.now().plusSeconds(30), 5 * 60 * 1000L, true, () ->
+        schedulesFactory.register("persist-metrics", LocalDateTime.now().plusMinutes(1), 5 * 60000L, true, () ->
         {
             queryMetrics.persistMetrics();
             return true;
