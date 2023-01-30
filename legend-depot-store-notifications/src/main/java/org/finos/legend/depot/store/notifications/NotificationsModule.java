@@ -68,7 +68,15 @@ public class NotificationsModule extends PrivateModule
     NotificationsQueueManager initQueue(SchedulesFactory schedulesFactory, QueueManagerConfiguration config, ProjectsService projectsService, Notifications events, Queue queue, NotificationEventHandler notificationHandler)
     {
         NotificationsQueueManager eventsQueueManager = new NotificationsQueueManager(projectsService, events, queue, notificationHandler);
-        schedulesFactory.register(QUEUE_OBSERVER, LocalDateTime.now().plusNanos(config.getQueueDelay() * 1000000L), config.getQueueInterval(), true, eventsQueueManager::handle);
+        long numberOfWorkers = config.getNumberOfQueueWorkers();
+        if (numberOfWorkers <= 0)
+        {
+            throw new IllegalArgumentException("Number of queue workers must be a positive number >1 ");
+        }
+        for (long worker = 1;numberOfWorkers >= worker;worker++)
+        {
+            schedulesFactory.register(QUEUE_OBSERVER + "_" + worker, LocalDateTime.now().plusNanos(config.getQueueDelay() * 1000000L), config.getQueueInterval(), true, eventsQueueManager::handle);
+        }
         return eventsQueueManager;
     }
 
@@ -79,7 +87,7 @@ public class NotificationsModule extends PrivateModule
     {
         metricsHandler.registerCounter(NOTIFICATIONS_COUNTER, NOTIFICATIONS_COUNTER_HELP);
         metricsHandler.registerGauge(QUEUE_WAITING, QUEUE_WAITING_HELP);
-        schedulesFactory.register(NOTIFICATION_METRICS_SCHEDULE, LocalDateTime.now().plusSeconds(1), 15000L, false, eventsQueueManager::waitingOnQueue);
+        schedulesFactory.register(NOTIFICATION_METRICS_SCHEDULE, LocalDateTime.now().plusSeconds(1), 60000L, false, eventsQueueManager::waitingOnQueue);
         return true;
     }
 

@@ -21,14 +21,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class QueueManagerConfiguration
 {
-    public static final long TWENTY_SECONDS = 20 * 1000L;
-    public static final long ONE_MINUTE = 60 * 1000L;
+    private static final long TWENTY_SECONDS = 20 * 1000L;
+    private static final long ONE_MINUTE = 60 * 1000L;
+    private static final long DEFAULT_NUMBER_OF_QUEUE_WORKERS = 1;
 
     @JsonProperty
     long queueInterval = TWENTY_SECONDS;
 
     @JsonProperty
     long queueDelay = ONE_MINUTE;
+
+    @JsonProperty
+    long numberOfQueueWorkers = DEFAULT_NUMBER_OF_QUEUE_WORKERS;
 
     public long getQueueInterval()
     {
@@ -48,5 +52,15 @@ public class QueueManagerConfiguration
     public void setQueueDelay(long queueDelay)
     {
         this.queueDelay = queueDelay;
+    }
+
+    public long getNumberOfQueueWorkers()
+    {
+        return numberOfQueueWorkers;
+    }
+
+    public void setNumberOfQueueWorkers(long numberOfQueueWorkers)
+    {
+        this.numberOfQueueWorkers = numberOfQueueWorkers;
     }
 }

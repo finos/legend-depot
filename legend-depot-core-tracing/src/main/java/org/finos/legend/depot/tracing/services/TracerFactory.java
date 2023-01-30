@@ -158,7 +158,6 @@ public final class TracerFactory
         }
         catch (Exception e)
         {
-          
             Span currentSpan = GlobalTracer.get().activeSpan();
             String message;
             if (currentSpan != null)

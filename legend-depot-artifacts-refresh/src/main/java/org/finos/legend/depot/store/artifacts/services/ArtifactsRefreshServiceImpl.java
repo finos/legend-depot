@@ -296,30 +296,30 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     {
         return executeWithTrace(REFRESH_PROJECT_VERSION_ARTIFACTS, project.getGroupId(), project.getArtifactId(), versionId, parentEventId, () ->
         {
-            MetadataEventResponse response = new MetadataEventResponse();
             long refreshStartTime = System.currentTimeMillis();
-            response.combine(validateInput(project.getGroupId(),project.getArtifactId(),versionId));
+            LOGGER.info("Started updating project data [{}{}{}]", project.getGroupId(), project.getArtifactId(), versionId);
+            MetadataEventResponse response = validateInput(project.getGroupId(),project.getArtifactId(),versionId);
             response.addMessage(String.format("Processing [%s-%s-%s] fullUpdate/transitive? [%s/%s] parent:[%s]", project.getGroupId(), project.getArtifactId(), versionId, fullUpdate, transitive,parentEventId));
-            getSupportedArtifactTypes().forEach(artifactType -> response.combine(executeVersionRefresh(artifactType, project, versionId,fullUpdate)));
+            List<ProjectVersionDependency> newDependencies = calculateDependencies(project.getGroupId(), project.getArtifactId(), versionId);
+            response.combine(validateDependencies(newDependencies));
             if (!response.hasErrors())
             {
-                List<ProjectVersionDependency> newDependencies = calculateDependencies(project.getGroupId(), project.getArtifactId(), versionId);
-                if (transitive)
+                getSupportedArtifactTypes().forEach(artifactType -> response.combine(executeVersionRefresh(artifactType, project, versionId, fullUpdate)));
+                LOGGER.info("Finished processing artifacts for [{}{}{}]", project.getGroupId(), project.getArtifactId(), versionId);
+                if (!response.hasErrors())
                 {
-                    response.combine(refreshDependencies(newDependencies,fullUpdate,transitive,parentEventId));
-                    LOGGER.info("Finished updating {} dependencies for [{}{}{}]", project.getDependencies(versionId).size(), project.getGroupId(), project.getArtifactId(), versionId);
-                }
-                else
-                {
-                    newDependencies.stream().forEach(dep ->
+                    Optional<ProjectData> latestProjectData = projects.find(project.getGroupId(), project.getArtifactId());
+                    updateProjectData(versionId, newDependencies, latestProjectData);
+                    LOGGER.info("Finished updating project data [{}{}{}]", project.getGroupId(), project.getArtifactId(), versionId);
+                    if (transitive)
                     {
-                        if (!dep.getVersionId().equals(MASTER_SNAPSHOT) && dep.getDependency().getVersionId().equals(MASTER_SNAPSHOT))
-                        {
-                            String illegalDepError = String.format("Snapshot dependency %s-%s-%s not allowed in versions", dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId());
-                            response.addError(illegalDepError);
-                            LOGGER.error(illegalDepError);
-                        }
-                        else
+                        LOGGER.info("Started updating {} dependencies for [{}{}{}]", newDependencies.size(), project.getGroupId(), project.getArtifactId(), versionId);
+                        response.combine(refreshDependencies(newDependencies, fullUpdate, transitive, parentEventId));
+                        LOGGER.info("Finished updating {} dependencies for [{}{}{}]",newDependencies.size(), project.getGroupId(), project.getArtifactId(), versionId);
+                    }
+                    else
+                    {
+                        newDependencies.stream().forEach(dep ->
                         {
                             try
                             {
@@ -331,13 +331,8 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                                 response.addError(missingDepError);
                                 LOGGER.error(missingDepError);
                             }
-                        }
-                    });
-                }
-                if (!response.hasErrors())
-                {
-                    Optional<ProjectData> latestProjectData = projects.find(project.getGroupId(), project.getArtifactId());
-                    refreshProjectData(versionId, newDependencies, latestProjectData);
+                        });
+                    }
                 }
             }
             long refreshEndTime = System.currentTimeMillis();
@@ -346,7 +341,22 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         });
     }
 
-    private void refreshProjectData(String versionId, List<ProjectVersionDependency> newDependencies, Optional<ProjectData> latestProjectData)
+    private MetadataEventResponse validateDependencies(List<ProjectVersionDependency> newDependencies)
+    {
+        MetadataEventResponse response = new MetadataEventResponse();
+        newDependencies.stream().forEach(dep ->
+        {
+            if (!dep.getVersionId().equals(MASTER_SNAPSHOT) && dep.getDependency().getVersionId().equals(MASTER_SNAPSHOT))
+            {
+                String illegalDepError = String.format("Snapshot dependency %s-%s-%s not allowed in versions", dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId());
+                response.addError(illegalDepError);
+                LOGGER.error(illegalDepError);
+            }
+        });
+        return response;
+    }
+
+    private void updateProjectData(String versionId, List<ProjectVersionDependency> newDependencies, Optional<ProjectData> latestProjectData)
     {
         latestProjectData.ifPresent(p ->
         {
@@ -357,6 +367,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             projects.createOrUpdate(p);
         });
     }
+
 
     private List<ProjectVersionDependency> calculateDependencies(String groupId, String artifactId, String versionId)
     {
@@ -416,17 +427,20 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         MetadataEventResponse response = new MetadataEventResponse();
         dependencies.stream().forEach(dependency ->
         {
-            Optional<ProjectData> found = projects.find(dependency.getDependency().getGroupId(), dependency.getDependency().getArtifactId());
-            if (found.isPresent())
+            Optional<ProjectData> dependent = projects.find(dependency.getDependency().getGroupId(), dependency.getDependency().getArtifactId());
+            if (dependent.isPresent())
             {
-                ProjectData dependentProject = found.get();
+                ProjectData dependentProject = dependent.get();
                 String projectCoordinates = String.format("[%s-%s-%s]", dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersionId());
                 String dependencyCoordinates = String.format("[%s-%s-%s]", dependency.getDependency().getGroupId(), dependency.getDependency().getArtifactId(), dependency.getDependency().getVersionId());
-                response.addMessage(String.format("Processing dependency %s -> %s", projectCoordinates, dependencyCoordinates));
-                response.addMessage(queueWorkToRefreshProjectVersion(dependentProject,dependency.getDependency().getVersionId(), fullUpdate,transitive,parentEventId));
-                if (response.hasErrors())
+                if (dependentProject.getVersion(dependency.getDependency().getVersionId()).isPresent())
                 {
-                    return;
+                    response.addMessage(String.format("Skipping update dependency %s -> %s, already in store", projectCoordinates, dependencyCoordinates));
+                }
+                else
+                {
+                    response.addMessage(String.format("Processing dependency %s -> %s", projectCoordinates, dependencyCoordinates));
+                    response.addMessage(queueWorkToRefreshProjectVersion(dependentProject, dependency.getDependency().getVersionId(), fullUpdate, transitive, parentEventId));
                 }
             }
             else

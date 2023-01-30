@@ -480,7 +480,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void cantRefreshNonExistingProjectInRepo()
     {
         String versionId = "2.111.0";
-        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject("i.dont.exist", "in.repo", versionId,false,false,PARENT_EVENT_ID);
+        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject("i.dont.exist", "in-repo", versionId,false,false,PARENT_EVENT_ID);
         Assert.assertNotNull(response);
         Assert.assertTrue(response.hasErrors());
     }

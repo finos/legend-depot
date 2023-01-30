@@ -209,4 +209,20 @@ public class TestQueueMongo extends TestStoreMongo
 
     }
 
+    @Test
+    public void canGetFirstInQueueByFIFO()
+    {
+        MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST,VERSION);
+        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1");
+        queue.push(event);
+        queue.push(event1);
+
+        Optional<MetadataNotification> first = queue.getFirstInQueue();
+        Optional<MetadataNotification> second = queue.getFirstInQueue();
+
+        Assert.assertEquals(VERSION,first.get().getVersionId());
+        Assert.assertEquals("1.0.1",second.get().getVersionId());
+        Assert.assertTrue(first.get().getCreatedAt().before(second.get().getCreatedAt()));
+    }
+
 }
