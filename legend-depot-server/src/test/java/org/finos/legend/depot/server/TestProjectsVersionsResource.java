@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.server;
 
-import org.finos.legend.depot.server.resources.ProjectsResource;
+import org.finos.legend.depot.server.resources.ProjectsVersionsResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.junit.Assert;
@@ -23,15 +23,15 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class TestProjectsResource extends TestBaseServices
+public class TestProjectsVersionsResource extends TestBaseServices
 {
 
-    private ProjectsResource projects = new ProjectsResource(new ProjectsServiceImpl(projectsStore));
+    private ProjectsVersionsResource projectsVersionsResource = new ProjectsVersionsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore));
 
     @Test
     public void canQueryVersionsForProjectGA()
     {
-        List<String> versionSet = projects.getVersions("examples.metadata","test");
+        List<String> versionSet = projectsVersionsResource.getVersions("examples.metadata","test");
         Assert.assertNotNull(versionSet);
         Assert.assertEquals(2, versionSet.size());
     }
@@ -39,7 +39,7 @@ public class TestProjectsResource extends TestBaseServices
     @Test
     public void canQueryVersionsForProject()
     {
-        List<String> versionSet = projects.getVersions("examples.metadata","test");
+        List<String> versionSet = projectsVersionsResource.getVersions("examples.metadata","test");
         Assert.assertNotNull(versionSet);
         Assert.assertEquals(2, versionSet.size());
     }

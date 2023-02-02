@@ -19,14 +19,13 @@ import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.purge.api.ArtifactsPurgeService;
 import org.finos.legend.depot.store.artifacts.services.ArtifactHandlerFactory;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -76,9 +75,9 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
         TracerFactory.get().addTags(tags);
     }
 
-    private ProjectData getProject(String groupId, String artifactId)
+    private StoreProjectVersionData getProjectVersion(String groupId, String artifactId, String versionId)
     {
-        Optional<ProjectData> found = projects.find(groupId, artifactId);
+        Optional<StoreProjectVersionData> found = projects.find(groupId, artifactId, versionId);
         if (!found.isPresent())
         {
             throw new IllegalArgumentException("can't find project for " + groupId + SEPARATOR + artifactId);
@@ -100,10 +99,28 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
                     artifactHandler.delete(groupId, artifactId, versionId);
                 }
             });
-            ProjectData project = getProject(groupId, artifactId);
-            project.removeVersion(versionId);
             PrometheusMetricsFactory.getInstance().incrementCount(VERSION_PURGE_COUNTER);
-            return projects.createOrUpdate(project);
+            return projects.delete(groupId, artifactId, versionId);
+        });
+    }
+
+    private void evict(String groupId, String artifactId, String versionId)
+    {
+        decorateSpanWithVersionInfo(groupId, artifactId, versionId);
+        TracerFactory.get().executeWithTrace(EVICT_VERSION, () ->
+        {
+            getSupportedArtifactTypes().forEach(artifactType ->
+            {
+                ProjectArtifactsHandler artifactHandler = ArtifactHandlerFactory.getArtifactHandler(artifactType);
+                if (artifactHandler != null)
+                {
+                    artifactHandler.delete(groupId, artifactId, versionId);
+                }
+            });
+            StoreProjectVersionData projectData = getProjectVersion(groupId, artifactId, versionId);
+            projectData.setEvicted(true);
+            PrometheusMetricsFactory.getInstance().incrementCount(VERSION_PURGE_COUNTER);
+            return projects.createOrUpdate(projectData);
         });
     }
 
@@ -132,35 +149,29 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     @Override
     public MetadataEventResponse evictOldestProjectVersions(String groupId, String artifactId, int versionsToKeep)
     {
-        return evictOldestProjectVersions(getProject(groupId, artifactId),versionsToKeep);
-    }
-
-    private MetadataEventResponse evictOldestProjectVersions(ProjectData project, int versionsToKeep)
-    {
+        projects.checkExists(groupId, artifactId);
         return TracerFactory.get().executeWithTrace(EVICT_OLDEST, () ->
         {
             MetadataEventResponse response = new MetadataEventResponse();
-            List<VersionId> versionIds = project.getVersionsOrdered();
+            List<String> versionIds = projects.getVersions(groupId, artifactId);
             int numberOfVersions = versionIds.size();
             try
             {
                 while (versionIds.size() > versionsToKeep)
                 {
-                    VersionId versionId = versionIds.get(0);
-                    delete(project.getGroupId(), project.getArtifactId(), versionId.toVersionIdString());
+                    String versionId = versionIds.get(0);
+                    evict(groupId, artifactId, versionId);
                     versionIds.remove(versionId);
-                    project.removeVersion(versionId.toVersionIdString());
-                    response.addMessage(String.format("%s-%s-%s evicted", project.getGroupId(), project.getArtifactId(), versionId.toVersionIdString()));
+                    response.addMessage(String.format("%s-%s-%s evicted", groupId, artifactId, versionId));
                 }
-                projects.createOrUpdate(project);
-                response.addMessage(String.format("%s-%s evicted %s versions", project.getGroupId(), project.getArtifactId(), numberOfVersions - versionIds.size()));
+                response.addMessage(String.format("%s-%s evicted %s versions", groupId, artifactId, numberOfVersions - versionIds.size()));
             }
             catch (Exception e)
             {
-                 String errorMessage = String.format(" Error evicting old versions %s-%s %s",project.getGroupId(),project.getArtifactId(),e.getMessage());
-                 LOGGER.error(errorMessage);
-                 response.addError(errorMessage);
-                 PrometheusMetricsFactory.getInstance().incrementErrorCount(VERSION_PURGE_COUNTER);
+                String errorMessage = String.format(" Error evicting old versions %s-%s %s",groupId,artifactId,e.getMessage());
+                LOGGER.error(errorMessage);
+                response.addError(errorMessage);
+                PrometheusMetricsFactory.getInstance().incrementErrorCount(VERSION_PURGE_COUNTER);
             }
             return response;
         });

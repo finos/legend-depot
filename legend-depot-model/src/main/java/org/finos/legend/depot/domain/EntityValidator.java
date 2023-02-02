@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.domain;
 
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 
 import javax.lang.model.SourceVersion;
 import java.util.regex.Pattern;
@@ -28,7 +28,7 @@ public class EntityValidator
     {
     }
 
-    public static boolean isValid(ProjectData projectData)
+    public static boolean isValid(StoreProjectData projectData)
     {
         return isValidGroupId(projectData.getGroupId()) && isValidArtifactId(projectData.getArtifactId());
     }

@@ -17,16 +17,14 @@ package org.finos.legend.depot.domain.project.dependencies;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.eclipse.collections.api.factory.Sets;
-import org.finos.legend.depot.domain.BaseDomain;
+import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.HasIdentifier;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 
 import java.util.Set;
 
-public class ProjectDependencyVersionNode extends BaseDomain implements HasIdentifier
+public class ProjectDependencyVersionNode extends VersionedData implements HasIdentifier
 {
-    private String versionId;
-
     private String projectId;
 
     private Set<String> forwardEdges;
@@ -35,8 +33,7 @@ public class ProjectDependencyVersionNode extends BaseDomain implements HasIdent
 
     public ProjectDependencyVersionNode(String groupId, String artifactId, String versionId)
     {
-        super(groupId, artifactId);
-        this.versionId = versionId;
+        super(groupId, artifactId, versionId);
         this.forwardEdges = Sets.mutable.empty();
         this.backEdges = Sets.mutable.empty();
     }
@@ -59,11 +56,6 @@ public class ProjectDependencyVersionNode extends BaseDomain implements HasIdent
     public Set<String> getForwardEdges()
     {
         return forwardEdges;
-    }
-
-    public String getVersionId()
-    {
-        return versionId;
     }
 
     public void setProjectId(String projectId)

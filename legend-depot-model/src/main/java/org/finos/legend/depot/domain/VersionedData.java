@@ -13,39 +13,41 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.domain.project;
+package org.finos.legend.depot.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.BaseDomain;
+
+import javax.validation.constraints.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProjectVersionDependency extends BaseDomain
+public abstract class VersionedData extends CoordinateData
 {
+    @JsonProperty
+    @NotNull
     private String versionId;
-    private ProjectVersion dependency;
 
-    public ProjectVersionDependency()
+    public VersionedData()
     {
+        super();
     }
 
-    public ProjectVersionDependency(String groupid, String artifactId, String versionId, ProjectVersion dep)
+    public VersionedData(String groupId, String artifactId, String versionId)
     {
-        super(groupid, artifactId);
+        super(groupId, artifactId);
         this.versionId = versionId;
-        this.dependency = dep;
     }
-
 
     public String getVersionId()
     {
         return versionId;
     }
 
-    public ProjectVersion getDependency()
+    public void setVersionId(String versionId)
     {
-        return dependency;
+        this.versionId = versionId;
     }
 
     @Override

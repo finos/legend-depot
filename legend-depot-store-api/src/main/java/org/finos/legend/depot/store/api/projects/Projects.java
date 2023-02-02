@@ -15,25 +15,20 @@
 
 package org.finos.legend.depot.store.api.projects;
 
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface Projects
 {
-
-    List<ProjectData> getAll();
+    List<StoreProjectData> getAll();
 
     /**
      * NOTE: page starting from 1
      */
-    List<ProjectData> getProjects(int page, int pageSize);
+    List<StoreProjectData> getProjects(int page, int pageSize);
 
-    List<ProjectData> findByProjectId(String projectId);
-
-    Optional<ProjectData> find(String groupId, String artifactId);
-
-    List<String> getVersions(String groupId, String artifactId);
+    Optional<StoreProjectData> find(String groupId, String artifactId);
 
 }

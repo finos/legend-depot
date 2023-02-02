@@ -18,12 +18,10 @@ package org.finos.legend.depot.services.projects;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
-import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionDependency;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.TestBaseServices;
-import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
+import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,29 +47,31 @@ public class TestDependencyCache extends TestBaseServices
     @Test
     public void canInitialiseCacheEmptyStore()
     {
-        DependenciesCache dependenciesCache = new DependenciesCache(projectsStore);
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
         Assert.assertTrue(dependenciesCache.transitiveDependencies.isEmpty());
     }
 
     private void seedTestData()
     {
-        ProjectData projectA = new ProjectData("a", TEST_GROUP,"artifacta").withVersions("1.0.0","2.0.0");
-        ProjectData projectB = new ProjectData("b", TEST_GROUP,"artifactb").withVersions("1.0.0");
-        ProjectData projectC = new ProjectData("c", TEST_GROUP,"artifactc").withVersions("1.0.0");
-        projectA.addDependency(new ProjectVersionDependency(TEST_GROUP, "artifacta", "2.0.0", new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0")));
-        projectA.addDependency(new ProjectVersionDependency(TEST_GROUP, "artifacta", "1.0.0", new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0")));
-        projectB.addDependency(new ProjectVersionDependency(TEST_GROUP, "artifactb", "1.0.0", new ProjectVersion(TEST_GROUP, "artifactc", "1.0.0")));
+        StoreProjectVersionData projectAv1 = new StoreProjectVersionData(TEST_GROUP,"artifacta","1.0.0");
+        StoreProjectVersionData projectAv2 = new StoreProjectVersionData(TEST_GROUP,"artifacta","2.0.0");
+        StoreProjectVersionData projectB = new StoreProjectVersionData(TEST_GROUP,"artifactb","1.0.0");
+        StoreProjectVersionData projectC = new StoreProjectVersionData(TEST_GROUP,"artifactc","1.0.0");
+        projectAv2.getVersionData().addDependency(new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0"));
+        projectAv1.getVersionData().addDependency(new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0"));
+        projectB.getVersionData().addDependency(new ProjectVersion(TEST_GROUP, "artifactc", "1.0.0"));
 
-        projectsStore.createOrUpdate(projectA);
-        projectsStore.createOrUpdate(projectB);
-        projectsStore.createOrUpdate(projectC);
+        projectsVersionsStore.createOrUpdate(projectAv1);
+        projectsVersionsStore.createOrUpdate(projectAv2);
+        projectsVersionsStore.createOrUpdate(projectB);
+        projectsVersionsStore.createOrUpdate(projectC);
     }
 
     @Test
     public void canInitialiseCache()
     {
         seedTestData();
-        DependenciesCache dependenciesCache = new DependenciesCache(projectsStore);
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
         Assert.assertFalse(dependenciesCache.transitiveDependencies.isEmpty());
         Assert.assertEquals(4, dependenciesCache.transitiveDependencies.size());
         Assert.assertTrue(dependenciesCache.transitiveDependencies.keySet().stream().anyMatch(pv -> pv.equals(new ProjectVersion(TEST_GROUP,"artifactc","1.0.0"))));
@@ -87,9 +87,9 @@ public class TestDependencyCache extends TestBaseServices
     public void getDependenciesForNewProjectVersion()
     {
         seedTestData();
-        DependenciesCache dependenciesCache = new DependenciesCache(projectsStore);
-        ProjectData projectD = new ProjectData("d", TEST_GROUP,"artifactd").withVersions("1.0.0");
-        projectsStore.createOrUpdate(projectD);
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
+        StoreProjectVersionData projectD = new StoreProjectVersionData(TEST_GROUP,"artifactd","1.0.0");
+        projectsVersionsStore.createOrUpdate(projectD);
         dependenciesCache.getTransitiveDependencies(new ProjectVersion(TEST_GROUP,"artifactd","1.0.0"));
 
         Assert.assertFalse(dependenciesCache.transitiveDependencies.isEmpty());
@@ -101,9 +101,9 @@ public class TestDependencyCache extends TestBaseServices
     public void getDependenciesForNewProjectVersionWithSameDependencies()
     {
         seedTestData();
-        DependenciesCache dependenciesCache = new DependenciesCache(projectsStore);
-        ProjectData projectD = new ProjectData("d", TEST_GROUP,"artifactd").withVersions("1.0.0");
-        projectsStore.createOrUpdate(projectD);
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
+        StoreProjectVersionData projectD = new StoreProjectVersionData(TEST_GROUP,"artifactd","1.0.0");
+        projectsVersionsStore.createOrUpdate(projectD);
         dependenciesCache.getTransitiveDependencies(new ProjectVersion(TEST_GROUP,"artifactd","1.0.0"));
         Assert.assertEquals(3,dependenciesCache.absentKeys.get());
         Assert.assertFalse(dependenciesCache.transitiveDependencies.isEmpty());
@@ -111,10 +111,9 @@ public class TestDependencyCache extends TestBaseServices
         Assert.assertTrue(dependenciesCache.transitiveDependencies.keySet().stream().anyMatch(pv -> pv.equals(new ProjectVersion(TEST_GROUP,"artifactd","1.0.0"))));
 
         //add new version with same dependencies it should hit the cache.
-        ProjectData prodA = projectsStore.find(TEST_GROUP,"artifacta").get();
-        prodA.addVersion("2.0.1");
-        prodA.addDependency(new ProjectVersionDependency(TEST_GROUP, "artifacta", "2.0.1", new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0")));
-        projectsStore.createOrUpdate(prodA);
+        StoreProjectVersionData prodA = new StoreProjectVersionData(TEST_GROUP,"artifacta","2.0.1");
+        prodA.getVersionData().addDependency(new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0"));
+        projectsVersionsStore.createOrUpdate(prodA);
         Assert.assertEquals(5, dependenciesCache.transitiveDependencies.size());
 
         dependenciesCache.getTransitiveDependencies(new ProjectVersion(TEST_GROUP,"artifacta","2.0.1"));
@@ -129,7 +128,7 @@ public class TestDependencyCache extends TestBaseServices
     public void getDependenciesForUnknownProject()
     {
         seedTestData();
-        DependenciesCache dependenciesCache = new DependenciesCache(projectsStore);
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
         Assert.assertEquals(4, dependenciesCache.transitiveDependencies.size());
         ProjectVersion unknownProject = new ProjectVersion(TEST_GROUP, "artifactd", "1.0.0");
         dependenciesCache.getTransitiveDependencies(unknownProject);
@@ -145,7 +144,7 @@ public class TestDependencyCache extends TestBaseServices
     public void getDependenciesForUnknownVersion()
     {
         seedTestData();
-        DependenciesCache dependenciesCache = new DependenciesCache(projectsStore);
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
         Assert.assertEquals(4, dependenciesCache.transitiveDependencies.size());
         ProjectVersion unknownVersion = new ProjectVersion(TEST_GROUP, "artifacta", "10.0.0");
         dependenciesCache.getTransitiveDependencies(unknownVersion);
@@ -160,13 +159,13 @@ public class TestDependencyCache extends TestBaseServices
     public void getDependenciesForNewProjectVersionWithDependencies()
     {
         seedTestData();
-        DependenciesCache dependenciesCache = new DependenciesCache(projectsStore);
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
         Assert.assertEquals(4, dependenciesCache.transitiveDependencies.size());
-        ProjectData projectD = new ProjectData("d", TEST_GROUP,"artifactd").withVersions("1.0.0");
+        StoreProjectVersionData projectD = new StoreProjectVersionData(TEST_GROUP,"artifactd","1.0.0");
         ProjectVersion projectDVersion1 = new ProjectVersion(TEST_GROUP, "artifactd", "1.0.0");
         ProjectVersion newProjectDependency = new ProjectVersion(TEST_GROUP, "artifactc", "1.0.0");
-        projectD.addDependency(new ProjectVersionDependency(TEST_GROUP, "artifactd", "1.0.0", newProjectDependency));
-        projectsStore.createOrUpdate(projectD);
+        projectD.getVersionData().addDependency(newProjectDependency);
+        projectsVersionsStore.createOrUpdate(projectD);
 
         dependenciesCache.getTransitiveDependencies(projectDVersion1);
 
@@ -181,11 +180,11 @@ public class TestDependencyCache extends TestBaseServices
         ProjectVersion masterSNAPSHOTVersion = new ProjectVersion(TEST_GROUP, "artifacta", "master-SNAPSHOT");
 
         seedTestData();
-        ProjectData projectA = projectsStore.find(TEST_GROUP,"artifacta").get();
-        projectA.addDependency(new ProjectVersionDependency(TEST_GROUP, "artifacta", "master-SNAPSHOT", new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0")));
-        projectsStore.createOrUpdate(projectA);
+        StoreProjectVersionData projectA = new StoreProjectVersionData(TEST_GROUP, "artifacta", "master-SNAPSHOT");
+        projectA.getVersionData().addDependency(new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0"));
+        projectsVersionsStore.createOrUpdate(projectA);
 
-        DependenciesCache dependenciesCache = new DependenciesCache(projectsStore);
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
 
         Assert.assertEquals(4, dependenciesCache.transitiveDependencies.size());
 
@@ -195,11 +194,11 @@ public class TestDependencyCache extends TestBaseServices
         Assert.assertEquals(2,dependenciesCache.transitiveDependencies.get(masterSNAPSHOTVersion).size());
 
 
-        ProjectData projectD = new ProjectData("d", TEST_GROUP,"artifactd").withVersions("1.0.0");
-        projectsStore.createOrUpdate(projectD);
-        ProjectData changedProjectA = projectsStore.find(TEST_GROUP,"artifacta").get();
-        changedProjectA.addDependency(new ProjectVersionDependency(TEST_GROUP, "artifacta", "master-SNAPSHOT", new ProjectVersion(TEST_GROUP, "artifactd", "1.0.0")));
-        projectsStore.createOrUpdate(changedProjectA);
+        StoreProjectVersionData projectD = new StoreProjectVersionData(TEST_GROUP, "artifactd", "1.0.0");
+        projectsVersionsStore.createOrUpdate(projectD);
+        StoreProjectVersionData changedProjectA = projectsVersionsStore.find(TEST_GROUP,"artifacta","master-SNAPSHOT").get();
+        changedProjectA.getVersionData().addDependency(new ProjectVersion(TEST_GROUP, "artifactd", "1.0.0"));
+        projectsVersionsStore.createOrUpdate(changedProjectA);
 
         dependenciesCache.getTransitiveDependencies(masterSNAPSHOTVersion);
 
@@ -211,13 +210,13 @@ public class TestDependencyCache extends TestBaseServices
     @Test
     public void errorInitialisingDupProjects()
     {
-        setUpProjectsFromFile(TestStoreMongo.class.getClassLoader().getResource("data/dupProjects.json"));
-        Assert.assertEquals(5, projectsStore.getAll().size());
-        Assert.assertEquals("PROD-CCC", projectsStore.find("example.services.Test", "Test").get().getProjectId());
+        setUpProjectsFromFile(TestDependencyCache.class.getClassLoader().getResource("data/dupProjects.json"));
+        Assert.assertEquals(7, projectsVersionsStore.getAll().size());
+        //TODO: make this testing more robust, no need to add this as indexing would never allow dups to be formed
         try
         {
 
-            Assert.assertEquals("PROD-A", projectsStore.find("examples.metadata", "test").get().getProjectId());
+            Assert.assertEquals("test", projectsVersionsStore.find("examples.metadata", "test","2.0.1").get().getArtifactId());
             Assert.fail();
         }
         catch (Exception e)
@@ -226,7 +225,7 @@ public class TestDependencyCache extends TestBaseServices
         }
         try
         {
-            DependenciesCache dependenciesCache = new DependenciesCache(projectsStore);
+            DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
             Assert.fail();
             Assert.assertNotNull(dependenciesCache);
         }
@@ -240,11 +239,11 @@ public class TestDependencyCache extends TestBaseServices
 
     protected void setUpProjectsFromFile(URL projectConfigFile)
     {
-        readProjectConfigsFile(projectConfigFile).forEach(project ->
+        readProjectVersionsConfigsFile(projectConfigFile).forEach(project ->
         {
             try
             {
-                getMongoClient().getDatabase(mongoProvider.getName()).getCollection(ProjectsMongo.COLLECTION).insertOne(Document.parse(new ObjectMapper().writeValueAsString(project)));
+                getMongoClient().getDatabase(mongoProvider.getName()).getCollection(ProjectsVersionsMongo.COLLECTION).insertOne(Document.parse(new ObjectMapper().writeValueAsString(project)));
             }
             catch (JsonProcessingException e)
             {

@@ -27,10 +27,13 @@ import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 import org.bson.Document;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
+import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.junit.After;
 import org.junit.Assert;
 
@@ -52,7 +55,27 @@ public abstract class TestStoreMongo
         return mongoClient;
     }
 
-    public static List<ProjectData> readProjectConfigsFile(URL fileName)
+    public static List<StoreProjectData> readProjectConfigsFile(URL fileName)
+    {
+        try
+        {
+            InputStream stream = fileName.openStream();
+            String jsonInput = new java.util.Scanner(stream).useDelimiter("\\A").next();
+
+            List<StoreProjectData> projects = new ObjectMapper().readValue(jsonInput, new TypeReference<List<StoreProjectData>>()
+            {
+            });
+            Assert.assertNotNull("testing file" + fileName.getFile(), projects);
+            return projects;
+        }
+        catch (Exception e)
+        {
+            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+        }
+        return null;
+    }
+
+    public static List<ProjectData> readProjectDataConfigsFile(URL fileName)
     {
         try
         {
@@ -60,6 +83,26 @@ public abstract class TestStoreMongo
             String jsonInput = new java.util.Scanner(stream).useDelimiter("\\A").next();
 
             List<ProjectData> projects = new ObjectMapper().readValue(jsonInput, new TypeReference<List<ProjectData>>()
+            {
+            });
+            Assert.assertNotNull("testing file" + fileName.getFile(), projects);
+            return projects;
+        }
+        catch (Exception e)
+        {
+            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+        }
+        return null;
+    }
+
+    public static List<StoreProjectVersionData> readProjectVersionsConfigsFile(URL fileName)
+    {
+        try
+        {
+            InputStream stream = fileName.openStream();
+            String jsonInput = new java.util.Scanner(stream).useDelimiter("\\A").next();
+
+            List<StoreProjectVersionData> projects = new ObjectMapper().readValue(jsonInput, new TypeReference<List<StoreProjectVersionData>>()
             {
             });
             Assert.assertNotNull("testing file" + fileName.getFile(), projects);
@@ -136,6 +179,52 @@ public abstract class TestStoreMongo
         }
     }
 
+    protected void setUpProjectDataFromFile(URL projectConfigFile)
+    {
+        try
+        {
+            readProjectDataConfigsFile(projectConfigFile).forEach(project ->
+            {
+                try
+                {
+                    getMongoProjects().insertOne(Document.parse(new ObjectMapper().writeValueAsString(project)));
+                }
+                catch (JsonProcessingException e)
+                {
+                    Assert.fail("an error has occurred loading test project " + e.getMessage());
+                }
+            });
+            Assert.assertNotNull(getMongoProjects());
+        }
+        catch (Exception e)
+        {
+            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+        }
+    }
+
+    protected void setUpProjectsVersionsFromFile(URL projectConfigFile)
+    {
+        try
+        {
+            readProjectVersionsConfigsFile(projectConfigFile).forEach(project ->
+            {
+                try
+                {
+                    getMongoProjectVersions().insertOne(Document.parse(new ObjectMapper().writeValueAsString(project)));
+                }
+                catch (JsonProcessingException e)
+                {
+                    Assert.fail("an error has occurred loading test project " + e.getMessage());
+                }
+            });
+            Assert.assertNotNull(getMongoProjectVersions());
+        }
+        catch (Exception e)
+        {
+            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+        }
+    }
+
     protected void setUpEntitiesDataFromFile(URL versionedEntities)
     {
         try
@@ -204,6 +293,11 @@ public abstract class TestStoreMongo
     private MongoCollection getMongoFileGenerations()
     {
         return getMongoDatabase().getCollection(FileGenerationsMongo.COLLECTION);
+    }
+
+    private MongoCollection getMongoProjectVersions()
+    {
+        return getMongoDatabase().getCollection(ProjectsVersionsMongo.COLLECTION);
     }
 
     protected Date toDate(LocalDateTime date)

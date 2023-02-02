@@ -1,74 +1,82 @@
 [
   {
-    "projectId": "PROD-A",
     "groupId": "examples.metadata",
     "artifactId": "test",
-    "versions": [
-      "2.2.0",
-      "2.3.1"
-    ],
-    "dependencies": [
-      {
-        "projectId": "PROD-A",
-        "versionId": "master-SNAPSHOT",
-        "groupId": "examples.metadata",
-        "artifactId": "test",
-        "dependency": {
-          "projectId": "PROD-B",
+    "versionId": "2.2.0",
+    "versionData": {
+      "dependencies": [
+      ]
+    }
+  },
+  {
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.1",
+    "versionData": {
+      "dependencies": [
+        {
           "groupId": "examples.metadata",
           "artifactId": "test-dependencies",
           "versionId": "1.0.0"
         }
-      },
-      {
-        "projectId": "PROD-A",
-        "versionId": "2.3.1",
-        "groupId": "examples.metadata",
-        "artifactId": "test",
-        "dependency": {
-          "projectId": "PROD-B",
+      ]
+    }
+  },
+  {
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "master-SNAPSHOT",
+    "versionData": {
+      "dependencies": [
+        {
           "groupId": "examples.metadata",
           "artifactId": "test-dependencies",
           "versionId": "1.0.0"
         }
-      }
-    ]
+      ]
+    }
   },
   {
-    "projectId": "PROD-AA",
     "groupId": "examples.metadata",
     "artifactId": "test",
-    "versions": [
-      "1.0.0"
-    ],
-    "dependencies": []
+    "versionId": "1.0.0",
+    "versionData": {
+      "dependencies": []
+    }
   },
   {
-    "projectId": "PROD-C",
     "groupId": "example.services.test",
     "artifactId": "test",
-    "versions": [
-      "2.0.1"
-    ],
+    "versionId": "2.0.1",
     "dependencies": []
   },
   {
-    "projectId": "PROD-CC",
-    "groupId": "example.services.test",
+    "groupId": "example.services.Test",
     "artifactId": "Test",
-    "versions": [
-      "2.0.1"
-    ],
-    "dependencies": []
+    "versionId": "2.0.1",
+    "versionData": {
+      "dependencies": [
+        {
+          "groupId": "examples.metadata",
+          "artifactId": "test-dependencies",
+          "versionId": "1.0.0"
+        }
+      ]
+    }
   },
 
   {
-    "projectId": "PROD-CCC",
     "groupId": "example.services.Test",
     "artifactId": "Test",
-    "versions": [
-      "2.0.1"
-    ],
-    "dependencies": []
+    "versionId": "2.0.1",
+    "versionData": {
+      "dependencies": [
+        {
+          "groupId": "examples.metadata",
+          "artifactId": "test-dependencies",
+          "versionId": "1.0.0"
+        }
+      ]
+    }
   }
 ]

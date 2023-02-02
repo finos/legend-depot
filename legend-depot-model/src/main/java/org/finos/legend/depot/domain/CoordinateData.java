@@ -13,39 +13,45 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.domain.project;
+package org.finos.legend.depot.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.VersionedData;
-
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProjectVersionPlatformDependency extends VersionedData
+public abstract class CoordinateData
 {
     @JsonProperty
-    private List<ProjectProperty> platformsVersion;
+    private String groupId;
     @JsonProperty
-    private ProjectVersion dependency;
+    private String artifactId;
 
-    public ProjectVersionPlatformDependency(String groupId, String artifactId, String versionId, ProjectVersion dependency, List<ProjectProperty> platformsVersion)
+    public CoordinateData()
     {
-        super(groupId, artifactId, versionId);
-        this.platformsVersion = platformsVersion;
-        this.dependency = dependency;
     }
 
-    public List<ProjectProperty> getPlatformsVersion()
+    public CoordinateData(String groupId, String artifactId)
     {
-        return platformsVersion;
+        this.groupId = groupId;
+        this.artifactId = artifactId;
     }
 
-    public ProjectVersion getDependency()
+
+    public String getGroupId()
     {
-        return dependency;
+        return groupId;
+    }
+
+    public String getArtifactId()
+    {
+        return artifactId;
+    }
+
+    public void setArtifactId(String artifactId)
+    {
+        this.artifactId = artifactId;
     }
 
     @Override

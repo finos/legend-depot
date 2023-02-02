@@ -20,7 +20,7 @@ import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.store.artifacts.ArtifactLoadingException;
@@ -68,19 +68,19 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
 
 
 
-    public MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId, List<File> files)
+    public MetadataEventResponse refreshProjectVersionArtifacts(StoreProjectData projectData, String versionId, List<File> files)
     {
         MetadataEventResponse response = new MetadataEventResponse();
         try
         {
-            List<Entity> projectEntities = getAllNonVersionedEntities(project.getGroupId(), project.getArtifactId(), versionId);
+            List<Entity> projectEntities = getAllNonVersionedEntities(projectData.getGroupId(), projectData.getArtifactId(), versionId);
             List<Entity> fileGenerationEntities = filterEntitiesByFileGenerationEntities(projectEntities);
             List<FileGeneration> generatedFiles = provider.loadArtifacts(files);
             //handle files generated when a new master snapshot comes into picture
             if (versionId.equals(VersionValidator.MASTER_SNAPSHOT))
             {
-                generations.delete(project.getGroupId(), project.getArtifactId(), versionId);
-                String message = String.format("removed [%s] %s [%s-%s]",generations.getStoredFileGenerations(project.getGroupId(), project.getArtifactId(), versionId).size(),provider.getType(),project.getProjectId(),versionId);
+                generations.delete(projectData.getGroupId(), projectData.getArtifactId(), versionId);
+                String message = String.format("removed [%s] %s [%s-%s]",generations.getStoredFileGenerations(projectData.getGroupId(), projectData.getArtifactId(), versionId).size(),provider.getType(),projectData.getProjectId(),versionId);
                 LOGGER.info(message);
                 response.addMessage(message);
             }
@@ -95,7 +95,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
                 generatedFiles.stream().filter(gen -> gen.getPath().startsWith(elementPath)).forEach(gen ->
                 {
                     FileGeneration generation = new FileGeneration(gen.getPath().replace(elementPath, BLANK), gen.getContent());
-                    generations.createOrUpdate(new StoredFileGeneration(project.getGroupId(), project.getArtifactId(), versionId, entity.getPath(), codeSchemaGenerationType, generation));
+                    generations.createOrUpdate(new StoredFileGeneration(projectData.getGroupId(), projectData.getArtifactId(), versionId, entity.getPath(), codeSchemaGenerationType, generation));
                     processedGeneratedFiles.add(gen);
                 });
             });
@@ -114,17 +114,17 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
                     }
                     String elementPath = entityMap.get(entityPath.get()).getPath();
                     FileGeneration generation = new FileGeneration(generatedFile.getPath(), generatedFile.getContent());
-                    generations.createOrUpdate(new StoredFileGeneration(project.getGroupId(), project.getArtifactId(), versionId, elementPath, null, generation));
+                    generations.createOrUpdate(new StoredFileGeneration(projectData.getGroupId(), projectData.getArtifactId(), versionId, elementPath, null, generation));
                     processedGeneratedFiles.add(generatedFile);
                 }
             });
-            String message = String.format("[%s]: processed [%s] generations for [%s-%s-%s] ", project.getProjectId(),processedGeneratedFiles.size(), project.getGroupId(), project.getArtifactId(), versionId);
+            String message = String.format("[%s]: processed [%s] generations for [%s-%s-%s] ", projectData.getProjectId(),processedGeneratedFiles.size(), projectData.getGroupId(), projectData.getArtifactId(), versionId);
             LOGGER.info(message);
             response.addMessage(message);
         }
         catch (Exception e)
         {
-           String message = String.format("Error processing generations update for %s-%s-%s , ERROR: [%s]", project.getGroupId(),project.getArtifactId(),versionId,e.getMessage());
+           String message = String.format("Error processing generations update for %s-%s-%s , ERROR: [%s]", projectData.getGroupId(),projectData.getArtifactId(),versionId,e.getMessage());
            LOGGER.error(message);
            response.addError(message);
         }

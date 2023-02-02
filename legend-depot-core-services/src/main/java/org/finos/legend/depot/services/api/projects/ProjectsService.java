@@ -15,10 +15,11 @@
 
 package org.finos.legend.depot.services.api.projects;
 
-import org.finos.legend.depot.domain.project.ProjectData;
-import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import java.util.Arrays;
@@ -28,22 +29,22 @@ import java.util.Set;
 
 public interface ProjectsService
 {
-    List<ProjectData> getAll();
+    List<StoreProjectData> getAllProjectCoordinates();
 
     /**
      * NOTE: page starting from 1
      */
-    List<ProjectData> getProjects(int page, int pageSize);
-
-    List<ProjectData> findByProjectId(String projectId);
+    List<StoreProjectData> getProjects(int page, int pageSize);
 
     List<String> getVersions(String groupId, String artifactId);
 
     Optional<VersionId> getLatestVersion(String groupId, String artifactId);
 
-    Optional<ProjectData> find(String groupId, String artifactId);
+    List<StoreProjectVersionData> find(String groupId, String artifactId);
 
-    boolean exists(String groupId, String artifactId, String versionId);
+    Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId);
+
+    Optional<StoreProjectData> findCoordinates(String groupId, String artifactId);
 
     default Set<ProjectVersion> getDependencies(String groupId, String artifactId, String versionId, boolean transitive)
     {

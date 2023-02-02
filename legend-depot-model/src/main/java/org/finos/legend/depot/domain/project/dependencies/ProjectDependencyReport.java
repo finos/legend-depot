@@ -20,7 +20,7 @@ import org.eclipse.collections.api.factory.Lists;
 import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.factory.Sets;
 import org.eclipse.collections.api.map.MutableMap;
-import org.finos.legend.depot.domain.BaseDomain;
+import org.finos.legend.depot.domain.CoordinateData;
 
 import java.util.List;
 import java.util.Set;
@@ -48,7 +48,7 @@ public class ProjectDependencyReport
         }
     }
 
-    public class ProjectDependencyConflict extends BaseDomain
+    public class ProjectDependencyConflict extends CoordinateData
     {
         private Set<String> versions;
 

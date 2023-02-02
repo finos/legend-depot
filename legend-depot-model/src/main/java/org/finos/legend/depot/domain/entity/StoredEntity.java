@@ -20,17 +20,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.BaseDomain;
+import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.HasIdentifier;
 
-import javax.validation.constraints.NotNull;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StoredEntity extends BaseDomain implements HasIdentifier
+public class StoredEntity extends VersionedData implements HasIdentifier
 {
-    @NotNull
-    @JsonProperty
-    private String versionId;
     @JsonProperty
     private boolean versionedEntity;
     @JsonProperty
@@ -44,16 +39,14 @@ public class StoredEntity extends BaseDomain implements HasIdentifier
                         @JsonProperty(value = "versionedEntity") boolean versionedEntity,
                         @JsonProperty(value = "entity") EntityDefinition entity)
     {
-        super(groupId, artifactId);
-        this.versionId = versionId;
+        super(groupId, artifactId, versionId);
         this.versionedEntity = versionedEntity;
         this.entity = entity;
     }
 
     StoredEntity(String groupId, String artifactId, String versionId,boolean versionedEntity)
     {
-        super(groupId, artifactId);
-        this.versionId = versionId;
+        super(groupId, artifactId, versionId);
         this.versionedEntity = versionedEntity;
     }
 
@@ -61,16 +54,6 @@ public class StoredEntity extends BaseDomain implements HasIdentifier
     public String getId()
     {
         return "";
-    }
-
-    public String getVersionId()
-    {
-        return versionId;
-    }
-
-    public void setVersionId(String versionId)
-    {
-        this.versionId = versionId;
     }
 
     public boolean isVersionedEntity()

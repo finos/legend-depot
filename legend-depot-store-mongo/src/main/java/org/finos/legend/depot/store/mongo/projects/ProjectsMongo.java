@@ -23,54 +23,44 @@ import com.mongodb.client.model.IndexModel;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.domain.EntityValidator;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.store.StoreException;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 
-public class ProjectsMongo extends BaseMongo<ProjectData> implements Projects, UpdateProjects
+public class ProjectsMongo extends BaseMongo<StoreProjectData> implements Projects, UpdateProjects
 {
 
     public static final String COLLECTION = "project-configurations";
 
-    public static final String PROJECT_ID = "projectId";
-
     @Inject
     public ProjectsMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
     {
-        super(databaseProvider, ProjectData.class, new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY));
+        super(databaseProvider, StoreProjectData.class, new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY));
     }
 
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("groupId-artifactId", GROUP_ID, ARTIFACT_ID));
+        return Arrays.asList(buildIndex("groupId-artifactId", true, GROUP_ID, ARTIFACT_ID));
     }
 
     @Override
-    protected Bson getKeyFilter(ProjectData data)
+    protected Bson getKeyFilter(StoreProjectData data)
     {
         return and(eq(GROUP_ID, data.getGroupId()),
                 eq(ARTIFACT_ID, data.getArtifactId()));
     }
-
-    protected Bson getProjectIdFilter(String projectId)
-    {
-        return eq(PROJECT_ID, projectId);
-    }
-
 
     @Override
     protected MongoCollection getCollection()
@@ -79,52 +69,35 @@ public class ProjectsMongo extends BaseMongo<ProjectData> implements Projects, U
     }
 
     @Override
-    protected void validateNewData(ProjectData data)
+    protected void validateNewData(StoreProjectData data)
     {
         if (!EntityValidator.isValid(data))
         {
             throw new IllegalArgumentException(String.format("invalid groupId [%s] or artifactId [%s]",data.getGroupId(),data.getArtifactId()));
         }
-        Optional<ProjectData> projectData = find(data.getGroupId(), data.getArtifactId());
+        Optional<StoreProjectData> projectData = find(data.getGroupId(), data.getArtifactId());
         if (projectData.isPresent() && (data.getId() == null || !data.getId().equals(projectData.get().getId())))
         {
             throw new StoreException(String.format("Duplicate coordinates: Different project %s its already registered with this coordinates %s-%s", projectData.get().getProjectId(), data.getGroupId(), data.getArtifactId()));
         }
     }
 
-    public List<ProjectData> findByProjectId(String projectId)
-    {
-        return find(getProjectIdFilter(projectId));
-    }
-
     @Override
-    public List<ProjectData> getAll()
+    public List<StoreProjectData> getAll()
     {
         return getAllStoredEntities();
     }
 
     @Override
-    public List<ProjectData> getProjects(int page, int pageSize)
+    public List<StoreProjectData> getProjects(int page, int pageSize)
     {
         return getStoredEntitiesByPage(page, pageSize);
     }
 
     @Override
-    public Optional<ProjectData> find(String groupId, String artifactId)
+    public Optional<StoreProjectData> find(String groupId, String artifactId)
     {
         return findOne(and(eq(GROUP_ID, groupId), eq(ARTIFACT_ID, artifactId)));
-    }
-
-
-    @Override
-    public List<String> getVersions(String groupId, String artifactId)
-    {
-        Optional<ProjectData> projectData = findOne(getArtifactFilter(groupId, artifactId));
-        if (!projectData.isPresent())
-        {
-            throw new IllegalArgumentException(String.format("not found project for %s-%s", groupId, artifactId));
-        }
-        return projectData.get().getVersionsOrdered().stream().map(VersionId::toVersionIdString).collect(Collectors.toList());
     }
 
     @Override
@@ -132,14 +105,6 @@ public class ProjectsMongo extends BaseMongo<ProjectData> implements Projects, U
     {
         MetadataEventResponse response = new MetadataEventResponse();
         getCollection().findOneAndDelete(getArtifactFilter(groupId, artifactId));
-        return response;
-    }
-
-    @Override
-    public MetadataEventResponse deleteByProjectId(String projectId)
-    {
-        MetadataEventResponse response = new MetadataEventResponse();
-        getCollection().deleteMany(eq(PROJECT_ID, projectId));
         return response;
     }
 }

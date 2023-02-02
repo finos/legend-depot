@@ -1,0 +1,45 @@
+[
+  {
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.2.0"
+  },
+  {
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "master-SNAPSHOT",
+    "versionData": {
+      "dependencies": [
+        {
+          "groupId": "examples.metadata",
+          "artifactId": "test-dependencies",
+          "versionId": "1.0.0"
+        }
+      ]
+    }
+  },
+  {
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.3.1",
+    "versionData": {
+      "dependencies": [
+        {
+          "groupId": "examples.metadata",
+          "artifactId": "test-dependencies",
+          "versionId": "1.0.0"
+        }
+      ]
+    }
+  },
+  {
+    "groupId": "examples.metadata",
+    "artifactId": "test-dependencies",
+    "versionId": "1.0.0"
+  },
+  {
+    "groupId": "example.services.test",
+    "artifactId": "test",
+    "versionId": "2.0.1"
+  }
+]

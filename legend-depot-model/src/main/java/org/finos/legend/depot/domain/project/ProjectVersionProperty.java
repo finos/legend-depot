@@ -16,36 +16,33 @@
 package org.finos.legend.depot.domain.project;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.VersionedData;
-
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProjectVersionPlatformDependency extends VersionedData
+public class ProjectVersionProperty
 {
-    @JsonProperty
-    private List<ProjectProperty> platformsVersion;
-    @JsonProperty
-    private ProjectVersion dependency;
+    private String propertyName;
+    private String value;
 
-    public ProjectVersionPlatformDependency(String groupId, String artifactId, String versionId, ProjectVersion dependency, List<ProjectProperty> platformsVersion)
+    public ProjectVersionProperty()
     {
-        super(groupId, artifactId, versionId);
-        this.platformsVersion = platformsVersion;
-        this.dependency = dependency;
     }
 
-    public List<ProjectProperty> getPlatformsVersion()
+    public ProjectVersionProperty(String propertyName, String value)
     {
-        return platformsVersion;
+        this.propertyName = propertyName;
+        this.value = value;
     }
 
-    public ProjectVersion getDependency()
+    public String getPropertyName()
     {
-        return dependency;
+        return propertyName;
+    }
+
+    public String getValue()
+    {
+        return value;
     }
 
     @Override
@@ -59,5 +56,4 @@ public class ProjectVersionPlatformDependency extends VersionedData
     {
         return HashCodeBuilder.reflectionHashCode(this);
     }
-
 }

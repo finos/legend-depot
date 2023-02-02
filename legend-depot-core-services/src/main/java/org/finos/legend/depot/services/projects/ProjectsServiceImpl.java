@@ -16,26 +16,31 @@
 package org.finos.legend.depot.services.projects;
 
 import org.eclipse.collections.api.factory.Sets;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
+import org.finos.legend.depot.domain.project.ProjectProperty;
+import org.finos.legend.depot.domain.project.ProjectVersionProperty;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraph;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraphWalkerContext;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.projects.Projects;
+import org.finos.legend.depot.store.api.projects.ProjectsVersions;
+import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Collections;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
@@ -43,86 +48,91 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class ProjectsServiceImpl implements ProjectsService
 {
 
+    private final ProjectsVersions projectsVersions;
+
     private final Projects projects;
 
     private final DependenciesCache dependenciesCache;
 
     @Inject
-    public ProjectsServiceImpl(Projects projects, @Named("dependencyCache") DependenciesCache dependenciesCache)
+    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("dependencyCache") DependenciesCache dependenciesCache)
     {
+        this.projectsVersions = projectsVersions;
         this.projects = projects;
         this.dependenciesCache = dependenciesCache;
     }
 
-    public ProjectsServiceImpl(UpdateProjects projects)
+    public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects)
     {
+        this.projectsVersions = projectsVersions;
         this.projects = projects;
-        this.dependenciesCache = new DependenciesCache(projects);
+        this.dependenciesCache = new DependenciesCache(projectsVersions);
     }
 
     @Override
-    public List<ProjectData> getAll()
+    public List<StoreProjectData> getAllProjectCoordinates()
     {
         return projects.getAll();
     }
 
     @Override
-    public List<ProjectData> getProjects(int page, int pageSize)
+    public List<StoreProjectData> getProjects(int page, int pageSize)
     {
         return projects.getProjects(page, pageSize);
     }
 
     @Override
-    public List<ProjectData> findByProjectId(String id)
-    {
-        return projects.findByProjectId(id);
-    }
-
-    @Override
     public List<String> getVersions(String groupId, String artifactId)
     {
-        return projects.getVersions(groupId, artifactId);
+        return projectsVersions.getVersions(groupId, artifactId).stream().map(VersionId::parseVersionId).sorted().map(VersionId::toVersionIdString).collect(Collectors.toList());
     }
 
     @Override
-    public Optional<ProjectData> find(String groupId, String artifactId)
+    public List<StoreProjectVersionData> find(String groupId, String artifactId)
+    {
+        return projectsVersions.find(groupId, artifactId);
+    }
+
+    @Override
+    public Optional<StoreProjectData> findCoordinates(String groupId, String artifactId)
     {
         return projects.find(groupId, artifactId);
     }
 
     @Override
-    public boolean exists(String groupId, String artifactId, String versionId)
+    public Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId)
     {
-        return this.find(groupId,artifactId).orElse(new ProjectData()).getVersions().contains(versionId);
+        return projectsVersions.find(groupId, artifactId, versionId);
     }
 
     @Override
     public void checkExists(String groupId, String artifactId) throws IllegalArgumentException
     {
-        checkExists(groupId, artifactId,null);
-    }
-
-    @Override
-    public void checkExists(String groupId, String artifactId, String versionId) throws IllegalArgumentException
-    {
-        Optional<ProjectData> projectData = this.projects.find(groupId,artifactId);
-        if (projectData.isPresent())
-        {
-            if (versionId != null && !versionId.equals(MASTER_SNAPSHOT) && !projectData.get().getVersions().stream().anyMatch(v -> v.equals(versionId)))
-            {
-                throw new IllegalArgumentException(String.format("No version found for %s-%s-%s",groupId,artifactId,versionId));
-            }
-        }
-        else
+        if (!this.projects.find(groupId, artifactId).isPresent())
         {
             throw new IllegalArgumentException(String.format("No project found for %s-%s",groupId,artifactId));
         }
     }
 
     @Override
+    public void checkExists(String groupId, String artifactId, String versionId) throws IllegalArgumentException
+    {
+        if (versionId != null && !versionId.equals(MASTER_SNAPSHOT) && !this.projectsVersions.find(groupId,artifactId,versionId).isPresent())
+        {
+            throw new IllegalArgumentException(String.format("No version found for %s-%s-%s",groupId,artifactId,versionId));
+        }
+    }
+
+    @Override
     public Optional<VersionId> getLatestVersion(String groupId, String artifactId)
     {
-        return getProject(groupId,artifactId).getLatestVersion();
+        List<String> versions = this.getVersions(groupId, artifactId);
+        if (versions != null && !versions.isEmpty())
+        {
+            List<VersionId> versionIds = versions.stream().map(VersionId::parseVersionId).collect(Collectors.toList());
+            return versionIds.stream().max(VersionId::compareTo);
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -131,9 +141,9 @@ public class ProjectsServiceImpl implements ProjectsService
         Set<ProjectVersion> dependencies = new HashSet<>();
         projectVersions.forEach(pv ->
         {
-            ProjectData projectData = getProject(pv.getGroupId(), pv.getArtifactId());
-            List<ProjectVersionDependency> projectVersionDependencies = projectData.getDependencies(pv.getVersionId());
-            projectVersionDependencies.forEach(dep -> dependencies.add(dep.getDependency()));
+            StoreProjectVersionData projectData = this.getProject(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+            List<ProjectVersion> projectVersionDependencies = projectData.getVersionData().getDependencies();
+            dependencies.addAll(projectVersionDependencies);
             if (transitive && !projectVersionDependencies.isEmpty())
             {
                 dependencies.addAll(dependenciesCache.getTransitiveDependencies(pv));
@@ -149,11 +159,11 @@ public class ProjectsServiceImpl implements ProjectsService
             if (!graph.hasNode(projectVersion))
             {
                 graph.addNode(projectVersion, parent);
-                context.addVersionToProject(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion);
+                context.addVersionToProject(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId(), projectVersion);
                 if (!context.getProjectVersionToDependencyMap().containsKey(projectVersion))
                 {
-                    ProjectData projectData =  context.getProjectDataPutIfAbsent(projectVersion.getGroupId(), projectVersion.getArtifactId(),() -> getProject(projectVersion.getGroupId(), projectVersion.getArtifactId()));
-                    context.getProjectVersionToDependencyMap().putIfAbsent(projectVersion, projectData.getDependencies(projectVersion.getVersionId()).stream().map(ProjectVersionDependency::getDependency).collect(Collectors.toList()));
+                    StoreProjectVersionData projectData =  context.getProjectDataPutIfAbsent(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId(), () -> getProject(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()));
+                    context.getProjectVersionToDependencyMap().putIfAbsent(projectVersion, projectData.getVersionData().getDependencies());
                 }
                 List<ProjectVersion> dependencies = context.getProjectVersionToDependencyMap().get(projectVersion);
                 dependencies.forEach(child -> graph.setEdges(projectVersion, child));
@@ -180,10 +190,11 @@ public class ProjectsServiceImpl implements ProjectsService
             // add node
             ProjectDependencyVersionNode versionNode = ProjectDependencyVersionNode.buildFromProjectVersion(projectVersion);
             graph.getNodes().putIfAbsent(versionNode.getId(), versionNode);
-            ProjectData projectData = graphWalkerContext.getProjectData(versionNode.getGroupId(), versionNode.getArtifactId());
+            StoreProjectVersionData projectData = graphWalkerContext.getProjectData(versionNode.getGroupId(), versionNode.getArtifactId(), versionNode.getVersionId());
             if (projectData != null)
             {
-                versionNode.setProjectId(projectData.getProjectId());
+                StoreProjectData projectCoordinates = this.projects.find(projectData.getGroupId(), projectData.getArtifactId()).get();
+                versionNode.setProjectId(projectCoordinates.getProjectId());
             }
             // forward edges
             dependencyGraph.getForwardEdges().getIfAbsentValue(projectVersion, Sets.mutable.empty()).forEach(forwardNode -> versionNode.getForwardEdges().add(forwardNode.getGav()));
@@ -211,23 +222,28 @@ public class ProjectsServiceImpl implements ProjectsService
     {
         if (versionId.equalsIgnoreCase("ALL"))
         {
-            return getAll().stream().map(projectData -> projectData.getDependencies().stream()
-                    .filter(dep -> dep.getDependency().getGroupId().equals(groupId) && dep.getDependency().getArtifactId().equals(artifactId))
-                    .map(dep -> new ProjectVersionPlatformDependency(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), dep.getDependency(), projectData.getPropertiesForProjectVersionID(dep.getVersionId())))
+            return projectsVersions.getAll().stream().map(projectData -> projectData.getVersionData().getDependencies().stream()
+                    .filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId))
+                    .map(dep -> new ProjectVersionPlatformDependency(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep, transformPropertyToProjectProperty(projectData.getVersionData().getProperties(), projectData.getVersionId())))
                     .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
         }
-        return getAll().stream().map(projectData -> projectData.getDependencies().stream()
-                .filter(dep -> dep.getDependency().getGroupId().equals(groupId) && dep.getDependency().getArtifactId().equals(artifactId) && dep.getDependency().getVersionId().equals(versionId))
-                .map(dep -> new ProjectVersionPlatformDependency(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), dep.getDependency(), projectData.getPropertiesForProjectVersionID(dep.getVersionId())))
+        return projectsVersions.getAll().stream().map(projectData -> projectData.getVersionData().getDependencies().stream()
+                .filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId) && dep.getVersionId().equals(versionId))
+                .map(dep -> new ProjectVersionPlatformDependency(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep, transformPropertyToProjectProperty(projectData.getVersionData().getProperties(), projectData.getVersionId())))
                 .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    private ProjectData getProject(String groupId, String artifactId)
+    private List<ProjectProperty> transformPropertyToProjectProperty(List<ProjectVersionProperty> properties, String versionId)
     {
-        Optional<ProjectData> projectData = find(groupId, artifactId);
+        return properties.isEmpty() ? Collections.emptyList() : properties.stream().map(p -> new ProjectProperty(p.getPropertyName(), p.getValue(), versionId)).collect(Collectors.toList());
+    }
+
+    private StoreProjectVersionData getProject(String groupId, String artifactId, String versionId)
+    {
+        Optional<StoreProjectVersionData> projectData = projectsVersions.find(groupId, artifactId, versionId);
         if (!projectData.isPresent())
         {
-            throw new IllegalArgumentException(String.format("project not found for %s-%s", groupId, artifactId));
+            throw new IllegalArgumentException(String.format("project version not found for %s-%s", groupId, artifactId, versionId));
         }
         return projectData.get();
     }

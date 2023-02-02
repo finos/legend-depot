@@ -15,13 +15,14 @@
 
 package org.finos.legend.depot.store.mongo.projects;
 
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public class TestUpdateProjectApi extends TestStoreMongo
@@ -40,23 +41,23 @@ public class TestUpdateProjectApi extends TestStoreMongo
     @Test
     public void canCreateAnewProjectConfiguration()
     {
-        ProjectData projectConfiguration = new ProjectData("PROD-121", "some.examples", "test121");
+        StoreProjectData projectConfiguration = new StoreProjectData("PROD-121", TEST_GROUP_ID, "test121");
 
         projectsAPI.createOrUpdate(projectConfiguration);
 
-        List<ProjectData> newConfig = projectsAPI.findByProjectId("PROD-121");
+        Optional<StoreProjectData> newConfig = projectsAPI.find("some.examples", "test121");
         Assert.assertNotNull(newConfig);
-        Assert.assertEquals(1, newConfig.size());
-        Assert.assertEquals("PROD-121", newConfig.get(0).getProjectId());
-        Assert.assertEquals("some.examples", newConfig.get(0).getGroupId());
-        Assert.assertEquals("test121", newConfig.get(0).getArtifactId());
+        Assert.assertTrue(newConfig.isPresent());
+        Assert.assertEquals("PROD-121", newConfig.get().getProjectId());
+        Assert.assertEquals("some.examples", newConfig.get().getGroupId());
+        Assert.assertEquals("test121", newConfig.get().getArtifactId());
 
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void cantCreateAnewProjectWithBadConfiguration()
     {
-        ProjectData projectConfiguration = new ProjectData("PROD-121", "example.bad this is bad", "test121");
+        StoreProjectData projectConfiguration = new StoreProjectData("PROD-121", "example.bad this is bad", "test121");
         projectsAPI.createOrUpdate(projectConfiguration);
     }
 
@@ -66,11 +67,11 @@ public class TestUpdateProjectApi extends TestStoreMongo
     {
         Assert.assertEquals(3, projectsAPI.getAll().size());
 
-        ProjectData projectConfiguration = new ProjectData("PROD-123", TEST_GROUP_ID, "test121");
+        StoreProjectData projectConfiguration = new StoreProjectData("PROD-123", TEST_GROUP_ID, "test121");
         projectsAPI.createOrUpdate(projectConfiguration);
         Assert.assertEquals(4, projectsAPI.getAll().size());
 
-        ProjectData projectConfiguration2 = new ProjectData("PROD-124", TEST_GROUP_ID, "test121");
+        StoreProjectData projectConfiguration2 = new StoreProjectData("PROD-124", TEST_GROUP_ID, "test121");
         try
         {
             projectsAPI.createOrUpdate(projectConfiguration2);
@@ -81,7 +82,7 @@ public class TestUpdateProjectApi extends TestStoreMongo
             Assert.assertTrue(e.getMessage().contains("Duplicate"));
         }
 
-        ProjectData newData = projectsAPI.createOrUpdate(new ProjectData("PROD-124", TEST_GROUP_ID, "test122"));
+        StoreProjectData newData = projectsAPI.createOrUpdate(new StoreProjectData("PROD-124", TEST_GROUP_ID, "test122"));
         newData.setArtifactId("test121");
 
         try
@@ -100,11 +101,11 @@ public class TestUpdateProjectApi extends TestStoreMongo
     {
         Assert.assertEquals(3, projectsAPI.getAll().size());
 
-        ProjectData projectConfiguration = new ProjectData("PROD-123", TEST_GROUP_ID, "test121");
+        StoreProjectData projectConfiguration = new StoreProjectData("PROD-123", TEST_GROUP_ID, "test121");
         projectsAPI.createOrUpdate(projectConfiguration);
         Assert.assertEquals(4, projectsAPI.getAll().size());
 
-        ProjectData projectConfiguration2 = new ProjectData("PROD-124", "some.Examples", "test121");
+        StoreProjectData projectConfiguration2 = new StoreProjectData("PROD-124", "some.Examples", "test121");
         try
         {
           Assert.assertNotNull(projectsAPI.createOrUpdate(projectConfiguration2));
@@ -115,7 +116,7 @@ public class TestUpdateProjectApi extends TestStoreMongo
             Assert.fail("not duplicate coordinates, different in case");
         }
 
-        ProjectData newData = projectsAPI.createOrUpdate(new ProjectData("PROD-124", "some.Examples", "test122"));
+        StoreProjectData newData = projectsAPI.createOrUpdate(new StoreProjectData("PROD-124", "some.Examples", "test122"));
         newData.setArtifactId("test121");
 
         try
@@ -130,40 +131,16 @@ public class TestUpdateProjectApi extends TestStoreMongo
     }
 
     @Test
-    public void canUpdateProject()
-    {
-
-        List<ProjectData> updatedProject = projectsAPI.findByProjectId("PROD-A");
-        Assert.assertNotNull(updatedProject);
-        Assert.assertEquals(1, updatedProject.size());
-        Assert.assertNotNull(updatedProject.get(0).getVersions());
-        Assert.assertEquals(2, updatedProject.get(0).getVersions().size());
-        updatedProject.get(0).getVersions().add("1.1.1");
-        projectsAPI.createOrUpdate(updatedProject.get(0));
-        List<ProjectData> after = projectsAPI.findByProjectId("PROD-A");
-        Assert.assertEquals(3, after.get(0).getVersions().size());
-        after.get(0).getVersions().add("1.2.0");
-        projectsAPI.createOrUpdate(after.get(0));
-        Assert.assertEquals(4, projectsAPI.findByProjectId("PROD-A").get(0).getVersions().size());
-
-        after.get(0).removeVersion("1.1.1");
-        projectsAPI.createOrUpdate(after.get(0));
-        Assert.assertEquals(3, projectsAPI.findByProjectId("PROD-A").get(0).getVersions().size());
-    }
-
-
-
-    @Test
     public void onlyInsertIfAbsent()
     {
 
         Assert.assertEquals(3, projectsAPI.getAll().size());
 
-        ProjectData projectConfiguration = new ProjectData("PROD-123", TEST_GROUP_ID, "test121");
+        StoreProjectData projectConfiguration = new StoreProjectData("PROD-123", TEST_GROUP_ID, "test121");
         projectsAPI.createOrUpdate(projectConfiguration);
         Assert.assertEquals(4, projectsAPI.getAll().size());
 
-        ProjectData projectConfiguration2 = new ProjectData("PROD-123", TEST_GROUP_ID, "test121");
+        StoreProjectData projectConfiguration2 = new StoreProjectData("PROD-123", TEST_GROUP_ID, "test121");
         try
         {
             projectsAPI.createOrUpdate(projectConfiguration2);
@@ -172,7 +149,7 @@ public class TestUpdateProjectApi extends TestStoreMongo
         {
             Assert.assertTrue(e.getMessage().contains("Duplicate"));
         }
-        List<ProjectData> newConfig = projectsAPI.getAll();
+        List<StoreProjectData> newConfig = projectsAPI.getAll();
         Assert.assertNotNull(newConfig);
         Assert.assertEquals(4, newConfig.size());
 
@@ -183,11 +160,11 @@ public class TestUpdateProjectApi extends TestStoreMongo
     {
 
         Assert.assertEquals(3, projectsAPI.getAll().size());
-        ProjectData projectConfiguration = new ProjectData("PROD-123", TEST_GROUP_ID, "test121");
+        StoreProjectData projectConfiguration = new StoreProjectData("PROD-123", TEST_GROUP_ID, "test121");
         projectsAPI.createOrUpdate(projectConfiguration);
         Assert.assertEquals(4, projectsAPI.getAll().size());
 
-        ProjectData projectConfiguration2 = new ProjectData("PROD-21111", TEST_GROUP_ID, "test121");
+        StoreProjectData projectConfiguration2 = new StoreProjectData("PROD-21111", TEST_GROUP_ID, "test121");
         try
         {
             projectsAPI.createOrUpdate(projectConfiguration2);
@@ -198,9 +175,9 @@ public class TestUpdateProjectApi extends TestStoreMongo
             Assert.assertTrue(e.getMessage().contains("Duplicate"));
         }
 
-        ProjectData projectConfiguration3 = new ProjectData("PROD-21111", TEST_GROUP_ID, "test12111");
+        StoreProjectData projectConfiguration3 = new StoreProjectData("PROD-21111", TEST_GROUP_ID, "test12111");
 
-        ProjectData res1 = projectsAPI.createOrUpdate(projectConfiguration3);
+        StoreProjectData res1 = projectsAPI.createOrUpdate(projectConfiguration3);
         Assert.assertNotNull(res1);
         Assert.assertEquals(5, projectsAPI.getAll().size());
     }

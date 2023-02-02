@@ -18,9 +18,11 @@ package org.finos.legend.depot.store.mongo;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
+import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 
 public class ManageDataStoreMongoModule extends DataStoreMongoModule
 {
@@ -30,9 +32,11 @@ public class ManageDataStoreMongoModule extends DataStoreMongoModule
         super.configure();
         bind(UpdateEntities.class).to(EntitiesMongo.class);
         bind(UpdateProjects.class).to(ProjectsMongo.class);
+        bind(UpdateProjectsVersions.class).to(ProjectsVersionsMongo.class);
         bind(UpdateFileGenerations.class).to(FileGenerationsMongo.class);
 
         expose(UpdateEntities.class);
+        expose(UpdateProjectsVersions.class);
         expose(UpdateFileGenerations.class);
         expose(UpdateProjects.class);
     }

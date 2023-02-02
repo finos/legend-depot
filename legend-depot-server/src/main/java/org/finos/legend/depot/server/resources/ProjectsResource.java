@@ -17,7 +17,10 @@ package org.finos.legend.depot.server.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.domain.project.ProjectProperty;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
@@ -30,9 +33,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Path("")
 @Api("Projects")
+@Deprecated
 public class ProjectsResource extends BaseResource
 {
 
@@ -44,33 +49,39 @@ public class ProjectsResource extends BaseResource
         this.projectApi = projectApi;
     }
 
-    @GET
-    @Path("/projects")
-    @ApiOperation(ResourceLoggingAndTracing.GET_ALL_PROJECTS)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<ProjectData> getProjects()
-    {
-        return handle(ResourceLoggingAndTracing.GET_ALL_PROJECTS, this.projectApi::getAll);
-    }
 
     @GET
     @Path("/projects/{groupId}/{artifactId}")
     @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_BY_GA)
     @Produces(MediaType.APPLICATION_JSON)
+    @Deprecated
     public Optional<ProjectData> getProject(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
     {
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_BY_GA, ResourceLoggingAndTracing.GET_PROJECT_BY_GA + groupId + artifactId, () -> this.projectApi.find(groupId, artifactId));
+        return handle(ResourceLoggingAndTracing.GET_PROJECT_BY_GA, ResourceLoggingAndTracing.GET_PROJECT_BY_GA + groupId + artifactId, () ->
+        {
+            List<StoreProjectVersionData> projectVersions = projectApi.find(groupId, artifactId);
+            if (!projectVersions.isEmpty())
+            {
+                return Optional.of(transformToProjectData(groupId, artifactId, projectVersions));
+            }
+            return Optional.empty();
+        });
     }
 
-    @GET
-    @Path("/projects/{groupId}/{artifactId}/versions")
-    @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<String> getVersions(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
+    private ProjectData transformToProjectData(String groupId, String artifactId, List<StoreProjectVersionData> projectVersionsData)
     {
-        return handle(ResourceLoggingAndTracing.GET_VERSIONS, () -> projectApi.getVersions(groupId, artifactId));
+        StoreProjectData projectCoordinates = this.projectApi.findCoordinates(groupId, artifactId).get();
+        ProjectData projectData = new ProjectData(projectCoordinates.getProjectId(), groupId, artifactId);
+        projectVersionsData.stream().forEach(pv ->
+        {
+            List<ProjectData.ProjectVersionDependency> dependencies = pv.getVersionData().getDependencies().stream().map(dep -> new ProjectData.ProjectVersionDependency(groupId, artifactId, pv.getVersionId(), dep)).collect(Collectors.toList());
+            projectData.addDependencies(dependencies);
+            List<ProjectProperty> projectProperties = pv.getVersionData().getProperties().stream().map(prop -> new ProjectProperty(prop.getPropertyName(), prop.getValue(), pv.getVersionId())).collect(Collectors.toList());
+            projectData.addProperties(projectProperties);
+            projectData.addVersion(pv.getVersionId());
+        });
+        return projectData;
     }
-
 
 
 }

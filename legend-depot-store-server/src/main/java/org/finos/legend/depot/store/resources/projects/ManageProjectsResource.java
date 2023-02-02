@@ -20,7 +20,8 @@ import io.swagger.annotations.ApiOperation;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
@@ -28,12 +29,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.security.Principal;
+import java.util.List;
 
 @Path("")
 @Api("Projects")
@@ -57,12 +60,33 @@ public class ManageProjectsResource extends BaseAuthorisedResource
         return PROJECTS_RESOURCE;
     }
 
+    @GET
+    @Path("/projects/versions/all")
+    @ApiOperation(ResourceLoggingAndTracing.GET_ALL_PROJECTS_VERSIONS)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Deprecated
+    public List<StoreProjectVersionData> getProjectsVersions()
+    {
+        return handle(ResourceLoggingAndTracing.GET_ALL_PROJECTS_VERSIONS, () -> this.projectApi.getAll());
+    }
+
+    @GET
+    @Path("/projects/all")
+    @ApiOperation(ResourceLoggingAndTracing.GET_ALL_PROJECTS)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Deprecated
+    public List<StoreProjectData> getProjects()
+    {
+        return handle(ResourceLoggingAndTracing.GET_ALL_PROJECTS, () -> this.projectApi.getAllProjectCoordinates());
+    }
+
+
 
     @PUT
     @Path("/projects/{projectId}/{groupId}/{artifactId}")
     @ApiOperation(ResourceLoggingAndTracing.CREATE_EMPTY_PROJECT)
     @Produces(MediaType.APPLICATION_JSON)
-    public ProjectData updateProject(@PathParam("projectId") String projectId, @PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
+    public StoreProjectData updateProject(@PathParam("projectId") String projectId, @PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
     {
         return handle(
                 ResourceLoggingAndTracing.CREATE_EMPTY_PROJECT,
@@ -70,7 +94,7 @@ public class ManageProjectsResource extends BaseAuthorisedResource
                 () ->
                 {
                     validateUser();
-                    return projectApi.createOrUpdate(new ProjectData(projectId, groupId, artifactId));
+                    return projectApi.createOrUpdate(new StoreProjectData(projectId, groupId, artifactId));
                 });
     }
 
@@ -88,23 +112,6 @@ public class ManageProjectsResource extends BaseAuthorisedResource
                 {
                     validateUser();
                     return projectApi.delete(groupId, artifactId);
-                });
-    }
-
-    @DELETE
-    @Path("/projects/{projectId}")
-    @ApiOperation(ResourceLoggingAndTracing.DELETE_PROJECT_ID)
-    @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse deleteProject(@PathParam("projectId") String projectId)
-    {
-
-        return handle(
-                ResourceLoggingAndTracing.DELETE_PROJECT_ID,
-                ResourceLoggingAndTracing.DELETE_PROJECT + projectId,
-                () ->
-                {
-                    validateUser();
-                    return projectApi.delete(projectId);
                 });
     }
 

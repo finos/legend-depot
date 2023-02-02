@@ -19,12 +19,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.BaseDomain;
+import org.finos.legend.depot.domain.VersionedData;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProjectVersion extends BaseDomain
+public class ProjectVersion extends VersionedData
 {
-    private String versionId;
 
     public ProjectVersion()
     {
@@ -32,13 +31,7 @@ public class ProjectVersion extends BaseDomain
 
     public ProjectVersion(String groupId, String artifactId, String versionId)
     {
-        super(groupId, artifactId);
-        this.versionId = versionId;
-    }
-
-    public String getVersionId()
-    {
-        return versionId;
+        super(groupId, artifactId, versionId);
     }
 
     @Override

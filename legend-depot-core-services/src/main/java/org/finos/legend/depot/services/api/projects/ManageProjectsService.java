@@ -16,15 +16,26 @@
 package org.finos.legend.depot.services.api.projects;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+
+import java.util.List;
 
 public interface ManageProjectsService extends ProjectsService
 {
 
-    ProjectData createOrUpdate(ProjectData projectData);
+    List<StoreProjectVersionData> getAll();
+
+//    /**
+//     * NOTE: page starting from 1
+//     */
+
+    StoreProjectVersionData createOrUpdate(StoreProjectVersionData projectData);
+
+    StoreProjectData createOrUpdate(StoreProjectData projectData);
 
     MetadataEventResponse delete(String groupId,String artifactId);
 
-    MetadataEventResponse delete(String projectId);
+    MetadataEventResponse delete(String groupId,String artifactId, String versionId);
 
 }

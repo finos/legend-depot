@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class EntityClassifierServiceImpl implements EntityClassifierService
@@ -47,8 +48,8 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
     {
         return ListIterate.collect(projects.getProjects(page, pageSize), projectData ->
         {
-            VersionId latestVersion = projectData.getLatestVersion().orElse(null);
-            return new ProjectVersion(projectData.getGroupId(), projectData.getArtifactId(), latestVersion != null ? latestVersion.toVersionIdString() : null);
+            Optional<VersionId> latestVersion = projects.getLatestVersion(projectData.getGroupId(), projectData.getArtifactId());
+            return new ProjectVersion(projectData.getGroupId(), projectData.getArtifactId(), latestVersion.isPresent() ? latestVersion.get().toVersionIdString() : null);
         }).select(info -> info.getVersionId() != null);
     }
 

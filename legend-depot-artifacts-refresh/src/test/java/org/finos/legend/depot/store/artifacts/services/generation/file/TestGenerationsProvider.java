@@ -21,13 +21,15 @@ import org.finos.legend.depot.artifacts.repository.maven.impl.TestMavenArtifacts
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvider;
@@ -57,13 +59,16 @@ public class TestGenerationsProvider extends TestStoreMongo
     private final ArtifactRepository repository = new TestMavenArtifactsRepository();
     private FileGenerationsArtifactsProvider fileGenerationsProvider = new FileGenerationsProvider();
     private final UpdateProjects projects = mock(UpdateProjects.class);
+    private final UpdateProjectsVersions projectsVersions = mock(UpdateProjectsVersions.class);
     private final UpdateEntities entities = new EntitiesMongo(mongoProvider);
-    private final ManageFileGenerationsService generations = new ManageFileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities, new ProjectsServiceImpl(projects));
+    private final ManageFileGenerationsService generations = new ManageFileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities, new ProjectsServiceImpl(projectsVersions,projects));
 
     @Before
     public void setup()
     {
-       when(projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID)).thenReturn(Optional.of(new ProjectData(PRODUCT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID).withVersions("2.0.0")));
+       when(projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID)).thenReturn(Optional.of(new StoreProjectData(PRODUCT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID)));
+       when(projectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT")).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT")));
+        when(projectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0")).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0")));
     }
 
     private List<File> getFiles(String versionId)
@@ -96,7 +101,7 @@ public class TestGenerationsProvider extends TestStoreMongo
 
         Assert.assertTrue(generations.getAll().isEmpty());
         FileGenerationHandlerImpl handler = new FileGenerationHandlerImpl(repository, fileGenerationsProvider, generations);
-        ProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
+        StoreProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
         MetadataEventResponse response = handler.refreshProjectRevisionArtifacts(projectData, getFiles(VersionValidator.MASTER_SNAPSHOT));
         Assert.assertNotNull(response);
         Assert.assertFalse(response.hasErrors());
@@ -112,7 +117,7 @@ public class TestGenerationsProvider extends TestStoreMongo
         URL filePath = this.getClass().getClassLoader().getResource("repository/examples/metadata/test-file-generation/master-SNAPSHOT/test-file-generation-new-master-SNAPSHOT.jar");
         Assert.assertTrue(generations.getAll().isEmpty());
         FileGenerationHandlerImpl handler = new FileGenerationHandlerImpl(repository, fileGenerationsProvider, generations);
-        ProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
+        StoreProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
         //deleted one generation as part of new master snapshot version
         MetadataEventResponse response = handler.refreshProjectRevisionArtifacts(projectData, Arrays.asList(new File(filePath.getFile())));
         Assert.assertNotNull(response);
@@ -128,7 +133,7 @@ public class TestGenerationsProvider extends TestStoreMongo
 
         Assert.assertTrue(generations.getAll().isEmpty());
         FileGenerationHandlerImpl handler = new FileGenerationHandlerImpl(repository, fileGenerationsProvider, generations);
-        ProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
+        StoreProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
         MetadataEventResponse response = handler.refreshProjectVersionArtifacts(projectData, "2.0.0", getFiles("2.0.0"));
         Assert.assertNotNull(response);
         Assert.assertFalse(response.hasErrors());
@@ -144,7 +149,7 @@ public class TestGenerationsProvider extends TestStoreMongo
     {
         Assert.assertTrue(generations.getAll().isEmpty());
         FileGenerationHandlerImpl handler = new FileGenerationHandlerImpl(repository, fileGenerationsProvider, generations);
-        ProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
+        StoreProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
         MetadataEventResponse response = handler.refreshProjectVersionArtifacts(projectData, "2.0.0", getFiles("2.0.0"));
         Assert.assertNotNull(response);
 

@@ -18,7 +18,7 @@ package org.finos.legend.depot.store.artifacts.services.entities;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.StoredEntity;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.store.artifacts.api.entities.EntitiesArtifactsHandler;
@@ -39,15 +39,9 @@ public class EntitiesHandlerImpl extends AbstractEntityRefreshHandlerImpl implem
     }
 
     @Override
-    public MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId, List<File> files)
+    public MetadataEventResponse refreshProjectVersionArtifacts(StoreProjectData projectData, String versionId, List<File> files)
     {
-        return super.refreshVersionArtifacts(project, versionId, files);
-    }
-
-    @Override
-    public MetadataEventResponse refreshProjectRevisionArtifacts(ProjectData project, List<File> files)
-    {
-        return super.refreshVersionArtifacts(project, VersionValidator.MASTER_SNAPSHOT, files);
+        return super.refreshVersionArtifacts(projectData, versionId, files);
     }
 
     @Override
@@ -57,13 +51,13 @@ public class EntitiesHandlerImpl extends AbstractEntityRefreshHandlerImpl implem
     }
 
     @Override
-    List<StoredEntity> transformVersionedEntities(ProjectData project, String versionId, List<Entity> entityList)
+    List<StoredEntity> transformVersionedEntities(StoreProjectData projectData, String versionId, List<Entity> entityList)
     {
         List<StoredEntity> versionedEntities = new ArrayList<>();
         for (Entity entity : entityList)
         {
             EntityDefinition entityDefinition = new EntityDefinition(entity.getPath(), entity.getClassifierPath(), entity.getContent());
-            StoredEntity storedEntity = new StoredEntity(project.getGroupId(), project.getArtifactId(), versionId, false,entityDefinition);
+            StoredEntity storedEntity = new StoredEntity(projectData.getGroupId(), projectData.getArtifactId(), versionId, false,entityDefinition);
             versionedEntities.add(storedEntity);
         }
         return versionedEntities;

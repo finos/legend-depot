@@ -16,33 +16,51 @@
 package org.finos.legend.depot.services.projects;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.List;
 
 public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements ManageProjectsService
 {
 
+    private final UpdateProjectsVersions projectsVersions;
     private final UpdateProjects projects;
 
     @Inject
-    public ManageProjectsServiceImpl(UpdateProjects projects, @Named("dependencyCache") DependenciesCache dependenciesCache)
+    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, @Named("dependencyCache") DependenciesCache dependenciesCache)
     {
-        super(projects,dependenciesCache);
+        super(projectsVersions,projects,dependenciesCache);
         this.projects = projects;
+        this.projectsVersions = projectsVersions;
     }
 
-    public ManageProjectsServiceImpl(UpdateProjects projects)
+    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects)
     {
-        super(projects,new DependenciesCache(projects));
+        super(projectsVersions, projects, new DependenciesCache(projectsVersions));
         this.projects = projects;
+        this.projectsVersions = projectsVersions;
     }
 
     @Override
-    public ProjectData createOrUpdate(ProjectData projectData)
+    public List<StoreProjectVersionData> getAll()
+    {
+        return projectsVersions.getAll();
+    }
+
+    @Override
+    public StoreProjectVersionData createOrUpdate(StoreProjectVersionData projectData)
+    {
+        return projectsVersions.createOrUpdate(projectData);
+    }
+
+    @Override
+    public StoreProjectData createOrUpdate(StoreProjectData projectData)
     {
         return projects.createOrUpdate(projectData);
     }
@@ -50,13 +68,14 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
     @Override
     public MetadataEventResponse delete(String groupId, String artifactId)
     {
-        return projects.delete(groupId, artifactId);
+        projects.delete(groupId, artifactId);
+        return projectsVersions.delete(groupId, artifactId);
     }
 
     @Override
-    public MetadataEventResponse delete(String projectId)
+    public MetadataEventResponse delete(String groupId, String artifactId, String versionId)
     {
-        return projects.deleteByProjectId(projectId);
+        return projectsVersions.deleteByVersionId(groupId, artifactId, versionId);
     }
 
 }

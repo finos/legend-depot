@@ -28,7 +28,7 @@ import org.finos.legend.depot.services.entities.EntityClassifierServiceImpl;
 import org.finos.legend.depot.services.generation.file.FileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.DependenciesCache;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
-import org.finos.legend.depot.store.api.projects.Projects;
+import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 
 import javax.inject.Named;
 
@@ -53,8 +53,8 @@ public class ReadDataServicesModule extends PrivateModule
     @Provides
     @Named("dependencyCache")
     @Singleton
-    public DependenciesCache initialiseDependencyCache(Projects projects)
+    public DependenciesCache initialiseDependencyCache(ProjectsVersions projectsVersions)
     {
-        return new DependenciesCache(projects);
+        return new DependenciesCache(projectsVersions);
     }
 }

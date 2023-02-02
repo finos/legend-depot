@@ -17,6 +17,8 @@ package org.finos.legend.depot.store.mongo.admin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.bson.Document;
+import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
@@ -118,5 +120,30 @@ public class TestMongoAdminStore extends TestStoreMongo
         Assert.assertNotNull(result);
         Assert.assertEquals(1,result.size());
 
+    }
+
+    @Test
+    public void testOneOffMigrationService()
+    {
+        setUpProjectDataFromFile(this.getClass().getClassLoader().getResource("data/projectsData.json"));
+        mongoAdminStore.migrationToProjectVersions();
+        Assert.assertEquals(7,mongoProvider.getCollection("versions").countDocuments());
+        StoreProjectVersionData result = new MigrationHelper(mongoProvider).convert(mongoProvider.getCollection("versions").find().first(), StoreProjectVersionData.class);
+        Assert.assertEquals(result.getGroupId(), "examples.metadata");
+        Assert.assertEquals(result.getArtifactId(), "test");
+        Assert.assertEquals(result.getVersionId(), "master-SNAPSHOT");
+    }
+
+    @Test
+    public void testCleanupMigrationService()
+    {
+        setUpProjectDataFromFile(this.getClass().getClassLoader().getResource("data/projectsData.json"));
+        mongoAdminStore.cleanUpProjectData();
+        Assert.assertEquals(3,mongoProvider.getCollection("project-configurations").countDocuments());
+        StoreProjectData result = new MigrationHelper(mongoProvider).convert(mongoProvider.getCollection("project-configurations").find().first(), StoreProjectData.class);
+        Assert.assertEquals(1,1);
+        Assert.assertEquals(result.getProjectId(), "PROD-A");
+        Assert.assertEquals(result.getGroupId(), "examples.metadata");
+        Assert.assertEquals(result.getArtifactId(), "test");
     }
 }

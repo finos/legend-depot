@@ -2,54 +2,16 @@
   {
     "projectId": "PROD-A",
     "groupId": "examples.metadata",
-    "artifactId": "test",
-    "versions": [
-      "2.0.0",
-      "2.2.0",
-      "2.3.0"
-    ],
-    "dependencies": [
-      {
-        "projectId": "PROD-A",
-        "versionId": "master-SNAPSHOT",
-        "groupId": "examples.metadata",
-        "artifactId": "test",
-        "dependency": {
-          "projectId": "PROD-B",
-          "groupId": "examples.metadata",
-          "artifactId": "test-dependencies",
-          "versionId": "1.0.0"
-        }
-      },
-      {
-        "projectId": "PROD-A",
-        "versionId": "2.3.1",
-        "groupId": "examples.metadata",
-        "artifactId": "test",
-        "dependency": {
-          "projectId": "PROD-B",
-          "groupId": "examples.metadata",
-          "artifactId": "test-dependencies",
-          "versionId": "1.0.0"
-        }
-      }
-    ]
+    "artifactId": "test"
   },
   {
     "projectId": "PROD-B",
     "groupId": "examples.metadata",
-    "artifactId": "test-dependencies",
-    "versions": [
-      "1.0.0"
-    ],
-    "dependencies": []
+    "artifactId": "test-dependencies"
   },
   {
     "projectId": "PROD-C",
     "groupId": "examples.metadata",
-    "artifactId": "test1",
-    "versions": [
-    ],
-    "dependencies": []
+    "artifactId": "test1"
   }
 ]
