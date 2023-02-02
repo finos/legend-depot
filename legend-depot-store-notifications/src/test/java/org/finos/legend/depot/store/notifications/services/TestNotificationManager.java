@@ -17,13 +17,15 @@ package org.finos.legend.depot.store.notifications.services;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
+import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
@@ -51,16 +53,17 @@ public class TestNotificationManager extends TestStoreMongo
     public static final String TEST_PROJECT_ID = "PROD-A";
     public static final String VERSION_ID = "2.3.1";
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
+    protected UpdateProjectsVersions projectsVersionsStore = new ProjectsVersionsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     private final NotificationsMongo eventsMongo = new NotificationsMongo(mongoProvider);
     private final NotificationsQueueMongo queue = new NotificationsQueueMongo(mongoProvider);
     private final NotificationEventHandler notificationEventHandler = mock(NotificationEventHandler.class);
-    private final NotificationsQueueManager eventsManager = new NotificationsQueueManager(new ProjectsServiceImpl(projectsStore), eventsMongo, queue, notificationEventHandler);
+    private final NotificationsQueueManager eventsManager = new NotificationsQueueManager(new ProjectsServiceImpl(projectsVersionsStore,projectsStore), eventsMongo, queue, notificationEventHandler);
 
     @Before
     public void setUpData()
     {
-        projectsStore.createOrUpdate(new ProjectData(TEST_PROJECT_ID, TEST_GROUP_ID, "test"));
+        projectsStore.createOrUpdate(new StoreProjectData(TEST_PROJECT_ID, TEST_GROUP_ID, "test"));
         when(notificationEventHandler.handleEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID, "test", VERSION_ID))).thenReturn(loadEntities(TEST_PROJECT_ID, VERSION_ID));
         when(notificationEventHandler.handleEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID,"test","10.0.0"))).thenReturn(new MetadataEventResponse());
         when(notificationEventHandler.validateEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID,"test","10.0.0"))).thenReturn(Arrays.asList("bad version"));

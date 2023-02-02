@@ -17,19 +17,23 @@ package org.finos.legend.depot.services;
 
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
+import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.junit.Before;
 
 public class TestBaseServices extends TestStoreMongo
 {
+    protected UpdateProjectsVersions projectsVersionsStore = new ProjectsVersionsMongo(mongoProvider);
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
 
     @Before
     public void setUpData()
     {
+        setUpProjectsVersionsFromFile(TestStoreMongo.class.getClassLoader().getResource("data/projectsVersions.json"));
         setUpProjectsFromFile(TestStoreMongo.class.getClassLoader().getResource("data/projects.json"));
     }
 

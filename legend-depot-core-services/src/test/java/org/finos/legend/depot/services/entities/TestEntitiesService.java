@@ -20,9 +20,8 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.domain.entity.StoredEntity;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionDependency;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
@@ -39,17 +38,17 @@ import java.util.function.Predicate;
 public class TestEntitiesService extends TestBaseServices
 {
 
-    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsStore));
+    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsVersionsStore, projectsStore));
 
     @Before
     public void setUpData()
     {
         super.setUpData();
 
-        ProjectData project1 = projectsStore.findByProjectId("PROD-B").get(0);
+        StoreProjectVersionData project1 = projectsVersionsStore.find("examples.metadata", "test-dependencies", "1.0.0").get();
         //"PROD-A" -> "PROD-B" -> "PROD-C"
-        project1.addDependency(new ProjectVersionDependency("examples.metadata", "test-dependencies", "1.0.0", new ProjectVersion("example.services.test", "test", "2.0.1")));
-        projectsStore.createOrUpdate(project1);
+        project1.getVersionData().addDependency(new ProjectVersion("example.services.test", "test", "2.0.1"));
+        projectsVersionsStore.createOrUpdate(project1);
         loadEntities("PROD-A", "2.3.1");
         loadEntities("PROD-B", "1.0.0");
         loadEntities("PROD-C", "2.0.1");
@@ -75,30 +74,30 @@ public class TestEntitiesService extends TestBaseServices
         List<ProjectVersionEntities> dependencyList = entitiesService.getDependenciesEntities("examples.metadata", "test", "2.3.1", false, false, false);
         Assert.assertFalse(dependencyList.isEmpty());
         Assert.assertEquals(1, dependencyList.size());
-        Assert.assertFalse(dependencyList.stream().filter(projectToArtifactFilter("PROD-A")).findFirst().isPresent());
-        Assert.assertEquals(1, dependencyList.stream().filter(projectToArtifactFilter("PROD-B")).findFirst().get().getEntities().size());
-        Assert.assertFalse(dependencyList.stream().filter(projectToArtifactFilter("PROD-C")).findFirst().isPresent());
+        Assert.assertFalse(dependencyList.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().isPresent());
+        Assert.assertEquals(1, dependencyList.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assert.assertFalse(dependencyList.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().isPresent());
 
         List<ProjectVersionEntities> dependencyList2 = entitiesService.getDependenciesEntities("examples.metadata", "test", "2.3.1", false, true, false);
         Assert.assertFalse(dependencyList2.isEmpty());
         Assert.assertEquals(2, dependencyList2.size());
-        Assert.assertFalse(dependencyList2.stream().filter(projectToArtifactFilter("PROD-A")).findFirst().isPresent());
-        Assert.assertEquals(1, dependencyList2.stream().filter(projectToArtifactFilter("PROD-B")).findFirst().get().getEntities().size());
-        Assert.assertEquals(18, dependencyList2.stream().filter(projectToArtifactFilter("PROD-C")).findFirst().get().getEntities().size());
+        Assert.assertFalse(dependencyList2.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().isPresent());
+        Assert.assertEquals(1, dependencyList2.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assert.assertEquals(18, dependencyList2.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
 
         List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities("examples.metadata", "test", "2.3.1", false, true, true);
         Assert.assertFalse(dependencyList3.isEmpty());
         Assert.assertEquals(3, dependencyList3.size());
-        Assert.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("PROD-A")).findFirst().get().getEntities().size());
-        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("PROD-B")).findFirst().get().getEntities().size());
-        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("PROD-C")).findFirst().get().getEntities().size());
+        Assert.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
+        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
     }
 
-    private Predicate<ProjectVersionEntities> projectToArtifactFilter(String projectId)
+    private Predicate<ProjectVersionEntities> projectToArtifactFilter(String groupId,String artifactId)
     {
-        List<ProjectData> p = projectsStore.findByProjectId(projectId);
-        Assert.assertEquals(1, p.size());
-        return dep -> dep.getGroupId().equals(p.get(0).getGroupId()) && dep.getArtifactId().equals(p.get(0).getArtifactId());
+        List<StoreProjectVersionData> p = projectsVersionsStore.find(groupId, artifactId);
+        Assert.assertTrue(!p.isEmpty());
+        return dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId);
     }
 
     @Test
@@ -108,9 +107,9 @@ public class TestEntitiesService extends TestBaseServices
         List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities(projectVersions, false, true, true);
         Assert.assertFalse(dependencyList3.isEmpty());
         Assert.assertEquals(3, dependencyList3.size());
-        Assert.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("PROD-A")).findFirst().get().getEntities().size());
-        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("PROD-B")).findFirst().get().getEntities().size());
-        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("PROD-C")).findFirst().get().getEntities().size());
+        Assert.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
+        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
 
     }
 
@@ -131,7 +130,7 @@ public class TestEntitiesService extends TestBaseServices
     @Test
     public void canQueryEntitiesWithVersionInPackage()
     {
-        projectsStore.createOrUpdate(new ProjectData("PROD-D","examples.metadata","test1").withVersions("1.0.0"));
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata","test1","1.0.0"));
         loadEntities("PROD-D", "1.0.0");
 
         String pkgName = "examples::metadata::test::dependency::v1_2_3";

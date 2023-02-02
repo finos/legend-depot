@@ -20,20 +20,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.BaseDomain;
+import org.finos.legend.depot.domain.CoordinateData;
 import org.finos.legend.depot.domain.HasIdentifier;
+import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class ProjectData extends BaseDomain implements HasIdentifier
+@Deprecated
+public final class ProjectData extends CoordinateData implements HasIdentifier
 {
     @JsonProperty
     private String id;
@@ -77,40 +78,12 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
         return versions;
     }
 
-    @JsonIgnore
-    public List<VersionId> getVersionIds()
-    {
-        Collections.sort(versions);
-        return versions.stream().map(VersionId::parseVersionId).collect(Collectors.toList());
-    }
-
-    public void setVersions(List<String> versions)
-    {
-        this.versions = versions;
-    }
-
-    @JsonIgnore
-    public List<VersionId> getVersionsOrdered()
-    {
-        return versions.stream().map(VersionId::parseVersionId).sorted().collect(Collectors.toList());
-    }
-
     public void addVersion(String versionId)
     {
         if (!versionId.equals(VersionValidator.MASTER_SNAPSHOT) && !this.getVersions().contains(versionId))
         {
             this.versions.add(versionId);
         }
-    }
-
-    public void removeVersion(String versionId)
-    {
-        this.versions.remove(versionId);
-    }
-
-    public void removeDependency(ProjectVersionDependency projectVersionDependency)
-    {
-        this.dependencies.remove(projectVersionDependency);
     }
 
     @Override
@@ -154,17 +127,14 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
         return dependencies.stream().filter(dependency -> dependency.getVersionId().equals(version)).collect(Collectors.toList());
     }
 
+    public List<ProjectProperty> getPropertiesForProjectVersionID(String projectVersionId)
+    {
+        return properties.stream().filter(property -> property.getProjectVersionId().equals(projectVersionId)).collect(Collectors.toList());
+    }
+
     public void addDependencies(List<ProjectVersionDependency> dependencies)
     {
         this.dependencies.addAll(dependencies);
-    }
-
-    public void addDependency(ProjectVersionDependency dependency)
-    {
-        if (!dependencies.contains(dependency))
-        {
-            this.dependencies.add(dependency);
-        }
     }
 
     public void setDependencies(List<ProjectVersionDependency> dependencies)
@@ -183,30 +153,51 @@ public final class ProjectData extends BaseDomain implements HasIdentifier
         this.properties = properties;
     }
 
-    public List<ProjectProperty> getPropertiesForProjectVersionID(String projectVersionId)
-    {
-        return properties.stream().filter(property -> property.getProjectVersionId().equals(projectVersionId)).collect(Collectors.toList());
-    }
-
     public void addProperties(List<ProjectProperty> propertyList)
     {
         propertyList.stream().filter(property -> !properties.contains(property)).forEach(property -> this.properties.add(property));
-    }
-
-    public void removePropertiesForProjectVersionID(String versionId)
-    {
-        this.properties.removeAll(getPropertiesForProjectVersionID(versionId));
-    }
-
-    public ProjectData withVersions(String... versionIds)
-    {
-        this.versions.addAll(Arrays.asList(versionIds));
-        return this;
     }
 
     @JsonIgnore
     public Optional<String> getVersion(String versionId)
     {
         return this.versions.stream().filter(v -> v.equals(versionId)).findFirst();
+    }
+
+    public static class ProjectVersionDependency extends VersionedData
+    {
+        private ProjectVersion dependency;
+
+        public ProjectVersionDependency()
+        {
+        }
+
+        public ProjectVersionDependency(String groupid, String artifactId, String versionId, ProjectVersion dep)
+        {
+            super(groupid, artifactId, versionId);
+            this.dependency = dep;
+        }
+
+        public ProjectVersion getDependency()
+        {
+            return dependency;
+        }
+
+        public void setDependency(ProjectVersion dependency)
+        {
+            this.dependency = dependency;
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            return EqualsBuilder.reflectionEquals(this, obj);
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return HashCodeBuilder.reflectionHashCode(this);
+        }
     }
 }

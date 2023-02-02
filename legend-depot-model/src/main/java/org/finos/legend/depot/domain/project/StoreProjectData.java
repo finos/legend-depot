@@ -13,45 +13,48 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.domain;
+package org.finos.legend.depot.domain.project;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.finos.legend.depot.domain.HasIdentifier;
+import org.finos.legend.depot.domain.CoordinateData;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class BaseDomain
+public class StoreProjectData extends CoordinateData implements HasIdentifier
 {
     @JsonProperty
-    private String groupId;
+    private String id;
     @JsonProperty
-    private String artifactId;
+    private String projectId;
 
-    public BaseDomain()
+    public StoreProjectData()
     {
+        super();
     }
 
-    public BaseDomain(String groupId, String artifactId)
+    public StoreProjectData(String projectId,String groupId,String artifactId)
     {
-        this.groupId = groupId;
-        this.artifactId = artifactId;
+        super(groupId, artifactId);
+        this.projectId = projectId;
     }
 
-
-    public String getGroupId()
+    public void setId(String id)
     {
-        return groupId;
+        this.id = id;
     }
 
-    public String getArtifactId()
+    public String getProjectId()
     {
-        return artifactId;
+        return projectId;
     }
 
-    public void setArtifactId(String artifactId)
+    @Override
+    public String getId()
     {
-        this.artifactId = artifactId;
+        return this.id;
     }
 
     @Override
@@ -65,5 +68,4 @@ public abstract class BaseDomain
     {
         return HashCodeBuilder.reflectionHashCode(this);
     }
-
 }

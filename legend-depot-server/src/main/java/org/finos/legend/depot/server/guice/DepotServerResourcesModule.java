@@ -17,6 +17,7 @@ package org.finos.legend.depot.server.guice;
 
 import com.google.inject.PrivateModule;
 import org.finos.legend.depot.server.resources.ProjectsResource;
+import org.finos.legend.depot.server.resources.ProjectsVersionsResource;
 import org.finos.legend.depot.server.resources.dependencies.DependenciesResource;
 import org.finos.legend.depot.server.resources.entities.EntitiesResource;
 import org.finos.legend.depot.server.resources.entities.EntityClassifierResource;
@@ -28,12 +29,14 @@ public class DepotServerResourcesModule extends PrivateModule
     protected void configure()
     {
         bind(ProjectsResource.class);
+        bind(ProjectsVersionsResource.class);
         bind(EntitiesResource.class);
         bind(EntityClassifierResource.class);
         bind(DependenciesResource.class);
         bind(FileGenerationsResource.class);
 
         expose(ProjectsResource.class);
+        expose(ProjectsVersionsResource.class);
         expose(EntityClassifierResource.class);
         expose(EntitiesResource.class);
         expose(DependenciesResource.class);

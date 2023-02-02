@@ -15,45 +15,33 @@
 
 package org.finos.legend.depot.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.BaseDomain;
+import org.finos.legend.depot.domain.VersionedData;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProjectVersionEntities extends BaseDomain
+public class ProjectVersionEntities extends VersionedData
 {
-    @NotNull
-    @JsonProperty
-    private String versionId;
     @JsonProperty
     private boolean versionedEntity;
 
     @JsonProperty
     private List<EntityDefinition> entities;
 
-
-    @JsonCreator
-    public ProjectVersionEntities(@JsonProperty(value = "groupId") String groupId,
-                                  @JsonProperty(value = "artifactId") String artifactId,
-                                  @JsonProperty(value = "versionId") String versionId,
-                                  @JsonProperty(value = "versionedEntity") boolean versionedEntity,
-                                  @JsonProperty(value = "entities") List<EntityDefinition> entities)
+    public ProjectVersionEntities()
     {
-        super(groupId,artifactId);
-        this.versionId = versionId;
-        this.versionedEntity = versionedEntity;
-        this.entities = entities;
+
     }
 
-    public String getVersionId()
+    public ProjectVersionEntities(String groupId, String artifactId, String versionId, boolean versionedEntity, List<EntityDefinition> entities)
     {
-        return versionId;
+        super(groupId,artifactId,versionId);
+        this.versionedEntity = versionedEntity;
+        this.entities = entities;
     }
 
     public boolean isVersionedEntity()

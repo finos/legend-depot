@@ -17,7 +17,7 @@ package org.finos.legend.depot.store.artifacts.services.entities;
 
 import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.StoredEntity;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntitiesArtifactsHandler;
@@ -44,13 +44,13 @@ public class VersionedEntitiesHandlerImpl extends EntitiesHandlerImpl implements
 
 
     @Override
-    List<StoredEntity> transformVersionedEntities(ProjectData project, String versionId, List<Entity> entityList)
+    List<StoredEntity> transformVersionedEntities(StoreProjectData projectData, String versionId, List<Entity> entityList)
     {
         List<StoredEntity> versionedEntities = new ArrayList<>();
         for (Entity entity : entityList)
         {
             EntityDefinition entityDefinition = new EntityDefinition(entity.getPath(), entity.getClassifierPath(), entity.getContent());
-            StoredEntity storedEntity = new StoredEntity(project.getGroupId(), project.getArtifactId(), versionId, true,entityDefinition);
+            StoredEntity storedEntity = new StoredEntity(projectData.getGroupId(), projectData.getArtifactId(), versionId, true,entityDefinition);
             versionedEntities.add(storedEntity);
         }
         return versionedEntities;

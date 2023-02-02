@@ -16,8 +16,7 @@
 package org.finos.legend.depot.store.notifications.services;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.Notifications;
@@ -31,10 +30,8 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 public final class NotificationsQueueManager implements NotificationsManager
 {
@@ -122,7 +119,7 @@ public final class NotificationsQueueManager implements NotificationsManager
 
     private void validateMavenCoordinates(String projectId, String groupId, String artifactId)
     {
-        Optional<ProjectData> project = projectsService.find(groupId, artifactId);
+        Optional<StoreProjectData> project = projectsService.findCoordinates(groupId, artifactId);
         if (project.isPresent() && !project.get().getProjectId().equals(projectId))
         {
             throw new IllegalArgumentException(String.format("%s:%s coordinates already registered with project %s", groupId, artifactId, project.get().getProjectId()));

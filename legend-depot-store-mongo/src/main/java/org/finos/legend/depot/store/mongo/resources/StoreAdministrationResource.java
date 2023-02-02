@@ -144,5 +144,32 @@ public class StoreAdministrationResource extends BaseAuthorisedResource
         return Response.ok().entity(this.manageStoreService.runPipeline(collectionMame,jsonPipeline)).build();
     }
 
+    @PUT
+    @Path("/migrations/migrateToVersionData")
+    @ApiOperation("migrate data from projects to store projects versions data")
+    @Deprecated
+    public Response migrationToProjectVersionData()
+    {
+        return handle("migrate data from projects to store projects versions data", () ->
+        {
+            validateUser();
+            manageStoreService.migrationToProjectVersions();
+            return Response.status(Response.Status.NO_CONTENT).build();
+        });
+    }
+
+    @PUT
+    @Path("/migrations/cleanupProjectData")
+    @ApiOperation("cleanup projects data")
+    @Deprecated
+    public Response cleanupProjectData()
+    {
+        return handle("cleanup projects data", () ->
+        {
+            validateUser();
+            manageStoreService.cleanUpProjectData();
+            return Response.status(Response.Status.NO_CONTENT).build();
+        });
+    }
 
 }

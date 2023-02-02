@@ -78,7 +78,7 @@ public class ManageEntitiesServiceImpl extends EntitiesServiceImpl implements Ma
     public List<Pair<String, String>> getOrphanedStoredEntities()
     {
         List<Pair<String, String>> allArtifacts = entities.getStoredEntitiesCoordinates();
-        return allArtifacts.stream().filter(art -> !projects.find(art.getOne(), art.getTwo()).isPresent()).collect(Collectors.toList());
+        return allArtifacts.stream().filter(art -> !projects.findCoordinates(art.getOne(), art.getTwo()).isPresent()).collect(Collectors.toList());
     }
 
     private Object executeWithTrace(String label, Supplier<Object> functionToExecute)

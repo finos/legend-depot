@@ -17,6 +17,7 @@ package org.finos.legend.depot.store.status;
 
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
@@ -24,6 +25,7 @@ import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
+import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.finos.legend.depot.store.status.domain.StoreStatus;
 import org.finos.legend.depot.store.status.services.StoreStatusService;
 import org.junit.After;
@@ -37,9 +39,10 @@ public class TestStatusServices extends TestStoreMongo
     private ArtifactsRefreshStatusMongo refreshStatus = new ArtifactsRefreshStatusMongo(mongoProvider);
     private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
     private QueryMetricsHandler queryMetricsHandler = new QueryMetricsHandler(metricsStore);
+    private UpdateProjectsVersions projectsVersions  = new ProjectsVersionsMongo(mongoProvider);
     private UpdateProjects projects = new ProjectsMongo(mongoProvider);
     private UpdateEntities entities = new EntitiesMongo(mongoProvider);
-    private StoreStatusService statusService = new StoreStatusService(projects, entities, refreshStatus, queryMetricsHandler);
+    private StoreStatusService statusService = new StoreStatusService(projectsVersions, projects, entities, refreshStatus, queryMetricsHandler);
 
     @Before
     public void setup()

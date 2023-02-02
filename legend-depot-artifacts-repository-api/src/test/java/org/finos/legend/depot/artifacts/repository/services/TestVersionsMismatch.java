@@ -17,7 +17,7 @@ package org.finos.legend.depot.artifacts.repository.services;
 
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,17 +42,16 @@ public class TestVersionsMismatch
     @Before
     public void setup() throws ArtifactRepositoryException
     {
-        ProjectData testProjectA = new ProjectData("PROD-A","examples.metadata", "test1");
-        testProjectA.getVersions().add("2.2.0");
-        testProjectA.getVersions().add("2.3.0");
-        ProjectData testProjectB = new ProjectData("PROD-B","examples.metadata", "test2");
-        testProjectB.getVersions().add("1.0.0");
-        ProjectData testProjectC = new ProjectData("PROD-C","examples.metadata", "test3");
-        testProjectC.getVersions().add("2.0.1");
-        ProjectData testProjectD = new ProjectData("PROD-D","examples.metadata", "test4");
-        testProjectD.getVersions().add("0.0.1");
-
-        when(projects.getAll()).thenReturn(Arrays.asList(testProjectA,testProjectB,testProjectC,testProjectD));
+        List<StoreProjectData> coordinates = new ArrayList<>();
+        coordinates.add(new StoreProjectData("PROD-A","examples.metadata", "test1"));
+        coordinates.add(new StoreProjectData("PROD-B","examples.metadata", "test2"));
+        coordinates.add(new StoreProjectData("PROD-C","examples.metadata", "test3"));
+        coordinates.add(new StoreProjectData("PROD-D","examples.metadata", "test4"));
+        when(projects.getAllProjectCoordinates()).thenReturn(coordinates);
+        when(projects.getVersions("examples.metadata", "test1")).thenReturn(Arrays.asList("2.2.0","2.3.0"));
+        when(projects.getVersions("examples.metadata", "test2")).thenReturn(Arrays.asList("1.0.0"));
+        when(projects.getVersions("examples.metadata", "test3")).thenReturn(Arrays.asList("2.0.1"));
+        when(projects.getVersions("examples.metadata", "test4")).thenReturn(Arrays.asList("0.0.1"));
         when(repository.findVersions("examples.metadata", "test1")).thenReturn(Arrays.asList(VersionId.parseVersionId("2.2.0"),VersionId.parseVersionId("2.3.0"), VersionId.parseVersionId("2.3.1")));
         when(repository.findVersions("examples.metadata", "test2")).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.1")));
         when(repository.findVersions("examples.metadata", "test3")).thenReturn(Collections.emptyList());

@@ -16,7 +16,7 @@
 package org.finos.legend.depot.store.artifacts.api;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 
 import java.io.File;
@@ -25,11 +25,11 @@ import java.util.List;
 public interface ProjectArtifactsHandler
 {
 
-    MetadataEventResponse refreshProjectVersionArtifacts(ProjectData project, String versionId, List<File> files);
+    MetadataEventResponse refreshProjectVersionArtifacts(StoreProjectData projectData, String versionId, List<File> files);
 
-    default MetadataEventResponse refreshProjectRevisionArtifacts(ProjectData project, List<File> files)
+    default MetadataEventResponse refreshProjectRevisionArtifacts(StoreProjectData projectData, List<File> files)
     {
-        return refreshProjectVersionArtifacts(project, VersionValidator.MASTER_SNAPSHOT, files);
+        return refreshProjectVersionArtifacts(projectData, VersionValidator.MASTER_SNAPSHOT, files);
     }
 
     void delete(String groupId, String artifactId, String versionId);

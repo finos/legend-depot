@@ -17,9 +17,10 @@ package org.finos.legend.depot.store.status.services;
 
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.entities.Entities;
-import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
+import org.finos.legend.depot.store.api.projects.Projects;
+import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.status.domain.StoreStatus;
@@ -31,15 +32,17 @@ import java.util.Optional;
 
 public class StoreStatusService
 {
-    private final Projects projectApi;
+    private final ProjectsVersions projectVersionsApi;
+    private final Projects projectsApi;
     private final Entities entities;
     private final RefreshStatusStore statusService;
     private final QueryMetricsHandler queryMetricsHandler;
 
     @Inject
-    public StoreStatusService(Projects projectApi, Entities versions, RefreshStatusStore statusService, QueryMetricsHandler queryMetrics)
+    public StoreStatusService(ProjectsVersions projectVersionsApi, Projects projectsApi, Entities versions, RefreshStatusStore statusService, QueryMetricsHandler queryMetrics)
     {
-        this.projectApi = projectApi;
+        this.projectVersionsApi = projectVersionsApi;
+        this.projectsApi = projectsApi;
         this.entities = versions;
         this.statusService = statusService;
         this.queryMetricsHandler = queryMetrics;
@@ -48,9 +51,9 @@ public class StoreStatusService
     public StoreStatus getStatus()
     {
         StoreStatus status = new StoreStatus();
-        projectApi.getAll().forEach(p ->
+        projectsApi.getAll().forEach(p ->
         {
-            StoreStatus.ProjectSummary summry = new StoreStatus.ProjectSummary(p.getProjectId(), p.getGroupId(), p.getArtifactId(), p.getVersions().size(), "/projects/");
+            StoreStatus.ProjectSummary summry = new StoreStatus.ProjectSummary(p.getProjectId(), p.getGroupId(), p.getArtifactId(), projectVersionsApi.getVersions(p.getGroupId(), p.getArtifactId()).size(), "/projects/");
             status.addProject(summry);
         });
 
@@ -76,7 +79,7 @@ public class StoreStatusService
     public StoreStatus.ProjectStatus getProjectStatus(String groupId, String artifactId)
     {
         StoreStatus.ProjectStatus projectStatus = new StoreStatus.ProjectStatus();
-        List<String> versions = projectApi.getVersions(groupId, artifactId);
+        List<String> versions = projectVersionsApi.getVersions(groupId, artifactId);
 
         versions.forEach(v ->
         {

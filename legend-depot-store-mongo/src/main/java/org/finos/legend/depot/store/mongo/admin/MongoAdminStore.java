@@ -27,6 +27,7 @@ import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
+import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -83,6 +84,7 @@ public class MongoAdminStore
     {
         List<String> results = new ArrayList<>();
         results.addAll(createIndexesIfAbsent(mongoDatabase,ProjectsMongo.COLLECTION,ProjectsMongo.buildIndexes()));
+        results.addAll(createIndexesIfAbsent(mongoDatabase, ProjectsVersionsMongo.COLLECTION, ProjectsVersionsMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,EntitiesMongo.COLLECTION,EntitiesMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,FileGenerationsMongo.COLLECTION,FileGenerationsMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsFilesMongo.COLLECTION,ArtifactsFilesMongo.buildIndexes()));
@@ -116,5 +118,15 @@ public class MongoAdminStore
     public String getName()
     {
         return mongoDatabase.getName();
+    }
+
+    public void migrationToProjectVersions()
+    {
+        new MigrationHelper(mongoDatabase).migrationToProjectVersions();
+    }
+
+    public void cleanUpProjectData()
+    {
+        new MigrationHelper(mongoDatabase).cleanUpProjectData();
     }
 }

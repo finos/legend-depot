@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
-import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextServiceException;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
@@ -29,6 +28,7 @@ import org.finos.legend.engine.protocol.pure.v1.model.context.AlloySDLC;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.shared.core.ObjectMapperFactory;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.finos.legend.sdlc.protocol.pure.v1.PureModelContextDataBuilder;
 import org.slf4j.Logger;
 
@@ -70,10 +70,10 @@ public class PureModelContextServiceImpl implements PureModelContextService
         String version = versionId;
         if (version.equals(LATEST))
         {
-            Optional<ProjectData> project = this.projectsService.find(groupId, artifactId);
+            Optional<VersionId> project = this.projectsService.getLatestVersion(groupId, artifactId);
             if (project.isPresent())
             {
-                version = project.get().getLatestVersionAsString();
+                version = project.get().toVersionIdString();
             }
         }
 

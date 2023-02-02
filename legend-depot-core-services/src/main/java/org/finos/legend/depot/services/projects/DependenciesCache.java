@@ -15,13 +15,12 @@
 
 package org.finos.legend.depot.services.projects;
 
-import org.eclipse.collections.api.block.function.Function2;
+import org.eclipse.collections.api.block.function.Function3;
 import org.eclipse.collections.api.map.ConcurrentMutableMap;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
-import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionDependency;
-import org.finos.legend.depot.store.api.projects.Projects;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.slf4j.Logger;
 
 import java.util.HashSet;
@@ -40,11 +39,11 @@ public final class DependenciesCache
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DependenciesCache.class);
     final ConcurrentMutableMap<ProjectVersion, Set<ProjectVersion>> transitiveDependencies = new ConcurrentHashMap<>();
     AtomicInteger absentKeys = new AtomicInteger(0);
-    private final Projects projectsStore;
+    private final ProjectsVersions projectsVersionsStore;
 
-    public DependenciesCache(Projects projectsService)
+    public DependenciesCache(ProjectsVersions projectsVersionsService)
     {
-        this.projectsStore = projectsService;
+        this.projectsVersionsStore = projectsVersionsService;
         initCache();
     }
 
@@ -52,10 +51,10 @@ public final class DependenciesCache
     {
         try
         {
-            List<ProjectData> allProject = projectsStore.getAll();
-            Stream<ProjectVersion> allProjectVersions = allProject.stream().filter(p -> !p.getDependencies().isEmpty()).flatMap(p -> p.getVersions().stream().map(v -> new ProjectVersion(p.getGroupId(), p.getArtifactId(), v)));
+            List<StoreProjectVersionData> allProjectsVersions = projectsVersionsStore.getAll();
+            Stream<ProjectVersion> allProjectVersions = allProjectsVersions.stream().filter(p -> !p.getVersionId().equals(MASTER_SNAPSHOT) && !p.getVersionData().getDependencies().isEmpty()).map(pv -> new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()));
             LOGGER.info("Initialising dependencies cache");
-            Map<String, ProjectData> projectDataMap = allProject.stream().collect(Collectors.toMap(p -> p.getGroupId() + p.getArtifactId(), Function.identity()));
+            Map<String, StoreProjectVersionData> projectDataMap = allProjectsVersions.stream().collect(Collectors.toMap(p -> p.getGroupId() + p.getArtifactId() + p.getVersionId(), Function.identity()));
             allProjectVersions.forEach(pv -> transitiveDependencies.put(pv, calculateTransitiveDependencies(pv, projectDataMap)));
             LOGGER.info("Total [{}] keys in cache",transitiveDependencies.keySet().size());
         }
@@ -66,34 +65,34 @@ public final class DependenciesCache
         }
     }
 
-    private Function2<String,String,ProjectData> getProjectDataFromStore()
+    private Function3<String,String,String,StoreProjectVersionData> getProjectDataFromStore()
     {
-        return (group, artifact) -> this.projectsStore.find(group, artifact).get();
+        return (group, artifact, versionId) -> this.projectsVersionsStore.find(group, artifact,versionId).get();
     }
 
-    private Function2<String,String,ProjectData> getProjectDataFromProjectsMap(Map<String, ProjectData> projectDataMap)
+    private Function3<String,String,String,StoreProjectVersionData> getProjectDataFromProjectsMap(Map<String, StoreProjectVersionData> projectDataMap)
     {
-        return (group, artifact) -> projectDataMap.get(group + artifact);
+        return (group, artifact, versionId) -> projectDataMap.get(group + artifact + versionId);
     }
 
-    private Set<ProjectVersion> calculateTransitiveDependencies(ProjectVersion projectVersion, Map<String, ProjectData> projectDataMap)
+    private Set<ProjectVersion> calculateTransitiveDependencies(ProjectVersion projectVersion, Map<String, StoreProjectVersionData> projectDataMap)
     {
         return getTransitiveDependencies(projectVersion, getProjectDataFromProjectsMap(projectDataMap));
     }
 
-    private Set<ProjectVersion> getTransitiveDependencies(ProjectVersion pv, Function2<String,String,ProjectData> projectDataProvider)
+    private Set<ProjectVersion> getTransitiveDependencies(ProjectVersion pv, Function3<String,String,String,StoreProjectVersionData> projectDataProvider)
     {
         Set<ProjectVersion> dependencies = new HashSet<>();
         try
         {
-            ProjectData projectData = projectDataProvider.apply(pv.getGroupId(), pv.getArtifactId());
+            StoreProjectVersionData projectData = projectDataProvider.value(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
             if (projectData != null)
             {
-                List<ProjectVersionDependency> projectVersionDependencies = projectData.getDependencies(pv.getVersionId());
+                List<ProjectVersion> projectVersionDependencies = projectData.getVersionData().getDependencies();
                 projectVersionDependencies.forEach(dep ->
                 {
-                    dependencies.add(dep.getDependency());
-                    ProjectVersion dpv = new ProjectVersion(dep.getDependency().getGroupId(), dep.getDependency().getArtifactId(), dep.getDependency().getVersionId());
+                    dependencies.add(dep);
+                    ProjectVersion dpv = new ProjectVersion(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
                     Set<ProjectVersion> deps = this.transitiveDependencies.getIfAbsentPut(dpv,() ->
                     {
                         absentKeys.getAndIncrement();

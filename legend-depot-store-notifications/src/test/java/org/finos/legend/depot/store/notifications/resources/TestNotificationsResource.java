@@ -19,6 +19,7 @@ import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
+import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.api.Queue;
@@ -40,7 +41,7 @@ public class TestNotificationsResource extends TestStoreMongo
     public static final String VERSION = "1.0.0";
     private final NotificationsMongo eventsMongo = new NotificationsMongo(mongoProvider);
     private final Queue queue = new NotificationsQueueMongo(mongoProvider);
-    private final ManageProjectsService projectsService = new ManageProjectsServiceImpl(new ProjectsMongo(mongoProvider));
+    private final ManageProjectsService projectsService = new ManageProjectsServiceImpl(new ProjectsVersionsMongo(mongoProvider), new ProjectsMongo(mongoProvider));
     private final NotificationEventHandler handler = mock(NotificationEventHandler.class);
     private final NotificationsManager notificationsManager = new NotificationsQueueManager(projectsService,eventsMongo,queue,handler);
 

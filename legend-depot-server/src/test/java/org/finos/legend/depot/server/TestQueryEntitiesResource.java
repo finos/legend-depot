@@ -16,11 +16,13 @@
 package org.finos.legend.depot.server;
 
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.server.resources.entities.EntitiesResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
@@ -43,7 +45,8 @@ import static org.mockito.Mockito.when;
 public class TestQueryEntitiesResource extends TestBaseServices
 {
     private UpdateProjects projects = mock(UpdateProjects.class);
-    private EntitiesResource entitiesResource = new EntitiesResource(new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projects)));
+    private UpdateProjectsVersions projectsVersions = mock(UpdateProjectsVersions.class);
+    private EntitiesResource entitiesResource = new EntitiesResource(new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projectsVersions, projects)));
     private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
     private QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metricsStore);
 
@@ -60,8 +63,10 @@ public class TestQueryEntitiesResource extends TestBaseServices
         metricsStore.getCollection().drop();
         loadEntities("PROD-A", "2.3.0");
         loadEntities("PROD-A", MASTER_SNAPSHOT);
-        when(projects.find("examples.metadata","test")).thenReturn(Optional.of(new ProjectData("mock","examples.metadata","test").withVersions("2.3.0")));
-        when(projects.find("example.services.test", "test")).thenReturn(Optional.of(new ProjectData("mock","example.services.test", "test").withVersions("1.0.1")));
+        when(projects.find("examples.metadata","test")).thenReturn(Optional.of(new StoreProjectData("mock","examples.metadata","test")));
+        when(projects.find("example.services.test", "test")).thenReturn(Optional.of(new StoreProjectData("mock","example.services.test", "test")));
+        when(projectsVersions.find("examples.metadata","test", "2.3.0")).thenReturn(Optional.of(new StoreProjectVersionData("examples.metadata","test", "2.3.0")));
+        when(projectsVersions.find("example.services.test", "test", "1.0.1")).thenReturn(Optional.of(new StoreProjectVersionData("example.services.test", "test", "1.0.1")));
     }
 
     @After

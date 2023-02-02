@@ -64,7 +64,7 @@ public class RepositoryServices
         PrometheusMetricsFactory.getInstance().setGauge(MISSING_STORE_VERSIONS,0);
         PrometheusMetricsFactory.getInstance().setGauge(REPO_EXCEPTIONS,0);
 
-        projects.getAll().forEach(p ->
+        projects.getAllProjectCoordinates().forEach(p ->
         {
             try
             {
@@ -73,10 +73,11 @@ public class RepositoryServices
                     Collections.sort(repositoryVersions);
                     //check versions not in cache
                     List<String> versionsNotInStore = new ArrayList<>(repositoryVersions);
-                    PrometheusMetricsFactory.getInstance().increaseGauge(STORE_VERSIONS,p.getVersions().size());
-                    versionsNotInStore.removeAll(p.getVersions());
+                List<String> storeVersions = projects.getVersions(p.getGroupId(), p.getArtifactId());
+                PrometheusMetricsFactory.getInstance().increaseGauge(STORE_VERSIONS, storeVersions.size());
+                    versionsNotInStore.removeAll(storeVersions);
                     //check versions not in repo
-                    List<String> versionsNotInRepo = new ArrayList<>(p.getVersions());
+                    List<String> versionsNotInRepo = new ArrayList<>(storeVersions);
                     versionsNotInRepo.removeAll(repositoryVersions);
 
                     if (!versionsNotInStore.isEmpty() || !versionsNotInRepo.isEmpty())

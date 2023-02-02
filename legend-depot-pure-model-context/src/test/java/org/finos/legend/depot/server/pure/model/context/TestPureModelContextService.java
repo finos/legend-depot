@@ -45,15 +45,15 @@ public class TestPureModelContextService extends TestBaseServices
     public static final String TEST_GROUP_ID = "examples.metadata";
     public static final String CLIENT_VERSION = "vX_X_X";
 
-    ProjectsService projectsService = new ProjectsServiceImpl(projectsStore);
+    ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore);
     private final PureModelContextService service = new PureModelContextServiceImpl(new EntitiesServiceImpl(entitiesStore, projectsService), projectsService);
 
 
     @Before
     public void setupMetadata()
     {
-        Assert.assertEquals(3, projectsService.getAll().size());
-        setUpProjectsFromFile(projects);
+        Assert.assertEquals(3, projectsService.getAllProjectCoordinates().size());
+        setUpProjectsVersionsFromFile(projects);
         setUpEntitiesDataFromFile(versionedEntities);
         setUpEntitiesDataFromFile(revisionEntities);
         setUpEntitiesDataFromFile(entities_16538);

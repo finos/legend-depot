@@ -1,24 +1,14 @@
 [
   {
-    "id": "60995951584b4249cc13760b",
-    "projectId": "PROD-16538",
     "groupId": "test.legend",
     "artifactId": "blank-prod",
-    "versions": [
-      "2.0.0"
-    ],
-    "dependencies": [
-      {
-        "groupId": "test.legend",
-        "artifactId": "blank-prod",
-        "versionId": "2.0.0",
-        "dependency": {
-          "groupId": "examples.metadata",
-          "artifactId": "test",
-          "versionId": "3.0.0"
-        }
-      }
-    ],
-    "latestVersion": "2.0.0"
+    "versionId": "2.0.0",
+    "versionData": {
+      "dependencies": [{
+        "groupId": "examples.metadata",
+        "artifactId": "test",
+        "versionId": "3.0.0"
+      }]
+    }
   }
 ]

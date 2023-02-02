@@ -18,7 +18,7 @@ package org.finos.legend.depot.store.artifacts.services.entities;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.StoredEntity;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
@@ -55,7 +55,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
     }
 
 
-    abstract List<StoredEntity> transformVersionedEntities(ProjectData project, String versionId, List<Entity> entityList);
+    abstract List<StoredEntity> transformVersionedEntities(StoreProjectData projectData, String versionId, List<Entity> entityList);
 
 
     protected MetadataEventResponse delete(String groupId, String artifactId, String versionId,boolean versioned)
@@ -64,29 +64,29 @@ public abstract class AbstractEntityRefreshHandlerImpl
     }
 
 
-    private String getGAVCoordinates(ProjectData projectConfig, String versionId)
+    private String getGAVCoordinates(StoreProjectData projectConfig, String versionId)
     {
         return String.format("%s-%s-%s", projectConfig.getGroupId(), projectConfig.getArtifactId(), versionId);
     }
 
 
-    public MetadataEventResponse refreshVersionArtifacts(ProjectData project, String versionId, List<File> files)
+    public MetadataEventResponse refreshVersionArtifacts(StoreProjectData projectData, String versionId, List<File> files)
     {
 
         MetadataEventResponse response = new MetadataEventResponse();
         try
         {
-            String gavCoordinates = getGAVCoordinates(project, versionId);
+            String gavCoordinates = getGAVCoordinates(projectData, versionId);
             List<Entity> entityList = getEntities(files);
             if (entityList != null && !entityList.isEmpty())
             {
-                String message = String.format("[%s]: found [%s] %s for [%s] ", project.getProjectId(), entityList.size(), this.entitiesProvider.getType(), gavCoordinates);
+                String message = String.format("[%s]: found [%s] %s for [%s] ", projectData.getProjectId(), entityList.size(), this.entitiesProvider.getType(), gavCoordinates);
                 getLOGGER().info(message);
                 response.addMessage(message);
-                List<StoredEntity> storedEntities = transformVersionedEntities(project, versionId, entityList);
+                List<StoredEntity> storedEntities = transformVersionedEntities(projectData, versionId, entityList);
                 if (versionId.equals(VersionValidator.MASTER_SNAPSHOT))
                 {
-                    MetadataEventResponse deleteResponse = getEntitiesApi().delete(project.getGroupId(), project.getArtifactId(),versionId,this.entitiesProvider.getType().equals(ArtifactType.VERSIONED_ENTITIES));
+                    MetadataEventResponse deleteResponse = getEntitiesApi().delete(projectData.getGroupId(), projectData.getArtifactId(),versionId,this.entitiesProvider.getType().equals(ArtifactType.VERSIONED_ENTITIES));
                     message = String.format("removed [%s] %s [%s-%s]",storedEntities.size(),this.entitiesProvider.getType(),gavCoordinates,versionId);
                     getLOGGER().info(message);
                     response.addMessage(message);
@@ -96,7 +96,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
             }
             else
             {
-                String message = String.format("[%s]: found 0 %s for [%s] ", project.getProjectId(), this.entitiesProvider.getType(), gavCoordinates);
+                String message = String.format("[%s]: found 0 %s for [%s] ", projectData.getProjectId(), this.entitiesProvider.getType(), gavCoordinates);
                 getLOGGER().info(message);
                 response.addMessage(message);
             }
@@ -104,7 +104,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
         }
         catch (Exception e)
         {
-            String errorMessage = String.format("Unexpected exception refreshing %s %s-%s-%s , %s",entitiesProvider.getType(),project.getGroupId(),project.getArtifactId(),versionId,e.getMessage());
+            String errorMessage = String.format("Unexpected exception refreshing %s %s-%s-%s , %s",entitiesProvider.getType(),projectData.getGroupId(),projectData.getArtifactId(),versionId,e.getMessage());
             response.addError(errorMessage);
             LOGGER.error(errorMessage);
         }

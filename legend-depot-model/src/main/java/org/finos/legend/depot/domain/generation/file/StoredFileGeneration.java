@@ -20,18 +20,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.BaseDomain;
+import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.HasIdentifier;
 
-import javax.validation.constraints.NotNull;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StoredFileGeneration extends BaseDomain implements HasIdentifier
+public class StoredFileGeneration extends VersionedData implements HasIdentifier
 {
-
-    @JsonProperty
-    @NotNull
-    private String versionId;
     @JsonProperty
     private String path;
     @JsonProperty
@@ -47,8 +41,7 @@ public class StoredFileGeneration extends BaseDomain implements HasIdentifier
                                 @JsonProperty(value = "type") String type,
                                 @JsonProperty(value = "fileGeneration") FileGeneration fileGeneration)
     {
-        super(groupId, artifactId);
-        this.versionId = versionId;
+        super(groupId, artifactId, versionId);
         this.file = fileGeneration;
         this.path = path;
         this.type = type;
@@ -58,11 +51,6 @@ public class StoredFileGeneration extends BaseDomain implements HasIdentifier
     public String getId()
     {
         return "";
-    }
-
-    public String getVersionId()
-    {
-        return versionId;
     }
 
     public String getPath()

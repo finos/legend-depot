@@ -17,7 +17,7 @@ package org.finos.legend.depot.store.artifacts.services;
 
 import org.finos.legend.depot.domain.EntityValidator;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.project.ProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
@@ -47,10 +47,10 @@ public class ArtifactRefreshEventHandler implements NotificationEventHandler
     public MetadataEventResponse handleEvent(MetadataNotification event)
     {
         MetadataEventResponse response = new MetadataEventResponse();
-        Optional<ProjectData> existingProject = projects.find(event.getGroupId(), event.getArtifactId());
+        Optional<StoreProjectData> existingProject = projects.findCoordinates(event.getGroupId(), event.getArtifactId());
         if (!existingProject.isPresent())
         {
-            ProjectData newProject = new ProjectData(event.getProjectId(), event.getGroupId(), event.getArtifactId());
+            StoreProjectData newProject = new StoreProjectData(event.getProjectId(), event.getGroupId(), event.getArtifactId());
             projects.createOrUpdate(newProject);
             response.addMessage(String.format("New project %s created %s-%s", newProject.getProjectId(), newProject.getGroupId(), newProject.getArtifactId()));
         }
