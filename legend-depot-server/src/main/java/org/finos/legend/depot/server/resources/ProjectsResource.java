@@ -17,6 +17,7 @@ package org.finos.legend.depot.server.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.finos.legend.depot.domain.CoordinateData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
@@ -31,6 +32,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,18 +62,50 @@ public class ProjectsResource extends BaseResource
         return handle(ResourceLoggingAndTracing.GET_PROJECT_BY_GA, ResourceLoggingAndTracing.GET_PROJECT_BY_GA + groupId + artifactId, () ->
         {
             List<StoreProjectVersionData> projectVersions = projectApi.find(groupId, artifactId);
-            if (!projectVersions.isEmpty())
+            Optional<StoreProjectData> projectCoordinates = this.projectApi.findCoordinates(groupId, artifactId);
+            if (!projectVersions.isEmpty() && projectCoordinates.isPresent())
             {
-                return Optional.of(transformToProjectData(groupId, artifactId, projectVersions));
+                return Optional.of(transformToProjectData(projectCoordinates.get().getProjectId(), groupId, artifactId, projectVersions));
             }
             return Optional.empty();
         });
     }
 
-    private ProjectData transformToProjectData(String groupId, String artifactId, List<StoreProjectVersionData> projectVersionsData)
+    @GET
+    @Path("/projects/versions/all/projectData")
+    @ApiOperation(ResourceLoggingAndTracing.GET_ALL_PROJECTS)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<ProjectDataDTO> getProjectsWithCoordinates()
     {
-        StoreProjectData projectCoordinates = this.projectApi.findCoordinates(groupId, artifactId).get();
-        ProjectData projectData = new ProjectData(projectCoordinates.getProjectId(), groupId, artifactId);
+        return handle(ResourceLoggingAndTracing.GET_ALL_PROJECTS, () ->
+            projectApi.getAllProjectCoordinates().stream().map(pc -> new ProjectDataDTO(pc.getProjectId(), pc.getGroupId(), pc.getArtifactId())).collect(Collectors.toList()));
+    }
+
+    @GET
+    @Path("/projects")
+    @ApiOperation(ResourceLoggingAndTracing.GET_ALL_LEGACY_PROJECTS)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Deprecated
+    public List<ProjectData> getProjects()
+    {
+        return handle(ResourceLoggingAndTracing.GET_ALL_LEGACY_PROJECTS, ResourceLoggingAndTracing.GET_ALL_LEGACY_PROJECTS, () ->
+        {
+            List<StoreProjectData> projectCoordinates = projectApi.getAllProjectCoordinates();
+            if (!projectCoordinates.isEmpty())
+            {
+                return projectCoordinates.stream().map(pc ->
+                {
+                    List<StoreProjectVersionData> projectVersions = projectApi.find(pc.getGroupId(), pc.getArtifactId());
+                    return projectVersions.isEmpty() ? new ProjectData(pc.getProjectId(), pc.getGroupId(), pc.getArtifactId()) : transformToProjectData(pc.getProjectId(), pc.getGroupId(), pc.getArtifactId(), projectVersions);
+                }).collect(Collectors.toList());
+            }
+            return Collections.emptyList();
+        });
+    }
+
+    private ProjectData transformToProjectData(String projectId, String groupId, String artifactId, List<StoreProjectVersionData> projectVersionsData)
+    {
+        ProjectData projectData = new ProjectData(projectId, groupId, artifactId);
         projectVersionsData.stream().forEach(pv ->
         {
             List<ProjectData.ProjectVersionDependency> dependencies = pv.getVersionData().getDependencies().stream().map(dep -> new ProjectData.ProjectVersionDependency(groupId, artifactId, pv.getVersionId(), dep)).collect(Collectors.toList());
@@ -83,5 +117,24 @@ public class ProjectsResource extends BaseResource
         return projectData;
     }
 
+    public class ProjectDataDTO extends CoordinateData
+    {
+        private String projectId;
 
+        public ProjectDataDTO()
+        {
+            super();
+        }
+
+        public ProjectDataDTO(String projectId, String groupId, String artifactId)
+        {
+            super(groupId, artifactId);
+            this.projectId = projectId;
+        }
+
+        public String getProjectId()
+        {
+            return projectId;
+        }
+    }
 }

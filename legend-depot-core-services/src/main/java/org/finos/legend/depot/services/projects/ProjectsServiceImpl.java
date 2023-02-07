@@ -88,6 +88,12 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
+    public List<StoreProjectData> findByProjectId(String projectId)
+    {
+        return projects.findByProjectId(projectId);
+    }
+
+    @Override
     public List<StoreProjectVersionData> find(String groupId, String artifactId)
     {
         return projectsVersions.find(groupId, artifactId);

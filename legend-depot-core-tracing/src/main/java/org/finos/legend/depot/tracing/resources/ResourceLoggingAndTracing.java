@@ -17,9 +17,10 @@ package org.finos.legend.depot.tracing.resources;
 
 public class ResourceLoggingAndTracing
 {
-    public static final String GET_ALL_PROJECTS_VERSIONS = "get all projects versions";
     public static final String GET_ALL_PROJECTS = "get all projects";
+    public static final String GET_ALL_LEGACY_PROJECTS = "get all projects legacy";
     public static final String GET_PROJECT_BY_GA = "get project by ga";
+    public static final String GET_PROJECT_BY_ID = "get project by project id";
     public static final String GET_PROJECT_VERSIONS_BY_GA = "get project versions by ga";
     public static final String GET_PROJECT_VERSION_BY_GAV = "get project version by gav";
     public static final String DELETE_PROJECT = "delete project";

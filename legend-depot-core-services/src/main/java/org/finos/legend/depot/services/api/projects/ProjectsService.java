@@ -40,6 +40,9 @@ public interface ProjectsService
 
     Optional<VersionId> getLatestVersion(String groupId, String artifactId);
 
+    @Deprecated
+    List<StoreProjectData> findByProjectId(String projectId);
+
     List<StoreProjectVersionData> find(String groupId, String artifactId);
 
     Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId);
