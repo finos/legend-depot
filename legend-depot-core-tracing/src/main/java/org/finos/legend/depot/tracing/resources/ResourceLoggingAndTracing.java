@@ -78,6 +78,7 @@ public class ResourceLoggingAndTracing
     public static final String FIND_EVENT_BY_ID = "find event";
     public static final String GET_EVENT_IN_QUEUE = "find event in queue";
     public static final String DELETE_SCHEDULE = "delete schedule";
+    public static final String GET_QUEUE_COUNT = "queue count";
 
 
     private ResourceLoggingAndTracing()

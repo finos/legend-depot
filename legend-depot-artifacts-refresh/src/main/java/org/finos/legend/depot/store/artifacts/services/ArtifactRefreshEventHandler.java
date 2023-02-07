@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.store.artifacts.services;
 
-import org.finos.legend.depot.domain.EntityValidator;
+import org.finos.legend.depot.domain.CoordinateValidator;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
@@ -62,7 +62,7 @@ public class ArtifactRefreshEventHandler implements NotificationEventHandler
     {
         List<String> errors = new ArrayList<>();
 
-        if (!EntityValidator.isValidGroupId(event.getGroupId()) || !EntityValidator.isValidArtifactId(event.getArtifactId()))
+        if (!CoordinateValidator.isValidGroupId(event.getGroupId()) || !CoordinateValidator.isValidArtifactId(event.getArtifactId()))
         {
             errors.add(String.format("invalid groupId %s or artifactId %s",event.getGroupId(),event.getArtifactId()));
         }

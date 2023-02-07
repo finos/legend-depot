@@ -65,9 +65,8 @@ public class NotificationsModule extends PrivateModule
     @Provides
     @Singleton
     @Named("queue-observer")
-    NotificationsQueueManager initQueue(SchedulesFactory schedulesFactory, QueueManagerConfiguration config, ProjectsService projectsService, Notifications events, Queue queue, NotificationEventHandler notificationHandler)
+    boolean initQueue(SchedulesFactory schedulesFactory, QueueManagerConfiguration config, NotificationsManager notificationsManager)
     {
-        NotificationsQueueManager eventsQueueManager = new NotificationsQueueManager(projectsService, events, queue, notificationHandler);
         long numberOfWorkers = config.getNumberOfQueueWorkers();
         if (numberOfWorkers <= 0)
         {
@@ -75,26 +74,26 @@ public class NotificationsModule extends PrivateModule
         }
         for (long worker = 1;numberOfWorkers >= worker;worker++)
         {
-            schedulesFactory.register(QUEUE_OBSERVER + "_" + worker, LocalDateTime.now().plusNanos(config.getQueueDelay() * 1000000L), config.getQueueInterval(), true, eventsQueueManager::handle);
+            schedulesFactory.register(QUEUE_OBSERVER + "_" + worker, LocalDateTime.now().plusNanos(config.getQueueDelay() * 1000000L), config.getQueueInterval(), true, notificationsManager::handle);
         }
-        return eventsQueueManager;
+        return true;
     }
 
     @Provides
     @Named("notifications-metrics")
     @Singleton
-    boolean registerMetrics(PrometheusMetricsHandler metricsHandler,SchedulesFactory schedulesFactory, @Named("queue-observer") NotificationsQueueManager eventsQueueManager)
+    boolean registerMetrics(PrometheusMetricsHandler metricsHandler,SchedulesFactory schedulesFactory,NotificationsManager notificationsManager)
     {
         metricsHandler.registerCounter(NOTIFICATIONS_COUNTER, NOTIFICATIONS_COUNTER_HELP);
         metricsHandler.registerGauge(QUEUE_WAITING, QUEUE_WAITING_HELP);
-        schedulesFactory.register(NOTIFICATION_METRICS_SCHEDULE, LocalDateTime.now().plusSeconds(1), 60000L, false, eventsQueueManager::waitingOnQueue);
+        schedulesFactory.register(NOTIFICATION_METRICS_SCHEDULE, LocalDateTime.now().plusSeconds(1), 60000L, false, notificationsManager::waitingInQueue);
         return true;
     }
 
     @Provides
     @Named("clean-old-notifications")
     @Singleton
-    boolean notificationsCleanUp(SchedulesFactory schedulesFactory, @Named("queue-observer") NotificationsQueueManager eventsQueueManager)
+    boolean notificationsCleanUp(SchedulesFactory schedulesFactory, NotificationsManager eventsQueueManager)
     {
         schedulesFactory.register(CLEANUP_NOTIFICATIONS_SCHEDULE, LocalDateTime.now().plusSeconds(1), 12 * 3600000, false, () -> eventsQueueManager.deleteOldNotifications(60));
         return true;

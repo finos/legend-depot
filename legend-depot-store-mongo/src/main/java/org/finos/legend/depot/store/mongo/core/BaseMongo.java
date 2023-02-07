@@ -238,7 +238,7 @@ public abstract class BaseMongo<T extends HasIdentifier>
         List<T> result = convert(getCollection().find(filter));
         if (!result.isEmpty() && result.size() > 1)
         {
-            throw new IllegalStateException(String.format(" Found more than one match %s in collection %s",filter.toString(),getCollection().getNamespace().getCollectionName()));
+            throw new IllegalStateException(String.format(" Found more than one match %s in collection %s",filter,getCollection().getNamespace().getCollectionName()));
         }
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
@@ -247,7 +247,7 @@ public abstract class BaseMongo<T extends HasIdentifier>
     protected boolean delete(Bson key)
     {
         DeleteResult deleteResult = getCollection().deleteMany(key);
-        LOGGER.info("delete result {} :{}",getCollection().getNamespace().getCollectionName(),deleteResult);
+        LOGGER.debug("delete result {} :{}",getCollection().getNamespace().getCollectionName(),deleteResult);
         return deleteResult.wasAcknowledged();
     }
 }

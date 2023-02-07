@@ -16,36 +16,23 @@
 package org.finos.legend.depot.domain.project;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Deprecated
-public class ProjectProperty
+public class Property
 {
-    @JsonProperty
     private String propertyName;
-    @JsonProperty
     private String value;
-    @JsonProperty
-    private String projectVersionId;
 
-    public ProjectProperty()
+    public Property()
     {
-
     }
 
-    public ProjectProperty(String propertyName, String value, String projectVersionId)
+    public Property(String propertyName, String value)
     {
         this.propertyName = propertyName;
         this.value = value;
-        this.projectVersionId = projectVersionId;
-    }
-
-    public String getProjectVersionId()
-    {
-        return projectVersionId;
     }
 
     public String getPropertyName()

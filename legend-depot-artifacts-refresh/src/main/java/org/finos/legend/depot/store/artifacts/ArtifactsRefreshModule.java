@@ -85,7 +85,7 @@ public class ArtifactsRefreshModule extends PrivateModule
     @Named("update-missing-versions")
     boolean initFixVersionsMismatchDaemon(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService,ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(FIX_MISSING_VERSIONS_SCHEDULE, LocalDateTime.now().plusSeconds(configuration.getFixVersionsMismatchIntervalInMillis() / 1000), configuration.getFixVersionsMismatchIntervalInMillis(), false,() -> artifactsRefreshService.refreshProjectsWithMissingVersions(false,false,FIX_MISSING_VERSIONS_SCHEDULE));
+        schedulesFactory.register(FIX_MISSING_VERSIONS_SCHEDULE, LocalDateTime.now().plusSeconds(configuration.getFixVersionsMismatchIntervalInMillis() / 1000), configuration.getFixVersionsMismatchIntervalInMillis(), false,() -> artifactsRefreshService.refreshProjectsWithMissingVersions(FIX_MISSING_VERSIONS_SCHEDULE));
         return true;
     }
 

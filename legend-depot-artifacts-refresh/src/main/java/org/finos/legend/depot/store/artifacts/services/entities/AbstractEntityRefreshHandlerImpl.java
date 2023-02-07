@@ -86,11 +86,10 @@ public abstract class AbstractEntityRefreshHandlerImpl
                 List<StoredEntity> storedEntities = transformVersionedEntities(projectData, versionId, entityList);
                 if (versionId.equals(VersionValidator.MASTER_SNAPSHOT))
                 {
-                    MetadataEventResponse deleteResponse = getEntitiesApi().delete(projectData.getGroupId(), projectData.getArtifactId(),versionId,this.entitiesProvider.getType().equals(ArtifactType.VERSIONED_ENTITIES));
-                    message = String.format("removed [%s] %s [%s-%s]",storedEntities.size(),this.entitiesProvider.getType(),gavCoordinates,versionId);
-                    getLOGGER().info(message);
+                    message = String.format("removing prior artifacts %s [%s-%s]",this.entitiesProvider.getType(),gavCoordinates,versionId);
                     response.addMessage(message);
-                    response.combine(deleteResponse);
+                    response.combine(getEntitiesApi().delete(projectData.getGroupId(), projectData.getArtifactId(),versionId,this.entitiesProvider.getType().equals(ArtifactType.VERSIONED_ENTITIES)));
+                    LOGGER.info(message);
                 }
                 response.combine(getEntitiesApi().createOrUpdate(storedEntities));
             }

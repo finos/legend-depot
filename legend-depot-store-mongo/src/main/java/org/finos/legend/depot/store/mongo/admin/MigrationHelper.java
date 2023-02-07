@@ -29,8 +29,8 @@ import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
+import org.finos.legend.depot.domain.project.Property;
 import org.finos.legend.depot.domain.project.ProjectVersionProperty;
-import org.finos.legend.depot.domain.project.ProjectProperty;
 import org.finos.legend.depot.store.StoreException;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
@@ -125,8 +125,8 @@ public class MigrationHelper
     {
         List<ProjectData.ProjectVersionDependency> dependencies = pd.getDependencies(version);
         List<ProjectVersion> dep = dependencies.isEmpty() ? Collections.emptyList() : dependencies.stream().map(x -> x.getDependency()).collect(Collectors.toList());
-        List<ProjectProperty> properties = pd.getPropertiesForProjectVersionID(version);
-        List<ProjectVersionProperty> prop = properties.isEmpty() ? Collections.emptyList() : properties.stream().map(x -> new ProjectVersionProperty(x.getPropertyName(), x.getValue())).collect(Collectors.toList());
+        List<ProjectVersionProperty> properties = pd.getPropertiesForProjectVersionID(version);
+        List<Property> prop = properties.isEmpty() ? Collections.emptyList() : properties.stream().map(x -> new Property(x.getPropertyName(), x.getValue())).collect(Collectors.toList());
         return new StoreProjectVersionData(pd.getGroupId(), pd.getArtifactId(), version, false, new ProjectVersionData(dep, prop));
     }
 

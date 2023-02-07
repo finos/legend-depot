@@ -26,7 +26,7 @@ import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionProperty;
+import org.finos.legend.depot.domain.project.Property;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
@@ -84,6 +84,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     public static final String VERSION_REFRESH_DURATION = "versionRefresh_duration";
     public static final String VERSION_REFRESH_DURATION_HELP = "version refresh duration";
     public static final String TOTAL_NUMBER_OF_VERSIONS_REFRESH = "total number of versions refresh";
+    public static final String EVENT_ID = "eventId:";
 
     private final ManageProjectsService projects;
     private final RefreshStatusStore store;
@@ -126,7 +127,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     private MetadataEventResponse handleRefresh(String groupId, String artifactId, String version, String parentEventId, Supplier<MetadataEventResponse> functionToExecute)
     {
         MetadataEventResponse response = new MetadataEventResponse();
-        getLOGGER().info("Starting [{}{}{}] refresh", groupId, artifactId, version);
+        getLOGGER().info("Starting [{}-{}-{}] refresh", groupId, artifactId, version);
         RefreshStatus storeStatus = store.get(groupId, artifactId, version);
         if (storeStatus.isRunning())
         {
@@ -149,7 +150,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         {
             String message = String.format("Error refreshing [%s-%s-%s] : %s",groupId,artifactId,version,e.getMessage());
             response.addError(message);
-            LOGGER.error("Error refreshing [{}{}{}] : {} ",groupId,artifactId,version,e);
+            LOGGER.error("Error refreshing [{}-{}-{}] : {} ",groupId,artifactId,version,e);
         }
         finally
         {
@@ -158,7 +159,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             {
                 PrometheusMetricsFactory.getInstance().incrementErrorCount(VERSION_REFRESH_COUNTER);
             }
-            getLOGGER().info("Finished [{}{}{}] refresh", groupId, artifactId, version);
+            getLOGGER().info("Finished [{}-{}-{}] refresh", groupId, artifactId, version);
         }
         return response;
     }
@@ -198,9 +199,9 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 {
                     MetadataEventResponse result = new MetadataEventResponse();
                     String parentEvent = buildParentEventId(ALL, ALL, ALL,parentEventId);
-                    result.addMessage(String.format("Executing :[%s-%s-%s]",ALL,ALL,ALL));
-                    result.addMessage(String.format("Parent event :[%s], full/transitive :[%s/%s]",parentEvent,fullUpdate,transitive));
-                    LOGGER.info("Executing {},{}{}{}",REFRESH_ALL_VERSIONS_FOR_ALL_PROJECTS,ALL, ALL, ALL);
+                    String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",ALL,ALL,ALL,parentEvent,fullUpdate,transitive);
+                    result.addMessage(message);
+                    LOGGER.info(message);
                     ParallelIterate.forEach(getProjects(),project -> result.combine(refreshAllVersionsForProject(project,fullUpdate,transitive,parentEvent)));
                     return result;
                 }
@@ -214,9 +215,9 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 {
                     MetadataEventResponse result = new MetadataEventResponse();
                     String parentEvent =  buildParentEventId(ALL, ALL, MASTER_SNAPSHOT,parentEventId);
-                    result.addMessage(String.format("Executing :[%s-%s-%s]",ALL,ALL,ALL));
-                    result.addMessage(String.format("Parent event :[%s], full/transitive :[%s/%s]",parentEvent,fullUpdate,transitive));
-                    LOGGER.info("Executing {},{}{}{}",REFRESH_MASTER_SNAPSHOT_FOR_ALL_PROJECTS,ALL, ALL, MASTER_SNAPSHOT);
+                    String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",ALL,ALL,MASTER_SNAPSHOT,parentEvent,fullUpdate,transitive);
+                    result.addMessage(message);
+                    LOGGER.info(message);
                     ParallelIterate.forEach(getProjects(), project -> result.addMessage(queueWorkToRefreshProjectVersion(project, MASTER_SNAPSHOT, fullUpdate,transitive, parentEvent)));
                     return result;
                 }
@@ -233,9 +234,12 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             if (!result.hasErrors())
             {
                 String parentEvent = buildParentEventId(groupId, artifactId, ALL, parentEventId);
-                result.addMessage(String.format("Parent event [%s], full/transitive [%s/%s]", parentEvent, fullUpdate, transitive));
-                result.combine(refreshAllVersionsForProject(getProject(groupId, artifactId), fullUpdate, transitive, parentEvent));
-                result.combine(refreshVersionForProject(groupId, artifactId, MASTER_SNAPSHOT, fullUpdate, transitive, parentEvent));
+                String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",groupId,artifactId,ALL,parentEvent,fullUpdate,transitive);
+                result.addMessage(message);
+                LOGGER.info(message);
+                StoreProjectData projectData = getProject(groupId, artifactId);
+                result.combine(refreshAllVersionsForProject(projectData, fullUpdate, transitive, parentEvent));
+                result.addMessage(queueWorkToRefreshProjectVersion(projectData, MASTER_SNAPSHOT, fullUpdate, transitive, parentEvent));
             }
             return result;
         });
@@ -248,7 +252,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 
     private String queueWorkToRefreshProjectVersion(StoreProjectData projectData, String versionId, boolean fullUpdate, boolean transitive, String parentEvent)
     {
-        return this.workQueue.push(new MetadataNotification(projectData.getProjectId(),projectData.getGroupId(),projectData.getArtifactId(),versionId,fullUpdate,transitive,parentEvent));
+        return EVENT_ID + this.workQueue.push(new MetadataNotification(projectData.getProjectId(),projectData.getGroupId(),projectData.getArtifactId(),versionId,fullUpdate,transitive,parentEvent));
     }
 
     @Override
@@ -300,7 +304,9 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             long refreshStartTime = System.currentTimeMillis();
             LOGGER.info("Started updating project data [{}{}{}]", projectData.getGroupId(), projectData.getArtifactId(), versionId);
             MetadataEventResponse response = validateInput(projectData.getGroupId(),projectData.getArtifactId(),versionId);
-            response.addMessage(String.format("Processing [%s-%s-%s] fullUpdate/transitive? [%s/%s] parent:[%s]", projectData.getGroupId(), projectData.getArtifactId(), versionId, fullUpdate, transitive,parentEventId));
+            String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",projectData.getGroupId(),projectData.getArtifactId(),versionId,parentEventId,fullUpdate,transitive);
+            response.addMessage(message);
+            LOGGER.info(message);
             List<ProjectVersion> newDependencies = calculateDependencies(projectData.getGroupId(), projectData.getArtifactId(), versionId);
             response.combine(validateDependencies(newDependencies, versionId));
             if (!response.hasErrors())
@@ -309,7 +315,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 LOGGER.info("Finished processing artifacts for [{}{}{}]", projectData.getGroupId(), projectData.getArtifactId(), versionId);
                 if (!response.hasErrors())
                 {
-                    refreshProjectData(projectData, versionId, newDependencies);
+                    updateProjectData(projectData, versionId, newDependencies);
                     LOGGER.info("Finished updating project data [{}{}{}]", projectData.getGroupId(), projectData.getArtifactId(), versionId);
                     if (transitive)
                     {
@@ -356,7 +362,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         return response;
     }
 
-    private void refreshProjectData(StoreProjectData projectData, String versionId, List<ProjectVersion> newDependencies)
+    private void updateProjectData(StoreProjectData projectData, String versionId, List<ProjectVersion> newDependencies)
     {
         Optional<StoreProjectVersionData> projectVersionData = projects.find(projectData.getGroupId(), projectData.getArtifactId(), versionId);
         StoreProjectVersionData data = projectVersionData.isPresent() ? projectVersionData.get() : new StoreProjectVersionData(projectData.getGroupId(), projectData.getArtifactId(), versionId);
@@ -391,9 +397,9 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         });
     }
 
-    private List<ProjectVersionProperty> extractProjectPropertiesForVersion(StoreProjectVersionData projectData)
+    private List<Property> extractProjectPropertiesForVersion(StoreProjectVersionData projectData)
     {
-        List<ProjectVersionProperty> projectPropertyList = new ArrayList<>();
+        List<Property> projectPropertyList = new ArrayList<>();
         Model model = this.repositoryServices.getPOM(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId());
         if (model != null)
         {
@@ -404,7 +410,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 String propertyName = propertyNames.nextElement().toString();
                 if (projectProperties.contains(propertyName) || projectProperties.stream().anyMatch(propertyName::matches))
                 {
-                    projectPropertyList.add(new ProjectVersionProperty(propertyName, model.getProperties().getProperty(propertyName)));
+                    projectPropertyList.add(new Property(propertyName, model.getProperties().getProperty(propertyName)));
                 }
             }
         }
@@ -550,12 +556,15 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 
 
     @Override
-    public MetadataEventResponse refreshProjectsWithMissingVersions(boolean fullUpdate, boolean transitive,String parentEvent)
+    public MetadataEventResponse refreshProjectsWithMissingVersions(String parentEvent)
     {
         return executeWithTrace(REFRESH_PROJECTS_WITH_MISSING_VERSIONS,ALL, ALL, MISSING, () ->
         {
             MetadataEventResponse response = new MetadataEventResponse();
             String parentEventId = buildParentEventId(ALL, ALL,MISSING,parentEvent);
+            String infoMessage = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",ALL,ALL,MISSING,parentEventId,true,false);
+            response.addMessage(infoMessage);
+            LOGGER.info(infoMessage);
             List<VersionMismatch> projectsWithMissingVersions = this.repositoryServices.findVersionsMismatches().stream().filter(r -> !r.versionsNotInStore.isEmpty()).collect(Collectors.toList());
             String countInfo = String.format("Starting fixing [%s] projects with missing versions",projectsWithMissingVersions.size());
             LOGGER.info(countInfo);
@@ -567,14 +576,13 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                                 {
                                     try
                                     {
-                                        response.addMessage(queueWorkToRefreshProjectVersion(getProject(vm.groupId, vm.artifactId), missingVersion, fullUpdate,transitive,parentEventId));
+                                        response.addMessage(queueWorkToRefreshProjectVersion(getProject(vm.groupId, vm.artifactId), missingVersion, true,false,parentEventId));
                                         String message = String.format("queued fixing missing version: %s-%s-%s ", vm.groupId, vm.artifactId, missingVersion);
                                         LOGGER.info(message);
-                                        response.addMessage(message);
                                     }
                                     catch (Exception e)
                                     {
-                                        String message = String.format("queue failed for missing version: %s-%s-%s ", vm.groupId, vm.artifactId, missingVersion);
+                                        String message = String.format("queuing failed for missing version: %s-%s-%s ", vm.groupId, vm.artifactId, missingVersion);
                                         LOGGER.error(message);
                                         response.addError(message);
                                     }

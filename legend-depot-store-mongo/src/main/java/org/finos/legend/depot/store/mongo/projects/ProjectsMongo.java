@@ -21,8 +21,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
 import org.bson.conversions.Bson;
-import org.finos.legend.depot.domain.EntityValidator;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.project.ProjectValidator;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.store.StoreException;
 import org.finos.legend.depot.store.api.projects.Projects;
@@ -72,9 +72,9 @@ public class ProjectsMongo extends BaseMongo<StoreProjectData> implements Projec
     @Override
     protected void validateNewData(StoreProjectData data)
     {
-        if (!EntityValidator.isValid(data))
+        if (!ProjectValidator.isValid(data))
         {
-            throw new IllegalArgumentException(String.format("invalid groupId [%s] or artifactId [%s]",data.getGroupId(),data.getArtifactId()));
+            throw new IllegalArgumentException(String.format("invalid project [%s] or invalid groupId [%s] or artifactId [%s]",data.getProjectId(),data.getGroupId(),data.getArtifactId()));
         }
         Optional<StoreProjectData> projectData = find(data.getGroupId(), data.getArtifactId());
         if (projectData.isPresent() && (data.getId() == null || !data.getId().equals(projectData.get().getId())))

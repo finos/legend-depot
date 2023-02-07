@@ -225,4 +225,18 @@ public class TestQueueMongo extends TestStoreMongo
         Assert.assertTrue(first.get().getCreatedAt().before(second.get().getCreatedAt()));
     }
 
+    @Test
+    public void canPurgeQueue()
+    {
+        MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST,VERSION);
+        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1");
+        queue.push(event);
+        queue.push(event1);
+        Assert.assertEquals(2, queue.size());
+        long deleted = queue.deleteAll();
+        Assert.assertEquals(2, deleted);
+        Assert.assertEquals(0, queue.size());
+
+    }
+
 }

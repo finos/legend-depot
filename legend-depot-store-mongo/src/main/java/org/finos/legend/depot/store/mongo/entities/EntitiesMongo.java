@@ -37,7 +37,7 @@ import org.bson.conversions.Bson;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
-import org.finos.legend.depot.domain.EntityValidator;
+import org.finos.legend.depot.domain.CoordinateValidator;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.entity.StoredEntityOverview;
 import org.finos.legend.depot.domain.project.ProjectVersion;
@@ -46,8 +46,9 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.finos.legend.depot.store.mongo.core.MongoStoreErrors;
+import org.finos.legend.depot.domain.entity.EntityValidationErrors;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
+import org.finos.legend.sdlc.tools.entity.EntityPaths;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -61,6 +62,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -89,6 +91,10 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     public static final String PATH = "path";
     public static final String ENTITY_PACKAGE = "entity.content.package";
     public static final String VERSIONED_ENTITY = "versionedEntity";
+    private static final TransactionOptions TRANSACTION_OPTIONS = TransactionOptions.builder()
+            .readConcern(ReadConcern.MAJORITY)
+            .writeConcern(WriteConcern.ACKNOWLEDGED)
+            .readPreference(ReadPreference.primary()).build();
 
 
     public final boolean transactionMode;
@@ -158,7 +164,11 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     @Override
     protected void validateNewData(StoredEntity data)
     {
-        //no specific validation
+        StoreOperationResult result = validateEntity(data);
+        if (result.hasErrors())
+        {
+            throw new IllegalArgumentException("invalid data " + result.getErrors());
+        }
     }
 
 
@@ -175,10 +185,31 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
                 currentDate(LAST_MODIFIED));
     }
 
-
-    public StoreOperationResult newOrUpdate(ClientSession clientSession, StoredEntity entity)
+    private StoreOperationResult validateEntity(StoredEntity entity)
     {
-        StoreOperationResult report = validateEntity(entity, new StoreOperationResult(0, 0, 0, new ArrayList<>()));
+        StoreOperationResult result = new StoreOperationResult();
+        if (!CoordinateValidator.isValidGroupId(entity.getGroupId()))
+        {
+            result.logError(String.format(EntityValidationErrors.INVALID_GROUP_ID, entity.getGroupId()));
+        }
+        if (!CoordinateValidator.isValidArtifactId(entity.getArtifactId()))
+        {
+            result.logError(String.format(EntityValidationErrors.INVALID_ARTIFACT_ID, entity.getArtifactId()));
+        }
+        if (!VersionValidator.isValid(entity.getVersionId()))
+        {
+            result.logError(String.format(EntityValidationErrors.INVALID_VERSION_ID, entity.getVersionId()));
+        }
+        if (!EntityPaths.isValidEntityPath(entity.getEntity().getPath()))
+        {
+            result.logError(String.format(EntityValidationErrors.INVALID_ENTITY_PATH, entity.getEntity().getPath()));
+        }
+        return result;
+    }
+
+    StoreOperationResult newOrUpdate(ClientSession clientSession, StoredEntity entity)
+    {
+        StoreOperationResult report = validateEntity(entity);
         if (report.hasErrors())
         {
             return report;
@@ -193,6 +224,12 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         {
             result = getCollection().updateOne(getEntityPathFilter(entity), combineDocument(entity), INSERT_IF_ABSENT);
         }
+        return combineResult(result);
+    }
+
+    private StoreOperationResult combineResult(UpdateResult result)
+    {
+        StoreOperationResult report = new StoreOperationResult();
         if (result.getUpsertedId() != null)
         {
             report.addInsertedCount();
@@ -204,70 +241,55 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         return report;
     }
 
+    StoreOperationResult newOrUpdate(List<StoredEntity> entities)
+    {
+        return newOrUpdate(null, entities);
+    }
 
-    public StoreOperationResult newOrUpdate(StoredEntity entity)
+    StoreOperationResult newOrUpdate(StoredEntity entity)
     {
         return newOrUpdate(null, entity);
     }
 
-    private StoreOperationResult validateEntity(StoredEntity entity, StoreOperationResult result)
+    private StoreOperationResult newOrUpdate(ClientSession clientSession, List<StoredEntity> versionedEntities)
     {
-        if (!EntityValidator.isValidGroupId(entity.getGroupId()))
-        {
-            throw new IllegalArgumentException(String.format(MongoStoreErrors.INVALID_GROUP_ID, entity.getGroupId()));
-        }
-        if (!EntityValidator.isValidArtifactId(entity.getArtifactId()))
-        {
-            throw new IllegalArgumentException(String.format(MongoStoreErrors.INVALID_ARTIFACT_ID, entity.getArtifactId()));
-        }
-        if (!VersionValidator.isValid(entity.getVersionId()))
-        {
-            result.logError(String.format(MongoStoreErrors.INVALID_VERSION_ID, entity.getVersionId()));
-        }
-        return result;
-    }
-
-    public StoreOperationResult newOrUpdate(ClientSession clientSession, List<StoredEntity> versionedEntities)
-    {
-        StoreOperationResult report = new StoreOperationResult(0, 0, 0, new ArrayList<>());
+        StoreOperationResult report = new StoreOperationResult();
         for (StoredEntity versionedEntity : versionedEntities)
         {
-            StoreOperationResult result = newOrUpdate(clientSession, versionedEntity);
-            report.addInsertedCount();
-            report.logErrors(result.getErrors());
+            report.combine(newOrUpdate(clientSession, versionedEntity));
+        }
+        if (report.getInsertedCount() + report.getModifiedCount() != versionedEntities.size())
+        {
+            report.logError("error creating/updating entities,did not get acknowledgment for all");
         }
         return report;
     }
 
-    public StoreOperationResult atomicNewOrUpdate(ClientSession clientSession, List<StoredEntity> versionedEntities)
+    private StoreOperationResult executeWithinTransaction(Function<ClientSession,StoreOperationResult> atomicTransaction)
     {
-
-        StoreOperationResult report = new StoreOperationResult(0, 0, 0, new ArrayList<>());
-        TransactionOptions txnOptions = TransactionOptions.builder()
-                .readConcern(ReadConcern.MAJORITY)
-                .writeConcern(WriteConcern.ACKNOWLEDGED)
-                .readPreference(ReadPreference.primary()).build();
+        StoreOperationResult report = new StoreOperationResult();
+        ClientSession clientSession = mongoClient.startSession();
         try
         {
-            clientSession.startTransaction(txnOptions);
-            newOrUpdate(clientSession, versionedEntities);
+            clientSession.startTransaction(TRANSACTION_OPTIONS);
+            report.combine(atomicTransaction.apply(clientSession));
+        }
+        catch (RuntimeException e)
+        {
+            report.logError(e.getMessage());
+            LOGGER.error("error executing atomic new/update",e);
+        }
+        finally
+        {
             if (report.hasErrors())
             {
                 clientSession.abortTransaction();
+                report.logError("transaction aborted");
             }
             else
             {
                 clientSession.commitTransaction();
             }
-        }
-        catch (RuntimeException e)
-        {
-            clientSession.abortTransaction();
-            report.logError(e.getMessage());
-            throw e;
-        }
-        finally
-        {
             clientSession.close();
         }
         return report;
@@ -276,18 +298,12 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     @Override
     public StoreOperationResult createOrUpdate(List<StoredEntity> versionedEntities)
     {
-        if (transactionMode)
-        {
-            final ClientSession clientSession = mongoClient.startSession();
-            return atomicNewOrUpdate(clientSession, versionedEntities);
-        }
-        return newOrUpdate(null, versionedEntities);
+        return transactionMode ? executeWithinTransaction((clientSession) -> newOrUpdate(clientSession,versionedEntities)) : newOrUpdate(versionedEntities);
     }
 
     @Override
     public Optional<Entity> getEntity(String groupId, String artifactId, String versionId, String path)
     {
-        validateInput(groupId, artifactId, versionId);
         Bson filterByKey = getEntityPathFilter(groupId, artifactId, versionId, path);
         Optional<StoredEntity> found = findOne(filterByKey);
         return found.map(StoredEntity::getEntity);
@@ -314,21 +330,18 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     @Override
     public List<Entity> getAllEntities(String groupId, String artifactId, String versionId)
     {
-        validateInput(groupId, artifactId, versionId);
         return find(getArtifactAndVersionFilter(groupId, artifactId, versionId)).stream().map(StoredEntity::getEntity).collect(Collectors.toList());
     }
 
 
     private List<Entity> getAllEntities(String groupId, String artifactId, String versionId, boolean versioned)
     {
-        validateInput(groupId, artifactId, versionId);
         return find(getArtifactWithVersionsFilter(groupId, artifactId, versionId, versioned)).stream().map(StoredEntity::getEntity).collect(Collectors.toList());
     }
 
     @Override
     public List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, boolean versioned, Set<String> classifierPaths, boolean includeSubPackages)
     {
-        validateInput(groupId, artifactId, versionId);
         Bson filter = getArtifactWithVersionsFilter(groupId, artifactId, versionId, versioned);
         if (includeSubPackages)
         {
@@ -433,27 +446,10 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         return find(and(getArtifactWithVersionsFilter(groupId, artifactId, versionId, versionedEntities), eq(ENTITY_CLASSIFIER_PATH, classifier)));
     }
 
-    private void validateInput(String groupId, String artifactId, String versionId)
-    {
-        if (!EntityValidator.isValidGroupId(groupId))
-        {
-            throw new IllegalArgumentException(String.format(MongoStoreErrors.INVALID_GROUP_ID, groupId));
-        }
-        if (!EntityValidator.isValidArtifactId(artifactId))
-        {
-            throw new IllegalArgumentException(String.format(MongoStoreErrors.INVALID_ARTIFACT_ID, artifactId));
-        }
-        if (!VersionValidator.isValid(versionId))
-        {
-            throw new IllegalArgumentException(String.format(MongoStoreErrors.INVALID_VERSION_ID, versionId));
-        }
-    }
-
 
     @Override
     public List<Entity> getEntities(String groupId, String artifactId, String version, boolean versioned)
     {
-        validateInput(groupId, artifactId, version);
         return getAllEntities(groupId, artifactId, version, versioned);
     }
 

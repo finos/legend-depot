@@ -238,7 +238,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         MetadataEventResponse response = artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, true,true,PARENT_EVENT_ID);
         Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
 
-        Assert.assertEquals(4,notificationsQueueManager.getAllInQueue().size());
+        Assert.assertEquals(3,notificationsQueueManager.getAllInQueue().size());
         notificationsQueueManager.handleAll();
 
         Assert.assertEquals(3,projectsStore.getAll().size());
@@ -258,7 +258,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void partialRefreshAllVersionForProjectOnlyRefreshLatest()
     {
         artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, true,true,PARENT_EVENT_ID);
-        Assert.assertEquals(4,notificationsQueueManager.getAllInQueue().size());
+        Assert.assertEquals(3,notificationsQueueManager.getAllInQueue().size());
         notificationsQueueManager.handleAll();
 
         List<String> versions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID);
@@ -271,11 +271,12 @@ public class TestArtifactsRefreshService extends TestStoreMongo
 
         artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, false,false,PARENT_EVENT_ID);
         Assert.assertEquals("2.3.3",projectsService.getLatestVersion(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().toVersionIdString());
-        Assert.assertEquals(0,notificationsQueueManager.getAllInQueue().size());
+        Assert.assertEquals(1,notificationsQueueManager.getAllInQueue().size());
+        notificationsQueueManager.handleAll();
 
         projectsService.delete(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0");
         artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, false,false,PARENT_EVENT_ID);
-        Assert.assertEquals(0,notificationsQueueManager.getAllInQueue().size());
+        Assert.assertEquals(1,notificationsQueueManager.getAllInQueue().size());
         notificationsQueueManager.handleAll();
 
     }

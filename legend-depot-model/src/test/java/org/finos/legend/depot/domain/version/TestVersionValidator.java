@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.domain.version;
 
-import org.finos.legend.depot.domain.project.ProjectData;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,15 +28,4 @@ public class TestVersionValidator
         Assert.assertFalse(VersionValidator.isValid("jkwhfkjasf-jhdfjks"));
     }
 
-
-    @Test
-    public void canGetLatestVersion()
-    {
-        ProjectData projectData = new ProjectData("one", "sample", "project");
-        projectData.addVersion("1.0.0");
-        projectData.addVersion("1.0.1");
-        projectData.addVersion("2.0.0");
-        projectData.addVersion("2.0.2");
-        Assert.assertEquals("2.0.2", projectData.getLatestVersionAsString());
-    }
 }

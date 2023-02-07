@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.mongo.projects;
 
-import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;

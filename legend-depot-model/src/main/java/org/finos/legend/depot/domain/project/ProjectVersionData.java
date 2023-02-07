@@ -27,13 +27,13 @@ public class ProjectVersionData
     @JsonProperty
     private List<ProjectVersion> dependencies = new ArrayList<>();
     @JsonProperty
-    private List<ProjectVersionProperty> properties = new ArrayList<>();
+    private List<Property> properties = new ArrayList<>();
 
     public ProjectVersionData()
     {
     }
 
-    public ProjectVersionData(List<ProjectVersion> dependencies, List<ProjectVersionProperty> properties)
+    public ProjectVersionData(List<ProjectVersion> dependencies, List<Property> properties)
     {
         this.dependencies = dependencies;
         this.properties = properties;
@@ -63,17 +63,17 @@ public class ProjectVersionData
     }
 
 
-    public List<ProjectVersionProperty> getProperties()
+    public List<Property> getProperties()
     {
         return properties;
     }
 
-    public void setProperties(List<ProjectVersionProperty> properties)
+    public void setProperties(List<Property> properties)
     {
         this.properties = properties;
     }
 
-    public void addProperties(List<ProjectVersionProperty> propertyList)
+    public void addProperties(List<Property> propertyList)
     {
         propertyList.stream().filter(property -> !properties.contains(property)).forEach(property -> this.properties.add(property));
     }

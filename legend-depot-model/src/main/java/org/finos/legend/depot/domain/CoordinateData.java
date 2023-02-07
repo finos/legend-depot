@@ -20,11 +20,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import javax.validation.constraints.NotNull;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class CoordinateData
 {
     @JsonProperty
+    @NotNull
     private String groupId;
+    @NotNull
     @JsonProperty
     private String artifactId;
 

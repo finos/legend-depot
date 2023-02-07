@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.domain.project;
 
-import org.finos.legend.depot.domain.EntityValidator;
+import org.finos.legend.depot.domain.CoordinateValidator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,20 +25,20 @@ public class TestProjectValidator
     @Test
     public void validGroupId()
     {
-        Assert.assertTrue(EntityValidator.isValidGroupId("example.good.group"));
-        Assert.assertTrue(EntityValidator.isValidGroupId("org.finos"));
-        Assert.assertFalse(EntityValidator.isValidGroupId(""));
-        Assert.assertFalse(EntityValidator.isValidGroupId("this is not a good one"));
-        Assert.assertFalse(EntityValidator.isValidGroupId("this.is.starting.well but not ending well"));
-        Assert.assertTrue(EntityValidator.isValidGroupId("singleWordNoDots"));
+        Assert.assertTrue(CoordinateValidator.isValidGroupId("example.good.group"));
+        Assert.assertTrue(CoordinateValidator.isValidGroupId("org.finos"));
+        Assert.assertFalse(CoordinateValidator.isValidGroupId(""));
+        Assert.assertFalse(CoordinateValidator.isValidGroupId("this is not a good one"));
+        Assert.assertFalse(CoordinateValidator.isValidGroupId("this.is.starting.well but not ending well"));
+        Assert.assertTrue(CoordinateValidator.isValidGroupId("singleWordNoDots"));
     }
 
     @Test
     public void validArtifactId()
     {
-        Assert.assertTrue(EntityValidator.isValidArtifactId("test"));
-        Assert.assertTrue(EntityValidator.isValidArtifactId("test-other"));
-        Assert.assertFalse(EntityValidator.isValidArtifactId(""));
-        Assert.assertFalse(EntityValidator.isValidArtifactId("singleWordNoDots"));
+        Assert.assertTrue(CoordinateValidator.isValidArtifactId("test"));
+        Assert.assertTrue(CoordinateValidator.isValidArtifactId("test-other"));
+        Assert.assertFalse(CoordinateValidator.isValidArtifactId(""));
+        Assert.assertFalse(CoordinateValidator.isValidArtifactId("singleWordNoDots"));
     }
 }

@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.CoordinateData;
-import org.finos.legend.depot.domain.HasIdentifier;
 import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
@@ -34,10 +33,8 @@ import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Deprecated
-public final class ProjectData extends CoordinateData implements HasIdentifier
+public final class ProjectData extends CoordinateData
 {
-    @JsonProperty
-    private String id;
     @JsonProperty
     private String projectId;
     @JsonProperty
@@ -45,7 +42,7 @@ public final class ProjectData extends CoordinateData implements HasIdentifier
     @JsonProperty
     private List<ProjectVersionDependency> dependencies = new ArrayList<>();
     @JsonProperty
-    private List<ProjectProperty> properties = new ArrayList<>();
+    private List<ProjectVersionProperty> properties = new ArrayList<>();
 
     public ProjectData()
     {
@@ -57,14 +54,10 @@ public final class ProjectData extends CoordinateData implements HasIdentifier
         this.projectId = projectId;
     }
 
+    @JsonIgnore
     public String getId()
     {
-        return id;
-    }
-
-    public void setId(String id)
-    {
-        this.id = id;
+        return "";
     }
 
     public String getProjectId()
@@ -127,7 +120,7 @@ public final class ProjectData extends CoordinateData implements HasIdentifier
         return dependencies.stream().filter(dependency -> dependency.getVersionId().equals(version)).collect(Collectors.toList());
     }
 
-    public List<ProjectProperty> getPropertiesForProjectVersionID(String projectVersionId)
+    public List<ProjectVersionProperty> getPropertiesForProjectVersionID(String projectVersionId)
     {
         return properties.stream().filter(property -> property.getProjectVersionId().equals(projectVersionId)).collect(Collectors.toList());
     }
@@ -143,17 +136,17 @@ public final class ProjectData extends CoordinateData implements HasIdentifier
     }
 
 
-    public List<ProjectProperty> getProperties()
+    public List<ProjectVersionProperty> getProperties()
     {
         return properties;
     }
 
-    public void setProperties(List<ProjectProperty> properties)
+    public void setProperties(List<ProjectVersionProperty> properties)
     {
         this.properties = properties;
     }
 
-    public void addProperties(List<ProjectProperty> propertyList)
+    public void addProperties(List<ProjectVersionProperty> propertyList)
     {
         propertyList.stream().filter(property -> !properties.contains(property)).forEach(property -> this.properties.add(property));
     }

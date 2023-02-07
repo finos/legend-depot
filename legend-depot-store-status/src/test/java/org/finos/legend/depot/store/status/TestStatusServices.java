@@ -33,6 +33,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 public class TestStatusServices extends TestStoreMongo
 {
 
@@ -70,9 +72,9 @@ public class TestStatusServices extends TestStoreMongo
     @Test
     public void testStatus()
     {
-        StoreStatus status = statusService.getStatus();
+        List<StoreStatus.ProjectSummary> status = statusService.getStatus();
         Assert.assertNotNull(status);
-        Assert.assertEquals(3, status.totalProjects);
+        Assert.assertEquals(3, status.size());
 
         StoreStatus.DocumentCounts counts = statusService.getDocumentCounts();
         Assert.assertNotNull(counts);

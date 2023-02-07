@@ -28,6 +28,7 @@ import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -108,7 +109,17 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<MetadataNotification> getAllEventsInQueue()
     {
+        validateUser();
         return handle(ResourceLoggingAndTracing.GET_ALL_EVENTS_IN_QUEUE, notificationsManager::getAllInQueue);
+    }
+
+    @GET
+    @Path("/queue/count")
+    @ApiOperation(ResourceLoggingAndTracing.GET_QUEUE_COUNT)
+    @Produces(MediaType.APPLICATION_JSON)
+    public long getAllEventsInQueueCount()
+    {
+        return handle(ResourceLoggingAndTracing.GET_QUEUE_COUNT, () -> this.notificationsManager.waitingInQueue());
     }
 
     @GET
@@ -131,6 +142,15 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
                              @PathParam("versionId") String versionId)
     {
         return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId));
+    }
+
+    @DELETE
+    @Path("/queue")
+    @ApiOperation("purge queue")
+    public long purgeQueue()
+    {
+        validateUser();
+        return handle("purge queue", () -> this.notificationsManager.purgeQueue());
     }
 
     @PUT

@@ -117,8 +117,8 @@ public class TestEntitiesService extends TestBaseServices
     public void canGetOrphanedEntities()
     {
         entitiesService.createOrUpdate(Arrays.asList(
-                new StoredEntity("example.one", "orphaned", "1.0.0", false,new EntityDefinition("la", "la", null)),
-                new StoredEntity("example.two", "orphaned", "1.0.1", false,new EntityDefinition("lala", "la", null))
+                new StoredEntity("example.one", "orphaned", "1.0.0", false,new EntityDefinition("path::entity", "la", null)),
+                new StoredEntity("example.two", "orphaned", "1.0.1", false,new EntityDefinition("path::lala", "la", null))
         ));
 
         List<Pair<String, String>> orphaned = entitiesService.getOrphanedStoredEntities();
