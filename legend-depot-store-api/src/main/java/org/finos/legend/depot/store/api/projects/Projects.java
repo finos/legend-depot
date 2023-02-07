@@ -31,4 +31,6 @@ public interface Projects
 
     Optional<StoreProjectData> find(String groupId, String artifactId);
 
+    @Deprecated
+    List<StoreProjectData> findByProjectId(String projectId);
 }

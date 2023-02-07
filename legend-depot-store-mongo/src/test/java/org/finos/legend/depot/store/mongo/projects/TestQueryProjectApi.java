@@ -54,6 +54,17 @@ public class TestQueryProjectApi extends TestStoreMongo
     }
 
     @Test
+    public void canFindByProjectId()
+    {
+        List<StoreProjectData> projectConfig = projectsAPI.findByProjectId("PROD-A");
+        Assert.assertTrue(!projectConfig.isEmpty());
+        Assert.assertEquals(projectConfig.size(), 1);
+        Assert.assertEquals(projectConfig.get(0).getGroupId(), "examples.metadata");
+        Assert.assertEquals(projectConfig.get(0).getArtifactId(), "test");
+
+    }
+
+    @Test
     public void cannotFindProject()
     {
         Optional<StoreProjectData> project = projectsAPI.find("PROD-9691231123", "lalal");

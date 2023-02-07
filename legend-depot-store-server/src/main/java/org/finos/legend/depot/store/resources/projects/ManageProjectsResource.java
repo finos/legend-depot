@@ -60,28 +60,6 @@ public class ManageProjectsResource extends BaseAuthorisedResource
         return PROJECTS_RESOURCE;
     }
 
-    @GET
-    @Path("/projects/versions/all")
-    @ApiOperation(ResourceLoggingAndTracing.GET_ALL_PROJECTS_VERSIONS)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Deprecated
-    public List<StoreProjectVersionData> getProjectsVersions()
-    {
-        return handle(ResourceLoggingAndTracing.GET_ALL_PROJECTS_VERSIONS, () -> this.projectApi.getAll());
-    }
-
-    @GET
-    @Path("/projects/all")
-    @ApiOperation(ResourceLoggingAndTracing.GET_ALL_PROJECTS)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Deprecated
-    public List<StoreProjectData> getProjects()
-    {
-        return handle(ResourceLoggingAndTracing.GET_ALL_PROJECTS, () -> this.projectApi.getAllProjectCoordinates());
-    }
-
-
-
     @PUT
     @Path("/projects/{projectId}/{groupId}/{artifactId}")
     @ApiOperation(ResourceLoggingAndTracing.CREATE_EMPTY_PROJECT)
@@ -113,6 +91,15 @@ public class ManageProjectsResource extends BaseAuthorisedResource
                     validateUser();
                     return projectApi.delete(groupId, artifactId);
                 });
+    }
+
+    @GET
+    @Path("/projects/{groupId}/{artifactId}/versions/all/versionData")
+    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<StoreProjectVersionData> getProject(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
+    {
+        return handle(ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA, ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA + groupId + artifactId, () -> projectApi.find(groupId, artifactId));
     }
 
 }

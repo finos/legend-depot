@@ -34,10 +34,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Path("")
 @Api("Projects")
@@ -50,26 +48,6 @@ public class ProjectsVersionsResource extends BaseResource
     public ProjectsVersionsResource(ProjectsService projectVersionApi)
     {
         this.projectVersionApi = projectVersionApi;
-    }
-
-
-    @GET
-    @Path("/projects/{groupId}/{artifactId}/versions/all/data")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<ProjectVersionDTO> getProject(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
-    {
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA, ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA + groupId + artifactId, () ->
-        {
-            List<StoreProjectVersionData> projectVersions = projectVersionApi.find(groupId, artifactId);
-            if (!projectVersions.isEmpty())
-            {
-                return projectVersions.stream()
-                        .map(pv -> new ProjectVersionDTO(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), pv.getVersionData()))
-                        .collect(Collectors.toList());
-            }
-            return Collections.emptyList();
-        });
     }
 
     @GET

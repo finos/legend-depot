@@ -42,6 +42,7 @@ public class ProjectsMongo extends BaseMongo<StoreProjectData> implements Projec
 {
 
     public static final String COLLECTION = "project-configurations";
+    public static final String PROJECT_ID = "projectId";
 
     @Inject
     public ProjectsMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -92,6 +93,12 @@ public class ProjectsMongo extends BaseMongo<StoreProjectData> implements Projec
     public List<StoreProjectData> getProjects(int page, int pageSize)
     {
         return getStoredEntitiesByPage(page, pageSize);
+    }
+
+    @Override
+    public List<StoreProjectData> findByProjectId(String projectId)
+    {
+        return find(eq(PROJECT_ID, projectId));
     }
 
     @Override
