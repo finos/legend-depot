@@ -13,49 +13,41 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.domain.project;
+package org.finos.legend.depot.domain.project.dependencies;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.finos.legend.depot.domain.VersionedData;
+import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.Property;
+
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Deprecated
-public class ProjectVersionProperty
+public class ProjectDependencyWithPlatformVersions extends VersionedData
 {
     @JsonProperty
-    private String propertyName;
+    private List<Property> platformsVersion;
     @JsonProperty
-    private String value;
-    @JsonProperty
-    private String projectVersionId;
+    private ProjectVersion dependency;
 
-    public ProjectVersionProperty()
+    public ProjectDependencyWithPlatformVersions(String groupId, String artifactId, String versionId, ProjectVersion dependency, List<Property> platformsVersion)
     {
-
+        super(groupId, artifactId, versionId);
+        this.platformsVersion = platformsVersion;
+        this.dependency = dependency;
     }
 
-    public ProjectVersionProperty(String propertyName, String value, String projectVersionId)
+    public List<Property> getPlatformsVersion()
     {
-        this.propertyName = propertyName;
-        this.value = value;
-        this.projectVersionId = projectVersionId;
+        return platformsVersion;
     }
 
-    public String getProjectVersionId()
+    public ProjectVersion getDependency()
     {
-        return projectVersionId;
-    }
-
-    public String getPropertyName()
-    {
-        return propertyName;
-    }
-
-    public String getValue()
-    {
-        return value;
+        return dependency;
     }
 
     @Override
@@ -69,4 +61,5 @@ public class ProjectVersionProperty
     {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
 }

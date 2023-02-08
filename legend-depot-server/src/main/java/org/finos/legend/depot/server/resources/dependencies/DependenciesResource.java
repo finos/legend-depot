@@ -15,13 +15,20 @@
 
 package org.finos.legend.depot.server.resources.dependencies;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
+import org.finos.legend.depot.domain.project.Property;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
+import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
@@ -39,6 +46,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_DEPENDANT_PROJECTS;
@@ -104,8 +112,9 @@ public class DependenciesResource extends BaseResource
                                                                          @PathParam("versionId") String versionId
     )
     {
-        return handle(GET_DEPENDANT_PROJECTS, GET_DEPENDANT_PROJECTS + groupId + artifactId, () -> this.projectApi.getDependentProjects(groupId, artifactId, versionId));
+        return handle(GET_DEPENDANT_PROJECTS, GET_DEPENDANT_PROJECTS + groupId + artifactId, () -> transform(this.projectApi.getDependentProjects(groupId, artifactId, versionId)));
     }
+
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/dependencies")
@@ -159,5 +168,55 @@ public class DependenciesResource extends BaseResource
         projectDependencies.forEach(dep ->
             QueryMetricsContainer.record(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()));
         return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, versioned, transitive, includeOrigin));
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @Deprecated
+    private static final class ProjectVersionPlatformDependency extends VersionedData
+    {
+        @JsonProperty
+        private List<ProjectsResource.ProjectVersionProperty> platformsVersion;
+        @JsonProperty
+        private ProjectVersion dependency;
+
+        public ProjectVersionPlatformDependency(String groupId, String artifactId, String versionId, ProjectVersion dependency, List<ProjectsResource.ProjectVersionProperty> platformsVersion)
+        {
+            super(groupId, artifactId, versionId);
+            this.platformsVersion = platformsVersion;
+            this.dependency = dependency;
+        }
+
+        public List<ProjectsResource.ProjectVersionProperty> getPlatformsVersion()
+        {
+            return platformsVersion;
+        }
+
+        public ProjectVersion getDependency()
+        {
+            return dependency;
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            return EqualsBuilder.reflectionEquals(this, obj);
+        }
+
+        @Override
+        public int hashCode()
+        {
+            return HashCodeBuilder.reflectionHashCode(this);
+        }
+
+    }
+
+    private List<ProjectVersionPlatformDependency> transform(List<ProjectDependencyWithPlatformVersions> dependentProjects)
+    {
+        return dependentProjects.stream().map(dep -> new ProjectVersionPlatformDependency(dep.getGroupId(),dep.getArtifactId(),dep.getVersionId(),dep.getDependency(),transformPropertyToProjectProperty(dep.getPlatformsVersion(),dep.getVersionId()))).collect(Collectors.toList());
+    }
+
+    private List<ProjectsResource.ProjectVersionProperty> transformPropertyToProjectProperty(List<Property> properties, String versionId)
+    {
+        return properties.stream().map(p -> new ProjectsResource.ProjectVersionProperty(p.getPropertyName(), p.getValue(), versionId)).collect(Collectors.toList());
     }
 }

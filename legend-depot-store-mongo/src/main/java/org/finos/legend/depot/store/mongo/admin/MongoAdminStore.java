@@ -22,6 +22,7 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
+import org.finos.legend.depot.store.mongo.admin.migrations.ProjectToProjectVersionMigration;
 import org.finos.legend.depot.store.mongo.admin.schedules.SchedulesMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
@@ -120,13 +121,15 @@ public class MongoAdminStore
         return mongoDatabase.getName();
     }
 
+    @Deprecated
     public void migrationToProjectVersions()
     {
-        new MigrationHelper(mongoDatabase).migrationToProjectVersions();
+        new ProjectToProjectVersionMigration(mongoDatabase).migrationToProjectVersions();
     }
 
+    @Deprecated
     public void cleanUpProjectData()
     {
-        new MigrationHelper(mongoDatabase).cleanUpProjectData();
+        new ProjectToProjectVersionMigration(mongoDatabase).cleanUpProjectData();
     }
 }

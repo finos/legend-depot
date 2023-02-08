@@ -77,7 +77,7 @@ public class ProjectsMongo extends BaseMongo<StoreProjectData> implements Projec
             throw new IllegalArgumentException(String.format("invalid project [%s] or invalid groupId [%s] or artifactId [%s]",data.getProjectId(),data.getGroupId(),data.getArtifactId()));
         }
         Optional<StoreProjectData> projectData = find(data.getGroupId(), data.getArtifactId());
-        if (projectData.isPresent() && (data.getId() == null || !data.getId().equals(projectData.get().getId())))
+        if (projectData.isPresent() && (!data.getProjectId().equals(projectData.get().getProjectId())))
         {
             throw new StoreException(String.format("Duplicate coordinates: Different project %s its already registered with this coordinates %s-%s", projectData.get().getProjectId(), data.getGroupId(), data.getArtifactId()));
         }

@@ -32,6 +32,13 @@
           "versionId": "1.0.0"
         }
       }
+    ],
+    "properties": [
+      {
+        "projectVersionId": "2.3.1",
+        "propertyName": "platform",
+        "value": "test"
+      }
     ]
   },
   {

@@ -16,12 +16,7 @@
 package org.finos.legend.depot.store.mongo.admin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
-import org.finos.legend.depot.domain.project.ProjectData;
-import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
@@ -29,8 +24,6 @@ import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,49 +33,6 @@ public class TestMongoAdminStore extends TestStoreMongo
 {
     MongoAdminStore mongoAdminStore = new MongoAdminStore(mongoProvider);
 
-
-    protected static List<ProjectData> readProjectDataConfigsFile(URL fileName)
-    {
-        try
-        {
-            InputStream stream = fileName.openStream();
-            String jsonInput = new java.util.Scanner(stream).useDelimiter("\\A").next();
-
-            List<ProjectData> projects = new ObjectMapper().readValue(jsonInput, new TypeReference<List<ProjectData>>()
-            {
-            });
-            Assert.assertNotNull("testing file" + fileName.getFile(), projects);
-            return projects;
-        }
-        catch (Exception e)
-        {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
-        }
-        return null;
-    }
-
-    private void setUpProjectDataFromFile(URL projectConfigFile)
-    {
-        try
-        {
-            readProjectDataConfigsFile(projectConfigFile).forEach(project ->
-            {
-                try
-                {
-                    getMongoProjects().insertOne(Document.parse(new ObjectMapper().writeValueAsString(project)));
-                }
-                catch (JsonProcessingException e)
-                {
-                    Assert.fail("an error has occurred loading test project " + e.getMessage());
-                }
-            });
-            Assert.assertNotNull(getMongoProjects());
-        }
-        catch (Exception e)
-        {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
-        }
-    }
 
     @Test
     public void canCreateEntitiesIndexesIfAbsent()
@@ -171,28 +121,4 @@ public class TestMongoAdminStore extends TestStoreMongo
 
     }
 
-    @Test
-    public void testOneOffMigrationService()
-    {
-        setUpProjectDataFromFile(this.getClass().getClassLoader().getResource("data/projectsData.json"));
-        mongoAdminStore.migrationToProjectVersions();
-        Assert.assertEquals(7,mongoProvider.getCollection("versions").countDocuments());
-        StoreProjectVersionData result = new MigrationHelper(mongoProvider).convert(mongoProvider.getCollection("versions").find().first(), StoreProjectVersionData.class);
-        Assert.assertEquals(result.getGroupId(), "examples.metadata");
-        Assert.assertEquals(result.getArtifactId(), "test");
-        Assert.assertEquals(result.getVersionId(), "master-SNAPSHOT");
-    }
-
-    @Test
-    public void testCleanupMigrationService()
-    {
-        setUpProjectDataFromFile(this.getClass().getClassLoader().getResource("data/projectsData.json"));
-        mongoAdminStore.cleanUpProjectData();
-        Assert.assertEquals(3,mongoProvider.getCollection("project-configurations").countDocuments());
-        StoreProjectData result = new MigrationHelper(mongoProvider).convert(mongoProvider.getCollection("project-configurations").find().first(), StoreProjectData.class);
-        Assert.assertEquals(1,1);
-        Assert.assertEquals(result.getProjectId(), "PROD-A");
-        Assert.assertEquals(result.getGroupId(), "examples.metadata");
-        Assert.assertEquals(result.getArtifactId(), "test");
-    }
 }
