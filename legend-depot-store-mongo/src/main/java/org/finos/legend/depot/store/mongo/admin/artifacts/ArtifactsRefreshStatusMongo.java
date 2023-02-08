@@ -74,7 +74,7 @@ public class ArtifactsRefreshStatusMongo extends BaseMongo<RefreshStatus> implem
         buildIndex("startTime",STAR_TIME),
         buildIndex("parentId",PARENT_EVENT),
         buildIndex("status",RESPONSE_STATUS),
-        buildIndex("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID));
+        buildIndex("groupId-artifactId-versionId",true,GROUP_ID, ARTIFACT_ID, VERSION_ID));
     }
 
     @Override
