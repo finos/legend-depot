@@ -21,7 +21,7 @@ import org.finos.legend.depot.domain.CoordinateData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.ProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
-import org.finos.legend.depot.domain.project.ProjectProperty;
+import org.finos.legend.depot.domain.project.ProjectVersionProperty;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
@@ -110,7 +110,7 @@ public class ProjectsResource extends BaseResource
         {
             List<ProjectData.ProjectVersionDependency> dependencies = pv.getVersionData().getDependencies().stream().map(dep -> new ProjectData.ProjectVersionDependency(groupId, artifactId, pv.getVersionId(), dep)).collect(Collectors.toList());
             projectData.addDependencies(dependencies);
-            List<ProjectProperty> projectProperties = pv.getVersionData().getProperties().stream().map(prop -> new ProjectProperty(prop.getPropertyName(), prop.getValue(), pv.getVersionId())).collect(Collectors.toList());
+            List<ProjectVersionProperty> projectProperties = pv.getVersionData().getProperties().stream().map(prop -> new ProjectVersionProperty(prop.getPropertyName(), prop.getValue(), pv.getVersionId())).collect(Collectors.toList());
             projectData.addProperties(projectProperties);
             projectData.addVersion(pv.getVersionId());
         });

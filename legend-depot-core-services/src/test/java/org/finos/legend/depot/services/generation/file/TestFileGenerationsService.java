@@ -17,6 +17,7 @@ package org.finos.legend.depot.services.generation.file;
 
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
@@ -84,6 +85,8 @@ public class TestFileGenerationsService extends TestStoreMongo
             Assert.assertEquals(54, generations.getAll().size());
         }
 
+        when(projectsStore.find("group.test","test")).thenReturn(Optional.of(new StoreProjectData("prod-1","group.test","test")));
+        when(projectsStore.find("group.test.otherproject", "test")).thenReturn(Optional.of(new StoreProjectData("prod-2","group.test.otherproject", "test")));
         when(projectsVersionsStore.find("group.test","test","master-SNAPSHOT")).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test","master-SNAPSHOT")));
         when(projectsVersionsStore.find("group.test","test","1.0.0")).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test","1.0.0")));
         when(projectsVersionsStore.find("i.dont","exist","version")).thenReturn(Optional.empty());
@@ -100,7 +103,7 @@ public class TestFileGenerationsService extends TestStoreMongo
         Assert.assertEquals(26, generations.getAll().size());
         try
         {
-            service.delete("group.test", "test", "1.1.0");
+            service.delete("group.test", "test111", "1.1.0");
             Assert.fail("exception expected");
         }
         catch (IllegalArgumentException e)

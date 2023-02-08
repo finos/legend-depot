@@ -99,6 +99,7 @@ public class ManageProjectsResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<StoreProjectVersionData> getProject(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
     {
+        validateUser();
         return handle(ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA, ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA + groupId + artifactId, () -> projectApi.find(groupId, artifactId));
     }
 

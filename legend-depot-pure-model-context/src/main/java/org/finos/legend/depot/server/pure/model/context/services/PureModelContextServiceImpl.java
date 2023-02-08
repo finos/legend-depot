@@ -67,6 +67,7 @@ public class PureModelContextServiceImpl implements PureModelContextService
     @Override
     public PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean versioned, boolean getDependencies)
     {
+        this.projectsService.checkExists(groupId, artifactId);
         String version = versionId;
         if (version.equals(LATEST))
         {

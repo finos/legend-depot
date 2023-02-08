@@ -15,22 +15,16 @@
 
 package org.finos.legend.depot.domain;
 
-import org.finos.legend.depot.domain.project.StoreProjectData;
-
 import javax.lang.model.SourceVersion;
 import java.util.regex.Pattern;
 
-public class EntityValidator
+public class CoordinateValidator
 {
+
     public static final Pattern VALID_ARTIFACT_ID_PATTERN = Pattern.compile("[a-z][a-z\\d_]*+(-[a-z][a-z\\d_]*+)*+");
 
-    private EntityValidator()
+    private CoordinateValidator()
     {
-    }
-
-    public static boolean isValid(StoreProjectData projectData)
-    {
-        return isValidGroupId(projectData.getGroupId()) && isValidArtifactId(projectData.getArtifactId());
     }
 
     public static boolean isValidArtifactId(String artifactId)

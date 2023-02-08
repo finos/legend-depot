@@ -137,4 +137,11 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
         getCollection().find().forEach((Consumer<Document>)document -> allInQueue.add(convert(document, MetadataNotification.class)));
         return allInQueue;
     }
+
+    @Override
+    public long deleteAll()
+    {
+        DeleteResult result = getCollection().deleteMany(Filters.exists(GROUP_ID));
+        return result.getDeletedCount();
+    }
 }

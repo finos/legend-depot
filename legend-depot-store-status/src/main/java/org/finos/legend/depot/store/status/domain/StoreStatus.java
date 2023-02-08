@@ -30,18 +30,6 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class StoreStatus
 {
 
-    @JsonProperty
-    public long totalProjects = 0;
-
-    @JsonProperty
-    public List<ProjectSummary> projects = new ArrayList<>();
-
-    public void addProject(ProjectSummary projectId)
-    {
-        this.projects.add(projectId);
-        totalProjects++;
-    }
-
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ProjectSummary implements Comparable
     {

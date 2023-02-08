@@ -20,8 +20,8 @@ import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
-import org.finos.legend.depot.domain.project.ProjectProperty;
 import org.finos.legend.depot.domain.project.ProjectVersionProperty;
+import org.finos.legend.depot.domain.project.Property;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraph;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraphWalkerContext;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
@@ -42,8 +42,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Collectors;
-
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public class ProjectsServiceImpl implements ProjectsService
 {
@@ -84,7 +82,7 @@ public class ProjectsServiceImpl implements ProjectsService
     @Override
     public List<String> getVersions(String groupId, String artifactId)
     {
-        return projectsVersions.getVersions(groupId, artifactId).stream().map(VersionId::parseVersionId).sorted().map(VersionId::toVersionIdString).collect(Collectors.toList());
+        return projectsVersions.getVersions(groupId, artifactId).stream().sorted().map(VersionId::toVersionIdString).collect(Collectors.toList());
     }
 
     @Override
@@ -123,23 +121,18 @@ public class ProjectsServiceImpl implements ProjectsService
     @Override
     public void checkExists(String groupId, String artifactId, String versionId) throws IllegalArgumentException
     {
-        if (versionId != null && !versionId.equals(MASTER_SNAPSHOT) && !this.projectsVersions.find(groupId,artifactId,versionId).isPresent())
+        if (!this.projectsVersions.find(groupId,artifactId,versionId).isPresent())
         {
-            throw new IllegalArgumentException(String.format("No version found for %s-%s-%s",groupId,artifactId,versionId));
+            throw new IllegalArgumentException(String.format("No version data found for %s-%s-%s",groupId,artifactId,versionId));
         }
     }
 
     @Override
     public Optional<VersionId> getLatestVersion(String groupId, String artifactId)
     {
-        List<String> versions = this.getVersions(groupId, artifactId);
-        if (versions != null && !versions.isEmpty())
-        {
-            List<VersionId> versionIds = versions.stream().map(VersionId::parseVersionId).collect(Collectors.toList());
-            return versionIds.stream().max(VersionId::compareTo);
-        }
-        return Optional.empty();
+        return this.projectsVersions.getVersions(groupId, artifactId).stream().max(VersionId::compareTo);
     }
+
 
     @Override
     public Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, boolean transitive)
@@ -239,9 +232,9 @@ public class ProjectsServiceImpl implements ProjectsService
                 .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    private List<ProjectProperty> transformPropertyToProjectProperty(List<ProjectVersionProperty> properties, String versionId)
+    private List<ProjectVersionProperty> transformPropertyToProjectProperty(List<Property> properties, String versionId)
     {
-        return properties.isEmpty() ? Collections.emptyList() : properties.stream().map(p -> new ProjectProperty(p.getPropertyName(), p.getValue(), versionId)).collect(Collectors.toList());
+        return properties.isEmpty() ? Collections.emptyList() : properties.stream().map(p -> new ProjectVersionProperty(p.getPropertyName(), p.getValue(), versionId)).collect(Collectors.toList());
     }
 
     private StoreProjectVersionData getProject(String groupId, String artifactId, String versionId)

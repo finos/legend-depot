@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiOperation;
 import org.bson.Document;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 
 import javax.inject.Inject;
@@ -47,14 +48,16 @@ public class StoreAdministrationResource extends BaseAuthorisedResource
 
     public static final String STORE_ADMINISTRATION_RESOURCE = "Store Administration";
     private final MongoAdminStore manageStoreService;
+    private final StorageMetrics storageMetrics;
 
     @Inject
     protected StoreAdministrationResource(MongoAdminStore manageStoreService,
                                           AuthorisationProvider authorisationProvider,
-                                          @Named("requestPrincipal") Provider<Principal> principalProvider)
+                                          @Named("requestPrincipal") Provider<Principal> principalProvider, StorageMetrics storageMetrics)
     {
         super(authorisationProvider, principalProvider);
         this.manageStoreService = manageStoreService;
+        this.storageMetrics = storageMetrics;
     }
 
     @Override
@@ -101,12 +104,21 @@ public class StoreAdministrationResource extends BaseAuthorisedResource
         });
     }
 
+    @GET
+    @Path("/collections/stats")
+    @ApiOperation("get collections stats")
+    public Object getCollectionStats()
+    {
+        return handle("Get collections stats", () -> this.storageMetrics.reportMetrics());
+    }
+
 
     @GET
     @Path("/collections")
     @ApiOperation("get collections")
     public List<String> getCollections()
     {
+        validateUser();
         return handle("Get collections", this::getAllCollections);
     }
 

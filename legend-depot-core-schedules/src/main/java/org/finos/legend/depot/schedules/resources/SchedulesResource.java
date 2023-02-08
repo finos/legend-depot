@@ -71,6 +71,7 @@ public class SchedulesResource extends BaseAuthorisedResource
     public List<ScheduleInfo> getSchedulerStatus(@QueryParam("running") Boolean running,
                                                  @QueryParam("disabled") Boolean disabled)
     {
+        validateUser();
         return handle(ResourceLoggingAndTracing.SCHEDULES_STATUS,() -> this.schedulesFactory.find(running,disabled));
     }
 

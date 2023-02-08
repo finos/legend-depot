@@ -57,7 +57,7 @@ public class ManageEntitiesServiceImpl extends EntitiesServiceImpl implements Ma
     @Override
     public MetadataEventResponse delete(String groupId, String artifactId, String versionId, boolean versioned)
     {
-        this.projects.checkExists(groupId, artifactId, versionId);
+        this.projects.checkExists(groupId, artifactId);
         return new MetadataEventResponse().combine(entities.delete(groupId, artifactId, versionId, versioned));
     }
 

@@ -79,30 +79,13 @@ public class ManageEntitiesResource extends BaseAuthorisedResource
     }
 
 
-    @DELETE
-    @Path("/projects/{groupId}/{artifactId}/entities")
-    @ApiOperation(ResourceLoggingAndTracing.DELETE_STORE_ENTITIES)
-    @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse deleteEntities(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
-    {
-
-        return handle(
-                ResourceLoggingAndTracing.DELETE_STORE_ENTITIES,
-                ResourceLoggingAndTracing.DELETE_STORE_ENTITIES + groupId + artifactId,
-                () ->
-                {
-                    validateUser();
-                    return entitiesService.deleteAll(groupId, artifactId);
-                });
-    }
-
     @GET
     @Path("/projects/orphan/entities")
     @ApiOperation(ResourceLoggingAndTracing.ORPHAN_STORE_ENTITIES)
     @Produces(MediaType.APPLICATION_JSON)
     public List<Pair<String, String>> getOrphanEntities()
     {
-
+        validateUser();
         return handle(ResourceLoggingAndTracing.ORPHAN_STORE_ENTITIES, () -> entitiesService.getOrphanedStoredEntities());
     }
 

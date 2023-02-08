@@ -27,18 +27,18 @@ import java.util.List;
 public class ProjectVersionPlatformDependency extends VersionedData
 {
     @JsonProperty
-    private List<ProjectProperty> platformsVersion;
+    private List<ProjectVersionProperty> platformsVersion;
     @JsonProperty
     private ProjectVersion dependency;
 
-    public ProjectVersionPlatformDependency(String groupId, String artifactId, String versionId, ProjectVersion dependency, List<ProjectProperty> platformsVersion)
+    public ProjectVersionPlatformDependency(String groupId, String artifactId, String versionId, ProjectVersion dependency, List<ProjectVersionProperty> platformsVersion)
     {
         super(groupId, artifactId, versionId);
         this.platformsVersion = platformsVersion;
         this.dependency = dependency;
     }
 
-    public List<ProjectProperty> getPlatformsVersion()
+    public List<ProjectVersionProperty> getPlatformsVersion()
     {
         return platformsVersion;
     }

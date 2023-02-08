@@ -19,15 +19,20 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoreOperationResult
 {
-    private long modifiedCount;
-    private long insertedCount;
-    private long deletionCount;
-    private List<String> errors;
+    private long modifiedCount = 0;
+    private long insertedCount = 0;
+    private long deletionCount = 0;
+    private List<String> errors = new ArrayList<>();
+
+    public StoreOperationResult()
+    {
+    }
 
     @JsonCreator
     public StoreOperationResult(@JsonProperty("modifiedCount") long modifiedCount, @JsonProperty("insertedCount") long insertedCount, @JsonProperty("deletionCount") long deletionCount, @JsonProperty("errors") List<String> errors)
@@ -86,11 +91,18 @@ public class StoreOperationResult
     @Override
     public String toString()
     {
-        return String.format("inserted: [%s], modified:[%s], deleted:[%s] ", insertedCount, modifiedCount, +deletionCount);
+        return String.format("inserted: [%s], modified:[%s], deleted:[%s] ", insertedCount, modifiedCount, deletionCount);
     }
 
-    public void logErrors(List<String> errors)
+
+    public void combine(StoreOperationResult result)
     {
-        this.errors.addAll(errors);
+        if (result != null)
+        {
+            this.insertedCount += result.getInsertedCount();
+            this.modifiedCount += result.getModifiedCount();
+            this.deletionCount += result.getDeletionCount();
+            this.errors.addAll(result.getErrors());
+        }
     }
 }

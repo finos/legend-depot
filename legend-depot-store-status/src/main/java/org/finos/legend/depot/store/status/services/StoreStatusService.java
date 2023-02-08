@@ -24,11 +24,13 @@ import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.status.domain.StoreStatus;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class StoreStatusService
 {
@@ -48,16 +50,14 @@ public class StoreStatusService
         this.queryMetricsHandler = queryMetrics;
     }
 
-    public StoreStatus getStatus()
+    public List<StoreStatus.ProjectSummary> getStatus()
     {
-        StoreStatus status = new StoreStatus();
+        List<StoreStatus.ProjectSummary> status = new ArrayList();
         projectsApi.getAll().forEach(p ->
         {
             StoreStatus.ProjectSummary summry = new StoreStatus.ProjectSummary(p.getProjectId(), p.getGroupId(), p.getArtifactId(), projectVersionsApi.getVersions(p.getGroupId(), p.getArtifactId()).size(), "/projects/");
-            status.addProject(summry);
+            status.add(summry);
         });
-
-        Collections.sort(status.projects);
         return status;
     }
 
@@ -79,7 +79,7 @@ public class StoreStatusService
     public StoreStatus.ProjectStatus getProjectStatus(String groupId, String artifactId)
     {
         StoreStatus.ProjectStatus projectStatus = new StoreStatus.ProjectStatus();
-        List<String> versions = projectVersionsApi.getVersions(groupId, artifactId);
+        List<String> versions = projectVersionsApi.getVersions(groupId, artifactId).stream().map(VersionId::toVersionIdString).collect(Collectors.toList());
 
         versions.forEach(v ->
         {

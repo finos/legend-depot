@@ -18,6 +18,7 @@ package org.finos.legend.depot.store.mongo.projects;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +26,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 public class TestQueryProjectVersionApi extends TestStoreMongo
@@ -72,10 +74,12 @@ public class TestQueryProjectVersionApi extends TestStoreMongo
     @Test
     public void caGetLatestVersionForProject()
     {
-        List<String> versions = projectsVersionsAPI.getVersions("examples.metadata", "test");
+        List<String> versions = projectsVersionsAPI.getVersions("examples.metadata", "test").stream().map(pv -> pv.toVersionIdString()).collect(Collectors.toList());
         Assert.assertFalse(versions.isEmpty());
         Assert.assertEquals(2, versions.size());
         Assert.assertEquals(Arrays.asList("2.2.0","2.3.1"), versions);
+
+        Assert.assertEquals("2.3.1",projectsVersionsAPI.getVersions("examples.metadata", "test").stream().max(VersionId::compareTo).get().toVersionIdString());
     }
 
 }

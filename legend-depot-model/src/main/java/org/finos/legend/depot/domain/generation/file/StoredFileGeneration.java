@@ -16,6 +16,7 @@
 package org.finos.legend.depot.domain.generation.file;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -48,6 +49,7 @@ public class StoredFileGeneration extends VersionedData implements HasIdentifier
     }
 
     @Override
+    @JsonIgnore
     public String getId()
     {
         return "";

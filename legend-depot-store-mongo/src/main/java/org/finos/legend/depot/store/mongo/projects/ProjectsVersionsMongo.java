@@ -21,12 +21,14 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
 import org.bson.conversions.Bson;
-import org.finos.legend.depot.domain.EntityValidator;
+import org.finos.legend.depot.domain.CoordinateValidator;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -70,14 +72,18 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
     @Override
     public Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId)
     {
+        if (versionId == null)
+        {
+            throw new IllegalArgumentException("cannot find project version, versionId cannot be null");
+        }
         return findOne(and(getArtifactAndVersionFilter(groupId, artifactId, versionId)));
     }
 
     @Override
-    public List<String> getVersions(String groupId, String artifactId)
+    public List<VersionId> getVersions(String groupId, String artifactId)
     {
         List<StoreProjectVersionData> storeProjectsVersions = find(groupId, artifactId);
-        return storeProjectsVersions.isEmpty() ? Collections.EMPTY_LIST : storeProjectsVersions.stream().filter(pv -> !pv.getVersionId().equals(MASTER_SNAPSHOT)).map(pv -> pv.getVersionId()).collect(Collectors.toList());
+        return storeProjectsVersions.isEmpty() ? Collections.EMPTY_LIST : storeProjectsVersions.stream().filter(pv -> !pv.getVersionId().equals(MASTER_SNAPSHOT)).map(pv -> VersionId.parseVersionId(pv.getVersionId())).collect(Collectors.toList());
     }
 
     @Override
@@ -113,9 +119,13 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
     @Override
     protected void validateNewData(StoreProjectVersionData data)
     {
-        if (!EntityValidator.isValidGroupId(data.getGroupId()) || !EntityValidator.isValidArtifactId(data.getArtifactId()))
+        if (!CoordinateValidator.isValidGroupId(data.getGroupId()) || !CoordinateValidator.isValidArtifactId(data.getArtifactId()))
         {
             throw new IllegalArgumentException(String.format("invalid groupId [%s] or artifactId [%s]",data.getGroupId(),data.getArtifactId()));
+        }
+        if (!MASTER_SNAPSHOT.equals(data.getVersionId()) && !VersionValidator.isValid(data.getVersionId()))
+        {
+            throw new IllegalArgumentException(String.format("invalid versionId [%s]",data.getVersionId()));
         }
     }
 }

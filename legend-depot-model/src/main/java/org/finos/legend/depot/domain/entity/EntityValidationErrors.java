@@ -13,15 +13,16 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.mongo.core;
+package org.finos.legend.depot.domain.entity;
 
-public class MongoStoreErrors
+public class EntityValidationErrors
 {
     public static final String INVALID_VERSION_ID = "Invalid version Id %s";
     public static final String INVALID_ARTIFACT_ID = "Invalid artifact id %s";
     public static final String INVALID_GROUP_ID = "Invalid group id %s";
+    public static final String INVALID_ENTITY_PATH = "Invalid entity path %s";
 
-    private MongoStoreErrors()
+    private EntityValidationErrors()
     {
     }
 

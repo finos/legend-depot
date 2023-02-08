@@ -17,37 +17,27 @@ package org.finos.legend.depot.domain.project;
 
 import java.util.regex.Pattern;
 
+import static org.finos.legend.depot.domain.CoordinateValidator.isValidArtifactId;
+import static org.finos.legend.depot.domain.CoordinateValidator.isValidGroupId;
+
 public class ProjectValidator
 {
 
     public static final Pattern PROJECT_NAME_PATTERN = Pattern.compile("^PROD-\\d+$");
-    public static final Pattern GROUP_ID_PATTERN = Pattern.compile("^\\S+\\.\\S+$");
-    public static final Pattern ARTIFACT_ID_PATTERN = Pattern.compile("^\\S+$");
-    private static final String STRING = "string";
+
 
     private ProjectValidator()
     {
     }
 
-    public static boolean isValid(ProjectData projectData)
+    public static boolean isValid(StoreProjectData projectData)
     {
         return isValidProjectId(projectData.getProjectId()) && isValidGroupId(projectData.getGroupId()) && isValidArtifactId(projectData.getArtifactId());
-    }
-
-    public static boolean isValidArtifactId(String artifactId)
-    {
-        return artifactId != null && !STRING.equals(artifactId) && ARTIFACT_ID_PATTERN.matcher(artifactId).matches();
-    }
-
-    public static boolean isValidGroupId(String groupId)
-    {
-        return groupId != null && GROUP_ID_PATTERN.matcher(groupId).matches();
     }
 
     public static boolean isValidProjectId(String projectId)
     {
         return projectId != null && PROJECT_NAME_PATTERN.matcher(projectId).matches();
     }
-
 
 }

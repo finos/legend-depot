@@ -50,7 +50,7 @@ public class TestNotificationManager extends TestStoreMongo
 {
 
     public static final String TEST_GROUP_ID = "examples.metadata";
-    public static final String TEST_PROJECT_ID = "PROD-A";
+    public static final String TEST_PROJECT_ID = "PROD-1";
     public static final String VERSION_ID = "2.3.1";
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
     protected UpdateProjectsVersions projectsVersionsStore = new ProjectsVersionsMongo(mongoProvider);

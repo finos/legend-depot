@@ -66,7 +66,7 @@ public class ManageFileGenerationsServiceImpl extends  FileGenerationsServiceImp
     @Override
     public void delete(String groupId, String artifactId, String versionId)
     {
-        this.projects.checkExists(groupId, artifactId, versionId);
+        this.projects.checkExists(groupId, artifactId);
         fileGenerations.delete(groupId, artifactId, versionId);
     }
 }

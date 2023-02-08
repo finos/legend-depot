@@ -102,7 +102,6 @@ public final class NotificationsQueueManager implements NotificationsManager
         catch (Exception e)
         {
             response.addError(e.getMessage());
-
         }
         if (response.hasErrors())
         {
@@ -182,10 +181,17 @@ public final class NotificationsQueueManager implements NotificationsManager
         while (event.isPresent());
     }
 
-    public long waitingOnQueue()
+    @Override
+    public long waitingInQueue()
     {
         long waiting = this.queue.size();
         PrometheusMetricsFactory.getInstance().setGauge(QUEUE_WAITING,waiting);
         return waiting;
+    }
+
+    @Override
+    public long purgeQueue()
+    {
+        return this.queue.deleteAll();
     }
 }
