@@ -28,6 +28,7 @@ import java.util.Date;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RefreshStatus implements HasIdentifier
 {
+    @EqualsExclude
     private String id;
     @JsonProperty
     private String groupId;
@@ -36,17 +37,22 @@ public class RefreshStatus implements HasIdentifier
     @JsonProperty
     private String versionId;
     @JsonProperty
+    @EqualsExclude
     private String parentEventId;
     @JsonProperty
+    @EqualsExclude
     private boolean running;
     @JsonProperty
     @EqualsExclude
     private MetadataEventResponse response;
     @JsonProperty
+    @EqualsExclude
     private Date lastRun;
     @JsonProperty
+    @EqualsExclude
     private Date startTime;
     @JsonProperty
+    @EqualsExclude
     private long duration;
 
     public RefreshStatus()
@@ -63,6 +69,11 @@ public class RefreshStatus implements HasIdentifier
     public String getId()
     {
         return id;
+    }
+
+    public void setId(String id)
+    {
+        this.id = id;
     }
 
     public String getGroupId()
