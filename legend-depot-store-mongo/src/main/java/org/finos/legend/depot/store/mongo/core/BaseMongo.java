@@ -83,11 +83,8 @@ public abstract class BaseMongo<T extends HasIdentifier>
         try
         {
             Document doc = Document.parse(new ObjectMapper().writeValueAsString(object));
-            if (object.getId() != null && !object.getId().isEmpty())
-            {
-                doc.put(ID_FIELD, new ObjectId(object.getId()));
-                doc.remove(ID);
-            }
+            doc.remove(ID_FIELD);
+            doc.remove(ID);
             return doc;
         }
         catch (JsonProcessingException e)

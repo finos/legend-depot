@@ -46,7 +46,7 @@ public class ArtifactsFilesMongo extends BaseMongo<ArtifactFile> implements Arti
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("path", PATH));
+        return Arrays.asList(buildIndex("path", true,PATH));
     }
 
     @Override
