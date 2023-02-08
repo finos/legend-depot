@@ -88,7 +88,7 @@ public final class NotificationsQueueManager implements NotificationsManager
 
     void handleEvent(MetadataNotification event)
     {
-        PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
+        PrometheusMetricsFactory.getInstance().incrementCount(NOTIFICATIONS_COUNTER);
         List<String> validationErrors = eventHandler.validateEvent(event);
         if (!validationErrors.isEmpty())
         {
