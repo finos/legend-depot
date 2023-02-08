@@ -173,6 +173,11 @@ public abstract class BaseMongo<T extends HasIdentifier>
 
     public <T> T convert(Document document, Class<T> clazz)
     {
+      return convert(this.objectMapper,document,clazz);
+    }
+
+    public static <T> T convert(ObjectMapper mapper,Document document, Class<T> clazz)
+    {
         if (document == null)
         {
             return null;
@@ -185,7 +190,7 @@ public abstract class BaseMongo<T extends HasIdentifier>
         }
         try
         {
-            return this.objectMapper.convertValue(document, clazz);
+            return mapper.convertValue(document, clazz);
         }
         catch (Exception e)
         {

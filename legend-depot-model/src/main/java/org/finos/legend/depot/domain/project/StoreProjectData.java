@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.domain.project;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -25,8 +26,7 @@ import org.finos.legend.depot.domain.CoordinateData;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoreProjectData extends CoordinateData implements HasIdentifier
 {
-    @JsonProperty
-    private String id;
+
     @JsonProperty
     private String projectId;
 
@@ -41,10 +41,6 @@ public class StoreProjectData extends CoordinateData implements HasIdentifier
         this.projectId = projectId;
     }
 
-    public void setId(String id)
-    {
-        this.id = id;
-    }
 
     public String getProjectId()
     {
@@ -52,9 +48,10 @@ public class StoreProjectData extends CoordinateData implements HasIdentifier
     }
 
     @Override
+    @JsonIgnore
     public String getId()
     {
-        return this.id;
+        return "";
     }
 
     @Override

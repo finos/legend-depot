@@ -82,11 +82,10 @@ public class NotificationsModule extends PrivateModule
     @Provides
     @Named("notifications-metrics")
     @Singleton
-    boolean registerMetrics(PrometheusMetricsHandler metricsHandler,SchedulesFactory schedulesFactory,NotificationsManager notificationsManager)
+    boolean registerMetrics(PrometheusMetricsHandler metricsHandler)
     {
         metricsHandler.registerCounter(NOTIFICATIONS_COUNTER, NOTIFICATIONS_COUNTER_HELP);
         metricsHandler.registerGauge(QUEUE_WAITING, QUEUE_WAITING_HELP);
-        schedulesFactory.register(NOTIFICATION_METRICS_SCHEDULE, LocalDateTime.now().plusSeconds(1), 60000L, false, notificationsManager::waitingInQueue);
         return true;
     }
 

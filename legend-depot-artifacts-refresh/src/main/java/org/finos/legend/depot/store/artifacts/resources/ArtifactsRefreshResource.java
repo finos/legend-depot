@@ -72,7 +72,6 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
     @ApiOperation("get updateStatusService information")
     @Produces(MediaType.APPLICATION_JSON)
     public List<RefreshStatus> getStatus(
-            @QueryParam("project") String project,
             @QueryParam("groupId") String group,
             @QueryParam("artifactId") String artifact,
             @QueryParam("versionId") String version,
