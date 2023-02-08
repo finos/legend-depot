@@ -58,6 +58,9 @@ public final class NotificationsQueueManager implements NotificationsManager
 
     public int handle()
     {
+        long waitingInQueue = queue.size();
+        PrometheusMetricsFactory.getInstance().setGauge(QUEUE_WAITING,waitingInQueue);
+        LOGGER.info("waiting in queue {}",waitingInQueue);
         return TracerFactory.get().executeWithTrace(ResourceLoggingAndTracing.HANDLE_EVENTS_IN_QUEUE, () -> handleEvents(queue.getFirstInQueue()));
     }
 
@@ -85,12 +88,12 @@ public final class NotificationsQueueManager implements NotificationsManager
 
     void handleEvent(MetadataNotification event)
     {
+        PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
         List<String> validationErrors = eventHandler.validateEvent(event);
         if (!validationErrors.isEmpty())
         {
             event.addError(String.join(",",validationErrors));
             events.complete(event);
-            PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
             return;
         }
 
@@ -185,7 +188,7 @@ public final class NotificationsQueueManager implements NotificationsManager
     public long waitingInQueue()
     {
         long waiting = this.queue.size();
-        PrometheusMetricsFactory.getInstance().setGauge(QUEUE_WAITING,waiting);
+
         return waiting;
     }
 

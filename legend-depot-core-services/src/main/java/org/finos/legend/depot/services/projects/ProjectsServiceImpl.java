@@ -19,13 +19,11 @@ import org.eclipse.collections.api.factory.Sets;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
-import org.finos.legend.depot.domain.project.ProjectVersionProperty;
-import org.finos.legend.depot.domain.project.Property;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraph;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraphWalkerContext;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
@@ -36,7 +34,6 @@ import org.finos.legend.sdlc.domain.model.version.VersionId;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.List;
-import java.util.Collections;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
@@ -217,25 +214,21 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
-    public List<ProjectVersionPlatformDependency> getDependentProjects(String groupId, String artifactId, String versionId)
+    public List<ProjectDependencyWithPlatformVersions> getDependentProjects(String groupId, String artifactId, String versionId)
     {
         if (versionId.equalsIgnoreCase("ALL"))
         {
             return projectsVersions.getAll().stream().map(projectData -> projectData.getVersionData().getDependencies().stream()
                     .filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId))
-                    .map(dep -> new ProjectVersionPlatformDependency(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep, transformPropertyToProjectProperty(projectData.getVersionData().getProperties(), projectData.getVersionId())))
+                    .map(dep -> new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep,projectData.getVersionData().getProperties()))
                     .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
         }
         return projectsVersions.getAll().stream().map(projectData -> projectData.getVersionData().getDependencies().stream()
                 .filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId) && dep.getVersionId().equals(versionId))
-                .map(dep -> new ProjectVersionPlatformDependency(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep, transformPropertyToProjectProperty(projectData.getVersionData().getProperties(), projectData.getVersionId())))
+                .map(dep -> new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep,projectData.getVersionData().getProperties()))
                 .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    private List<ProjectVersionProperty> transformPropertyToProjectProperty(List<Property> properties, String versionId)
-    {
-        return properties.isEmpty() ? Collections.emptyList() : properties.stream().map(p -> new ProjectVersionProperty(p.getPropertyName(), p.getValue(), versionId)).collect(Collectors.toList());
-    }
 
     private StoreProjectVersionData getProject(String groupId, String artifactId, String versionId)
     {

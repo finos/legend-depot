@@ -83,6 +83,7 @@ public class TestUpdateProjectApi extends TestStoreMongo
         }
 
         StoreProjectData newData = projectsAPI.createOrUpdate(new StoreProjectData("PROD-124", TEST_GROUP_ID, "test122"));
+        Assert.assertEquals("test122", newData.getArtifactId());
         newData.setArtifactId("test121");
 
         try
@@ -101,7 +102,7 @@ public class TestUpdateProjectApi extends TestStoreMongo
     {
         Assert.assertEquals(3, projectsAPI.getAll().size());
 
-        StoreProjectData projectConfiguration = new StoreProjectData("PROD-123", TEST_GROUP_ID, "test121");
+        StoreProjectData projectConfiguration = new StoreProjectData("PROD-123", "some.examples", "test121");
         projectsAPI.createOrUpdate(projectConfiguration);
         Assert.assertEquals(4, projectsAPI.getAll().size());
 
@@ -116,12 +117,9 @@ public class TestUpdateProjectApi extends TestStoreMongo
             Assert.fail("not duplicate coordinates, different in case");
         }
 
-        StoreProjectData newData = projectsAPI.createOrUpdate(new StoreProjectData("PROD-124", "some.Examples", "test122"));
-        newData.setArtifactId("test121");
-
         try
         {
-            projectsAPI.createOrUpdate(newData);
+            projectsAPI.createOrUpdate(new StoreProjectData("PROD-124", "some.examples", "test121"));
             Assert.fail("cant create duplicate coordinates");
         }
         catch (Exception e)

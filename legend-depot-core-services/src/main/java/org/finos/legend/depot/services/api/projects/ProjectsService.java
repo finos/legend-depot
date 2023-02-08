@@ -18,8 +18,8 @@ package org.finos.legend.depot.services.api.projects;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionPlatformDependency;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
+import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import java.util.Arrays;
@@ -63,7 +63,7 @@ public interface ProjectsService
         return getProjectDependencyReport(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)));
     }
 
-    List<ProjectVersionPlatformDependency> getDependentProjects(String groupId, String artifactId, String versionId);
+    List<ProjectDependencyWithPlatformVersions> getDependentProjects(String groupId, String artifactId, String versionId);
 
     void checkExists(String groupId, String artifactId) throws IllegalArgumentException;
 
