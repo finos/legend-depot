@@ -40,6 +40,7 @@ public final class NotificationsQueueManager implements NotificationsManager
     public static final String NOTIFICATIONS_COUNTER_HELP = "total notifications received";
     public static final String QUEUE_WAITING = "queue_waiting";
     public static final String QUEUE_WAITING_HELP = "waiting in queue";
+    public static final String DELIMITER = ",";
 
     private final Notifications events;
     private final Queue queue;
@@ -58,6 +59,9 @@ public final class NotificationsQueueManager implements NotificationsManager
 
     public int handle()
     {
+        long waitingInQueue = queue.size();
+        PrometheusMetricsFactory.getInstance().setGauge(QUEUE_WAITING,waitingInQueue);
+        LOGGER.info("waiting in queue {}",waitingInQueue);
         return TracerFactory.get().executeWithTrace(ResourceLoggingAndTracing.HANDLE_EVENTS_IN_QUEUE, () -> handleEvents(queue.getFirstInQueue()));
     }
 
@@ -68,9 +72,10 @@ public final class NotificationsQueueManager implements NotificationsManager
             MetadataNotification event = foundEvent.get();
             if (event.retriesExceeded())
             {
-                event.getResponse().addError("Max number of retries exceed");
+                String message = String.format("%s [%s-%s-%s] event has exceeded %s maximum retries", event.getEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getMaxRetries());
+                event.getResponse().addError(message);
                 events.complete(event);
-                LOGGER.info("{} event has exceeded {} maximum retries", event.getEventId(),event.getMaxRetries());
+                LOGGER.info(message);
             }
             else
             {
@@ -85,11 +90,13 @@ public final class NotificationsQueueManager implements NotificationsManager
 
     void handleEvent(MetadataNotification event)
     {
+        PrometheusMetricsFactory.getInstance().incrementCount(NOTIFICATIONS_COUNTER);
         List<String> validationErrors = eventHandler.validateEvent(event);
         if (!validationErrors.isEmpty())
         {
-            event.addError(String.join(",",validationErrors));
+            event.addError(String.join(DELIMITER,validationErrors));
             events.complete(event);
+            LOGGER.info("event {}-{}-{} completed with validation errors [{}]", event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getErrors());
             PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
             return;
         }
@@ -106,13 +113,13 @@ public final class NotificationsQueueManager implements NotificationsManager
         if (response.hasErrors())
         {
             queue.push(event.increaseRetries().setResponse(response));
-            LOGGER.info("event completed with errors [{}]", response.getErrors());
+            LOGGER.info("event {}-{}-{} completed with errors [{}]", event.getGroupId(),event.getArtifactId(),event.getVersionId(),response.getErrors());
             PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
         }
         else
         {
             events.complete(event.setResponse(response));
-            LOGGER.info("event completed successfully");
+            LOGGER.info("event {}-{}-{} completed successfully", event.getGroupId(),event.getArtifactId(),event.getVersionId());
         }
     }
 
@@ -185,7 +192,7 @@ public final class NotificationsQueueManager implements NotificationsManager
     public long waitingInQueue()
     {
         long waiting = this.queue.size();
-        PrometheusMetricsFactory.getInstance().setGauge(QUEUE_WAITING,waiting);
+
         return waiting;
     }
 
