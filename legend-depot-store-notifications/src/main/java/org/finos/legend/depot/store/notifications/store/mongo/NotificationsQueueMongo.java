@@ -92,8 +92,7 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
         MetadataNotification result = createOrUpdate(event);
         if (result.getEventId() == null)
         {
-            result.setEventId(result.getId());
-            createOrUpdate(result);
+            createOrUpdate(result.setEventId(result.getId()));
         }
         return result.getEventId();
     }
