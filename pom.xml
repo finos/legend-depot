@@ -27,7 +27,7 @@
     <name>Legend Depot</name>
     <groupId>org.finos.legend.depot</groupId>
     <artifactId>legend-depot</artifactId>
-    <version>1.5.2</version>
+    <version>1.5.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
