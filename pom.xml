@@ -154,7 +154,7 @@
 
     <scm>
         <developerConnection>scm:git:https://github.com/finos/legend-depot</developerConnection>
-        <tag>legend-depot-1.5.2</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <build>
