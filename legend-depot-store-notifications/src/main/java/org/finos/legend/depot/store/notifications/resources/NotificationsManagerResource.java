@@ -82,15 +82,16 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
                                                    @QueryParam("groupId") String group,
                                                    @QueryParam("artifactId") String artifact,
                                                    @QueryParam("versionId") String version,
+                                                   @QueryParam("eventId") String eventId,
                                                    @QueryParam("parentEventId") @ApiParam("refresh could be started by another event, eg refresh all cache versions") String parentId,
                                                    @QueryParam("success") Boolean success,
                                                    @QueryParam("from")
-                                                   @ApiParam("query from this date yyyy-MM-dd HH:mm:ss (default is 30 minutes prior)") String from,
+                                                   @ApiParam("query from this date yyyy-MM-dd HH:mm:ss (default is 60 minutes prior)") String from,
                                                    @QueryParam("to")
                                                    @ApiParam("include  up to this date yyyy-MM-dd HH:mm:ss (default is now)") String to)
     {
         return handle(ResourceLoggingAndTracing.FIND_PAST_EVENTS, () ->
-                notificationsManager.findProcessedEvents(group,artifact,version,parentId,success,from == null ?  LocalDateTime.now().minusMinutes(30) : LocalDateTime.parse(from, DATE_TIME_FORMATTER),
+                notificationsManager.findProcessedEvents(group,artifact,version,eventId,parentId,success,from == null ?  LocalDateTime.now().minusMinutes(60) : LocalDateTime.parse(from, DATE_TIME_FORMATTER),
                         to == null ? LocalDateTime.now() : LocalDateTime.parse(to, DATE_TIME_FORMATTER)));
     }
 

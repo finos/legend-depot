@@ -141,7 +141,7 @@ public class MavenArtifactRepository implements ArtifactRepository
     @Override
     public List<File> findFiles(ArtifactType type, String group, String artifactId, String version)
     {
-        LOGGER.info("resolving files for [{}] artifacts [{}:{}:{}]", type, group, artifactId, version);
+        LOGGER.info("resolving files for [{}] artifacts [{}-{}-{}]", type, group, artifactId, version);
         List<String> modulesWithArtifacts = getModulesFromPOM(type, group, artifactId, version);
         List<File> foundFiles = new ArrayList<>();
         try
@@ -154,9 +154,9 @@ public class MavenArtifactRepository implements ArtifactRepository
         }
         catch (NoResolvedResultException ex)
         {
-            LOGGER.error("could not resolve file for [{}] artifacts [{}{}{}] : [{}]", type, group, artifactId, version, ex.getMessage());
+            LOGGER.error("could not resolve file for [{}] artifacts [{}-{}-{}] : [{}]", type, group, artifactId, version, ex.getMessage());
         }
-        LOGGER.info("found [{}] files for [{}] artifacts [{}{}{}]",foundFiles.size(), type, group, artifactId, version);
+        LOGGER.info("found [{}] files for [{}] artifacts [{}-{}-{}]",foundFiles.size(), type, group, artifactId, version);
         return foundFiles;
     }
 
@@ -223,7 +223,7 @@ public class MavenArtifactRepository implements ArtifactRepository
     @Override
     public List<String> getModulesFromPOM(ArtifactType type, String groupId, String artifactId, String versionId)
     {
-        LOGGER.info("resolving module [{}] artifacts [{}{}{}] from pom",type,groupId, artifactId, versionId);
+        LOGGER.info("resolving module [{}] artifacts [{}-{}-{}] from pom",type,groupId, artifactId, versionId);
         Model model = getPOM(groupId, artifactId, versionId);
         List<String> modules = new ArrayList<>();
         if (model.getModules().isEmpty())
@@ -234,7 +234,7 @@ public class MavenArtifactRepository implements ArtifactRepository
         {
             modules.addAll(model.getModules().stream().filter(moduleName -> moduleName.equals(artifactId + SEPARATOR + type.getModuleName())).collect(Collectors.toList()));
         }
-        LOGGER.info("found [{}] modules [{}] artifacts [{}:{}:{}]  from pom",modules,type,groupId, artifactId, versionId);
+        LOGGER.info("found [{}] modules [{}] artifacts [{}-{}-{}]  from pom",modules,type,groupId, artifactId, versionId);
         return modules;
     }
 

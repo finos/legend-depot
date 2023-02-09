@@ -44,17 +44,17 @@ public class ArtifactRefreshEventHandler implements NotificationEventHandler
     }
 
     @Override
-    public MetadataEventResponse handleEvent(MetadataNotification event)
+    public MetadataEventResponse handleEvent(MetadataNotification versionEvent)
     {
         MetadataEventResponse response = new MetadataEventResponse();
-        Optional<StoreProjectData> existingProject = projects.findCoordinates(event.getGroupId(), event.getArtifactId());
+        Optional<StoreProjectData> existingProject = projects.findCoordinates(versionEvent.getGroupId(), versionEvent.getArtifactId());
         if (!existingProject.isPresent())
         {
-            StoreProjectData newProject = new StoreProjectData(event.getProjectId(), event.getGroupId(), event.getArtifactId());
+            StoreProjectData newProject = new StoreProjectData(versionEvent.getProjectId(), versionEvent.getGroupId(), versionEvent.getArtifactId());
             projects.createOrUpdate(newProject);
-            response.addMessage(String.format("New project %s created %s-%s", newProject.getProjectId(), newProject.getGroupId(), newProject.getArtifactId()));
+            response.addMessage(String.format("New project %s created with coordinates %s-%s", newProject.getProjectId(), newProject.getGroupId(), newProject.getArtifactId()));
         }
-        return response.combine(artifactsRefreshService.refreshVersionForProject(event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.isFullUpdate(),event.isTransitive(),event.getParentEventId()));
+        return response.combine(artifactsRefreshService.refresh(versionEvent));
     }
 
     @Override

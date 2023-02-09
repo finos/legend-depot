@@ -105,7 +105,7 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
 
 
     @Override
-    public List<MetadataNotification> find(String groupId, String artifactId, String version, String parentEventId, Boolean success, LocalDateTime fromDate, LocalDateTime toDate)
+    public List<MetadataNotification> find(String groupId, String artifactId, String version, String eventId,String parentEventId, Boolean success, LocalDateTime fromDate, LocalDateTime toDate)
     {
         MongoCollection<Document> events = getCollection();
         LocalDateTime to = LocalDateTime.now();
@@ -119,6 +119,7 @@ public class NotificationsMongo extends BaseMongo<MetadataNotification> implemen
         filter = groupId != null ? and(filter, eq(GROUP_ID, groupId)) : filter;
         filter = artifactId != null ? and(filter, eq(ARTIFACT_ID, artifactId)) : filter;
         filter = version != null ? and(filter, eq(VERSION_ID, version)) : filter;
+        filter = eventId != null ? and(filter, eq(EVENT_ID, eventId)) : filter;
         filter = parentEventId != null ? and(filter, eq(PARENT_EVENT, parentEventId)) : filter;
         filter = success != null ? and(filter, eq(RESPONSE_STATUS, (success ? MetadataEventStatus.SUCCESS.name() : MetadataEventStatus.FAILED.name()))) : filter;
 

@@ -173,11 +173,11 @@ public class TestQueueMongo extends TestStoreMongo
         List<MetadataNotification> allEvents = eventsMongo.getAll();
         Assert.assertNotNull(allEvents);
         Assert.assertEquals(4, allEvents.size());
-        List<MetadataNotification> eventsBeforeLunch = eventsMongo.find(null,null,null,null,null,aPointInTime.toLocalDate().atStartOfDay(), aPointInTime);
+        List<MetadataNotification> eventsBeforeLunch = eventsMongo.find(null,null,null,null,null,null,aPointInTime.toLocalDate().atStartOfDay(), aPointInTime);
         Assert.assertNotNull(eventsBeforeLunch);
         Assert.assertEquals(1, eventsBeforeLunch.size());
 
-        List<MetadataNotification> afterLunch = eventsMongo.find(null,null,null,null,null,aPointInTime.withHour(12).withMinute(0).withSecond(1), null);
+        List<MetadataNotification> afterLunch = eventsMongo.find(null,null,null,null,null,null,aPointInTime.withHour(12).withMinute(0).withSecond(1), null);
         Assert.assertNotNull(afterLunch);
         Assert.assertEquals(3, afterLunch.size());
     }

@@ -154,6 +154,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         }
         finally
         {
+            storeStatus.setTraceId(TracerFactory.get().getActiveSpanTraceId());
             store.createOrUpdate(storeStatus.stopRunning(response));
             if (response.hasErrors())
             {
@@ -265,6 +266,16 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             return response;
         }
         return refreshVersionForProject(getProject(groupId, artifactId), versionId, fullUpdate, transitive, parentEventId);
+    }
+
+    @Override
+    public MetadataEventResponse refresh(MetadataNotification evt)
+    {
+        MetadataEventResponse response = new MetadataEventResponse();
+        String message = String.format("Executing: [%s-%s-%s], eventId:[%s] parentEventId :[%s], full/transitive :[%s/%s], retries:[%s]",evt.getGroupId(),evt.getArtifactId(),
+                evt.getVersionId(),evt.getEventId(),evt.getParentEventId(),evt.isFullUpdate(),evt.isTransitive(),evt.getRetries());
+        response.addMessage(message);
+        return response.combine(refreshVersionForProject(evt.getGroupId(),evt.getArtifactId(), evt.getVersionId(),evt.isFullUpdate(),evt.isTransitive(),evt.getParentEventId()));
     }
 
     private MetadataEventResponse validateInput(String groupId, String artifactId, String versionId)

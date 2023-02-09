@@ -54,6 +54,9 @@ public class RefreshStatus implements HasIdentifier
     @JsonProperty
     @EqualsExclude
     private long duration;
+    @JsonProperty
+    @EqualsExclude
+    private String traceId;
 
     public RefreshStatus()
     {
@@ -150,6 +153,16 @@ public class RefreshStatus implements HasIdentifier
     {
         this.parentEventId = parentEventId;
         return this;
+    }
+
+    public String getTraceId()
+    {
+        return traceId;
+    }
+
+    public void setTraceId(String traceId)
+    {
+        this.traceId = traceId;
     }
 
     public RefreshStatus withStartTime(Date startTime)
