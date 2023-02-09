@@ -16,6 +16,7 @@
 package org.finos.legend.depot.store.artifacts.api;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
@@ -29,6 +30,8 @@ public interface ArtifactsRefreshService
     }
 
     MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean fullUpdate, boolean transitive, String parentEventId);
+
+    MetadataEventResponse refresh(MetadataNotification event);
 
     MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate,boolean transitive, String parentEventId);
 

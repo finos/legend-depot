@@ -72,10 +72,10 @@ public final class NotificationsQueueManager implements NotificationsManager
             MetadataNotification event = foundEvent.get();
             if (event.retriesExceeded())
             {
-                String message = String.format("%s [%s-%s-%s] event has exceeded %s maximum retries", event.getEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getMaxRetries());
-                event.getResponse().addError(message);
+                String message = String.format("eventId:[%s],parentEventId:[%s],gav:[%s-%s-%s] has exceeded [%s] of [%s] maximum retries", event.getEventId(),event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getRetries(),event.getMaxRetries());
+                event.addError(message);
                 events.complete(event);
-                LOGGER.info(message);
+                LOGGER.error(message);
             }
             else
             {
@@ -94,9 +94,10 @@ public final class NotificationsQueueManager implements NotificationsManager
         List<String> validationErrors = eventHandler.validateEvent(event);
         if (!validationErrors.isEmpty())
         {
-            event.addError(String.join(DELIMITER,validationErrors));
-            events.complete(event);
-            LOGGER.info("event {}-{}-{} completed with validation errors [{}]", event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getErrors());
+            String message = String.format("eventId:[%s],parentEventId:[%s],gav:[%s-%s-%s],retry [%s] completed with validation errors [%s]",
+                    event.getEventId(), event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getRetries(),String.join(DELIMITER,validationErrors));
+            LOGGER.error(message);
+            events.complete(event.addError(message));
             PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
             return;
         }
@@ -104,6 +105,10 @@ public final class NotificationsQueueManager implements NotificationsManager
         MetadataEventResponse response = new MetadataEventResponse();
         try
         {
+            String message = String.format("Handling eventId:[%s],parentEventId:[%s],gav: [%s-%s-%s],retry [%s]",
+                    event.getEventId(),event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getRetries());
+            response.addMessage(message);
+            LOGGER.info(message);
             response.combine(eventHandler.handleEvent(event));
         }
         catch (Exception e)
@@ -112,14 +117,17 @@ public final class NotificationsQueueManager implements NotificationsManager
         }
         if (response.hasErrors())
         {
-            queue.push(event.increaseRetries().setResponse(response));
-            LOGGER.info("event {}-{}-{} completed with errors [{}]", event.getGroupId(),event.getArtifactId(),event.getVersionId(),response.getErrors());
+            String message = String.format("eventId:[%s],parentEventId:[%s],gav:[%s-%s-%s], retry[%s] completed with errors [%s] will attempt retry",
+                    event.getEventId(),event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getRetries(),String.join(DELIMITER,response.getErrors()));
+            response.addError(message);
+            LOGGER.error(message);
+            queue.push(event.combineResponse(response).setFullUpdate(true).increaseRetries());
             PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
         }
         else
         {
-            events.complete(event.setResponse(response));
-            LOGGER.info("event {}-{}-{} completed successfully", event.getGroupId(),event.getArtifactId(),event.getVersionId());
+            events.complete(event.combineResponse(response));
+            LOGGER.info("eventId:[{}],parentEventId:[{}],gav: [{}-{}-{}] ,retry[{}] completed successfully",event.getEventId(),event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getRetries());
         }
     }
 
@@ -144,9 +152,9 @@ public final class NotificationsQueueManager implements NotificationsManager
     }
 
     @Override
-    public List<MetadataNotification> findProcessedEvents(String group, String artifact, String version, String parentId, Boolean success, LocalDateTime from, LocalDateTime to)
+    public List<MetadataNotification> findProcessedEvents(String group, String artifact, String version, String eventId,String parentId, Boolean success, LocalDateTime from, LocalDateTime to)
     {
-        return this.events.find(group,artifact,version,parentId,success,from,to);
+        return this.events.find(group,artifact,version,eventId,parentId,success,from,to);
     }
 
     @Override
@@ -171,7 +179,7 @@ public final class NotificationsQueueManager implements NotificationsManager
     public long deleteOldNotifications(long days)
     {
         LocalDateTime timeToLive = LocalDateTime.now().minusDays(days);
-        List<MetadataNotification> notifications = this.events.find(null,null,null,null,null,null,timeToLive);
+        List<MetadataNotification> notifications = this.events.find(null,null,null,null,null,null,null,timeToLive);
         notifications.forEach(notification -> this.events.delete(notification.getId()));
         LOGGER.info("deleted [{}] notifications older than [{}] days",notifications.size(),days);
         return notifications.size();

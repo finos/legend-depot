@@ -187,4 +187,9 @@ public final class TracerFactory
     }
 
 
+    public String getActiveSpanTraceId()
+    {
+        Span activeSpan = GlobalTracer.get().activeSpan();
+        return activeSpan != null ? activeSpan.context().toTraceId() : "no traceId, no current span";
+    }
 }

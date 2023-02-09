@@ -26,7 +26,7 @@ public interface NotificationsManager
 {
     int handle();
 
-    List<MetadataNotification> findProcessedEvents(String group, String artifact, String version, String parentId, Boolean success, LocalDateTime localDateTime, LocalDateTime localDateTime1);
+    List<MetadataNotification> findProcessedEvents(String group, String artifact, String version,String eventId, String parentId, Boolean success, LocalDateTime localDateTime, LocalDateTime localDateTime1);
 
     Optional<MetadataNotification> getProcessedEvent(String eventId);
 

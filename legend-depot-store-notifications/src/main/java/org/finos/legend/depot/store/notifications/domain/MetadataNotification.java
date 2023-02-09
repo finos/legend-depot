@@ -202,9 +202,10 @@ public class MetadataNotification implements HasIdentifier
         this.parentEventId = parentEventId;
     }
 
-    public void setFullUpdate(boolean fullUpdate)
+    public MetadataNotification setFullUpdate(boolean fullUpdate)
     {
         this.fullUpdate = fullUpdate;
+        return this;
     }
 
     public void setTransitive(boolean transitive)
@@ -271,6 +272,14 @@ public class MetadataNotification implements HasIdentifier
         return this;
     }
 
+    public MetadataNotification combineResponse(MetadataEventResponse response)
+    {
+        if (response != null)
+        {
+            this.response.combine(response);
+        }
+        return this;
+    }
 
     public Date getLastUpdated()
     {
@@ -310,5 +319,6 @@ public class MetadataNotification implements HasIdentifier
     {
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
 
 }
