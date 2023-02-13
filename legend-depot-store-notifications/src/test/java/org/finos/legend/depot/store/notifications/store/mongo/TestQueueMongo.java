@@ -18,7 +18,7 @@ package org.finos.legend.depot.store.notifications.store.mongo;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.Queue;
-import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -152,8 +152,8 @@ public class TestQueueMongo extends TestStoreMongo
         MetadataNotification foundEvent = queue.get(eventList.get(0).getEventId()).get();
         Assert.assertNotNull(foundEvent);
         Assert.assertEquals(eventList.get(0).getEventId(), foundEvent.getEventId());
-        Assert.assertNotNull(eventList.get(0).getErrors());
-        Assert.assertEquals(1, eventList.get(0).getErrors().size());
+        Assert.assertNotNull(eventList.get(0).getCurrentResponse().getErrors());
+        Assert.assertEquals(1, eventList.get(0).getCurrentResponse().getErrors().size());
     }
 
     @Test
@@ -222,7 +222,7 @@ public class TestQueueMongo extends TestStoreMongo
 
         Assert.assertEquals(VERSION,first.get().getVersionId());
         Assert.assertEquals("1.0.1",second.get().getVersionId());
-        Assert.assertTrue(first.get().getCreatedAt().before(second.get().getCreatedAt()));
+        Assert.assertTrue(first.get().getCreated().before(second.get().getCreated()));
     }
 
     @Test

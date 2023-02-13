@@ -32,8 +32,7 @@ import java.time.LocalDateTime;
 
 public class ArtifactsRefreshModule extends PrivateModule
 {
-    private static final String UPDATE_MASTER_REVISIONS_SCHEDULER = "refreshVersionArtifacts-master-revisions-schedule";
-    private static final String UPDATE_VERSIONS_SCHEDULER = "refreshVersionArtifacts-versions-schedule";
+    private static final String REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE = "refreshAllVersionArtifacts-schedule";
     private static final String FIX_MISSING_VERSIONS_SCHEDULE = "fix-missing-versions-schedule";
     private static final String CLEANUP_REFRESH_SCHEDULE = "clean-refresh-status-schedule";
 
@@ -64,28 +63,20 @@ public class ArtifactsRefreshModule extends PrivateModule
 
     @Provides
     @Singleton
-    @Named("update-versions")
+    @Named("refresh-all-versions")
     boolean initVersions(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(UPDATE_VERSIONS_SCHEDULER, LocalDateTime.now().plusSeconds(configuration.getVersionsUpdateIntervalInMillis() / 1000), configuration.getVersionsUpdateIntervalInMillis(), false,() -> artifactsRefreshService.refreshAllVersionsForAllProjects(false,false,UPDATE_VERSIONS_SCHEDULER));
+        schedulesFactory.register(REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE, LocalDateTime.now().plusSeconds(configuration.getVersionsUpdateIntervalInMillis() / 1000), configuration.getVersionsUpdateIntervalInMillis(), false,() -> artifactsRefreshService.refreshAllVersionsForAllProjects(false,false, REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE));
         return true;
     }
 
-    @Provides
-    @Singleton
-    @Named("update-revisions")
-    boolean initRevisions(SchedulesFactory schedulesFactory,ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
-    {
-        schedulesFactory.register(UPDATE_MASTER_REVISIONS_SCHEDULER, LocalDateTime.now().plusSeconds(configuration.getLatestUpdateIntervalInMillis() / 1000), configuration.getLatestUpdateIntervalInMillis(),false, () -> artifactsRefreshService.refreshMasterSnapshotForAllProjects(false,false,UPDATE_MASTER_REVISIONS_SCHEDULER));
-        return true;
-    }
 
     @Provides
     @Singleton
-    @Named("update-missing-versions")
+    @Named("refresh-missing-versions")
     boolean initFixVersionsMismatchDaemon(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService,ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(FIX_MISSING_VERSIONS_SCHEDULE, LocalDateTime.now().plusSeconds(configuration.getFixVersionsMismatchIntervalInMillis() / 1000), configuration.getFixVersionsMismatchIntervalInMillis(), false,() -> artifactsRefreshService.refreshProjectsWithMissingVersions(FIX_MISSING_VERSIONS_SCHEDULE));
+        schedulesFactory.register(FIX_MISSING_VERSIONS_SCHEDULE, LocalDateTime.now().plusSeconds(configuration.getFixMissingVersionsIntervalInMillis() / 1000), configuration.getFixMissingVersionsIntervalInMillis(), false,() -> artifactsRefreshService.refreshProjectsWithMissingVersions(FIX_MISSING_VERSIONS_SCHEDULE));
         return true;
     }
 

@@ -285,7 +285,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void canRefreshAllVersionsAllProjects()
     {
         MetadataEventResponse response = artifactsRefreshService.refreshAllVersionsForAllProjects(true,true,PARENT_EVENT_ID);
-        Assert.assertEquals(3,notificationsQueueManager.getAllInQueue().size());
+        Assert.assertEquals(6,notificationsQueueManager.getAllInQueue().size());
         notificationsQueueManager.handleAll();
 
         Assert.assertNotNull(response);
@@ -297,11 +297,12 @@ public class TestArtifactsRefreshService extends TestStoreMongo
 
         List<RefreshStatus> statuses = refreshStatusStore.getAll();
         Assert.assertNotNull(statuses);
-        Assert.assertEquals(4,statuses.size());
+        Assert.assertEquals(7,statuses.size());
 
         MetadataEventResponse partialUpdate = artifactsRefreshService.refreshAllVersionsForAllProjects(false,true,PARENT_EVENT_ID);
-        Assert.assertEquals(0,notificationsQueueManager.getAllInQueue().size());
-
+        Assert.assertEquals(3,notificationsQueueManager.getAllInQueue().size());
+        notificationsQueueManager.getAllInQueue().stream().allMatch(notification -> MASTER_SNAPSHOT.equals(notification.getVersionId()));
+        notificationsQueueManager.handleAll();
     }
 
     @Test
@@ -345,44 +346,6 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertEquals(2, dependencies.size());
         Assert.assertEquals(2,notificationsQueueManager.getAllInQueue().size());
         notificationsQueueManager.handleAll();
-
-    }
-
-
-    @Test
-    public void canRefreshRevisionsAllProjects()
-    {
-       Assert.assertTrue(refreshStatusStore.getAll().isEmpty());
-
-        MetadataEventResponse response = artifactsRefreshService.refreshMasterSnapshotForAllProjects(true,true,PARENT_EVENT_ID);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
-        Assert.assertEquals(3,queue.getAll().size());
-        notificationsQueueManager.handleAll();
-
-        List<StoredEntity> all = entitiesStore.getAllStoredEntities();
-        Assert.assertNotNull(all);
-        Assert.assertEquals(42, all.size());
-
-        List<Entity> entityList = entitiesStore.getAllLatestEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID);
-        Assert.assertNotNull(entityList);
-        Assert.assertEquals(18, entityList.size());
-
-        List<Entity> entityList2 = entitiesStore.getAllLatestEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID);
-        Assert.assertNotNull(entityList2);
-        Assert.assertEquals(4, entityList2.size());
-        Assert.assertEquals(4, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, MASTER_SNAPSHOT).size());
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
-        Assert.assertEquals(1, entitiesStore.getEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0", false).size());
-
-
-        List<ProjectVersion> dependencies = projectsVersionsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).get().getVersionData().getDependencies();
-        Assert.assertFalse(dependencies.isEmpty());
-        Assert.assertEquals(2, dependencies.size());
-
-        List<RefreshStatus> refreshStatuses = refreshStatusStore.getAll();
-       projectsService.getDependencies(TEST_GROUP_ID,TEST_ARTIFACT_ID,MASTER_SNAPSHOT,true);
-        Assert.assertEquals(5,refreshStatuses.size());
 
     }
 
@@ -433,13 +396,11 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertTrue(response.hasErrors());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void cantRefreshNonExistingProjectInRepo()
     {
         String versionId = "2.111.0";
-        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject("i.dont.exist", "in-repo", versionId,false,false,PARENT_EVENT_ID);
-        Assert.assertNotNull(response);
-        Assert.assertTrue(response.hasErrors());
+        artifactsRefreshService.refreshVersionForProject("i.dont.exist", "in-repo", versionId,false,false,PARENT_EVENT_ID);
     }
 
     @Test

@@ -52,8 +52,9 @@ public class ArtifactsRefreshStatusMongo extends BaseMongo<RefreshStatus> implem
 
     private static final String RUNNING = "running";
     private static final String STAR_TIME = "startTime";
-    private static final String RESPONSE_STATUS = "response.status";
+    private static final String RESPONSE_STATUS = "status";
     private static final String PARENT_EVENT = "parentEventId";
+    private static final String EVENT_ID = "eventId";
 
     @Inject
     public ArtifactsRefreshStatusMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -90,11 +91,18 @@ public class ArtifactsRefreshStatusMongo extends BaseMongo<RefreshStatus> implem
     }
 
     @Override
-    public List<RefreshStatus> find(String groupId, String artifactId, String version, String parentEventId, Boolean running, Boolean success, LocalDateTime fromStartTime,LocalDateTime toStartTime)
+    public List<RefreshStatus> getAll()
+    {
+        return super.getAllStoredEntities();
+    }
+
+    @Override
+    public List<RefreshStatus> find(String groupId, String artifactId, String version,String eventId,String parentEventId, Boolean running, Boolean success, LocalDateTime fromStartTime,LocalDateTime toStartTime)
     {
         Bson filter = groupId != null ? eq(GROUP_ID, groupId) : exists(GROUP_ID);
         filter = artifactId != null ? and(filter, eq(ARTIFACT_ID, artifactId)) : filter;
         filter = version != null ? and(filter, eq(VERSION_ID, version)) : filter;
+        filter = eventId != null ? and(filter, eq(EVENT_ID, eventId)) : filter;
         filter = parentEventId != null ? and(filter, eq(PARENT_EVENT, parentEventId)) : filter;
         filter = running != null ? and(filter, eq(RUNNING, running)) : filter;
         filter = success != null ? and(filter, eq(RESPONSE_STATUS, (success ? MetadataEventStatus.SUCCESS.name() : MetadataEventStatus.FAILED.name()))) : filter;
@@ -104,11 +112,10 @@ public class ArtifactsRefreshStatusMongo extends BaseMongo<RefreshStatus> implem
     }
 
     @Override
-    public RefreshStatus get(String groupId, String artifactId, String version)
+    public Optional<RefreshStatus> get(String groupId, String artifactId, String version)
     {
         Bson filter = and(and(eq(GROUP_ID, groupId), eq(ARTIFACT_ID, artifactId)), eq(VERSION_ID, version));
-        Optional<RefreshStatus> found = findOne(filter);
-        return found.orElseGet(() -> new RefreshStatus(groupId, artifactId, version));
+        return  findOne(filter);
     }
 
     @Override

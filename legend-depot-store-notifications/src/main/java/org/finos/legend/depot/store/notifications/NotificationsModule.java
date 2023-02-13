@@ -44,7 +44,6 @@ import static org.finos.legend.depot.store.notifications.services.NotificationsQ
 public class NotificationsModule extends PrivateModule
 {
     private static final String QUEUE_OBSERVER = "queue-observer";
-    private static final String NOTIFICATION_METRICS_SCHEDULE = "notification-metrics-schedule";
     private static final String CLEANUP_NOTIFICATIONS_SCHEDULE = "clean-notifications-schedule";
 
     @Override

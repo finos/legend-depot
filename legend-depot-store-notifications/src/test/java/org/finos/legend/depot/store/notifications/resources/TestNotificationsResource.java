@@ -23,7 +23,7 @@ import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.api.Queue;
-import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.store.notifications.services.NotificationsQueueManager;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsQueueMongo;

@@ -25,13 +25,10 @@ public abstract class ArtifactRepositoryProviderConfiguration
     private final String name;
 
     @JsonProperty
-    long versionsUpdateIntervalInMillis = 12 * ONE_HOUR;
+    long versionsUpdateIntervalInMillis = 2 * ONE_HOUR;
 
     @JsonProperty
-    long latestUpdateIntervalInMillis = 3 * ONE_HOUR;
-
-    @JsonProperty
-    long fixVersionsMismatchIntervalInMillis = 1 * ONE_HOUR;
+    long fixMissingVersionsIntervalInMillis = 1 * ONE_HOUR;
 
     @JsonProperty
     long deleteVersionInRepoIntervalInMillis = 12 * ONE_HOUR;
@@ -67,14 +64,9 @@ public abstract class ArtifactRepositoryProviderConfiguration
         return versionsUpdateIntervalInMillis;
     }
 
-    public long getLatestUpdateIntervalInMillis()
+    public long getFixMissingVersionsIntervalInMillis()
     {
-        return latestUpdateIntervalInMillis;
-    }
-
-    public long getFixVersionsMismatchIntervalInMillis()
-    {
-        return fixVersionsMismatchIntervalInMillis;
+        return fixMissingVersionsIntervalInMillis;
     }
 
     public long getDeleteVersionInRepoIntervalInMillis()

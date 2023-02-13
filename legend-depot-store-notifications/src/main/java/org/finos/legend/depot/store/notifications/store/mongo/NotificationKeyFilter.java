@@ -19,7 +19,7 @@ import com.mongodb.client.model.Filters;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
 class NotificationKeyFilter
 {

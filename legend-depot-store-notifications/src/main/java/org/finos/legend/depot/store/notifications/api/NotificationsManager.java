@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.store.notifications.api;
 
-import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
 import java.time.LocalDateTime;
 import java.util.List;

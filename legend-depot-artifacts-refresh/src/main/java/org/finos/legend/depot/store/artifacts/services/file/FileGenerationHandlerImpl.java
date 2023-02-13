@@ -79,7 +79,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
             //handle files generated when a new master snapshot comes into picture
             if (versionId.equals(VersionValidator.MASTER_SNAPSHOT))
             {
-                String message = String.format("removing prior artifacts %s [%s-%s]",provider.getType(),projectData.getProjectId(),versionId);
+                String message = String.format("removing prior %s artifacts for [%s-%s-%s]",provider.getType(),projectData.getGroupId(),projectData.getArtifactId(),versionId);
                 response.addMessage(message);
                 generations.delete(projectData.getGroupId(), projectData.getArtifactId(), versionId);
                 LOGGER.info(message);
@@ -118,7 +118,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
                     processedGeneratedFiles.add(generatedFile);
                 }
             });
-            String message = String.format("[%s]: processed [%s] generations for [%s-%s-%s] ", projectData.getProjectId(),processedGeneratedFiles.size(), projectData.getGroupId(), projectData.getArtifactId(), versionId);
+            String message = String.format("processed [%s] generations for [%s-%s-%s] ", processedGeneratedFiles.size(), projectData.getGroupId(), projectData.getArtifactId(), versionId);
             LOGGER.info(message);
             response.addMessage(message);
         }

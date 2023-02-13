@@ -22,7 +22,7 @@ import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.api.Queue;
-import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
@@ -69,18 +69,7 @@ public final class NotificationsQueueManager implements NotificationsManager
     {
         if (foundEvent.isPresent())
         {
-            MetadataNotification event = foundEvent.get();
-            if (event.retriesExceeded())
-            {
-                String message = String.format("eventId:[%s],parentEventId:[%s],gav:[%s-%s-%s] has exceeded [%s] of [%s] maximum retries", event.getEventId(),event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getRetries(),event.getMaxRetries());
-                event.addError(message);
-                events.complete(event);
-                LOGGER.error(message);
-            }
-            else
-            {
-                handleEvent(event);
-            }
+            handleEvent(foundEvent.get());
             LOGGER.info("Finished processing events");
             return 1;
         }
@@ -94,8 +83,8 @@ public final class NotificationsQueueManager implements NotificationsManager
         List<String> validationErrors = eventHandler.validateEvent(event);
         if (!validationErrors.isEmpty())
         {
-            String message = String.format("eventId:[%s],parentEventId:[%s],gav:[%s-%s-%s],retry [%s] completed with validation errors [%s]",
-                    event.getEventId(), event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getRetries(),String.join(DELIMITER,validationErrors));
+            String message = String.format("eventId:[%s],parentEventId:[%s],gav:[%s-%s-%s],attempt [%s] completed with validation errors [%s]",
+                    event.getEventId(), event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getAttempt(),String.join(DELIMITER,validationErrors));
             LOGGER.error(message);
             events.complete(event.addError(message));
             PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
@@ -105,8 +94,9 @@ public final class NotificationsQueueManager implements NotificationsManager
         MetadataEventResponse response = new MetadataEventResponse();
         try
         {
-            String message = String.format("Handling eventId:[%s],parentEventId:[%s],gav: [%s-%s-%s],retry [%s]",
-                    event.getEventId(),event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getRetries());
+            event.increaseAttempts();
+            String message = String.format("Handling eventId:[%s],parentEventId:[%s],gav: [%s-%s-%s],attempt [%s]",
+                    event.getEventId(),event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getAttempt());
             response.addMessage(message);
             LOGGER.info(message);
             response.combine(eventHandler.handleEvent(event));
@@ -115,19 +105,33 @@ public final class NotificationsQueueManager implements NotificationsManager
         {
             response.addError(e.getMessage());
         }
-        if (response.hasErrors())
+        finally
         {
-            String message = String.format("eventId:[%s],parentEventId:[%s],gav:[%s-%s-%s], retry[%s] completed with errors [%s] will attempt retry",
-                    event.getEventId(),event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getRetries(),String.join(DELIMITER,response.getErrors()));
-            response.addError(message);
-            LOGGER.error(message);
-            queue.push(event.combineResponse(response).setFullUpdate(true).increaseRetries());
-            PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
-        }
-        else
-        {
-            events.complete(event.combineResponse(response));
-            LOGGER.info("eventId:[{}],parentEventId:[{}],gav: [{}-{}-{}] ,retry[{}] completed successfully",event.getEventId(),event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getRetries());
+            if (response.hasErrors())
+            {
+                PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
+                if (event.retriesExceeded())
+                {
+                    String messageRetry = String.format("eventId:[%s],parentEventId:[%s],gav:[%s-%s-%s], attempt [%s] completed with errors [%s] will not retry [%s] maximum retries exceeded",
+                            event.getEventId(), event.getParentEventId(), event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.getAttempt(), String.join(DELIMITER, response.getErrors()), event.getMaxAttempts());
+                    event.addError(messageRetry);
+                    LOGGER.error(messageRetry);
+                    events.complete(event.combineResponse(response));
+                }
+                else
+                {
+                    String message = String.format("eventId:[%s],parentEventId:[%s],gav:[%s-%s-%s], attempt [%s] completed with errors [%s] will retry",
+                            event.getEventId(), event.getParentEventId(), event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.getAttempt(), String.join(DELIMITER, response.getErrors()));
+                    response.addError(message);
+                    LOGGER.error(message);
+                    queue.push(event.combineResponse(response).setFullUpdate(true));
+                }
+            }
+            else
+            {
+                events.complete(event.combineResponse(response));
+                LOGGER.info("eventId:[{}],parentEventId:[{}],gav: [{}-{}-{}] ,attempt [{}] completed successfully", event.getEventId(), event.getParentEventId(), event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.getAttempt());
+            }
         }
     }
 

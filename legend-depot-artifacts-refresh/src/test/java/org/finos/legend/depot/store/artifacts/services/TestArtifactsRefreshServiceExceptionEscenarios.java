@@ -117,14 +117,10 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
         Assert.assertTrue("should not have events in queue",queue.getAll().isEmpty());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void cannotFindProject()
     {
-        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject("test.test","missing.project","1.0.0",true,true, PARENT_EVENT_ID);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
-        Assert.assertEquals("No Project found for test.test-missing.project", response.getErrors().get(0));
-
+      artifactsRefreshService.refreshVersionForProject("test.test","missing.project","1.0.0",true,true, PARENT_EVENT_ID);
     }
 
     @Test

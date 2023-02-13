@@ -22,7 +22,7 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
-import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
