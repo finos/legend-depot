@@ -21,6 +21,7 @@ import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryExcepti
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
@@ -45,6 +46,7 @@ public class RepositoryServices
     public static final String MISSING_REPO_VERSIONS = "missing_repo_versions";
     public static final String MISSING_STORE_VERSIONS = "missing_store_versions";
     public static final String REPO_EXCEPTIONS = "repo_exceptions";
+    public static final String PROJECTS = "projects";
 
     private final ArtifactRepository repository;
     private final ProjectsService projects;
@@ -64,8 +66,8 @@ public class RepositoryServices
         AtomicLong missingRepoVersions = new AtomicLong(0);
         AtomicLong missingStoreVersions = new AtomicLong(0);
         AtomicLong repoExceptions = new AtomicLong(0);
-
-        projects.getAllProjectCoordinates().forEach(p ->
+        List<StoreProjectData> allProjects = projects.getAllProjectCoordinates();
+        allProjects.forEach(p ->
         {
             try
             {
@@ -97,6 +99,7 @@ public class RepositoryServices
                 repoExceptions.addAndGet(1);
             }
         });
+        PrometheusMetricsFactory.getInstance().setGauge(PROJECTS,allProjects.size());
         PrometheusMetricsFactory.getInstance().setGauge(REPO_VERSIONS,repoVersions.get());
         PrometheusMetricsFactory.getInstance().setGauge(STORE_VERSIONS,storeVersionsCount.get());
         PrometheusMetricsFactory.getInstance().setGauge(MISSING_REPO_VERSIONS,missingRepoVersions.get());

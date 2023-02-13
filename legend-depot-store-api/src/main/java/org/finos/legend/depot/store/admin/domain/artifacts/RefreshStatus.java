@@ -20,37 +20,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.EqualsExclude;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.HasIdentifier;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
 import java.util.Date;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RefreshStatus implements HasIdentifier
+public class RefreshStatus extends MetadataNotification
 {
-    @EqualsExclude
-    private String id;
-    @JsonProperty
-    private String groupId;
-    @JsonProperty
-    private String artifactId;
-    @JsonProperty
-    private String versionId;
-    @JsonProperty
-    @EqualsExclude
-    private String parentEventId;
     @JsonProperty
     @EqualsExclude
     private boolean running;
     @JsonProperty
     @EqualsExclude
-    private MetadataEventResponse response;
+    private Date startTime;
     @JsonProperty
     @EqualsExclude
     private Date lastRun;
-    @JsonProperty
-    @EqualsExclude
-    private Date startTime;
     @JsonProperty
     @EqualsExclude
     private long duration;
@@ -58,35 +45,25 @@ public class RefreshStatus implements HasIdentifier
     @EqualsExclude
     private String traceId;
 
+
     public RefreshStatus()
     {
+        super();
+    }
+
+    public RefreshStatus(String projectId, String groupId, String artifactId, String version, String eventId, String parentEventId, Boolean fullUpdate, Boolean transitive, Integer attempt, Integer maxAttempts, Map<Integer,MetadataEventResponse> responses, Date createdAt, Date lastUpdated)
+    {
+        super(projectId, groupId, artifactId, version, eventId, parentEventId, fullUpdate, transitive, attempt, maxAttempts, responses, createdAt, lastUpdated);
+    }
+
+    public RefreshStatus(String projectId, String groupId, String artifactId, String versionId)
+    {
+        super(projectId, groupId, artifactId, versionId);
     }
 
     public RefreshStatus(String groupId, String artifactId, String version)
     {
-        this.groupId = groupId;
-        this.artifactId = artifactId;
-        this.versionId = version;
-    }
-
-    public String getId()
-    {
-        return id;
-    }
-
-    public void setId(String id)
-    {
-        this.id = id;
-    }
-
-    public String getGroupId()
-    {
-        return groupId;
-    }
-
-    public String getArtifactId()
-    {
-        return artifactId;
+        super(null,groupId, artifactId, version);
     }
 
     public boolean isRunning()
@@ -99,16 +76,6 @@ public class RefreshStatus implements HasIdentifier
         this.running = running;
     }
 
-    public MetadataEventResponse getResponse()
-    {
-        return response;
-    }
-
-    public void setResponse(MetadataEventResponse response)
-    {
-        this.response = response;
-    }
-
     public Date getLastRun()
     {
         return lastRun;
@@ -117,11 +84,6 @@ public class RefreshStatus implements HasIdentifier
     public void setLastRun(Date lastRun)
     {
         this.lastRun = lastRun;
-    }
-
-    public String getVersionId()
-    {
-        return versionId;
     }
 
     public Date getStartTime()
@@ -142,17 +104,6 @@ public class RefreshStatus implements HasIdentifier
     public void setDuration(long duration)
     {
         this.duration = duration;
-    }
-
-    public String getParentEventId()
-    {
-        return parentEventId;
-    }
-
-    public RefreshStatus setParentEventId(String parentEventId)
-    {
-        this.parentEventId = parentEventId;
-        return this;
     }
 
     public String getTraceId()
@@ -176,11 +127,10 @@ public class RefreshStatus implements HasIdentifier
         this.running = true;
         this.startTime = new Date();
         this.duration = 0;
-        this.response = new MetadataEventResponse();
         return this;
     }
 
-    public RefreshStatus stopRunning(MetadataEventResponse response)
+    public RefreshStatus stopRunning()
     {
         this.running = false;
         this.lastRun = new Date();
@@ -188,7 +138,6 @@ public class RefreshStatus implements HasIdentifier
         {
             this.duration = lastRun.getTime() - startTime.getTime();
         }
-        this.response = this.response != null ? this.response.combine(response) : response;
         return this;
     }
 
@@ -204,4 +153,26 @@ public class RefreshStatus implements HasIdentifier
         return HashCodeBuilder.reflectionHashCode(this);
     }
 
+    public RefreshStatus withParentEventId(String parentId)
+    {
+        setParentEventId(parentId);
+        return this;
+    }
+
+    public static RefreshStatus from(MetadataNotification event)
+    {
+        return new RefreshStatus(event.getProjectId(),
+                event.getGroupId(),
+                event.getArtifactId(),
+                event.getVersionId(),
+                event.getEventId(),
+                event.getParentEventId(),
+                event.isFullUpdate(),
+                event.isTransitive(),
+                event.getAttempt(),
+                event.getMaxAttempts(),
+                event.getResponses(),
+                event.getCreated(),
+                event.getLastUpdated());
+    }
 }

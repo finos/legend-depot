@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.notifications.services;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.domain.project.StoreProjectData;
@@ -27,7 +28,7 @@ import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
-import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsQueueMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -55,10 +56,10 @@ public class TestNotificationManager extends TestStoreMongo
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
     protected UpdateProjectsVersions projectsVersionsStore = new ProjectsVersionsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
-    private final NotificationsMongo eventsMongo = new NotificationsMongo(mongoProvider);
+    private final NotificationsMongo notifications = new NotificationsMongo(mongoProvider);
     private final NotificationsQueueMongo queue = new NotificationsQueueMongo(mongoProvider);
     private final NotificationEventHandler notificationEventHandler = mock(NotificationEventHandler.class);
-    private final NotificationsQueueManager eventsManager = new NotificationsQueueManager(new ProjectsServiceImpl(projectsVersionsStore,projectsStore), eventsMongo, queue, notificationEventHandler);
+    private final NotificationsQueueManager eventsManager = new NotificationsQueueManager(new ProjectsServiceImpl(projectsVersionsStore,projectsStore), notifications, queue, notificationEventHandler);
 
     @Before
     public void setUpData()
@@ -109,7 +110,7 @@ public class TestNotificationManager extends TestStoreMongo
         List<MetadataNotification> newEvents = queue.getAllStoredEntities();
         Assert.assertEquals(0, newEvents.size());
 
-        List<MetadataNotification> events = eventsMongo.getAllStoredEntities();
+        List<MetadataNotification> events = notifications.getAllStoredEntities();
         Assert.assertNotNull(events);
         Assert.assertEquals(1, events.size());
         Assert.assertEquals(events.get(0).getGroupId(), event.getGroupId());
@@ -125,7 +126,7 @@ public class TestNotificationManager extends TestStoreMongo
         MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "10.0.0");
         eventsManager.handleEvent(event);
         Assert.assertTrue(queue.getAll().isEmpty());
-        MetadataNotification response = eventsMongo.getAll().get(0);
+        MetadataNotification response = notifications.getAll().get(0);
         Assert.assertTrue(response.getStatus().equals(MetadataEventStatus.FAILED));
     }
 
@@ -133,14 +134,20 @@ public class TestNotificationManager extends TestStoreMongo
     public void testRetry()
     {
         MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "2.3.1");
-        queue.push(event);
+        String eventId = queue.push(event);
         Assert.assertFalse(queue.getAll().isEmpty());
-        when(notificationEventHandler.handleEvent(queue.getAllStoredEntities().get(0))).thenReturn(new MetadataEventResponse().addError("i have failed, need to retry"));
+        MetadataNotification mockEnt = queue.getAllStoredEntities().get(0).increaseAttempts();
+        when(notificationEventHandler.handleEvent(mockEnt)).thenReturn(new MetadataEventResponse().addError("i have failed, need to retry"));
 
         eventsManager.handle();
         Assert.assertFalse(queue.getAll().isEmpty());
-        MetadataNotification response = queue.getFirstInQueue().get();
+        MetadataNotification response = queue.getAll().get(0);
         Assert.assertTrue(response.getStatus().equals(MetadataEventStatus.FAILED));
+
+        eventsManager.handle();
+        Assert.assertTrue(queue.getAll().isEmpty());
+        MetadataNotification response1 = eventsManager.getProcessedEvent(eventId).get();
+        Assert.assertTrue(response1.getStatus().equals(MetadataEventStatus.SUCCESS));
     }
 
     @Test
@@ -149,15 +156,72 @@ public class TestNotificationManager extends TestStoreMongo
         MetadataNotification ev1 = new MetadataNotification("prod-123","test","artifacts","1.0.0");
         ev1.setEventId("609a5af62ccc9300c2e02581");
         ev1.setLastUpdated(Date.from(LocalDateTime.now().minusDays(12).atZone(ZoneId.systemDefault()).toInstant()));
-        eventsMongo.insert(ev1);
+        notifications.insert(ev1);
         MetadataNotification ev2 = new MetadataNotification("prod-123","test","artifacts","2.0.0");
         ev2.setEventId("609a631a2ccc9300c2edafb8");
-        eventsMongo.insert(ev2);
+        notifications.insert(ev2);
 
-        Assert.assertEquals(2,eventsMongo.getAll().size());
+        Assert.assertEquals(2, notifications.getAll().size());
 
         eventsManager.deleteOldNotifications(10);
-        Assert.assertEquals(1,eventsMongo.getAll().size());
+        Assert.assertEquals(1, notifications.getAll().size());
     }
 
+    @Test
+    public void testMaxRetry()
+    {
+        MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "2.3.1");
+        String eventId = queue.push(event);
+        Assert.assertFalse(queue.getAll().isEmpty());
+        MetadataNotification mockEnt = queue.getAllStoredEntities().get(0);
+        MetadataEventResponse responseTryOne = new MetadataEventResponse().addError("i have failed, need to retry");
+        when(notificationEventHandler.handleEvent(mockEnt.increaseAttempts())).thenReturn(responseTryOne);
+
+        eventsManager.handle();
+        Assert.assertFalse(queue.getAll().isEmpty());
+        MetadataNotification response = queue.getAll().get(0);
+        Assert.assertTrue(response.getStatus().equals(MetadataEventStatus.FAILED));
+
+        MetadataNotification updatedMockEvent = queue.getAllStoredEntities().get(0);
+        MetadataEventResponse responseTryTwo = new MetadataEventResponse().addError("i have failed again, cant retry");
+        when(notificationEventHandler.handleEvent(updatedMockEvent.increaseAttempts())).thenReturn(responseTryTwo);
+        eventsManager.handle();
+        Assert.assertTrue(queue.getAll().isEmpty());
+        MetadataNotification response1 = eventsManager.getProcessedEvent(eventId).get();
+        Assert.assertTrue(response1.getStatus().equals(MetadataEventStatus.FAILED));
+
+        Assert.assertFalse(notifications.getAll().isEmpty());
+        MetadataNotification notification = notifications.getAll().get(0);
+        Assert.assertEquals(2,notification.getAttempt());
+        Assert.assertEquals(2,notification.getResponses().size());
+    }
+
+    @Test
+    public void testRetryIsSuccessfull()
+    {
+        MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "2.3.1");
+        String eventId = queue.push(event);
+        Assert.assertFalse(queue.getAll().isEmpty());
+        MetadataNotification mockEnt = queue.getAllStoredEntities().get(0);
+        MetadataEventResponse responseTryOne = new MetadataEventResponse().addError("i have failed, need to retry");
+        when(notificationEventHandler.handleEvent(mockEnt.increaseAttempts())).thenReturn(responseTryOne);
+
+        eventsManager.handle();
+        Assert.assertFalse(queue.getAll().isEmpty());
+        MetadataNotification response = queue.getAll().get(0);
+        Assert.assertTrue(response.getStatus().equals(MetadataEventStatus.FAILED));
+
+        MetadataNotification updatedMockEvent = queue.getAllStoredEntities().get(0);
+        MetadataEventResponse responseTryTwo = new MetadataEventResponse().addMessage("i am ok now , did not fail");
+        when(notificationEventHandler.handleEvent(updatedMockEvent.increaseAttempts())).thenReturn(responseTryTwo);
+        eventsManager.handle();
+        Assert.assertTrue(queue.getAll().isEmpty());
+        MetadataNotification response1 = eventsManager.getProcessedEvent(eventId).get();
+        Assert.assertTrue(response1.getStatus().equals(MetadataEventStatus.SUCCESS));
+
+        Assert.assertFalse(notifications.getAll().isEmpty());
+        MetadataNotification notification = notifications.getAll().get(0);
+        Assert.assertEquals(2,notification.getAttempt());
+        Assert.assertEquals(2,notification.getResponses().size());
+    }
 }

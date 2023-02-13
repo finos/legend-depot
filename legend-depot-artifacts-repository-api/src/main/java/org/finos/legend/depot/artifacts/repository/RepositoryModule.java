@@ -27,6 +27,7 @@ import javax.inject.Named;
 import java.time.LocalDateTime;
 
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.MISSING_STORE_VERSIONS;
+import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.PROJECTS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.REPO_EXCEPTIONS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.REPO_VERSIONS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.MISSING_REPO_VERSIONS;
@@ -52,6 +53,7 @@ public class RepositoryModule extends PrivateModule
     @Singleton
     boolean registerMetrics(SchedulesFactory schedulesFactory, PrometheusMetricsHandler metricsHandler, RepositoryServices repositoryServices)
     {
+        metricsHandler.registerGauge(PROJECTS, PROJECTS);
         metricsHandler.registerGauge(REPO_VERSIONS, REPO_VERSIONS);
         metricsHandler.registerGauge(STORE_VERSIONS, STORE_VERSIONS);
         metricsHandler.registerGauge(MISSING_REPO_VERSIONS, MISSING_REPO_VERSIONS);

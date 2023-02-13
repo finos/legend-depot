@@ -80,13 +80,13 @@ public abstract class AbstractEntityRefreshHandlerImpl
             List<Entity> entityList = getEntities(files);
             if (entityList != null && !entityList.isEmpty())
             {
-                String message = String.format("[%s]: found [%s] %s for [%s] ", projectData.getProjectId(), entityList.size(), this.entitiesProvider.getType(), gavCoordinates);
+                String message = String.format("found [%s] %s for [%s] ", entityList.size(), this.entitiesProvider.getType(), gavCoordinates);
                 getLOGGER().info(message);
                 response.addMessage(message);
                 List<StoredEntity> storedEntities = transformVersionedEntities(projectData, versionId, entityList);
                 if (versionId.equals(VersionValidator.MASTER_SNAPSHOT))
                 {
-                    message = String.format("removing prior artifacts %s [%s-%s]",this.entitiesProvider.getType(),gavCoordinates,versionId);
+                    message = String.format("removing prior %s artifacts for [%s-%s]",this.entitiesProvider.getType(),gavCoordinates,versionId);
                     response.addMessage(message);
                     response.combine(getEntitiesApi().delete(projectData.getGroupId(), projectData.getArtifactId(),versionId,this.entitiesProvider.getType().equals(ArtifactType.VERSIONED_ENTITIES)));
                     LOGGER.info(message);
@@ -95,7 +95,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
             }
             else
             {
-                String message = String.format("[%s]: found 0 %s for [%s] ", projectData.getProjectId(), this.entitiesProvider.getType(), gavCoordinates);
+                String message = String.format("found 0 %s for [%s] ",this.entitiesProvider.getType(), gavCoordinates);
                 getLOGGER().info(message);
                 response.addMessage(message);
             }

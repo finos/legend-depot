@@ -37,18 +37,18 @@ public class TestMongoStatus extends TestStoreMongo
     public void testStatus()
     {
         Assert.assertEquals(0, refreshStatus.getCollection().countDocuments());
-        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").startRunning());
+        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").orElse(new RefreshStatus(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0")).startRunning());
         Assert.assertEquals(1, refreshStatus.getCollection().countDocuments());
-        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").stopRunning(null));
+        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").get().stopRunning());
         Assert.assertEquals(1, refreshStatus.getCollection().countDocuments());
 
         Assert.assertNotNull(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0"));
-        Assert.assertFalse(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").isRunning());
+        Assert.assertFalse(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").get().isRunning());
 
-        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).startRunning());
+        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).orElse(new RefreshStatus(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT)).startRunning());
         Assert.assertEquals(2, refreshStatus.getCollection().countDocuments());
         Assert.assertNotNull(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0"));
-        Assert.assertTrue(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).isRunning());
+        Assert.assertTrue(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).get().isRunning());
 
     }
 
@@ -66,19 +66,19 @@ public class TestMongoStatus extends TestStoreMongo
         refreshStatus.createOrUpdate(status3.withStartTime(toDate(aPointInTime.plusHours(1).plusMinutes(22))));
         refreshStatus.createOrUpdate(status4.withStartTime(toDate(aPointInTime.plusHours(2).plusMinutes(35))));
 
-        List<RefreshStatus> allstatuss = refreshStatus.find(null,null,null,null);
+        List<RefreshStatus> allstatuss = refreshStatus.getAll();
         Assert.assertNotNull(allstatuss);
         Assert.assertEquals(4, allstatuss.size());
-        List<RefreshStatus> statusesBeforeLunch = refreshStatus.find(null,null,null,null,null,null,aPointInTime.toLocalDate().atStartOfDay(), aPointInTime);
+        List<RefreshStatus> statusesBeforeLunch = refreshStatus.find(aPointInTime.toLocalDate().atStartOfDay(), aPointInTime);
         Assert.assertNotNull(statusesBeforeLunch);
         Assert.assertEquals(1, statusesBeforeLunch.size());
         Assert.assertEquals("test1.org", statusesBeforeLunch.get(0).getGroupId());
 
-        List<RefreshStatus> afterLunch = refreshStatus.find(null,null,null,null,null,null,aPointInTime.withHour(12).withMinute(0).withSecond(1), null);
+        List<RefreshStatus> afterLunch = refreshStatus.find(aPointInTime.withHour(12).withMinute(0).withSecond(1), null);
         Assert.assertNotNull(afterLunch);
         Assert.assertEquals(3, afterLunch.size());
 
-        List<RefreshStatus> statusInBetween = refreshStatus.find(null,null,null,null,null,null,aPointInTime.plusHours(1).plusMinutes(1),aPointInTime.plusHours(2));
+        List<RefreshStatus> statusInBetween = refreshStatus.find(aPointInTime.plusHours(1).plusMinutes(1),aPointInTime.plusHours(2));
         Assert.assertNotNull(statusInBetween);
         Assert.assertEquals(1, statusInBetween.size());
         Assert.assertEquals("test3.org", statusInBetween.get(0).getGroupId());
@@ -90,13 +90,13 @@ public class TestMongoStatus extends TestStoreMongo
     public void testFindByStatus()
     {
         Assert.assertEquals(0, refreshStatus.getCollection().countDocuments());
-        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").stopRunning(new MetadataEventResponse()));
-        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.1").stopRunning(new MetadataEventResponse().addError("it failed")));
+        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").orElse(new RefreshStatus(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0")).stopRunning());
+        refreshStatus.createOrUpdate(refreshStatus.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.1").orElse((RefreshStatus) new RefreshStatus(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.1").addError("it failed")).stopRunning());
         Assert.assertEquals(2, refreshStatus.getCollection().countDocuments());
 
         Assert.assertEquals(2,refreshStatus.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,null).size());
-        Assert.assertEquals("1.0.0",refreshStatus.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,null,null,null,true,null,null).get(0).getVersionId());
-        Assert.assertEquals("1.0.1",refreshStatus.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,null,null,null,false,null,null).get(0).getVersionId());
+        Assert.assertEquals("1.0.0",refreshStatus.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,null,null,null,null,true,null,null).get(0).getVersionId());
+        Assert.assertEquals("1.0.1",refreshStatus.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,null,null,null,null,false,null,null).get(0).getVersionId());
 
     }
 
@@ -105,14 +105,14 @@ public class TestMongoStatus extends TestStoreMongo
     public void testFindByParentId()
     {
         Assert.assertEquals(0, refreshStatus.getCollection().countDocuments());
-        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.0").setParentEventId("test"));
-        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.1").setParentEventId("test"));
-        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.2").setParentEventId("test"));
-        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.3").setParentEventId("test1"));
+        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.0").withParentEventId("test"));
+        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.1").withParentEventId("test"));
+        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.2").withParentEventId("test"));
+        refreshStatus.createOrUpdate(new RefreshStatus(TEST_GROUP_ID,TEST_ARTIFACT_ID,"0.0.3").withParentEventId("test1"));
         Assert.assertEquals(4, refreshStatus.getCollection().countDocuments());
 
-        Assert.assertEquals(3,refreshStatus.find(null,null,null,"test",null,null,null,null).size());
-        Assert.assertEquals(1,refreshStatus.find(null,null,null,"test1",null,null,null,null).size());
+        Assert.assertEquals(3,refreshStatus.find(null,null,null,null,"test",null,null,null,null).size());
+        Assert.assertEquals(1,refreshStatus.find(null,null,null,null,"test1",null,null,null,null).size());
 
 
     }

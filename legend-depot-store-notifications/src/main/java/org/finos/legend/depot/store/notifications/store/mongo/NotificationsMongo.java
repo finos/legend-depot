@@ -21,14 +21,13 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexModel;
-import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Sorts;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.notifications.api.Notifications;
-import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,7 +38,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static com.mongodb.client.model.Filters.and;

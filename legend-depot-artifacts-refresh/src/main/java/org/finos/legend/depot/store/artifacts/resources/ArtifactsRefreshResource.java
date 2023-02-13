@@ -75,6 +75,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
             @QueryParam("groupId") String group,
             @QueryParam("artifactId") String artifact,
             @QueryParam("versionId") String version,
+            @QueryParam("eventId") String eventId,
             @QueryParam("parentEventId")
             @ApiParam("refresh could be started by another event, eg refresh all cache versions") String parentId,
             @QueryParam("running") Boolean running,
@@ -87,7 +88,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
     {
         LocalDateTime fromStatTime = startTimeFrom == null ? null : LocalDateTime.parse(startTimeFrom, DATE_TIME_FORMATTER);
         LocalDateTime toStartTime = startTimeTo == null ? LocalDateTime.now() : LocalDateTime.parse(startTimeTo, DATE_TIME_FORMATTER);
-        return handle(ResourceLoggingAndTracing.STORE_STATUS, () -> refreshStatusService.find(group, artifact, version, parentId,running, success, fromStatTime,toStartTime));
+        return handle(ResourceLoggingAndTracing.STORE_STATUS, () -> refreshStatusService.find(group, artifact, version,eventId,parentId,running, success, fromStatTime,toStartTime));
     }
 
     @DELETE
@@ -158,22 +159,6 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
             return artifactsRefreshService.refreshAllVersionsForAllProjects(fullUpdate,transitive,ResourceLoggingAndTracing.UPDATE_ALL_VERSIONS);
         });
     }
-
-
-    @PUT
-    @Path("/artifactsRefresh/latest")
-    @ApiOperation(ResourceLoggingAndTracing.UPDATE_ALL_MASTER_REVISIONS)
-    @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse updateAllProjectsAllLatestRevisions(@QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to force refresh of processed jar files, versions ,etc") boolean fullUpdate,
-                                                                     @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to refresh its dependencies") boolean transitive)
-    {
-        return handle(ResourceLoggingAndTracing.UPDATE_ALL_MASTER_REVISIONS, () ->
-        {
-            validateUser();
-            return artifactsRefreshService.refreshMasterSnapshotForAllProjects(fullUpdate,transitive,ResourceLoggingAndTracing.UPDATE_ALL_MASTER_REVISIONS);
-        });
-    }
-
 
     @Override
     protected String getResourceName()

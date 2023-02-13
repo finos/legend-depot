@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
-import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.store.notifications.store.api.NotificationsStore;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
@@ -105,7 +105,7 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     }
 
     @GET
-    @Path("/queue")
+    @Path("/notifications-queue")
     @ApiOperation(ResourceLoggingAndTracing.GET_ALL_EVENTS_IN_QUEUE)
     @Produces(MediaType.APPLICATION_JSON)
     public List<MetadataNotification> getAllEventsInQueue()
@@ -115,7 +115,7 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     }
 
     @GET
-    @Path("/queue/count")
+    @Path("/notifications-queue/count")
     @ApiOperation(ResourceLoggingAndTracing.GET_QUEUE_COUNT)
     @Produces(MediaType.APPLICATION_JSON)
     public long getAllEventsInQueueCount()
@@ -124,7 +124,7 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     }
 
     @GET
-    @Path("/queue/{eventId}")
+    @Path("/notifications-queue/{eventId}")
     @ApiOperation(ResourceLoggingAndTracing.GET_EVENT_IN_QUEUE)
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<MetadataNotification> geEventsInQueue(@PathParam("eventId") String eventId)
@@ -146,7 +146,7 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     }
 
     @DELETE
-    @Path("/queue")
+    @Path("/notifications-queue")
     @ApiOperation("purge queue")
     public long purgeQueue()
     {

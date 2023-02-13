@@ -84,7 +84,7 @@ public class StoreStatusService
         versions.forEach(v ->
         {
             StoreStatus.VersionStatus versionStatus = new StoreStatus.VersionStatus(groupId, artifactId, v);
-            RefreshStatus updateStatus = statusService.get(groupId, artifactId, v);
+            RefreshStatus updateStatus = statusService.get(groupId, artifactId, v).orElse(new RefreshStatus(groupId, artifactId, v));
             Optional<VersionQuerySummary> versionQueryCounter = queryMetricsHandler.getSummary(groupId, artifactId, v);
             if (versionQueryCounter.isPresent())
             {
@@ -98,7 +98,7 @@ public class StoreStatusService
         });
 
         StoreStatus.MasterRevisionStatus masterRevisionStatus = new StoreStatus.MasterRevisionStatus(groupId, artifactId);
-        RefreshStatus revisionsUpdateStatus = statusService.get(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT);
+        RefreshStatus revisionsUpdateStatus = statusService.get(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT).orElse(new RefreshStatus(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT));;
         masterRevisionStatus.lastUpdated = revisionsUpdateStatus.getLastRun();
         masterRevisionStatus.updating = revisionsUpdateStatus.isRunning();
         masterRevisionStatus.url = String.format("/projects/%s/%s/revisions/latest", groupId, artifactId);

@@ -29,7 +29,7 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.notifications.api.Queue;
-import org.finos.legend.depot.store.notifications.domain.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -85,9 +85,9 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
     public String push(MetadataNotification event)
     {
         event.setLastUpdated(new Date());
-        if (event.getCreatedAt() == null)
+        if (event.getCreated() == null)
         {
-            event.setCreatedAt(new Date());
+            event.setCreated(new Date());
         }
         MetadataNotification result = createOrUpdate(event);
         if (result.getEventId() == null)
