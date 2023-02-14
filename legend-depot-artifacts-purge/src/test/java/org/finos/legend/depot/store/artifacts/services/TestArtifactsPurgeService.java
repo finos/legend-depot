@@ -154,6 +154,24 @@ public class TestArtifactsPurgeService extends TestStoreMongo
     }
 
     @Test
+    public void canEvictVersion()
+    {
+        String versionId = "2.0.0";
+
+        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assert.assertEquals(2, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false).size());
+        Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true).size());
+        Assert.assertEquals(3, fileGenerationsStore.getAll().size());
+
+        purgeService.evict(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
+        Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false).size());
+        Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true).size());
+        Assert.assertEquals(0, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assert.assertTrue(projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID).contains(versionId));
+        Assert.assertTrue(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).get().isEvicted());
+    }
+
+    @Test
     public void canDeleteVersion()
     {
         String versionId = "2.0.0";
@@ -168,6 +186,7 @@ public class TestArtifactsPurgeService extends TestStoreMongo
         Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true).size());
         Assert.assertEquals(0, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
         Assert.assertFalse(projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID).contains(versionId));
+        Assert.assertFalse(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).isPresent());
     }
 
     @Test

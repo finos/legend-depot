@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.DELETE_VERSION;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.EVICT_VERSION;
 
 
@@ -47,6 +48,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     private static final String VERSION_ID = "versionId";
 
     public static final String VERSION_PURGE_COUNTER = "versionPurge";
+    public static final String VERSION_DELETE_COUNTER = "versionDeletion";
     private static final String EVICT_OLDEST = "evict_old";
 
     private final ManageProjectsService projects;
@@ -89,7 +91,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     public void delete(String groupId, String artifactId, String versionId)
     {
         decorateSpanWithVersionInfo(groupId, artifactId, versionId);
-        TracerFactory.get().executeWithTrace(EVICT_VERSION, () ->
+        TracerFactory.get().executeWithTrace(DELETE_VERSION, () ->
         {
             getSupportedArtifactTypes().forEach(artifactType ->
             {
@@ -99,12 +101,13 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
                     artifactHandler.delete(groupId, artifactId, versionId);
                 }
             });
-            PrometheusMetricsFactory.getInstance().incrementCount(VERSION_PURGE_COUNTER);
+            PrometheusMetricsFactory.getInstance().incrementCount(VERSION_DELETE_COUNTER);
             return projects.delete(groupId, artifactId, versionId);
         });
     }
 
-    private void evict(String groupId, String artifactId, String versionId)
+    @Override
+    public void evict(String groupId, String artifactId, String versionId)
     {
         decorateSpanWithVersionInfo(groupId, artifactId, versionId);
         TracerFactory.get().executeWithTrace(EVICT_VERSION, () ->

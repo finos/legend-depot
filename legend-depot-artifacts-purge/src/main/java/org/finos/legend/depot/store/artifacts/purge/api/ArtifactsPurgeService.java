@@ -23,6 +23,8 @@ public interface ArtifactsPurgeService
 
     MetadataEventResponse evictOldestProjectVersions(String groupId, String artifactId, int versionsToKeep);
 
+    void evict(String groupId, String artifactId, String versionId);
+
     void delete(String groupId, String artifactId, String versionId);
 
     MetadataEventResponse deleteVersionsNotInRepository();
