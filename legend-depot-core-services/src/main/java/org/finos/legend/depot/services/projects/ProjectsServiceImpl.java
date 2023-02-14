@@ -130,6 +130,16 @@ public class ProjectsServiceImpl implements ProjectsService
         return this.projectsVersions.getVersions(groupId, artifactId).stream().max(VersionId::compareTo);
     }
 
+    @Override
+    public Optional<StoreProjectVersionData> getLatestProjectVersionData(String groupId, String artifactId)
+    {
+        Optional<VersionId> latestVersion = this.getLatestVersion(groupId, artifactId);
+        if (!latestVersion.isPresent())
+        {
+            return Optional.empty();
+        }
+        return this.find(groupId, artifactId, latestVersion.get().toVersionIdString());
+    }
 
     @Override
     public Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, boolean transitive)

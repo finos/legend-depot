@@ -23,6 +23,7 @@ public class ResourceLoggingAndTracing
     public static final String GET_PROJECT_BY_ID = "get project by project id";
     public static final String GET_PROJECT_VERSIONS_BY_GA = "get project versions by ga";
     public static final String GET_PROJECT_VERSION_BY_GAV = "get project version by gav";
+    public static final String GET_LATEST_PROJECT_VERSION = "get latest project version data";
     public static final String DELETE_PROJECT = "delete project";
     public static final String CREATE_EMPTY_PROJECT = "create empty project";
     public static final String GET_PROJECT_DEPENDENCIES = "get upstream project dependencies";

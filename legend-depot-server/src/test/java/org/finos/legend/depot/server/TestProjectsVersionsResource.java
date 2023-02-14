@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.server;
 
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.server.resources.ProjectsVersionsResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
@@ -22,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 public class TestProjectsVersionsResource extends TestBaseServices
 {
@@ -42,5 +44,19 @@ public class TestProjectsVersionsResource extends TestBaseServices
         List<String> versionSet = projectsVersionsResource.getVersions("examples.metadata","test");
         Assert.assertNotNull(versionSet);
         Assert.assertEquals(2, versionSet.size());
+    }
+
+    @Test
+    public void canQueryLatestProjectVersionData()
+    {
+        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = projectsVersionsResource.getLatestProjectVersion("examples.metadata", "test");
+        Assert.assertTrue(versionData.isPresent());
+        Assert.assertEquals(versionData.get().getGroupId(), "examples.metadata");
+        Assert.assertEquals(versionData.get().getArtifactId(), "test");
+        Assert.assertEquals(versionData.get().getVersionId(), "2.3.1");
+        Assert.assertEquals(versionData.get().getVersionData().getDependencies().get(0), new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"));
+
+        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = projectsVersionsResource.getLatestProjectVersion("somethig.random", "test");
+        Assert.assertFalse(versionData1.isPresent());
     }
 }
