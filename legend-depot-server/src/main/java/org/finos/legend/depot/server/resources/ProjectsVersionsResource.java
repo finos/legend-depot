@@ -69,6 +69,24 @@ public class ProjectsVersionsResource extends BaseResource
     }
 
     @GET
+    @Path("/projects/{groupId}/{artifactId}/versions/latest/latestData")
+    @ApiOperation(ResourceLoggingAndTracing.GET_LATEST_PROJECT_VERSION)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Optional<ProjectVersionDTO> getLatestProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
+    {
+        return handle(ResourceLoggingAndTracing.GET_LATEST_PROJECT_VERSION, ResourceLoggingAndTracing.GET_LATEST_PROJECT_VERSION + groupId + artifactId, () ->
+        {
+            Optional<StoreProjectVersionData> versionData = projectVersionApi.getLatestProjectVersionData(groupId, artifactId);
+            if (versionData.isPresent())
+            {
+                StoreProjectVersionData pv = versionData.get();
+                return Optional.of(new ProjectVersionDTO(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), pv.getVersionData()));
+            }
+            return Optional.empty();
+        });
+    }
+
+    @GET
     @Path("/projects/{groupId}/{artifactId}/versions")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
