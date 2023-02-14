@@ -63,6 +63,23 @@ public class ArtifactsPurgeResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.EVICT_VERSION, () ->
         {
             validateUser();
+            artifactsPurgeService.evict(groupId, artifactId, versionId);
+            return new MetadataEventResponse();
+        });
+    }
+
+    @DELETE
+    @Path("/artifactDelete/{groupId}/{artifactId}/versions/{versionId}")
+    @ApiOperation(ResourceLoggingAndTracing.DELETE_VERSION)
+    @Produces(MediaType.APPLICATION_JSON)
+    public MetadataEventResponse deleteVersion(@PathParam("groupId") String groupId,
+                                              @PathParam("artifactId") String artifactId,
+                                              @PathParam("versionId") String versionId)
+    {
+
+        return handle(ResourceLoggingAndTracing.DELETE_VERSION, () ->
+        {
+            validateUser();
             artifactsPurgeService.delete(groupId, artifactId, versionId);
             return new MetadataEventResponse();
         });
