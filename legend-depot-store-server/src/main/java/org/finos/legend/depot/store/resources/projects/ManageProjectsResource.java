@@ -21,7 +21,6 @@ import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
@@ -29,14 +28,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.security.Principal;
-import java.util.List;
 
 @Path("")
 @Api("Projects")
@@ -91,16 +88,6 @@ public class ManageProjectsResource extends BaseAuthorisedResource
                     validateUser();
                     return projectApi.delete(groupId, artifactId);
                 });
-    }
-
-    @GET
-    @Path("/projects/{groupId}/{artifactId}/versions/all/versionData")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<StoreProjectVersionData> getProject(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
-    {
-        validateUser();
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA, ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA + groupId + artifactId, () -> projectApi.find(groupId, artifactId));
     }
 
 }

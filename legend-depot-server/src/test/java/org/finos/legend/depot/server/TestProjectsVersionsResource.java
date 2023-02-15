@@ -31,22 +31,6 @@ public class TestProjectsVersionsResource extends TestBaseServices
     private ProjectsVersionsResource projectsVersionsResource = new ProjectsVersionsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore));
 
     @Test
-    public void canQueryVersionsForProjectGA()
-    {
-        List<String> versionSet = projectsVersionsResource.getVersions("examples.metadata","test");
-        Assert.assertNotNull(versionSet);
-        Assert.assertEquals(2, versionSet.size());
-    }
-
-    @Test
-    public void canQueryVersionsForProject()
-    {
-        List<String> versionSet = projectsVersionsResource.getVersions("examples.metadata","test");
-        Assert.assertNotNull(versionSet);
-        Assert.assertEquals(2, versionSet.size());
-    }
-
-    @Test
     public void canQueryLatestProjectVersionData()
     {
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = projectsVersionsResource.getLatestProjectVersion("examples.metadata", "test");

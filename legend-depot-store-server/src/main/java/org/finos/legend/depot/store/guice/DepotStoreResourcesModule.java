@@ -19,6 +19,7 @@ import com.google.inject.PrivateModule;
 import org.finos.legend.depot.store.resources.entities.ManageEntitiesResource;
 import org.finos.legend.depot.store.resources.generation.file.ManageFileGenerationsResource;
 import org.finos.legend.depot.store.resources.projects.ManageProjectsResource;
+import org.finos.legend.depot.store.resources.versions.ManageProjectsVersionsResource;
 
 public class DepotStoreResourcesModule extends PrivateModule
 {
@@ -29,10 +30,12 @@ public class DepotStoreResourcesModule extends PrivateModule
         bind(ManageProjectsResource.class);
         bind(ManageEntitiesResource.class);
         bind(ManageFileGenerationsResource.class);
+        bind(ManageProjectsVersionsResource.class);
 
         expose(ManageProjectsResource.class);
         expose(ManageEntitiesResource.class);
         expose(ManageFileGenerationsResource.class);
+        expose(ManageProjectsVersionsResource.class);
     }
 
 }

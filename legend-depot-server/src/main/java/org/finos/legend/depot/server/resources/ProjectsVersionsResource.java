@@ -34,11 +34,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
 import java.util.Optional;
 
 @Path("")
-@Api("Projects")
+@Api("Versions")
 public class ProjectsVersionsResource extends BaseResource
 {
 
@@ -51,7 +50,7 @@ public class ProjectsVersionsResource extends BaseResource
     }
 
     @GET
-    @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/data")
+    @Path("/versions/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV)
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<ProjectVersionDTO> getProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") String versionId)
@@ -69,7 +68,7 @@ public class ProjectsVersionsResource extends BaseResource
     }
 
     @GET
-    @Path("/projects/{groupId}/{artifactId}/versions/latest/latestData")
+    @Path("/versions/{groupId}/{artifactId}/latest")
     @ApiOperation(ResourceLoggingAndTracing.GET_LATEST_PROJECT_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<ProjectVersionDTO> getLatestProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
@@ -84,15 +83,6 @@ public class ProjectsVersionsResource extends BaseResource
             }
             return Optional.empty();
         });
-    }
-
-    @GET
-    @Path("/projects/{groupId}/{artifactId}/versions")
-    @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<String> getVersions(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
-    {
-        return handle(ResourceLoggingAndTracing.GET_VERSIONS, () -> projectVersionApi.getVersions(groupId, artifactId));
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
