@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
 
 @Path("")
 @Api("Projects")
-@Deprecated
 public class ProjectsResource extends BaseResource
 {
 
@@ -80,7 +79,7 @@ public class ProjectsResource extends BaseResource
     }
 
     @GET
-    @Path("/projects/versions/all/projectData")
+    @Path("/project-configurations")
     @ApiOperation(ResourceLoggingAndTracing.GET_ALL_PROJECTS)
     @Produces(MediaType.APPLICATION_JSON)
     public List<StoreProjectData> getProjectsWithCoordinates()
@@ -108,6 +107,15 @@ public class ProjectsResource extends BaseResource
             }
             return Collections.emptyList();
         });
+    }
+
+    @GET
+    @Path("/projects/{groupId}/{artifactId}/versions")
+    @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<String> getVersions(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
+    {
+        return handle(ResourceLoggingAndTracing.GET_VERSIONS, () -> projectApi.getVersions(groupId, artifactId));
     }
 
     private ProjectData transformToProjectData(String projectId, String groupId, String artifactId, List<StoreProjectVersionData> projectVersionsData)
