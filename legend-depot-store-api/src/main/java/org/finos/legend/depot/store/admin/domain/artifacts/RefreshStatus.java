@@ -21,6 +21,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.EqualsExclude;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.notifications.EventPriority;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
 import java.util.Date;
@@ -51,9 +52,9 @@ public class RefreshStatus extends MetadataNotification
         super();
     }
 
-    public RefreshStatus(String projectId, String groupId, String artifactId, String version, String eventId, String parentEventId, Boolean fullUpdate, Boolean transitive, Integer attempt, Integer maxAttempts, Map<Integer,MetadataEventResponse> responses, Date createdAt, Date lastUpdated)
+    public RefreshStatus(String projectId, String groupId, String artifactId, String version, String eventId, String parentEventId, Boolean fullUpdate, Boolean transitive, Integer attempt, Integer maxAttempts, Map<Integer,MetadataEventResponse> responses, Date createdAt, Date lastUpdated, EventPriority eventPriority)
     {
-        super(projectId, groupId, artifactId, version, eventId, parentEventId, fullUpdate, transitive, attempt, maxAttempts, responses, createdAt, lastUpdated);
+        super(projectId, groupId, artifactId, version, eventId, parentEventId, fullUpdate, transitive, attempt, maxAttempts, responses, createdAt, lastUpdated, eventPriority);
     }
 
     public RefreshStatus(String projectId, String groupId, String artifactId, String versionId)
@@ -173,6 +174,7 @@ public class RefreshStatus extends MetadataNotification
                 event.getMaxAttempts(),
                 event.getResponses(),
                 event.getCreated(),
-                event.getLastUpdated());
+                event.getLastUpdated(),
+                event.getEventPriority());
     }
 }

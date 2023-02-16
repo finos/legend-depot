@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.notifications.store.mongo;
 
+import org.finos.legend.depot.domain.notifications.EventPriority;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.Queue;
@@ -23,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -223,6 +225,52 @@ public class TestQueueMongo extends TestStoreMongo
         Assert.assertEquals(VERSION,first.get().getVersionId());
         Assert.assertEquals("1.0.1",second.get().getVersionId());
         Assert.assertTrue(first.get().getCreated().before(second.get().getCreated()));
+    }
+
+    @Test
+    public void canGetFirstInQueueByPriority()
+    {
+        MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST, VERSION, null, null, null, null, null, null, null, null, null, EventPriority.LOW);
+        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1", null, null, null, null, null, null, null, null, null, EventPriority.HIGH);
+        queue.push(event);
+        queue.push(event1);
+
+        Optional<MetadataNotification> first = queue.getFirstInQueue();
+        Optional<MetadataNotification> second = queue.getFirstInQueue();
+
+        Assert.assertEquals("1.0.1", first.get().getVersionId());
+        Assert.assertEquals(VERSION, second.get().getVersionId());
+    }
+
+    @Test
+    public void canGetFirstInQueueBySamePriorityWithDifferentCreatedTime()
+    {
+        MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST, VERSION, null, null, null, null, null, null, null, new Date(), null, EventPriority.HIGH);
+        queue.push(event);
+        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1", null, null, null, null, null, null, null, new Date(System.currentTimeMillis() + 60000), null, EventPriority.HIGH);
+        queue.push(event1);
+
+        Optional<MetadataNotification> first = queue.getFirstInQueue();
+        Optional<MetadataNotification> second = queue.getFirstInQueue();
+
+        Assert.assertEquals(VERSION, first.get().getVersionId());
+        Assert.assertEquals("1.0.1", second.get().getVersionId());
+    }
+
+    @Test
+    public void canGetFirstInQueueByDifferentPriorityWithSameTime()
+    {
+        long date = System.currentTimeMillis();
+        MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST, VERSION, null, null, null, null, null, null, null, new Date(date), null, EventPriority.HIGH);
+        queue.push(event);
+        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1", null, null, null, null, null, null, null, new Date(date), null, EventPriority.LOW);
+        queue.push(event1);
+
+        Optional<MetadataNotification> first = queue.getFirstInQueue();
+        Optional<MetadataNotification> second = queue.getFirstInQueue();
+
+        Assert.assertEquals(VERSION, first.get().getVersionId());
+        Assert.assertEquals("1.0.1", second.get().getVersionId());
     }
 
     @Test
