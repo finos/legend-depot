@@ -16,6 +16,7 @@
 package org.finos.legend.depot.store.notifications.services;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.notifications.EventPriority;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
@@ -151,7 +152,7 @@ public final class NotificationsQueueManager implements NotificationsManager
         validateMavenCoordinates(projectId, groupId, artifactId);
         //we create a notification event with fullUpdate/transitive flag set to false(ie partial update)
         //this means, it will only process changed jar files and will only handle those entities,etc
-        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId,false,false, null);
+        MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId,false,false, null, EventPriority.HIGH);
         return queue.push(event);
     }
 

@@ -59,6 +59,8 @@ public class MetadataNotification extends VersionedData implements HasIdentifier
     @EqualsExclude
     @JsonProperty
     private Map<Integer,MetadataEventResponse> responses;
+    @JsonProperty
+    private EventPriority eventPriority;
 
 
     @JsonCreator
@@ -74,7 +76,8 @@ public class MetadataNotification extends VersionedData implements HasIdentifier
                                 @JsonProperty(value = "maxAttempts") Integer maxAttempts,
                                 @JsonProperty(value = "responses") Map<Integer,MetadataEventResponse> responses,
                                 @JsonProperty(value = "createdAt") Date createdAt,
-                                @JsonProperty(value = "lastUpdated") Date lastUpdated)
+                                @JsonProperty(value = "lastUpdated") Date lastUpdated,
+                                @JsonProperty(value = "eventPriority") EventPriority eventPriority)
     {
         super(groupId,artifactId,version);
         this.projectId = projectId;
@@ -87,16 +90,22 @@ public class MetadataNotification extends VersionedData implements HasIdentifier
         this.attempt = attempt != null ? attempt : 0;
         this.fullUpdate = fullUpdate != null ? fullUpdate : false;
         this.transitive = transitive != null ? transitive : false;
+        this.eventPriority = eventPriority;
     }
 
     public MetadataNotification(String projectId, String groupId, String artifactId, String versionId)
     {
-        this(projectId, groupId, artifactId, versionId, null, null, null, null, null, null, null, null, null);
+        this(projectId, groupId, artifactId, versionId, null, null, null, null, null, null, null, null, null, EventPriority.LOW);
     }
 
     public MetadataNotification(String projectId,String groupId, String artifactId, String versionId, Boolean fullUpdate,Boolean transitive, String parentEvent)
     {
-        this(projectId, groupId, artifactId, versionId, null, parentEvent, fullUpdate, transitive, null, null, null, null, null);
+        this(projectId, groupId, artifactId, versionId, null, parentEvent, fullUpdate, transitive, null, null, null, null, null, EventPriority.LOW);
+    }
+
+    public MetadataNotification(String projectId,String groupId, String artifactId, String versionId, Boolean fullUpdate,Boolean transitive, String parentEvent, EventPriority eventPriority)
+    {
+        this(projectId, groupId, artifactId, versionId, null, parentEvent, fullUpdate, transitive, null, null, null, null, null, eventPriority);
     }
 
     public MetadataNotification()
@@ -271,6 +280,11 @@ public class MetadataNotification extends VersionedData implements HasIdentifier
     public int getMaxAttempts()
     {
         return maxAttempts;
+    }
+
+    public EventPriority getEventPriority()
+    {
+        return eventPriority;
     }
 
     @Override

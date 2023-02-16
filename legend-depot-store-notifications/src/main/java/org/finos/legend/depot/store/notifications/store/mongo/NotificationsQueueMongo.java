@@ -27,6 +27,7 @@ import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
+import org.finos.legend.depot.domain.notifications.EventPriority;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
@@ -55,7 +56,7 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("createdAt", "createdAt"));
+        return Arrays.asList(buildIndex("eventPriority-createdAt", "eventPriority","createdAt"));
     }
 
     @Override
@@ -115,13 +116,13 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
     @Override
     public Optional<MetadataNotification> getFirstInQueue()
     {
-        Document first = (Document)getCollection().findOneAndDelete(Filters.exists("_id"),new FindOneAndDeleteOptions().sort(Sorts.ascending("createdAt")));
+        Document first = (Document)getCollection().findOneAndDelete(Filters.exists("_id"), new FindOneAndDeleteOptions().sort(Sorts.ascending("eventPriority", "createdAt")));
         if (first != null)
         {
             return Optional.of(convert(first, MetadataNotification.class));
 
         }
-        return Optional.empty();
+            return Optional.empty();
     }
 
     @Override
