@@ -116,13 +116,13 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
     @Override
     public Optional<MetadataNotification> getFirstInQueue()
     {
-        Document first = (Document)getCollection().findOneAndDelete(Filters.exists("_id"), new FindOneAndDeleteOptions().sort(Sorts.ascending("eventPriority", "createdAt")));
+        Document first = (Document)getCollection().findOneAndDelete(Filters.exists("_id"),new FindOneAndDeleteOptions().sort(Sorts.ascending("eventPriority", "createdAt")));
         if (first != null)
         {
             return Optional.of(convert(first, MetadataNotification.class));
 
         }
-            return Optional.empty();
+        return Optional.empty();
     }
 
     @Override
