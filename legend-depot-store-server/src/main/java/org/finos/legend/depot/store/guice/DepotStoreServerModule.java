@@ -96,7 +96,7 @@ public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfigura
     boolean scheduleStorageMetrics(SchedulesFactory schedulesFactory, StorageMetrics storageMetrics)
     {
         storageMetrics.init();
-        schedulesFactory.register("storage-metrics", LocalDateTime.now().plusMinutes(1), 60000L, false, storageMetrics::reportMetrics);
+        schedulesFactory.register("storage-metrics", LocalDateTime.now().plusMinutes(1), 60000L, true, storageMetrics::reportMetrics);
         return true;
     }
 
