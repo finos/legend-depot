@@ -102,6 +102,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
                 }
             });
             PrometheusMetricsFactory.getInstance().incrementCount(VERSION_DELETE_COUNTER);
+            LOGGER.info(String.format("%s-%s-%s artifacts deleted", groupId, artifactId, versionId));
             return projects.delete(groupId, artifactId, versionId);
         });
     }
@@ -121,7 +122,9 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
                 }
             });
             StoreProjectVersionData projectData = getProjectVersion(groupId, artifactId, versionId);
+            LOGGER.info(String.format("%s-%s-%s artifacts deleted", groupId, artifactId, versionId));
             projectData.setEvicted(true);
+            LOGGER.info(String.format("%s-%s-%s evicted", groupId, artifactId, versionId));
             PrometheusMetricsFactory.getInstance().incrementCount(VERSION_PURGE_COUNTER);
             return projects.createOrUpdate(projectData);
         });
@@ -131,7 +134,10 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     public MetadataEventResponse deleteVersionsNotInRepository()
     {
         List<VersionMismatch> versionMismatch = repository.findVersionsMismatches();
-        return deleteVersionsNotInRepository(versionMismatch);
+        LOGGER.info("Started deleting all versions not in repository");
+        MetadataEventResponse response = deleteVersionsNotInRepository(versionMismatch);
+        LOGGER.info("Completed deleting all versions not in repository");
+        return response;
     }
 
     public MetadataEventResponse deleteVersionsNotInRepository(List<VersionMismatch> versionMismatch)
@@ -142,6 +148,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
                       mismatch.versionsNotInRepository.forEach(version ->
                       {
                           delete(mismatch.groupId, mismatch.artifactId, version);
+                          LOGGER.info(String.format("%s-%s-%s deleted", mismatch.groupId, mismatch.artifactId, version));
                           response.addMessage(String.format("%s-%s-%s deleted", mismatch.groupId, mismatch.artifactId, version));
                       });
                 }
