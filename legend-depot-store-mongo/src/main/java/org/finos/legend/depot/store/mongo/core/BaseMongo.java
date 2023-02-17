@@ -58,7 +58,7 @@ public abstract class BaseMongo<T extends HasIdentifier>
     public static final String ID = "id";
     public static final UpdateOptions INSERT_IF_ABSENT = new UpdateOptions().upsert(true);
     public static final FindOneAndReplaceOptions FIND_ONE_AND_REPLACE_OPTIONS = new FindOneAndReplaceOptions().upsert(true).returnDocument(ReturnDocument.AFTER);
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BaseMongo.class);
+    protected static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BaseMongo.class);
     private final ObjectMapper objectMapper;
     private final MongoDatabase mongoDatabase;
     private final Class<T> documentClass;

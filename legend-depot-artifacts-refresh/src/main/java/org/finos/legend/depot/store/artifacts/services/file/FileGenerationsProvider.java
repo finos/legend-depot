@@ -39,7 +39,7 @@ public class FileGenerationsProvider implements FileGenerationsArtifactsProvider
     }
 
     @Override
-    public List<FileGeneration> loadArtifactsForType(Stream<File> files)
+    public List<FileGeneration> extractArtifactsForType(Stream<File> files)
     {
         List<FileGeneration> generations = new ArrayList<>();
         files.forEach(f ->

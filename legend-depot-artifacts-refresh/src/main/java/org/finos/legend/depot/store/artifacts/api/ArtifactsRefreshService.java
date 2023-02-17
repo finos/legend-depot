@@ -16,26 +16,21 @@
 package org.finos.legend.depot.store.artifacts.api;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public interface ArtifactsRefreshService
 {
-    MetadataEventResponse refresh(MetadataNotification event);
 
-    MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean fullUpdate, boolean transitive, String parentEventId);
+    MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean transitive, String parentEventId);
 
-    default MetadataEventResponse refreshMasterSnapshotForProject(String groupId, String artifactId, boolean fullUpdate, boolean transitive,String parentEventId)
-    {
-        return refreshVersionForProject(groupId,artifactId,MASTER_SNAPSHOT,fullUpdate,transitive,parentEventId);
-    }
+    MetadataEventResponse refreshMasterSnapshotForProject(String groupId, String artifactId, boolean fullUpdate, boolean transitive,String parentEventId);
 
-    MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate,boolean transitive, String parentEventId);
+    MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate,boolean allVersions,boolean transitive, String parentEventId);
 
-    MetadataEventResponse refreshAllVersionsForAllProjects(boolean fullUpdate,boolean transitive, String parentEventId);
+    MetadataEventResponse refreshAllVersionsForAllProjects(boolean fullUpdate,boolean allVersions,boolean transitive, String parentEventId);
+
+    MetadataEventResponse refreshMasterSnapshotForAllProjects(boolean fullUpdate,boolean transitive, String parentEventId);
 
     MetadataEventResponse refreshProjectsWithMissingVersions(String parentEventId);
 
-    long deleteOldRefreshStatuses(int days);
 }

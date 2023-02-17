@@ -23,7 +23,7 @@ import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.purge.api.ArtifactsPurgeService;
-import org.finos.legend.depot.store.artifacts.services.ArtifactHandlerFactory;
+import org.finos.legend.depot.store.artifacts.services.ProjectArtifactHandlerFactory;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
 
     private Set<ArtifactType> getSupportedArtifactTypes()
     {
-        return ArtifactHandlerFactory.getSupportedTypes();
+        return ProjectArtifactHandlerFactory.getSupportedTypes();
     }
 
     private void decorateSpanWithVersionInfo(String groupId,String artifactId, String versionId)
@@ -95,7 +95,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
         {
             getSupportedArtifactTypes().forEach(artifactType ->
             {
-                ProjectArtifactsHandler artifactHandler = ArtifactHandlerFactory.getArtifactHandler(artifactType);
+                ProjectArtifactsHandler artifactHandler = ProjectArtifactHandlerFactory.getArtifactHandler(artifactType);
                 if (artifactHandler != null)
                 {
                     artifactHandler.delete(groupId, artifactId, versionId);
@@ -115,7 +115,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
         {
             getSupportedArtifactTypes().forEach(artifactType ->
             {
-                ProjectArtifactsHandler artifactHandler = ArtifactHandlerFactory.getArtifactHandler(artifactType);
+                ProjectArtifactsHandler artifactHandler = ProjectArtifactHandlerFactory.getArtifactHandler(artifactType);
                 if (artifactHandler != null)
                 {
                     artifactHandler.delete(groupId, artifactId, versionId);

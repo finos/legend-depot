@@ -13,11 +13,25 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.artifacts.api.generation.file;
+package org.finos.legend.depot.store.artifacts.api;
 
-import org.finos.legend.depot.domain.generation.file.FileGeneration;
-import org.finos.legend.depot.store.artifacts.api.ArtifactsExtractor;
+import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 
-public interface FileGenerationsArtifactsProvider extends ArtifactsExtractor<FileGeneration>
+import java.io.File;
+import java.util.List;
+import java.util.stream.Stream;
+
+public interface ArtifactsExtractor<T>
 {
+    ArtifactType getType();
+
+    boolean matchesArtifactType(File file);
+
+    default List<T> extractArtifacts(List<File> files)
+    {
+        return extractArtifactsForType(files.stream().filter(file -> matchesArtifactType(file)));
+    }
+
+    List<T> extractArtifactsForType(Stream<File> files);
+
 }

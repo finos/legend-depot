@@ -112,7 +112,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
 
     private List<Entity> getEntities(List<File> files)
     {
-        return entitiesProvider.loadArtifacts(files);
+        return entitiesProvider.extractArtifacts(files);
     }
 
 

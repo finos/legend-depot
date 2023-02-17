@@ -25,7 +25,7 @@ import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntitiesArti
 import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntityArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
-import org.finos.legend.depot.store.artifacts.services.ArtifactHandlerFactory;
+import org.finos.legend.depot.store.artifacts.services.ProjectArtifactHandlerFactory;
 import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntityProvider;
 import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntitiesHandlerImpl;
@@ -59,7 +59,7 @@ public class ArtifactsHandlersModule extends PrivateModule
     @Singleton
     boolean registerEntityHandler(EntitiesArtifactsHandler versionArtifactsHandler)
     {
-        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, versionArtifactsHandler);
+        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, versionArtifactsHandler);
         return true;
     }
 
@@ -68,7 +68,7 @@ public class ArtifactsHandlersModule extends PrivateModule
     @Singleton
     boolean registerVersionedEntityHandler(VersionedEntitiesArtifactsHandler versionedEntitiesArtifactsHandler)
     {
-        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, versionedEntitiesArtifactsHandler);
+        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, versionedEntitiesArtifactsHandler);
         return true;
     }
 
@@ -77,7 +77,7 @@ public class ArtifactsHandlersModule extends PrivateModule
     @Singleton
     boolean registerFileGenerationHandler(FileGenerationsArtifactsHandler versionArtifactsHandler)
     {
-        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, versionArtifactsHandler);
+        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, versionArtifactsHandler);
         return true;
     }
 

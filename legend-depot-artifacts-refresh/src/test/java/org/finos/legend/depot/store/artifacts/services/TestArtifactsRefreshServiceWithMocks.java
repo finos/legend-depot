@@ -36,7 +36,6 @@ import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
-import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerImpl;
@@ -56,22 +55,22 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Collections;
 import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TestArtifactsRefreshServiceViaMock extends TestStoreMongo
+public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
 {
     public static final String TEST_GROUP_ID = "examples.metadata";
     public static final String TEST_ARTIFACT_ID = "test";
     public static final String TEST_DEPENDENCIES_ARTIFACT_ID = "test-dependencies";
     public static final String PROJECT_A = "PROD-1";
     public static final String PROJECT_B = "PROD-2";
-    static final String PARENT_EVENT_ID = "unit-test";
+
     protected ArtifactsFilesStore artifacts = new ArtifactsFilesMongo(mongoProvider);
     protected List<String> properties = Arrays.asList("[a-zA-Z0-9]+.version");
     protected RefreshStatusStore refreshStatusStore = new ArtifactsRefreshStatusMongo(mongoProvider);
@@ -89,15 +88,17 @@ public class TestArtifactsRefreshServiceViaMock extends TestStoreMongo
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);
     protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
-    protected ArtifactsRefreshServiceImpl artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repositoryServices, artifacts, queue, new IncludeProjectPropertiesConfiguration(properties));
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(properties));
+
+    protected ArtifactsRefreshServiceImpl artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices,queue,versionHandler);
 
 
     @Before
     public void setUpData() throws ArtifactRepositoryException
     {
-        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
-        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new EntitiesHandlerImpl(entitiesService, versionedEntityProvider));
-        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new ManageFileGenerationsServiceImpl(mongoGenerations, mongoEntities, projectsService)));
+        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
+        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new EntitiesHandlerImpl(entitiesService, versionedEntityProvider));
+        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new ManageFileGenerationsServiceImpl(mongoGenerations, mongoEntities, projectsService)));
 
         List<StoreProjectData> projects = Arrays.asList(new StoreProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID),
                 new StoreProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID),
@@ -118,25 +119,6 @@ public class TestArtifactsRefreshServiceViaMock extends TestStoreMongo
         Assert.assertTrue("should not have events in queue",queue.getAll().isEmpty());
     }
 
-    @Test
-    public void canRefreshMasterWithMasterSnapshotDependency()
-    {
-        Set<ArtifactDependency> artifactDependency = Collections.singleton(new ArtifactDependency(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "master-SNAPSHOT"));
-        when(repositoryServices.findDependencies(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT")).thenReturn(artifactDependency);
-        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT", false, false, PARENT_EVENT_ID);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
-    }
-
-    @Test
-    public void cantRefreshVersionWithMasterDependencies()
-    {
-        Set<ArtifactDependency> artifactDependency = Collections.singleton(new ArtifactDependency(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "master-SNAPSHOT"));
-        when(repositoryServices.findDependencies(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0")).thenReturn(artifactDependency);
-        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0", false, false, PARENT_EVENT_ID);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.FAILED, response.getStatus());
-    }
     
     @Test
     public void canCalculateCandidateVersionsToUpdate()

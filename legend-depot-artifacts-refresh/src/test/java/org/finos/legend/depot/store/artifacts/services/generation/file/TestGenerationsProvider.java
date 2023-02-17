@@ -91,7 +91,7 @@ public class TestGenerationsProvider extends TestStoreMongo
 
         Assert.assertEquals(0, getDependenciesFiles("2.0.0").size());
 
-        List<FileGeneration> gens = fileGenerationsProvider.loadArtifacts(files);
+        List<FileGeneration> gens = fileGenerationsProvider.extractArtifacts(files);
         Assert.assertFalse(gens.isEmpty());
     }
 

@@ -131,4 +131,14 @@ public class ArtifactsRefreshStatusMongo extends BaseMongo<RefreshStatus> implem
                 .toInstant()).getTime();
     }
 
+    @Override
+    public long deleteOldRefreshStatuses(int days)
+    {
+        LocalDateTime timeToLive = LocalDateTime.now().minusDays(days);
+        List<RefreshStatus> refreshStatuses = find(null,timeToLive);
+        refreshStatuses.forEach(status -> delete(status.getId()));
+        LOGGER.info("deleted [{}] statuses older than [{}] days",refreshStatuses.size(),days);
+        return refreshStatuses.size();
+    }
+
 }

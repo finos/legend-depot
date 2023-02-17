@@ -65,4 +65,5 @@ public class TestArtifactMongo extends TestStoreMongo
         Assert.assertEquals("laalalala", artifact1.get().getCheckSum());
 
     }
+
 }

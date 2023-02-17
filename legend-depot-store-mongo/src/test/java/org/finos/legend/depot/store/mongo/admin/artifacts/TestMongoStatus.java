@@ -22,6 +22,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
@@ -113,6 +115,24 @@ public class TestMongoStatus extends TestStoreMongo
 
         Assert.assertEquals(3,refreshStatus.find(null,null,null,null,"test",null,null,null,null).size());
         Assert.assertEquals(1,refreshStatus.find(null,null,null,null,"test1",null,null,null,null).size());
+
+
+    }
+
+    @Test
+    public void canDeleteOldStatuses()
+    {
+        RefreshStatus status1 = new RefreshStatus("test","artifact","2.0.0");
+        RefreshStatus status2 = new RefreshStatus("test","artifact","1.0.0");
+        status1.setStartTime(Date.from(LocalDateTime.now().minusDays(12).atZone(ZoneId.systemDefault()).toInstant()));
+        status2.setStartTime(Date.from(LocalDateTime.now().minusDays(2).atZone(ZoneId.systemDefault()).toInstant()));
+        refreshStatus.createOrUpdate(status1);
+        refreshStatus.createOrUpdate(status2);
+        Assert.assertEquals(2, refreshStatus.getAll().size());
+        refreshStatus.deleteOldRefreshStatuses(10);
+        Assert.assertEquals(1, refreshStatus.getAll().size());
+        refreshStatus.deleteOldRefreshStatuses(1);
+        Assert.assertEquals(0, refreshStatus.getAll().size());
 
 
     }
