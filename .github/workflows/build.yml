@@ -28,9 +28,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
       - name: Cache Maven dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.6
         env:
           cache-name: cache-mvn-deps
         with:
@@ -54,9 +54,7 @@ jobs:
           git config --global author.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config --global author.name "${GITHUB_ACTOR}"
       - name: Download deps and plugins
-        run: mvn de.qaware.maven:go-offline-maven-plugin:resolve-dependencies
-        env:
-          MAVEN_OPTS: -Xmx4g
+        run: mvn de.qaware.maven:go-offline-maven-plugin:resolve-dependencies -DargLine="-Xmx6g"
       - name: Build + Test
         if: (github.repository != 'finos/legend-depot') || (github.ref != 'refs/heads/master')
         run: mvn install javadoc:javadoc
