@@ -580,6 +580,12 @@
                 <version>${json-smart.version}</version>
                 <scope>runtime</scope>
             </dependency>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>lang-tag</artifactId>
+                <version>1.7</version>
+                <scope>runtime</scope>
+            </dependency>
             <!-- SHARED-->
 
             <!-- ENGINE-->
