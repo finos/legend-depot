@@ -4,6 +4,7 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=finos_legend-depot&metric=security_rating&token=69394360757d5e1356312ddfee658a6b205e2c97)](https://sonarcloud.io/dashboard?id=legend-depot)
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=finos_legend-depot&metric=bugs&token=69394360757d5e1356312ddfee658a6b205e2c97)](https://sonarcloud.io/dashboard?id=legend-depot)
 
+dummy change
 
 # legend-depot
 The Legend Depot servers provide a rich `REST API` allowing users to query metadata fast and reliably which has been authored in `Legend Studio` and `Legend SDLC`
