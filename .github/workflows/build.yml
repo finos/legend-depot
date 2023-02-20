@@ -56,7 +56,7 @@ jobs:
       - name: Print out mvn version
         run: mvn -v
       - name: Download deps and plugins
-        run: mvn de.qaware.maven:go-offline-maven-plugin:resolve-dependencies
+        run: mvn de.qaware.maven:go-offline-maven-plugin:1.2.8:resolve-dependencies
         env:
           MAVEN_OPTS: -Xmx6g
       - name: Build + Test
