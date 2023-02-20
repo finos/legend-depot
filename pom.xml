@@ -109,7 +109,7 @@
         <jersey2-guice.version>1.0.6</jersey2-guice.version>
         <jetty.version>9.4.39.v20210325</jetty.version>
         <joda.time.version>2.10.1</joda.time.version>
-        <json-smart.version>2.4.2</json-smart.version>
+        <json-smart.version>2.4.7</json-smart.version>
         <junit.version>4.13.1</junit.version>
         <mockito.version>3.9.0</mockito.version>
         <pac4j.version>3.8.3</pac4j.version>
