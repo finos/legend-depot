@@ -159,8 +159,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             {
                 try
                 {
-                    List<VersionId> versionsInRepo = this.repositoryServices.findVersions(groupId, artifactId);
-                    if (versionsInRepo.isEmpty() || !versionsInRepo.contains(VersionId.parseVersionId(versionId)))
+                    if (!this.repositoryServices.findVersion(groupId, artifactId,versionId).isPresent())
                     {
                         response.addError(String.format("Version %s does not exists for %s-%s", versionId, groupId, artifactId));
                         return response;

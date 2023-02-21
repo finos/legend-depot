@@ -16,6 +16,7 @@
 package org.finos.legend.depot.artifacts.repository.maven.impl;
 
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
@@ -26,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class TestMavenArtifactsRepository extends MavenArtifactRepository implements ArtifactRepository
 {
@@ -51,6 +53,12 @@ public class TestMavenArtifactsRepository extends MavenArtifactRepository implem
     public List<VersionId> findVersions(String group, String artifact)
     {
         return TESTING_VERSIONS.getOrDefault(group + DOT + artifact, Collections.emptyList());
+    }
+
+    @Override
+    public Optional<String> findVersion(String group, String artifact, String versionId) throws ArtifactRepositoryException
+    {
+        return TESTING_VERSIONS.getOrDefault(group + DOT + artifact, Collections.emptyList()).stream().filter(v -> v.toVersionIdString().equals(versionId)).map(v -> v.toVersionIdString()).findFirst();
     }
 
     @Override

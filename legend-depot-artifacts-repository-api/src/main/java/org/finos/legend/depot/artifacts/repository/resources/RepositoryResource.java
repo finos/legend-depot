@@ -18,6 +18,7 @@ package org.finos.legend.depot.artifacts.repository.resources;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.tracing.resources.BaseResource;
@@ -30,6 +31,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Path("")
@@ -67,6 +69,25 @@ public class RepositoryResource extends BaseResource
                 });
     }
 
+    @GET
+    @Path("/repository/versions/{groupId}/{artifactId}/{versionId}")
+    @ApiOperation(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)
+    public Optional<String> getRepositoryVersion(@PathParam("groupId") String groupId,
+                                                 @PathParam("artifactId") String artifactId,
+                                                 @PathParam("versionId") String versionId)
+    {
+        return handle(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId + versionId, () ->
+        {
+            try
+            {
+                return artifactRepository.findVersion(groupId, artifactId,versionId);
+            }
+            catch (ArtifactRepositoryException e)
+            {
+                return Optional.of(e.getMessage());
+            }
+        });
+    }
 
     @GET
     @Path("/repository/versions/mismatch")

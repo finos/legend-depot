@@ -163,6 +163,7 @@ public final class SchedulesFactory
         long t = System.currentTimeMillis();
         try
         {
+            LOGGER.info("Starting {} ", jobId);
             this.schedulesStore.createOrUpdate(scheduleInfo.startRunning(t));
             scheduleInfo.message = functionToExecute.get();
         }

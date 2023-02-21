@@ -23,6 +23,7 @@ import org.finos.legend.sdlc.domain.model.version.VersionId;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class VoidArtifactRepositoryProvider implements ArtifactRepository
@@ -53,6 +54,12 @@ public class VoidArtifactRepositoryProvider implements ArtifactRepository
     public List<VersionId> findVersions(String group, String artifact)
     {
         return Collections.emptyList();
+    }
+
+    @Override
+    public Optional<String> findVersion(String group, String artifact, String versionId) throws ArtifactRepositoryException
+    {
+        return Optional.empty();
     }
 
     @Override
