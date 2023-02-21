@@ -46,7 +46,7 @@ public class EntityProvider implements EntityArtifactsProvider
     }
 
     @Override
-    public List<Entity> loadArtifactsForType(Stream<File> files)
+    public List<Entity> extractArtifactsForType(Stream<File> files)
     {
         List<Entity> entities = new ArrayList<>();
         files.forEach(f ->

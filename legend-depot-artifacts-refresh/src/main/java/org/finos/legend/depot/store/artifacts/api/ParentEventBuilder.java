@@ -15,23 +15,12 @@
 
 package org.finos.legend.depot.store.artifacts.api;
 
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-
-import java.io.File;
-import java.util.List;
-import java.util.stream.Stream;
-
-public interface ArtifactLoader<T>
+public final class ParentEventBuilder
 {
-    ArtifactType getType();
+    private static final String SEPARATOR = "-";
 
-    boolean matchesArtifactType(File file);
-
-    default List<T> loadArtifacts(List<File> files)
+    public static String build(String groupId, String artifactId, String versionId,String parentEventId)
     {
-        return loadArtifactsForType(files.stream().filter(file -> matchesArtifactType(file)));
+        return parentEventId != null ? parentEventId : groupId + SEPARATOR + artifactId + SEPARATOR + versionId;
     }
-
-    List<T> loadArtifactsForType(Stream<File> files);
-
 }

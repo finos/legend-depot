@@ -15,9 +15,9 @@
 
 package org.finos.legend.depot.store.artifacts.api.entities;
 
-import org.finos.legend.depot.store.artifacts.api.ArtifactLoader;
+import org.finos.legend.depot.store.artifacts.api.ArtifactsExtractor;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
-public interface VersionedEntityArtifactsProvider extends ArtifactLoader<Entity>
+public interface VersionedEntityArtifactsProvider extends ArtifactsExtractor<Entity>
 {
 }

@@ -75,7 +75,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
         {
             List<Entity> projectEntities = getAllNonVersionedEntities(projectData.getGroupId(), projectData.getArtifactId(), versionId);
             List<Entity> fileGenerationEntities = filterEntitiesByFileGenerationEntities(projectEntities);
-            List<FileGeneration> generatedFiles = provider.loadArtifacts(files);
+            List<FileGeneration> generatedFiles = provider.extractArtifacts(files);
             //handle files generated when a new master snapshot comes into picture
             if (versionId.equals(VersionValidator.MASTER_SNAPSHOT))
             {

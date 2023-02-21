@@ -558,7 +558,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <dependency>
+          <dependency>
                 <groupId>org.finos.legend.shared</groupId>
                 <artifactId>legend-shared-pac4j-gitlab</artifactId>
                 <version>${legend.shared.version}</version>

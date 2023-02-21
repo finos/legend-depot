@@ -55,7 +55,7 @@ public class TestEntityProvider
     public void canResolveEntitiesInJar()
     {
 
-        List<Entity> entities = artifactProvider.loadArtifacts(getFiles(TEST_GROUP_ID, "test", "2.0.0"));
+        List<Entity> entities = artifactProvider.extractArtifacts(getFiles(TEST_GROUP_ID, "test", "2.0.0"));
         Assert.assertNotNull(entities);
         Assert.assertEquals(9, entities.size());
 

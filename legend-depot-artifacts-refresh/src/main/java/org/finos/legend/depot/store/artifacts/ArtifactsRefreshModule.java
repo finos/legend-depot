@@ -20,15 +20,22 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
+import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
+import org.finos.legend.depot.store.artifacts.resources.ArtifactRefreshStatusResource;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactsRefreshResource;
-import org.finos.legend.depot.store.artifacts.services.ArtifactRefreshEventHandler;
+import org.finos.legend.depot.store.artifacts.services.ProjectVersionRefreshHandler;
 import org.finos.legend.depot.store.artifacts.services.ArtifactsRefreshServiceImpl;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
 import javax.inject.Named;
 import java.time.LocalDateTime;
+
+import static org.finos.legend.depot.store.artifacts.services.ProjectVersionRefreshHandler.TOTAL_NUMBER_OF_VERSIONS_REFRESH;
+import static org.finos.legend.depot.store.artifacts.services.ProjectVersionRefreshHandler.VERSION_REFRESH_COUNTER;
+import static org.finos.legend.depot.store.artifacts.services.ProjectVersionRefreshHandler.VERSION_REFRESH_DURATION;
+import static org.finos.legend.depot.store.artifacts.services.ProjectVersionRefreshHandler.VERSION_REFRESH_DURATION_HELP;
 
 public class ArtifactsRefreshModule extends PrivateModule
 {
@@ -40,13 +47,16 @@ public class ArtifactsRefreshModule extends PrivateModule
     protected void configure()
     {
         bind(ArtifactsRefreshResource.class);
+        bind(ArtifactRefreshStatusResource.class);
 
         bind(ArtifactsRefreshService.class).to(ArtifactsRefreshServiceImpl.class);
-        bind(NotificationEventHandler.class).to(ArtifactRefreshEventHandler.class);
+        bind(NotificationEventHandler.class).to(ProjectVersionRefreshHandler.class);
+        bind(ProjectVersionRefreshHandler.class);
 
         expose(ArtifactsRefreshService.class);
         expose(NotificationEventHandler.class);
         expose(ArtifactsRefreshResource.class);
+        expose(ArtifactRefreshStatusResource.class);
     }
 
 
@@ -55,8 +65,8 @@ public class ArtifactsRefreshModule extends PrivateModule
     @Singleton
     boolean registerMetrics(PrometheusMetricsHandler metricsHandler)
     {
-        metricsHandler.registerCounter(ArtifactsRefreshServiceImpl.VERSION_REFRESH_COUNTER, ArtifactsRefreshServiceImpl.TOTAL_NUMBER_OF_VERSIONS_REFRESH);
-        metricsHandler.registerHistogram(ArtifactsRefreshServiceImpl.VERSION_REFRESH_DURATION, ArtifactsRefreshServiceImpl.VERSION_REFRESH_DURATION_HELP);
+        metricsHandler.registerCounter(VERSION_REFRESH_COUNTER, TOTAL_NUMBER_OF_VERSIONS_REFRESH);
+        metricsHandler.registerHistogram(VERSION_REFRESH_DURATION, VERSION_REFRESH_DURATION_HELP);
         return true;
     }
 
@@ -66,7 +76,7 @@ public class ArtifactsRefreshModule extends PrivateModule
     @Named("refresh-all-versions")
     boolean initVersions(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE, LocalDateTime.now().plusSeconds(configuration.getVersionsUpdateIntervalInMillis() / 1000), configuration.getVersionsUpdateIntervalInMillis(), false,() -> artifactsRefreshService.refreshAllVersionsForAllProjects(false,false, REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE));
+        schedulesFactory.register(REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE, LocalDateTime.now().plusSeconds(configuration.getVersionsUpdateIntervalInMillis() / 1000), configuration.getVersionsUpdateIntervalInMillis(), false,() -> artifactsRefreshService.refreshAllVersionsForAllProjects(false,false,false, REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE));
         return true;
     }
 
@@ -83,9 +93,9 @@ public class ArtifactsRefreshModule extends PrivateModule
     @Provides
     @Singleton
     @Named("cleanup-refresh-status")
-    boolean cleanUpSchedule(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService,ArtifactRepositoryProviderConfiguration configuration)
+    boolean cleanUpSchedule(SchedulesFactory schedulesFactory, RefreshStatusStore refreshStatusStore)
     {
-        schedulesFactory.register(CLEANUP_REFRESH_SCHEDULE,LocalDateTime.now().plusMinutes(60),12 * 3600000,false,() -> artifactsRefreshService.deleteOldRefreshStatuses(7));
+        schedulesFactory.register(CLEANUP_REFRESH_SCHEDULE,LocalDateTime.now().plusMinutes(60),12 * 3600000,false,() -> refreshStatusStore.deleteOldRefreshStatuses(7));
         return true;
     }
 }

@@ -48,4 +48,5 @@ public interface RefreshStatusStore
 
     void delete(String statusId);
 
+    long deleteOldRefreshStatuses(int days);
 }

@@ -23,12 +23,12 @@ import java.util.EnumMap;
 import java.util.Set;
 
 @Singleton
-public class ArtifactHandlerFactory
+public class ProjectArtifactHandlerFactory
 {
-    private static final ArtifactHandlerFactory instance = new ArtifactHandlerFactory();
+    private static final ProjectArtifactHandlerFactory instance = new ProjectArtifactHandlerFactory();
     private final EnumMap<ArtifactType, ProjectArtifactsHandler> artifactHandlers = new EnumMap<>(ArtifactType.class);
 
-    private ArtifactHandlerFactory()
+    private ProjectArtifactHandlerFactory()
     {
     }
 

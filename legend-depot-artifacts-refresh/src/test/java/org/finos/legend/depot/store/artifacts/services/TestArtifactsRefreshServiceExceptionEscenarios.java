@@ -90,15 +90,17 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);
     protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
-    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, refreshStatusStore, repositoryServices, artifacts, queue, new IncludeProjectPropertiesConfiguration(properties));
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(properties));
+
+    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices, queue,versionHandler);
 
 
     @Before
     public void setUpData() throws ArtifactRepositoryException
     {
-        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
-        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new EntitiesHandlerImpl(entitiesService, versionedEntityProvider));
-        ArtifactHandlerFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new ManageFileGenerationsServiceImpl(mongoGenerations, mongoEntities, projectsService)));
+        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
+        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new EntitiesHandlerImpl(entitiesService, versionedEntityProvider));
+        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new ManageFileGenerationsServiceImpl(mongoGenerations, mongoEntities, projectsService)));
 
         List<StoreProjectData> projects = Arrays.asList(new StoreProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID),
                                                    new StoreProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID),
@@ -120,21 +122,10 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     @Test(expected = IllegalArgumentException.class)
     public void cannotFindProject()
     {
-      artifactsRefreshService.refreshVersionForProject("test.test","missing.project","1.0.0",true,true, PARENT_EVENT_ID);
+      artifactsRefreshService.refreshVersionForProject("test.test","missing.project","1.0.0",true, PARENT_EVENT_ID);
     }
 
-    @Test
-    public void cannotFindDependentProject()
-    {
-      Set<ArtifactDependency> deps = new HashSet<>();
-      deps.add(new ArtifactDependency(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID,"1.0.0"));
-      deps.add(new ArtifactDependency(TEST_GROUP_ID,"c","1.0.0"));
-      when(repository.findDependencies(TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0")).thenReturn(deps);
-      MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0",true,false,PARENT_EVENT_ID);
-      Assert.assertNotNull(response);
-      Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
-      Assert.assertEquals("Dependency examples.metadata-c-1.0.0 not found in store", response.getErrors().get(0));
-    }
+
 
     @Test
     @Ignore
@@ -142,7 +133,7 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     {
         when(mongoProjects.find(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID)).thenReturn(Optional.of(new StoreProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID)));
 
-        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID,"1.0.0",true,true,PARENT_EVENT_ID);
+        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID,"1.0.0",true,PARENT_EVENT_ID);
         Assert.assertNotNull(response);
         Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
         Assert.assertEquals("Could not find dependent project: [examples.metadata-test-dependencies-1.0.0]", response.getErrors().get(0));
