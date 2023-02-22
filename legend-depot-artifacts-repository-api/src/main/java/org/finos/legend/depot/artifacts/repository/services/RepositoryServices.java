@@ -68,44 +68,52 @@ public class RepositoryServices
         AtomicLong missingStoreVersions = new AtomicLong(0);
         AtomicLong repoExceptions = new AtomicLong(0);
         List<StoreProjectData> allProjects = projects.getAllProjectCoordinates();
+        LOGGER.info("Starting findVersionsMismatches {}",allProjects.size());
         allProjects.forEach(p ->
         {
             try
             {
-                    List<String> repositoryVersions = repository.findVersions(p.getGroupId(), p.getArtifactId()).stream().map(v -> v.toVersionIdString()).collect(Collectors.toList());
-                    repoVersions.addAndGet(repositoryVersions.size());
-                    //check versions not in cache
-                    List<String> versionsNotInStore = new ArrayList<>(repositoryVersions);
-                    List<String> storeVersions = projects.getVersions(p.getGroupId(), p.getArtifactId());
-                    storeVersionsCount.addAndGet(storeVersions.size());
-                    versionsNotInStore.removeAll(storeVersions);
-                    //check versions not in repo
-                    List<String> versionsNotInRepo = new ArrayList<>(storeVersions);
-                    versionsNotInRepo.removeAll(repositoryVersions);
+                final List<String> storeVersions = projects.getVersions(p.getGroupId(), p.getArtifactId());
+                storeVersionsCount.addAndGet(storeVersions.size());
+                final List<String> repositoryVersions = repository.findVersions(p.getGroupId(), p.getArtifactId()).stream().map(v -> v.toVersionIdString()).collect(Collectors.toList());
+                repoVersions.addAndGet(repositoryVersions.size());
 
-                    if (!versionsNotInStore.isEmpty() || !versionsNotInRepo.isEmpty())
-                    {
-                        missingRepoVersions.addAndGet(versionsNotInStore.size());
-                        missingStoreVersions.addAndGet(versionsNotInRepo.size());
-                        versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInStore, versionsNotInRepo));
-                        LOGGER.info("version-mismatch found for {} {} {} : notInStore[{}], notInRepository [{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInStore, versionsNotInRepo);
-                    }
+                //check versions not in store
+                List<String> versionsNotInStore = repositoryVersions.stream().filter(repoVersion -> !storeVersions.contains(repoVersion)).collect(Collectors.toList());
+                missingRepoVersions.addAndGet(versionsNotInStore.size());
+                if (!versionsNotInStore.isEmpty())
+                {
+                    LOGGER.info("version-mismatch found for {} {} {} : notInStore[{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInStore);
+                }
+                //check versions not in repo
+                List<String> versionsNotInRepo = storeVersions.stream().filter(storeVersion -> !repositoryVersions.contains(storeVersion)).collect(Collectors.toList());
+                missingStoreVersions.addAndGet(versionsNotInRepo.size());
+                if (!versionsNotInRepo.isEmpty())
+                {
+                    LOGGER.info("version-mismatch found for {} {} {} : notInRepository [{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInRepo);
+                }
 
+                if (!versionsNotInStore.isEmpty() || !versionsNotInRepo.isEmpty())
+                {
+                    versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInStore, versionsNotInRepo));
+                }
             }
             catch (Exception e)
             {
-                String message = String.format("Could not get versions for %s:%s exception: %s ",p.getGroupId(),p.getArtifactId(),e.getMessage());
+                String message = String.format("Could not get versions for %s:%s exception: %s ", p.getGroupId(), p.getArtifactId(), e.getMessage());
                 LOGGER.error(message);
                 versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), Collections.emptyList(), Collections.emptyList(), Arrays.asList(message)));
                 repoExceptions.addAndGet(1);
             }
         });
+
         PrometheusMetricsFactory.getInstance().setGauge(PROJECTS,allProjects.size());
         PrometheusMetricsFactory.getInstance().setGauge(REPO_VERSIONS,repoVersions.get());
         PrometheusMetricsFactory.getInstance().setGauge(STORE_VERSIONS,storeVersionsCount.get());
         PrometheusMetricsFactory.getInstance().setGauge(MISSING_REPO_VERSIONS,missingRepoVersions.get());
         PrometheusMetricsFactory.getInstance().setGauge(MISSING_STORE_VERSIONS,missingStoreVersions.get());
         PrometheusMetricsFactory.getInstance().setGauge(REPO_EXCEPTIONS,repoExceptions.get());
+        LOGGER.info("Finished findVersionsMismatches {}",versionMismatches.size());
         return versionMismatches;
     }
 
