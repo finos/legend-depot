@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -111,6 +112,11 @@ public class RepositoryServices
     public List<VersionId> findVersions(String groupId, String artifactId) throws ArtifactRepositoryException
     {
         return this.repository.findVersions(groupId,artifactId);
+    }
+
+    public Optional<String> findVersion(String groupId, String artifactId, String versionId) throws ArtifactRepositoryException
+    {
+        return this.repository.findVersion(groupId,artifactId,versionId);
     }
 
     public Set<ArtifactDependency> findDependencies(String groupId, String artifactId, String versionId)

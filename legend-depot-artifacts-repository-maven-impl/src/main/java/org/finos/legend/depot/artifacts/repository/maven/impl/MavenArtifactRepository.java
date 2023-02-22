@@ -302,7 +302,9 @@ public class MavenArtifactRepository implements ArtifactRepository
             }
             catch (VersionResolutionException ex)
             {
-                LOGGER.error(String.format("Error resolveVersionsFromRepository %s-%s version resolution issue", group, artifact), ex.getMessage());
+                String message = String.format("Error resolveVersionsFromRepository %s-%s version resolution issue", group, artifact,ex.getMessage());
+                LOGGER.error(message);
+                throw new ArtifactRepositoryException(message);
             }
             catch (Exception e)
             {
@@ -311,6 +313,29 @@ public class MavenArtifactRepository implements ArtifactRepository
             }
             Collections.sort(result);
             return result;
+    }
+
+    @Override
+    public Optional<String> findVersion(String group, String artifact, String versionId) throws ArtifactRepositoryException
+    {
+        try
+        {
+            final MavenVersionRangeResult versionRangeResult = (MavenVersionRangeResult) executeWithTrace("resolveVersionFromRepository",group,artifact,versionId,() -> getResolver().resolveVersionRange(group + GAV_SEP + artifact + GAV_SEP + versionId));
+            LOGGER.debug("resolveVersionFromRepository {}{}{} , Version data: [{}]", group, artifact, versionId, versionRangeResult);
+            return versionRangeResult != null && versionRangeResult.getVersions() != null && !versionRangeResult.getVersions().isEmpty() ?
+                    versionRangeResult.getVersions().stream().filter(v -> v.getVersion().equals(versionId)).map(v -> v.getVersion()).findFirst() : Optional.empty();
+        }
+        catch (VersionResolutionException ex)
+        {
+            String message = String.format("Error resolveVersionsFromRepository %s-%s version resolution issue", group, artifact,ex.getMessage());
+            LOGGER.error(message);
+            throw new ArtifactRepositoryException(message);
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("unknown error executing resolveVersionsFromRepository", e);
+            throw new ArtifactRepositoryException(e.getMessage());
+        }
     }
 
     private Object executeWithTrace(String label, String groupId, String artifactId, String version, Supplier<Object> functionToExecute)

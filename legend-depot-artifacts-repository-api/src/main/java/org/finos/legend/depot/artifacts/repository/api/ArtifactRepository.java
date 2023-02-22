@@ -36,6 +36,8 @@ public interface ArtifactRepository
 
     List<VersionId> findVersions(String group, String artifact) throws ArtifactRepositoryException;
 
+    Optional<String> findVersion(String group, String artifact,String versionId) throws ArtifactRepositoryException;
+
     List<File> findFiles(ArtifactType type, String group, String artifact, String version);
 
     List<File> findDependenciesFiles(ArtifactType type, String group, String artifact, String version);
