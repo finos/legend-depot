@@ -28,6 +28,8 @@ public class ProjectVersionData
     private List<ProjectVersion> dependencies = new ArrayList<>();
     @JsonProperty
     private List<Property> properties = new ArrayList<>();
+    @JsonProperty
+    private boolean deprecated = false;
 
     public ProjectVersionData()
     {
@@ -37,6 +39,12 @@ public class ProjectVersionData
     {
         this.dependencies = dependencies;
         this.properties = properties;
+    }
+
+    public ProjectVersionData(List<ProjectVersion> dependencies, List<Property> properties, boolean deprecated)
+    {
+        this(dependencies, properties);
+        this.deprecated = deprecated;
     }
 
     public List<ProjectVersion> getDependencies()
@@ -76,5 +84,15 @@ public class ProjectVersionData
     public void addProperties(List<Property> propertyList)
     {
         propertyList.stream().filter(property -> !properties.contains(property)).forEach(property -> this.properties.add(property));
+    }
+
+    public boolean isDeprecated()
+    {
+        return deprecated;
+    }
+
+    public void setDeprecated(boolean deprecated)
+    {
+        this.deprecated = deprecated;
     }
 }

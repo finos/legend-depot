@@ -27,6 +27,6 @@ public interface ArtifactsPurgeService
 
     void delete(String groupId, String artifactId, String versionId);
 
-    MetadataEventResponse deleteVersionsNotInRepository();
+    MetadataEventResponse deprecate(String groupId, String artifactId, String version);
 
   }

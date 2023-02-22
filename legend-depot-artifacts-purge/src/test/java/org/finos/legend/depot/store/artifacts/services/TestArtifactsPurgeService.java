@@ -17,10 +17,10 @@ package org.finos.legend.depot.store.artifacts.services;
 
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
@@ -48,8 +48,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import static org.mockito.Mockito.mock;
@@ -190,22 +190,21 @@ public class TestArtifactsPurgeService extends TestStoreMongo
     }
 
     @Test
-    public void canDeleteVersionsMissingInRepository()
+    public void canDeprecateVersion()
     {
         String versionId = "2.0.0";
-        VersionMismatch versionMismatch = new VersionMismatch("PROD-A", TEST_GROUP_ID, TEST_ARTIFACT_ID, Collections.EMPTY_LIST, Collections.singletonList(versionId), Collections.EMPTY_LIST);
         List<String> versions = projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID);
         Assert.assertEquals(versions.size(), 3);
-        Assert.assertEquals(3, fileGenerationsStore.getAll().size());
-        //deleting the version not present in the repository
-        ((ArtifactsPurgeServiceImpl)purgeService).deleteVersionsNotInRepository(Collections.singletonList(versionMismatch));
+        Assert.assertEquals(1, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        //deprecating version
+        purgeService.deprecate(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
         versions = projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID);
-        Assert.assertEquals(versions.size(), 2);
-        Assert.assertEquals(versions, Arrays.asList("2.2.0", "2.3.0"));
-        //checking if entities are deleted
-        Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false).size());
-        Assert.assertEquals(0, entitiesStore.getEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true).size());
-        Assert.assertEquals(0, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        //no versions deleted
+        Assert.assertEquals(versions, Arrays.asList("2.0.0", "2.2.0", "2.3.0"));
+        //no artifacts deleted
+        Assert.assertEquals(1, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Optional<StoreProjectVersionData> storeProjectData = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
+        Assert.assertTrue(storeProjectData.get().getVersionData().isDeprecated());
     }
 
 }

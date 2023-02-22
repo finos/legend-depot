@@ -103,16 +103,18 @@ public class ArtifactsPurgeResource extends BaseAuthorisedResource
     }
 
     @DELETE
-    @Path("/artifactDelete/versionsNotInRepository")
-    @ApiOperation(ResourceLoggingAndTracing.DELETE_VERSIONS_NOT_IN_REPO)
+    @Path("/artifactDeprecate/{groupId}/{artifactId}/versions/{versionId}")
+    @ApiOperation(ResourceLoggingAndTracing.DEPRECATE_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse deleteVersionsNotInRepository()
+    public MetadataEventResponse deprecateVersion(@PathParam("groupId") String groupId,
+                                                  @PathParam("artifactId") String artifactId,
+                                                  @PathParam("versionId") String versionId)
     {
 
-        return handle(ResourceLoggingAndTracing.DELETE_VERSIONS_NOT_IN_REPO, () ->
+        return handle(ResourceLoggingAndTracing.DEPRECATE_VERSION, () ->
         {
             validateUser();
-            return artifactsPurgeService.deleteVersionsNotInRepository();
+            return artifactsPurgeService.deprecate(groupId, artifactId, versionId);
         });
     }
 

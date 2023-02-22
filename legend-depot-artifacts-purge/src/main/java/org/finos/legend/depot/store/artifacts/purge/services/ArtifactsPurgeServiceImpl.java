@@ -16,7 +16,6 @@
 package org.finos.legend.depot.store.artifacts.purge.services;
 
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
@@ -37,6 +36,7 @@ import java.util.Set;
 
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.DELETE_VERSION;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.EVICT_VERSION;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.DEPRECATE_VERSION;
 
 
 public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
@@ -130,30 +130,20 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
         });
     }
 
+    //TODO: add more to this method once deprecation policy is setup
     @Override
-    public MetadataEventResponse deleteVersionsNotInRepository()
+    public MetadataEventResponse deprecate(String groupId, String artifactId, String versionId)
     {
-        List<VersionMismatch> versionMismatch = repository.findVersionsMismatches();
-        LOGGER.info("Started deleting all versions not in repository");
-        MetadataEventResponse response = deleteVersionsNotInRepository(versionMismatch);
-        LOGGER.info("Completed deleting all versions not in repository");
-        return response;
-    }
-
-    public MetadataEventResponse deleteVersionsNotInRepository(List<VersionMismatch> versionMismatch)
-    {
-        MetadataEventResponse response = new MetadataEventResponse();
-        versionMismatch.forEach(mismatch ->
-                {
-                      mismatch.versionsNotInRepository.forEach(version ->
-                      {
-                          delete(mismatch.groupId, mismatch.artifactId, version);
-                          LOGGER.info(String.format("%s-%s-%s deleted", mismatch.groupId, mismatch.artifactId, version));
-                          response.addMessage(String.format("%s-%s-%s deleted", mismatch.groupId, mismatch.artifactId, version));
-                      });
-                }
-        );
-        return response;
+        decorateSpanWithVersionInfo(groupId, artifactId, versionId);
+        return TracerFactory.get().executeWithTrace(DEPRECATE_VERSION, () ->
+        {
+            MetadataEventResponse response = new MetadataEventResponse();
+            StoreProjectVersionData projectData = getProjectVersion(groupId, artifactId, versionId);
+            projectData.getVersionData().setDeprecated(true);
+            response.addMessage(String.format("%s-%s-%s deprecated", groupId, artifactId, versionId));
+            projects.createOrUpdate(projectData);
+            return response;
+        });
     }
 
     @Override
