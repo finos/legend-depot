@@ -83,14 +83,14 @@ public class RepositoryServices
                 missingRepoVersions.addAndGet(versionsNotInStore.size());
                 if (!versionsNotInStore.isEmpty())
                 {
-                    LOGGER.info("version-mismatch found for {} {} {} : notInStore[{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInStore);
+                    LOGGER.info("version-mismatch found for {} {}-{} : notInStore[{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInStore);
                 }
                 //check versions not in repo
                 List<String> versionsNotInRepo = storeVersions.stream().filter(storeVersion -> !repositoryVersions.contains(storeVersion)).collect(Collectors.toList());
                 missingStoreVersions.addAndGet(versionsNotInRepo.size());
                 if (!versionsNotInRepo.isEmpty())
                 {
-                    LOGGER.info("version-mismatch found for {} {} {} : notInRepository [{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInRepo);
+                    LOGGER.info("version-mismatch found for {} {}-{} : notInRepository [{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInRepo);
                 }
 
                 if (!versionsNotInStore.isEmpty() || !versionsNotInRepo.isEmpty())
