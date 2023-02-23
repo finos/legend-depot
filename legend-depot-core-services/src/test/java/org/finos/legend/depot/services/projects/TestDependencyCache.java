@@ -29,6 +29,8 @@ import org.junit.Test;
 
 import java.net.URL;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public class TestDependencyCache extends TestBaseServices
 {
 
@@ -177,10 +179,10 @@ public class TestDependencyCache extends TestBaseServices
     @Test
     public void getDependenciesForChangingMasterSnapshotDependencies()
     {
-        ProjectVersion masterSNAPSHOTVersion = new ProjectVersion(TEST_GROUP, "artifacta", "master-SNAPSHOT");
+        ProjectVersion masterSNAPSHOTVersion = new ProjectVersion(TEST_GROUP, "artifacta", MASTER_SNAPSHOT);
 
         seedTestData();
-        StoreProjectVersionData projectA = new StoreProjectVersionData(TEST_GROUP, "artifacta", "master-SNAPSHOT");
+        StoreProjectVersionData projectA = new StoreProjectVersionData(TEST_GROUP, "artifacta", MASTER_SNAPSHOT);
         projectA.getVersionData().addDependency(new ProjectVersion(TEST_GROUP, "artifactb", "1.0.0"));
         projectsVersionsStore.createOrUpdate(projectA);
 
@@ -196,7 +198,7 @@ public class TestDependencyCache extends TestBaseServices
 
         StoreProjectVersionData projectD = new StoreProjectVersionData(TEST_GROUP, "artifactd", "1.0.0");
         projectsVersionsStore.createOrUpdate(projectD);
-        StoreProjectVersionData changedProjectA = projectsVersionsStore.find(TEST_GROUP,"artifacta","master-SNAPSHOT").get();
+        StoreProjectVersionData changedProjectA = projectsVersionsStore.find(TEST_GROUP,"artifacta",MASTER_SNAPSHOT).get();
         changedProjectA.getVersionData().addDependency(new ProjectVersion(TEST_GROUP, "artifactd", "1.0.0"));
         projectsVersionsStore.createOrUpdate(changedProjectA);
 

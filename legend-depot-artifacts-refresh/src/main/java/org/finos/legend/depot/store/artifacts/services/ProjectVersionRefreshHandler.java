@@ -115,7 +115,9 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         {
             StoreProjectData newProject = new StoreProjectData(versionEvent.getProjectId(), versionEvent.getGroupId(), versionEvent.getArtifactId());
             projects.createOrUpdate(newProject);
-            response.addMessage(String.format("New project %s created with coordinates %s-%s", newProject.getProjectId(), newProject.getGroupId(), newProject.getArtifactId()));
+            String newProjectMessage = String.format("New project %s created with coordinates %s-%s", newProject.getProjectId(), newProject.getGroupId(), newProject.getArtifactId());
+            response.addMessage(newProjectMessage);
+            LOGGER.info(newProjectMessage);
         }
         return response.combine(process(versionEvent));
     }
@@ -125,13 +127,23 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
     {
         List<String> errors = new ArrayList<>();
 
-        if (!CoordinateValidator.isValidGroupId(event.getGroupId()) || !CoordinateValidator.isValidArtifactId(event.getArtifactId()))
+        if (!CoordinateValidator.isValidGroupId(event.getGroupId()))
         {
-            errors.add(String.format("invalid groupId %s or artifactId %s",event.getGroupId(),event.getArtifactId()));
+            errors.add(String.format("invalid groupId [%s]",event.getGroupId()));
         }
-        if (!MASTER_SNAPSHOT.equals(event.getVersionId()) && !VersionValidator.isValid(event.getVersionId()))
+        if (!CoordinateValidator.isValidArtifactId(event.getArtifactId()))
         {
-            errors.add(String.format("invalid versionId %s ",event.getVersionId()));
+            errors.add(String.format("invalid artifactId [%s]",event.getArtifactId()));
+        }
+        if (!VersionValidator.isValid(event.getVersionId()))
+        {
+            errors.add(String.format("invalid versionId [%s]",event.getVersionId()));
+        }
+
+        Optional<StoreProjectData> projectData = projects.findCoordinates(event.getGroupId(),event.getArtifactId());
+        if (projectData.isPresent() && projectData.get().getProjectId() != null && !projectData.get().getProjectId().equals(event.getProjectId()))
+        {
+            errors.add(String.format("Invalid projectId [%s]. Existing project [%s] has same [%s-%s] coordinates",event.getProjectId(),projectData.get().getProjectId(),event.getGroupId(),event.getArtifactId()));
         }
         return errors;
     }
@@ -151,25 +163,26 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         MetadataEventResponse response = new MetadataEventResponse();
         if (!projects.findCoordinates(groupId, artifactId).isPresent())
         {
-            response.addError(String.format("No Project found for %s-%s", groupId, artifactId));
+            String missingProject = String.format("No Project with coordinates %s-%s found", groupId, artifactId);
+            response.addError(missingProject);
+            LOGGER.error(missingProject);
         }
         else
         {
-            if (!MASTER_SNAPSHOT.equals(versionId))
+            try
             {
-                try
+                if (!this.repositoryServices.findVersion(groupId, artifactId, versionId).isPresent())
                 {
-                    if (!this.repositoryServices.findVersion(groupId, artifactId,versionId).isPresent())
-                    {
-                        response.addError(String.format("Version %s does not exists for %s-%s", versionId, groupId, artifactId));
-                        return response;
-                    }
+                    String missingVersion = String.format("Version %s does not exists for %s-%s", versionId, groupId, artifactId);
+                    response.addError(missingVersion);
+                    LOGGER.error(missingVersion);
+                    return response;
                 }
-                catch (ArtifactRepositoryException e)
-                {
-                    PrometheusMetricsFactory.getInstance().incrementCount(REPO_EXCEPTIONS);
-                    response.addError(e.getMessage());
-                }
+            }
+            catch (ArtifactRepositoryException e)
+            {
+                PrometheusMetricsFactory.getInstance().incrementCount(REPO_EXCEPTIONS);
+                response.addError(e.getMessage());
             }
         }
         return response;

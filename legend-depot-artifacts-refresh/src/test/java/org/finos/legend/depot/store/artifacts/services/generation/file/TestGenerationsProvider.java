@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -67,7 +68,7 @@ public class TestGenerationsProvider extends TestStoreMongo
     public void setup()
     {
        when(projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID)).thenReturn(Optional.of(new StoreProjectData(PRODUCT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID)));
-       when(projectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT")).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT")));
+       when(projectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT)).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT)));
         when(projectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0")).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0")));
     }
 
@@ -102,7 +103,7 @@ public class TestGenerationsProvider extends TestStoreMongo
         Assert.assertTrue(generations.getAll().isEmpty());
         FileGenerationHandlerImpl handler = new FileGenerationHandlerImpl(repository, fileGenerationsProvider, generations);
         StoreProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
-        MetadataEventResponse response = handler.refreshProjectRevisionArtifacts(projectData, getFiles(VersionValidator.MASTER_SNAPSHOT));
+        MetadataEventResponse response = handler.refreshProjectRevisionArtifacts(projectData, getFiles(MASTER_SNAPSHOT));
         Assert.assertNotNull(response);
         Assert.assertFalse(response.hasErrors());
         List<StoredFileGeneration> fileGenerations = generations.getAll();
