@@ -18,13 +18,15 @@ package org.finos.legend.depot.domain.version;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public class TestVersionValidator
 {
     @Test
     public void testVersionsAreCorrect()
     {
         Assert.assertTrue(VersionValidator.isValid("1.1.1"));
-        Assert.assertTrue(VersionValidator.isValid("master-SNAPSHOT"));
+        Assert.assertTrue(VersionValidator.isValid(MASTER_SNAPSHOT));
         Assert.assertFalse(VersionValidator.isValid("jkwhfkjasf-jhdfjks"));
     }
 

@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import static org.finos.legend.depot.store.mongo.core.BaseMongo.convert;
 
 public class TestProjectVersionMigrations extends TestStoreMongo
@@ -94,7 +95,7 @@ public class TestProjectVersionMigrations extends TestStoreMongo
         StoreProjectVersionData result = convert(new ObjectMapper(),mongoProvider.getCollection("versions").find().first(), StoreProjectVersionData.class);
         Assert.assertEquals(result.getGroupId(), "examples.metadata");
         Assert.assertEquals(result.getArtifactId(), "test");
-        Assert.assertEquals(result.getVersionId(), "master-SNAPSHOT");
+        Assert.assertEquals(result.getVersionId(), MASTER_SNAPSHOT);
     }
 
     @Test

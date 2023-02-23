@@ -150,10 +150,13 @@ public final class NotificationsQueueManager implements NotificationsManager
     {
         PrometheusMetricsFactory.getInstance().incrementCount(NOTIFICATIONS_COUNTER);
         validateMavenCoordinates(projectId, groupId, artifactId);
-        //we create a notification event with fullUpdate/transitive flag set to false(ie partial update)
-        //this means, it will only process changed jar files and will only handle those entities,etc
+        //create a notification event with fullUpdate/transitive flag = false/false
+        //it means, it will only process changed master-SNAPSHOT jar files and wont force dependencies to load
         MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId,false,false, null, EventPriority.HIGH);
-        return queue.push(event);
+        String eventId = queue.push(event);
+        TracerFactory.get().log("eventId=" + eventId);
+        LOGGER.info("Notification received : project[{}] [{}-{}-{}], eventId:[{}]",projectId,groupId,artifactId,versionId,eventId);
+        return eventId;
     }
 
     @Override

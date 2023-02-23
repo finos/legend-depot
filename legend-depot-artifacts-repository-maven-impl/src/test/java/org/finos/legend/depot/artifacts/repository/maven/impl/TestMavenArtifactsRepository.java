@@ -28,20 +28,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public class TestMavenArtifactsRepository extends MavenArtifactRepository implements ArtifactRepository
 {
     public static final String SEPARATOR = "/";
     public static final String DOT = ".";
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TestMavenArtifactsRepository.class);
-    private static Map<String, List<VersionId>> TESTING_VERSIONS = new HashMap<>();
+    private static Map<String, List<String>> TESTING_VERSIONS = new HashMap<>();
 
     static
     {
-        TESTING_VERSIONS.put("examples.metadata.test", Arrays.asList(
-                VersionId.parseVersionId("2.0.0"),
-                VersionId.parseVersionId("1.0.0")));
-        TESTING_VERSIONS.put("examples.metadata.test-dependencies", Arrays.asList(VersionId.parseVersionId("1.0.0")));
+        TESTING_VERSIONS.put("examples.metadata.test", Arrays.asList(MASTER_SNAPSHOT, "2.0.0", "1.0.0"));
+        TESTING_VERSIONS.put("examples.metadata.test-dependencies", Arrays.asList(MASTER_SNAPSHOT,"1.0.0"));
+        TESTING_VERSIONS.put("examples.metadata.art101", Arrays.asList(MASTER_SNAPSHOT));
     }
 
     public TestMavenArtifactsRepository()
@@ -52,13 +54,13 @@ public class TestMavenArtifactsRepository extends MavenArtifactRepository implem
     @Override
     public List<VersionId> findVersions(String group, String artifact)
     {
-        return TESTING_VERSIONS.getOrDefault(group + DOT + artifact, Collections.emptyList());
+        return TESTING_VERSIONS.getOrDefault(group + DOT + artifact, Collections.emptyList()).stream().filter(v -> !v.equals(MASTER_SNAPSHOT)).map(v -> VersionId.parseVersionId(v)).collect(Collectors.toList());
     }
 
     @Override
     public Optional<String> findVersion(String group, String artifact, String versionId) throws ArtifactRepositoryException
     {
-        return TESTING_VERSIONS.getOrDefault(group + DOT + artifact, Collections.emptyList()).stream().filter(v -> v.toVersionIdString().equals(versionId)).map(v -> v.toVersionIdString()).findFirst();
+        return TESTING_VERSIONS.getOrDefault(group + DOT + artifact, Collections.emptyList()).stream().filter(v -> v.equals(versionId)).findFirst();
     }
 
     @Override

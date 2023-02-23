@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,14 +69,14 @@ public class TestFileGenerationsService extends TestStoreMongo
                 if (gen.getPath().startsWith("/examples/metadata"))
                 {
                     FileGeneration generation = new FileGeneration(gen.getPath(), gen.getContent());
-                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test",  VersionValidator.MASTER_SNAPSHOT, null, null, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test",  MASTER_SNAPSHOT, null, null, generation));
                     generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.0", "examples::metadata::test::ClientBasic", null, generation));
                     generations.createOrUpdate(new StoredFileGeneration("group.test.otherproject", "test", "1.0.0", "examples::metadata::test::ClientBasic", null, generation));
                 }
                 else
                 {
                     FileGeneration generation = new FileGeneration(gen.getPath().replace("examples_avrogen/", ""), gen.getContent());
-                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test", VersionValidator.MASTER_SNAPSHOT, "examples::avrogen", AVRO, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test", MASTER_SNAPSHOT, "examples::avrogen", AVRO, generation));
                     generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.1", "examples::avrogen", AVRO, generation));
                     generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.0", "examples::avrogen", AVRO, generation));
                     generations.createOrUpdate(new StoredFileGeneration("group.test.otherproject", "test", "1.0.0", "examples::avrogen1", AVRO, generation));
@@ -87,7 +88,7 @@ public class TestFileGenerationsService extends TestStoreMongo
 
         when(projectsStore.find("group.test","test")).thenReturn(Optional.of(new StoreProjectData("prod-1","group.test","test")));
         when(projectsStore.find("group.test.otherproject", "test")).thenReturn(Optional.of(new StoreProjectData("prod-2","group.test.otherproject", "test")));
-        when(projectsVersionsStore.find("group.test","test","master-SNAPSHOT")).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test","master-SNAPSHOT")));
+        when(projectsVersionsStore.find("group.test","test",MASTER_SNAPSHOT)).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test",MASTER_SNAPSHOT)));
         when(projectsVersionsStore.find("group.test","test","1.0.0")).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test","1.0.0")));
         when(projectsVersionsStore.find("i.dont","exist","version")).thenReturn(Optional.empty());
         when(projectsVersionsStore.find("group.test.otherproject", "test","1.0.0")).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test","1.0.0")));
