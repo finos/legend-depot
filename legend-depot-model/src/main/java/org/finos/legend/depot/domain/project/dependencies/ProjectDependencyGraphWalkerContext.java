@@ -21,7 +21,7 @@ import org.eclipse.collections.api.factory.Sets;
 import org.eclipse.collections.api.map.ConcurrentMutableMap;
 import org.eclipse.collections.api.map.MutableMap;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
-import org.finos.legend.depot.domain.VersionedData;
+import org.finos.legend.depot.domain.CoordinateData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 
@@ -32,14 +32,14 @@ import java.util.Set;
 public class ProjectDependencyGraphWalkerContext
 {
     private final ConcurrentMutableMap<ProjectVersion, List<ProjectVersion>> projectVersionToDependencyMap = new ConcurrentHashMap<>();
-    private final MutableMap<DependencyProject, StoreProjectVersionData> projectDataMap = Maps.mutable.empty();
+    private final MutableMap<ProjectVersion, StoreProjectVersionData> projectDataMap = Maps.mutable.empty();
     private final MutableMap<DependencyProject, Set<ProjectVersion>> projectToVersions = Maps.mutable.empty();
 
-    public static class DependencyProject extends VersionedData
+    public static class DependencyProject extends CoordinateData
     {
-        DependencyProject(String groupId, String artifactId, String versionId)
+        DependencyProject(String groupId, String artifactId)
         {
-            super(groupId, artifactId, versionId);
+            super(groupId, artifactId);
         }
     }
 
@@ -53,9 +53,9 @@ public class ProjectDependencyGraphWalkerContext
         return projectToVersions;
     }
 
-    public void addVersionToProject(String groupId, String artifactId, String versionId, ProjectVersion version)
+    public void addVersionToProject(String groupId, String artifactId, ProjectVersion version)
     {
-        this.projectToVersions.getIfAbsentPut(new DependencyProject(groupId, artifactId, versionId), Sets.mutable.empty()).add(version);
+        this.projectToVersions.getIfAbsentPut(new DependencyProject(groupId, artifactId), Sets.mutable.empty()).add(version);
     }
 
     public ConcurrentMutableMap<ProjectVersion, List<ProjectVersion>> getProjectVersionToDependencyMap()
@@ -65,12 +65,12 @@ public class ProjectDependencyGraphWalkerContext
 
     public StoreProjectVersionData getProjectDataPutIfAbsent(String groupId, String artifactId, String versionId, Function0<? extends StoreProjectVersionData> projectDataGetter)
     {
-        return this.projectDataMap.getIfAbsentPut(new DependencyProject(groupId, artifactId, versionId), projectDataGetter);
+        return this.projectDataMap.getIfAbsentPut(new ProjectVersion(groupId, artifactId, versionId), projectDataGetter);
     }
 
     public StoreProjectVersionData getProjectData(String groupId, String artifactId, String versionId)
     {
-        return this.projectDataMap.get(new DependencyProject(groupId, artifactId, versionId));
+        return this.projectDataMap.get(new ProjectVersion(groupId, artifactId, versionId));
     }
 
 }

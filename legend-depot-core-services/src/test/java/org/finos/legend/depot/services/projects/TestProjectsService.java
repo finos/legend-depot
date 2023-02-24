@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.services.projects;
 
+import org.eclipse.collections.api.factory.Sets;
 import org.eclipse.collections.api.map.MutableMap;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
@@ -156,6 +157,32 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertFalse(projectsService.getDependencies("examples.metadata", "test", "2.3.1", false).contains(new ProjectVersion("example.services.test", "test", "1.0.0")));
 
     }
+
+    @Test
+    public void canGetProjectDependenciesWithConflicts()
+    {
+        Set<ProjectVersion> dependencyList = projectsService.getDependencies("examples.metadata", "test", "2.3.1", false);
+        Assert.assertFalse(dependencyList.isEmpty());
+        Assert.assertTrue(dependencyList.contains(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0")));
+
+        Set<ProjectVersion> dependencyList2 = projectsService.getDependencies("examples.metadata", "test", "2.3.1", true);
+        Assert.assertFalse(dependencyList2.isEmpty());
+        Assert.assertTrue(dependencyList2.contains(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0")));
+        Assert.assertTrue(dependencyList2.contains(new ProjectVersion("example.services.test", "test", "1.0.0")));
+        Assert.assertFalse(projectsService.getDependencies("examples.metadata", "test", "2.3.1", false).contains(new ProjectVersion("example.services.test", "test", "2.0.1")));
+        StoreProjectVersionData projectA = projectsService.find("example.services.test", "test", "1.0.0").get();
+        StoreProjectVersionData projectB = new StoreProjectVersionData("examples.metadata", "test-dependencies", "2.0.0");
+        projectA.getVersionData().addDependency(new ProjectVersion("examples.metadata", "test-dependencies", "2.0.0"));
+        projectsService.createOrUpdate(projectB);
+        projectsService.createOrUpdate(projectA);
+
+        // Dependency Tree
+        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReport("examples.metadata", "test", "2.3.1");
+
+        Assert.assertEquals(1, dependencyReport.getConflicts().size());
+        Assert.assertEquals(dependencyReport.getConflicts().get(0).getVersions(), Sets.mutable.of("examples.metadata:test-dependencies:1.0.0","examples.metadata:test-dependencies:2.0.0"));
+    }
+
 
     @Test
     public void canGetDependantProjects()
