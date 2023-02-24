@@ -79,9 +79,9 @@ public class TestDependencyCache extends TestBaseServices
         Assert.assertTrue(dependenciesCache.transitiveDependencies.keySet().stream().anyMatch(pv -> pv.equals(new ProjectVersion(TEST_GROUP,"artifactc","1.0.0"))));
         Assert.assertTrue(dependenciesCache.transitiveDependencies.keySet().stream().anyMatch(pv -> pv.equals(new ProjectVersion(TEST_GROUP,"artifacta","1.0.0"))));
         Assert.assertTrue(dependenciesCache.transitiveDependencies.keySet().stream().anyMatch(pv -> pv.equals(new ProjectVersion(TEST_GROUP,"artifacta","2.0.0"))));
-        Assert.assertEquals(2,dependenciesCache.transitiveDependencies.get(new ProjectVersion(TEST_GROUP,"artifacta","2.0.0")).size());
-        Assert.assertEquals(1,dependenciesCache.transitiveDependencies.get(new ProjectVersion(TEST_GROUP,"artifactb","1.0.0")).size());
-        Assert.assertTrue(dependenciesCache.transitiveDependencies.get(new ProjectVersion(TEST_GROUP,"artifactc","1.0.0")).isEmpty());
+        Assert.assertEquals(2,dependenciesCache.transitiveDependencies.get(new ProjectVersion(TEST_GROUP,"artifacta","2.0.0")).getProjectVersion().size());
+        Assert.assertEquals(1,dependenciesCache.transitiveDependencies.get(new ProjectVersion(TEST_GROUP,"artifactb","1.0.0")).getProjectVersion().size());
+        Assert.assertTrue(dependenciesCache.transitiveDependencies.get(new ProjectVersion(TEST_GROUP,"artifactc","1.0.0")).getProjectVersion().isEmpty());
         Assert.assertTrue(dependenciesCache.transitiveDependencies.keySet().stream().anyMatch(pv -> pv.equals(new ProjectVersion(TEST_GROUP,"artifactb","1.0.0"))));
     }
 
@@ -133,13 +133,15 @@ public class TestDependencyCache extends TestBaseServices
         DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
         Assert.assertEquals(4, dependenciesCache.transitiveDependencies.size());
         ProjectVersion unknownProject = new ProjectVersion(TEST_GROUP, "artifactd", "1.0.0");
-        dependenciesCache.getTransitiveDependencies(unknownProject);
-        //we might end up with dirty entries for wrong projects or versions in the cache but we need speed
-        //we must absolutely return empty dependencies
-        Assert.assertFalse(dependenciesCache.transitiveDependencies.isEmpty());
-        Assert.assertEquals(5, dependenciesCache.transitiveDependencies.size());
-        Assert.assertTrue(dependenciesCache.transitiveDependencies.keySet().stream().anyMatch(pv -> pv.equals(unknownProject)));
-        Assert.assertTrue(dependenciesCache.transitiveDependencies.get(unknownProject).isEmpty());
+        try
+        {
+            dependenciesCache.getTransitiveDependencies(unknownProject);
+            Assert.assertTrue(false);
+        }
+        catch (RuntimeException e)
+        {
+            Assert.assertTrue(true);
+        }
     }
 
     @Test
@@ -149,12 +151,15 @@ public class TestDependencyCache extends TestBaseServices
         DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
         Assert.assertEquals(4, dependenciesCache.transitiveDependencies.size());
         ProjectVersion unknownVersion = new ProjectVersion(TEST_GROUP, "artifacta", "10.0.0");
-        dependenciesCache.getTransitiveDependencies(unknownVersion);
-
-        Assert.assertFalse(dependenciesCache.transitiveDependencies.isEmpty());
-        Assert.assertEquals(5, dependenciesCache.transitiveDependencies.size());
-        Assert.assertTrue(dependenciesCache.transitiveDependencies.keySet().stream().anyMatch(pv -> pv.equals(unknownVersion)));
-        Assert.assertTrue(dependenciesCache.transitiveDependencies.get(unknownVersion).isEmpty());
+        try
+        {
+            dependenciesCache.getTransitiveDependencies(unknownVersion);
+            Assert.assertTrue(false);
+        }
+        catch (RuntimeException e)
+        {
+            Assert.assertTrue(true);
+        }
     }
 
     @Test
@@ -173,7 +178,44 @@ public class TestDependencyCache extends TestBaseServices
 
         Assert.assertFalse(dependenciesCache.transitiveDependencies.isEmpty());
         Assert.assertEquals(5,dependenciesCache.transitiveDependencies.size());
-        Assert.assertEquals(1,dependenciesCache.transitiveDependencies.get(projectDVersion1).size());
+        Assert.assertEquals(1,dependenciesCache.transitiveDependencies.get(projectDVersion1).getProjectVersion().size());
+    }
+
+    @Test
+    public void getDependenciesForNewProjectVersionWithDependencyDoesNotExist()
+    {
+        seedTestData();
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
+        Assert.assertEquals(4, dependenciesCache.transitiveDependencies.size());
+        StoreProjectVersionData projectD = new StoreProjectVersionData(TEST_GROUP,"artifactd","1.0.0");
+        ProjectVersion projectDVersion1 = new ProjectVersion(TEST_GROUP, "artifactd", "1.0.0");
+        ProjectVersion newProjectDependency = new ProjectVersion(TEST_GROUP, "dummyDep", "1.0.0");
+        projectD.getVersionData().addDependency(newProjectDependency);
+        projectsVersionsStore.createOrUpdate(projectD);
+
+        try
+        {
+            dependenciesCache.getTransitiveDependencies(projectDVersion1);
+            Assert.assertTrue(false);
+        }
+        catch (RuntimeException e)
+        {
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void initializeCacheWithNotPresentDependencies()
+    {
+        seedTestData();
+        StoreProjectVersionData projectB = projectsVersionsStore.find(TEST_GROUP,"artifacta","1.0.0").get();
+        projectB.getVersionData().addDependency(new ProjectVersion(TEST_GROUP, "artifactd", "1.0.0"));
+        projectsVersionsStore.createOrUpdate(projectB);
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
+        Assert.assertEquals(dependenciesCache.transitiveDependencies.get(new ProjectVersion(TEST_GROUP,"artifacta","1.0.0")).getStatus(), DependenciesCache.DependencyStatus.FAIL);
+        Assert.assertEquals(dependenciesCache.transitiveDependencies.get(new ProjectVersion(TEST_GROUP,"artifactd","1.0.0")).getStatus(), DependenciesCache.DependencyStatus.FAIL);
+        Assert.assertEquals(dependenciesCache.transitiveDependencies.get(new ProjectVersion(TEST_GROUP,"artifactb","1.0.0")).getStatus(), DependenciesCache.DependencyStatus.SUCCESS);
+        Assert.assertEquals(dependenciesCache.transitiveDependencies.values().size(), 5);
     }
 
     @Test
@@ -193,7 +235,7 @@ public class TestDependencyCache extends TestBaseServices
         dependenciesCache.getTransitiveDependencies(masterSNAPSHOTVersion);
 
         Assert.assertEquals(5,dependenciesCache.transitiveDependencies.size());
-        Assert.assertEquals(2,dependenciesCache.transitiveDependencies.get(masterSNAPSHOTVersion).size());
+        Assert.assertEquals(2,dependenciesCache.transitiveDependencies.get(masterSNAPSHOTVersion).getProjectVersion().size());
 
 
         StoreProjectVersionData projectD = new StoreProjectVersionData(TEST_GROUP, "artifactd", "1.0.0");
@@ -205,7 +247,7 @@ public class TestDependencyCache extends TestBaseServices
         dependenciesCache.getTransitiveDependencies(masterSNAPSHOTVersion);
 
         Assert.assertEquals(6,dependenciesCache.transitiveDependencies.size());
-        Assert.assertEquals(3,dependenciesCache.transitiveDependencies.get(masterSNAPSHOTVersion).size());
+        Assert.assertEquals(3,dependenciesCache.transitiveDependencies.get(masterSNAPSHOTVersion).getProjectVersion().size());
 
     }
 
