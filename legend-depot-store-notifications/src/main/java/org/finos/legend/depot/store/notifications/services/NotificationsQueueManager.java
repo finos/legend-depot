@@ -28,6 +28,7 @@ import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.slf4j.Logger;
+import sun.jvm.hotspot.debugger.win32.coff.DebugVC50SSSrcLnSeg;
 
 import javax.inject.Inject;
 import java.time.LocalDateTime;
@@ -136,27 +137,27 @@ public final class NotificationsQueueManager implements NotificationsManager
         }
     }
 
-    private void validateMavenCoordinates(String projectId, String groupId, String artifactId)
-    {
-        Optional<StoreProjectData> project = projectsService.findCoordinates(groupId, artifactId);
-        if (project.isPresent() && !project.get().getProjectId().equals(projectId))
-        {
-            throw new IllegalArgumentException(String.format("%s:%s coordinates already registered with project %s", groupId, artifactId, project.get().getProjectId()));
-        }
-    }
 
     @Override
     public String notify(String projectId, String groupId, String artifactId, String versionId)
     {
         PrometheusMetricsFactory.getInstance().incrementCount(NOTIFICATIONS_COUNTER);
-        validateMavenCoordinates(projectId, groupId, artifactId);
         //create a notification event with fullUpdate/transitive flag = false/false
         //it means, it will only process changed master-SNAPSHOT jar files and wont force dependencies to load
         MetadataNotification event = new MetadataNotification(projectId, groupId, artifactId, versionId,false,false, null, EventPriority.HIGH);
-        String eventId = queue.push(event);
-        TracerFactory.get().log("eventId=" + eventId);
-        LOGGER.info("Notification received : project[{}] [{}-{}-{}], eventId:[{}]",projectId,groupId,artifactId,versionId,eventId);
-        return eventId;
+        List<String> validationResponse = eventHandler.validateEvent(event);
+        if (validationResponse.isEmpty())
+        {
+            String eventId = queue.push(event);
+            TracerFactory.get().log("eventId=" + eventId);
+            LOGGER.info("Notification received : project[{}] [{}-{}-{}], eventId:[{}]", projectId, groupId, artifactId, versionId, eventId);
+            return eventId;
+        }
+        else
+        {
+            return String.format("Notification failed validation : project[{}] [{}-{}-{}]",projectId, groupId, artifactId, versionId, String.join(",",validationResponse));
+        }
+
     }
 
     @Override
