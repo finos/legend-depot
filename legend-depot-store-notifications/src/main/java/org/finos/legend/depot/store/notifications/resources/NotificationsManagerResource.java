@@ -36,6 +36,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -136,13 +137,12 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     @GET
     @Path("/queue/{projectId}/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.ENQUEUE_EVENT)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String queueEvent(@PathParam("projectId") String projectId,
+    public Response queueEvent(@PathParam("projectId") String projectId,
                              @PathParam("groupId") String groupId,
                              @PathParam("artifactId") String artifactId,
                              @PathParam("versionId") String versionId)
     {
-        return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId));
+        return Response.ok().entity(handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId))).build();
     }
 
     @DELETE
