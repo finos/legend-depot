@@ -165,7 +165,7 @@ public class ProjectsServiceImpl implements ProjectsService
             if (!graph.hasNode(projectVersion))
             {
                 graph.addNode(projectVersion, parent);
-                context.addVersionToProject(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId(), projectVersion);
+                context.addVersionToProject(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion);
                 if (!context.getProjectVersionToDependencyMap().containsKey(projectVersion))
                 {
                     StoreProjectVersionData projectData =  context.getProjectDataPutIfAbsent(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId(), () -> getProject(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()));
