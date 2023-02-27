@@ -136,29 +136,24 @@ public final class DependenciesCache
             {
                 throw new RuntimeException(String.format("Error fetching dependencies for %s", pv.getGav()));
             }
-            this.transitiveDependencies.put(pv,depResult);
+            this.transitiveDependencies.put(pv, depResult);
             return depResult.getProjectVersion();
         }
         else
         {
-            DependencyResult depResult  = this.transitiveDependencies.get(pv);
-            if (depResult == null)
+            DependencyResult depResult = this.transitiveDependencies.getIfAbsentPut(pv, () ->
             {
                 absentKeys.getAndIncrement();
-                depResult = calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());
-                this.transitiveDependencies.put(pv, depResult);
-            }
-            else
-            {
-                if (depResult.status == DependencyStatus.FAIL)
-                {
-                    absentKeys.getAndIncrement();
-                    this.transitiveDependencies.put(pv, calculateTransitiveDependencies(pv, getProjectVersionDataFromStore()));
-                }
-            }
+                return calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());
+            });
             if (depResult.status == DependencyStatus.FAIL)
             {
-                throw new RuntimeException(String.format("Error fetching dependencies for %s", pv.getGav()));
+                depResult = calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());
+                this.transitiveDependencies.put(pv, depResult);
+                if (depResult.status == DependencyStatus.FAIL)
+                {
+                    throw new RuntimeException(String.format("Error fetching dependencies for %s", pv.getGav()));
+                }
             }
             return depResult.getProjectVersion();
         }
