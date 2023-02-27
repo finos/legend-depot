@@ -56,7 +56,7 @@ public final class DependenciesCache
             Stream<ProjectVersion> versionWithDependencies = allProjectsVersions.stream().filter(p -> !p.getVersionId().equals(MASTER_SNAPSHOT) && !p.getVersionData().getDependencies().isEmpty()).map(pv -> new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()));
             LOGGER.info("Initialising dependencies cache");
             Map<String, StoreProjectVersionData> projectDataMap = allProjectsVersions.stream().collect(Collectors.toMap(p -> p.getGroupId() + p.getArtifactId() + p.getVersionId(), Function.identity()));
-            versionWithDependencies.forEach(pv -> transitiveDependencies.put(pv, calculateTransitiveDependencies(pv, projectDataMap, DependencyStatus.SUCCESS)));
+            versionWithDependencies.forEach(pv -> transitiveDependencies.put(pv, calculateTransitiveDependencies(pv, projectDataMap)));
             LOGGER.info("Total [{}] keys in cache",transitiveDependencies.keySet().size());
         }
         catch (Exception e)
@@ -84,12 +84,12 @@ public final class DependenciesCache
         return (group, artifact, versionId) -> projectDataMap.get(group + artifact + versionId);
     }
 
-    private DependencyResult calculateTransitiveDependencies(ProjectVersion projectVersion, Map<String, StoreProjectVersionData> projectDataMap, DependencyStatus status)
+    private DependencyResult calculateTransitiveDependencies(ProjectVersion projectVersion, Map<String, StoreProjectVersionData> projectDataMap)
     {
-        return calculateTransitiveDependencies(projectVersion, getProjectVersionDataFromProjectsMap(projectDataMap), status);
+        return calculateTransitiveDependencies(projectVersion, getProjectVersionDataFromProjectsMap(projectDataMap));
     }
 
-    private DependencyResult calculateTransitiveDependencies(ProjectVersion pv, Function3<String,String,String,StoreProjectVersionData> projectDataProvider, DependencyStatus status)
+    private DependencyResult calculateTransitiveDependencies(ProjectVersion pv, Function3<String,String,String,StoreProjectVersionData> projectDataProvider)
     {
         Set<ProjectVersion> dependencies = new HashSet<>();
         try
@@ -103,7 +103,7 @@ public final class DependenciesCache
                     DependencyResult deps = this.transitiveDependencies.getIfAbsentPut(dep,() ->
                     {
                         absentKeys.getAndIncrement();
-                        return calculateTransitiveDependencies(dep, projectDataProvider, status);
+                        return calculateTransitiveDependencies(dep, projectDataProvider);
                     });
                     if (deps.getStatus() == DependencyStatus.FAIL)
                     {
@@ -123,7 +123,7 @@ public final class DependenciesCache
             LOGGER.error("error getting transitive dependencies {}",e.getMessage());
             return new DependencyResult(DependencyStatus.FAIL, dependencies);
         }
-        return new DependencyResult(status, dependencies);
+        return new DependencyResult(DependencyStatus.SUCCESS, dependencies);
     }
 
     public Set<ProjectVersion> getTransitiveDependencies(ProjectVersion pv)
@@ -131,7 +131,7 @@ public final class DependenciesCache
         if (pv.getVersionId().equals(MASTER_SNAPSHOT))
         {
             absentKeys.getAndIncrement();
-            DependencyResult depResult = calculateTransitiveDependencies(pv, getProjectVersionDataFromStore(), DependencyStatus.SUCCESS);
+            DependencyResult depResult = calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());
             if (depResult.status == DependencyStatus.FAIL)
             {
                 throw new RuntimeException(String.format("Error fetching dependencies for %s", pv.getGav()));
@@ -141,11 +141,21 @@ public final class DependenciesCache
         }
         else
         {
-            DependencyResult depResult = this.transitiveDependencies.getIfAbsentPut(pv, () ->
+            DependencyResult depResult  = this.transitiveDependencies.get(pv);
+            if (depResult == null)
             {
                 absentKeys.getAndIncrement();
-                return calculateTransitiveDependencies(pv, getProjectVersionDataFromStore(), DependencyStatus.SUCCESS);
-            });
+                depResult = calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());
+                this.transitiveDependencies.put(pv, depResult);
+            }
+            else
+            {
+                if (depResult.status == DependencyStatus.FAIL)
+                {
+                    absentKeys.getAndIncrement();
+                    this.transitiveDependencies.put(pv, calculateTransitiveDependencies(pv, getProjectVersionDataFromStore()));
+                }
+            }
             if (depResult.status == DependencyStatus.FAIL)
             {
                 throw new RuntimeException(String.format("Error fetching dependencies for %s", pv.getGav()));
