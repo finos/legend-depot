@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URL;
+import java.util.Set;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
@@ -201,6 +202,34 @@ public class TestDependencyCache extends TestBaseServices
         catch (RuntimeException e)
         {
             Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void initializeDependencyCacheWithRetryMechanism()
+    {
+        seedTestData();
+        DependenciesCache dependenciesCache = new DependenciesCache(projectsVersionsStore);
+        Assert.assertEquals(4, dependenciesCache.transitiveDependencies.size());
+        StoreProjectVersionData projectD = new StoreProjectVersionData(TEST_GROUP,"artifactd","1.0.0");
+        ProjectVersion projectDVersion1 = new ProjectVersion(TEST_GROUP, "artifactd", "1.0.0");
+        ProjectVersion newProjectDependency = new ProjectVersion(TEST_GROUP, "artifacte", "1.0.0");
+        projectD.getVersionData().addDependency(newProjectDependency);
+        projectsVersionsStore.createOrUpdate(projectD);
+
+        try
+        {
+            dependenciesCache.getTransitiveDependencies(projectDVersion1);
+            Assert.assertTrue(false);
+        }
+        catch (RuntimeException e)
+        {
+            Assert.assertTrue(true);
+            StoreProjectVersionData projectE = new StoreProjectVersionData(TEST_GROUP, "artifacte", "1.0.0");
+            projectsVersionsStore.createOrUpdate(projectE);
+            dependenciesCache.getTransitiveDependencies(newProjectDependency);
+            Set<ProjectVersion> dep = dependenciesCache.getTransitiveDependencies(projectDVersion1);
+            Assert.assertEquals(dep.size(), 1);
         }
     }
 
