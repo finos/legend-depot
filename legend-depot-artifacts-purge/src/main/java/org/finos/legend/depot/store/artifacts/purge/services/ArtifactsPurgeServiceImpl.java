@@ -87,6 +87,8 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
         return found.get();
     }
 
+    //TODO: whenever we delete versions we need a way to recompute/deal with the dependencies cache for that project version
+
     @Override
     public void delete(String groupId, String artifactId, String versionId)
     {

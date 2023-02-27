@@ -16,6 +16,7 @@
 package org.finos.legend.depot.server.pure.model.context;
 
 import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
 import org.finos.legend.depot.server.pure.model.context.services.PureModelContextServiceImpl;
 import org.finos.legend.depot.services.TestBaseServices;
@@ -111,7 +112,8 @@ public class TestPureModelContextService extends TestBaseServices
     @Test
     public void canGetEntitiesForProjectAsPureModelContextData_WithDependencies()
     {
-
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata", "test-dependencies", "2.0.0"));
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata", "test", "3.0.0"));
         List<Entity> entityList1 = entitiesStore.getEntities("test.legend", "blank-prod", "2.0.0", true);
         List<Entity> entityList2 = entitiesStore.getEntities("examples.metadata", "test", "3.0.0", true);
         List<Entity> entityList3 = entitiesStore.getEntities("examples.metadata", "test-dependencies", "2.0.0", true);

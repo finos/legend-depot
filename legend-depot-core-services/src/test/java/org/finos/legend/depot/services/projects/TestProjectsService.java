@@ -138,21 +138,21 @@ public class TestProjectsService extends TestBaseServices
         // PROD-10357 -> PROD-10855-> PROD-19481
         // PROD-10357 -> PROD-123 -> PROD-19481
         StoreProjectVersionData project1 = projectsService.find("examples.metadata", "test", "2.3.1").get();
-        project1.getVersionData().addDependency(new ProjectVersion("example.group", "test.dups", "1.0.0"));
+        project1.getVersionData().addDependency(new ProjectVersion("example.group", "test-dups", "1.0.0"));
         projectsVersionsStore.createOrUpdate(project1);
 
         Set<ProjectVersion> dependencyList = projectsService.getDependencies("examples.metadata", "test", "2.3.1", false);
         Assert.assertFalse(dependencyList.isEmpty());
         Assert.assertEquals(2, dependencyList.size());
         Assert.assertTrue(dependencyList.contains(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0")));
-        Assert.assertTrue(dependencyList.contains(new ProjectVersion("example.group", "test.dups", "1.0.0")));
+        Assert.assertTrue(dependencyList.contains(new ProjectVersion("example.group", "test-dups", "1.0.0")));
 
         Set<ProjectVersion> dependencyList2 = projectsService.getDependencies("examples.metadata", "test", "2.3.1", true);
         Assert.assertFalse(dependencyList2.isEmpty());
         Assert.assertEquals(3, dependencyList2.size());
         Assert.assertTrue(dependencyList2.contains(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0")));
         Assert.assertTrue(dependencyList2.contains(new ProjectVersion("example.services.test", "test", "1.0.0")));
-        Assert.assertTrue(dependencyList2.contains(new ProjectVersion("example.group", "test.dups", "1.0.0")));
+        Assert.assertTrue(dependencyList2.contains(new ProjectVersion("example.group", "test-dups", "1.0.0")));
 
         Assert.assertFalse(projectsService.getDependencies("examples.metadata", "test", "2.3.1", false).contains(new ProjectVersion("example.services.test", "test", "1.0.0")));
 
