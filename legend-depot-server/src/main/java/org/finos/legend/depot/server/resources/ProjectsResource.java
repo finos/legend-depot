@@ -88,6 +88,15 @@ public class ProjectsResource extends BaseResource
     }
 
     @GET
+    @Path("/project-configurations/{groupId}/{artifactId}")
+    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CONFIG_BY_GA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Optional<StoreProjectData> getProjectCoordinates(@PathParam("groupId")String groupId, @PathParam("artifactId") String artifactId)
+    {
+        return handle(ResourceLoggingAndTracing.GET_PROJECT_CONFIG_BY_GA, () -> projectApi.findCoordinates(groupId, artifactId));
+    }
+
+    @GET
     @Path("/projects")
     @ApiOperation(ResourceLoggingAndTracing.GET_ALL_LEGACY_PROJECTS)
     @Produces(MediaType.APPLICATION_JSON)

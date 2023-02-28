@@ -18,6 +18,7 @@ package org.finos.legend.depot.services.projects;
 import org.eclipse.collections.api.factory.Sets;
 import org.eclipse.collections.api.map.MutableMap;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
@@ -203,6 +204,17 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertTrue(dependencyList3.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test-dependencies", "1.0.0", new ProjectVersion("example.services.test", "test", "1.0.0"), Collections.emptyList())));
         Assert.assertFalse(dependencyList3.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
 
+    }
+
+    @Test
+    public void canGetProjectCoordinatesByGA()
+    {
+        Optional<StoreProjectData> storeProjectData = projectsService.findCoordinates("examples.metadata", "test");
+        Assert.assertTrue(storeProjectData.isPresent());
+        Assert.assertEquals(storeProjectData.get(), new StoreProjectData("PROD-A", "examples.metadata", "test"));
+
+        Optional<StoreProjectData> storeProjectData1 = projectsService.findCoordinates("dummy.dep", "test");
+        Assert.assertFalse(storeProjectData1.isPresent());
     }
 
     @Test
