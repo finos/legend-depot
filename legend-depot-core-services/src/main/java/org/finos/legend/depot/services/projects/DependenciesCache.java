@@ -23,6 +23,7 @@ import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -120,8 +121,8 @@ public final class DependenciesCache
         }
         catch (Exception e)
         {
-            LOGGER.error("error getting transitive dependencies {}",e.getMessage());
-            return new DependencyResult(DependencyStatus.FAIL, dependencies);
+            LOGGER.error("error getting transitive dependencies for {}-{}-{} : {}",pv.getGroupId(),pv.getArtifactId(),pv.getVersionId(),e.getMessage());
+            return new DependencyResult(DependencyStatus.FAIL,e.getMessage());
         }
         return new DependencyResult(DependencyStatus.SUCCESS, dependencies);
     }
@@ -134,7 +135,9 @@ public final class DependenciesCache
             DependencyResult depResult = calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());
             if (depResult.status == DependencyStatus.FAIL)
             {
-                throw new RuntimeException(String.format("Error fetching dependencies for %s", pv.getGav()));
+                String message = String.format("getTransitiveDependencies %s failed: %s", pv.getGav(),depResult.errors);
+                LOGGER.error(message);
+                throw new RuntimeException(message);
             }
             this.transitiveDependencies.put(pv, depResult);
             return depResult.getProjectVersion();
@@ -152,7 +155,9 @@ public final class DependenciesCache
                 this.transitiveDependencies.put(pv, depResult);
                 if (depResult.status == DependencyStatus.FAIL)
                 {
-                    throw new RuntimeException(String.format("Error fetching dependencies for %s", pv.getGav()));
+                    String message = String.format("getTransitiveDependencies %s failed: %s", pv.getGav(),depResult.errors);
+                    LOGGER.error(message);
+                    throw new RuntimeException(message);
                 }
             }
             return depResult.getProjectVersion();
@@ -163,11 +168,18 @@ public final class DependenciesCache
     {
         private DependencyStatus status;
         private Set<ProjectVersion> projectVersion;
+        private String errors;
 
         DependencyResult(DependencyStatus status, Set<ProjectVersion> projectVersion)
         {
             this.status = status;
             this.projectVersion = projectVersion;
+        }
+
+        public DependencyResult(DependencyStatus status, String errorMessage)
+        {
+            this.status = status;
+            this.errors = errorMessage;
         }
 
         public DependencyStatus getStatus()
@@ -178,6 +190,11 @@ public final class DependenciesCache
         public Set<ProjectVersion> getProjectVersion()
         {
             return projectVersion;
+        }
+
+        public String getErrors()
+        {
+            return errors;
         }
     }
 
