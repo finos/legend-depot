@@ -137,12 +137,12 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     @GET
     @Path("/queue/{projectId}/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.ENQUEUE_EVENT)
-    public Response queueEvent(@PathParam("projectId") String projectId,
+    public String queueEvent(@PathParam("projectId") String projectId,
                              @PathParam("groupId") String groupId,
                              @PathParam("artifactId") String artifactId,
                              @PathParam("versionId") String versionId)
     {
-        return Response.ok().entity(handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId))).build();
+        return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId));
     }
 
     @DELETE

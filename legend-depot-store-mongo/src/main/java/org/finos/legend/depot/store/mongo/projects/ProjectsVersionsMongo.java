@@ -87,6 +87,12 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
     }
 
     @Override
+    public long getVersionCount(String groupId, String artifactId)
+    {
+        return count(getArtifactFilter(groupId,artifactId));
+    }
+
+    @Override
     public MetadataEventResponse delete(String groupId, String artifactId)
     {
         MetadataEventResponse response = new MetadataEventResponse();
