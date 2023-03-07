@@ -41,16 +41,13 @@ public class StoreStatus
         public String artifactId;
         @JsonProperty
         public long versions;
-        @JsonProperty
-        public String url;
 
-        public ProjectSummary(String projectId, String groupId, String artifactId, long versions, String url)
+        public ProjectSummary(String projectId, String groupId, String artifactId, long versions)
         {
             this.projectId = projectId;
             this.groupId = groupId;
             this.artifactId = artifactId;
             this.versions = versions;
-            this.url = url;
         }
 
         @JsonProperty(value = "mavenCoordinates")
@@ -126,8 +123,6 @@ public class StoreStatus
         public Date lastUpdated;
         @JsonProperty
         public boolean updating;
-        @JsonProperty
-        public String url;
         @JsonProperty
         public int queryCount;
         @JsonProperty

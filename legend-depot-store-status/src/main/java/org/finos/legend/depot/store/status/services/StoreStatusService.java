@@ -55,7 +55,7 @@ public class StoreStatusService
         List<StoreStatus.ProjectSummary> status = new ArrayList();
         projectsApi.getAll().forEach(p ->
         {
-            StoreStatus.ProjectSummary summry = new StoreStatus.ProjectSummary(p.getProjectId(), p.getGroupId(), p.getArtifactId(), projectVersionsApi.getVersions(p.getGroupId(), p.getArtifactId()).size(), "/projects/");
+            StoreStatus.ProjectSummary summry = new StoreStatus.ProjectSummary(p.getProjectId(), p.getGroupId(), p.getArtifactId(), projectVersionsApi.getVersionCount(p.getGroupId(), p.getArtifactId()));
             status.add(summry);
         });
         return status;
@@ -93,7 +93,6 @@ public class StoreStatusService
             }
             versionStatus.lastUpdated = updateStatus.getLastRun();
             versionStatus.updating = updateStatus.isRunning();
-            versionStatus.url = String.format("/projects/%s/%s/versions/%s", groupId, artifactId, v);
             projectStatus.addVersionStatus(versionStatus);
         });
 
@@ -101,7 +100,6 @@ public class StoreStatusService
         RefreshStatus revisionsUpdateStatus = statusService.get(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT).orElse(new RefreshStatus(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT));;
         masterRevisionStatus.lastUpdated = revisionsUpdateStatus.getLastRun();
         masterRevisionStatus.updating = revisionsUpdateStatus.isRunning();
-        masterRevisionStatus.url = String.format("/projects/%s/%s/revisions/latest", groupId, artifactId);
         projectStatus.setMasterRevisionStatus(masterRevisionStatus);
 
         return projectStatus;

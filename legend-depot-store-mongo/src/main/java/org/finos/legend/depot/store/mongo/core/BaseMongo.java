@@ -222,6 +222,11 @@ public abstract class BaseMongo<T extends HasIdentifier>
         return convert(getCollection().find(filter));
     }
 
+    protected long count(Bson condition)
+    {
+        return getCollection().countDocuments(condition);
+    }
+
     protected FindIterable executeFind(Bson filter)
     {
         return getCollection().find(filter);
