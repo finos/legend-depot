@@ -55,6 +55,11 @@ public class ReadDataServicesModule extends PrivateModule
     @Singleton
     public DependenciesCache initialiseDependencyCache(ProjectsVersions projectsVersions)
     {
-        return new DependenciesCache(projectsVersions);
+        return new DependenciesCache(projectsVersions, isPreLoadFromStore());
+    }
+
+    protected boolean isPreLoadFromStore()
+    {
+        return true;
     }
 }

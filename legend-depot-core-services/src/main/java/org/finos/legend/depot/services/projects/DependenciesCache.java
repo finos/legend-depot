@@ -23,12 +23,12 @@ import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,14 +39,26 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public final class DependenciesCache
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DependenciesCache.class);
+    private static final String NOT_FOUND_IN_STORE = "%s-%s-%s not found in store";
+    private static final String TRANSITIVE_DEPENDENCIES_FAILED_MGS = "getTransitiveDependencies failed for %s: %s";
     final ConcurrentMutableMap<ProjectVersion, DependencyResult> transitiveDependencies = new ConcurrentHashMap<>();
     AtomicInteger absentKeys = new AtomicInteger(0);
+    AtomicInteger resolutionErrors = new AtomicInteger(0);
+    private AtomicBoolean initialised = new AtomicBoolean(false);
     private final ProjectsVersions projectsVersionsStore;
+
+    public DependenciesCache(ProjectsVersions projectsVersionsService,boolean preLoadFromStore)
+    {
+        this.projectsVersionsStore = projectsVersionsService;
+        if (preLoadFromStore)
+        {
+            initCache();
+        }
+    }
 
     public DependenciesCache(ProjectsVersions projectsVersionsService)
     {
-        this.projectsVersionsStore = projectsVersionsService;
-        initCache();
+        this(projectsVersionsService,true);
     }
 
     private void initCache()
@@ -55,16 +67,17 @@ public final class DependenciesCache
         {
             List<StoreProjectVersionData> allProjectsVersions = projectsVersionsStore.getAll();
             Stream<ProjectVersion> versionWithDependencies = allProjectsVersions.stream().filter(p -> !p.getVersionId().equals(MASTER_SNAPSHOT) && !p.getVersionData().getDependencies().isEmpty()).map(pv -> new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()));
-            LOGGER.info("Initialising dependencies cache");
+            LOGGER.info("Initialising DependenciesCache");
             Map<String, StoreProjectVersionData> projectDataMap = allProjectsVersions.stream().collect(Collectors.toMap(p -> p.getGroupId() + p.getArtifactId() + p.getVersionId(), Function.identity()));
             versionWithDependencies.forEach(pv -> transitiveDependencies.put(pv, calculateTransitiveDependencies(pv, projectDataMap)));
-            LOGGER.info("Total [{}] keys in cache",transitiveDependencies.keySet().size());
+            LOGGER.info("Initialising DependenciesCache done: Total [{}] keys in cache, resolutionErrors [{}]",transitiveDependencies.keySet().size(),resolutionErrors.get());
         }
         catch (Exception e)
         {
-            LOGGER.error("Could not initialise dependencies cache {}",e.getMessage());
+            LOGGER.error("Could not initialise DependenciesCache {}",e.getMessage());
             throw new RuntimeException(e);
         }
+        initialised.getAndSet(true);
     }
 
     private Function3<String,String,String,StoreProjectVersionData> getProjectVersionDataFromStore()
@@ -74,7 +87,7 @@ public final class DependenciesCache
             Optional<StoreProjectVersionData> projectVersion = this.projectsVersionsStore.find(group, artifact, versionId);
             if (!projectVersion.isPresent())
             {
-                throw new IllegalStateException(String.format("%s-%s-%s not found in store", group, artifact, versionId));
+                throw new IllegalStateException(String.format(NOT_FOUND_IN_STORE, group, artifact, versionId));
             }
             return this.projectsVersionsStore.find(group, artifact,versionId).get();
         };
@@ -106,9 +119,9 @@ public final class DependenciesCache
                         absentKeys.getAndIncrement();
                         return calculateTransitiveDependencies(dep, projectDataProvider);
                     });
-                    if (deps.getStatus() == DependencyStatus.FAIL)
+                    if (DependencyStatus.FAIL.equals(deps.getStatus()))
                     {
-                        throw new IllegalStateException(String.format("Dependency not present in store %s", dep.getGav()));
+                        throw new IllegalStateException(String.format(NOT_FOUND_IN_STORE, dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()));
                     }
                     dependencies.add(dep);
                     dependencies.addAll(deps.getProjectVersion());
@@ -116,28 +129,27 @@ public final class DependenciesCache
             }
             else
             {
-                return new DependencyResult(DependencyStatus.FAIL, dependencies);
+                throw  new IllegalStateException(String.format(NOT_FOUND_IN_STORE, pv.getGroupId(),pv.getArtifactId(),pv.getVersionId()));
             }
         }
         catch (Exception e)
         {
-            LOGGER.error("error getting transitive dependencies for {}-{}-{} : {}",pv.getGroupId(),pv.getArtifactId(),pv.getVersionId(),e.getMessage());
-            return new DependencyResult(DependencyStatus.FAIL,e.getMessage());
+            resolutionErrors.getAndIncrement();
+            LOGGER.error(String.format(TRANSITIVE_DEPENDENCIES_FAILED_MGS,pv.getGav(),e.getMessage()));
+            return new DependencyResult(e.getMessage());
         }
-        return new DependencyResult(DependencyStatus.SUCCESS, dependencies);
+        return new DependencyResult(dependencies);
     }
 
     public Set<ProjectVersion> getTransitiveDependencies(ProjectVersion pv)
     {
-        if (pv.getVersionId().equals(MASTER_SNAPSHOT))
+        if (MASTER_SNAPSHOT.equals(pv.getVersionId()))
         {
             absentKeys.getAndIncrement();
             DependencyResult depResult = calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());
-            if (depResult.status == DependencyStatus.FAIL)
+            if (DependencyStatus.FAIL.equals(depResult.getStatus()))
             {
-                String message = String.format("getTransitiveDependencies %s failed: %s", pv.getGav(),depResult.errors);
-                LOGGER.error(message);
-                throw new RuntimeException(message);
+                throw new IllegalStateException(String.format(TRANSITIVE_DEPENDENCIES_FAILED_MGS, pv.getGav(),depResult.errors));
             }
             this.transitiveDependencies.put(pv, depResult);
             return depResult.getProjectVersion();
@@ -149,42 +161,37 @@ public final class DependenciesCache
                 absentKeys.getAndIncrement();
                 return calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());
             });
-            if (depResult.status == DependencyStatus.FAIL)
+            if (DependencyStatus.FAIL.equals(depResult.getStatus()))
             {
                 depResult = calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());
-                this.transitiveDependencies.put(pv, depResult);
-                if (depResult.status == DependencyStatus.FAIL)
+                if (DependencyStatus.FAIL.equals(depResult.getStatus()))
                 {
-                    String message = String.format("getTransitiveDependencies %s failed: %s", pv.getGav(),depResult.errors);
-                    LOGGER.error(message);
-                    throw new RuntimeException(message);
+                    throw new IllegalStateException(String.format(TRANSITIVE_DEPENDENCIES_FAILED_MGS, pv.getGav(),depResult.errors));
                 }
+                this.transitiveDependencies.put(pv, depResult);
             }
             return depResult.getProjectVersion();
         }
     }
 
-    public class DependencyResult
+    public static class DependencyResult
     {
-        private DependencyStatus status;
         private Set<ProjectVersion> projectVersion;
         private String errors;
 
-        DependencyResult(DependencyStatus status, Set<ProjectVersion> projectVersion)
+        DependencyResult(Set<ProjectVersion> projectVersion)
         {
-            this.status = status;
             this.projectVersion = projectVersion;
         }
 
-        public DependencyResult(DependencyStatus status, String errorMessage)
+        public DependencyResult(String errorMessage)
         {
-            this.status = status;
             this.errors = errorMessage;
         }
 
         public DependencyStatus getStatus()
         {
-            return status;
+            return errors == null ? DependencyStatus.SUCCESS : DependencyStatus.FAIL;
         }
 
         public Set<ProjectVersion> getProjectVersion()
