@@ -32,6 +32,7 @@ import io.prometheus.client.dropwizard.DropwizardExports;
 import io.prometheus.client.exporter.MetricsServlet;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.eclipse.jetty.util.component.LifeCycle;
 import org.finos.legend.depot.tracing.configuration.PrometheusMetricsProviderConfiguration;
 import org.finos.legend.depot.tracing.configuration.TracingAuthenticationProviderConfiguration;
 import org.finos.legend.sdlc.server.error.LegendSDLCServerExceptionMapper;
@@ -40,17 +41,24 @@ import org.finos.legend.server.shared.bundles.ChainFixingFilterHandler;
 import org.finos.legend.server.shared.bundles.HostnameHeaderBundle;
 import org.finos.legend.server.shared.bundles.OpenTracingBundle;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.slf4j.Logger;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class BaseServer<T extends ServersConfiguration> extends Application<T>
 {
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BaseServer.class);
+
+    AtomicBoolean ready = new AtomicBoolean(false);
+
     protected BaseServer()
     {
     }
+
 
     @Override
     public void initialize(Bootstrap<T> bootstrap)
@@ -82,6 +90,8 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
     @Override
     public void run(T configuration, Environment environment)
     {
+        registerLifeCycleListener(configuration, environment);
+
         SessionHandler sessionHandler = new SessionHandler();
         if (configuration.getSessionCookie() != null)
         {
@@ -102,18 +112,56 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
         environment.jersey().register(new LegendSDLCServerExceptionMapper());
         environment.jersey().register(new JsonProcessingExceptionMapper(true));
 
-        environment.healthChecks().register("Health Check", new HealthCheck()
+        environment.healthChecks().register("HealthCheck", new HealthCheck()
         {
             @Override
             protected Result check()
             {
-                return Result.healthy();
+                return ready.get() ? Result.healthy() : Result.unhealthy("app not ready");
             }
         });
 
         initialiseCors(environment);
         initialisePrometheusMetrics(environment);
         initialiseOpenTracing(environment);
+    }
+
+    private void registerLifeCycleListener(T configuration, Environment environment)
+    {
+        environment.lifecycle().addLifeCycleListener(new LifeCycle.Listener()
+        {
+            @Override
+            public void lifeCycleStarting(LifeCycle event)
+            {
+                LOGGER.info("Starting {}", configuration.getApplicationName());
+            }
+
+            @Override
+            public void lifeCycleStarted(LifeCycle event)
+            {
+                ready.getAndSet(true);
+                LOGGER.info("Started {} ready: {}", configuration.getApplicationName(),ready.get());
+            }
+
+            @Override
+            public void lifeCycleFailure(LifeCycle event, Throwable cause)
+            {
+                ready.getAndSet(false);
+                LOGGER.error("Application {} failure : {}", configuration.getApplicationName(),cause.getMessage());
+            }
+
+            @Override
+            public void lifeCycleStopping(LifeCycle event)
+            {
+                LOGGER.info("Stopping {}", configuration.getApplicationName());
+            }
+
+            @Override
+            public void lifeCycleStopped(LifeCycle event)
+            {
+                LOGGER.info("Stopped {}", configuration.getApplicationName());
+            }
+        });
     }
 
     private void initialiseOpenTracing(Environment environment)
