@@ -38,4 +38,6 @@ public interface ManageProjectsService extends ProjectsService
 
     MetadataEventResponse delete(String groupId,String artifactId, String versionId);
 
+    StoreProjectVersionData excludeProjectVersion(String groupId, String artifactId, String versionId, String exclusionReason);
+
 }

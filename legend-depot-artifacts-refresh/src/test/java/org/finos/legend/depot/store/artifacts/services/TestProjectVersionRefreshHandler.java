@@ -28,7 +28,6 @@ import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
-import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
 import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
@@ -38,7 +37,6 @@ import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntityProvider;
-import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandlerImpl;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
@@ -131,6 +129,23 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("prod-1",TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false,false,PARENT_EVENT_ID));
         Assert.assertNotNull(response);
         Assert.assertTrue(response.hasErrors());
+    }
+
+    @Test
+    public void cannotRefreshExcludedVersion()
+    {
+        String versionId = "2.111.0";
+        final String EXCLUSION_REASON = "version missing in repository";
+        StoreProjectVersionData storeProjectVersionData = projectsService.excludeProjectVersion(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId, EXCLUSION_REASON);
+        Assert.assertTrue(storeProjectVersionData.getVersionData().isExcluded());
+
+        MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("prod-1",TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false,false,PARENT_EVENT_ID));
+        Assert.assertNotNull(response);
+        Assert.assertTrue(response.hasErrors());
+
+        storeProjectVersionData = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).get();
+        Assert.assertTrue(storeProjectVersionData.getVersionData().isExcluded());
+        Assert.assertEquals(storeProjectVersionData.getVersionData().getExclusionReason(), EXCLUSION_REASON);
     }
 
     @Test

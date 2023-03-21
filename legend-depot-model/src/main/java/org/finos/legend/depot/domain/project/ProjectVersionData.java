@@ -30,6 +30,10 @@ public class ProjectVersionData
     private List<Property> properties = new ArrayList<>();
     @JsonProperty
     private boolean deprecated = false;
+    @JsonProperty
+    private boolean excluded = false;
+    @JsonProperty
+    private String exclusionReason = null;
 
     public ProjectVersionData()
     {
@@ -41,10 +45,11 @@ public class ProjectVersionData
         this.properties = properties;
     }
 
-    public ProjectVersionData(List<ProjectVersion> dependencies, List<Property> properties, boolean deprecated)
+    public ProjectVersionData(List<ProjectVersion> dependencies, List<Property> properties, boolean deprecated, boolean excluded)
     {
         this(dependencies, properties);
         this.deprecated = deprecated;
+        this.excluded = excluded;
     }
 
     public List<ProjectVersion> getDependencies()
@@ -94,5 +99,25 @@ public class ProjectVersionData
     public void setDeprecated(boolean deprecated)
     {
         this.deprecated = deprecated;
+    }
+
+    public boolean isExcluded()
+    {
+        return excluded;
+    }
+
+    public void setExcluded(boolean excluded)
+    {
+        this.excluded = excluded;
+    }
+
+    public String getExclusionReason()
+    {
+        return exclusionReason;
+    }
+
+    public void setExclusionReason(String exclusionReason)
+    {
+        this.exclusionReason = exclusionReason;
     }
 }

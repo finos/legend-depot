@@ -207,6 +207,17 @@ public class TestProjectsService extends TestBaseServices
     }
 
     @Test
+    public void canExcludeProjectVersion()
+    {
+        final String EXCLUSION_REASON = "payload too big to be handled with mongo currently";
+        StoreProjectVersionData storeProjectVersionData = projectsService.excludeProjectVersion("examples.metadata", "test", "2.3.1", EXCLUSION_REASON);
+        Assert.assertTrue(storeProjectVersionData.getVersionData().isExcluded());
+        Assert.assertTrue(storeProjectVersionData.getVersionData().getDependencies().size() == 0);
+        Assert.assertTrue(storeProjectVersionData.getVersionData().getProperties().size() == 0);
+        Assert.assertEquals(storeProjectVersionData.getVersionData().getExclusionReason(),EXCLUSION_REASON);
+    }
+
+    @Test
     public void canGetProjectCoordinatesByGA()
     {
         Optional<StoreProjectData> storeProjectData = projectsService.findCoordinates("examples.metadata", "test");

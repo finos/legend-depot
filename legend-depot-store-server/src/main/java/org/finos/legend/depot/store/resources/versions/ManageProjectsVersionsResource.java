@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -64,6 +65,17 @@ public class ManageProjectsVersionsResource extends BaseAuthorisedResource
     {
         validateUser();
         return handle(ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA, ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA + groupId + artifactId, () -> projectVersionApi.find(groupId, artifactId));
+    }
+
+    @PUT
+    @Path("/versions/{groupId}/{artifactId}/{versionId}/{exclusionReason}")
+    @ApiOperation(ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION)
+    @Produces(MediaType.APPLICATION_JSON)
+    public StoreProjectVersionData excludeProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") String versionId, @PathParam("exclusionReason") String exclusionReason)
+    {
+        return handle(ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION, ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION + groupId + artifactId + versionId + exclusionReason, () ->
+            projectVersionApi.excludeProjectVersion(groupId, artifactId, versionId, exclusionReason)
+        );
     }
 
 }
