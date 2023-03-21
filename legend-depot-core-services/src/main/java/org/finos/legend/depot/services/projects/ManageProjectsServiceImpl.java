@@ -78,4 +78,18 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
         return projectsVersions.deleteByVersionId(groupId, artifactId, versionId);
     }
 
+    @Override
+    public StoreProjectVersionData excludeProjectVersion(String groupId, String artifactId, String versionId, String exclusionReason)
+    {
+        StoreProjectVersionData storeProjectVersionData = new StoreProjectVersionData(groupId, artifactId, versionId);
+        return this.createOrUpdate(excludeProjectVersion(storeProjectVersionData, exclusionReason));
+    }
+
+    private StoreProjectVersionData excludeProjectVersion(StoreProjectVersionData projectVersionData, String exclusionReason)
+    {
+        projectVersionData.getVersionData().setExcluded(true);
+        projectVersionData.getVersionData().setExclusionReason(exclusionReason);
+        return projectVersionData;
+    }
+
 }

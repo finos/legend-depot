@@ -17,7 +17,6 @@ package org.finos.legend.depot.store.notifications.services;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.notifications.EventPriority;
-import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.Notifications;
@@ -28,7 +27,6 @@ import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.slf4j.Logger;
-import sun.jvm.hotspot.debugger.win32.coff.DebugVC50SSSrcLnSeg;
 
 import javax.inject.Inject;
 import java.time.LocalDateTime;

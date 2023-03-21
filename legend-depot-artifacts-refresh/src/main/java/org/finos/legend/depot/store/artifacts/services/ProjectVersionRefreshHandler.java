@@ -41,7 +41,6 @@ import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -330,6 +329,8 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         versionData.setProperties(properties);
         storeProjectVersionData.setVersionData(versionData);
         storeProjectVersionData.setEvicted(false);
+        storeProjectVersionData.getVersionData().setExcluded(false);
+        storeProjectVersionData.getVersionData().setExclusionReason(null);
         projects.createOrUpdate(storeProjectVersionData);
         LOGGER.info("Finished updating project data [{}-{}-{}]", project.getGroupId(), project.getArtifactId(), versionId);
     }

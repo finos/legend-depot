@@ -16,7 +16,6 @@
 package org.finos.legend.depot.store.artifacts.services;
 
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
-import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.maven.impl.TestMavenArtifactsRepository;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
@@ -60,7 +59,6 @@ import org.finos.legend.depot.store.notifications.services.NotificationsQueueMan
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsQueueMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -73,8 +71,6 @@ import java.util.Optional;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import static org.finos.legend.depot.store.artifacts.services.TestArtifactsRefreshServiceExceptionEscenarios.PARENT_EVENT_ID;
-import static org.finos.legend.depot.store.artifacts.services.TestArtifactsRefreshServiceWithMocks.TEST_DEPENDENCIES_ARTIFACT_ID;
-import static org.finos.legend.depot.store.artifacts.services.TestArtifactsRefreshServiceWithMocks.TEST_GROUP_ID;
 
 public class TestArtifactsRefreshService extends TestStoreMongo
 {
@@ -221,6 +217,24 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         List<RefreshStatus> statuses = refreshStatusStore.getAll();
         Assert.assertNotNull(statuses);
         Assert.assertEquals(2,statuses.size());
+    }
+
+    @Test
+    public void canRefreshExcludedProjectVersionIfLoadable()
+    {
+        StoreProjectVersionData storeProjectVersionData = projectsService.excludeProjectVersion(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "unknown error");
+        Assert.assertTrue(storeProjectVersionData.getVersionData().isExcluded());
+        Assert.assertEquals(storeProjectVersionData.getVersionData().getDependencies().size(), 0);
+
+        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0",false,PARENT_EVENT_ID);
+        Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
+        Assert.assertEquals(1,notificationsQueueManager.getAllInQueue().size());
+        notificationsQueueManager.handleAll();
+
+        storeProjectVersionData = projectsVersionsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get();
+        Assert.assertFalse(storeProjectVersionData.getVersionData().isExcluded());
+        Assert.assertNull(storeProjectVersionData.getVersionData().getExclusionReason());
+        Assert.assertEquals(storeProjectVersionData.getVersionData().getDependencies().size(), 1);
     }
 
     @Test

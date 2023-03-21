@@ -47,6 +47,7 @@ public class ResourceLoggingAndTracing
     public static final String GET_VERSIONS = "get versions";
     public static final String UPDATE_ALL_VERSIONS = "refresh all versions";
     public static final String UPDATE_VERSION = "refresh version";
+    public static final String EXCLUDE_PROJECT_VERSION = "exclude project version";
     public static final String UPDATE_ALL_PROJECT_VERSIONS = "refresh all project versions";
     public static final String EVICT_OLD_VERSIONS = "evict old versions";
     public static final String DELETE_VERSION = "delete version";
