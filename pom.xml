@@ -565,10 +565,6 @@
                 <scope>runtime</scope>
                 <exclusions>
                     <exclusion>
-                        <groupId>com.nimbusds</groupId>
-                        <artifactId>lang-tag</artifactId>
-                    </exclusion>
-                    <exclusion>
                         <groupId>javax.activation</groupId>
                         <artifactId>activation</artifactId>
                     </exclusion>
