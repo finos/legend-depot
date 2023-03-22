@@ -110,12 +110,15 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
                     Optional<String> entityPath = entityPaths.stream().filter(s -> generatedFile.getPath().startsWith(PATH + s)).findFirst();
                     if (!entityPath.isPresent())
                     {
-                        throw new ArtifactLoadingException("Can't find element path for generated file with path: '" + generatedFile.getPath() + "'");
+                        String unableToHandle = String.format("Can't find element path for generated file with path %s",generatedFile.getPath());
+                        LOGGER.warn(unableToHandle);
                     }
-                    String elementPath = entityMap.get(entityPath.get()).getPath();
-                    FileGeneration generation = new FileGeneration(generatedFile.getPath(), generatedFile.getContent());
-                    generations.createOrUpdate(new StoredFileGeneration(projectData.getGroupId(), projectData.getArtifactId(), versionId, elementPath, null, generation));
-                    processedGeneratedFiles.add(generatedFile);
+                    else
+                    {
+                        String elementPath = entityMap.get(entityPath.get()).getPath();
+                        FileGeneration generation = new FileGeneration(generatedFile.getPath(), generatedFile.getContent());
+                        generations.createOrUpdate(new StoredFileGeneration(projectData.getGroupId(), projectData.getArtifactId(), versionId, elementPath, null, generation));
+                    }
                 }
             });
             String message = String.format("processed [%s] generations for [%s-%s-%s] ", processedGeneratedFiles.size(), projectData.getGroupId(), projectData.getArtifactId(), versionId);
