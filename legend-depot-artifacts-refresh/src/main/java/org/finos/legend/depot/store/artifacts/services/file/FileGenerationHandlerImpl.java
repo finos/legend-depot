@@ -110,7 +110,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
                     Optional<String> entityPath = entityPaths.stream().filter(s -> generatedFile.getPath().startsWith(PATH + s)).findFirst();
                     if (!entityPath.isPresent())
                     {
-                        String unableToHandle = String.format("Can't find element path for generated file with path %s" , generatedFile.getPath());
+                        String unableToHandle = String.format("Can't find element path for generated file with path %s",generatedFile.getPath());
                         LOGGER.warn(unableToHandle);
                     }
                     else
