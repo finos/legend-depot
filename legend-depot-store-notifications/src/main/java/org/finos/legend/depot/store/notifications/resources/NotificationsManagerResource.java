@@ -137,6 +137,7 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
     @GET
     @Path("/queue/{projectId}/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.ENQUEUE_EVENT)
+    @Produces(MediaType.TEXT_PLAIN)
     public String queueEvent(@PathParam("projectId") String projectId,
                              @PathParam("groupId") String groupId,
                              @PathParam("artifactId") String artifactId,
