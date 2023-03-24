@@ -47,6 +47,8 @@ public interface ProjectsService
 
     List<StoreProjectVersionData> find(String groupId, String artifactId);
 
+    List<StoreProjectVersionData> findVersion(Boolean excluded);
+
     Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId);
 
     Optional<StoreProjectData> findCoordinates(String groupId, String artifactId);

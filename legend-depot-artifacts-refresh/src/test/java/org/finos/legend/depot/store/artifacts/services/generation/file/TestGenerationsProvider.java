@@ -167,4 +167,14 @@ public class TestGenerationsProvider extends TestStoreMongo
     {
         generations.getFileGenerations(TEST_GROUP_ID,TEST_ARTIFACT_ID,"10.0.0");
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void cannotGetGenerationsForExcludedVersions()
+    {
+        String versionId = "3.0.0";
+        StoreProjectVersionData storeProjectVersion = new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
+        storeProjectVersion.getVersionData().setExcluded(true);
+        when(projectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId)).thenReturn(Optional.of(storeProjectVersion));
+        generations.getFileGenerations(TEST_GROUP_ID,TEST_ARTIFACT_ID,versionId);
+    }
 }

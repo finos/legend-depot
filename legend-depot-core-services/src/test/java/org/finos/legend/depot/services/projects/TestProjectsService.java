@@ -29,10 +29,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Collections;
+import java.util.Arrays;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
@@ -45,7 +46,7 @@ public class TestProjectsService extends TestBaseServices
     public void setUpData()
     {
         super.setUpData();
-        Assert.assertEquals(5, projectsService.getAll().size());
+        Assert.assertEquals(6, projectsService.getAll().size());
         Assert.assertEquals(0, projectsService.find("examples.metadata","test", "2.2.0").get().getVersionData().getDependencies().size());
         Assert.assertEquals(1, projectsService.find("examples.metadata","test", "2.3.1").get().getVersionData().getDependencies().size());
 
@@ -264,5 +265,13 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertTrue(projectsService.getLatestVersion("examples.metadata", "test").isPresent());
         Assert.assertEquals("2.3.1", projectsService.getLatestVersion("examples.metadata", "test").get().toVersionIdString());
 
+    }
+
+    @Test
+    public void canGetVersionsWithExcludedVersionsInStore()
+    {
+        List<String> versions = projectsService.getVersions("examples.metadata", "test");
+        Assert.assertEquals(2, versions.size());
+        Assert.assertEquals(Arrays.asList("2.2.0", "2.3.1"), versions);
     }
 }

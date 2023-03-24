@@ -16,6 +16,7 @@
 package org.finos.legend.depot.services.projects;
 
 import org.eclipse.collections.api.factory.Sets;
+import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
@@ -30,6 +31,7 @@ import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -37,6 +39,7 @@ import java.util.List;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -49,6 +52,8 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private final DependenciesCache dependenciesCache;
 
+    private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
+    private static final String NOT_FOUND_IN_STORE ="project version not found for %s-%s-%s";
     @Inject
     public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("dependencyCache") DependenciesCache dependenciesCache)
     {
@@ -79,7 +84,8 @@ public class ProjectsServiceImpl implements ProjectsService
     @Override
     public List<String> getVersions(String groupId, String artifactId)
     {
-        return projectsVersions.getVersions(groupId, artifactId).stream().sorted().map(VersionId::toVersionIdString).collect(Collectors.toList());
+        List<StoreProjectVersionData> storeProjectsVersions = this.find(groupId, artifactId);
+        return storeProjectsVersions.isEmpty() ? Collections.EMPTY_LIST : storeProjectsVersions.stream().filter(pv -> !pv.getVersionId().equals(MASTER_SNAPSHOT) && !pv.getVersionData().isExcluded()).map(pv -> pv.getVersionId()).collect(Collectors.toList());
     }
 
     @Override
@@ -92,6 +98,12 @@ public class ProjectsServiceImpl implements ProjectsService
     public List<StoreProjectVersionData> find(String groupId, String artifactId)
     {
         return projectsVersions.find(groupId, artifactId);
+    }
+
+    @Override
+    public List<StoreProjectVersionData> findVersion(Boolean excluded)
+    {
+        return projectsVersions.findVersion(excluded);
     }
 
     @Override
@@ -118,16 +130,22 @@ public class ProjectsServiceImpl implements ProjectsService
     @Override
     public void checkExists(String groupId, String artifactId, String versionId) throws IllegalArgumentException
     {
-        if (!this.projectsVersions.find(groupId,artifactId,versionId).isPresent())
+        Optional<StoreProjectVersionData> projectVersion = this.projectsVersions.find(groupId, artifactId, versionId);
+        if (!projectVersion.isPresent())
         {
-            throw new IllegalArgumentException(String.format("No version data found for %s-%s-%s",groupId,artifactId,versionId));
+            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
+        }
+        ProjectVersionData versionData = projectVersion.get().getVersionData();
+        if (versionData.isExcluded())
+        {
+            throw new IllegalArgumentException(String.format(EXCLUSION_FOUND_IN_STORE, groupId, artifactId, versionId, versionData.getExclusionReason()));
         }
     }
 
     @Override
     public Optional<VersionId> getLatestVersion(String groupId, String artifactId)
     {
-        return this.projectsVersions.getVersions(groupId, artifactId).stream().max(VersionId::compareTo);
+        return this.getVersions(groupId, artifactId).stream().map(v -> VersionId.parseVersionId(v)).max(VersionId::compareTo);
     }
 
     @Override
@@ -245,7 +263,12 @@ public class ProjectsServiceImpl implements ProjectsService
         Optional<StoreProjectVersionData> projectData = projectsVersions.find(groupId, artifactId, versionId);
         if (!projectData.isPresent())
         {
-            throw new IllegalArgumentException(String.format("project version not found for %s-%s", groupId, artifactId, versionId));
+            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
+        }
+        ProjectVersionData versionData = projectData.get().getVersionData();
+        if (versionData.isExcluded())
+        {
+            throw new IllegalArgumentException(String.format(EXCLUSION_FOUND_IN_STORE, groupId, artifactId, versionId, versionData.getExclusionReason()));
         }
         return projectData.get();
     }

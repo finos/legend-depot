@@ -68,6 +68,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import static org.finos.legend.depot.store.artifacts.services.TestArtifactsRefreshServiceExceptionEscenarios.PARENT_EVENT_ID;
@@ -134,7 +135,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     {
 
         Assert.assertTrue(entitiesStore.getEntities(TEST_GROUP_ID, "art101", MASTER_SNAPSHOT, false).isEmpty());
-        Assert.assertEquals(0, projectsVersionsStore.getVersions(TEST_GROUP_ID, "art101").size());
+        Assert.assertEquals(0, projectsVersionsStore.find(TEST_GROUP_ID, "art101").size());
         StoreProjectData projectData = projectsStore.find(TEST_GROUP_ID, "art101").get();
         List<File> files = repository.findFiles(ArtifactType.ENTITIES, projectData.getGroupId(), projectData.getArtifactId(), MASTER_SNAPSHOT);
         Assert.assertNotNull(files);
@@ -144,7 +145,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         notificationsQueueManager.handleAll();
         Assert.assertTrue(refreshStatusStore.find(TEST_GROUP_ID, "art101", MASTER_SNAPSHOT, true).isEmpty());
         Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
-        Assert.assertEquals(0, projectsVersionsStore.getVersions(TEST_GROUP_ID, "art101").size());
+        Assert.assertEquals(0, projectsVersionsStore.find(TEST_GROUP_ID, "art101").stream().filter(x -> !x.getVersionId().equals(MASTER_SNAPSHOT)).collect(Collectors.toList()).size());
         List<Entity> entities = entitiesStore.getEntities(TEST_GROUP_ID, "art101", MASTER_SNAPSHOT, false);
         Assert.assertNotNull(entities);
         Assert.assertEquals(9, entities.size());
@@ -429,7 +430,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         notificationsQueueManager.handleAll();
         Assert.assertEquals(docsBefore,entitiesStore.getAllStoredEntities().size());
         Assert.assertTrue(projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,versionId).isPresent());
-        Assert.assertEquals(3,projectsVersionsStore.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID).size());
+        Assert.assertEquals(3,projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).stream().filter(x -> !x.getVersionId().equals(MASTER_SNAPSHOT)).collect(Collectors.toList()).size());
         Assert.assertEquals(0,notificationsQueueManager.getAllInQueue().size());
     }
 

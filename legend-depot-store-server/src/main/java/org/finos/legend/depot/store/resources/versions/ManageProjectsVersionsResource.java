@@ -30,6 +30,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.security.Principal;
@@ -65,6 +66,16 @@ public class ManageProjectsVersionsResource extends BaseAuthorisedResource
     {
         validateUser();
         return handle(ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA, ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA + groupId + artifactId, () -> projectVersionApi.find(groupId, artifactId));
+    }
+
+    @GET
+    @Path("/versions")
+    @ApiOperation(ResourceLoggingAndTracing.FIND_PROJECT_VERSIONS)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<StoreProjectVersionData> findProjectVersion(@QueryParam("excluded") Boolean excluded)
+    {
+        validateUser();
+        return handle(ResourceLoggingAndTracing.FIND_PROJECT_VERSIONS, ResourceLoggingAndTracing.FIND_PROJECT_VERSIONS + excluded, () -> projectVersionApi.findVersion(excluded));
     }
 
     @PUT

@@ -67,7 +67,7 @@ public class TestUpdateProjectVersionApi extends TestStoreMongo
 
         List<StoreProjectVersionData> project = projectsVersionsAPI.find("examples.metadata","test");
         Assert.assertFalse(project.isEmpty());
-        Assert.assertEquals(3, project.size());
+        Assert.assertEquals(4, project.size());
         Optional<StoreProjectVersionData> updatedProject = projectsVersionsAPI.find("examples.metadata","test", "2.2.0");
         Assert.assertTrue(updatedProject.isPresent());
         Assert.assertEquals(updatedProject.get().getVersionData().getDependencies().size(),0);

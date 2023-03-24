@@ -44,7 +44,7 @@ public class TestQueryProjectVersionApi extends TestStoreMongo
     {
         List<StoreProjectVersionData> allConfigs = projectsVersionsAPI.getAll();
         Assert.assertNotNull(allConfigs);
-        Assert.assertEquals(5, allConfigs.size());
+        Assert.assertEquals(6, allConfigs.size());
     }
 
     @Test
@@ -61,7 +61,7 @@ public class TestQueryProjectVersionApi extends TestStoreMongo
     {
         List<StoreProjectVersionData> project = projectsVersionsAPI.find("examples.metadata", "test");
         Assert.assertFalse(project.isEmpty());
-        Assert.assertEquals(3, project.size());
+        Assert.assertEquals(4, project.size());
     }
 
     @Test
@@ -72,14 +72,14 @@ public class TestQueryProjectVersionApi extends TestStoreMongo
     }
 
     @Test
-    public void caGetLatestVersionForProject()
+    public void canGetProjectVersionIfExcluded()
     {
-        List<String> versions = projectsVersionsAPI.getVersions("examples.metadata", "test").stream().map(pv -> pv.toVersionIdString()).collect(Collectors.toList());
-        Assert.assertFalse(versions.isEmpty());
-        Assert.assertEquals(2, versions.size());
-        Assert.assertEquals(Arrays.asList("2.2.0","2.3.1"), versions);
-
-        Assert.assertEquals("2.3.1",projectsVersionsAPI.getVersions("examples.metadata", "test").stream().max(VersionId::compareTo).get().toVersionIdString());
+        List<StoreProjectVersionData> storeProjectVersionData = projectsVersionsAPI.findVersion(true);
+        Assert.assertFalse(storeProjectVersionData.isEmpty());
+        Assert.assertEquals(1, storeProjectVersionData.size());
+        Assert.assertEquals("examples.metadata", storeProjectVersionData.get(0).getGroupId());
+        Assert.assertEquals("test", storeProjectVersionData.get(0).getArtifactId());
+        Assert.assertEquals("3.0.0", storeProjectVersionData.get(0).getVersionId());
     }
 
 }

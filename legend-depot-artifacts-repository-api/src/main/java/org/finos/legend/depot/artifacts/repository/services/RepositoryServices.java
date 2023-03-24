@@ -22,9 +22,11 @@ import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -73,7 +75,8 @@ public class RepositoryServices
         {
             try
             {
-                final List<String> storeVersions = projects.getVersions(p.getGroupId(), p.getArtifactId());
+                final List<StoreProjectVersionData> projectVersions = projects.find(p.getGroupId(), p.getArtifactId());
+                List<String> storeVersions = projectVersions.stream().filter(pv -> !pv.getVersionId().equals(MASTER_SNAPSHOT)).map(pv -> pv.getVersionId()).collect(Collectors.toList());
                 storeVersionsCount.addAndGet(storeVersions.size());
                 final List<String> repositoryVersions = repository.findVersions(p.getGroupId(), p.getArtifactId()).stream().map(v -> v.toVersionIdString()).collect(Collectors.toList());
                 repoVersions.addAndGet(repositoryVersions.size());
