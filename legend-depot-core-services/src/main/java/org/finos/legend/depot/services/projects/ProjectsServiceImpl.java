@@ -53,7 +53,8 @@ public class ProjectsServiceImpl implements ProjectsService
     private final DependenciesCache dependenciesCache;
 
     private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
-    private static final String NOT_FOUND_IN_STORE ="project version not found for %s-%s-%s";
+    private static final String NOT_FOUND_IN_STORE = "project version not found for %s-%s-%s";
+
     @Inject
     public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("dependencyCache") DependenciesCache dependenciesCache)
     {
