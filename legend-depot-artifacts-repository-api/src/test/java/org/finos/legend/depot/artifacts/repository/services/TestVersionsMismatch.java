@@ -19,6 +19,7 @@ import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.Assert;
@@ -48,10 +49,15 @@ public class TestVersionsMismatch
         coordinates.add(new StoreProjectData("PROD-C","examples.metadata", "test3"));
         coordinates.add(new StoreProjectData("PROD-D","examples.metadata", "test4"));
         when(projects.getAllProjectCoordinates()).thenReturn(coordinates);
-        when(projects.getVersions("examples.metadata", "test1")).thenReturn(Arrays.asList("2.2.0","2.3.0"));
-        when(projects.getVersions("examples.metadata", "test2")).thenReturn(Arrays.asList("1.0.0"));
-        when(projects.getVersions("examples.metadata", "test3")).thenReturn(Arrays.asList("2.0.1"));
-        when(projects.getVersions("examples.metadata", "test4")).thenReturn(Arrays.asList("0.0.1"));
+        StoreProjectVersionData p1v1 = new StoreProjectVersionData("examples.metadata", "test1", "2.2.0");
+        StoreProjectVersionData p1v2 = new StoreProjectVersionData("examples.metadata", "test1", "2.3.0");
+        StoreProjectVersionData p2v1 = new StoreProjectVersionData("examples.metadata", "test2", "1.0.0");
+        StoreProjectVersionData p3v1 = new StoreProjectVersionData("examples.metadata", "test3", "2.0.1");
+        StoreProjectVersionData p4v1 = new StoreProjectVersionData("examples.metadata", "test4", "0.0.1");
+        when(projects.find("examples.metadata", "test1")).thenReturn(Arrays.asList(p1v1, p1v2));
+        when(projects.find("examples.metadata", "test2")).thenReturn(Arrays.asList(p2v1));
+        when(projects.find("examples.metadata", "test3")).thenReturn(Arrays.asList(p3v1));
+        when(projects.find("examples.metadata", "test4")).thenReturn(Arrays.asList(p4v1));
         when(repository.findVersions("examples.metadata", "test1")).thenReturn(Arrays.asList(VersionId.parseVersionId("2.2.0"),VersionId.parseVersionId("2.3.0"), VersionId.parseVersionId("2.3.1")));
         when(repository.findVersions("examples.metadata", "test2")).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.1")));
         when(repository.findVersions("examples.metadata", "test3")).thenReturn(Collections.emptyList());
@@ -98,6 +104,21 @@ public class TestVersionsMismatch
         Assert.assertFalse(prodD.errors.isEmpty());
 
 
+
+    }
+
+    @Test
+    public void getVersionsMismatchIfExcludedVersionsPresent() throws ArtifactRepositoryException
+    {
+        StoreProjectVersionData p1v1 = new StoreProjectVersionData("examples.metadata", "test5", "1.0.0");
+        p1v1.getVersionData().setExcluded(true);
+        p1v1.getVersionData().setExclusionReason("unknown error");
+        when(projects.find("examples.metadata", "test5")).thenReturn(Arrays.asList(p1v1));
+        when(repository.findVersions("examples.metadata", "test5")).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
+        List<VersionMismatch> counts = repositoryServices.findVersionsMismatches();
+        Assert.assertNotNull(counts);
+        Assert.assertEquals(3, counts.size());
+        Assert.assertEquals(0, counts.stream().filter(p -> p.artifactId.equals("test5")).count());
 
     }
 }

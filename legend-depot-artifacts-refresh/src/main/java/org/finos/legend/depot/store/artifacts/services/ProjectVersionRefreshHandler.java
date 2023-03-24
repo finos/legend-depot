@@ -397,7 +397,8 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
                 StoreProjectData dependentProject = dependent.get();
                 String projectCoordinates = String.format("[%s-%s-%s]", projectData.getGroupId(), projectData.getArtifactId(), versionId);
                 String dependencyCoordinates = String.format("[%s-%s-%s]", dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersionId());
-                if (!MASTER_SNAPSHOT.equals(dependency.getVersionId()) && projects.find(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersionId()).isPresent())
+                Optional<StoreProjectVersionData> projectVersion = projects.find(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersionId());
+                if (!MASTER_SNAPSHOT.equals(dependency.getVersionId()) && projectVersion.isPresent() && !projectVersion.get().getVersionData().isExcluded())
                 {
                     response.addMessage(String.format("Skipping update dependency %s -> %s, already in store", projectCoordinates, dependencyCoordinates));
                 }

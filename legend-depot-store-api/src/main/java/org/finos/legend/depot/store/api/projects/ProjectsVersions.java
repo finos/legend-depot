@@ -16,9 +16,7 @@
 package org.finos.legend.depot.store.api.projects;
 
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +28,7 @@ public interface ProjectsVersions
 
     Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId);
 
-    List<VersionId> getVersions(String groupId, String artifactId);
-
     long getVersionCount(String groupId, String artifactId);
+
+    List<StoreProjectVersionData> findVersion(Boolean excluded);
 }

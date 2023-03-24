@@ -45,6 +45,7 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> implements ProjectsVersions, UpdateProjectsVersions
 {
     public static final String COLLECTION = "versions";
+    private static final String VERSION_DATA_EXCLUDED = "versionData.excluded";
 
     @Inject
     public ProjectsVersionsMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -80,10 +81,9 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
     }
 
     @Override
-    public List<VersionId> getVersions(String groupId, String artifactId)
+    public List<StoreProjectVersionData> findVersion(Boolean excluded)
     {
-        List<StoreProjectVersionData> storeProjectsVersions = find(groupId, artifactId);
-        return storeProjectsVersions.isEmpty() ? Collections.EMPTY_LIST : storeProjectsVersions.stream().filter(pv -> !pv.getVersionId().equals(MASTER_SNAPSHOT)).map(pv -> VersionId.parseVersionId(pv.getVersionId())).collect(Collectors.toList());
+        return find(and(eq(VERSION_DATA_EXCLUDED, excluded)));
     }
 
     @Override

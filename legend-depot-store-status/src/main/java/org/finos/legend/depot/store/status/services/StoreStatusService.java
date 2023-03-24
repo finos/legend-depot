@@ -79,7 +79,7 @@ public class StoreStatusService
     public StoreStatus.ProjectStatus getProjectStatus(String groupId, String artifactId)
     {
         StoreStatus.ProjectStatus projectStatus = new StoreStatus.ProjectStatus();
-        List<String> versions = projectVersionsApi.getVersions(groupId, artifactId).stream().map(VersionId::toVersionIdString).collect(Collectors.toList());
+        List<String> versions = projectVersionsApi.find(groupId, artifactId).stream().filter(v -> !v.getVersionId().equals("master-SNAPSHOT") && !v.getVersionData().isExcluded()).map(v -> v.getVersionId()).collect(Collectors.toList());
 
         versions.forEach(v ->
         {

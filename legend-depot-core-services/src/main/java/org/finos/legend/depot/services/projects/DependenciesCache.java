@@ -19,6 +19,7 @@ import org.eclipse.collections.api.block.function.Function3;
 import org.eclipse.collections.api.map.ConcurrentMutableMap;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ public final class DependenciesCache
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DependenciesCache.class);
     private static final String NOT_FOUND_IN_STORE = "%s-%s-%s not found in store";
+    private static final String EXCLUSION_FOUND_IN_STORE = "%s-%s-%s not found in store, exclusion reason: %s";
     private static final String TRANSITIVE_DEPENDENCIES_FAILED_MGS = "getTransitiveDependencies failed for %s: %s";
     final ConcurrentMutableMap<ProjectVersion, DependencyResult> transitiveDependencies = new ConcurrentHashMap<>();
     AtomicInteger absentKeys = new AtomicInteger(0);
@@ -66,9 +68,9 @@ public final class DependenciesCache
         try
         {
             List<StoreProjectVersionData> allProjectsVersions = projectsVersionsStore.getAll();
-            Stream<ProjectVersion> versionWithDependencies = allProjectsVersions.stream().filter(p -> !p.getVersionId().equals(MASTER_SNAPSHOT) && !p.getVersionData().getDependencies().isEmpty()).map(pv -> new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()));
+            Stream<ProjectVersion> versionWithDependencies = allProjectsVersions.stream().filter(p -> !p.getVersionId().equals(MASTER_SNAPSHOT) && !p.getVersionData().getDependencies().isEmpty() && !p.getVersionData().isExcluded()).map(pv -> new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()));
             LOGGER.info("Initialising DependenciesCache");
-            Map<String, StoreProjectVersionData> projectDataMap = allProjectsVersions.stream().collect(Collectors.toMap(p -> p.getGroupId() + p.getArtifactId() + p.getVersionId(), Function.identity()));
+            Map<String, StoreProjectVersionData> projectDataMap = allProjectsVersions.stream().filter(p -> !p.getVersionData().isExcluded()).collect(Collectors.toMap(p -> p.getGroupId() + p.getArtifactId() + p.getVersionId(), Function.identity()));
             versionWithDependencies.forEach(pv -> transitiveDependencies.put(pv, calculateTransitiveDependencies(pv, projectDataMap)));
             LOGGER.info("Initialising DependenciesCache done: Total [{}] keys in cache, resolutionErrors [{}]",transitiveDependencies.keySet().size(),resolutionErrors.get());
         }
@@ -89,7 +91,12 @@ public final class DependenciesCache
             {
                 throw new IllegalStateException(String.format(NOT_FOUND_IN_STORE, group, artifact, versionId));
             }
-            return this.projectsVersionsStore.find(group, artifact,versionId).get();
+            ProjectVersionData versionData = projectVersion.get().getVersionData();
+            if (versionData.isExcluded())
+            {
+                throw new IllegalStateException(String.format(EXCLUSION_FOUND_IN_STORE, group, artifact, versionId, versionData.getExclusionReason()));
+            }
+            return projectVersion.get();
         };
     }
 

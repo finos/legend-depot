@@ -130,7 +130,7 @@ public class ProjectsResource extends BaseResource
     private ProjectData transformToProjectData(String projectId, String groupId, String artifactId, List<StoreProjectVersionData> projectVersionsData)
     {
         ProjectData projectData = new ProjectData(projectId, groupId, artifactId);
-        projectVersionsData.stream().forEach(pv ->
+        projectVersionsData.stream().filter(pv -> !pv.getVersionData().isExcluded()).forEach(pv ->
         {
             List<ProjectData.ProjectVersionDependency> dependencies = pv.getVersionData().getDependencies().stream().map(dep -> new ProjectData.ProjectVersionDependency(groupId, artifactId, pv.getVersionId(), dep)).collect(Collectors.toList());
             projectData.addDependencies(dependencies);
