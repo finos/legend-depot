@@ -19,6 +19,7 @@ import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryCounter;
 
 import javax.inject.Singleton;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class QueryMetricsContainer
 {
 
     private static final QueryMetricsContainer instance = new QueryMetricsContainer();
-    List<VersionQueryCounter> metrics = new ArrayList<>();
+    List<VersionQueryCounter> metrics = Collections.synchronizedList(new ArrayList<>());
 
     private QueryMetricsContainer()
     {
@@ -55,6 +56,6 @@ public class QueryMetricsContainer
 
     public static void flush()
     {
-        getInstance().metrics = new ArrayList<>();
+        getInstance().metrics = Collections.synchronizedList(new ArrayList<>());
     }
 }

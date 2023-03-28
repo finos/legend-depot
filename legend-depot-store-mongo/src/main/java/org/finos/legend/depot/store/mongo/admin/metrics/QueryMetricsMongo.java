@@ -66,7 +66,7 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryCounter> implements
     }
 
     @Override
-    public void persistMetrics(List<VersionQueryCounter> metrics)
+    public synchronized void persistMetrics(List<VersionQueryCounter> metrics)
     {
         metrics.forEach(metric -> getCollection().insertOne(BaseMongo.buildDocument(metric)));
     }
