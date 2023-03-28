@@ -22,7 +22,6 @@ import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 
 import javax.inject.Named;
-import java.time.LocalDateTime;
 
 public class MetricsModule extends PrivateModule
 {
@@ -39,7 +38,7 @@ public class MetricsModule extends PrivateModule
     @Named("persist-metrics")
     boolean scheduleMetricsPersistence(SchedulesFactory schedulesFactory, QueryMetricsHandler queryMetrics)
     {
-        schedulesFactory.register("persist-metrics", LocalDateTime.now().plusMinutes(1), 20160 * 60000L, true, () ->
+        schedulesFactory.register("persist-metrics", SchedulesFactory.MINUTE, 2016000 * SchedulesFactory.MINUTE, () ->
         {
             queryMetrics.persistMetrics();
             return true;

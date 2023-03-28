@@ -22,7 +22,7 @@ import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
-import org.finos.legend.depot.store.artifacts.api.ParentEventBuilder;
+import org.finos.legend.depot.store.artifacts.api.ParentEvent;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
@@ -69,7 +69,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
     {
         validateUser();
         return handle(ResourceLoggingAndTracing.UPDATE_VERSION, ResourceLoggingAndTracing.UPDATE_VERSION + groupId + artifactId + versionId,
-                () -> artifactsRefreshService.refreshVersionForProject(groupId, artifactId,versionId,transitive,ParentEventBuilder.build(groupId,artifactId,versionId, ResourceLoggingAndTracing.UPDATE_VERSION)));
+                () -> artifactsRefreshService.refreshVersionForProject(groupId, artifactId,versionId,transitive, ParentEvent.build(groupId,artifactId,versionId, ParentEvent.UPDATE_PROJECT_VERSION.name())));
     }
 
     @PUT
@@ -83,7 +83,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
     {
         validateUser();
         return handle(ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION, ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION + groupId + artifactId,
-                () -> artifactsRefreshService.refreshMasterSnapshotForProject(groupId,artifactId,fullUpdate,transitive, ParentEventBuilder.build(groupId,artifactId,MASTER_SNAPSHOT, ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION)));
+                () -> artifactsRefreshService.refreshMasterSnapshotForProject(groupId,artifactId,fullUpdate,transitive, ParentEvent.build(groupId,artifactId,MASTER_SNAPSHOT, ParentEvent.UPDATE_PROJECT_HEAD.name())));
     }
 
     @PUT
@@ -98,7 +98,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
     {
         validateUser();
         return handle(ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS, ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS + groupId + artifactId,
-                () -> artifactsRefreshService.refreshAllVersionsForProject(groupId, artifactId, fullUpdate,allVersions,transitive,ParentEventBuilder.build(groupId,artifactId,"ALL", ResourceLoggingAndTracing.UPDATE_ALL_PROJECT_VERSIONS)));
+                () -> artifactsRefreshService.refreshAllVersionsForProject(groupId, artifactId, fullUpdate,allVersions,transitive, ParentEvent.build(groupId,artifactId,"ALL", ParentEvent.UPDATE_PROJECT_ALL_VERSIONS.name())));
     }
 
 
@@ -113,7 +113,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.UPDATE_ALL_VERSIONS, () ->
         {
             validateUser();
-            return artifactsRefreshService.refreshAllVersionsForAllProjects(fullUpdate,allVersions,transitive,ResourceLoggingAndTracing.UPDATE_ALL_VERSIONS);
+            return artifactsRefreshService.refreshAllVersionsForAllProjects(fullUpdate,allVersions,transitive, ParentEvent.UPDATE_ALL_PROJECT_ALL_VERSIONS.name());
         });
     }
 
@@ -127,7 +127,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.UPDATE_ALL_MASTER_REVISIONS, () ->
         {
             validateUser();
-            return artifactsRefreshService.refreshMasterSnapshotForAllProjects(fullUpdate,transitive,ResourceLoggingAndTracing.UPDATE_ALL_MASTER_REVISIONS);
+            return artifactsRefreshService.refreshMasterSnapshotForAllProjects(fullUpdate,transitive, ParentEvent.UPDATE_ALL_PROJECT_HEAD.name());
         });
     }
 
@@ -147,7 +147,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.FIX_MISSING_VERSIONS, () ->
         {
             validateUser();
-            return this.artifactsRefreshService.refreshProjectsWithMissingVersions(ResourceLoggingAndTracing.FIX_MISSING_VERSIONS);
+            return this.artifactsRefreshService.refreshProjectsWithMissingVersions(ParentEvent.FIX_MISSING_VERSIONS.name());
         });
     }
 }

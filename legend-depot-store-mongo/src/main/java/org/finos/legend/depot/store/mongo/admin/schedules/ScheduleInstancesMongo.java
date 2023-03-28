@@ -21,34 +21,34 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
 import org.bson.conversions.Bson;
-import org.finos.legend.depot.store.admin.api.schedules.SchedulesStore;
-import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInfo;
+import org.bson.types.ObjectId;
+import org.finos.legend.depot.store.admin.api.schedules.ScheduleInstancesStore;
+import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInstance;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static com.mongodb.client.model.Filters.eq;
 
-public class SchedulesMongo extends BaseMongo<ScheduleInfo> implements SchedulesStore
+public class ScheduleInstancesMongo extends BaseMongo<ScheduleInstance> implements ScheduleInstancesStore
 {
-    public static final String COLLECTION = "schedules";
-    public static final String NAME = "name";
+    public static final String COLLECTION = "schedule-instances";
+    public static final String SCHEDULE = "schedule";
 
 
     @Inject
-    public SchedulesMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
+    public ScheduleInstancesMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
     {
-        super(databaseProvider, ScheduleInfo.class, new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY));
+        super(databaseProvider, ScheduleInstance.class, new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY));
     }
 
     @Override
-    protected void validateNewData(ScheduleInfo data)
+    protected void validateNewData(ScheduleInstance data)
     {
-        //nothing to validate
+
     }
 
     @Override
@@ -58,35 +58,31 @@ public class SchedulesMongo extends BaseMongo<ScheduleInfo> implements Schedules
     }
 
     @Override
-    protected Bson getKeyFilter(ScheduleInfo data)
+    protected Bson getKeyFilter(ScheduleInstance data)
     {
-        return eq(NAME, data.name);
+        return eq(SCHEDULE, data.getSchedule());
     }
 
-
-    @Override
-    public Optional<ScheduleInfo> get(String name)
+    public static List<IndexModel> buildIndexes()
     {
-        return findOne(eq(NAME, name));
+        return Arrays.asList(buildIndex("schedule", SCHEDULE));
     }
 
-
     @Override
-    public List<ScheduleInfo> getAll()
+    public List<ScheduleInstance> getAll()
     {
         return super.getAllStoredEntities();
     }
 
-
     @Override
-    public void delete(String name)
+    public void delete(String instanceId)
     {
-        super.delete(eq(NAME, name));
+        super.delete(eq(ID_FIELD, new ObjectId(instanceId)));
     }
 
-
-    public static List<IndexModel> buildIndexes()
+    @Override
+    public List<ScheduleInstance> find(String scheduleName)
     {
-        return Arrays.asList(buildIndex("name", NAME));
+        return super.find(eq(SCHEDULE, scheduleName));
     }
 }

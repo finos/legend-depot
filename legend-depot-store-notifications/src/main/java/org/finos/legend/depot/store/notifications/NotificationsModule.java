@@ -19,8 +19,6 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.api.Queue;
@@ -34,10 +32,11 @@ import org.finos.legend.depot.store.notifications.store.mongo.NotificationsStore
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
 import javax.inject.Named;
-import java.time.LocalDateTime;
 
 import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.NOTIFICATIONS_COUNTER;
 import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.NOTIFICATIONS_COUNTER_HELP;
+import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.NOTIFICATION_COMPLETE;
+import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.NOTIFICATION_COMPLETE_HELP;
 import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.QUEUE_WAITING;
 import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.QUEUE_WAITING_HELP;
 
@@ -73,7 +72,7 @@ public class NotificationsModule extends PrivateModule
         }
         for (long worker = 1;numberOfWorkers >= worker;worker++)
         {
-            schedulesFactory.register(QUEUE_OBSERVER + "_" + worker, LocalDateTime.now().plusNanos(config.getQueueDelay() * 1000000L), config.getQueueInterval(), true, notificationsManager::handle);
+            schedulesFactory.register(QUEUE_OBSERVER + "_" + worker, config.getQueueDelay(), config.getQueueInterval(), notificationsManager::handle);
         }
         return true;
     }
@@ -85,6 +84,7 @@ public class NotificationsModule extends PrivateModule
     {
         metricsHandler.registerCounter(NOTIFICATIONS_COUNTER, NOTIFICATIONS_COUNTER_HELP);
         metricsHandler.registerGauge(QUEUE_WAITING, QUEUE_WAITING_HELP);
+        metricsHandler.registerHistogram(NOTIFICATION_COMPLETE, NOTIFICATION_COMPLETE_HELP);
         return true;
     }
 
@@ -93,7 +93,7 @@ public class NotificationsModule extends PrivateModule
     @Singleton
     boolean notificationsCleanUp(SchedulesFactory schedulesFactory, NotificationsManager eventsQueueManager)
     {
-        schedulesFactory.register(CLEANUP_NOTIFICATIONS_SCHEDULE, LocalDateTime.now().plusSeconds(1), 12 * 3600000, false, () -> eventsQueueManager.deleteOldNotifications(60));
+        schedulesFactory.register(CLEANUP_NOTIFICATIONS_SCHEDULE, SchedulesFactory.MINUTE, 1 * SchedulesFactory.HOUR,  () -> eventsQueueManager.deleteOldNotifications(120));
         return true;
     }
 

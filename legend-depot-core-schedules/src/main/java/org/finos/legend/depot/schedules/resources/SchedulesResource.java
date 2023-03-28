@@ -19,16 +19,18 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.schedules.services.SchedulesFactory;
+import org.finos.legend.depot.store.admin.api.schedules.ScheduleInstancesStore;
 import org.finos.legend.depot.store.admin.api.schedules.SchedulesStore;
 import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInfo;
-import org.finos.legend.depot.schedules.services.SchedulesFactory;
+import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInstance;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -39,6 +41,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("")
 @Api("Schedules")
@@ -47,15 +50,17 @@ public class SchedulesResource extends BaseAuthorisedResource
 
     public static final String SCHEDULES_RESOURCE = "Schedules";
     private final SchedulesFactory schedulesFactory;
-    private final SchedulesStore manageSchedulesService;
+    private final SchedulesStore schedulesStore;
+    private final ScheduleInstancesStore scheduleInstancesStore;
 
     @Inject
     protected SchedulesResource(AuthorisationProvider authorisationProvider,
-                                @Named("requestPrincipal") Provider<Principal> principalProvider, SchedulesFactory schedulesFactory, SchedulesStore manageSchedulesService)
+                                @Named("requestPrincipal") Provider<Principal> principalProvider, SchedulesFactory schedulesFactory, SchedulesStore manageSchedulesService, ScheduleInstancesStore scheduleInstancesStore)
     {
         super(authorisationProvider, principalProvider);
         this.schedulesFactory = schedulesFactory;
-        this.manageSchedulesService = manageSchedulesService;
+        this.schedulesStore = manageSchedulesService;
+        this.scheduleInstancesStore = scheduleInstancesStore;
     }
 
     @Override
@@ -68,97 +73,96 @@ public class SchedulesResource extends BaseAuthorisedResource
     @Path("/schedules")
     @ApiOperation(ResourceLoggingAndTracing.SCHEDULES_STATUS)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<ScheduleInfo> getSchedulerStatus(@QueryParam("running") Boolean running,
-                                                 @QueryParam("disabled") Boolean disabled)
+    public List<ScheduleInfo> getSchedulerStatus(@QueryParam("disabled") @DefaultValue("false") Boolean disabled)
+    {
+
+        return handle(ResourceLoggingAndTracing.SCHEDULES_STATUS,() ->
+        {
+            validateUser();
+            return this.schedulesStore.getAll().stream().filter(s -> disabled == null || s.disabled == disabled.booleanValue()).collect(Collectors.toList());
+        });
+    }
+
+
+    @GET
+    @Path("/scheduleInstances")
+    @ApiOperation(ResourceLoggingAndTracing.SCHEDULES_RUNS)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<ScheduleInstance> getSchedulerInstances()
     {
         validateUser();
-        return handle(ResourceLoggingAndTracing.SCHEDULES_STATUS,() -> this.schedulesFactory.find(running,disabled));
+        return handle(ResourceLoggingAndTracing.SCHEDULES_RUNS,() -> this.scheduleInstancesStore.getAll());
     }
 
     @PUT
-    @Path("/schedules/{jobId}")
+    @Path("/schedules/{scheduleName}")
     @ApiOperation(ResourceLoggingAndTracing.TRIGGER_SCHEDULE)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response forceScheduler(@PathParam("jobId") String jobId)
+    public Response forceScheduler(@PathParam("scheduleName") String scheduleName)
     {
         return handle(ResourceLoggingAndTracing.TRIGGER_SCHEDULE, () ->
         {
             validateUser();
-            schedulesFactory.run(jobId);
+            schedulesFactory.trigger(scheduleName);
             return Response.noContent().build();
         });
     }
 
     @DELETE
-    @Path("/schedules/{jobId}")
+    @Path("/schedules/{scheduleName}")
     @ApiOperation(ResourceLoggingAndTracing.DELETE_SCHEDULE)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteScheduler(@PathParam("jobId") String jobId)
+    public Response deleteScheduler(@PathParam("scheduleName") String scheduleName)
     {
         return handle(ResourceLoggingAndTracing.DELETE_SCHEDULE, () ->
         {
             validateUser();
-            schedulesFactory.deRegister(jobId);
+            schedulesFactory.deRegister(scheduleName);
             return Response.noContent().build();
         });
     }
 
-    @PUT
-    @Path("/schedules")
-    @ApiOperation(ResourceLoggingAndTracing.TRIGGER_SCHEDULE)
-    @Consumes(MediaType.APPLICATION_JSON)
+    @DELETE
+    @Path("/schedules/")
+    @ApiOperation(ResourceLoggingAndTracing.DELETE_SCHEDULES)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response registerSchedule(ScheduleInfo info)
+    public Response deleteSchedules()
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_SCHEDULE, () ->
+        return handle(ResourceLoggingAndTracing.DELETE_SCHEDULES, () ->
         {
             validateUser();
-            manageSchedulesService.createOrUpdate(info);
+            schedulesFactory.deRegisterAll();
             return Response.noContent().build();
         });
     }
 
     @PUT
-    @Path("/schedules/{jobId}/disable/{toggle}")
+    @Path("/schedules/{scheduleName}/disable/{toggle}")
     @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULE)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response toggleScheduler(@PathParam("jobId") String jobId, @PathParam("toggle") boolean toggle)
+    public Response toggleScheduler(@PathParam("scheduleName") String scheduleName, @PathParam("toggle") boolean toggle)
     {
         return handle(ResourceLoggingAndTracing.TOGGLE_SCHEDULE, () ->
         {
             validateUser();
-            schedulesFactory.toggleDisable(jobId, toggle);
+            schedulesFactory.toggleDisable(scheduleName, toggle);
             return Response.noContent().build();
         });
     }
 
-    @PUT
-    @Path("/schedules/{jobId}/running/{toggle}")
-    @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULE)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response toggleRunningScheduler(@PathParam("jobId") String jobId, @PathParam("toggle") boolean toggle)
-    {
-        return handle(ResourceLoggingAndTracing.TOGGLE_SCHEDULE, () ->
-        {
-            validateUser();
-            schedulesFactory.toggleRunning(jobId, toggle);
-            return Response.noContent().build();
-        });
-    }
 
     @PUT
     @Path("/schedules/all/disable/{toggle}")
-    @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULE)
+    @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULES)
     @Produces(MediaType.APPLICATION_JSON)
     public Response toggleScheduler(@PathParam("toggle") boolean toggle)
     {
-        return handle(ResourceLoggingAndTracing.TOGGLE_SCHEDULE, () ->
+        return handle(ResourceLoggingAndTracing.TOGGLE_SCHEDULES, () ->
         {
             validateUser();
             schedulesFactory.toggleDisableAll(toggle);
             return Response.noContent().build();
         });
     }
-
 
 }

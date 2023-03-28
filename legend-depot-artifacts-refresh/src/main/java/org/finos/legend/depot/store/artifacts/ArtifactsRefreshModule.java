@@ -20,17 +20,16 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
-import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
+import org.finos.legend.depot.store.artifacts.api.ParentEvent;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactRefreshStatusResource;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactsRefreshResource;
-import org.finos.legend.depot.store.artifacts.services.ProjectVersionRefreshHandler;
 import org.finos.legend.depot.store.artifacts.services.ArtifactsRefreshServiceImpl;
+import org.finos.legend.depot.store.artifacts.services.ProjectVersionRefreshHandler;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
 import javax.inject.Named;
-import java.time.LocalDateTime;
 
 import static org.finos.legend.depot.store.artifacts.services.ProjectVersionRefreshHandler.TOTAL_NUMBER_OF_VERSIONS_REFRESH;
 import static org.finos.legend.depot.store.artifacts.services.ProjectVersionRefreshHandler.VERSION_REFRESH_COUNTER;
@@ -39,8 +38,7 @@ import static org.finos.legend.depot.store.artifacts.services.ProjectVersionRefr
 
 public class ArtifactsRefreshModule extends PrivateModule
 {
-    private static final String REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE = "refreshAllVersionArtifacts-schedule";
-    private static final String FIX_MISSING_VERSIONS_SCHEDULE = "fix-missing-versions-schedule";
+
     private static final String CLEANUP_REFRESH_SCHEDULE = "clean-refresh-status-schedule";
 
     @Override
@@ -76,7 +74,7 @@ public class ArtifactsRefreshModule extends PrivateModule
     @Named("refresh-all-versions")
     boolean initVersions(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE, LocalDateTime.now().plusSeconds(configuration.getVersionsUpdateIntervalInMillis() / 1000), configuration.getVersionsUpdateIntervalInMillis(), false,() -> artifactsRefreshService.refreshAllVersionsForAllProjects(false,false,false, REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE));
+        schedulesFactory.registerSingleInstance(ParentEvent.REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE.name(), configuration.getVersionsUpdateIntervalInMillis(), configuration.getVersionsUpdateIntervalInMillis(),() -> artifactsRefreshService.refreshAllVersionsForAllProjects(false,false,false, ParentEvent.REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE.name()));
         return true;
     }
 
@@ -86,16 +84,16 @@ public class ArtifactsRefreshModule extends PrivateModule
     @Named("refresh-missing-versions")
     boolean initFixVersionsMismatchDaemon(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService,ArtifactRepositoryProviderConfiguration configuration)
     {
-        schedulesFactory.register(FIX_MISSING_VERSIONS_SCHEDULE, LocalDateTime.now().plusSeconds(configuration.getFixMissingVersionsIntervalInMillis() / 1000), configuration.getFixMissingVersionsIntervalInMillis(), false,() -> artifactsRefreshService.refreshProjectsWithMissingVersions(FIX_MISSING_VERSIONS_SCHEDULE));
+        schedulesFactory.registerSingleInstance(ParentEvent.FIX_MISSING_VERSIONS_SCHEDULE.name(),configuration.getFixMissingVersionsIntervalInMillis(), configuration.getFixMissingVersionsIntervalInMillis(),() -> artifactsRefreshService.refreshProjectsWithMissingVersions(ParentEvent.FIX_MISSING_VERSIONS_SCHEDULE.name()));
         return true;
     }
 
     @Provides
     @Singleton
     @Named("cleanup-refresh-status")
-    boolean cleanUpSchedule(SchedulesFactory schedulesFactory, RefreshStatusStore refreshStatusStore)
+    boolean cleanUpSchedule(SchedulesFactory schedulesFactory, ProjectVersionRefreshHandler refreshHandler)
     {
-        schedulesFactory.register(CLEANUP_REFRESH_SCHEDULE,LocalDateTime.now().plusMinutes(60),12 * 3600000,false,() -> refreshStatusStore.deleteOldRefreshStatuses(7));
+        schedulesFactory.register(CLEANUP_REFRESH_SCHEDULE, SchedulesFactory.MINUTE,SchedulesFactory.MINUTE, () -> refreshHandler.deleteExpiredRefresh());
         return true;
     }
 }

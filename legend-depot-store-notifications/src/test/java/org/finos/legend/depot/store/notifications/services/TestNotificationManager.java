@@ -15,35 +15,29 @@
 
 package org.finos.legend.depot.store.notifications.services;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
-import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
-import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
-import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsQueueMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
+import static org.finos.legend.depot.domain.DatesHandler.toDate;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -54,12 +48,11 @@ public class TestNotificationManager extends TestStoreMongo
     public static final String TEST_PROJECT_ID = "PROD-1";
     public static final String VERSION_ID = "2.3.1";
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
-    protected UpdateProjectsVersions projectsVersionsStore = new ProjectsVersionsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     private final NotificationsMongo notifications = new NotificationsMongo(mongoProvider);
     private final NotificationsQueueMongo queue = new NotificationsQueueMongo(mongoProvider);
     private final NotificationEventHandler notificationEventHandler = mock(NotificationEventHandler.class);
-    private final NotificationsQueueManager eventsManager = new NotificationsQueueManager(new ProjectsServiceImpl(projectsVersionsStore,projectsStore), notifications, queue, notificationEventHandler);
+    private final NotificationsQueueManager eventsManager = new NotificationsQueueManager(notifications, queue, notificationEventHandler);
 
     @Before
     public void setUpData()
@@ -120,7 +113,6 @@ public class TestNotificationManager extends TestStoreMongo
 
 
     @Test
-    @Ignore
     public void processNewVersionEventForNonExistingVersion()
     {
         MetadataNotification event = new MetadataNotification(TEST_PROJECT_ID, TEST_GROUP_ID, "test", "10.0.0");
@@ -154,18 +146,19 @@ public class TestNotificationManager extends TestStoreMongo
     public void testDeleteOldNotifications()
     {
         MetadataNotification ev1 = new MetadataNotification("prod-123","test","artifacts","1.0.0");
-        ev1.setEventId("609a5af62ccc9300c2e02581");
-        ev1.setLastUpdated(Date.from(LocalDateTime.now().minusDays(12).atZone(ZoneId.systemDefault()).toInstant()));
-        notifications.insert(ev1);
+        ev1.setUpdated(toDate(LocalDateTime.now().minusDays(12)));
+        insertRaw(NotificationsMongo.COLLECTION,ev1);
+        Assert.assertEquals(1, notifications.getAll().size());
         MetadataNotification ev2 = new MetadataNotification("prod-123","test","artifacts","2.0.0");
-        ev2.setEventId("609a631a2ccc9300c2edafb8");
-        notifications.insert(ev2);
+        notifications.createOrUpdate(ev2);
 
         Assert.assertEquals(2, notifications.getAll().size());
 
-        eventsManager.deleteOldNotifications(10);
+        long deleted = eventsManager.deleteOldNotifications(10);
+        Assert.assertEquals(1,deleted);
         Assert.assertEquals(1, notifications.getAll().size());
     }
+
 
     @Test
     public void testMaxRetry()
@@ -224,4 +217,20 @@ public class TestNotificationManager extends TestStoreMongo
         Assert.assertEquals(2,notification.getAttempt());
         Assert.assertEquals(2,notification.getResponses().size());
     }
+
+//    List<RefreshStatus> statusesBeforeLunch = refreshStatus.find(aPointInTime.toLocalDate().atStartOfDay(), aPointInTime);
+//        Assert.assertNotNull(statusesBeforeLunch);
+//        Assert.assertEquals(1, statusesBeforeLunch.size());
+//        Assert.assertEquals("test1.org", statusesBeforeLunch.get(0).getGroupId());
+//
+//    List<RefreshStatus> afterLunch = refreshStatus.find(aPointInTime.withHour(12).withMinute(0).withSecond(1), null);
+//        Assert.assertNotNull(afterLunch);
+//        Assert.assertEquals(3, afterLunch.size());
+//
+//    List<RefreshStatus> statusInBetween = refreshStatus.find(aPointInTime.plusHours(1).plusMinutes(1),aPointInTime.plusHours(2));
+//        Assert.assertNotNull(statusInBetween);
+//        Assert.assertEquals(1, statusInBetween.size());
+//        Assert.assertEquals("test3.org", statusInBetween.get(0).getGroupId());
+
+
 }

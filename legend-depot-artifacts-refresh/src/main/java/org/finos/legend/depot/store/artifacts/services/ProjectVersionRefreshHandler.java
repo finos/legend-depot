@@ -210,20 +210,17 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         MetadataEventResponse response = new MetadataEventResponse();
         LOGGER.info("Starting [{}-{}-{}] refresh", event.getGroupId(), event.getArtifactId(), event.getVersionId());
         Optional<RefreshStatus> exitingRefresh = statusStore.get(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-        if (exitingRefresh.isPresent() && exitingRefresh.get().isRunning())
+        if (exitingRefresh.isPresent() && !exitingRefresh.get().isExpired())
         {
-            String skip  = String.format("Other instance is running, skipping [%s-%s-%s] refresh", event.getGroupId(), event.getArtifactId(), event.getVersionId());
+            String skip = String.format("Skipping [%s-%s-%s] refresh", event.getGroupId(), event.getArtifactId(), event.getVersionId());
             LOGGER.info(skip);
             response.addMessage(skip);
             return response;
         }
-        RefreshStatus storeStatus = RefreshStatus.from(event);
         try
         {
             PrometheusMetricsFactory.getInstance().incrementCount(VERSION_REFRESH_COUNTER);
-            storeStatus.setTraceId(TracerFactory.get().getActiveSpanTraceId());
-            storeStatus.setResponse(response);
-            storeStatus = statusStore.createOrUpdate(storeStatus.startRunning());
+            statusStore.insert(RefreshStatus.from(event));
             response = functionToExecute.get();
         }
         catch (Exception e)
@@ -234,12 +231,11 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         }
         finally
         {
-            storeStatus.combineResponse(response);
-            statusStore.createOrUpdate(storeStatus.stopRunning());
             if (response.hasErrors())
             {
                 PrometheusMetricsFactory.getInstance().incrementErrorCount(VERSION_REFRESH_COUNTER);
             }
+            statusStore.delete(event.getGroupId(), event.getArtifactId(), event.getVersionId());
             LOGGER.info("Finished [{}-{}-{}] refresh", event.getGroupId(), event.getArtifactId(), event.getVersionId());
         }
         return response;
@@ -471,4 +467,11 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         return false;
     }
 
+    public long deleteExpiredRefresh()
+    {
+        List<RefreshStatus> expired = statusStore.getAll().stream().filter(status -> status.isExpired()).collect(Collectors.toList());
+        expired.forEach(refresh -> statusStore.delete(refresh.getGroupId(),refresh.getArtifactId(),refresh.getVersionId()));
+        LOGGER.info("Deleted {} expired versions refresh");
+        return expired.size();
+    }
 }

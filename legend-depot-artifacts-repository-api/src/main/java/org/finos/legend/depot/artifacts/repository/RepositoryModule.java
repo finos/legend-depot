@@ -24,13 +24,12 @@ import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
 import javax.inject.Named;
-import java.time.LocalDateTime;
 
+import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.MISSING_REPO_VERSIONS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.MISSING_STORE_VERSIONS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.PROJECTS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.REPO_EXCEPTIONS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.REPO_VERSIONS;
-import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.MISSING_REPO_VERSIONS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.STORE_VERSIONS;
 
 public class RepositoryModule extends PrivateModule
@@ -59,7 +58,7 @@ public class RepositoryModule extends PrivateModule
         metricsHandler.registerGauge(MISSING_REPO_VERSIONS, MISSING_REPO_VERSIONS);
         metricsHandler.registerGauge(MISSING_STORE_VERSIONS, MISSING_STORE_VERSIONS);
         metricsHandler.registerGauge(REPO_EXCEPTIONS, REPO_EXCEPTIONS);
-        schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, LocalDateTime.now().plusMinutes(1), 300000, true,repositoryServices::findVersionsMismatches);
+        schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE,repositoryServices::findVersionsMismatches);
         return true;
     }
 }

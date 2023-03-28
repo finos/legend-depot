@@ -25,10 +25,12 @@ import com.mongodb.client.MongoDatabase;
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 import org.bson.Document;
+import org.finos.legend.depot.domain.HasIdentifier;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
@@ -38,9 +40,6 @@ import org.junit.Assert;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 
 public abstract class TestStoreMongo
@@ -74,6 +73,10 @@ public abstract class TestStoreMongo
         return null;
     }
 
+    protected void insertRaw(String collectionName,HasIdentifier rawObject)
+    {
+        mongoProvider.getCollection(collectionName).insertOne(BaseMongo.buildDocument(rawObject));
+    }
 
     public static List<StoreProjectVersionData> readProjectVersionsConfigsFile(URL fileName)
     {
@@ -258,8 +261,4 @@ public abstract class TestStoreMongo
         return getMongoDatabase().getCollection(ProjectsVersionsMongo.COLLECTION);
     }
 
-    protected Date toDate(LocalDateTime date)
-    {
-        return Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
-    }
 }

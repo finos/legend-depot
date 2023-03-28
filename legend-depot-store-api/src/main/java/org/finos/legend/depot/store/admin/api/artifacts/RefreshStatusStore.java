@@ -17,7 +17,6 @@ package org.finos.legend.depot.store.admin.api.artifacts;
 
 import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,28 +24,19 @@ public interface RefreshStatusStore
 {
     Optional<RefreshStatus> get(String groupId, String artifactId, String version);
 
-    List<RefreshStatus> find(String groupId, String artifactId, String version,String eventId, String parentEventId,Boolean running, Boolean success, LocalDateTime startTimeFrom,LocalDateTime startTimeTo);
+    List<RefreshStatus> find(String groupId, String artifactId, String version,String eventId, String parentEventId);
 
     List<RefreshStatus> getAll();
 
-    default List<RefreshStatus> find(LocalDateTime from, LocalDateTime to)
-    {
-        return  find(null,null,null,null,null,null,null,from,to);
-    }
-
     default List<RefreshStatus> find(String groupId, String artifactId, String version)
     {
-        return  find(groupId,artifactId,version,null,null,null,null,null,null);
+        return  find(groupId,artifactId,version,null,null);
     }
 
-    default List<RefreshStatus> find(String groupId, String artifactId, String version, Boolean running)
-    {
-        return  find(groupId,artifactId,version,null,null,running,null,null,null);
-    }
+    void insert(RefreshStatus status);
 
     RefreshStatus createOrUpdate(RefreshStatus storeStatus);
 
-    void delete(String statusId);
+    void delete(String groupId, String artifactId, String versionId);
 
-    long deleteOldRefreshStatuses(int days);
 }

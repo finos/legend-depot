@@ -13,14 +13,21 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.artifacts.api;
 
-public final class ParentEventBuilder
+package org.finos.legend.depot.store.admin.api.schedules;
+
+import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInstance;
+
+import java.util.List;
+
+public interface ScheduleInstancesStore
 {
-    private static final String SEPARATOR = "-";
+    List<ScheduleInstance> getAll();
 
-    public static String build(String groupId, String artifactId, String versionId,String parentEventId)
-    {
-        return parentEventId != null ? parentEventId : groupId + SEPARATOR + artifactId + SEPARATOR + versionId;
-    }
+    List<ScheduleInstance> find(String scheduleName);
+
+    void insert(ScheduleInstance instance);
+
+    void delete(String instanceId);
+
 }

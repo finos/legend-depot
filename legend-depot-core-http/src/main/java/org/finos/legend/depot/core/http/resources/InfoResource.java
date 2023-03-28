@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.finos.legend.depot.domain.DatesHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,6 +145,7 @@ public class InfoResource
         private final long totalMemory;
         private final long maxMemory;
         private final long usedMemory;
+        private final String serverTimeZone;
         private final InfoResource.ServerPlatformInfo platform;
 
         private ServerInfo(String hostName, InfoResource.PlatformVersionInfo platformVersionInfo)
@@ -153,6 +155,7 @@ public class InfoResource
             this.totalMemory = Runtime.getRuntime().totalMemory() / MEGABYTE;
             this.maxMemory = Runtime.getRuntime().maxMemory() / MEGABYTE;
             this.usedMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / MEGABYTE;
+            this.serverTimeZone = DatesHandler.ZONE_ID.getId();
         }
 
         public String getHostName()
@@ -178,6 +181,11 @@ public class InfoResource
         public InfoResource.ServerPlatformInfo getPlatform()
         {
             return this.platform;
+        }
+
+        public String getServerTimeZone()
+        {
+            return serverTimeZone;
         }
     }
 

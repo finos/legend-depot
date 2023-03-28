@@ -38,6 +38,7 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.depot.domain.CoordinateValidator;
+import org.finos.legend.depot.domain.entity.EntityValidationErrors;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.entity.StoredEntityOverview;
 import org.finos.legend.depot.domain.project.ProjectVersion;
@@ -46,7 +47,6 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.finos.legend.depot.domain.entity.EntityValidationErrors;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.finos.legend.sdlc.tools.entity.EntityPaths;
 import org.slf4j.Logger;
@@ -182,7 +182,7 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
                 set(ENTITY_PATH, entity.getEntity().getPath()),
                 set(ENTITY_CLASSIFIER_PATH, entity.getEntity().getClassifierPath()),
                 set(ENTITY_CONTENT, entity.getEntity().getContent()),
-                currentDate(LAST_MODIFIED));
+                currentDate(UPDATED));
     }
 
     private StoreOperationResult validateEntity(StoredEntity entity)

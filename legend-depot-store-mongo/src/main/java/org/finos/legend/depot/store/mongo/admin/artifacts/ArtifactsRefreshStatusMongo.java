@@ -20,39 +20,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
-import com.mongodb.client.model.IndexOptions;
 import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
-import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.exists;
-import static com.mongodb.client.model.Filters.gte;
-import static com.mongodb.client.model.Filters.lte;
 
 
 public class ArtifactsRefreshStatusMongo extends BaseMongo<RefreshStatus> implements RefreshStatusStore
 {
 
     public static final String COLLECTION = "artifacts-refresh-status";
-
-    private static final String RUNNING = "running";
-    private static final String STAR_TIME = "startTime";
-    private static final String RESPONSE_STATUS = "status";
     private static final String PARENT_EVENT = "parentEventId";
     private static final String EVENT_ID = "eventId";
 
@@ -71,10 +58,8 @@ public class ArtifactsRefreshStatusMongo extends BaseMongo<RefreshStatus> implem
     public static List<IndexModel> buildIndexes()
     {
         return Arrays.asList(
-        buildIndex("running",RUNNING),
-        buildIndex("startTime",STAR_TIME),
+        buildIndex("eventId",EVENT_ID),
         buildIndex("parentId",PARENT_EVENT),
-        buildIndex("status",RESPONSE_STATUS),
         buildIndex("groupId-artifactId-versionId",true,GROUP_ID, ARTIFACT_ID, VERSION_ID));
     }
 
@@ -91,23 +76,25 @@ public class ArtifactsRefreshStatusMongo extends BaseMongo<RefreshStatus> implem
     }
 
     @Override
+    public RefreshStatus createOrUpdate(RefreshStatus data)
+    {
+        throw new UnsupportedOperationException("createOrUpdate Not supported for refresh status class");
+    }
+
+    @Override
     public List<RefreshStatus> getAll()
     {
         return super.getAllStoredEntities();
     }
 
     @Override
-    public List<RefreshStatus> find(String groupId, String artifactId, String version,String eventId,String parentEventId, Boolean running, Boolean success, LocalDateTime fromStartTime,LocalDateTime toStartTime)
+    public List<RefreshStatus> find(String groupId, String artifactId, String version,String eventId,String parentEventId)
     {
         Bson filter = groupId != null ? eq(GROUP_ID, groupId) : exists(GROUP_ID);
         filter = artifactId != null ? and(filter, eq(ARTIFACT_ID, artifactId)) : filter;
         filter = version != null ? and(filter, eq(VERSION_ID, version)) : filter;
         filter = eventId != null ? and(filter, eq(EVENT_ID, eventId)) : filter;
         filter = parentEventId != null ? and(filter, eq(PARENT_EVENT, parentEventId)) : filter;
-        filter = running != null ? and(filter, eq(RUNNING, running)) : filter;
-        filter = success != null ? and(filter, eq(RESPONSE_STATUS, (success ? MetadataEventStatus.SUCCESS.name() : MetadataEventStatus.FAILED.name()))) : filter;
-        filter = toStartTime != null ? and(filter,lte(STAR_TIME, toTime(toStartTime))) : filter;
-        filter = fromStartTime != null ? and(filter, gte(STAR_TIME, toTime(fromStartTime))) : filter;
         return find(filter);
     }
 
@@ -118,27 +105,10 @@ public class ArtifactsRefreshStatusMongo extends BaseMongo<RefreshStatus> implem
         return  findOne(filter);
     }
 
-    @Override
-    public void delete(String id)
-    {
-        Bson filter = eq("_id", new ObjectId(id));
-        getCollection().deleteOne(filter);
-    }
-
-    private long toTime(LocalDateTime date)
-    {
-        return Date.from(date.atZone(ZoneId.systemDefault())
-                .toInstant()).getTime();
-    }
 
     @Override
-    public long deleteOldRefreshStatuses(int days)
+    public void delete(String groupId, String artifactId, String versionId)
     {
-        LocalDateTime timeToLive = LocalDateTime.now().minusDays(days);
-        List<RefreshStatus> refreshStatuses = find(null,timeToLive);
-        refreshStatuses.forEach(status -> delete(status.getId()));
-        LOGGER.info("deleted [{}] statuses older than [{}] days",refreshStatuses.size(),days);
-        return refreshStatuses.size();
+        super.delete(getArtifactAndVersionFilter(groupId, artifactId, versionId));
     }
-
 }

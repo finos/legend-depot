@@ -31,6 +31,7 @@ import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
 import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
+import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
@@ -49,6 +50,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -56,6 +58,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.finos.legend.depot.domain.DatesHandler.toDate;
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import static org.finos.legend.depot.store.artifacts.services.TestArtifactsRefreshServiceExceptionEscenarios.PARENT_EVENT_ID;
 import static org.finos.legend.depot.store.artifacts.services.TestArtifactsRefreshServiceWithMocks.PROJECT_A;
@@ -218,4 +221,42 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         Assert.assertEquals(MetadataEventStatus.FAILED, response.getStatus());
     }
 
+    @Test
+    public void dealWithOverrunningRefresh()
+    {
+        RefreshStatus overrun = new RefreshStatus(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, MASTER_SNAPSHOT);
+        Assert.assertFalse(overrun.isExpired());
+        overrun.setExpires(toDate(LocalDateTime.now().minusMinutes(100)));
+        Assert.assertTrue(overrun.isExpired());
+        refreshStatusStore.insert(overrun);
+        RefreshStatus fromStore = refreshStatusStore.get(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, MASTER_SNAPSHOT).get();
+        Assert.assertTrue(fromStore.isExpired());
+
+        RefreshStatus isOk = new RefreshStatus(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0");
+        Assert.assertFalse(isOk.isExpired());
+        isOk.setExpires(toDate(LocalDateTime.now().plusMinutes(9)));
+        Assert.assertFalse(isOk.isExpired());
+        refreshStatusStore.insert(isOk);
+        RefreshStatus fromStore2 = refreshStatusStore.get(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").get();
+        Assert.assertFalse(fromStore2.isExpired());
+    }
+
+
+    @Test
+    public void canDeleteStatuses()
+    {
+        RefreshStatus status1 = new RefreshStatus("test","artifact","2.0.0");
+        status1.setExpires(toDate(LocalDateTime.now().plusMinutes(100)));
+        RefreshStatus expiredStatus = new RefreshStatus("test","artifact","1.0.0");
+        expiredStatus.setExpires(toDate(LocalDateTime.now().minusMinutes(100)));
+        refreshStatusStore.insert(status1);
+        refreshStatusStore.insert(expiredStatus);
+        Assert.assertEquals(2, refreshStatusStore.getAll().size());
+        refreshStatusStore.delete("test","artifact","2.0.0");
+        Assert.assertEquals(1, refreshStatusStore.getAll().size());
+
+        versionHandler.deleteExpiredRefresh();
+        Assert.assertEquals(0, refreshStatusStore.getAll().size());
+
+    }
 }

@@ -17,8 +17,10 @@ package org.finos.legend.depot.store.mongo.admin;
 
 import com.google.inject.PrivateModule;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
+import org.finos.legend.depot.store.admin.api.schedules.ScheduleInstancesStore;
 import org.finos.legend.depot.store.admin.api.schedules.SchedulesStore;
 import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
+import org.finos.legend.depot.store.mongo.admin.schedules.ScheduleInstancesMongo;
 import org.finos.legend.depot.store.mongo.admin.schedules.SchedulesMongo;
 
 public class AdminDataStoreMongoModule extends PrivateModule
@@ -28,9 +30,11 @@ public class AdminDataStoreMongoModule extends PrivateModule
     {
 
         bind(SchedulesStore.class).to(SchedulesMongo.class);
+        bind(ScheduleInstancesStore.class).to(ScheduleInstancesMongo.class);
         bind(QueryMetricsStore.class).to(QueryMetricsMongo.class);
 
         expose(QueryMetricsStore.class);
         expose(SchedulesStore.class);
+        expose(ScheduleInstancesStore.class);
     }
 }

@@ -16,6 +16,7 @@
 package org.finos.legend.depot.artifacts.repository.services;
 
 import org.apache.maven.model.Model;
+import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
@@ -26,7 +27,6 @@ import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -39,6 +39,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public class RepositoryServices
 {
@@ -69,9 +71,10 @@ public class RepositoryServices
         AtomicLong missingRepoVersions = new AtomicLong(0);
         AtomicLong missingStoreVersions = new AtomicLong(0);
         AtomicLong repoExceptions = new AtomicLong(0);
+        long startTime = System.currentTimeMillis();
         List<StoreProjectData> allProjects = projects.getAllProjectCoordinates();
         LOGGER.info("Starting findVersionsMismatches {}",allProjects.size());
-        allProjects.forEach(p ->
+        ParallelIterate.forEach(allProjects,(p ->
         {
             try
             {
@@ -108,7 +111,7 @@ public class RepositoryServices
                 versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), Collections.emptyList(), Collections.emptyList(), Arrays.asList(message)));
                 repoExceptions.addAndGet(1);
             }
-        });
+        }));
 
         PrometheusMetricsFactory.getInstance().setGauge(PROJECTS,allProjects.size());
         PrometheusMetricsFactory.getInstance().setGauge(REPO_VERSIONS,repoVersions.get());
@@ -116,7 +119,7 @@ public class RepositoryServices
         PrometheusMetricsFactory.getInstance().setGauge(MISSING_REPO_VERSIONS,missingRepoVersions.get());
         PrometheusMetricsFactory.getInstance().setGauge(MISSING_STORE_VERSIONS,missingStoreVersions.get());
         PrometheusMetricsFactory.getInstance().setGauge(REPO_EXCEPTIONS,repoExceptions.get());
-        LOGGER.info("Finished findVersionsMismatches {}",versionMismatches.size());
+        LOGGER.info("Finished findVersionsMismatches {} ({}) ms",versionMismatches.size(),System.currentTimeMillis() - startTime);
         return versionMismatches;
     }
 

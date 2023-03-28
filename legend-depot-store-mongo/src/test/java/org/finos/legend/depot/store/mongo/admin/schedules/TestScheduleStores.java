@@ -13,21 +13,11 @@
 //  limitations under the License.
 //
 
+package org.finos.legend.depot.store.mongo.admin.schedules;
 
-package org.finos.legend.depot.store.admin.api.schedules;
+import org.finos.legend.depot.store.mongo.TestStoreMongo;
 
-import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInfo;
-
-import java.util.List;
-import java.util.Optional;
-
-public interface SchedulesStore
+public class TestScheduleStores extends TestStoreMongo
 {
-    List<ScheduleInfo> getAll();
 
-    Optional<ScheduleInfo> get(String name);
-
-    ScheduleInfo createOrUpdate(ScheduleInfo scheduleInfo);
-
-    void delete(String name);
 }
