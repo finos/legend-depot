@@ -44,6 +44,8 @@ import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
 import org.finos.legend.depot.store.notifications.api.Queue;
+import org.finos.legend.depot.store.notifications.services.NotificationsQueueManager;
+import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsQueueMongo;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.After;
@@ -104,7 +106,7 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
         when(mongoProjects.find(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID)).thenReturn(Optional.of(new StoreProjectData(PROJECT_B,TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID)));
         when(mongoProjectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID,MASTER_SNAPSHOT)).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT)));
         when(mongoProjectsVersions.find(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID,MASTER_SNAPSHOT)).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, MASTER_SNAPSHOT)));
-        when(repository.findVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID)).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
+        when(repository.findVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID)).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0"), VersionId.parseVersionId("2.0.0")));
         when(repository.findVersions(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID)).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
         when(repository.findVersions(TEST_GROUP_ID,"c")).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
     }
@@ -120,8 +122,8 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
     public void canCalculateCandidateVersionsToUpdate()
     {
         List<VersionId> repoVersions = Arrays.asList(VersionId.parseVersionId("1.0.0"),VersionId.parseVersionId("2.0.0"));
-        VersionId latest = VersionId.parseVersionId("1.0.0");
-        List<VersionId> candidates = artifactsRefreshService.calculateCandidateVersions(repoVersions,latest);
+        List<String> versions = Arrays.asList("1.0.0");
+        List<VersionId> candidates = artifactsRefreshService.calculateCandidateVersions(repoVersions,versions);
         Assert.assertEquals("2.0.0",candidates.get(0).toVersionIdString());
     }
 }

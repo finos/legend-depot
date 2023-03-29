@@ -102,8 +102,7 @@
     "org.finos.legend.depot.artifacts.repository.maven.impl.MavenArtifactRepositoryConfiguration": {
       "settingsLocation": "legend-depot-store-server/src/test/resources/sample-repository-settings.xml",
       "versionsUpdateIntervalInMillis": 7200000,
-      "latestUpdateIntervalInMillis": 3600000,
-      "fixVersionsMismatchIntervalInMillis": 360000
+      "latestUpdateIntervalInMillis": 3600000
     }
   },
   "includeProjectPropertiesConfiguration": {

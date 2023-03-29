@@ -27,9 +27,6 @@ public abstract class ArtifactRepositoryProviderConfiguration
     @JsonProperty
     long versionsUpdateIntervalInMillis = 2 * ONE_HOUR;
 
-    @JsonProperty
-    long fixMissingVersionsIntervalInMillis = 1 * ONE_HOUR;
-
     protected ArtifactRepositoryProviderConfiguration(String name)
     {
         this.name = name;
@@ -59,11 +56,6 @@ public abstract class ArtifactRepositoryProviderConfiguration
     public long getVersionsUpdateIntervalInMillis()
     {
         return versionsUpdateIntervalInMillis;
-    }
-
-    public long getFixMissingVersionsIntervalInMillis()
-    {
-        return fixMissingVersionsIntervalInMillis;
     }
 
     public abstract ArtifactRepository initialiseArtifactRepositoryProvider();

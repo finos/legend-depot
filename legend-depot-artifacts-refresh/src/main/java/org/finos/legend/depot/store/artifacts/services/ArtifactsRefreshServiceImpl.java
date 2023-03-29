@@ -17,11 +17,11 @@ package org.finos.legend.depot.store.artifacts.services;
 
 import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
-import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.ParentEvent;
@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
@@ -153,49 +152,6 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         });
     }
 
-    @Override
-    public MetadataEventResponse refreshProjectsWithMissingVersions(String parentEventId)
-    {
-        String parentEvent = ParentEvent.build(ALL, ALL,MISSING,parentEventId);
-        MetadataNotification missingVersions = new MetadataNotification(ALL,ALL,ALL,MISSING,true,false,parentEvent);
-        return versionRefreshHandler.executeWithTrace(REFRESH_PROJECTS_WITH_MISSING_VERSIONS,missingVersions, () ->
-        {
-            MetadataEventResponse response = new MetadataEventResponse();
-            String infoMessage = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",ALL,ALL,MISSING,parentEventId,true,false);
-            response.addMessage(infoMessage);
-            LOGGER.info(infoMessage);
-            List<VersionMismatch> projectsWithMissingVersions = this.repositoryServices.findVersionsMismatches().stream().filter(r -> !r.versionsNotInStore.isEmpty()).collect(Collectors.toList());
-            String countInfo = String.format("Starting fixing [%s] projects with missing versions",projectsWithMissingVersions.size());
-            LOGGER.info(countInfo);
-            response.addMessage(countInfo);
-            AtomicInteger totalMissingVersions = new AtomicInteger();
-            projectsWithMissingVersions.forEach(vm ->
-                    {
-                        vm.versionsNotInStore.forEach(missingVersion ->
-                                {
-                                    try
-                                    {
-                                        String message = String.format("queued fixing missing version: %s-%s-%s ", vm.groupId, vm.artifactId, missingVersion);
-                                        LOGGER.info(message);
-                                        response.addMessage(queueWorkToRefreshProjectVersion(getProject(vm.groupId, vm.artifactId), missingVersion, true,false,parentEventId));
-
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        String message = String.format("queuing failed for missing version: %s-%s-%s ", vm.groupId, vm.artifactId, missingVersion);
-                                        LOGGER.error(message);
-                                        response.addError(message);
-                                    }
-                                    totalMissingVersions.getAndIncrement();
-                                }
-                        );
-                    }
-            );
-            LOGGER.info("Fixed [{}] missing versions",totalMissingVersions);
-            return response;
-        });
-    }
-
     private MetadataEventResponse refreshAllVersionsForProject(StoreProjectData projectData, boolean allVersions, boolean transitive, String parentEvent)
     {
         String parentEventId = ParentEvent.build(projectData.getGroupId(), projectData.getArtifactId(), ALL, parentEvent);
@@ -219,10 +175,11 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             if (repoVersions != null && !repoVersions.isEmpty())
             {
                 List<VersionId> candidateVersions;
-                Optional<VersionId> latestVersion = projects.getLatestVersion(projectData.getGroupId(), projectData.getArtifactId());
-                if (!allVersions && latestVersion.isPresent())
+                List<StoreProjectVersionData> projectVersions = projects.find(projectData.getGroupId(), projectData.getArtifactId());
+                List<String> storeVersions = projectVersions.stream().filter(pv -> !pv.getVersionId().equals(MASTER_SNAPSHOT)).map(pv -> pv.getVersionId()).collect(Collectors.toList());
+                if (!allVersions && storeVersions.size() > 0)
                 {
-                    candidateVersions = calculateCandidateVersions(repoVersions, latestVersion.get());
+                    candidateVersions = calculateCandidateVersions(repoVersions, storeVersions);
                 }
                 else
                 {
@@ -244,9 +201,9 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         return response;
     }
 
-    List<VersionId> calculateCandidateVersions(List<VersionId> repoVersions, VersionId latest)
+    List<VersionId> calculateCandidateVersions(List<VersionId> repoVersions, List<String> versions)
     {
-        return repoVersions.stream().filter(v -> v.compareTo(latest) > 0).collect(Collectors.toList());
+        return repoVersions.stream().filter(v -> !versions.contains(v.toVersionIdString())).collect(Collectors.toList());
     }
 
     private String queueWorkToRefreshProjectVersion(StoreProjectData projectData, String versionId, boolean fullUpdate, boolean transitive, String parentEvent)

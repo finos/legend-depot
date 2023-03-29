@@ -31,6 +31,4 @@ public interface ArtifactsRefreshService
 
     MetadataEventResponse refreshMasterSnapshotForAllProjects(boolean fullUpdate,boolean transitive, String parentEventId);
 
-    MetadataEventResponse refreshProjectsWithMissingVersions(String parentEventId);
-
 }

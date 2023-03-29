@@ -136,18 +136,4 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
     {
         return ARTIFACTS_RESOURCE;
     }
-
-
-    @PUT
-    @Path("/artifactsRefresh/versions/missing")
-    @ApiOperation(ResourceLoggingAndTracing.FIX_MISSING_VERSIONS)
-    @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse updateMissingVersions()
-    {
-        return handle(ResourceLoggingAndTracing.FIX_MISSING_VERSIONS, () ->
-        {
-            validateUser();
-            return this.artifactsRefreshService.refreshProjectsWithMissingVersions(ParentEvent.FIX_MISSING_VERSIONS.name());
-        });
-    }
 }
