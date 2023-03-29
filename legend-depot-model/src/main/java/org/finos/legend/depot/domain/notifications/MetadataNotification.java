@@ -55,7 +55,9 @@ public class MetadataNotification extends VersionedData implements HasIdentifier
     @JsonProperty
     private Date created;
     @JsonProperty
-    private Date lastUpdated;
+    private Date updated;
+    @JsonProperty
+    private Date completed;
     @EqualsExclude
     @JsonProperty
     private Map<Integer,MetadataEventResponse> responses;
@@ -75,37 +77,39 @@ public class MetadataNotification extends VersionedData implements HasIdentifier
                                 @JsonProperty(value = "attempt") Integer attempt,
                                 @JsonProperty(value = "maxAttempts") Integer maxAttempts,
                                 @JsonProperty(value = "responses") Map<Integer,MetadataEventResponse> responses,
-                                @JsonProperty(value = "createdAt") Date createdAt,
-                                @JsonProperty(value = "lastUpdated") Date lastUpdated,
+                                @JsonProperty(value = "created") Date created,
+                                @JsonProperty(value = "updated") Date updated,
+                                @JsonProperty(value = "completed") Date completed,
                                 @JsonProperty(value = "eventPriority") EventPriority eventPriority)
     {
         super(groupId,artifactId,version);
         this.projectId = projectId;
         this.eventId = eventId;
         this.parentEventId = parentEventId;
-        this.lastUpdated = lastUpdated;
-        this.created = createdAt;
+        this.updated = updated;
+        this.created = created;
         this.maxAttempts = maxAttempts != null ? maxAttempts : DEFAULT_MAX_ATTEMPTS;
         this.responses = responses != null ? responses : new HashMap<>();
         this.attempt = attempt != null ? attempt : 0;
         this.fullUpdate = fullUpdate != null ? fullUpdate : false;
         this.transitive = transitive != null ? transitive : false;
         this.eventPriority = eventPriority;
+        this.completed = completed;
     }
 
     public MetadataNotification(String projectId, String groupId, String artifactId, String versionId)
     {
-        this(projectId, groupId, artifactId, versionId, null, null, null, null, null, null, null, null, null, EventPriority.LOW);
+        this(projectId, groupId, artifactId, versionId, null, null, null, null, null, null, null, null,null,null, EventPriority.LOW);
     }
 
     public MetadataNotification(String projectId,String groupId, String artifactId, String versionId, Boolean fullUpdate,Boolean transitive, String parentEvent)
     {
-        this(projectId, groupId, artifactId, versionId, null, parentEvent, fullUpdate, transitive, null, null, null, null, null, EventPriority.LOW);
+        this(projectId, groupId, artifactId, versionId, null, parentEvent, fullUpdate, transitive, null, null, null,null,null,null, EventPriority.LOW);
     }
 
     public MetadataNotification(String projectId,String groupId, String artifactId, String versionId, Boolean fullUpdate,Boolean transitive, String parentEvent, EventPriority eventPriority)
     {
-        this(projectId, groupId, artifactId, versionId, null, parentEvent, fullUpdate, transitive, null, null, null, null, null, eventPriority);
+        this(projectId, groupId, artifactId, versionId, null, parentEvent, fullUpdate, transitive, null, null, null, null,null, null,eventPriority);
     }
 
     public MetadataNotification()
@@ -131,6 +135,21 @@ public class MetadataNotification extends VersionedData implements HasIdentifier
     {
         this.eventId = eventID;
         return this;
+    }
+
+    public Date getCompleted()
+    {
+        return completed;
+    }
+
+    public void setCompleted(Date completed)
+    {
+        this.completed = completed;
+    }
+
+    public void setEventPriority(EventPriority eventPriority)
+    {
+        this.eventPriority = eventPriority;
     }
 
     public boolean isFullUpdate()
@@ -196,6 +215,11 @@ public class MetadataNotification extends VersionedData implements HasIdentifier
         return transitive;
     }
 
+    public MetadataNotification complete()
+    {
+        this.completed = new Date();
+        return this;
+    }
 
     public MetadataNotification increaseAttempts()
     {
@@ -255,14 +279,14 @@ public class MetadataNotification extends VersionedData implements HasIdentifier
         return getResponses().get(attempt);
     }
 
-    public Date getLastUpdated()
+    public Date getUpdated()
     {
-        return lastUpdated;
+        return updated;
     }
 
-    public MetadataNotification setLastUpdated(Date lastUpdated)
+    public MetadataNotification setUpdated(Date updated)
     {
-        this.lastUpdated = lastUpdated;
+        this.updated = updated;
         return this;
     }
 

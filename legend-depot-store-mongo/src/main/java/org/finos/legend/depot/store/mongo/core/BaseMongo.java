@@ -34,22 +34,25 @@ import org.finos.legend.depot.domain.HasIdentifier;
 import org.finos.legend.depot.store.StoreException;
 import org.slf4j.Logger;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.in;
+import static org.finos.legend.depot.domain.DatesHandler.toTime;
+
 
 public abstract class BaseMongo<T extends HasIdentifier>
 {
-    public static final String LAST_MODIFIED = "lastModified";
+    public static final String CREATED = "created";
+    public static final String UPDATED = "updated";
     public static final String GROUP_ID = "groupId";
     public static final String ARTIFACT_ID = "artifactId";
     public static final String VERSION_ID = "versionId";
@@ -150,8 +153,21 @@ public abstract class BaseMongo<T extends HasIdentifier>
     {
         validateNewData(data);
         Bson keyFilter = getKeyFilter(data);
-        Document result = (Document)getCollection().findOneAndReplace(keyFilter, buildDocument(data), FIND_ONE_AND_REPLACE_OPTIONS);
+        Document result = (Document)getCollection().findOneAndReplace(keyFilter,handleCreateUpdateDates(buildDocument(data)), FIND_ONE_AND_REPLACE_OPTIONS);
         return convert(result, documentClass);
+    }
+
+    public void insert(T data)
+    {
+        validateNewData(data);
+        getCollection().insertOne(handleCreateUpdateDates(buildDocument(data)));
+    }
+
+    private Document handleCreateUpdateDates(Document document)
+    {
+        document.putIfAbsent(CREATED, toTime(LocalDateTime.now()));
+        document.put(UPDATED,toTime(LocalDateTime.now()));
+        return document;
     }
 
     public List<T> getAllStoredEntities()
@@ -251,10 +267,10 @@ public abstract class BaseMongo<T extends HasIdentifier>
     }
 
 
-    protected boolean delete(Bson key)
+    protected long delete(Bson key)
     {
         DeleteResult deleteResult = getCollection().deleteMany(key);
         LOGGER.debug("delete result {} :{}",getCollection().getNamespace().getCollectionName(),deleteResult);
-        return deleteResult.wasAcknowledged();
+        return deleteResult.getDeletedCount();
     }
 }

@@ -16,172 +16,184 @@
 package org.finos.legend.depot.schedules.services;
 
 import org.eclipse.collections.api.factory.Maps;
-import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.map.mutable.SynchronizedMutableMap;
-import org.eclipse.collections.impl.tuple.Tuples;
+import org.finos.legend.depot.store.admin.api.schedules.ScheduleInstancesStore;
 import org.finos.legend.depot.store.admin.api.schedules.SchedulesStore;
 import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInfo;
+import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInstance;
 import org.slf4j.Logger;
 
 import javax.inject.Singleton;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-import static com.mongodb.client.model.Filters.eq;
+import static org.finos.legend.depot.domain.DatesHandler.toDate;
+
 
 @Singleton
 public final class SchedulesFactory
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SchedulesFactory.class);
-    final SynchronizedMutableMap<String, Pair<TimerTask, ScheduleInfo>> schedulesBuffer;
-    final Timer timer = new Timer();
-    private final SchedulesStore schedulesStore;
 
-    public SchedulesFactory(SchedulesStore manageSchedulesService)
+    public static final long MINUTE = 6000L;
+    public static final long HOUR = 3600000L;
+
+    final SynchronizedMutableMap<String, TimerTask> tasksRegistry = new SynchronizedMutableMap(Maps.mutable.empty());
+    final SynchronizedMutableMap<String, Supplier<Object>> functions = new SynchronizedMutableMap(Maps.mutable.empty());
+    final Timer timer = new Timer();
+    final SchedulesStore schedulesStore;
+    final ScheduleInstancesStore instancesStore;
+
+    public SchedulesFactory(SchedulesStore manageSchedulesService, ScheduleInstancesStore instancesStore)
     {
         this.schedulesStore = manageSchedulesService;
-        this.schedulesBuffer = new SynchronizedMutableMap(Maps.mutable.empty());
-    }
-
-    public List<ScheduleInfo> find()
-    {
-        return find(null,null);
-    }
-
-    public List<ScheduleInfo> find(Boolean running, Boolean disabled)
-    {
-        return schedulesStore.find(running,disabled);
-    }
-
-    public void register(String name, LocalDateTime start, long intervalInMilliseconds, boolean parallelRun, Supplier<Object> function)
-    {
-        TimerTask task = createTask(name, function);
-        schedulesBuffer.put(name, Tuples.pair(task, new ScheduleInfo(name, intervalInMilliseconds, parallelRun)));
-        timer.scheduleAtFixedRate(task, java.sql.Date.from(start.atZone(ZoneId.systemDefault()).toInstant()), intervalInMilliseconds);
-        Optional<ScheduleInfo> existingInfo = schedulesStore.get(name);
-
-        ScheduleInfo info = existingInfo.orElseGet(() -> new ScheduleInfo(name));
-        info.allowMultipleRuns = parallelRun;
-        info.frequency = intervalInMilliseconds;
-        schedulesStore.createOrUpdate(info);
-    }
-
-    public void deRegister(String name)
-    {
-        this.schedulesBuffer.remove(name);
-        this.schedulesStore.delete(name);
-    }
-
-    public void run(String jobId)
-    {
-        schedulesBuffer.get(jobId).getOne().run();
-    }
-
-
-    private ScheduleInfo getScheduleInfo(String jobId)
-    {
-        Optional<ScheduleInfo> info = schedulesStore.get(jobId);
-        ScheduleInfo scheduleInfo = new ScheduleInfo(jobId);
-        if (info.isPresent())
+        this.instancesStore = instancesStore;
+        timer.scheduleAtFixedRate(new TimerTask()
         {
-            scheduleInfo = info.get();
-        }
-        return scheduleInfo;
-    }
-
-
-    public void toggleDisable(String jobId, boolean toggle)
-    {
-        synchronized (ScheduleInfo.class)
-        {
-            ScheduleInfo info = getScheduleInfo(jobId);
-            info.disabled.compareAndSet(!toggle,toggle);
-            schedulesStore.createOrUpdate(info);
-        }
-    }
-
-
-    public void toggleRunning(String jobId, boolean toggle)
-    {
-        synchronized (ScheduleInfo.class)
-        {
-            ScheduleInfo info = getScheduleInfo(jobId);
-            info.running.compareAndSet(!toggle,toggle);
-            schedulesStore.createOrUpdate(info);
-        }
-    }
-
-    public void toggleDisableAll(boolean toggle)
-    {
-        synchronized (ScheduleInfo.class)
-        {
-            schedulesStore.getAll().stream().forEach(info ->
+            @Override
+            public void run()
             {
-                toggleDisable(info.jobId, toggle);
-            });
-        }
+                deleteExpired();
+            }
+        },MINUTE, MINUTE);
     }
 
+    public void registerSingleInstance(String name, long delayStartInMilliseconds, long intervalInMilliseconds, Supplier<Object> function)
+    {
+        register(name, delayStartInMilliseconds, intervalInMilliseconds, true, function);
+    }
 
-    private TimerTask createTask(String id, Supplier<Object> f)
+    public void register(String name, long delayStartInMilliseconds, long intervalInMilliseconds, Supplier<Object> task)
+    {
+        this.register(name, delayStartInMilliseconds, intervalInMilliseconds, false, task);
+    }
+
+    private void register(String name, long delayStartInMilliseconds, long intervalInMilliseconds, boolean singleInstance, Supplier<Object> function)
+    {
+        ScheduleInfo info = schedulesStore.get(name).orElse(new ScheduleInfo(name));
+        info.frequency = intervalInMilliseconds;
+        info.singleInstance = singleInstance;
+        functions.put(name,function);
+        schedulesStore.createOrUpdate(info);
+
+        TimerTask timerTask = createTimerTask(name);
+        tasksRegistry.put(name,timerTask);
+        timer.scheduleAtFixedRate(timerTask, delayStartInMilliseconds, intervalInMilliseconds);
+    }
+
+    private TimerTask createTimerTask(String name)
     {
         return new TimerTask()
         {
             @Override
             public void run()
             {
-                if (schedulesBuffer.get(id) == null)
+                Optional<ScheduleInfo> scheduleInfoInStore = schedulesStore.get(name);
+                if (!scheduleInfoInStore.isPresent())
                 {
-                    LOGGER.info("cancelling timer for execution {}", id);
-                    this.cancel();
+                    LOGGER.info("Schedule {} not in store", name);
+                    deRegister(name);
                     return;
                 }
-                handleExecution(id, f);
+                ScheduleInfo schedule = scheduleInfoInStore.get();
+                LOGGER.info("Found {} schedule: disabled {}, singleInstance {}", name, schedule.disabled, schedule.getSingleInstance());
+                if (schedule.disabled)
+                {
+                    LOGGER.info("Schedule {} disabled, skipping", name);
+                    return;
+                }
+
+                if (schedule.singleInstance && !canExecute(name))
+                {
+                    LOGGER.info("Skipping {} execution", name);
+                    return;
+                }
+                execute(schedule);
             }
         };
     }
 
-    private void handleExecution(String jobId, Supplier<Object> functionToExecute)
+    boolean canExecute(String name)
     {
-        ScheduleInfo scheduleInfo = get(jobId);
-        if (scheduleInfo.disabled.get())
-        {
-            LOGGER.info("Job {} is disabled, skipping", jobId);
-            return;
-        }
-        if (!scheduleInfo.allowMultipleRuns && scheduleInfo.running.get())
-        {
-            LOGGER.info("Other instance is running, skipping {}", jobId);
-            return;
+        return instancesStore.find(name).stream().allMatch(instance -> instance.isExpired());
+    }
 
+    long deleteExpired()
+    {
+        List<ScheduleInstance> expired = instancesStore.getAll().stream().filter(instance -> instance.isExpired()).collect(Collectors.toList());
+        expired.forEach(instance -> this.instancesStore.delete(instance.getId()));
+        LOGGER.info("Deleted {} expired schedule runs", expired.size());
+        return expired.size();
+    }
+
+    public void deRegister(String name)
+    {
+        TimerTask task = this.tasksRegistry.remove(name);
+        if (task != null)
+        {
+            task.cancel();
         }
-        long t = System.currentTimeMillis();
+        this.schedulesStore.delete(name);
+        LOGGER.info("De-registering schedule {}", name);
+    }
+
+    public void deRegisterAll()
+    {
+        this.schedulesStore.getAll().forEach(scheduleInfo ->
+        {
+            this.deRegister(scheduleInfo.name);
+        });
+    }
+
+    public void trigger(String scheduleName)
+    {
+        Optional<ScheduleInfo> scheduleInfo = schedulesStore.get(scheduleName);
+        scheduleInfo.ifPresent(schedule -> execute(schedule));
+    }
+
+    void run(String scheduleName)
+    {
+        tasksRegistry.get(scheduleName).run();
+    }
+
+    public void toggleDisable(String scheduleName, boolean toggle)
+    {
+        schedulesStore.get(scheduleName).ifPresent(scheduleInfo ->
+        {
+            scheduleInfo.disabled = toggle;
+            schedulesStore.createOrUpdate(scheduleInfo);
+        });
+    }
+
+    public void toggleDisableAll(boolean toggle)
+    {
+        schedulesStore.getAll().forEach(info -> toggleDisable(info.name, toggle));
+    }
+
+    private void execute(ScheduleInfo schedule)
+    {
         try
         {
-            LOGGER.info("Starting {} ", jobId);
-            this.schedulesStore.createOrUpdate(scheduleInfo.startRunning(t));
-            scheduleInfo.message = functionToExecute.get();
+            if (functions.containsKey(schedule.name))
+            {
+                this.instancesStore.insert(new ScheduleInstance(schedule.name,toDate(LocalDateTime.now().plusSeconds(schedule.frequency / 1000L))));
+                LOGGER.info("Starting schedule {} ", schedule.name);
+                Object result = functions.get(schedule.name).get();
+                LOGGER.info("Schedule {} result {}", schedule.name, result);
+            }
+            else
+            {
+                LOGGER.warn("No function to execute {}", schedule.name);
+            }
         }
         catch (Exception e)
         {
-            scheduleInfo.message = "ERROR: " + e.getMessage();
-            LOGGER.error("Error executing {} {}", jobId, e);
+            LOGGER.error("Error executing schedule {} {}", schedule.name, e.getMessage());
         }
-        finally
-        {
-            this.schedulesStore.createOrUpdate(scheduleInfo.stopRunning());
-            LOGGER.info("Finished {} ", jobId);
-        }
-    }
-
-    private ScheduleInfo get(String jobId)
-    {
-        Optional<ScheduleInfo> scheduleInfo = this.schedulesStore.get(jobId);
-        return scheduleInfo.orElseGet(() -> schedulesBuffer.get(jobId).getTwo());
     }
 }

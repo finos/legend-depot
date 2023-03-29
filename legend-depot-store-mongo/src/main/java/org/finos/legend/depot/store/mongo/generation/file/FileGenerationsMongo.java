@@ -111,11 +111,10 @@ public class FileGenerationsMongo extends BaseMongo<StoredFileGeneration> implem
     }
 
     @Override
-    public boolean delete(String groupId, String artifactId, String versionId)
+    public long delete(String groupId, String artifactId, String versionId)
     {
         return delete(getArtifactAndVersionFilter(groupId, artifactId, versionId));
     }
-
 
 }
 

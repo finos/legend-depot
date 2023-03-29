@@ -27,16 +27,14 @@ import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
-import org.finos.legend.depot.domain.notifications.EventPriority;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.notifications.api.Queue;
-import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -46,6 +44,7 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
 {
 
     static final String COLLECTION = "notifications-queue";
+    private static final String EVENT_PRIORITY = "eventPriority";
 
     @Inject
     public NotificationsQueueMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -56,7 +55,7 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("eventPriority-createdAt", "eventPriority","createdAt"));
+        return Arrays.asList(buildIndex("eventPriority-created", "eventPriority","created"));
     }
 
     @Override
@@ -85,11 +84,6 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
 
     public String push(MetadataNotification event)
     {
-        event.setLastUpdated(new Date());
-        if (event.getCreated() == null)
-        {
-            event.setCreated(new Date());
-        }
         MetadataNotification result = createOrUpdate(event);
         if (result.getEventId() == null)
         {
@@ -116,7 +110,7 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
     @Override
     public Optional<MetadataNotification> getFirstInQueue()
     {
-        Document first = (Document)getCollection().findOneAndDelete(Filters.exists("_id"),new FindOneAndDeleteOptions().sort(Sorts.ascending("eventPriority", "createdAt")));
+        Document first = (Document)getCollection().findOneAndDelete(Filters.exists(ID_FIELD),new FindOneAndDeleteOptions().sort(Sorts.ascending(EVENT_PRIORITY, CREATED)));
         if (first != null)
         {
             return Optional.of(convert(first, MetadataNotification.class));

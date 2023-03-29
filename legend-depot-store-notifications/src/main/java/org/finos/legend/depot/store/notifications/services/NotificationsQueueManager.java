@@ -17,12 +17,11 @@ package org.finos.legend.depot.store.notifications.services;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.notifications.EventPriority;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.api.Queue;
-import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
@@ -41,19 +40,19 @@ public final class NotificationsQueueManager implements NotificationsManager
     public static final String QUEUE_WAITING = "queue_waiting";
     public static final String QUEUE_WAITING_HELP = "waiting in queue";
     public static final String DELIMITER = ",";
+    public static final String NOTIFICATION_COMPLETE = "notification_complete";
+    public static final String NOTIFICATION_COMPLETE_HELP = " time to precess notification";
 
     private final Notifications events;
     private final Queue queue;
     private final NotificationEventHandler eventHandler;
-    private final ProjectsService projectsService;
 
     @Inject
-    public NotificationsQueueManager(ProjectsService projectsService, Notifications events, Queue queue, NotificationEventHandler eventHandler)
+    public NotificationsQueueManager(Notifications events, Queue queue, NotificationEventHandler eventHandler)
     {
         this.events = events;
         this.queue = queue;
         this.eventHandler = eventHandler;
-        this.projectsService = projectsService;
     }
 
 
@@ -86,7 +85,7 @@ public final class NotificationsQueueManager implements NotificationsManager
             String message = String.format("eventId:[%s],parentEventId:[%s],gav:[%s-%s-%s],attempt [%s] completed with validation errors [%s]",
                     event.getEventId(), event.getParentEventId(),event.getGroupId(),event.getArtifactId(),event.getVersionId(),event.getAttempt(),String.join(DELIMITER,validationErrors));
             LOGGER.error(message);
-            events.complete(event.addError(message));
+            events.createOrUpdate(event.addError(message).complete());
             PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
             return;
         }
@@ -116,7 +115,8 @@ public final class NotificationsQueueManager implements NotificationsManager
                             event.getEventId(), event.getParentEventId(), event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.getAttempt(), String.join(DELIMITER, response.getErrors()), event.getMaxAttempts());
                     event.addError(messageRetry);
                     LOGGER.error(messageRetry);
-                    events.complete(event.combineResponse(response));
+                    events.createOrUpdate(event.combineResponse(response).complete());
+                    PrometheusMetricsFactory.getInstance().observeHistogram(NOTIFICATION_COMPLETE,event.getCreated().getTime(),System.currentTimeMillis());
                 }
                 else
                 {
@@ -129,7 +129,8 @@ public final class NotificationsQueueManager implements NotificationsManager
             }
             else
             {
-                events.complete(event.combineResponse(response));
+                events.createOrUpdate(event.combineResponse(response).complete());
+                PrometheusMetricsFactory.getInstance().observeHistogram(NOTIFICATION_COMPLETE,event.getCreated().getTime(),System.currentTimeMillis());
                 LOGGER.info("eventId:[{}],parentEventId:[{}],gav: [{}-{}-{}] ,attempt [{}] completed successfully", event.getEventId(), event.getParentEventId(), event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.getAttempt());
             }
         }

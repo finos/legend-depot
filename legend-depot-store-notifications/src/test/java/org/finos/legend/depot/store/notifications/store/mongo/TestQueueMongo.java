@@ -16,10 +16,9 @@
 package org.finos.legend.depot.store.notifications.store.mongo;
 
 import org.finos.legend.depot.domain.notifications.EventPriority;
-import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.finos.legend.depot.store.notifications.api.Notifications;
-import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
+import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.finos.legend.depot.store.notifications.api.Queue;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,6 +26,8 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static org.finos.legend.depot.domain.DatesHandler.toDate;
 
 public class TestQueueMongo extends TestStoreMongo
 {
@@ -38,7 +39,7 @@ public class TestQueueMongo extends TestStoreMongo
     public static final String TESTPROJECT_2 = "testproject2";
     public static final String TEST = "test";
     private Queue queue = new NotificationsQueueMongo(mongoProvider);
-    private Notifications eventsMongo = new NotificationsMongo(mongoProvider);
+    private NotificationsMongo eventsMongo = new NotificationsMongo(mongoProvider);
 
     @Test
     public void canStoreEvents()
@@ -58,7 +59,7 @@ public class TestQueueMongo extends TestStoreMongo
         Assert.assertEquals(4, eventList.size());
         for (MetadataNotification ev : eventList)
         {
-            eventsMongo.complete(ev);
+            eventsMongo.createOrUpdate(ev);
         }
 
         List<MetadataNotification> eventList2 = eventsMongo.getAll();
@@ -78,7 +79,7 @@ public class TestQueueMongo extends TestStoreMongo
         Assert.assertEquals(1, pulled.size());
         Assert.assertNotNull(pulled.get(0).getEventId());
 
-        eventsMongo.complete(pulled.get(0));
+        eventsMongo.createOrUpdate(pulled.get(0));
         List<MetadataNotification> eventList2 = eventsMongo.getAll();
         Assert.assertNotNull(eventList2);
         Assert.assertEquals(1, eventList2.size());
@@ -92,7 +93,7 @@ public class TestQueueMongo extends TestStoreMongo
         MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST,VERSION);
         String eventId = queue.push(event);
         List<MetadataNotification> events = queue.pullAll();
-        eventsMongo.complete(events.get(0));
+        eventsMongo.createOrUpdate(events.get(0));
 
         List<MetadataNotification> eventList = eventsMongo.getAll();
         Assert.assertNotNull(eventList);
@@ -167,10 +168,10 @@ public class TestQueueMongo extends TestStoreMongo
         MetadataNotification event4 = new MetadataNotification("testproject4", "org.test", TEST, VERSION);
 
         LocalDateTime aPointInTime = LocalDateTime.of(2020, 10, 12, 12, 0).minusDays(12);
-        eventsMongo.insert(event1.setLastUpdated(toDate(aPointInTime)));
-        eventsMongo.insert(event2.setLastUpdated(toDate(aPointInTime.plusHours(1))));
-        eventsMongo.insert(event3.setLastUpdated(toDate(aPointInTime.plusHours(2))));
-        eventsMongo.insert(event4.setLastUpdated(toDate(aPointInTime.plusHours(2).plusMinutes(35))));
+        insertRaw(eventsMongo.COLLECTION,event1.setUpdated(toDate(aPointInTime)));
+        insertRaw(eventsMongo.COLLECTION,event2.setUpdated(toDate(aPointInTime.plusHours(1))));
+        insertRaw(eventsMongo.COLLECTION,event3.setUpdated(toDate(aPointInTime.plusHours(2))));
+        insertRaw(eventsMongo.COLLECTION,event4.setUpdated(toDate(aPointInTime.plusHours(2).plusMinutes(35))));
 
         List<MetadataNotification> allEvents = eventsMongo.getAll();
         Assert.assertNotNull(allEvents);
@@ -230,8 +231,8 @@ public class TestQueueMongo extends TestStoreMongo
     @Test
     public void canGetFirstInQueueByPriority()
     {
-        MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST, VERSION, null, null, null, null, null, null, null, null, null, EventPriority.LOW);
-        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1", null, null, null, null, null, null, null, null, null, EventPriority.HIGH);
+        MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST, VERSION, null, null, null, null, null, null, null, null, null, null,EventPriority.LOW);
+        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1", null, null, null, null, null, null, null, null, null, null,EventPriority.HIGH);
         queue.push(event);
         queue.push(event1);
 
@@ -245,9 +246,9 @@ public class TestQueueMongo extends TestStoreMongo
     @Test
     public void canGetFirstInQueueBySamePriorityWithDifferentCreatedTime()
     {
-        MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST, VERSION, null, null, null, null, null, null, null, new Date(), null, EventPriority.HIGH);
+        MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST, VERSION, null, null, null, null, null, null, null, new Date(), null,null, EventPriority.HIGH);
         queue.push(event);
-        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1", null, null, null, null, null, null, null, new Date(System.currentTimeMillis() + 60000), null, EventPriority.HIGH);
+        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1", null, null, null, null, null, null, null, new Date(System.currentTimeMillis() + 60000), null,null, EventPriority.HIGH);
         queue.push(event1);
 
         Optional<MetadataNotification> first = queue.getFirstInQueue();
@@ -261,9 +262,9 @@ public class TestQueueMongo extends TestStoreMongo
     public void canGetFirstInQueueByDifferentPriorityWithSameTime()
     {
         long date = System.currentTimeMillis();
-        MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST, VERSION, null, null, null, null, null, null, null, new Date(date), null, EventPriority.HIGH);
+        MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST, VERSION, null, null, null, null, null, null, null, new Date(date), null, null,EventPriority.HIGH);
         queue.push(event);
-        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1", null, null, null, null, null, null, null, new Date(date), null, EventPriority.LOW);
+        MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1", null, null, null, null, null, null, null, new Date(date), null,null, EventPriority.LOW);
         queue.push(event1);
 
         Optional<MetadataNotification> first = queue.getFirstInQueue();

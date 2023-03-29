@@ -30,9 +30,7 @@ public interface Notifications
 
     List<MetadataNotification> find(String group, String artifact, String version, String eventId,String parentId, Boolean success, LocalDateTime fromDate, LocalDateTime toDate);
 
-    void insert(MetadataNotification metadataEvent);
-
-    void complete(MetadataNotification metadataEvent);
+    MetadataNotification createOrUpdate(MetadataNotification metadataEvent);
 
     void delete(String id);
 }

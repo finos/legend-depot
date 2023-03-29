@@ -13,21 +13,23 @@
 //  limitations under the License.
 //
 
+package org.finos.legend.depot.domain;
 
-package org.finos.legend.depot.store.admin.api.schedules;
+import org.junit.Assert;
+import org.junit.Test;
 
-import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInfo;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-import java.util.List;
-import java.util.Optional;
-
-public interface SchedulesStore
+public class DatesHandlerTest
 {
-    List<ScheduleInfo> getAll();
+    @Test
+    public void canGetEventByEpocMillis()
+    {
 
-    Optional<ScheduleInfo> get(String name);
+        LocalDateTime date = DatesHandler.parseDate("1679411706436");
+        LocalDateTime lunchTime = LocalDateTime.parse("2023-03-21T14:02:49", DateTimeFormatter.ISO_DATE_TIME);
+        Assert.assertNotNull(date);
 
-    ScheduleInfo createOrUpdate(ScheduleInfo scheduleInfo);
-
-    void delete(String name);
+    }
 }

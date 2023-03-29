@@ -21,7 +21,6 @@ public class ResourceLoggingAndTracing
     public static final String GET_PROJECT_CONFIG_BY_GA = "get project configuration by ga";
     public static final String GET_ALL_LEGACY_PROJECTS = "get all projects legacy";
     public static final String GET_PROJECT_BY_GA = "get project by ga";
-    public static final String GET_PROJECT_BY_ID = "get project by project id";
     public static final String GET_PROJECT_VERSIONS_BY_GA = "get project versions by ga";
     public static final String FIND_PROJECT_VERSIONS = "find project versions by excluded flag";
     public static final String GET_PROJECT_VERSION_BY_GAV = "get project version by gav";
@@ -41,7 +40,6 @@ public class ResourceLoggingAndTracing
     public static final String GET_VERSION_DEPENDENCY_ENTITIES = "get version dependencies entities";
     public static final String GET_REVISION_DEPENDENCY_ENTITIES = "get latest dependencies entities";
     public static final String GET_VERSION_STORE_ENTITIES = "get stored version entities";
-    public static final String DELETE_STORE_ENTITIES = "delete entities";
     public static final String GET_VERSION_ENTITIES_AS_PMCD = "get version entities as PMCD";
     public static final String GET_VERSION_ENTITY = "get version entity";
     public static final String GET_VERSION_ENTITIES_BY_PACKAGE = "get version entities by package";
@@ -64,25 +62,26 @@ public class ResourceLoggingAndTracing
     public static final String GET_VERSION_FILE_GENERATION_BY_FILEPATH = "get version file generations by file";
     public static final String GET_ALL_EVENTS_IN_QUEUE = "get all queue events";
     public static final String FIND_PAST_EVENTS = "find past events";
-    public static final String ENQUEUE_EVENT = "enqueue event";
+    public static final String ENQUEUE_EVENT = "queue event";
     public static final String HANDLE_EVENTS_IN_QUEUE = "handle queue events";
     public static final String STORE_STATUS = "get store status";
-    public static final String TOGGLE_STORE_STATUS = "toggle store status";
     public static final String SCHEDULES_STATUS = "get schedule status";
+    public static final String SCHEDULES_RUNS = "get schedule runs";
     public static final String TRIGGER_SCHEDULE = "trigger schedule";
     public static final String GET_CACHE_STATUS = "cache status";
     public static final String GET_PROJECT_CACHE_STATUS = "project cache status";
     public static final String GET_VERSIONS_BY_LAST_USED = "versions last used";
     public static final String TOGGLE_SCHEDULE = "toggle schedule";
+    public static final String TOGGLE_SCHEDULES = "toggle schedules";
     public static final String ORPHAN_STORE_ENTITIES = "get orphaned entities";
     public static final String GET_ENTITIES_BY_CLASSIFIER_PATH = "get entities by classifier path";
     public static final String REPOSITORY_PROJECT_VERSIONS = "repo project versions";
     public static final String GET_PROJECT_CACHE_MISMATCHES = "version mismatch";
-    public static final String UPDATE_SCHEDULE = "update schedule";
     public static final String FIX_MISSING_VERSIONS = "fix missing versions";
     public static final String FIND_EVENT_BY_ID = "find event";
     public static final String GET_EVENT_IN_QUEUE = "find event in queue";
     public static final String DELETE_SCHEDULE = "delete schedule";
+    public static final String DELETE_SCHEDULES = "delete schedules";
     public static final String GET_QUEUE_COUNT = "queue count";
 
 

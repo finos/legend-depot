@@ -22,6 +22,6 @@ public interface UpdateFileGenerations extends FileGenerations
 
     StoredFileGeneration createOrUpdate(StoredFileGeneration detail);
 
-    boolean delete(String groupId, String artifactId, String versionId);
+    long delete(String groupId, String artifactId, String versionId);
 
 }

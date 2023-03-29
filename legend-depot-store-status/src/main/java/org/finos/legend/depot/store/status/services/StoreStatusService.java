@@ -16,15 +16,14 @@
 package org.finos.legend.depot.store.status.services;
 
 import org.finos.legend.depot.domain.version.VersionValidator;
-import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
+import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.status.domain.StoreStatus;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -84,22 +83,20 @@ public class StoreStatusService
         versions.forEach(v ->
         {
             StoreStatus.VersionStatus versionStatus = new StoreStatus.VersionStatus(groupId, artifactId, v);
-            RefreshStatus updateStatus = statusService.get(groupId, artifactId, v).orElse(new RefreshStatus(groupId, artifactId, v));
+            Optional<RefreshStatus> updateStatus = statusService.get(groupId, artifactId, v);
             Optional<VersionQuerySummary> versionQueryCounter = queryMetricsHandler.getSummary(groupId, artifactId, v);
             if (versionQueryCounter.isPresent())
             {
                 versionStatus.queryCount = versionQueryCounter.get().getQueryCount();
                 versionStatus.lastQueried = versionQueryCounter.get().getLastQueryTime();
             }
-            versionStatus.lastUpdated = updateStatus.getLastRun();
-            versionStatus.updating = updateStatus.isRunning();
+            versionStatus.updating = updateStatus.isPresent();
             projectStatus.addVersionStatus(versionStatus);
         });
 
         StoreStatus.MasterRevisionStatus masterRevisionStatus = new StoreStatus.MasterRevisionStatus(groupId, artifactId);
-        RefreshStatus revisionsUpdateStatus = statusService.get(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT).orElse(new RefreshStatus(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT));;
-        masterRevisionStatus.lastUpdated = revisionsUpdateStatus.getLastRun();
-        masterRevisionStatus.updating = revisionsUpdateStatus.isRunning();
+        Optional<RefreshStatus> revisionsUpdateStatus = statusService.get(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT);
+        masterRevisionStatus.updating = revisionsUpdateStatus.isPresent();
         projectStatus.setMasterRevisionStatus(masterRevisionStatus);
 
         return projectStatus;

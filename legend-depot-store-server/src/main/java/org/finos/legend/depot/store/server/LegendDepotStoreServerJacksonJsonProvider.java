@@ -21,17 +21,19 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 import javax.ws.rs.ext.ContextResolver;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 public class LegendDepotStoreServerJacksonJsonProvider extends JacksonJsonProvider implements ContextResolver<ObjectMapper>
 {
-    public static final String SIMPLE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private final ObjectMapper objectMapper;
 
     public LegendDepotStoreServerJacksonJsonProvider()
     {
         objectMapper = new ObjectMapper()
-                .setDateFormat(new SimpleDateFormat(SIMPLE_DATE_FORMAT))
+                .setTimeZone(TimeZone.getDefault())
+                .setDateFormat(SIMPLE_DATE_FORMAT)
                 .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
     }
 

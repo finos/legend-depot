@@ -18,8 +18,9 @@ package org.finos.legend.depot.schedules;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.finos.legend.depot.store.admin.api.schedules.SchedulesStore;
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
+import org.finos.legend.depot.store.admin.api.schedules.ScheduleInstancesStore;
+import org.finos.legend.depot.store.admin.api.schedules.SchedulesStore;
 
 public class SchedulesModule extends PrivateModule
 {
@@ -31,9 +32,9 @@ public class SchedulesModule extends PrivateModule
 
     @Provides
     @Singleton
-    public SchedulesFactory getFactory(SchedulesStore schedulesStore)
+    public SchedulesFactory getFactory(SchedulesStore schedulesStore, ScheduleInstancesStore instancesStore)
     {
-        return new SchedulesFactory(schedulesStore);
+        return new SchedulesFactory(schedulesStore, instancesStore);
     }
 
 }

@@ -18,34 +18,22 @@ package org.finos.legend.depot.store.admin.domain.artifacts;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.EqualsExclude;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.notifications.EventPriority;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
+
+import static org.finos.legend.depot.domain.DatesHandler.toDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RefreshStatus extends MetadataNotification
 {
     @JsonProperty
-    @EqualsExclude
-    private boolean running;
-    @JsonProperty
-    @EqualsExclude
-    private Date startTime;
-    @JsonProperty
-    @EqualsExclude
-    private Date lastRun;
-    @JsonProperty
-    @EqualsExclude
-    private long duration;
-    @JsonProperty
-    @EqualsExclude
-    private String traceId;
-
+    private Date expires = toDate(LocalDateTime.now().plusMinutes(15));
 
     public RefreshStatus()
     {
@@ -54,12 +42,7 @@ public class RefreshStatus extends MetadataNotification
 
     public RefreshStatus(String projectId, String groupId, String artifactId, String version, String eventId, String parentEventId, Boolean fullUpdate, Boolean transitive, Integer attempt, Integer maxAttempts, Map<Integer,MetadataEventResponse> responses, Date createdAt, Date lastUpdated, EventPriority eventPriority)
     {
-        super(projectId, groupId, artifactId, version, eventId, parentEventId, fullUpdate, transitive, attempt, maxAttempts, responses, createdAt, lastUpdated, eventPriority);
-    }
-
-    public RefreshStatus(String projectId, String groupId, String artifactId, String versionId)
-    {
-        super(projectId, groupId, artifactId, versionId);
+        super(projectId, groupId, artifactId, version, eventId, parentEventId, fullUpdate, transitive, attempt, maxAttempts, responses, createdAt, lastUpdated, null,eventPriority);
     }
 
     public RefreshStatus(String groupId, String artifactId, String version)
@@ -67,79 +50,20 @@ public class RefreshStatus extends MetadataNotification
         super(null,groupId, artifactId, version);
     }
 
-    public boolean isRunning()
+    public Date getExpires()
     {
-        return running;
+        return expires;
     }
 
-    public void setRunning(boolean running)
+    public void setExpires(Date expires)
     {
-        this.running = running;
+        this.expires = expires;
     }
 
-    public Date getLastRun()
+    @JsonProperty
+    public boolean isExpired()
     {
-        return lastRun;
-    }
-
-    public void setLastRun(Date lastRun)
-    {
-        this.lastRun = lastRun;
-    }
-
-    public Date getStartTime()
-    {
-        return startTime;
-    }
-
-    public void setStartTime(Date startTime)
-    {
-        this.startTime = startTime;
-    }
-
-    public long getDuration()
-    {
-        return duration;
-    }
-
-    public void setDuration(long duration)
-    {
-        this.duration = duration;
-    }
-
-    public String getTraceId()
-    {
-        return traceId;
-    }
-
-    public void setTraceId(String traceId)
-    {
-        this.traceId = traceId;
-    }
-
-    public RefreshStatus withStartTime(Date startTime)
-    {
-        this.startTime = startTime;
-        return this;
-    }
-
-    public RefreshStatus startRunning()
-    {
-        this.running = true;
-        this.startTime = new Date();
-        this.duration = 0;
-        return this;
-    }
-
-    public RefreshStatus stopRunning()
-    {
-        this.running = false;
-        this.lastRun = new Date();
-        if (this.startTime != null)
-        {
-            this.duration = lastRun.getTime() - startTime.getTime();
-        }
-        return this;
+        return new Date().after(expires);
     }
 
     @Override
@@ -174,7 +98,8 @@ public class RefreshStatus extends MetadataNotification
                 event.getMaxAttempts(),
                 event.getResponses(),
                 event.getCreated(),
-                event.getLastUpdated(),
+                event.getUpdated(),
                 event.getEventPriority());
     }
+
 }

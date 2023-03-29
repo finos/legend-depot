@@ -19,29 +19,29 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.finos.legend.depot.domain.HasIdentifier;
 
+import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ScheduleInfo implements HasIdentifier
+public class ScheduleInstance implements HasIdentifier
 {
-    @JsonProperty
-    public String id;
-    @JsonProperty
-    public String name;
-    @JsonProperty
-    public boolean disabled = false;
-    @JsonProperty
-    public Boolean singleInstance;
-    @JsonProperty
-    public Long frequency;
 
-    public ScheduleInfo()
+    @JsonProperty
+    private String id;
+    @JsonProperty
+    private String schedule;
+    @JsonProperty
+    private Date expires;
+
+    public ScheduleInstance()
     {
     }
 
-    public ScheduleInfo(String name)
+    public ScheduleInstance(String name, Date expires)
     {
-        this.name = name;
+        this.schedule = name;
+        this.expires = expires;
     }
+
 
     @Override
     public String getId()
@@ -49,48 +49,33 @@ public class ScheduleInfo implements HasIdentifier
         return id;
     }
 
+    public Date getExpires()
+    {
+        return expires;
+    }
+
+    public void setExpires(Date expires)
+    {
+        this.expires = expires;
+    }
+
     public void setId(String id)
     {
         this.id = id;
     }
 
-    public String getName()
+    public String getSchedule()
     {
-        return name;
+        return schedule;
     }
 
-    public void setName(String name)
+    public void setSchedule(String schedule)
     {
-        this.name = name;
+        this.schedule = schedule;
     }
 
-    public boolean isDisabled()
+    public boolean isExpired()
     {
-        return disabled;
-    }
-
-    public void setDisabled(boolean disabled)
-    {
-        this.disabled = disabled;
-    }
-
-    public Boolean getSingleInstance()
-    {
-        return singleInstance;
-    }
-
-    public void setSingleInstance(Boolean singleInstance)
-    {
-        this.singleInstance = singleInstance;
-    }
-
-    public Long getFrequency()
-    {
-        return frequency;
-    }
-
-    public void setFrequency(Long frequency)
-    {
-        this.frequency = frequency;
+        return new Date().after(expires);
     }
 }

@@ -20,8 +20,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
-import org.finos.legend.depot.store.notifications.api.NotificationsManager;
+import org.finos.legend.depot.domain.DatesHandler;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
+import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.store.api.NotificationsStore;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
@@ -36,10 +37,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,7 +47,6 @@ import java.util.Optional;
 public class NotificationsManagerResource extends BaseAuthorisedResource
 {
 
-    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final NotificationsManager notificationsManager;
     private final NotificationsStore notificationsStore;
 
@@ -87,14 +85,15 @@ public class NotificationsManagerResource extends BaseAuthorisedResource
                                                    @QueryParam("parentEventId") @ApiParam("refresh could be started by another event, eg refresh all store versions") String parentId,
                                                    @QueryParam("success") Boolean success,
                                                    @QueryParam("from")
-                                                   @ApiParam("query from this date yyyy-MM-dd HH:mm:ss (default is 120 minutes prior)") String from,
+                                                   @ApiParam("last updated from date: yyyy-MM-dd HH:mm:ss/unix epoc millis (default is 120 minutes prior)") String from,
                                                    @QueryParam("to")
-                                                   @ApiParam("include  up to this date yyyy-MM-dd HH:mm:ss (default is now)") String to)
+                                                   @ApiParam("to date: yyyy-MM-dd HH:mm:ss/unix epoc millis (default is now)") String to)
     {
-        return handle(ResourceLoggingAndTracing.FIND_PAST_EVENTS, () ->
-                notificationsManager.findProcessedEvents(group,artifact,version,eventId,parentId,success,from == null ?  LocalDateTime.now().minusMinutes(120) : LocalDateTime.parse(from, DATE_TIME_FORMATTER),
-                        to == null ? LocalDateTime.now() : LocalDateTime.parse(to, DATE_TIME_FORMATTER)));
+        return handle(ResourceLoggingAndTracing.FIND_PAST_EVENTS, () -> notificationsManager.findProcessedEvents(group,artifact,version,eventId,parentId,success,
+                from == null ?  LocalDateTime.now().minusMinutes(120) : DatesHandler.parseDate(from),
+                to == null ? LocalDateTime.now() : DatesHandler.parseDate(to)));
     }
+
 
     @GET
     @Path("/notifications/{eventId}")

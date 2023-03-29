@@ -24,7 +24,7 @@ import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
-import org.finos.legend.depot.store.artifacts.api.ParentEventBuilder;
+import org.finos.legend.depot.store.artifacts.api.ParentEvent;
 import org.finos.legend.depot.store.notifications.api.Queue;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
@@ -70,7 +70,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     @Override
     public MetadataEventResponse  refreshAllVersionsForAllProjects(boolean fullUpdate,boolean allVersions,boolean transitive,String parentEventId)
     {
-        String parentEvent = ParentEventBuilder.build(ALL, ALL, ALL,parentEventId);
+        String parentEvent = ParentEvent.build(ALL, ALL, ALL,parentEventId);
         MetadataNotification allVersionAllProjects = new MetadataNotification(ALL,ALL,ALL,ALL,fullUpdate,transitive,parentEvent);
         return versionRefreshHandler.executeWithTrace(REFRESH_ALL_VERSIONS_FOR_ALL_PROJECTS,allVersionAllProjects, () ->
                 {
@@ -87,7 +87,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     @Override
     public MetadataEventResponse refreshMasterSnapshotForAllProjects(boolean fullUpdate, boolean transitive, String parentEventId)
     {
-        String parentEvent = ParentEventBuilder.build(ALL, ALL, MASTER_SNAPSHOT,parentEventId);
+        String parentEvent = ParentEvent.build(ALL, ALL, MASTER_SNAPSHOT,parentEventId);
         MetadataNotification masterSnapshotAllProjects = new MetadataNotification(ALL,ALL,ALL,MASTER_SNAPSHOT,fullUpdate,transitive,parentEvent);
         return versionRefreshHandler.executeWithTrace(REFRESH_MASTER_SNAPSHOT_FOR_ALL_PROJECTS,masterSnapshotAllProjects, () ->
                 {
@@ -104,7 +104,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     @Override
     public MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate,boolean allVersions,boolean transitive,String parentEventId)
     {
-        String parentEvent = ParentEventBuilder.build(groupId, artifactId, ALL, parentEventId);
+        String parentEvent = ParentEvent.build(groupId, artifactId, ALL, parentEventId);
         StoreProjectData projectData = getProject(groupId, artifactId);
         MetadataNotification allVersionForProject = new MetadataNotification(projectData.getProjectId(),groupId,artifactId,ALL,fullUpdate,transitive,parentEvent);
         return versionRefreshHandler.executeWithTrace(REFRESH_ALL_VERSIONS_FOR_PROJECT, allVersionForProject, () ->
@@ -122,7 +122,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     @Override
     public MetadataEventResponse refreshMasterSnapshotForProject(String groupId, String artifactId, boolean fullUpdate, boolean transitive, String parentEventId)
     {
-        String parentEvent = ParentEventBuilder.build(groupId, artifactId, MASTER_SNAPSHOT, parentEventId);
+        String parentEvent = ParentEvent.build(groupId, artifactId, MASTER_SNAPSHOT, parentEventId);
         StoreProjectData projectData = getProject(groupId, artifactId);
         MetadataNotification masterSnapshotForProject = new MetadataNotification(projectData.getProjectId(), groupId, artifactId, MASTER_SNAPSHOT, fullUpdate, transitive, parentEvent);
         return versionRefreshHandler.executeWithTrace(REFRESH_MASTER_SNAPSHOT_FOR_PROJECT, masterSnapshotForProject, () ->
@@ -139,7 +139,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     @Override
     public MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean transitive,String parentEventId)
     {
-        String parentEvent = ParentEventBuilder.build(groupId, artifactId, versionId, parentEventId);
+        String parentEvent = ParentEvent.build(groupId, artifactId, versionId, parentEventId);
         StoreProjectData projectData = getProject(groupId, artifactId);
         MetadataNotification versionForProject = new MetadataNotification(projectData.getProjectId(),groupId,artifactId,versionId,true,transitive,parentEvent);
         return versionRefreshHandler.executeWithTrace(REFRESH_PROJECT_VERSION_ARTIFACTS, versionForProject, () ->
@@ -156,7 +156,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     @Override
     public MetadataEventResponse refreshProjectsWithMissingVersions(String parentEventId)
     {
-        String parentEvent = ParentEventBuilder.build(ALL, ALL,MISSING,parentEventId);
+        String parentEvent = ParentEvent.build(ALL, ALL,MISSING,parentEventId);
         MetadataNotification missingVersions = new MetadataNotification(ALL,ALL,ALL,MISSING,true,false,parentEvent);
         return versionRefreshHandler.executeWithTrace(REFRESH_PROJECTS_WITH_MISSING_VERSIONS,missingVersions, () ->
         {
@@ -198,7 +198,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 
     private MetadataEventResponse refreshAllVersionsForProject(StoreProjectData projectData, boolean allVersions, boolean transitive, String parentEvent)
     {
-        String parentEventId = ParentEventBuilder.build(projectData.getGroupId(), projectData.getArtifactId(), ALL, parentEvent);
+        String parentEventId = ParentEvent.build(projectData.getGroupId(), projectData.getArtifactId(), ALL, parentEvent);
         MetadataEventResponse response = new MetadataEventResponse();
 
         String projectArtifacts = String.format("%s: [%s-%s]", projectData.getProjectId(), projectData.getGroupId(), projectData.getArtifactId());
