@@ -78,16 +78,6 @@ public class ArtifactsRefreshModule extends PrivateModule
         return true;
     }
 
-
-    @Provides
-    @Singleton
-    @Named("refresh-missing-versions")
-    boolean initFixVersionsMismatchDaemon(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService,ArtifactRepositoryProviderConfiguration configuration)
-    {
-        schedulesFactory.registerSingleInstance(ParentEvent.FIX_MISSING_VERSIONS_SCHEDULE.name(),configuration.getFixMissingVersionsIntervalInMillis(), configuration.getFixMissingVersionsIntervalInMillis(),() -> artifactsRefreshService.refreshProjectsWithMissingVersions(ParentEvent.FIX_MISSING_VERSIONS_SCHEDULE.name()));
-        return true;
-    }
-
     @Provides
     @Singleton
     @Named("cleanup-refresh-status")
