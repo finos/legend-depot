@@ -77,7 +77,6 @@ public class ResourceLoggingAndTracing
     public static final String GET_ENTITIES_BY_CLASSIFIER_PATH = "get entities by classifier path";
     public static final String REPOSITORY_PROJECT_VERSIONS = "repo project versions";
     public static final String GET_PROJECT_CACHE_MISMATCHES = "version mismatch";
-    public static final String FIX_MISSING_VERSIONS = "fix missing versions";
     public static final String FIND_EVENT_BY_ID = "find event";
     public static final String GET_EVENT_IN_QUEUE = "find event in queue";
     public static final String DELETE_SCHEDULE = "delete schedule";

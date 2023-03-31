@@ -48,19 +48,28 @@ public final class SchedulesFactory
     final Timer timer = new Timer();
     final SchedulesStore schedulesStore;
     final ScheduleInstancesStore instancesStore;
+    private TimerTask houseKeeper ;
 
     public SchedulesFactory(SchedulesStore manageSchedulesService, ScheduleInstancesStore instancesStore)
     {
         this.schedulesStore = manageSchedulesService;
         this.instancesStore = instancesStore;
-        timer.scheduleAtFixedRate(new TimerTask()
+    }
+
+    public void registerHouseKeeper()
+    {
+        if (houseKeeper == null)
         {
-            @Override
-            public void run()
+            houseKeeper = new TimerTask()
             {
-                deleteExpired();
-            }
-        },MINUTE, MINUTE);
+                @Override
+                public void run()
+                {
+                    deleteExpired();
+                }
+            };
+            timer.scheduleAtFixedRate(houseKeeper, MINUTE, MINUTE);
+        }
     }
 
     public void registerSingleInstance(String name, long delayStartInMilliseconds, long intervalInMilliseconds, Supplier<Object> function)

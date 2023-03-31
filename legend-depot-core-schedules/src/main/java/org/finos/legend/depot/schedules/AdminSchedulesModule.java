@@ -15,7 +15,12 @@
 
 package org.finos.legend.depot.schedules;
 
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import org.finos.legend.depot.schedules.resources.SchedulesResource;
+import org.finos.legend.depot.schedules.services.SchedulesFactory;
+
+import javax.inject.Named;
 
 public class AdminSchedulesModule extends SchedulesModule
 {
@@ -25,6 +30,15 @@ public class AdminSchedulesModule extends SchedulesModule
         super.configure();
         bind(SchedulesResource.class);
         expose(SchedulesResource.class);
+    }
+
+    @Provides
+    @Singleton
+    @Named("register-housekeeper")
+    public boolean registerHouseKeeper(SchedulesFactory schedulesFactory)
+    {
+        schedulesFactory.registerHouseKeeper();
+        return true;
     }
 
 }
