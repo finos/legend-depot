@@ -48,7 +48,7 @@ public final class SchedulesFactory
     final Timer timer = new Timer();
     final SchedulesStore schedulesStore;
     final ScheduleInstancesStore instancesStore;
-    private TimerTask houseKeeper ;
+    private TimerTask houseKeeper;
 
     public SchedulesFactory(SchedulesStore manageSchedulesService, ScheduleInstancesStore instancesStore)
     {
