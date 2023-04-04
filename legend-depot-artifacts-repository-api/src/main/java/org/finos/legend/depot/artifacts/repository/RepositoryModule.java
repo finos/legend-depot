@@ -25,6 +25,8 @@ import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
 import javax.inject.Named;
 
+import java.util.Arrays;
+
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.MISSING_REPO_VERSIONS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.MISSING_STORE_VERSIONS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.PROJECTS;
@@ -34,7 +36,7 @@ import static org.finos.legend.depot.artifacts.repository.services.RepositorySer
 
 public class RepositoryModule extends PrivateModule
 {
-
+    public static final String GET_REPOSITORY_VERSIONS = "get_repository_versions";
     private static final String REPOSITORY_METRICS_SCHEDULE = "repository-metrics-schedule";
 
     @Override
@@ -58,6 +60,7 @@ public class RepositoryModule extends PrivateModule
         metricsHandler.registerGauge(MISSING_REPO_VERSIONS, MISSING_REPO_VERSIONS);
         metricsHandler.registerGauge(MISSING_STORE_VERSIONS, MISSING_STORE_VERSIONS);
         metricsHandler.registerGauge(REPO_EXCEPTIONS, REPO_EXCEPTIONS);
+        metricsHandler.registerHistogram(GET_REPOSITORY_VERSIONS,GET_REPOSITORY_VERSIONS,Arrays.asList("coordinates"));
         schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE,repositoryServices::findVersionsMismatches);
         return true;
     }

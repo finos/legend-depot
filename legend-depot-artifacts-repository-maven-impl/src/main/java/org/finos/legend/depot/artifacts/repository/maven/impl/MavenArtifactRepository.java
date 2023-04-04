@@ -30,6 +30,7 @@ import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.tracing.services.TracerFactory;
+import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.jboss.shrinkwrap.resolver.api.NoResolvedResultException;
 import org.jboss.shrinkwrap.resolver.api.ResolutionException;
@@ -47,7 +48,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +56,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static org.finos.legend.depot.artifacts.repository.RepositoryModule.GET_REPOSITORY_VERSIONS;
 
 public class MavenArtifactRepository implements ArtifactRepository
 {
@@ -67,6 +69,7 @@ public class MavenArtifactRepository implements ArtifactRepository
     public static final String VERSION_ID = "versionId";
     private static final String ALL_VERSIONS_SCOPE = ":[0.0,)";
     public static final String SEPARATOR = "-";
+
     private final MavenXpp3Reader mavenReader = new MavenXpp3Reader();
     private final String settingsLocation;
     private String localRepository;
@@ -286,8 +289,9 @@ public class MavenArtifactRepository implements ArtifactRepository
     @Override
     public List<VersionId> findVersions(String group, String artifact) throws ArtifactRepositoryException
     {
-            List<VersionId> result = new ArrayList<>();
-            try
+        List<VersionId> result = new ArrayList<>();
+        long start = System.currentTimeMillis();
+        try
             {
                 String groupArtifactVersionRange = gavCoordinates(group, artifact, ALL_VERSIONS_SCOPE);
                 final MavenVersionRangeResult versionRangeResult = (MavenVersionRangeResult) executeWithTrace("resolveVersionsFromRepository",group,artifact,"ALL",() -> getResolver().resolveVersionRange(groupArtifactVersionRange));
@@ -311,7 +315,9 @@ public class MavenArtifactRepository implements ArtifactRepository
                 LOGGER.error("unknown error executing resolveVersionsFromRepository", e);
                 throw new ArtifactRepositoryException(e.getMessage());
             }
-            Collections.sort(result);
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("resolveVersionsFromRepository {}{}, took [{}] ms", group, artifact, endTime - start);
+            PrometheusMetricsFactory.getInstance().observeHistogram(GET_REPOSITORY_VERSIONS,start,endTime,group + GAV_SEP + artifact);
             return result;
     }
 
