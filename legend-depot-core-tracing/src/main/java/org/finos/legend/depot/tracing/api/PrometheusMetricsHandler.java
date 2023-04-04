@@ -25,7 +25,11 @@ public interface PrometheusMetricsHandler
 
     void registerHistogram(String name,String helpMessage);
 
+    void registerHistogram(String name, String help,List<String> labelNames);
+
     void observe(String summaryName, long start, long end);
+
+    void observeHistogram(String name, long start, long end,String... labelValues);
 
     void observeHistogram(String name, long start, long end);
 

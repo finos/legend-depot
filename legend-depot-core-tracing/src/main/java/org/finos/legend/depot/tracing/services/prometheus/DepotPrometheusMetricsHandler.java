@@ -108,15 +108,16 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
         return builder.register();
     }
 
-    private Gauge buildGauge(String gaugeName, String helpMessage)
+    private Histogram buildHistogram(String name, String helpMessage, List<String> labelNames)
     {
-        return this.buildGauge(gaugeName,helpMessage,Collections.emptyList());
+        Histogram.Builder builder = Histogram.build(getKeyName(name),getHelpMessage(name, helpMessage));
+        if (!labelNames.isEmpty())
+        {
+            builder.labelNames(labelNames.toArray(new String[0]));
+        }
+        return builder.register();
     }
 
-    private Histogram buildHistogram(String name, String helpMessage)
-    {
-        return Histogram.build(getKeyName(name),getHelpMessage(name, helpMessage)).register();
-    }
 
     @Override
     public void incrementCount(String counter)
@@ -147,6 +148,18 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
     public void observe(String summaryName, long start, long end)
     {
         this.allSummaries.getIfAbsentPutWithKey(getKeyName(summaryName),(key) -> buildSummary(summaryName, summaryName + DURATION)).observe((end - start) / 1000f);
+    }
+
+
+
+    @Override
+    public void observeHistogram(String name, long start, long end, String... labelValues)
+    {
+        if (this.allHistograms.get(getKeyName(name)) == null)
+        {
+            throw new UnsupportedOperationException("Please register the histogram first if you need labels");
+        }
+        this.allHistograms.get(getKeyName(name)).labels(labelValues).observe(end - start);
     }
 
     @Override
@@ -184,7 +197,7 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
     @Override
     public void setGauge(String gaugeName, double value)
     {
-        this.allGauges.getIfAbsentPutWithKey(getKeyName(gaugeName),(key) -> buildGauge(gaugeName,gaugeName + GAUGE)).set(value);
+        this.allGauges.getIfAbsentPutWithKey(getKeyName(gaugeName),(key) -> buildGauge(gaugeName,gaugeName + GAUGE,Collections.emptyList())).set(value);
     }
 
     @Override
@@ -200,18 +213,24 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
     @Override
     public void increaseGauge(String gaugeName, int value)
     {
-        this.allGauges.getIfAbsentPutWithKey(getKeyName(gaugeName),(key) -> buildGauge(gaugeName,gaugeName + GAUGE)).inc(value);
+        this.allGauges.getIfAbsentPutWithKey(getKeyName(gaugeName),(key) -> buildGauge(gaugeName,gaugeName + GAUGE,Collections.emptyList())).inc(value);
     }
 
     @Override
     public void registerHistogram(String name, String helpMessage)
     {
-       this.allHistograms.getIfAbsentPutWithKey(getKeyName(name),(key) -> buildHistogram(name,name + HISTOGRAM));
+       this.allHistograms.getIfAbsentPutWithKey(getKeyName(name),(key) -> buildHistogram(name,name + HISTOGRAM,Collections.emptyList()));
+    }
+
+    @Override
+    public void registerHistogram(String name, String helpMessage, List<String> labelNames)
+    {
+        this.allHistograms.getIfAbsentPutWithKey(getKeyName(name),(key) -> buildHistogram(name,name + HISTOGRAM,labelNames));
     }
 
     @Override
     public void observeHistogram(String name, long start, long end)
     {
-       this.allHistograms.getIfAbsentPutWithKey(getKeyName(name),(key) -> buildHistogram(name,name + HISTOGRAM)).observe(end - start);
+       this.allHistograms.getIfAbsentPutWithKey(getKeyName(name),(key) -> buildHistogram(name,name + HISTOGRAM,Collections.emptyList())).observe(end - start);
     }
 }

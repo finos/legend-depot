@@ -87,4 +87,16 @@ public class VoidPrometheusMetricsHandler implements PrometheusMetricsHandler
     public void observeHistogram(String name, long start, long end)
     {
     }
+
+    @Override
+    public void registerHistogram(String name, String help, List<String> labelNames)
+    {
+
+    }
+
+    @Override
+    public void observeHistogram(String name, long start, long end, String... labelValues)
+    {
+
+    }
 }
