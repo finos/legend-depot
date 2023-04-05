@@ -89,11 +89,13 @@ public final class DependenciesCache
             Optional<StoreProjectVersionData> projectVersion = this.projectsVersionsStore.find(group, artifact, versionId);
             if (!projectVersion.isPresent())
             {
+                LOGGER.error(String.format(NOT_FOUND_IN_STORE, group, artifact, versionId));
                 throw new IllegalStateException(String.format(NOT_FOUND_IN_STORE, group, artifact, versionId));
             }
             ProjectVersionData versionData = projectVersion.get().getVersionData();
             if (versionData.isExcluded())
             {
+                LOGGER.error(String.format(EXCLUSION_FOUND_IN_STORE, group, artifact, versionId, versionData.getExclusionReason()));
                 throw new IllegalStateException(String.format(EXCLUSION_FOUND_IN_STORE, group, artifact, versionId, versionData.getExclusionReason()));
             }
             return projectVersion.get();
@@ -128,6 +130,7 @@ public final class DependenciesCache
                     });
                     if (DependencyStatus.FAIL.equals(deps.getStatus()))
                     {
+                        LOGGER.error(String.format(NOT_FOUND_IN_STORE, dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()));
                         throw new IllegalStateException(String.format(NOT_FOUND_IN_STORE, dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()));
                     }
                     dependencies.add(dep);
@@ -136,6 +139,7 @@ public final class DependenciesCache
             }
             else
             {
+                LOGGER.error(String.format(NOT_FOUND_IN_STORE, pv.getGroupId(),pv.getArtifactId(),pv.getVersionId()));
                 throw  new IllegalStateException(String.format(NOT_FOUND_IN_STORE, pv.getGroupId(),pv.getArtifactId(),pv.getVersionId()));
             }
         }
@@ -156,6 +160,7 @@ public final class DependenciesCache
             DependencyResult depResult = calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());
             if (DependencyStatus.FAIL.equals(depResult.getStatus()))
             {
+                LOGGER.error(String.format(TRANSITIVE_DEPENDENCIES_FAILED_MGS, pv.getGav(),depResult.errors));
                 throw new IllegalStateException(String.format(TRANSITIVE_DEPENDENCIES_FAILED_MGS, pv.getGav(),depResult.errors));
             }
             this.transitiveDependencies.put(pv, depResult);
@@ -173,6 +178,7 @@ public final class DependenciesCache
                 depResult = calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());
                 if (DependencyStatus.FAIL.equals(depResult.getStatus()))
                 {
+                    LOGGER.error(String.format(TRANSITIVE_DEPENDENCIES_FAILED_MGS, pv.getGav(),depResult.errors));
                     throw new IllegalStateException(String.format(TRANSITIVE_DEPENDENCIES_FAILED_MGS, pv.getGav(),depResult.errors));
                 }
                 this.transitiveDependencies.put(pv, depResult);
