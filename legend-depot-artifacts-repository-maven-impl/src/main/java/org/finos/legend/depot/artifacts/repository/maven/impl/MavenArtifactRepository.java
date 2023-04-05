@@ -317,7 +317,7 @@ public class MavenArtifactRepository implements ArtifactRepository
             }
             long endTime = System.currentTimeMillis();
             LOGGER.info("resolveVersionsFromRepository {}{}, took [{}] ms", group, artifact, endTime - start);
-            PrometheusMetricsFactory.getInstance().observeHistogram(GET_REPOSITORY_VERSIONS,start,endTime);
+          
             return result;
     }
 
