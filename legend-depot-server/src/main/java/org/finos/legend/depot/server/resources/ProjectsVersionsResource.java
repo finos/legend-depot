@@ -51,7 +51,7 @@ public class ProjectsVersionsResource extends BaseResource
 
     @GET
     @Path("/versions/{groupId}/{artifactId}/{versionId}")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV)
+    @ApiOperation(value = ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV, response = ProjectVersionDTO.class)
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<ProjectVersionDTO> getProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") String versionId)
     {
@@ -69,7 +69,7 @@ public class ProjectsVersionsResource extends BaseResource
 
     @GET
     @Path("/versions/{groupId}/{artifactId}/latest")
-    @ApiOperation(ResourceLoggingAndTracing.GET_LATEST_PROJECT_VERSION)
+    @ApiOperation(value = ResourceLoggingAndTracing.GET_LATEST_PROJECT_VERSION, response = ProjectVersionDTO.class)
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<ProjectVersionDTO> getLatestProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
     {
