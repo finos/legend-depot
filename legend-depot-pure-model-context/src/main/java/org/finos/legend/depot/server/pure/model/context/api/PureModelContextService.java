@@ -15,22 +15,11 @@
 
 package org.finos.legend.depot.server.pure.model.context.api;
 
-import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 
 public interface PureModelContextService
 {
     String getPureModelContextDataAsString(String groupId, String artifactId, String versionId, String clientVersion, boolean versioned, boolean getDependencies);
 
-    default String getLatestPureModelContextDataAsString(String groupId, String artifactId, String clientVersion, boolean versioned, boolean getDependencies)
-    {
-        return getPureModelContextDataAsString(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT, clientVersion, versioned, getDependencies);
-    }
-
     PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean versioned, boolean getDependencies);
-
-    default PureModelContextData getLatestPureModelContextData(String groupId, String artifactId, String clientVersion, boolean versioned, boolean getDependencies)
-    {
-        return getPureModelContextData(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT, clientVersion, versioned, getDependencies);
-    }
 }

@@ -19,8 +19,6 @@ public class ResourceLoggingAndTracing
 {
     public static final String GET_ALL_PROJECTS = "get all projects";
     public static final String GET_PROJECT_CONFIG_BY_GA = "get project configuration by ga";
-    public static final String GET_ALL_LEGACY_PROJECTS = "get all projects legacy";
-    public static final String GET_PROJECT_BY_GA = "get project by ga";
     public static final String GET_PROJECT_VERSIONS_BY_GA = "get project versions by ga";
     public static final String FIND_PROJECT_VERSIONS = "find project versions";
     public static final String GET_PROJECT_VERSION_BY_GAV = "get project version by gav";
@@ -30,15 +28,10 @@ public class ResourceLoggingAndTracing
     public static final String GET_PROJECT_DEPENDENCIES = "get upstream project dependencies";
     public static final String GET_PROJECT_DEPENDENCY_TREE = "get project dependency tree";
     public static final String GET_DEPENDANT_PROJECTS = "downstream projects";
-    public static final String GET_REVISION_ENTITIES = "get revision entities";
-    public static final String GET_REVISION_ENTITIES_AS_PMCD = "get revision entities as PMCD";
-    public static final String GET_REVISION_ENTITY = "get revision entity";
-    public static final String GET_REVISION_ENTITIES_BY_PACKAGE = "get revision entities by package";
     public static final String UPDATE_ALL_MASTER_REVISIONS = "refresh all master revisions";
     public static final String UPDATE_LATEST_PROJECT_REVISION = "refresh project master revision";
     public static final String GET_VERSION_ENTITIES = "get version entities";
     public static final String GET_VERSION_DEPENDENCY_ENTITIES = "get version dependencies entities";
-    public static final String GET_REVISION_DEPENDENCY_ENTITIES = "get latest dependencies entities";
     public static final String GET_VERSION_STORE_ENTITIES = "get stored version entities";
     public static final String GET_VERSION_ENTITIES_AS_PMCD = "get version entities as PMCD";
     public static final String GET_VERSION_ENTITY = "get version entity";
@@ -52,11 +45,7 @@ public class ResourceLoggingAndTracing
     public static final String DELETE_VERSION = "delete version";
     public static final String DEPRECATE_VERSION = "deprecate version";
     public static final String EVICT_VERSION = "evict version";
-    public static final String GET_REVISION_FILE_GENERATION_ENTITIES = "get revision generation entities";
     public static final String GET_VERSION_FILE_GENERATION_ENTITIES = "get version generation entities";
-    public static final String GET_REVISION_FILE_GENERATION = "get revision file generations";
-    public static final String GET_REVISION_FILE_GENERATION_BY_ELEMENT_PATH = "get revision file generations by element path";
-    public static final String GET_REVISION_FILE_GENERATION_BY_FILEPATH = "get revision file generations by file";
     public static final String GET_VERSION_FILE_GENERATION = "get version file generations";
     public static final String GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH = "get version file generations by element path";
     public static final String GET_VERSION_FILE_GENERATION_BY_FILEPATH = "get version file generations by file";

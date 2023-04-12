@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public interface EntitiesService
 {
@@ -36,31 +35,12 @@ public interface EntitiesService
 
     List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, boolean versioned, Set<String> classifierPaths, boolean includeSubPackages);
 
-    default List<Entity> getLatestEntities(String groupId, String artifactId, boolean versioned)
-    {
-        return getEntities(groupId, artifactId, MASTER_SNAPSHOT, versioned);
-    }
-
-    default Optional<Entity> getLatestEntity(String groupId, String artifactId, String entityPath)
-    {
-        return getEntity(groupId, artifactId, MASTER_SNAPSHOT, entityPath);
-    }
-
-    default List<Entity> getLatestEntitiesByPackage(String groupId, String artifactId, String packageName, boolean versioned, Set<String> classifierPaths, boolean includeSubPackages)
-    {
-        return getEntitiesByPackage(groupId, artifactId, MASTER_SNAPSHOT, packageName, versioned, classifierPaths, includeSubPackages);
-    }
 
     List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean versioned, boolean transitive, boolean includeOrigin);
 
     default List<ProjectVersionEntities> getDependenciesEntities(String groupId, String artifactId, String versionId, boolean versioned, boolean transitive, boolean includeOrigin)
     {
         return getDependenciesEntities(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)), versioned, transitive, includeOrigin);
-    }
-
-    default List<ProjectVersionEntities> getLatestDependenciesEntities(String groupId, String artifactId, boolean versioned, boolean transitive, boolean includeOrigin)
-    {
-        return getDependenciesEntities(groupId, artifactId, MASTER_SNAPSHOT, versioned, transitive, includeOrigin);
     }
 
     List<StoredEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary, boolean versioned);

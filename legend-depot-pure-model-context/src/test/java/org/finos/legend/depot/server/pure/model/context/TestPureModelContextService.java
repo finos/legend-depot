@@ -36,6 +36,8 @@ import org.mockito.Mockito;
 import java.net.URL;
 import java.util.List;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public class TestPureModelContextService extends TestBaseServices
 {
     protected static final URL projects = TestStoreMongo.class.getClassLoader().getResource("allProjectVersions.json");
@@ -88,7 +90,7 @@ public class TestPureModelContextService extends TestBaseServices
     @Test
     public void canGetEntitiesAsPureModelContextData()
     {
-        String modelContextDataAsString = service.getLatestPureModelContextDataAsString(TEST_GROUP_ID, "test", CLIENT_VERSION, false, false);
+        String modelContextDataAsString = service.getPureModelContextDataAsString(TEST_GROUP_ID, "test", MASTER_SNAPSHOT, CLIENT_VERSION, false, false);
         Assert.assertNotNull(modelContextDataAsString);
         Assert.assertEquals("{\"_type\":\"data\",\"elements\":[{\"_type\":\"class\",\"constraints\":[],\"name\":\"ClassWithDependency\",\"originalMilestonedProperties\":[],\"package\":\"examples::metadata::test\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"Name\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"profile\",\"name\":\"TestProfile\",\"package\":\"examples::metadata::test\",\"stereotypes\":[],\"tags\":[]},{\"_type\":\"class\",\"constraints\":[],\"name\":\"ClientBasic\",\"originalMilestonedProperties\":[],\"package\":\"examples::metadata::test\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"Name\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"EntityId\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Integer\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IsActive\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Boolean\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"RiskScore\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Float\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IncorporationDate\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"StrictDate\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"OptionalAlternativeName\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"newProperty\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"profile\",\"name\":\"TestProfileTwo\",\"package\":\"examples::metadata::test::subpackage\",\"stereotypes\":[],\"tags\":[]}],\"origin\":{\"_type\":\"pointer\",\"sdlcInfo\":{\"_type\":\"alloy\",\"baseVersion\":\"master-SNAPSHOT\",\"packageableElementPointers\":[],\"project\":\"examples.metadata:test\",\"version\":\"none\"},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}}", modelContextDataAsString);
     }
@@ -96,7 +98,7 @@ public class TestPureModelContextService extends TestBaseServices
     @Test(expected = IllegalArgumentException.class)
     public void testNonExistentProject()
     {
-        service.getLatestPureModelContextDataAsString("non.existent.project", "test", CLIENT_VERSION, false, false);
+        service.getPureModelContextDataAsString("non.existent.project", "test",MASTER_SNAPSHOT, CLIENT_VERSION, false, false);
     }
 
     @Test
@@ -105,7 +107,7 @@ public class TestPureModelContextService extends TestBaseServices
 
         EntitiesService mockVersions = Mockito.mock(EntitiesService.class);
         PureModelContextService newService = new PureModelContextServiceImpl(mockVersions, projectsService);
-        String result = newService.getLatestPureModelContextDataAsString("test.legend", "blank-prod", CLIENT_VERSION, false, false);
+        String result = newService.getPureModelContextDataAsString("test.legend", "blank-prod", MASTER_SNAPSHOT, CLIENT_VERSION, false, false);
         Assert.assertNull(result);
     }
 

@@ -17,6 +17,7 @@ package org.finos.legend.depot.server.pure.model.context;
 
 import com.google.inject.PrivateModule;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
+import org.finos.legend.depot.server.pure.model.context.resources.DeprecatedPureModelContextAPIsResource;
 import org.finos.legend.depot.server.pure.model.context.resources.PureModelContextResource;
 import org.finos.legend.depot.server.pure.model.context.services.PureModelContextServiceImpl;
 
@@ -30,5 +31,8 @@ public class PureModelContextModule extends PrivateModule
 
         bind(PureModelContextResource.class);
         expose(PureModelContextResource.class);
+
+        bind(DeprecatedPureModelContextAPIsResource.class);
+        expose(DeprecatedPureModelContextAPIsResource.class);
     }
 }
