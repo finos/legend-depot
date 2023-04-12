@@ -31,12 +31,6 @@ public interface ManageEntitiesService extends EntitiesService
 
     List<StoredEntity> getStoredEntities(String groupId, String artifactId, String versionId);
 
-    @Override
-    default List<Entity> getLatestEntities(String groupId, String artifactId, boolean versioned)
-    {
-        return getEntities(groupId, artifactId, MASTER_SNAPSHOT, versioned);
-    }
-
     MetadataEventResponse deleteAll(String groupId, String artifactId);
 
     MetadataEventResponse delete(String groupId, String artifactId, String versionId,boolean versioned);

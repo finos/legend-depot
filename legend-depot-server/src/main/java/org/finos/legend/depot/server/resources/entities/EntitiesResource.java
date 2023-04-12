@@ -35,10 +35,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_ENTITIES;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_ENTITIES_BY_PACKAGE;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_ENTITY;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_BY_PACKAGE;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITY;
@@ -105,50 +101,4 @@ public class EntitiesResource extends BaseResource
         return handle(GET_VERSION_ENTITIES_BY_PACKAGE, GET_VERSION_ENTITIES_BY_PACKAGE + packageName, () -> entitiesService.getEntitiesByPackage(groupId, artifactId, versionId, packageName, versioned, classifierPaths, includeSubPackages));
     }
 
-
-    @GET
-    @Path("/projects/{groupId}/{artifactId}/revisions/latest")
-    @ApiOperation(GET_REVISION_ENTITIES)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<Entity> getLatestEntities(@PathParam("groupId") String groupId,
-                                          @PathParam("artifactId") String artifactId,
-                                          @QueryParam("versioned")
-                                          @DefaultValue("false")
-                                          @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned)
-    {
-        QueryMetricsContainer.record(groupId, artifactId, MASTER_SNAPSHOT);
-        return handle(GET_REVISION_ENTITIES, () -> this.entitiesService.getLatestEntities(groupId, artifactId, versioned));
-    }
-
-
-    @GET
-    @Path("/projects/{groupId}/{artifactId}/latest/entities/{path}")
-    @ApiOperation(GET_REVISION_ENTITY)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Optional<Entity> geLatestEntity(@PathParam("groupId") String groupId,
-                                           @PathParam("artifactId") String artifactId,
-                                           @PathParam("path") String entityPath)
-    {
-        QueryMetricsContainer.record(groupId, artifactId, MASTER_SNAPSHOT);
-        return handle(GET_REVISION_ENTITY, GET_REVISION_ENTITY + entityPath, () -> this.entitiesService.getLatestEntity(groupId, artifactId, entityPath));
-    }
-
-    @GET
-    @Path("/projects/{groupId}/{artifactId}/latest/entities")
-    @ApiOperation(GET_REVISION_ENTITIES_BY_PACKAGE)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<Entity> getLatestEntities(@PathParam("groupId") String groupId,
-                                          @PathParam("artifactId") String artifactId,
-                                          @QueryParam("package") String packageName,
-                                          @QueryParam("versioned")
-                                          @DefaultValue("false")
-                                          @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
-                                          @QueryParam("classifierPath") @ApiParam("Only include ENTITIES with one of these classifier paths.") Set<String> classifierPaths,
-                                          @QueryParam("includeSubPackages")
-                                          @DefaultValue("true")
-                                          @ApiParam("Whether to include ENTITIES from subpackages or only directly in one of the given packages") boolean includeSubPackages)
-    {
-        QueryMetricsContainer.record(groupId, artifactId, MASTER_SNAPSHOT);
-        return handle(GET_REVISION_ENTITIES_BY_PACKAGE, GET_REVISION_ENTITIES_BY_PACKAGE + packageName, () -> this.entitiesService.getLatestEntitiesByPackage(groupId, artifactId, packageName, versioned, classifierPaths, includeSubPackages));
-    }
 }

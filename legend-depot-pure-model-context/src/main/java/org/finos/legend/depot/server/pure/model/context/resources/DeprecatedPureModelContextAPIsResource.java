@@ -18,7 +18,6 @@ package org.finos.legend.depot.server.pure.model.context.resources;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
@@ -33,28 +32,30 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_ENTITIES_AS_PMCD;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_AS_PMCD;
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 @Path("")
-@Api("Pure Model Context Data")
-public class PureModelContextResource extends BaseResource
+@Api("Deprecated")
+public class DeprecatedPureModelContextAPIsResource extends BaseResource
 {
+
+    private static final String GET_REVISION_ENTITIES_AS_PMCD = "get revision entities as PMCD";
     private final PureModelContextService service;
 
     @Inject
-    public PureModelContextResource(PureModelContextService service)
+    public DeprecatedPureModelContextAPIsResource(PureModelContextService service)
     {
         this.service = service;
     }
 
+
     @GET
-    @Path("projects/{groupId}/{artifactId}/versions/{versionId}/pureModelContextData")
-    @ApiOperation(GET_VERSION_ENTITIES_AS_PMCD)
+    @Path("projects/{groupId}/{artifactId}/revisions/latest/pureModelContextData")
+    @ApiOperation(value = GET_REVISION_ENTITIES_AS_PMCD,notes = "deprecated use: projects/{groupId}/{artifactId}/versions/master-SNAPSHOT/pureModelContextData")
     @Produces(MediaType.APPLICATION_JSON)
+    @Deprecated
     public PureModelContextData getPureModelContextData(@PathParam("groupId") String groupId,
                                                         @PathParam("artifactId") String artifactId,
-                                                        @PathParam("versionId") @ApiParam("valid version string or aliases: latest-last released version")  String versionId,
                                                         @QueryParam("clientVersion") String clientVersion,
                                                         @QueryParam("versioned")
                                                         @DefaultValue("false")
@@ -63,7 +64,7 @@ public class PureModelContextResource extends BaseResource
                                                         @DefaultValue("true")
                                                         @ApiParam("Whether to return ENTITIES with version in entity path") boolean getDependencies)
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
-        return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, versioned, getDependencies));
+        QueryMetricsContainer.record(groupId, artifactId, MASTER_SNAPSHOT);
+        return handle(GET_REVISION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId,MASTER_SNAPSHOT, clientVersion, versioned, getDependencies));
     }
 }
