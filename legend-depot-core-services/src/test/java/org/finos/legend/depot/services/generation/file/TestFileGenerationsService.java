@@ -119,7 +119,7 @@ public class TestFileGenerationsService extends TestStoreMongo
     public void canQueryFileGenerationEntities()
     {
 
-        List<FileGeneration> generations = service.getLatestFileGenerations("group.test", "test");
+        List<FileGeneration> generations = service.getFileGenerations("group.test", "test",MASTER_SNAPSHOT);
         Assert.assertEquals(14, generations.size());
 
         List<FileGeneration> gens1 = service.getFileGenerations("group.test", "test", "1.0.0");
@@ -163,7 +163,7 @@ public class TestFileGenerationsService extends TestStoreMongo
         Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
         Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
         Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
-        Assert.assertTrue(service.getLatestFileGenerationContentByFilePath("group.test", "test",  "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test", "test",MASTER_SNAPSHOT,  "/examples/metadata/test/ClientBasic.avro").isPresent());
     }
 
     @Test(expected = IllegalArgumentException.class)

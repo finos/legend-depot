@@ -26,42 +26,17 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public interface FileGenerationsService
 {
 
-    default List<Entity> getLatestGenerations(String groupId, String artifactId)
-    {
-        return getGenerations(groupId, artifactId, MASTER_SNAPSHOT);
-    }
-
     List<Entity> getGenerations(String groupId, String artifactId, String versionId);
-
-    default List<FileGeneration> getLatestFileGenerations(String groupId, String artifactId)
-    {
-        return getFileGenerations(groupId, artifactId, MASTER_SNAPSHOT);
-    }
 
     List<FileGeneration> getFileGenerations(String groupId, String artifactId, String versionId);
 
-    default List<FileGeneration> getLatestFileGenerationsByElementPath(String groupId, String artifactId, String elementPath)
-    {
-        return getFileGenerationsByElementPath(groupId, artifactId, MASTER_SNAPSHOT, elementPath);
-    }
-
     List<FileGeneration> getFileGenerationsByElementPath(String groupId, String artifactId, String versionId, String elementPath);
-
-    default Optional<FileGeneration> getLatestFileGenerationsByFilePath(String groupId, String artifactId, String filePath)
-    {
-        return getFileGenerationsByFilePath(groupId, artifactId, MASTER_SNAPSHOT, filePath);
-    }
 
     Optional<FileGeneration> getFileGenerationsByFilePath(String groupId, String artifactId, String versionsId, String filePath);
 
     default  Optional<String> getFileGenerationContentByFilePath(String groupId, String artifactId, String versionsId, String filePath)
     {
         return  getFileGenerationsByFilePath(groupId,artifactId,versionsId,filePath).map(o -> o.getContent());
-    }
-
-    default Optional<String> getLatestFileGenerationContentByFilePath(String groupId, String artifactId, String filePath)
-    {
-        return getFileGenerationContentByFilePath(groupId, artifactId, MASTER_SNAPSHOT, filePath);
     }
 
 }

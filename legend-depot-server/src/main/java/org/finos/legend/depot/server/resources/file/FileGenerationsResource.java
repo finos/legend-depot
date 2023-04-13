@@ -18,7 +18,6 @@ package org.finos.legend.depot.server.resources.file;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
-import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
@@ -33,10 +32,6 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Optional;
 
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION_BY_ELEMENT_PATH;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION_BY_FILEPATH;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION_ENTITIES;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_FILEPATH;
@@ -55,16 +50,6 @@ public class FileGenerationsResource extends BaseResource
         this.generationsService = generationsService;
     }
 
-    @GET
-    @Path("/projects/{groupId}/{artifactId}/latest/generations")
-    @ApiOperation(GET_REVISION_FILE_GENERATION_ENTITIES)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<Entity> getLatestGenerations(@PathParam("groupId") String groupId,
-                                             @PathParam("artifactId") String artifactId)
-    {
-        QueryMetricsContainer.record(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT);
-        return handle(GET_REVISION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getLatestGenerations(groupId, artifactId));
-    }
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/{versionId}/generations")
@@ -78,40 +63,6 @@ public class FileGenerationsResource extends BaseResource
         return handle(GET_VERSION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getGenerations(groupId, artifactId, versionId));
     }
 
-    @GET
-    @Path("/generations/{groupId}/{artifactId}/latest")
-    @ApiOperation(GET_REVISION_FILE_GENERATION)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<FileGeneration> getLatestFileGenerations(@PathParam("groupId") String groupId,
-                                                          @PathParam("artifactId") String artifactId)
-    {
-        QueryMetricsContainer.record(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT);
-        return handle(GET_REVISION_FILE_GENERATION, () -> this.generationsService.getLatestFileGenerations(groupId, artifactId));
-    }
-
-    @GET
-    @Path("/generations/{groupId}/{artifactId}/latest/{elementPath}")
-    @ApiOperation(GET_REVISION_FILE_GENERATION_BY_ELEMENT_PATH)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<FileGeneration> getLatestFileGenerationsByElementPath(@PathParam("groupId") String groupId,
-                                                               @PathParam("artifactId") String artifactId,
-                                                               @PathParam("elementPath") String elementPath)
-    {
-        QueryMetricsContainer.record(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT);
-        return handle(GET_REVISION_FILE_GENERATION_BY_ELEMENT_PATH, () -> this.generationsService.getLatestFileGenerationsByElementPath(groupId, artifactId, elementPath));
-    }
-
-    @GET
-    @Path("/generations/{groupId}/{artifactId}/latest/file/{filePath}")
-    @ApiOperation(GET_REVISION_FILE_GENERATION_BY_FILEPATH)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Optional<FileGeneration> getLatestFileGenerationsByFilePath(@PathParam("groupId") String groupId,
-                                                                   @PathParam("artifactId") String artifactId,
-                                                                   @PathParam("filePath") String filePath)
-    {
-        QueryMetricsContainer.record(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT);
-        return handle(GET_REVISION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getLatestFileGenerationsByFilePath(groupId, artifactId, filePath));
-    }
 
     @GET
     @Path("/generations/{groupId}/{artifactId}/versions/{versionId}")
@@ -160,18 +111,5 @@ public class FileGenerationsResource extends BaseResource
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationContentByFilePath(groupId, artifactId, versionId, filePath));
     }
-
-    @GET
-    @Path("/generationFileContent/{groupId}/{artifactId}/latest/file/{filePath}")
-    @ApiOperation(GET_REVISION_FILE_GENERATION_BY_FILEPATH)
-    @Produces(MediaType.TEXT_PLAIN)
-    public Optional<String> getLatestFileGenerationContentByFilePath(@PathParam("groupId") String groupId,
-                                                                 @PathParam("artifactId") String artifactId,
-                                                                 @PathParam("filePath") String filePath)
-    {
-        QueryMetricsContainer.record(groupId, artifactId,VersionValidator.MASTER_SNAPSHOT);
-        return handle(GET_REVISION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getLatestFileGenerationContentByFilePath(groupId, artifactId, filePath));
-    }
-
 
 }

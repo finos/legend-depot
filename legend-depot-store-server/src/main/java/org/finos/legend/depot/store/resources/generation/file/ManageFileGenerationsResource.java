@@ -55,16 +55,6 @@ public class ManageFileGenerationsResource extends BaseAuthorisedResource
     }
 
     @GET
-    @Path("/generations/{groupId}/{artifactId}/latest")
-    @ApiOperation(ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<StoredFileGeneration> getFileGenerationEntities(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
-    {
-        validateUser();
-        return handle(ResourceLoggingAndTracing.GET_REVISION_FILE_GENERATION, () -> this.generationsService.getStoredLatestFileGenerations(groupId, artifactId));
-    }
-
-    @GET
     @Path("/generations/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION)
     @Produces(MediaType.APPLICATION_JSON)
