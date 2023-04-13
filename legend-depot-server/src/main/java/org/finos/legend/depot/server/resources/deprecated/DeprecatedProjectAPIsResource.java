@@ -65,7 +65,7 @@ public class DeprecatedProjectAPIsResource extends BaseResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}")
-    @ApiOperation(value = GET_PROJECT_BY_GA,notes = "deprecated use: /project-configurations/{groupId}/{artifactId}")
+    @ApiOperation(value = GET_PROJECT_BY_GA,notes = "replaced by: /project-configurations/{groupId}/{artifactId}", tags = "_Deprecated: remove by Q3 2023")
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public Optional<ProjectData> getProject(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
@@ -85,7 +85,7 @@ public class DeprecatedProjectAPIsResource extends BaseResource
 
     @GET
     @Path("/projects")
-    @ApiOperation(value = GET_ALL_LEGACY_PROJECTS,notes = "deprecated use: /project-configurations")
+    @ApiOperation(value = GET_ALL_LEGACY_PROJECTS,notes = "replaced by: /project-configurations", tags = "_Deprecated: remove by Q3 2023")
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public List<ProjectData> getProjects()

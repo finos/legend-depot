@@ -18,6 +18,7 @@ package org.finos.legend.depot.server.pure.model.context.resources;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
@@ -51,7 +52,7 @@ public class DeprecatedPureModelContextAPIsResource extends BaseResource
 
     @GET
     @Path("projects/{groupId}/{artifactId}/revisions/latest/pureModelContextData")
-    @ApiOperation(value = GET_REVISION_ENTITIES_AS_PMCD,notes = "deprecated use: projects/{groupId}/{artifactId}/versions/master-SNAPSHOT/pureModelContextData")
+    @ApiOperation(value = GET_REVISION_ENTITIES_AS_PMCD, notes = "replaced by: projects/{groupId}/{artifactId}/versions/master-SNAPSHOT/pureModelContextData", tags = "_Deprecated: remove by Q1 2024")
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public PureModelContextData getPureModelContextData(@PathParam("groupId") String groupId,

@@ -18,6 +18,7 @@ package org.finos.legend.depot.server.resources.deprecated;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Tag;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
@@ -56,7 +57,7 @@ public class DeprecatedEntitiesAPIsResource extends BaseResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/revisions/latest")
-    @ApiOperation(value = GET_REVISION_ENTITIES, notes = "deprecated use: /projects/{groupId}/{artifactId}/versions/master-SNAPSHOT")
+    @ApiOperation(value = GET_REVISION_ENTITIES, notes = "replaced by: /projects/{groupId}/{artifactId}/versions/master-SNAPSHOT", tags = "_Deprecated: remove by Q1 2024")
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public List<Entity> getLatestEntities(@PathParam("groupId") String groupId,
@@ -72,7 +73,7 @@ public class DeprecatedEntitiesAPIsResource extends BaseResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/latest/entities/{path}")
-    @ApiOperation(value = GET_REVISION_ENTITY,notes = "deprecated use: /projects/{groupId}/{artifactId}/versions/master-SNAPSHOT/entities/{path}")
+    @ApiOperation(value = GET_REVISION_ENTITY,notes = "replaced by: /projects/{groupId}/{artifactId}/versions/master-SNAPSHOT/entities/{path}", tags = "_Deprecated: remove by Q1 2024")
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public Optional<Entity> geLatestEntity(@PathParam("groupId") String groupId,
@@ -85,7 +86,7 @@ public class DeprecatedEntitiesAPIsResource extends BaseResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/latest/entities")
-    @ApiOperation(value = GET_REVISION_ENTITIES_BY_PACKAGE, notes = "deprecated use: /projects/{groupId}/{artifactId}/versions/master-SNAPSHOT/entities")
+    @ApiOperation(value = GET_REVISION_ENTITIES_BY_PACKAGE, notes = "replaced by: /projects/{groupId}/{artifactId}/versions/master-SNAPSHOT/entities",tags = "_Deprecated: remove by Q1 2024")
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public List<Entity> getLatestEntities(@PathParam("groupId") String groupId,

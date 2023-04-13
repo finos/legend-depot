@@ -53,7 +53,7 @@ public class DeprecatedFileGenerationAPIsResource extends BaseResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/latest/generations")
-    @ApiOperation(value = GET_REVISION_FILE_GENERATION_ENTITIES,notes = "deprecated use: /projects/{groupId}/{artifactId}/master-SNAPSHOT/generations")
+    @ApiOperation(value = GET_REVISION_FILE_GENERATION_ENTITIES,notes = "replaced by: /projects/{groupId}/{artifactId}/master-SNAPSHOT/generations",tags = "_Deprecated: remove by Q1 2024")
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public List<Entity> getLatestGenerations(@PathParam("groupId") String groupId,
@@ -66,7 +66,7 @@ public class DeprecatedFileGenerationAPIsResource extends BaseResource
 
     @GET
     @Path("/generations/{groupId}/{artifactId}/latest")
-    @ApiOperation(value = GET_REVISION_FILE_GENERATION, notes = "deprecated use: /generations/{groupId}/{artifactId}/versions/master-SNAPSHOT")
+    @ApiOperation(value = GET_REVISION_FILE_GENERATION, notes = "replaced by: /generations/{groupId}/{artifactId}/versions/master-SNAPSHOT",tags = "_Deprecated: remove by Q1 2024")
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public List<FileGeneration> getLatestFileGenerations(@PathParam("groupId") String groupId,
@@ -78,7 +78,7 @@ public class DeprecatedFileGenerationAPIsResource extends BaseResource
 
     @GET
     @Path("/generations/{groupId}/{artifactId}/latest/{elementPath}")
-    @ApiOperation(value = GET_REVISION_FILE_GENERATION_BY_ELEMENT_PATH, notes = " deprecated use /generations/{groupId}/{artifactId}/versions/master-SNAPSHOT/{elementPath}")
+    @ApiOperation(value = GET_REVISION_FILE_GENERATION_BY_ELEMENT_PATH, notes = " deprecated use /generations/{groupId}/{artifactId}/versions/master-SNAPSHOT/{elementPath}",tags = "_Deprecated: remove by Q1 2024")
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public List<FileGeneration> getLatestFileGenerationsByElementPath(@PathParam("groupId") String groupId,
@@ -91,7 +91,7 @@ public class DeprecatedFileGenerationAPIsResource extends BaseResource
 
     @GET
     @Path("/generations/{groupId}/{artifactId}/latest/file/{filePath}")
-    @ApiOperation(value = GET_REVISION_FILE_GENERATION_BY_FILEPATH, notes = "deprecated use: /generations/{groupId}/{artifactId}/versions/master-SNAPSHOT/file/{filePath} ")
+    @ApiOperation(value = GET_REVISION_FILE_GENERATION_BY_FILEPATH, notes = "replaced by: /generations/{groupId}/{artifactId}/versions/master-SNAPSHOT/file/{filePath}",tags = "_Deprecated: remove by Q1 2024")
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public Optional<FileGeneration> getLatestFileGenerationsByFilePath(@PathParam("groupId") String groupId,
