@@ -18,6 +18,8 @@ package org.finos.legend.depot.server.resources.deprecated;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.Info;
+import io.swagger.annotations.Tag;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
@@ -52,7 +54,7 @@ public class DeprecatedDependenciesAPIsResource extends BaseResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/revisions/latest/dependants")
-    @ApiOperation(value = GET_REVISION_DEPENDENCY_ENTITIES,notes = "deprecated use: /projects/{groupId}/{artifactId}/versions/master-SNAPSHOT/dependantProjects")
+    @ApiOperation(value = GET_REVISION_DEPENDENCY_ENTITIES, notes = "replaced by: /projects/{groupId}/{artifactId}/versions/master-SNAPSHOT/dependantProjects", tags = "_Deprecated: remove by Q1 2024")
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public List<ProjectVersionEntities> getLatestEntitiesFromDependencies(@PathParam("groupId") String groupId,
