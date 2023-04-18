@@ -71,7 +71,7 @@ public class SchedulesResource extends BaseAuthorisedResource
 
     @GET
     @Path("/schedules")
-    @ApiOperation(ResourceLoggingAndTracing.SCHEDULES_STATUS)
+    @ApiOperation(value = ResourceLoggingAndTracing.SCHEDULES_STATUS, notes = "Toggle to true for checking disabled schedules or toggle to false for checking enabled schedules")
     @Produces(MediaType.APPLICATION_JSON)
     public List<ScheduleInfo> getSchedulerStatus(@QueryParam("disabled") @DefaultValue("false") Boolean disabled)
     {
@@ -138,7 +138,7 @@ public class SchedulesResource extends BaseAuthorisedResource
 
     @PUT
     @Path("/schedules/{scheduleName}/disable/{toggle}")
-    @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULE)
+    @ApiOperation(value = ResourceLoggingAndTracing.TOGGLE_SCHEDULE, notes = "Toggle to true for disabling the schedule mentioned or toggle to false for enabling the schedule")
     @Produces(MediaType.APPLICATION_JSON)
     public Response toggleScheduler(@PathParam("scheduleName") String scheduleName, @PathParam("toggle") boolean toggle)
     {
@@ -153,7 +153,7 @@ public class SchedulesResource extends BaseAuthorisedResource
 
     @PUT
     @Path("/schedules/all/disable/{toggle}")
-    @ApiOperation(ResourceLoggingAndTracing.TOGGLE_SCHEDULES)
+    @ApiOperation(value = ResourceLoggingAndTracing.TOGGLE_SCHEDULES, notes = "Toggle to true for disabling all schedules or toggle to false for enabling all schedules")
     @Produces(MediaType.APPLICATION_JSON)
     public Response toggleScheduler(@PathParam("toggle") boolean toggle)
     {
