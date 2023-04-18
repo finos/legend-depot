@@ -103,7 +103,7 @@ public class TestGenerationsProvider extends TestStoreMongo
         Assert.assertTrue(generations.getAll().isEmpty());
         FileGenerationHandlerImpl handler = new FileGenerationHandlerImpl(repository, fileGenerationsProvider, generations);
         StoreProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
-        MetadataEventResponse response = handler.refreshProjectRevisionArtifacts(projectData, getFiles(MASTER_SNAPSHOT));
+        MetadataEventResponse response = handler.refreshProjectVersionArtifacts(projectData, MASTER_SNAPSHOT, getFiles(MASTER_SNAPSHOT));
         Assert.assertNotNull(response);
         Assert.assertFalse(response.hasErrors());
         List<StoredFileGeneration> fileGenerations = generations.getAll();
@@ -120,7 +120,7 @@ public class TestGenerationsProvider extends TestStoreMongo
         FileGenerationHandlerImpl handler = new FileGenerationHandlerImpl(repository, fileGenerationsProvider, generations);
         StoreProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
         //deleted one generation as part of new master snapshot version
-        MetadataEventResponse response = handler.refreshProjectRevisionArtifacts(projectData, Arrays.asList(new File(filePath.getFile())));
+        MetadataEventResponse response = handler.refreshProjectVersionArtifacts(projectData, MASTER_SNAPSHOT,Arrays.asList(new File(filePath.getFile())));
         Assert.assertNotNull(response);
         Assert.assertFalse(response.hasErrors());
         List<StoredFileGeneration> fileGenerations = generations.getAll();

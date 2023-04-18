@@ -57,7 +57,7 @@ public class EntitiesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<Entity> getEntities(@PathParam("groupId") String groupId,
                                     @PathParam("artifactId") String artifactId,
-                                    @PathParam("versionId") String versionId,
+                                    @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId,
                                     @QueryParam("versioned")
                                     @DefaultValue("false")
                                     @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned)
@@ -73,7 +73,7 @@ public class EntitiesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<Entity> getEntity(@PathParam("groupId") String groupId,
                                       @PathParam("artifactId") String artifactId,
-                                      @PathParam("versionId") String versionId,
+                                      @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId,
                                       @PathParam("path") String entityPath)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
@@ -86,7 +86,7 @@ public class EntitiesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<Entity> getEntities(@PathParam("groupId") String groupId,
                                     @PathParam("artifactId") String artifactId,
-                                    @PathParam("versionId") String versionId,
+                                    @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId,
                                     @QueryParam("package") String packageName,
                                     @QueryParam("versioned")
                                     @DefaultValue("false")

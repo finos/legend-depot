@@ -17,6 +17,7 @@ package org.finos.legend.depot.artifacts.repository.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
@@ -72,9 +73,10 @@ public class RepositoryResource extends BaseResource
     @GET
     @Path("/repository/versions/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)
+    @Produces(MediaType.TEXT_PLAIN)
     public Optional<String> getRepositoryVersion(@PathParam("groupId") String groupId,
                                                  @PathParam("artifactId") String artifactId,
-                                                 @PathParam("versionId") String versionId)
+                                                 @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
         return handle(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId + versionId, () ->
         {

@@ -13,20 +13,29 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.artifacts.api;
+package org.finos.legend.depot.domain.version;
 
-public enum ParentEvent
+public enum VersionAlias
 {
-    UPDATE_PROJECT_VERSION,
-    UPDATE_PROJECT_ALL_VERSIONS,
-    UPDATE_ALL_PROJECT_ALL_VERSIONS,
-    UPDATE_ALL_PROJECT_ALL_SNAPSHOTS,
-    REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE;
+    LATEST("latest","last released version");
 
-    private static final String SEPARATOR = "_";
 
-    public static String build(String groupId, String artifactId, String versionId,String parentEventId)
+    String name;
+    String description;
+
+    VersionAlias(String name, String description)
     {
-        return parentEventId != null ? parentEventId : groupId + SEPARATOR + artifactId + SEPARATOR + versionId;
+        this.name = name;
+        this.description = description;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public String getDescription()
+    {
+        return description;
     }
 }

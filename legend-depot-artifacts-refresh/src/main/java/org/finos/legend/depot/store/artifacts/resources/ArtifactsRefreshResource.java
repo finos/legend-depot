@@ -37,8 +37,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.security.Principal;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
-
 
 @Path("")
 @Api("Artifacts Refresh")
@@ -64,26 +62,13 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataEventResponse updateProjectVersion(@PathParam("groupId") String groupId,
                                                       @PathParam("artifactId") String artifactId,
-                                                      @PathParam("versionId") String versionId,
+                                                      @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId,
+                                                      @QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to re-process unchanged SNAPSHOT jars") boolean fullUpdate,
                                                       @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to refresh dependencies") boolean transitive)
     {
         validateUser();
         return handle(ResourceLoggingAndTracing.UPDATE_VERSION, ResourceLoggingAndTracing.UPDATE_VERSION + groupId + artifactId + versionId,
-                () -> artifactsRefreshService.refreshVersionForProject(groupId, artifactId,versionId,transitive, ParentEvent.build(groupId,artifactId,versionId, ParentEvent.UPDATE_PROJECT_VERSION.name())));
-    }
-
-    @PUT
-    @Path("/artifactsRefresh/{groupId}/{artifactId}/latest")
-    @ApiOperation(ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION)
-    @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse updateProjectMaster(@PathParam("groupId") String groupId,
-                                                       @PathParam("artifactId") String artifactId,
-                                                       @QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to re-process unchanged master-SNAPSHOT jars") boolean fullUpdate,
-                                                       @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to refresh dependencies") boolean transitive)
-    {
-        validateUser();
-        return handle(ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION, ResourceLoggingAndTracing.UPDATE_LATEST_PROJECT_REVISION + groupId + artifactId,
-                () -> artifactsRefreshService.refreshMasterSnapshotForProject(groupId,artifactId,fullUpdate,transitive, ParentEvent.build(groupId,artifactId,MASTER_SNAPSHOT, ParentEvent.UPDATE_PROJECT_HEAD.name())));
+                () -> artifactsRefreshService.refreshVersionForProject(groupId, artifactId,versionId,fullUpdate,transitive, ParentEvent.build(groupId,artifactId,versionId, ParentEvent.UPDATE_PROJECT_VERSION.name())));
     }
 
     @PUT
@@ -92,7 +77,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataEventResponse updateProjectAllVersions(@PathParam("groupId") String groupId,
                                                        @PathParam("artifactId") String artifactId,
-                                                       @QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to re-process unchanged master-SNAPSHOT jars") boolean fullUpdate,
+                                                       @QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to re-process unchanged SNAPSHOT jars") boolean fullUpdate,
                                                        @QueryParam("allVersions") @DefaultValue("false") @ApiParam("Whether to refresh all versions or just new") boolean allVersions,
                                                        @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to refresh dependencies") boolean transitive)
     {
@@ -106,7 +91,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
     @Path("/artifactsRefresh/versions")
     @ApiOperation(ResourceLoggingAndTracing.UPDATE_ALL_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse updateAllProjectsAllVersions(@QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to re-process unchanged master-SNAPSHOT jars") boolean fullUpdate,
+    public MetadataEventResponse updateAllProjectsAllVersions(@QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to re-process unchanged SNAPSHOT jars") boolean fullUpdate,
                                                               @QueryParam("allVersions") @DefaultValue("false") @ApiParam("Whether to refresh all versions or just new ones") boolean allVersions,
                                                               @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to refresh dependencies") boolean transitive)
     {
@@ -118,16 +103,16 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
     }
 
     @PUT
-    @Path("/artifactsRefresh/latest")
-    @ApiOperation(ResourceLoggingAndTracing.UPDATE_ALL_MASTER_REVISIONS)
+    @Path("/artifactsRefresh/snapshots")
+    @ApiOperation(ResourceLoggingAndTracing.UPDATE_ALL_SNAPSHOTS)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse updateAllProjectsMaster(@QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to re-process unchanged master-SNAPSHOT jars") boolean fullUpdate,
+    public MetadataEventResponse updateAllProjectsMaster(@QueryParam("fullUpdate") @DefaultValue("false") @ApiParam("Whether to re-process unchanged SNAPSHOT jars") boolean fullUpdate,
                                                          @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to refresh dependencies") boolean transitive)
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_ALL_MASTER_REVISIONS, () ->
+        return handle(ResourceLoggingAndTracing.UPDATE_ALL_SNAPSHOTS, () ->
         {
             validateUser();
-            return artifactsRefreshService.refreshMasterSnapshotForAllProjects(fullUpdate,transitive, ParentEvent.UPDATE_ALL_PROJECT_HEAD.name());
+            return artifactsRefreshService.refreshSnapshotsForAllProjects(fullUpdate,transitive, ParentEvent.UPDATE_ALL_PROJECT_ALL_SNAPSHOTS.name());
         });
     }
 

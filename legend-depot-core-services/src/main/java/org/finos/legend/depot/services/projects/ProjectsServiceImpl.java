@@ -25,13 +25,14 @@ import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraph
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
+import org.finos.legend.depot.domain.version.VersionAlias;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -83,10 +84,10 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
-    public List<String> getVersions(String groupId, String artifactId)
+    public List<String> getVersions(String groupId, String artifactId,boolean includeSnapshots)
     {
         List<StoreProjectVersionData> storeProjectsVersions = this.find(groupId, artifactId);
-        return storeProjectsVersions.isEmpty() ? Collections.EMPTY_LIST : storeProjectsVersions.stream().filter(pv -> !pv.getVersionId().equals(MASTER_SNAPSHOT) && !pv.getVersionData().isExcluded()).map(pv -> pv.getVersionId()).collect(Collectors.toList());
+        return storeProjectsVersions.isEmpty() ? Collections.EMPTY_LIST : storeProjectsVersions.stream().filter(pv -> includeSnapshots || !VersionValidator.isSnapshotVersion(pv.getVersionId()) && !pv.getVersionData().isExcluded()).map(pv -> pv.getVersionId()).collect(Collectors.toList());
     }
 
     @Override
@@ -116,6 +117,18 @@ public class ProjectsServiceImpl implements ProjectsService
     @Override
     public Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId)
     {
+        if (VersionAlias.LATEST.getName().equals(versionId))
+        {
+            Optional<VersionId> latest = this.getLatestVersion(groupId, artifactId);
+            if (latest.isPresent())
+            {
+                return projectsVersions.find(groupId, artifactId,latest.get().toVersionIdString());
+            }
+            else
+            {
+                return Optional.empty();
+            }
+        }
         return projectsVersions.find(groupId, artifactId, versionId);
     }
 
@@ -146,18 +159,7 @@ public class ProjectsServiceImpl implements ProjectsService
     @Override
     public Optional<VersionId> getLatestVersion(String groupId, String artifactId)
     {
-        return this.getVersions(groupId, artifactId).stream().map(v -> VersionId.parseVersionId(v)).max(VersionId::compareTo);
-    }
-
-    @Override
-    public Optional<StoreProjectVersionData> getLatestProjectVersionData(String groupId, String artifactId)
-    {
-        Optional<VersionId> latestVersion = this.getLatestVersion(groupId, artifactId);
-        if (!latestVersion.isPresent())
-        {
-            return Optional.empty();
-        }
-        return this.find(groupId, artifactId, latestVersion.get().toVersionIdString());
+        return this.getVersions(groupId, artifactId).stream().filter(v -> !VersionValidator.isSnapshotVersion(v)).map(v -> VersionId.parseVersionId(v)).max(VersionId::compareTo);
     }
 
     @Override

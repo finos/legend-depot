@@ -77,7 +77,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
             List<Entity> fileGenerationEntities = filterEntitiesByFileGenerationEntities(projectEntities);
             List<FileGeneration> generatedFiles = provider.extractArtifacts(files);
             //handle files generated when a new master snapshot comes into picture
-            if (versionId.equals(VersionValidator.MASTER_SNAPSHOT))
+            if (VersionValidator.isSnapshotVersion(versionId))
             {
                 String message = String.format("removing prior %s artifacts for [%s-%s-%s]",provider.getType(),projectData.getGroupId(),projectData.getArtifactId(),versionId);
                 response.addMessage(message);

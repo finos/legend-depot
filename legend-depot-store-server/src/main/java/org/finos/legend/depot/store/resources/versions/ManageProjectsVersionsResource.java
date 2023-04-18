@@ -17,6 +17,7 @@ package org.finos.legend.depot.store.resources.versions;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
@@ -82,7 +83,7 @@ public class ManageProjectsVersionsResource extends BaseAuthorisedResource
     @Path("/versions/{groupId}/{artifactId}/{versionId}/{exclusionReason}")
     @ApiOperation(ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
-    public StoreProjectVersionData excludeProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") String versionId, @PathParam("exclusionReason") String exclusionReason)
+    public StoreProjectVersionData excludeProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("exclusionReason") String exclusionReason)
     {
         return handle(ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION, ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION + groupId + artifactId + versionId + exclusionReason, () ->
             projectVersionApi.excludeProjectVersion(groupId, artifactId, versionId, exclusionReason)

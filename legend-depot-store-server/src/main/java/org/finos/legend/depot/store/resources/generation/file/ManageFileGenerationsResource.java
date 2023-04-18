@@ -17,11 +17,11 @@ package org.finos.legend.depot.store.resources.generation.file;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
-import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
@@ -58,7 +58,7 @@ public class ManageFileGenerationsResource extends BaseAuthorisedResource
     @Path("/generations/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<StoredFileGeneration> getFileGenerations(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") String versionId)
+    public List<StoredFileGeneration> getFileGenerations(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
         validateUser();
         return handle(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION, () -> this.generationsService.getStoredFileGenerations(groupId, artifactId, versionId));

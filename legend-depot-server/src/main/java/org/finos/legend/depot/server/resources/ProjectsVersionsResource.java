@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.VersionedData;
@@ -53,7 +54,9 @@ public class ProjectsVersionsResource extends BaseResource
     @Path("/versions/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(value = ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV, response = ProjectVersionDTO.class)
     @Produces(MediaType.APPLICATION_JSON)
-    public Optional<ProjectVersionDTO> getProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") String versionId)
+    public Optional<ProjectVersionDTO> getProjectVersion(@PathParam("groupId") String groupId,
+                                                         @PathParam("artifactId") String artifactId,
+                                                         @PathParam("versionId") @ApiParam(value = "a valid versionId, released version X.Y.Z,master-SNAPSHOT or alias", example = "latest = last released version") String versionId)
     {
         return handle(ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV, ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV + groupId + artifactId + versionId, () ->
         {
@@ -61,24 +64,6 @@ public class ProjectsVersionsResource extends BaseResource
             if (projectVersion.isPresent())
             {
                 StoreProjectVersionData pv = projectVersion.get();
-                return Optional.of(new ProjectVersionDTO(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), pv.getVersionData()));
-            }
-            return Optional.empty();
-        });
-    }
-
-    @GET
-    @Path("/versions/{groupId}/{artifactId}/latest")
-    @ApiOperation(value = ResourceLoggingAndTracing.GET_LATEST_PROJECT_VERSION, response = ProjectVersionDTO.class)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Optional<ProjectVersionDTO> getLatestProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
-    {
-        return handle(ResourceLoggingAndTracing.GET_LATEST_PROJECT_VERSION, ResourceLoggingAndTracing.GET_LATEST_PROJECT_VERSION + groupId + artifactId, () ->
-        {
-            Optional<StoreProjectVersionData> versionData = projectVersionApi.getLatestProjectVersionData(groupId, artifactId);
-            if (versionData.isPresent())
-            {
-                StoreProjectVersionData pv = versionData.get();
                 return Optional.of(new ProjectVersionDTO(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), pv.getVersionData()));
             }
             return Optional.empty();

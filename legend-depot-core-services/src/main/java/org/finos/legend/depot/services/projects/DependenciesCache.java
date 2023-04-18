@@ -21,6 +21,7 @@ import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.slf4j.Logger;
 
@@ -34,8 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public final class DependenciesCache
 {
@@ -68,7 +67,7 @@ public final class DependenciesCache
         try
         {
             List<StoreProjectVersionData> allProjectsVersions = projectsVersionsStore.getAll();
-            Stream<ProjectVersion> versionWithDependencies = allProjectsVersions.stream().filter(p -> !p.getVersionId().equals(MASTER_SNAPSHOT) && !p.getVersionData().getDependencies().isEmpty() && !p.getVersionData().isExcluded()).map(pv -> new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()));
+            Stream<ProjectVersion> versionWithDependencies = allProjectsVersions.stream().filter(p -> !VersionValidator.isSnapshotVersion(p.getVersionId()) && !p.getVersionData().getDependencies().isEmpty() && !p.getVersionData().isExcluded()).map(pv -> new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()));
             LOGGER.info("Initialising DependenciesCache");
             Map<String, StoreProjectVersionData> projectDataMap = allProjectsVersions.stream().filter(p -> !p.getVersionData().isExcluded()).collect(Collectors.toMap(p -> p.getGroupId() + p.getArtifactId() + p.getVersionId(), Function.identity()));
             versionWithDependencies.forEach(pv -> transitiveDependencies.put(pv, calculateTransitiveDependencies(pv, projectDataMap)));
@@ -154,7 +153,7 @@ public final class DependenciesCache
 
     public Set<ProjectVersion> getTransitiveDependencies(ProjectVersion pv)
     {
-        if (MASTER_SNAPSHOT.equals(pv.getVersionId()))
+        if (VersionValidator.isSnapshotVersion(pv.getVersionId()))
         {
             absentKeys.getAndIncrement();
             DependencyResult depResult = calculateTransitiveDependencies(pv, getProjectVersionDataFromStore());

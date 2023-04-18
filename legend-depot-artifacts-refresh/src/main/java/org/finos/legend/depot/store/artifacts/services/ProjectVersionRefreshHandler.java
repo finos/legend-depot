@@ -60,7 +60,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.REPO_EXCEPTIONS;
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 
 public final class ProjectVersionRefreshHandler implements NotificationEventHandler
 {
@@ -362,7 +362,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         MetadataEventResponse response = new MetadataEventResponse();
         dependencies.stream().forEach(dep ->
         {
-            if (!versionId.equals(MASTER_SNAPSHOT) && dep.getVersionId().equals(MASTER_SNAPSHOT))
+            if (VersionValidator.isValidReleaseVersion(versionId) && VersionValidator.isSnapshotVersion(dep.getVersionId()))
             {
                 String illegalDepError = String.format("Snapshot dependency %s-%s-%s not allowed in versions", dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
                 response.addError(illegalDepError);
@@ -394,7 +394,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
                 String projectCoordinates = String.format("[%s-%s-%s]", projectData.getGroupId(), projectData.getArtifactId(), versionId);
                 String dependencyCoordinates = String.format("[%s-%s-%s]", dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersionId());
                 Optional<StoreProjectVersionData> projectVersion = projects.find(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersionId());
-                if (!MASTER_SNAPSHOT.equals(dependency.getVersionId()) && projectVersion.isPresent() && !projectVersion.get().getVersionData().isExcluded())
+                if (!VersionValidator.isSnapshotVersion(dependency.getVersionId()) && projectVersion.isPresent() && !projectVersion.get().getVersionData().isExcluded())
                 {
                     response.addMessage(String.format("Skipping update dependency %s -> %s, already in store", projectCoordinates, dependencyCoordinates));
                 }
@@ -419,7 +419,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         ProjectArtifactsHandler refreshHandler = ProjectArtifactHandlerFactory.getArtifactHandler(artifactType);
         if (refreshHandler != null)
         {
-            boolean processUnchangedFiles = !MASTER_SNAPSHOT.equals(versionId) ? true : fullUpdate;
+            boolean processUnchangedFiles = !VersionValidator.isSnapshotVersion(versionId) ? true : fullUpdate;
             List<File> files = findArtifactFiles(artifactType, project, versionId, processUnchangedFiles);
             if (files != null && !files.isEmpty())
             {

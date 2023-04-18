@@ -84,7 +84,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
                 getLOGGER().info(message);
                 response.addMessage(message);
                 List<StoredEntity> storedEntities = transformVersionedEntities(projectData, versionId, entityList);
-                if (versionId.equals(VersionValidator.MASTER_SNAPSHOT))
+                if (VersionValidator.isSnapshotVersion(versionId))
                 {
                     message = String.format("removing prior %s artifacts for [%s-%s]",this.entitiesProvider.getType(),gavCoordinates,versionId);
                     response.addMessage(message);

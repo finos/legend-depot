@@ -18,7 +18,6 @@ package org.finos.legend.depot.store.api.entities;
 import org.eclipse.collections.api.tuple.Pair;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.status.StoreOperationResult;
-import org.finos.legend.depot.domain.version.VersionValidator;
 
 import java.util.List;
 
@@ -30,11 +29,6 @@ public interface UpdateEntities extends Entities
     StoreOperationResult deleteAll(String groupId, String artifactId);
 
     StoreOperationResult delete(String groupId, String artifactId, String versionId,boolean versioned);
-
-    default void deleteLatest(String groupId, String artifactId,boolean versioned)
-    {
-        delete(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT,versioned);
-    }
 
     List<StoredEntity> getStoredEntities(String groupId, String artifactId);
 

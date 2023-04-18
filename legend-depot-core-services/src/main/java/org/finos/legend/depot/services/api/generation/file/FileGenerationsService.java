@@ -21,7 +21,6 @@ import org.finos.legend.sdlc.domain.model.entity.Entity;
 import java.util.List;
 import java.util.Optional;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public interface FileGenerationsService
 {

@@ -66,7 +66,7 @@ public class ArtifactRefreshStatusResource extends BaseAuthorisedResource
     public List<RefreshStatus> getRunningVersionsRefresh(
             @QueryParam("groupId") String group,
             @QueryParam("artifactId") String artifact,
-            @QueryParam("versionId") @ApiParam("x.y.z/master-SNAPSHOT") String version,
+            @QueryParam("versionId") @ApiParam(value = "valid version string : x.y.z/master-SNAPSHOT") String version,
             @QueryParam("eventId") String eventId,
             @QueryParam("parentEventId") @ApiParam("refresh could be started by another event") ParentEvent parentId
     )

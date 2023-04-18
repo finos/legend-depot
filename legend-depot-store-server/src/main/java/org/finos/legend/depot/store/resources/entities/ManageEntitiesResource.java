@@ -17,10 +17,10 @@ package org.finos.legend.depot.store.resources.entities;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.eclipse.collections.api.tuple.Pair;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
@@ -28,7 +28,6 @@ import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -72,7 +71,7 @@ public class ManageEntitiesResource extends BaseAuthorisedResource
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/entities")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSION_STORE_ENTITIES)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<StoredEntity> getEntities(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") String versionId)
+    public List<StoredEntity> getEntities(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
         validateUser();
         return handle(ResourceLoggingAndTracing.GET_VERSION_STORE_ENTITIES, () -> entitiesService.getStoredEntities(groupId, artifactId, versionId));

@@ -28,19 +28,15 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> implements ProjectsVersions, UpdateProjectsVersions
 {
@@ -73,7 +69,7 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
     @Override
     public Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId)
     {
-        if (versionId == null)
+        if (versionId == null || versionId.isEmpty())
         {
             throw new IllegalArgumentException("cannot find project version, versionId cannot be null");
         }
@@ -129,7 +125,7 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
         {
             throw new IllegalArgumentException(String.format("invalid groupId [%s] or artifactId [%s]",data.getGroupId(),data.getArtifactId()));
         }
-        if (!MASTER_SNAPSHOT.equals(data.getVersionId()) && !VersionValidator.isValid(data.getVersionId()))
+        if (!VersionValidator.isValid(data.getVersionId()))
         {
             throw new IllegalArgumentException(String.format("invalid versionId [%s]",data.getVersionId()));
         }

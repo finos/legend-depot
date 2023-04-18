@@ -472,11 +472,6 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         return new StoreOperationResult(0, 0, result.getDeletedCount(), Collections.emptyList());
     }
 
-    public long getRevisionEntityCount()
-    {
-        return getCollection().countDocuments(eq(VERSION_ID, MASTER_SNAPSHOT));
-    }
-
 
     public long getVersionEntityCount()
     {
