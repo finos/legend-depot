@@ -98,7 +98,7 @@ public class TestFileGenerationsService extends TestStoreMongo
     public void canDelete()
     {
 
-        service.deleteLatest("group.test", "test");
+        service.delete("group.test", "test",MASTER_SNAPSHOT);
         Assert.assertEquals(40, generations.getAll().size());
         service.delete("group.test.otherproject", "test", "1.0.0");
         Assert.assertEquals(26, generations.getAll().size());

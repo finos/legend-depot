@@ -28,6 +28,7 @@ public class TestVersionValidator
         Assert.assertTrue(VersionValidator.isValid("1.1.1"));
         Assert.assertTrue(VersionValidator.isValid(MASTER_SNAPSHOT));
         Assert.assertFalse(VersionValidator.isValid("jkwhfkjasf-jhdfjks"));
+        Assert.assertTrue(VersionValidator.isValid("my-SNAPSHOT"));
     }
 
 }

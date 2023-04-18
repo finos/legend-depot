@@ -22,14 +22,12 @@ public class ResourceLoggingAndTracing
     public static final String GET_PROJECT_VERSIONS_BY_GA = "get project versions by ga";
     public static final String FIND_PROJECT_VERSIONS = "find project versions";
     public static final String GET_PROJECT_VERSION_BY_GAV = "get project version by gav";
-    public static final String GET_LATEST_PROJECT_VERSION = "get latest project version data";
     public static final String DELETE_PROJECT = "delete project";
     public static final String CREATE_EMPTY_PROJECT = "create empty project";
     public static final String GET_PROJECT_DEPENDENCIES = "get upstream project dependencies";
     public static final String GET_PROJECT_DEPENDENCY_TREE = "get project dependency tree";
     public static final String GET_DEPENDANT_PROJECTS = "downstream projects";
-    public static final String UPDATE_ALL_MASTER_REVISIONS = "refresh all master revisions";
-    public static final String UPDATE_LATEST_PROJECT_REVISION = "refresh project master revision";
+    public static final String UPDATE_ALL_SNAPSHOTS = "refresh all snapshots";
     public static final String GET_VERSION_ENTITIES = "get version entities";
     public static final String GET_VERSION_DEPENDENCY_ENTITIES = "get version dependencies entities";
     public static final String GET_VERSION_STORE_ENTITIES = "get stored version entities";

@@ -31,6 +31,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public class TestUpdateRevisions extends TestStoreMongo
 {
     URL ENTITIES_FILE = TestUpdateRevisions.class.getClassLoader().getResource("data/revision-entities.json");
@@ -43,7 +45,7 @@ public class TestUpdateRevisions extends TestStoreMongo
         List<StoredEntity> entitiesList = readEntitiesFile(ENTITIES_FILE);
         Assert.assertNotNull(entitiesList);
         StoredEntity entity = entitiesList.get(0);
-        entity.setVersionId(VersionValidator.MASTER_SNAPSHOT);
+        entity.setVersionId(MASTER_SNAPSHOT);
         StoreOperationResult result = revisionsMongo.newOrUpdate(entity);
         Assert.assertNotNull(result);
         Assert.assertEquals(1, result.getInsertedCount());
@@ -53,7 +55,7 @@ public class TestUpdateRevisions extends TestStoreMongo
         Assert.assertNotNull(entities);
         Assert.assertEquals(1, entities.countDocuments());
         Document doc = (Document)entities.find().iterator().next();
-        Assert.assertEquals(VersionValidator.MASTER_SNAPSHOT, doc.getString(EntitiesMongo.VERSION_ID));
+        Assert.assertEquals(MASTER_SNAPSHOT, doc.getString(EntitiesMongo.VERSION_ID));
         Assert.assertEquals(entity.getEntity().getPath(), ((Map)doc.get(EntitiesMongo.ENTITY)).get("path"));
         Assert.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc.get(EntitiesMongo.ENTITY)).get("classifierPath"));
     }
@@ -82,7 +84,7 @@ public class TestUpdateRevisions extends TestStoreMongo
         List<StoredEntity> entitiesList = readEntitiesFile(ENTITIES_FILE);
         Assert.assertNotNull(entitiesList);
         StoredEntity entity = entitiesList.get(0);
-        entity.setVersionId(VersionValidator.MASTER_SNAPSHOT);
+        entity.setVersionId(MASTER_SNAPSHOT);
         StoreOperationResult result = revisionsMongo.newOrUpdate(entity);
         Assert.assertNotNull(result);
         Assert.assertEquals(1, result.getInsertedCount());
@@ -106,7 +108,7 @@ public class TestUpdateRevisions extends TestStoreMongo
         Assert.assertEquals(changes, ((Map)doc.get(EntitiesMongo.ENTITY)).get("classifierPath"));
         Assert.assertEquals("changed::change", ((Map)((Map)doc.get(EntitiesMongo.ENTITY)).get("content")).get("package"));
 
-        revisionsMongo.deleteLatest(entity.getGroupId(),entity.getArtifactId(),entity.isVersionedEntity());
+        revisionsMongo.delete(entity.getGroupId(),entity.getArtifactId(),MASTER_SNAPSHOT,entity.isVersionedEntity());
 
         Assert.assertTrue(revisionsMongo.getStoredEntities(entity.getGroupId(),entity.getArtifactId()).isEmpty());
 
@@ -130,11 +132,11 @@ public class TestUpdateRevisions extends TestStoreMongo
     public void canDeleteRevision()
     {
         setUpEntitiesDataFromFile(ENTITIES_FILE);
-        long count = revisionsMongo.getRevisionEntityCount("examples.metadata","test");
+        long count = revisionsMongo.getVersionEntityCount("examples.metadata","test",MASTER_SNAPSHOT);
         Assert.assertEquals(8, count);
-        revisionsMongo.deleteLatest("examples.metadata","test",false);
-        Assert.assertEquals(4, revisionsMongo.getRevisionEntityCount("examples.metadata","test"));
-        revisionsMongo.deleteLatest("examples.metadata","test",true);
-        Assert.assertEquals(0, revisionsMongo.getRevisionEntityCount("examples.metadata","test"));
+        revisionsMongo.delete("examples.metadata","test",MASTER_SNAPSHOT,false);
+        Assert.assertEquals(4, revisionsMongo.getVersionEntityCount("examples.metadata","test",MASTER_SNAPSHOT));
+        revisionsMongo.delete("examples.metadata","test",MASTER_SNAPSHOT,true);
+        Assert.assertEquals(0, revisionsMongo.getVersionEntityCount("examples.metadata","test",MASTER_SNAPSHOT));
     }
 }

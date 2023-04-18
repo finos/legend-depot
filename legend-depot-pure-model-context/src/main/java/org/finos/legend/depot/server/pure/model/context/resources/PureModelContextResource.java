@@ -52,7 +52,7 @@ public class PureModelContextResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public PureModelContextData getPureModelContextData(@PathParam("groupId") String groupId,
                                                         @PathParam("artifactId") String artifactId,
-                                                        @PathParam("versionId") @ApiParam("valid version string or aliases: latest-last released version")  String versionId,
+                                                        @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version")  String versionId,
                                                         @QueryParam("clientVersion") String clientVersion,
                                                         @QueryParam("versioned")
                                                         @DefaultValue("false")

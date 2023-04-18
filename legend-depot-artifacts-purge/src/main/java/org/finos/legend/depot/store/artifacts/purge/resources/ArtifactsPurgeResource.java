@@ -17,6 +17,7 @@ package org.finos.legend.depot.store.artifacts.purge.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
@@ -57,7 +58,7 @@ public class ArtifactsPurgeResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataEventResponse evictVersion(@PathParam("groupId") String groupId,
                                               @PathParam("artifactId") String artifactId,
-                                              @PathParam("versionId") String versionId)
+                                              @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
 
         return handle(ResourceLoggingAndTracing.EVICT_VERSION, () ->
@@ -74,7 +75,7 @@ public class ArtifactsPurgeResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataEventResponse deleteVersion(@PathParam("groupId") String groupId,
                                               @PathParam("artifactId") String artifactId,
-                                              @PathParam("versionId") String versionId)
+                                              @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
 
         return handle(ResourceLoggingAndTracing.DELETE_VERSION, () ->
@@ -108,7 +109,7 @@ public class ArtifactsPurgeResource extends BaseAuthorisedResource
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataEventResponse deprecateVersion(@PathParam("groupId") String groupId,
                                                   @PathParam("artifactId") String artifactId,
-                                                  @PathParam("versionId") String versionId)
+                                                  @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
 
         return handle(ResourceLoggingAndTracing.DEPRECATE_VERSION, () ->

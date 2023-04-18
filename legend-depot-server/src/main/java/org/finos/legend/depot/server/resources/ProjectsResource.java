@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.project.StoreProjectData;
@@ -27,10 +28,12 @@ import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Optional;
@@ -71,9 +74,10 @@ public class ProjectsResource extends BaseResource
     @Path("/projects/{groupId}/{artifactId}/versions")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<String> getVersions(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
+    public List<String> getVersions(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId,
+                                    @QueryParam("snapshots") @ApiParam("wether to return snapshot versions too") @DefaultValue("false") boolean includeSnapshots)
     {
-        return handle(ResourceLoggingAndTracing.GET_VERSIONS, () -> projectApi.getVersions(groupId, artifactId));
+        return handle(ResourceLoggingAndTracing.GET_VERSIONS, () -> projectApi.getVersions(groupId, artifactId,includeSnapshots));
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

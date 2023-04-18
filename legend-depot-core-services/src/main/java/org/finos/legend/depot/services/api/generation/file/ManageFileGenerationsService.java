@@ -19,22 +19,10 @@ import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 
 import java.util.List;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
-
 public interface ManageFileGenerationsService extends FileGenerationsService
 {
 
     void delete(String groupId, String artifactId, String versionId);
-
-    default void deleteLatest(String groupId, String artifactId)
-    {
-        delete(groupId, artifactId, MASTER_SNAPSHOT);
-    }
-
-    default List<StoredFileGeneration> getStoredLatestFileGenerations(String groupId, String artifactId)
-    {
-        return getStoredFileGenerations(groupId, artifactId, MASTER_SNAPSHOT);
-    }
 
     List<StoredFileGeneration> getStoredFileGenerations(String groupId, String artifactId, String versionId);
 

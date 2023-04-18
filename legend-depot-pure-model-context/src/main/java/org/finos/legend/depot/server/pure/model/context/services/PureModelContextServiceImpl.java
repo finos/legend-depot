@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
+import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextServiceException;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
@@ -44,7 +45,6 @@ import static org.finos.legend.engine.protocol.pure.v1.model.context.PureModelCo
 public class PureModelContextServiceImpl implements PureModelContextService
 {
     public static final String PURE = "pure";
-    private static final String LATEST = "latest";
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PureModelContextServiceImpl.class);
     private final EntitiesService entitiesService;
     private final ProjectsService projectsService;
@@ -67,9 +67,8 @@ public class PureModelContextServiceImpl implements PureModelContextService
     @Override
     public PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean versioned, boolean getDependencies)
     {
-        this.projectsService.checkExists(groupId, artifactId);
         String version = versionId;
-        if (version.equals(LATEST))
+        if (version.equals(VersionAlias.LATEST.getName()))
         {
             Optional<VersionId> project = this.projectsService.getLatestVersion(groupId, artifactId);
             if (project.isPresent())
@@ -77,7 +76,6 @@ public class PureModelContextServiceImpl implements PureModelContextService
                 version = project.get().toVersionIdString();
             }
         }
-
         List<Entity> entities = this.entitiesService.getEntities(groupId, artifactId, version, versioned);
         PureModelContextData pureModelContextData = getPureModelContextData(entities, groupId, artifactId, version, clientVersion);
         if (!getDependencies)

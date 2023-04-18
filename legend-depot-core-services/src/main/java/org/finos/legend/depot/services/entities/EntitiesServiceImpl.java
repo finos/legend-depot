@@ -94,6 +94,7 @@ public class EntitiesServiceImpl implements EntitiesService
             final AtomicInteger totalEntities = new AtomicInteger();
             ParallelIterate.forEach(dependencies, dep ->
             {
+                this.projects.checkExists(dep.getGroupId(),dep.getArtifactId(),dep.getVersionId());
                 List<EntityDefinition> deps = entities.getStoredEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), versioned).stream().map(StoredEntity::getEntity).collect(Collectors.toList());
                 depEntities.add(new ProjectVersionEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), versioned, deps));
                 totalEntities.addAndGet(deps.size());

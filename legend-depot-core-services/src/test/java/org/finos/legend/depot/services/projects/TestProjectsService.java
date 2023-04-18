@@ -265,6 +265,10 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertTrue(projectsService.getLatestVersion("examples.metadata", "test").isPresent());
         Assert.assertEquals("2.3.1", projectsService.getLatestVersion("examples.metadata", "test").get().toVersionIdString());
 
+        Assert.assertTrue(projectsService.find("examples.metadata", "test","latest").isPresent());
+        Assert.assertEquals("2.3.1", projectsService.getLatestVersion("examples.metadata", "test").get().toVersionIdString());
+
+
     }
 
     @Test

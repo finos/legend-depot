@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.status.services;
 
-import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.api.entities.Entities;
@@ -62,23 +61,18 @@ public class StoreStatusService
 
     public StoreStatus.DocumentCounts getDocumentCounts()
     {
-        return new StoreStatus.DocumentCounts(entities.getVersionEntityCount(), entities.getRevisionEntityCount());
+        return new StoreStatus.DocumentCounts(entities.getVersionEntityCount());
     }
 
     public StoreStatus.DocumentCounts getDocumentCounts(String groupId, String artifactId, String versionId)
     {
-        return new StoreStatus.DocumentCounts(entities.getVersionEntityCount(groupId, artifactId, versionId), 0);
-    }
-
-    public StoreStatus.DocumentCounts getRevisionDocumentCounts(String groupId, String artifactId)
-    {
-        return new StoreStatus.DocumentCounts(0, entities.getRevisionEntityCount(groupId, artifactId));
+        return new StoreStatus.DocumentCounts(entities.getVersionEntityCount(groupId, artifactId, versionId));
     }
 
     public StoreStatus.ProjectStatus getProjectStatus(String groupId, String artifactId)
     {
         StoreStatus.ProjectStatus projectStatus = new StoreStatus.ProjectStatus();
-        List<String> versions = projectVersionsApi.find(groupId, artifactId).stream().filter(v -> !v.getVersionId().equals("master-SNAPSHOT") && !v.getVersionData().isExcluded()).map(v -> v.getVersionId()).collect(Collectors.toList());
+        List<String> versions = projectVersionsApi.find(groupId, artifactId).stream().map(v -> v.getVersionId()).collect(Collectors.toList());
 
         versions.forEach(v ->
         {
@@ -93,11 +87,6 @@ public class StoreStatusService
             versionStatus.updating = updateStatus.isPresent();
             projectStatus.addVersionStatus(versionStatus);
         });
-
-        StoreStatus.MasterRevisionStatus masterRevisionStatus = new StoreStatus.MasterRevisionStatus(groupId, artifactId);
-        Optional<RefreshStatus> revisionsUpdateStatus = statusService.get(groupId, artifactId, VersionValidator.MASTER_SNAPSHOT);
-        masterRevisionStatus.updating = revisionsUpdateStatus.isPresent();
-        projectStatus.setMasterRevisionStatus(masterRevisionStatus);
 
         return projectStatus;
     }

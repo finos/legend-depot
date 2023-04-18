@@ -24,6 +24,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public class TestQueryRevisions extends TestStoreMongo
 {
     private EntitiesMongo revisionsMongo = new EntitiesMongo(mongoProvider);
@@ -38,7 +40,7 @@ public class TestQueryRevisions extends TestStoreMongo
     @Test
     public void canQueryAllEntityMetadataByProjectVersion()
     {
-        List<Entity> entityList = revisionsMongo.getAllLatestEntities("examples.metadata", "test");
+        List<Entity> entityList = revisionsMongo.getAllEntities("examples.metadata", "test",MASTER_SNAPSHOT);
         Assert.assertNotNull(entityList);
         Assert.assertEquals(8, entityList.size());
         List<String> paths = new ArrayList<>();
@@ -51,15 +53,15 @@ public class TestQueryRevisions extends TestStoreMongo
     @Test
     public void canQueryEntityMetadataByProjectVersion()
     {
-        List<Entity> entityList = revisionsMongo.getLatestEntities("examples.metadata", "test", false);
+        List<Entity> entityList = revisionsMongo.getAllEntities("examples.metadata", "test", MASTER_SNAPSHOT);
         Assert.assertNotNull(entityList);
-        Assert.assertEquals(4, entityList.size());
+        Assert.assertEquals(8, entityList.size());
     }
 
     @Test
     public void canQueryEntityMetadataByProjectVersionVersionInPath()
     {
-        List<Entity> entityList = revisionsMongo.getLatestEntities("examples.metadata", "test", true);
+        List<Entity> entityList = revisionsMongo.getEntities("examples.metadata", "test", MASTER_SNAPSHOT,true);
         Assert.assertNotNull(entityList);
         Assert.assertEquals(4, entityList.size());
     }
@@ -67,7 +69,7 @@ public class TestQueryRevisions extends TestStoreMongo
     @Test
     public void canQueryEntityMetadataByProjectVersionPath()
     {
-        Entity entity = revisionsMongo.getLatestEntity("examples.metadata", "test", "examples::metadata::test::TestProfile").get();
+        Entity entity = revisionsMongo.getEntity("examples.metadata", "test", MASTER_SNAPSHOT,"examples::metadata::test::TestProfile").get();
         Assert.assertNotNull(entity);
         Assert.assertEquals("examples::metadata::test::TestProfile", entity.getPath());
         Assert.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
@@ -78,7 +80,7 @@ public class TestQueryRevisions extends TestStoreMongo
     @Test
     public void canQueryEntityMetadataByProjectVersionPackage()
     {
-        List<Entity> entities = revisionsMongo.getLatestEntitiesByPackage("examples.metadata", "test", "examples::metadata::test", false, null, false);
+        List<Entity> entities = revisionsMongo.getEntitiesByPackage("examples.metadata", "test", MASTER_SNAPSHOT,"examples::metadata::test", false, null, false);
         Assert.assertNotNull(entities);
         Assert.assertEquals(3, entities.size());
         for (Entity entity : entities)
@@ -91,7 +93,7 @@ public class TestQueryRevisions extends TestStoreMongo
     @Test
     public void canQueryEntityMetadataByProjectSubPackage()
     {
-        List<Entity> entities = revisionsMongo.getLatestEntitiesByPackage("examples.metadata", "test", "examples::metadata::test", false, null, true);
+        List<Entity> entities = revisionsMongo.getEntitiesByPackage("examples.metadata", "test", MASTER_SNAPSHOT,"examples::metadata::test", false, null, true);
         Assert.assertNotNull(entities);
         Assert.assertEquals(4, entities.size());
         for (Entity entity : entities)
@@ -103,7 +105,7 @@ public class TestQueryRevisions extends TestStoreMongo
     @Test
     public void canQueryEntityMetadataByProjectVersionPackages()
     {
-        List<Entity> entities = revisionsMongo.getLatestEntitiesByPackage("examples.metadata", "test", "examples::metadata::test::vX_X_X::examples::metadata::test", true, null, false);
+        List<Entity> entities = revisionsMongo.getEntitiesByPackage("examples.metadata", "test", MASTER_SNAPSHOT,"examples::metadata::test::vX_X_X::examples::metadata::test", true, null, false);
         Assert.assertNotNull(entities);
         Assert.assertEquals(3, entities.size());
         for (Entity entity : entities)
@@ -116,7 +118,7 @@ public class TestQueryRevisions extends TestStoreMongo
     @Test
     public void canQueryEntityMetadataByProjectVersionPackageVersionedSubpackages()
     {
-        List<Entity> entities = revisionsMongo.getLatestEntitiesByPackage("examples.metadata", "test", "examples::metadata::test::vX_X_X::examples::metadata::test", true, null, true);
+        List<Entity> entities = revisionsMongo.getEntitiesByPackage("examples.metadata", "test", MASTER_SNAPSHOT,"examples::metadata::test::vX_X_X::examples::metadata::test", true, null, true);
         Assert.assertNotNull(entities);
         Assert.assertEquals(4, entities.size());
         for (Entity entity : entities)
