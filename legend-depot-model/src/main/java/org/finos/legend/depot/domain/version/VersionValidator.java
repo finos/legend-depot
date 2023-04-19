@@ -20,6 +20,7 @@ import org.finos.legend.sdlc.domain.model.version.VersionId;
 public class VersionValidator
 {
     public static final String MASTER_SNAPSHOT = "master-SNAPSHOT";
+    private static final String SNAPSHOT = "-SNAPSHOT";
 
     private VersionValidator()
     {
@@ -27,8 +28,7 @@ public class VersionValidator
 
     public static boolean isValid(String versionId)
     {
-        return MASTER_SNAPSHOT.equals(versionId) || isValidReleaseVersion(versionId);
-
+        return versionId != null && !versionId.isEmpty() && (isSnapshotVersion(versionId) || isValidReleaseVersion(versionId));
     }
 
     public static boolean isValidReleaseVersion(String versionId)
@@ -42,5 +42,10 @@ public class VersionValidator
         {
             return false;
         }
+    }
+
+    public static boolean isSnapshotVersion(String versionId)
+    {
+        return versionId.endsWith(SNAPSHOT);
     }
 }

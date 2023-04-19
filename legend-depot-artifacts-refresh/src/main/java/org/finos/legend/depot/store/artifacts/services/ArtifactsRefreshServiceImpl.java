@@ -22,6 +22,7 @@ import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.ParentEvent;
@@ -40,15 +41,12 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 {
 
     private static final String ALL = "all";
-    private static final String MISSING = "missing";
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ArtifactsRefreshServiceImpl.class);
     private static final String REFRESH_ALL_VERSIONS_FOR_ALL_PROJECTS = "refreshAllVersionsForAllProjects";
-    private static final String REFRESH_MASTER_SNAPSHOT_FOR_ALL_PROJECTS = "refreshMasterSnapshotForAllProjects";
-    private static final String REFRESH_MASTER_SNAPSHOT_FOR_PROJECT = "refreshMasterSnapshotForProject";
+    private static final String REFRESH_ALL_SNAPSHOT_FOR_ALL_PROJECTS = "refreshSnapshotsForAllProjects";
     private static final String REFRESH_ALL_VERSIONS_FOR_PROJECT = "refreshAllVersionsForProject";
-    private static final String REFRESH_PROJECTS_WITH_MISSING_VERSIONS = "refreshProjectsWithMissingVersions";
     private static final String REFRESH_PROJECT_VERSION_ARTIFACTS = "refreshProjectVersionArtifacts";
-
+    private static final String ALL_SNAPSHOT = "all-SNAPSHOT";
 
 
     private final ProjectsService projects;
@@ -84,17 +82,17 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     }
 
     @Override
-    public MetadataEventResponse refreshMasterSnapshotForAllProjects(boolean fullUpdate, boolean transitive, String parentEventId)
+    public MetadataEventResponse refreshSnapshotsForAllProjects(boolean fullUpdate, boolean transitive, String parentEventId)
     {
-        String parentEvent = ParentEvent.build(ALL, ALL, MASTER_SNAPSHOT,parentEventId);
-        MetadataNotification masterSnapshotAllProjects = new MetadataNotification(ALL,ALL,ALL,MASTER_SNAPSHOT,fullUpdate,transitive,parentEvent);
-        return versionRefreshHandler.executeWithTrace(REFRESH_MASTER_SNAPSHOT_FOR_ALL_PROJECTS,masterSnapshotAllProjects, () ->
+        String parentEvent = ParentEvent.build(ALL, ALL, ALL_SNAPSHOT,parentEventId);
+        MetadataNotification masterSnapshotAllProjects = new MetadataNotification(ALL,ALL,ALL,ALL_SNAPSHOT,fullUpdate,transitive,parentEvent);
+        return versionRefreshHandler.executeWithTrace(REFRESH_ALL_SNAPSHOT_FOR_ALL_PROJECTS,masterSnapshotAllProjects, () ->
                 {
                     MetadataEventResponse result = new MetadataEventResponse();
                     String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",ALL,ALL,MASTER_SNAPSHOT,parentEvent,fullUpdate,transitive);
                     result.addMessage(message);
                     LOGGER.info(message);
-                    ParallelIterate.forEach(projects.getAllProjectCoordinates(),project -> result.addMessage(queueWorkToRefreshProjectVersion(project,MASTER_SNAPSHOT,fullUpdate,transitive,parentEvent)));
+                    ParallelIterate.forEach(projects.getAllProjectCoordinates(),project -> result.combine(refreshAllSNAPSHOTVersionsForProject(project,fullUpdate,transitive,parentEvent)));
                     return result;
                 }
         );
@@ -112,42 +110,40 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/allVersions/transitive :[%s/%s/%s]", groupId, artifactId, ALL, parentEvent, fullUpdate, allVersions, transitive);
             result.addMessage(message);
             LOGGER.info(message);
-            result.addMessage(queueWorkToRefreshProjectVersion(projectData, MASTER_SNAPSHOT, fullUpdate, transitive, parentEvent));
+            result.combine(refreshAllSNAPSHOTVersionsForProject(projectData, fullUpdate, transitive, parentEvent));
             result.combine(refreshAllVersionsForProject(projectData, allVersions, transitive, parentEvent));
             return result;
         });
     }
 
-    @Override
-    public MetadataEventResponse refreshMasterSnapshotForProject(String groupId, String artifactId, boolean fullUpdate, boolean transitive, String parentEventId)
+    private MetadataEventResponse refreshAllSNAPSHOTVersionsForProject(StoreProjectData projectData,boolean fullUpdate, boolean transitive, String parentEvent)
     {
-        String parentEvent = ParentEvent.build(groupId, artifactId, MASTER_SNAPSHOT, parentEventId);
-        StoreProjectData projectData = getProject(groupId, artifactId);
-        MetadataNotification masterSnapshotForProject = new MetadataNotification(projectData.getProjectId(), groupId, artifactId, MASTER_SNAPSHOT, fullUpdate, transitive, parentEvent);
-        return versionRefreshHandler.executeWithTrace(REFRESH_MASTER_SNAPSHOT_FOR_PROJECT, masterSnapshotForProject, () ->
+        String parentEventId = ParentEvent.build(projectData.getGroupId(), projectData.getArtifactId(), ALL_SNAPSHOT, parentEvent);
+        MetadataEventResponse response = new MetadataEventResponse();
+        List<String> snapshots = this.projects.getVersions(projectData.getGroupId(),projectData.getArtifactId(),true).stream().filter(v -> VersionValidator.isSnapshotVersion(v)).collect(Collectors.toList());
+        snapshots.forEach(v ->
         {
-            MetadataEventResponse result = new MetadataEventResponse();
-            String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]", groupId, artifactId, MASTER_SNAPSHOT, parentEvent, fullUpdate, transitive);
-            result.addMessage(message);
+            String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]", projectData.getGroupId(), projectData.getArtifactId(), v, parentEvent, fullUpdate, transitive);
             LOGGER.info(message);
-            result.addMessage(queueWorkToRefreshProjectVersion(projectData, MASTER_SNAPSHOT, fullUpdate, transitive, parentEvent));
-            return result;
+            response.addMessage(queueWorkToRefreshProjectVersion(projectData, v, fullUpdate,transitive, parentEventId));
         });
+        return response;
     }
 
+
     @Override
-    public MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean transitive,String parentEventId)
+    public MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId,boolean fullUpdate,boolean transitive,String parentEventId)
     {
         String parentEvent = ParentEvent.build(groupId, artifactId, versionId, parentEventId);
         StoreProjectData projectData = getProject(groupId, artifactId);
-        MetadataNotification versionForProject = new MetadataNotification(projectData.getProjectId(),groupId,artifactId,versionId,true,transitive,parentEvent);
+        MetadataNotification versionForProject = new MetadataNotification(projectData.getProjectId(),groupId,artifactId,versionId,fullUpdate,transitive,parentEvent);
         return versionRefreshHandler.executeWithTrace(REFRESH_PROJECT_VERSION_ARTIFACTS, versionForProject, () ->
         {
             MetadataEventResponse result = new MetadataEventResponse();
-            String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",groupId,artifactId,versionId,parentEvent,true,transitive);
+            String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",groupId,artifactId,versionId,parentEvent,fullUpdate,transitive);
             result.addMessage(message);
             LOGGER.info(message);
-            result.addMessage(queueWorkToRefreshProjectVersion(projectData, versionId, true, transitive, parentEvent));
+            result.addMessage(queueWorkToRefreshProjectVersion(projectData, versionId, fullUpdate, transitive, parentEvent));
             return result;
         });
     }

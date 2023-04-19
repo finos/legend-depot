@@ -17,6 +17,7 @@ package org.finos.legend.depot.store.status.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.store.status.domain.StoreStatus;
 import org.finos.legend.depot.store.status.services.StoreStatusService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
@@ -65,18 +66,9 @@ public class StatusStoreResource extends BaseResource
     @Path("/status/counts/{groupId}/{artifactId}/versions/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_STATUS)
     @Produces(MediaType.APPLICATION_JSON)
-    public StoreStatus.DocumentCounts getVersionCounts(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") String versionId)
+    public StoreStatus.DocumentCounts getVersionCounts(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
         return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_STATUS, () -> this.statusService.getDocumentCounts(groupId, artifactId, versionId));
-    }
-
-    @GET
-    @Path("/status/counts/{groupId}/{artifactId}/latest")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_STATUS)
-    @Produces(MediaType.APPLICATION_JSON)
-    public StoreStatus.DocumentCounts getRevisionCounts(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
-    {
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_STATUS, () -> this.statusService.getRevisionDocumentCounts(groupId, artifactId));
     }
 
     @GET

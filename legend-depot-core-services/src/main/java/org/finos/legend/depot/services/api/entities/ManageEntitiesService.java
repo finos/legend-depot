@@ -18,11 +18,9 @@ package org.finos.legend.depot.services.api.entities;
 import org.eclipse.collections.api.tuple.Pair;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.StoredEntity;
-import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import java.util.List;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public interface ManageEntitiesService extends EntitiesService
 {

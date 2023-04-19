@@ -30,7 +30,6 @@ import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.tracing.services.TracerFactory;
-import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.jboss.shrinkwrap.resolver.api.NoResolvedResultException;
 import org.jboss.shrinkwrap.resolver.api.ResolutionException;
@@ -57,7 +56,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.artifacts.repository.RepositoryModule.GET_REPOSITORY_VERSIONS;
 
 public class MavenArtifactRepository implements ArtifactRepository
 {
@@ -289,47 +287,21 @@ public class MavenArtifactRepository implements ArtifactRepository
     @Override
     public List<VersionId> findVersions(String group, String artifact) throws ArtifactRepositoryException
     {
-        List<VersionId> result = new ArrayList<>();
-        long start = System.currentTimeMillis();
-        try
-            {
-                String groupArtifactVersionRange = gavCoordinates(group, artifact, ALL_VERSIONS_SCOPE);
-                final MavenVersionRangeResult versionRangeResult = (MavenVersionRangeResult) executeWithTrace("resolveVersionsFromRepository",group,artifact,"ALL",() -> getResolver().resolveVersionRange(groupArtifactVersionRange));
-                LOGGER.debug("resolveVersionsFromRepository {}{}{} , Version data: [{}]", group, artifact, ALL_VERSIONS_SCOPE, versionRangeResult);
-                for (MavenCoordinate coordinate : versionRangeResult.getVersions())
-                {
-                    if (VersionValidator.isValidReleaseVersion(coordinate.getVersion()))
-                    {
-                        result.add(VersionId.parseVersionId(coordinate.getVersion()));
-                    }
-                }
-            }
-            catch (VersionResolutionException ex)
-            {
-                String message = String.format("Error resolveVersionsFromRepository %s-%s version resolution issue", group, artifact,ex.getMessage());
-                LOGGER.error(message);
-                throw new ArtifactRepositoryException(message);
-            }
-            catch (Exception e)
-            {
-                LOGGER.error("unknown error executing resolveVersionsFromRepository", e);
-                throw new ArtifactRepositoryException(e.getMessage());
-            }
-            long endTime = System.currentTimeMillis();
-            LOGGER.info("resolveVersionsFromRepository {}{}, took [{}] ms", group, artifact, endTime - start);
-          
-            return result;
+        return findAllVersions(group,artifact).stream().filter(v -> VersionValidator.isValidReleaseVersion(v)).map(v -> VersionId.parseVersionId(v)).collect(Collectors.toList());
     }
 
-    @Override
-    public Optional<String> findVersion(String group, String artifact, String versionId) throws ArtifactRepositoryException
+
+
+    private List<String> findAllVersions(String group, String artifact) throws ArtifactRepositoryException
     {
+        List<String> result = new ArrayList<>();
+        long start = System.currentTimeMillis();
         try
         {
-            final MavenVersionRangeResult versionRangeResult = (MavenVersionRangeResult) executeWithTrace("resolveVersionFromRepository",group,artifact,versionId,() -> getResolver().resolveVersionRange(group + GAV_SEP + artifact + GAV_SEP + versionId));
-            LOGGER.debug("resolveVersionFromRepository {}{}{} , Version data: [{}]", group, artifact, versionId, versionRangeResult);
-            return versionRangeResult != null && versionRangeResult.getVersions() != null && !versionRangeResult.getVersions().isEmpty() ?
-                    versionRangeResult.getVersions().stream().filter(v -> v.getVersion().equals(versionId)).map(v -> v.getVersion()).findFirst() : Optional.empty();
+            String groupArtifactVersionRange = gavCoordinates(group, artifact, ALL_VERSIONS_SCOPE);
+            final MavenVersionRangeResult versionRangeResult = (MavenVersionRangeResult) executeWithTrace("resolveVersionsFromRepository",group,artifact,"ALL",() -> getResolver().resolveVersionRange(groupArtifactVersionRange));
+            LOGGER.debug("resolveVersionsFromRepository {}{}{} , Version data: [{}]", group, artifact, ALL_VERSIONS_SCOPE, versionRangeResult);
+            result.addAll(versionRangeResult.getVersions().stream().map(c -> c.getVersion()).collect(Collectors.toList()));
         }
         catch (VersionResolutionException ex)
         {
@@ -342,6 +314,16 @@ public class MavenArtifactRepository implements ArtifactRepository
             LOGGER.error("unknown error executing resolveVersionsFromRepository", e);
             throw new ArtifactRepositoryException(e.getMessage());
         }
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("resolveVersionsFromRepository {}{}, took [{}] ms", group, artifact, endTime - start);
+
+        return result;
+    }
+
+    @Override
+    public Optional<String> findVersion(String group, String artifact, String versionId) throws ArtifactRepositoryException
+    {
+        return this.findAllVersions(group,artifact).stream().filter(v -> v.equals(versionId)).findFirst();
     }
 
     private Object executeWithTrace(String label, String groupId, String artifactId, String version, Supplier<Object> functionToExecute)

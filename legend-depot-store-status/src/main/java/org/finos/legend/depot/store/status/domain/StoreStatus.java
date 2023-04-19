@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.compare;
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoreStatus
@@ -90,17 +89,10 @@ public class StoreStatus
     {
         @JsonProperty
         public List<VersionStatus> versions = new ArrayList<>();
-        @JsonProperty
-        public MasterRevisionStatus masterRevision;
 
         public void addVersionStatus(VersionStatus versionStatus)
         {
             this.versions.add(versionStatus);
-        }
-
-        public void setMasterRevisionStatus(MasterRevisionStatus masterRevisionStatus)
-        {
-            this.masterRevision = masterRevisionStatus;
         }
 
         @JsonProperty
@@ -138,29 +130,14 @@ public class StoreStatus
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class MasterRevisionStatus extends VersionStatus
-    {
-
-        public MasterRevisionStatus(String groupId, String artifactId)
-        {
-            super(groupId, artifactId, MASTER_SNAPSHOT);
-        }
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class DocumentCounts
     {
         @JsonProperty
         public long totalVersionEntities;
-        @JsonProperty
-        public long totalRevisionEntities;
 
-        public DocumentCounts(long totalVersionEntities, long totalRevisionEntities)
+        public DocumentCounts(long totalVersionEntities)
         {
             this.totalVersionEntities = totalVersionEntities;
-            this.totalRevisionEntities = totalRevisionEntities;
         }
     }
-
-
 }
