@@ -163,7 +163,7 @@ public class DeprecatedProjectAPIsResource extends BaseResource
 
         public void addVersion(String versionId)
         {
-            if (!versionId.equals(VersionValidator.MASTER_SNAPSHOT) && !this.getVersions().contains(versionId))
+            if (!VersionValidator.isSnapshotVersion(versionId) && !this.getVersions().contains(versionId))
             {
                 this.versions.add(versionId);
             }
