@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
 {
@@ -89,7 +88,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         return versionRefreshHandler.executeWithTrace(REFRESH_ALL_SNAPSHOT_FOR_ALL_PROJECTS,masterSnapshotAllProjects, () ->
                 {
                     MetadataEventResponse result = new MetadataEventResponse();
-                    String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",ALL,ALL,MASTER_SNAPSHOT,parentEvent,fullUpdate,transitive);
+                    String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",ALL,ALL,ALL_SNAPSHOT,parentEvent,fullUpdate,transitive);
                     result.addMessage(message);
                     LOGGER.info(message);
                     ParallelIterate.forEach(projects.getAllProjectCoordinates(),project -> result.combine(refreshAllSNAPSHOTVersionsForProject(project,fullUpdate,transitive,parentEvent)));
