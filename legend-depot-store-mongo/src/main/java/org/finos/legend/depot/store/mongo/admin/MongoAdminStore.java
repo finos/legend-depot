@@ -24,6 +24,7 @@ import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
 import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.admin.migrations.ProjectToProjectVersionMigration;
+import org.finos.legend.depot.store.mongo.admin.migrations.DependenciesMigration;
 import org.finos.legend.depot.store.mongo.admin.schedules.ScheduleInstancesMongo;
 import org.finos.legend.depot.store.mongo.admin.schedules.SchedulesMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
@@ -133,5 +134,17 @@ public class MongoAdminStore
     public void cleanUpProjectData()
     {
         new ProjectToProjectVersionMigration(mongoDatabase).cleanUpProjectData();
+    }
+
+    @Deprecated
+    public void storeTransitiveDependenciesForAllVersions()
+    {
+        new DependenciesMigration(mongoDatabase).storeTransitiveDependenciesForAllProjectVersions();
+    }
+
+    @Deprecated
+    public void renameVersionsCollection()
+    {
+        new DependenciesMigration(mongoDatabase).renameVersionsCollection();
     }
 }

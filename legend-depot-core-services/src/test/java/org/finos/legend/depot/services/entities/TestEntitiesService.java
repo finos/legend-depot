@@ -22,6 +22,7 @@ import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
@@ -47,8 +48,12 @@ public class TestEntitiesService extends TestBaseServices
 
         StoreProjectVersionData project1 = projectsVersionsStore.find("examples.metadata", "test-dependencies", "1.0.0").get();
         //"PROD-A" -> "PROD-B" -> "PROD-C"
-        project1.getVersionData().addDependency(new ProjectVersion("example.services.test", "test", "2.0.1"));
+        ProjectVersion pv = new ProjectVersion("example.services.test", "test", "2.0.1");
+        project1.getVersionData().addDependency(pv);
         projectsVersionsStore.createOrUpdate(project1);
+        StoreProjectVersionData project2 = projectsVersionsStore.find("examples.metadata","test", "2.3.1").get();
+        project2.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(pv), true));
+        projectsVersionsStore.createOrUpdate(project2);
         loadEntities("PROD-A", "2.3.1");
         loadEntities("PROD-B", "1.0.0");
         loadEntities("PROD-C", "2.0.1");

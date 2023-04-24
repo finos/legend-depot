@@ -16,9 +16,6 @@
 package org.finos.legend.depot.services;
 
 import com.google.inject.PrivateModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import com.google.inject.name.Names;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
@@ -26,11 +23,7 @@ import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.entities.EntityClassifierServiceImpl;
 import org.finos.legend.depot.services.generation.file.FileGenerationsServiceImpl;
-import org.finos.legend.depot.services.projects.DependenciesCache;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
-import org.finos.legend.depot.store.api.projects.ProjectsVersions;
-
-import javax.inject.Named;
 
 public class ReadDataServicesModule extends PrivateModule
 {
@@ -47,19 +40,5 @@ public class ReadDataServicesModule extends PrivateModule
         expose(EntitiesService.class);
         expose(EntityClassifierService.class);
         expose(FileGenerationsService.class);
-        expose(DependenciesCache.class).annotatedWith(Names.named("dependencyCache"));
-    }
-
-    @Provides
-    @Named("dependencyCache")
-    @Singleton
-    public DependenciesCache initialiseDependencyCache(ProjectsVersions projectsVersions)
-    {
-        return new DependenciesCache(projectsVersions, isPreLoadFromStore());
-    }
-
-    protected boolean isPreLoadFromStore()
-    {
-        return true;
     }
 }

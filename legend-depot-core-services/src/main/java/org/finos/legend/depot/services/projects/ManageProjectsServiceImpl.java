@@ -23,7 +23,6 @@ import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.List;
 
 public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements ManageProjectsService
@@ -33,16 +32,9 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
     private final UpdateProjects projects;
 
     @Inject
-    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, @Named("dependencyCache") DependenciesCache dependenciesCache)
-    {
-        super(projectsVersions,projects,dependenciesCache);
-        this.projects = projects;
-        this.projectsVersions = projectsVersions;
-    }
-
     public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects)
     {
-        super(projectsVersions, projects, new DependenciesCache(projectsVersions));
+        super(projectsVersions,projects);
         this.projects = projects;
         this.projectsVersions = projectsVersions;
     }

@@ -84,7 +84,9 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     protected RepositoryServices repositoryServices = mock(RepositoryServices.class);
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
 
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore, artifactsStore, new IncludeProjectPropertiesConfiguration(properties));
+    protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
+
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore, artifactsStore, new IncludeProjectPropertiesConfiguration(properties), dependencyManager);
 
 
     @Before

@@ -35,7 +35,6 @@ import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.List;
 import java.util.Collection;
 import java.util.Optional;
@@ -51,24 +50,20 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private final Projects projects;
 
-    private final DependenciesCache dependenciesCache;
-
     private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
     private static final String NOT_FOUND_IN_STORE = "project version not found for %s-%s-%s";
 
     @Inject
-    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("dependencyCache") DependenciesCache dependenciesCache)
+    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
-        this.dependenciesCache = dependenciesCache;
     }
 
     public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
-        this.dependenciesCache = new DependenciesCache(projectsVersions);
     }
 
     @Override
@@ -173,7 +168,14 @@ public class ProjectsServiceImpl implements ProjectsService
             dependencies.addAll(projectVersionDependencies);
             if (transitive && !projectVersionDependencies.isEmpty())
             {
-                dependencies.addAll(dependenciesCache.getTransitiveDependencies(pv));
+                if (projectData.getTransitiveDependenciesReport().isValid())
+                {
+                    dependencies.addAll(projectData.getTransitiveDependenciesReport().getTransitiveDependencies());
+                }
+                else
+                {
+                    throw new IllegalStateException(String.format("Error calculating transitive dependencies for project version - %s-%s-%s", projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId()));
+                }
             }
         });
         return dependencies;
