@@ -59,7 +59,7 @@ public class PureModelContextResource extends BaseResource
                                                         @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
                                                         @QueryParam("getDependencies")
                                                         @DefaultValue("true")
-                                                        @ApiParam("Whether to return ENTITIES with version in entity path") boolean getDependencies)
+                                                        @ApiParam("Whether to include entities from dependencies") boolean getDependencies)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, versioned, getDependencies));
