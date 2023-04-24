@@ -278,4 +278,20 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertEquals(2, versions.size());
         Assert.assertEquals(Arrays.asList("2.2.0", "2.3.1"), versions);
     }
+
+    @Test
+    public void canCheckExistsEvictedVersion()
+    {
+        StoreProjectVersionData versionData = new StoreProjectVersionData("examples.metadata", "art106", "1.0.0");
+        versionData.setEvicted(true);
+        try
+        {
+            projectsService.checkExists("examples.metadata", "art106", "1.0.0");
+            Assert.assertTrue(false);
+        }
+        catch (IllegalArgumentException e)
+        {
+            Assert.assertTrue(true);
+        }
+    }
 }
