@@ -31,7 +31,6 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
@@ -163,7 +162,7 @@ public class DeprecatedProjectAPIsResource extends BaseResource
 
         public void addVersion(String versionId)
         {
-            if (!versionId.equals(VersionValidator.MASTER_SNAPSHOT) && !this.getVersions().contains(versionId))
+            if (!VersionValidator.isSnapshotVersion(versionId) && !this.getVersions().contains(versionId))
             {
                 this.versions.add(versionId);
             }
