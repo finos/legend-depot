@@ -75,7 +75,7 @@ public class DependencyManager
                     }
                     else if (!projectData.get().getTransitiveDependenciesReport().isValid())
                     {
-                        throw new IllegalStateException(String.format("Project Version has invalid dependencies: %s", deps.getGav()));
+                        throw new IllegalStateException(String.format("Cannot calculate dependencies for project version: %s", deps.getGav()));
                     }
                     projectDependencies.addAll(projectData.get().getVersionData().getDependencies());
                     projectDependencies.addAll(projectData.get().getTransitiveDependenciesReport().getTransitiveDependencies());
