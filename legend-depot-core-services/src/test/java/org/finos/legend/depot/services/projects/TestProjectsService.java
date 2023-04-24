@@ -23,6 +23,7 @@ import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyRepor
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
+import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.junit.Assert;
@@ -48,12 +49,16 @@ public class TestProjectsService extends TestBaseServices
         super.setUpData();
         Assert.assertEquals(6, projectsService.getAll().size());
         Assert.assertEquals(0, projectsService.find("examples.metadata","test", "2.2.0").get().getVersionData().getDependencies().size());
-        Assert.assertEquals(1, projectsService.find("examples.metadata","test", "2.3.1").get().getVersionData().getDependencies().size());
 
         StoreProjectVersionData project1 = projectsService.find("examples.metadata", "test-dependencies", "1.0.0").get();
-        project1.getVersionData().addDependency(new ProjectVersion("example.services.test", "test", "1.0.0"));
+        ProjectVersion pv = new ProjectVersion("example.services.test", "test", "1.0.0");
+        project1.getVersionData().addDependency(pv);
         projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("example.services.test", "test", "1.0.0"));
         projectsVersionsStore.createOrUpdate(project1);
+        StoreProjectVersionData project2 = projectsService.find("examples.metadata","test", "2.3.1").get();
+        Assert.assertEquals(1, project2.getVersionData().getDependencies().size());
+        project2.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(pv), true));
+        projectsVersionsStore.createOrUpdate(project2);
         Assert.assertEquals(1, projectsVersionsStore.find("examples.metadata", "test-dependencies", "1.0.0").get().getVersionData().getDependencies().size());
         loadEntities("PROD-A", "2.3.1");
     }

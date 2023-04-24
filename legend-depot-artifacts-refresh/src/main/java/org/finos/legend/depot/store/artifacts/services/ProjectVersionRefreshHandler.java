@@ -18,7 +18,6 @@ package org.finos.legend.depot.store.artifacts.services;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.maven.model.Model;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.CoordinateValidator;
@@ -55,7 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -83,10 +81,11 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
     private final RepositoryServices repositoryServices;
     private final List<String> projectPropertiesInScope;
     private final Queue workQueue;
+    private final DependencyManager dependencyManager;
 
 
     @Inject
-    public ProjectVersionRefreshHandler(ManageProjectsService projects, RepositoryServices repositoryServices, Queue workQueue, RefreshStatusStore store, ArtifactsFilesStore artifacts, IncludeProjectPropertiesConfiguration includePropertyConfig)
+    public ProjectVersionRefreshHandler(ManageProjectsService projects, RepositoryServices repositoryServices, Queue workQueue, RefreshStatusStore store, ArtifactsFilesStore artifacts, IncludeProjectPropertiesConfiguration includePropertyConfig, DependencyManager dependencyManager)
     {
         this.projects = projects;
         this.workQueue = workQueue;
@@ -94,6 +93,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         this.artifacts = artifacts;
         this.repositoryServices = repositoryServices;
         this.projectPropertiesInScope = includePropertyConfig.getProperties();
+        this.dependencyManager = dependencyManager;
 
         try
         {
@@ -258,8 +258,8 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             StoreProjectData project = getProject(event.getGroupId(), event.getArtifactId());
             try
             {
-                List<ProjectVersion> newDependencies = calculateDependencies(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                response.combine(validateDependencies(newDependencies, event.getVersionId()));
+                List<ProjectVersion> newDependencies = this.dependencyManager.calculateDependencies(event.getGroupId(), event.getArtifactId(), event.getVersionId());
+                this.dependencyManager.validateDependencies(newDependencies, event.getVersionId()).forEach(error -> response.addError(error));
                 if (!response.hasErrors())
                 {
                     LOGGER.info("Processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
@@ -322,6 +322,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         StoreProjectVersionData storeProjectVersionData = projectVersionData.isPresent() ? projectVersionData.get() : new StoreProjectVersionData(project.getGroupId(), project.getArtifactId(), versionId);
         ProjectVersionData versionData = storeProjectVersionData.getVersionData();
         versionData.setDependencies(newDependencies);
+        this.dependencyManager.setProjectDataTransitiveDependencies(storeProjectVersionData);
         versionData.setProperties(properties);
         storeProjectVersionData.setVersionData(versionData);
         storeProjectVersionData.setEvicted(false);
@@ -355,31 +356,6 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             }
         }
         return projectPropertyList;
-    }
-
-    private MetadataEventResponse validateDependencies(List<ProjectVersion> dependencies, String versionId)
-    {
-        MetadataEventResponse response = new MetadataEventResponse();
-        dependencies.stream().forEach(dep ->
-        {
-            if (VersionValidator.isValidReleaseVersion(versionId) && VersionValidator.isSnapshotVersion(dep.getVersionId()))
-            {
-                String illegalDepError = String.format("Snapshot dependency %s-%s-%s not allowed in versions", dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
-                response.addError(illegalDepError);
-                LOGGER.error(illegalDepError);
-            }
-        });
-        return response;
-    }
-
-    private List<ProjectVersion> calculateDependencies(String groupId, String artifactId, String versionId)
-    {
-        List<ProjectVersion> versionDependencies = new ArrayList<>();
-        LOGGER.info("Finding dependencies for [{}-{}-{}]", groupId, artifactId, versionId);
-        Set<ArtifactDependency> dependencies = this.repositoryServices.findDependencies(groupId, artifactId, versionId);
-        LOGGER.info("Found [{}] dependencies for [{}-{}-{}]", dependencies.size(), groupId, artifactId, versionId);
-        dependencies.forEach(dependency ->  versionDependencies.add(new ProjectVersion(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion())));
-        return versionDependencies;
     }
 
     private MetadataEventResponse handleDependencies(StoreProjectData projectData, String versionId, List<ProjectVersion> dependencies, boolean fullUpdate, boolean transitive, String parentEventId)

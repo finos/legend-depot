@@ -256,7 +256,7 @@ public abstract class TestStoreMongo
         return getMongoDatabase().getCollection(FileGenerationsMongo.COLLECTION);
     }
 
-    private MongoCollection getMongoProjectVersions()
+    protected MongoCollection getMongoProjectVersions()
     {
         return getMongoDatabase().getCollection(ProjectsVersionsMongo.COLLECTION);
     }

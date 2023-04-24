@@ -22,6 +22,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.HasIdentifier;
+import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 
 import java.util.Date;
 
@@ -37,6 +38,8 @@ public class StoreProjectVersionData extends VersionedData implements HasIdentif
     private Date lastUpdated;
     @JsonProperty
     private ProjectVersionData versionData = new ProjectVersionData();
+    @JsonProperty
+    private VersionDependencyReport transitiveDependenciesReport = new VersionDependencyReport();
 
     public StoreProjectVersionData()
     {
@@ -95,6 +98,16 @@ public class StoreProjectVersionData extends VersionedData implements HasIdentif
     public ProjectVersionData getVersionData()
     {
         return versionData;
+    }
+
+    public VersionDependencyReport getTransitiveDependenciesReport()
+    {
+        return transitiveDependenciesReport;
+    }
+
+    public void setTransitiveDependenciesReport(VersionDependencyReport transitiveDependenciesReport)
+    {
+        this.transitiveDependenciesReport = transitiveDependenciesReport;
     }
 
     @Override

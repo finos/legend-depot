@@ -184,4 +184,32 @@ public class StoreAdministrationResource extends BaseAuthorisedResource
         });
     }
 
+    @PUT
+    @Path("/migrations/storeDependenciesForVersions/all")
+    @ApiOperation("storing transitive dependencies of each version present in the store")
+    @Deprecated
+    public Response storeTransitiveDependenciesForVersions()
+    {
+        return handle("storing transitive dependencies of each version present in the store", () ->
+        {
+            validateUser();
+            manageStoreService.storeTransitiveDependenciesForAllVersions();
+            return Response.status(Response.Status.NO_CONTENT).build();
+        });
+    }
+
+    @PUT
+    @Path("/migrations/renameCollection/versions")
+    @ApiOperation("migrating to use the new versions collection")
+    @Deprecated
+    public Response renameVersionsCollection()
+    {
+        return handle("migrating to use the new versions collection", () ->
+        {
+            validateUser();
+            manageStoreService.renameVersionsCollection();
+            return Response.status(Response.Status.NO_CONTENT).build();
+        });
+    }
+
 }

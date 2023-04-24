@@ -28,6 +28,7 @@ public class ResourceLoggingAndTracing
     public static final String GET_PROJECT_DEPENDENCY_TREE = "get project dependency tree";
     public static final String GET_DEPENDANT_PROJECTS = "downstream projects";
     public static final String UPDATE_ALL_SNAPSHOTS = "refresh all snapshots";
+    public static final String UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES = "update project transitive dependencies";
     public static final String GET_VERSION_ENTITIES = "get version entities";
     public static final String GET_VERSION_DEPENDENCY_ENTITIES = "get version dependencies entities";
     public static final String GET_VERSION_STORE_ENTITIES = "get stored version entities";

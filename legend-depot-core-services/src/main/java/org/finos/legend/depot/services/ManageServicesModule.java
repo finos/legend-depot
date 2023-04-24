@@ -20,9 +20,7 @@ import org.finos.legend.depot.services.api.generation.file.ManageFileGenerations
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
-import org.finos.legend.depot.services.projects.DependenciesCache;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
-import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 
 public class ManageServicesModule extends ReadDataServicesModule
 {
@@ -38,11 +36,5 @@ public class ManageServicesModule extends ReadDataServicesModule
         expose(ManageProjectsService.class);
         expose(ManageEntitiesService.class);
         expose(ManageFileGenerationsService.class);
-    }
-
-    @Override
-    protected boolean isPreLoadFromStore()
-    {
-        return false;
     }
 }
