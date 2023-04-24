@@ -154,6 +154,10 @@ public class ProjectsServiceImpl implements ProjectsService
         {
             throw new IllegalArgumentException(String.format(EXCLUSION_FOUND_IN_STORE, groupId, artifactId, versionId, versionData.getExclusionReason()));
         }
+        else if (projectVersion.get().isEvicted())
+        {
+            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
+        }
     }
 
     @Override
