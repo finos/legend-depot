@@ -171,7 +171,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             {
                 List<VersionId> candidateVersions;
                 List<StoreProjectVersionData> projectVersions = projects.find(projectData.getGroupId(), projectData.getArtifactId());
-                List<String> storeVersions = projectVersions.stream().filter(pv -> !pv.getVersionId().equals(MASTER_SNAPSHOT)).map(pv -> pv.getVersionId()).collect(Collectors.toList());
+                List<String> storeVersions = projectVersions.stream().filter(pv -> !VersionValidator.isSnapshotVersion(pv.getVersionId())).map(pv -> pv.getVersionId()).collect(Collectors.toList());
                 if (!allVersions && storeVersions.size() > 0)
                 {
                     candidateVersions = calculateCandidateVersions(repoVersions, storeVersions);
