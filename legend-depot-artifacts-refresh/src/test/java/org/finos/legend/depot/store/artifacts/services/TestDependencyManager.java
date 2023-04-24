@@ -62,7 +62,7 @@ public class TestDependencyManager extends TestStoreMongo
     @Before
     public void setUpData()
     {
-        List<StoreProjectVersionData> projectVersionData = readProjectVersionsConfigsFile(this.getClass().getClassLoader().getResource("data\\projectsVersions.json"));
+        List<StoreProjectVersionData> projectVersionData = readProjectVersionsConfigsFile(this.getClass().getClassLoader().getResource("data/projectsVersions.json"));
         projectVersionData.forEach(pv -> this.projectsVersionsStore.createOrUpdate(pv));
         Assert.assertEquals(5, projectsVersionsStore.getAll().size());
     }
