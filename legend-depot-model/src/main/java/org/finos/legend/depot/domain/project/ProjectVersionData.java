@@ -17,6 +17,7 @@ package org.finos.legend.depot.domain.project;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.finos.legend.depot.domain.version.ReleaseInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,8 @@ public class ProjectVersionData
     private List<ProjectVersion> dependencies = new ArrayList<>();
     @JsonProperty
     private List<Property> properties = new ArrayList<>();
+    @JsonProperty
+    private ReleaseInfo releaseInfo = null;
     @JsonProperty
     private boolean deprecated = false;
     @JsonProperty
@@ -89,6 +92,16 @@ public class ProjectVersionData
     public void addProperties(List<Property> propertyList)
     {
         propertyList.stream().filter(property -> !properties.contains(property)).forEach(property -> this.properties.add(property));
+    }
+
+    public ReleaseInfo getReleaseInfo()
+    {
+        return releaseInfo;
+    }
+
+    public void setReleaseInfo(ReleaseInfo releaseInfo)
+    {
+        this.releaseInfo = releaseInfo;
     }
 
     public boolean isDeprecated()

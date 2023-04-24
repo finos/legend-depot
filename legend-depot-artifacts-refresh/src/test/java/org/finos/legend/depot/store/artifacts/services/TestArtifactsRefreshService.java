@@ -24,8 +24,10 @@ import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.domain.version.ReleaseInfo;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
@@ -65,7 +67,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -176,6 +181,8 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Optional<StoreProjectVersionData> updatedProjectData = projectsVersionsStore.find(TEST_GROUP_ID, "art101", MASTER_SNAPSHOT);
         Assert.assertTrue(updatedProjectData.isPresent());
         Assert.assertEquals("0.0.0", updatedProjectData.get().getVersionData().getProperties().get(0).getValue());
+
+        Assert.assertTrue(updatedProjectData.get().getVersionData().getReleaseInfo().equals(new ReleaseInfo("test-author", Date.from(ZonedDateTime.parse("2023-04-11T14:48:27+00:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant()))));
     }
 
     @Test
@@ -237,6 +244,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertFalse(storeProjectVersionData.getVersionData().isExcluded());
         Assert.assertNull(storeProjectVersionData.getVersionData().getExclusionReason());
         Assert.assertEquals(storeProjectVersionData.getVersionData().getDependencies().size(), 1);
+        Assert.assertTrue(storeProjectVersionData.getVersionData().getReleaseInfo().equals(new ReleaseInfo("test-author", Date.from(ZonedDateTime.parse("2023-04-11T14:48:27+00:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant()))));
     }
 
     @Test
@@ -356,8 +364,10 @@ public class TestArtifactsRefreshService extends TestStoreMongo
 
         Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
 
-        List<ProjectVersion> dependencies = projectsVersionsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).get().getVersionData().getDependencies();
+        ProjectVersionData projectVersionData = projectsVersionsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).get().getVersionData();
+        List<ProjectVersion> dependencies = projectVersionData.getDependencies();
         Assert.assertEquals(2, dependencies.size());
+        Assert.assertTrue(projectVersionData.getReleaseInfo().equals(new ReleaseInfo("test-author", Date.from(ZonedDateTime.parse("2023-04-11T14:48:27+00:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant()))));
         List<RefreshStatus> statuses = refreshStatusStore.getAll();
         Assert.assertNotNull(statuses);
         Assert.assertTrue(statuses.isEmpty());

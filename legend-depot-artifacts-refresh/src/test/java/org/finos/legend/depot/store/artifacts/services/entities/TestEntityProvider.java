@@ -80,4 +80,17 @@ public class TestEntityProvider
 
     }
 
+    @Test
+    public void canResolveJar()
+    {
+        File jarFile = repository.getJarFile(TEST_GROUP_ID, "test-dependencies-entities", "1.0.0");
+        Assert.assertNotNull(jarFile);
+    }
+
+    @Test
+    public void canHandleJarNotPresent()
+    {
+        File jarFile = repository.getJarFile(TEST_GROUP_ID, "test-non-existing-entities", "1.0.0");
+        Assert.assertNull(jarFile);
+    }
 }

@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.jar.Manifest;
 
 public class VoidArtifactRepositoryProvider implements ArtifactRepository
 {
@@ -42,6 +43,12 @@ public class VoidArtifactRepositoryProvider implements ArtifactRepository
     public Model getPOM(String group, String artifact, String version)
     {
         return new Model();
+    }
+
+    @Override
+    public File getJarFile(String group, String artifact, String version)
+    {
+        return null;
     }
 
     @Override
