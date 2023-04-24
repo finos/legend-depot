@@ -31,7 +31,6 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
