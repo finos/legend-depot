@@ -299,4 +299,16 @@ public class TestProjectsService extends TestBaseServices
             Assert.assertTrue(true);
         }
     }
+
+    @Test
+    public void testGetVersions()
+    {
+        Assert.assertEquals(2, projectsService.getVersions("examples.metadata","test", false).size());
+        Assert.assertEquals(3, projectsService.getVersions("examples.metadata","test", true).size());
+        projectsService.excludeProjectVersion("examples.metadata","test",MASTER_SNAPSHOT,"test");
+        Assert.assertEquals(2, projectsService.getVersions("examples.metadata","test", true).size());
+        projectsService.excludeProjectVersion("examples.metadata","test","2.3.1","test");
+        Assert.assertEquals(1, projectsService.getVersions("examples.metadata","test", true).size());
+
+    }
 }

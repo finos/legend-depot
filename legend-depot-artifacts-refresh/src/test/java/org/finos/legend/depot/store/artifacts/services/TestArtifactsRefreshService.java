@@ -272,15 +272,14 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").isEmpty());
         Assert.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").isEmpty());
         refreshStatusStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,"ALL");
-        StoreProjectVersionData storeProjectVersionData = new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0");
-        storeProjectVersionData.getVersionData().setExcluded(true);
-        projectsService.createOrUpdate(storeProjectVersionData);
+
+        projectsService.excludeProjectVersion(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0","test");
         MetadataEventResponse response = artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, false, false,true,PARENT_EVENT_ID);
         Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
 
         Assert.assertEquals(1,notificationsQueueManager.getAllInQueue().size());
-        // 1.0.0 and 2.0.0 already present in store
-        Assert.assertEquals("master-SNAPSHOT", notificationsQueueManager.getAllInQueue().get(0).getVersionId());
+
+        Assert.assertEquals(MASTER_SNAPSHOT, notificationsQueueManager.getAllInQueue().get(0).getVersionId());
         notificationsQueueManager.handleAll();
 
     }
