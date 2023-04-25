@@ -82,7 +82,7 @@ public class ProjectsServiceImpl implements ProjectsService
     public List<String> getVersions(String groupId, String artifactId,boolean includeSnapshots)
     {
         List<StoreProjectVersionData> storeProjectsVersions = this.find(groupId, artifactId);
-        return storeProjectsVersions.isEmpty() ? Collections.EMPTY_LIST : storeProjectsVersions.stream().filter(pv -> includeSnapshots || !VersionValidator.isSnapshotVersion(pv.getVersionId()) && !pv.getVersionData().isExcluded()).map(pv -> pv.getVersionId()).collect(Collectors.toList());
+        return storeProjectsVersions.isEmpty() ? Collections.EMPTY_LIST : storeProjectsVersions.stream().filter(pv -> (includeSnapshots || !VersionValidator.isSnapshotVersion(pv.getVersionId())) && !pv.getVersionData().isExcluded()).map(pv -> pv.getVersionId()).collect(Collectors.toList());
     }
 
     @Override
