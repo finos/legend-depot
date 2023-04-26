@@ -127,6 +127,36 @@ public class ProjectsServiceImpl implements ProjectsService
         return projectsVersions.find(groupId, artifactId, versionId);
     }
 
+    private void validateStoreProjectVersionData(StoreProjectVersionData projectVersion) throws IllegalArgumentException
+    {
+        ProjectVersionData versionData = projectVersion.getVersionData();
+        if (versionData.isExcluded())
+        {
+            throw new IllegalArgumentException(String.format(EXCLUSION_FOUND_IN_STORE, projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId(), versionData.getExclusionReason()));
+        }
+        else if (projectVersion.isEvicted())
+        {
+            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()));
+        }
+    }
+
+    @Override
+    public String resolveAliasesAndCheckVersionExists(String groupId, String artifactId, String versionId)
+    {
+        String version = versionId;
+        Optional<StoreProjectVersionData> projectVersion = this.find(groupId, artifactId, version);
+        if (projectVersion.isPresent())
+        {
+            version = projectVersion.get().getVersionId();
+        }
+        else
+        {
+            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
+        }
+        validateStoreProjectVersionData(projectVersion.get());
+        return version;
+    }
+
     @Override
     public void checkExists(String groupId, String artifactId) throws IllegalArgumentException
     {
@@ -144,15 +174,7 @@ public class ProjectsServiceImpl implements ProjectsService
         {
             throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
         }
-        ProjectVersionData versionData = projectVersion.get().getVersionData();
-        if (versionData.isExcluded())
-        {
-            throw new IllegalArgumentException(String.format(EXCLUSION_FOUND_IN_STORE, groupId, artifactId, versionId, versionData.getExclusionReason()));
-        }
-        else if (projectVersion.get().isEvicted())
-        {
-            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
-        }
+        validateStoreProjectVersionData(projectVersion.get());
     }
 
     @Override
@@ -167,7 +189,8 @@ public class ProjectsServiceImpl implements ProjectsService
         Set<ProjectVersion> dependencies = new HashSet<>();
         projectVersions.forEach(pv ->
         {
-            StoreProjectVersionData projectData = this.getProject(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+            String version = this.resolveAliasesAndCheckVersionExists(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+            StoreProjectVersionData projectData = this.getProject(pv.getGroupId(), pv.getArtifactId(), version);
             List<ProjectVersion> projectVersionDependencies = projectData.getVersionData().getDependencies();
             dependencies.addAll(projectVersionDependencies);
             if (transitive && !projectVersionDependencies.isEmpty())
@@ -260,8 +283,9 @@ public class ProjectsServiceImpl implements ProjectsService
                     .map(dep -> new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep,projectData.getVersionData().getProperties()))
                     .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
         }
+        String version =  this.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
         return projectsVersions.getAll().stream().map(projectData -> projectData.getVersionData().getDependencies().stream()
-                .filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId) && dep.getVersionId().equals(versionId))
+                .filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId) && dep.getVersionId().equals(version))
                 .map(dep -> new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep,projectData.getVersionData().getProperties()))
                 .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
     }
@@ -269,7 +293,7 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private StoreProjectVersionData getProject(String groupId, String artifactId, String versionId)
     {
-        Optional<StoreProjectVersionData> projectData = projectsVersions.find(groupId, artifactId, versionId);
+        Optional<StoreProjectVersionData> projectData = this.find(groupId, artifactId, versionId);
         if (!projectData.isPresent())
         {
             throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));

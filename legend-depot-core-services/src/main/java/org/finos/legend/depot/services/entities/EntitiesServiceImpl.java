@@ -56,22 +56,22 @@ public class EntitiesServiceImpl implements EntitiesService
     @Override
     public List<Entity> getEntities(String groupId, String artifactId, String versionId, boolean versioned)
     {
-        this.projects.checkExists(groupId, artifactId, versionId);
-        return entities.getEntities(groupId, artifactId, versionId, versioned);
+        String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+        return entities.getEntities(groupId, artifactId, version, versioned);
     }
 
     @Override
     public Optional<Entity> getEntity(String groupId, String artifactId, String versionId, String entityPath)
     {
-        this.projects.checkExists(groupId, artifactId, versionId);
-        return entities.getEntity(groupId, artifactId, versionId, entityPath);
+        String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+        return entities.getEntity(groupId, artifactId, version, entityPath);
     }
 
     @Override
     public List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, boolean versioned, Set<String> classifierPaths, boolean includeSubPackages)
     {
-        this.projects.checkExists(groupId, artifactId, versionId);
-        return entities.getEntitiesByPackage(groupId, artifactId, versionId, packageName, versioned, classifierPaths, includeSubPackages);
+        String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+        return entities.getEntitiesByPackage(groupId, artifactId, version, packageName, versioned, classifierPaths, includeSubPackages);
     }
 
     @Override
@@ -94,9 +94,9 @@ public class EntitiesServiceImpl implements EntitiesService
             final AtomicInteger totalEntities = new AtomicInteger();
             ParallelIterate.forEach(dependencies, dep ->
             {
-                this.projects.checkExists(dep.getGroupId(),dep.getArtifactId(),dep.getVersionId());
-                List<EntityDefinition> deps = entities.getStoredEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), versioned).stream().map(StoredEntity::getEntity).collect(Collectors.toList());
-                depEntities.add(new ProjectVersionEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), versioned, deps));
+                String version = this.projects.resolveAliasesAndCheckVersionExists(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
+                List<EntityDefinition> deps = entities.getStoredEntities(dep.getGroupId(), dep.getArtifactId(), version, versioned).stream().map(StoredEntity::getEntity).collect(Collectors.toList());
+                depEntities.add(new ProjectVersionEntities(dep.getGroupId(), dep.getArtifactId(), version, versioned, deps));
                 totalEntities.addAndGet(deps.size());
                 TracerFactory.get().log(String.format("Total [%s-%s-%s]: [%s] entities",dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(),deps.size()));
             });

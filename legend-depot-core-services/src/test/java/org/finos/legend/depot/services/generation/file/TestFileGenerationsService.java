@@ -36,6 +36,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -90,6 +91,7 @@ public class TestFileGenerationsService extends TestStoreMongo
         when(projectsStore.find("group.test.otherproject", "test")).thenReturn(Optional.of(new StoreProjectData("prod-2","group.test.otherproject", "test")));
         when(projectsVersionsStore.find("group.test","test",MASTER_SNAPSHOT)).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test",MASTER_SNAPSHOT)));
         when(projectsVersionsStore.find("group.test","test","1.0.0")).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test","1.0.0")));
+        when(projectsVersionsStore.find("group.test","test")).thenReturn(Arrays.asList(new StoreProjectVersionData("group-test","test","1.0.0")));
         when(projectsVersionsStore.find("i.dont","exist","version")).thenReturn(Optional.empty());
         when(projectsVersionsStore.find("group.test.otherproject", "test","1.0.0")).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test","1.0.0")));
     }
@@ -176,5 +178,18 @@ public class TestFileGenerationsService extends TestStoreMongo
     public void cantGetGenerationsForNonExistentVersion()
     {
         service.getFileGenerations("group.test","test","10.0.0");
+    }
+
+    @Test
+    public void canQueryFileGenerationEntitiesWithLatestAlias()
+    {
+
+        List<FileGeneration> gens1 = service.getFileGenerations("group.test", "test", "latest");
+        Assert.assertEquals(14, gens1.size());
+        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "latest", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "latest", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
+        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "latest", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
+        Assert.assertEquals(2, service.getFileGenerationsByElementPath("group.test", "test", "latest", "examples::metadata::test::ClientBasic").size());
+        Assert.assertEquals(12, service.getFileGenerationsByElementPath("group.test", "test", "latest", "examples::avrogen").size());
     }
 }

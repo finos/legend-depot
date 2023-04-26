@@ -73,7 +73,7 @@ public class DependenciesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public Set<ProjectVersion> getProjectDependencies(@PathParam("groupId") String groupId,
                                                       @PathParam("artifactId") String artifactId,
-                                                      @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId,
+                                                      @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId,
                                                       @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to return transitive dependencies") boolean transitive)
     {
         return handle(GET_PROJECT_DEPENDENCIES, GET_PROJECT_DEPENDENCIES + groupId + artifactId, () -> this.projectApi.getDependencies(groupId, artifactId, versionId, transitive));
@@ -94,7 +94,7 @@ public class DependenciesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProjectVersionPlatformDependency> getProjectDependencies(@PathParam("groupId") String groupId,
                                                                          @PathParam("artifactId") String artifactId,
-                                                                         @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId
+                                                                         @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId
     )
     {
         return handle(GET_DEPENDANT_PROJECTS, GET_DEPENDANT_PROJECTS + groupId + artifactId, () -> transform(this.projectApi.getDependentProjects(groupId, artifactId, versionId)));
@@ -108,7 +108,7 @@ public class DependenciesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProjectVersionEntities> getEntitiesFromDependencies(@PathParam("groupId") String groupId,
                                                                     @PathParam("artifactId") String artifactId,
-                                                                    @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId,
+                                                                    @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId,
                                                                     @QueryParam("versioned") @DefaultValue("false")
                                                                     @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
                                                                     @QueryParam("transitive") @DefaultValue("false")

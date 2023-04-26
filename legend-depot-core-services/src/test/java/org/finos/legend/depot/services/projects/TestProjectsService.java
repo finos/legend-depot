@@ -311,4 +311,22 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertEquals(1, projectsService.getVersions("examples.metadata","test", true).size());
 
     }
+
+    @Test
+    public void testCanGetLatestVersionIdUsingAlias()
+    {
+        Assert.assertEquals("2.3.1", projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test", "latest"));
+    }
+
+    @Test
+    public void testErrorThrownWhenIncorrectAliasIsUsed()
+    {
+        Assert.assertThrows("project version not found for examples.metadata-test-lastest", IllegalArgumentException.class, () -> projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test", "lastest"));
+    }
+
+    @Test
+    public void testErrorThrownWhenNoProjectVersionFound()
+    {
+        Assert.assertThrows("project version not found for examples.metadata-test1-1.0.0", IllegalArgumentException.class, () -> projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test1", "1.0.0"));
+    }
 }

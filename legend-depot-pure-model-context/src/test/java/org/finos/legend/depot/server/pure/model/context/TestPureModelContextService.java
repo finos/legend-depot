@@ -102,13 +102,12 @@ public class TestPureModelContextService extends TestBaseServices
     }
 
     @Test
-    public void testEmpty()
+    public void testErrorThrownWhenNoProjectVersionFound()
     {
 
         EntitiesService mockVersions = Mockito.mock(EntitiesService.class);
         PureModelContextService newService = new PureModelContextServiceImpl(mockVersions, projectsService);
-        String result = newService.getPureModelContextDataAsString("test.legend", "blank-prod", MASTER_SNAPSHOT, CLIENT_VERSION, false, false);
-        Assert.assertNull(result);
+        Assert.assertThrows("project version not found for test.legend-blank-prod-master-SNAPSHOT", IllegalArgumentException.class, () -> newService.getPureModelContextDataAsString("test.legend", "blank-prod", MASTER_SNAPSHOT, CLIENT_VERSION, false, false));
     }
 
     @Test
