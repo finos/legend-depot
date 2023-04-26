@@ -180,7 +180,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             }
             catch (ArtifactRepositoryException e)
             {
-                PrometheusMetricsFactory.getInstance().incrementGauge(REPO_EXCEPTIONS,1);
+                PrometheusMetricsFactory.getInstance().increaseGauge(REPO_EXCEPTIONS,1);
                 response.addError(e.getMessage());
             }
         }
