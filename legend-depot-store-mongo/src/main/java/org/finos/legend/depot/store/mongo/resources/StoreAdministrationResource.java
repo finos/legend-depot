@@ -185,29 +185,29 @@ public class StoreAdministrationResource extends BaseAuthorisedResource
     }
 
     @PUT
-    @Path("/migrations/storeDependenciesForVersions/all")
-    @ApiOperation("storing transitive dependencies of each version present in the store")
+    @Path("/migrations/calculateDependenciesForVersions/all")
+    @ApiOperation("calculating transitive dependencies of each version present in the store")
     @Deprecated
     public Response storeTransitiveDependenciesForVersions()
     {
-        return handle("storing transitive dependencies of each version present in the store", () ->
+        return handle("calculating transitive dependencies of each version present in the store", () ->
         {
             validateUser();
-            manageStoreService.storeTransitiveDependenciesForAllVersions();
+            manageStoreService.calculateTransitiveDependenciesForAllProjectVersions();
             return Response.status(Response.Status.NO_CONTENT).build();
         });
     }
 
     @PUT
-    @Path("/migrations/renameCollection/versions")
-    @ApiOperation("migrating to use the new versions collection")
+    @Path("/migrations/addTransitiveDependenciesToVersionData")
+    @ApiOperation("Update versions collection with transitive dependencies")
     @Deprecated
-    public Response renameVersionsCollection()
+    public Response addTransitiveDependenciesToVersionData()
     {
-        return handle("migrating to use the new versions collection", () ->
+        return handle("Update versions collection with transitive dependencies", () ->
         {
             validateUser();
-            manageStoreService.renameVersionsCollection();
+            manageStoreService.addTransitiveDependenciesToVersionData();
             return Response.status(Response.Status.NO_CONTENT).build();
         });
     }

@@ -137,14 +137,14 @@ public class MongoAdminStore
     }
 
     @Deprecated
-    public void storeTransitiveDependenciesForAllVersions()
+    public void calculateTransitiveDependenciesForAllProjectVersions()
     {
-        new DependenciesMigration(mongoDatabase).storeTransitiveDependenciesForAllProjectVersions();
+        new DependenciesMigration(mongoDatabase).calculateTransitiveDependenciesForAllProjectVersions();
     }
 
     @Deprecated
-    public void renameVersionsCollection()
+    public void addTransitiveDependenciesToVersionData()
     {
-        new DependenciesMigration(mongoDatabase).renameVersionsCollection();
+        new DependenciesMigration(mongoDatabase).addTransitiveDependenciesToVersionData();
     }
 }

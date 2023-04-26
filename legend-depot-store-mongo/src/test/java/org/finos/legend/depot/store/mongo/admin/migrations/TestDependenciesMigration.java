@@ -90,7 +90,7 @@ public class TestDependenciesMigration extends TestStoreMongo
     @Test
     public void testStoringTransitiveDependencies()
     {
-        mongoAdminStore.storeTransitiveDependenciesForAllVersions();
+        mongoAdminStore.calculateTransitiveDependenciesForAllProjectVersions();
 
         StoreProjectVersionData result = convert(new ObjectMapper(),mongoProvider.getCollection(VERSIONS_COLLECTION).find().first(), StoreProjectVersionData.class);
         Assert.assertTrue(result.getTransitiveDependenciesReport().isValid());
@@ -112,6 +112,34 @@ public class TestDependenciesMigration extends TestStoreMongo
 
         //check for dependency not present in store
         StoreProjectVersionData result3 = convert(new ObjectMapper(), mongoProvider.getCollection(VERSIONS_COLLECTION).find(Filters.and(Filters.eq("groupId", "examples.metadata"), Filters.eq("artifactId", "art108"))).first(), StoreProjectVersionData.class);
+        Assert.assertFalse(result3.getTransitiveDependenciesReport().isValid());
+    }
+
+    @Test
+    public void testUpdatingVersionsCollection()
+    {
+        mongoAdminStore.calculateTransitiveDependenciesForAllProjectVersions();
+        mongoAdminStore.addTransitiveDependenciesToVersionData();
+        StoreProjectVersionData result = convert(new ObjectMapper(),mongoProvider.getCollection(ProjectsVersionsMongo.COLLECTION).find().first(), StoreProjectVersionData.class);
+        Assert.assertTrue(result.getTransitiveDependenciesReport().isValid());
+        Assert.assertEquals(4, result.getTransitiveDependenciesReport().getTransitiveDependencies().size());
+        ProjectVersion pv1 = new ProjectVersion("examples.metadata", "test-dependencies", "2.0.0");
+        ProjectVersion pv2 = new ProjectVersion("examples.metadata", "art101", "1.0.0");
+        ProjectVersion pv3 = new ProjectVersion("examples.metadata", "art102", "1.0.0");
+        ProjectVersion pv4 = new ProjectVersion("examples.metadata", "art103", "1.0.0");
+        Assert.assertEquals(result.getTransitiveDependenciesReport().getTransitiveDependencies(), Arrays.asList(pv1, pv2, pv3, pv4));
+
+        //check for the excluded Dependency
+        StoreProjectVersionData result1 = convert(new ObjectMapper(), mongoProvider.getCollection(ProjectsVersionsMongo.COLLECTION).find(Filters.and(Filters.eq("groupId", "examples.metadata"), Filters.eq("artifactId", "art104"))).first(), StoreProjectVersionData.class);
+        Assert.assertFalse(result1.getTransitiveDependenciesReport().isValid());
+
+        //check for other dependencies
+        StoreProjectVersionData result2 = convert(new ObjectMapper(), mongoProvider.getCollection(ProjectsVersionsMongo.COLLECTION).find(Filters.and(Filters.eq("groupId", "examples.metadata"), Filters.eq("artifactId", "test-dependencies"))).first(), StoreProjectVersionData.class);
+        Assert.assertTrue(result2.getTransitiveDependenciesReport().isValid());
+        Assert.assertEquals(result2.getTransitiveDependenciesReport().getTransitiveDependencies(), Arrays.asList(pv2, pv3, pv4));
+
+        //check for dependency not present in store
+        StoreProjectVersionData result3 = convert(new ObjectMapper(), mongoProvider.getCollection(ProjectsVersionsMongo.COLLECTION).find(Filters.and(Filters.eq("groupId", "examples.metadata"), Filters.eq("artifactId", "art108"))).first(), StoreProjectVersionData.class);
         Assert.assertFalse(result3.getTransitiveDependenciesReport().isValid());
     }
 }
