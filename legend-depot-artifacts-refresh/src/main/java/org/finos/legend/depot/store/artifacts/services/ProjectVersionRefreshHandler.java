@@ -172,7 +172,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             {
                 if (!this.repositoryServices.findVersion(groupId, artifactId, versionId).isPresent())
                 {
-                    String missingVersion = String.format("Version %s does not exists for %s-%s", versionId, groupId, artifactId);
+                    String missingVersion = String.format("Version %s does not exist for %s-%s in repository", versionId, groupId, artifactId);
                     response.addError(missingVersion);
                     LOGGER.error(missingVersion);
                     return response;
@@ -180,7 +180,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             }
             catch (ArtifactRepositoryException e)
             {
-                PrometheusMetricsFactory.getInstance().incrementCount(REPO_EXCEPTIONS);
+                PrometheusMetricsFactory.getInstance().incrementGauge(REPO_EXCEPTIONS,1);
                 response.addError(e.getMessage());
             }
         }
