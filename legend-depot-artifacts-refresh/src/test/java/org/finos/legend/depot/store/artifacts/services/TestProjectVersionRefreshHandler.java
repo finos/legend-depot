@@ -176,7 +176,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("prod-1",TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0",true,false,PARENT_EVENT_ID));
         Assert.assertNotNull(response);
         Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
-        Assert.assertEquals("Version 1.0.0 does not exists for examples.metadata-test", response.getErrors().get(0));
+        Assert.assertEquals("Version 1.0.0 does not exist for examples.metadata-test in repository", response.getErrors().get(0));
     }
 
     @Test
