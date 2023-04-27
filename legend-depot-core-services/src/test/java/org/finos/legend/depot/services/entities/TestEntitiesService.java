@@ -149,4 +149,31 @@ public class TestEntitiesService extends TestBaseServices
         Assert.assertEquals(0, entitiesService.getEntitiesByPackage("examples.metadata","test1","1.0.0",pkgName,true, Collections.EMPTY_SET,true).size());
 
     }
+
+    @Test
+    public void canQueryEntitiesWithLatestVersionAlias()
+    {
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata","test1","1.0.0"));
+        loadEntities("PROD-D", "1.0.0");
+
+        String pkgName = "examples::metadata::test::dependency::v1_2_3";
+
+        Assert.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","latest",true).size());
+        Assert.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","latest",false).size());
+        Assert.assertEquals(2, entitiesService.getEntitiesByPackage("examples.metadata","test1","latest",pkgName,false, Collections.EMPTY_SET,true).size());
+        Assert.assertEquals(0, entitiesService.getEntitiesByPackage("examples.metadata","test1","latest",pkgName,true, Collections.EMPTY_SET,true).size());
+
+    }
+
+    @Test
+    public void canGetDependenciesMapWithLatestAlias()
+    {
+        List<ProjectVersion> projectVersions = Arrays.asList(new ProjectVersion("examples.metadata", "test", "latest"), new ProjectVersion("examples.metadata", "test-dependencies", "latest"));
+        List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities(projectVersions, false, true, true);
+        Assert.assertFalse(dependencyList3.isEmpty());
+        Assert.assertEquals(4, dependencyList3.size());
+        Assert.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
+        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+    }
 }

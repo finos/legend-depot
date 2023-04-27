@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
-import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextServiceException;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
@@ -29,7 +28,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.context.AlloySDLC;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.shared.core.ObjectMapperFactory;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.finos.legend.sdlc.protocol.pure.v1.PureModelContextDataBuilder;
 import org.slf4j.Logger;
 
@@ -37,7 +35,6 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData.newBuilder;
@@ -67,15 +64,7 @@ public class PureModelContextServiceImpl implements PureModelContextService
     @Override
     public PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean versioned, boolean getDependencies)
     {
-        String version = versionId;
-        if (version.equals(VersionAlias.LATEST.getName()))
-        {
-            Optional<VersionId> project = this.projectsService.getLatestVersion(groupId, artifactId);
-            if (project.isPresent())
-            {
-                version = project.get().toVersionIdString();
-            }
-        }
+        String version = this.projectsService.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
         List<Entity> entities = this.entitiesService.getEntities(groupId, artifactId, version, versioned);
         PureModelContextData pureModelContextData = getPureModelContextData(entities, groupId, artifactId, version, clientVersion);
         if (!getDependencies)

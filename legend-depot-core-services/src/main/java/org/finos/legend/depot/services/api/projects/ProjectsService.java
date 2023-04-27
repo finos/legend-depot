@@ -54,6 +54,8 @@ public interface ProjectsService
 
     Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId);
 
+    String resolveAliasesAndCheckVersionExists(String groupId, String artifactId, String versionId);
+
     Optional<StoreProjectData> findCoordinates(String groupId, String artifactId);
 
     default Set<ProjectVersion> getDependencies(String groupId, String artifactId, String versionId, boolean transitive)

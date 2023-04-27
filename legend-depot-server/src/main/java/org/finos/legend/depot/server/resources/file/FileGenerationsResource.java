@@ -58,7 +58,7 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<Entity> getVersionGenerationsEntities(@PathParam("groupId") String groupId,
                                                      @PathParam("artifactId") String artifactId,
-                                                     @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
+                                                     @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getGenerations(groupId, artifactId, versionId));
@@ -71,7 +71,7 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<FileGeneration> getFileGenerations(@PathParam("groupId") String groupId,
                                                    @PathParam("artifactId") String artifactId,
-                                                   @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
+                                                   @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION, () -> this.generationsService.getFileGenerations(groupId, artifactId, versionId));
@@ -83,7 +83,7 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<FileGeneration> getFileGenerationsByElementPath(@PathParam("groupId") String groupId,
                                                          @PathParam("artifactId") String artifactId,
-                                                         @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT")String versionId,
+                                                         @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version")String versionId,
                                                                 @PathParam("elementPath") String elementPath)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
@@ -96,7 +96,7 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<FileGeneration> getFileGenerationsByFilePath(@PathParam("groupId") String groupId,
                                                              @PathParam("artifactId") String artifactId,
-                                                             @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("filePath") String filePath)
+                                                             @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId, @PathParam("filePath") String filePath)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFilePath(groupId, artifactId, versionId, filePath));
@@ -108,7 +108,7 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.TEXT_PLAIN)
     public Optional<String> getFileGenerationContentByFilePath(@PathParam("groupId") String groupId,
                                                            @PathParam("artifactId") String artifactId,
-                                                           @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("filePath") String filePath)
+                                                           @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId, @PathParam("filePath") String filePath)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationContentByFilePath(groupId, artifactId, versionId, filePath));
