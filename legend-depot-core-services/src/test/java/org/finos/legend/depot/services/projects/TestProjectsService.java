@@ -273,6 +273,13 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertTrue(projectsService.find("examples.metadata", "test","latest").isPresent());
         Assert.assertEquals("2.3.1", projectsService.getLatestVersion("examples.metadata", "test").get().toVersionIdString());
 
+        Assert.assertFalse(projectsService.find("dont","exist","latest").isPresent());
+
+        StoreProjectVersionData noVersions = new StoreProjectVersionData("noversion","examples",MASTER_SNAPSHOT);
+        projectsService.createOrUpdate(noVersions);
+
+        Assert.assertFalse(projectsService.find("noversion","examples", VersionAlias.LATEST.getName()).isPresent());
+
 
     }
 
