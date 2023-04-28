@@ -35,11 +35,11 @@ import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -81,8 +81,7 @@ public class ProjectsServiceImpl implements ProjectsService
     @Override
     public List<String> getVersions(String groupId, String artifactId,boolean includeSnapshots)
     {
-        List<StoreProjectVersionData> storeProjectsVersions = this.find(groupId, artifactId);
-        return storeProjectsVersions.isEmpty() ? Collections.EMPTY_LIST : storeProjectsVersions.stream().filter(pv -> (includeSnapshots || !VersionValidator.isSnapshotVersion(pv.getVersionId())) && !pv.getVersionData().isExcluded()).map(pv -> pv.getVersionId()).collect(Collectors.toList());
+        return this.find(groupId, artifactId).stream().filter(pv -> (includeSnapshots || !VersionValidator.isSnapshotVersion(pv.getVersionId())) && !pv.getVersionData().isExcluded()).map(pv -> pv.getVersionId()).collect(Collectors.toList());
     }
 
     @Override
@@ -114,15 +113,7 @@ public class ProjectsServiceImpl implements ProjectsService
     {
         if (VersionAlias.LATEST.getName().equals(versionId))
         {
-            Optional<VersionId> latest = this.getLatestVersion(groupId, artifactId);
-            if (latest.isPresent())
-            {
-                return projectsVersions.find(groupId, artifactId,latest.get().toVersionIdString());
-            }
-            else
-            {
-                return Optional.empty();
-            }
+            return projectsVersions.find(groupId, artifactId).stream().filter(v -> !VersionValidator.isSnapshotVersion(v.getVersionId()) && !v.getVersionData().isExcluded()).max(Comparator.comparing(o -> VersionId.parseVersionId(o.getVersionId())));
         }
         return projectsVersions.find(groupId, artifactId, versionId);
     }
@@ -180,7 +171,7 @@ public class ProjectsServiceImpl implements ProjectsService
     @Override
     public Optional<VersionId> getLatestVersion(String groupId, String artifactId)
     {
-        return this.getVersions(groupId, artifactId).stream().filter(v -> !VersionValidator.isSnapshotVersion(v)).map(v -> VersionId.parseVersionId(v)).max(VersionId::compareTo);
+        return this.getVersions(groupId, artifactId,false).stream().map(v -> VersionId.parseVersionId(v)).max(VersionId::compareTo);
     }
 
     @Override

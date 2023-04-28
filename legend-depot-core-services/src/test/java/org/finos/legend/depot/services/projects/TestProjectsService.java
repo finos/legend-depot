@@ -21,6 +21,7 @@ import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
@@ -272,6 +273,13 @@ public class TestProjectsService extends TestBaseServices
 
         Assert.assertTrue(projectsService.find("examples.metadata", "test","latest").isPresent());
         Assert.assertEquals("2.3.1", projectsService.getLatestVersion("examples.metadata", "test").get().toVersionIdString());
+
+        Assert.assertFalse(projectsService.find("dont","exist","latest").isPresent());
+
+        StoreProjectVersionData noVersions = new StoreProjectVersionData("noversion","examples",MASTER_SNAPSHOT);
+        projectsService.createOrUpdate(noVersions);
+
+        Assert.assertFalse(projectsService.find("noversion","examples", VersionAlias.LATEST.getName()).isPresent());
 
 
     }
