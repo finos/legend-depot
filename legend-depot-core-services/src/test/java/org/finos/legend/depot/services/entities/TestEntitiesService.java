@@ -36,6 +36,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public class TestEntitiesService extends TestBaseServices
 {
 
@@ -175,5 +177,31 @@ public class TestEntitiesService extends TestBaseServices
         Assert.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
         Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
         Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+    }
+
+    @Test
+    public void canGetDependenciesMapWithHeadAlias()
+    {
+        List<ProjectVersion> projectVersions = Arrays.asList(new ProjectVersion("examples.metadata", "test", "head"), new ProjectVersion("examples.metadata", "test-dependencies", "latest"));
+        List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities(projectVersions, false, true, true);
+        Assert.assertFalse(dependencyList3.isEmpty());
+        Assert.assertEquals(4, dependencyList3.size());
+        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+    }
+
+    @Test
+    public void canQueryEntitiesWithHeadVersionAlias()
+    {
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata","test", MASTER_SNAPSHOT));
+        loadEntities("PROD-A", MASTER_SNAPSHOT);
+
+        String pkgName = "examples::metadata::test::v2_3_1::examples::metadata::test";
+
+        Assert.assertEquals(7, entitiesService.getEntities("examples.metadata","test","head",true).size());
+        Assert.assertEquals(7, entitiesService.getEntities("examples.metadata","test","head",false).size());
+        Assert.assertEquals(0, entitiesService.getEntitiesByPackage("examples.metadata","test","head",pkgName,false, Collections.EMPTY_SET,true).size());
+        Assert.assertEquals(4, entitiesService.getEntitiesByPackage("examples.metadata","test","head",pkgName,true, Collections.EMPTY_SET,true).size());
+
     }
 }

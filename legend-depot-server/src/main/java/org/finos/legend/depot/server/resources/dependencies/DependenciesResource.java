@@ -28,6 +28,7 @@ import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.Property;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
@@ -73,7 +74,7 @@ public class DependenciesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public Set<ProjectVersion> getProjectDependencies(@PathParam("groupId") String groupId,
                                                       @PathParam("artifactId") String artifactId,
-                                                      @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId,
+                                                      @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                                       @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to return transitive dependencies") boolean transitive)
     {
         return handle(GET_PROJECT_DEPENDENCIES, GET_PROJECT_DEPENDENCIES + groupId + artifactId, () -> this.projectApi.getDependencies(groupId, artifactId, versionId, transitive));
@@ -94,7 +95,7 @@ public class DependenciesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProjectVersionPlatformDependency> getProjectDependencies(@PathParam("groupId") String groupId,
                                                                          @PathParam("artifactId") String artifactId,
-                                                                         @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId
+                                                                         @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId
     )
     {
         return handle(GET_DEPENDANT_PROJECTS, GET_DEPENDANT_PROJECTS + groupId + artifactId, () -> transform(this.projectApi.getDependentProjects(groupId, artifactId, versionId)));
@@ -108,7 +109,7 @@ public class DependenciesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProjectVersionEntities> getEntitiesFromDependencies(@PathParam("groupId") String groupId,
                                                                     @PathParam("artifactId") String artifactId,
-                                                                    @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId,
+                                                                    @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                                                     @QueryParam("versioned") @DefaultValue("false")
                                                                     @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
                                                                     @QueryParam("transitive") @DefaultValue("false")

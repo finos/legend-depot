@@ -19,6 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
@@ -58,7 +59,7 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<Entity> getVersionGenerationsEntities(@PathParam("groupId") String groupId,
                                                      @PathParam("artifactId") String artifactId,
-                                                     @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId)
+                                                     @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getGenerations(groupId, artifactId, versionId));
@@ -71,7 +72,7 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<FileGeneration> getFileGenerations(@PathParam("groupId") String groupId,
                                                    @PathParam("artifactId") String artifactId,
-                                                   @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId)
+                                                   @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION, () -> this.generationsService.getFileGenerations(groupId, artifactId, versionId));
@@ -83,7 +84,7 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<FileGeneration> getFileGenerationsByElementPath(@PathParam("groupId") String groupId,
                                                          @PathParam("artifactId") String artifactId,
-                                                         @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version")String versionId,
+                                                         @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT)String versionId,
                                                                 @PathParam("elementPath") String elementPath)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
@@ -96,7 +97,7 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<FileGeneration> getFileGenerationsByFilePath(@PathParam("groupId") String groupId,
                                                              @PathParam("artifactId") String artifactId,
-                                                             @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId, @PathParam("filePath") String filePath)
+                                                             @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFilePath(groupId, artifactId, versionId, filePath));
@@ -108,7 +109,7 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.TEXT_PLAIN)
     public Optional<String> getFileGenerationContentByFilePath(@PathParam("groupId") String groupId,
                                                            @PathParam("artifactId") String artifactId,
-                                                           @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version") String versionId, @PathParam("filePath") String filePath)
+                                                           @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath)
     {
         QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationContentByFilePath(groupId, artifactId, versionId, filePath));

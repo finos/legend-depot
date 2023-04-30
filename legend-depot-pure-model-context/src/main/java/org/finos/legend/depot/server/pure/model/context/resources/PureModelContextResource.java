@@ -18,6 +18,7 @@ package org.finos.legend.depot.server.pure.model.context.resources;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
@@ -52,7 +53,7 @@ public class PureModelContextResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public PureModelContextData getPureModelContextData(@PathParam("groupId") String groupId,
                                                         @PathParam("artifactId") String artifactId,
-                                                        @PathParam("versionId") @ApiParam(value = "a valid version string: x.y.z, master-SNAPSHOT or alias", example = "latest = last released version")  String versionId,
+                                                        @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT)  String versionId,
                                                         @QueryParam("clientVersion") String clientVersion,
                                                         @QueryParam("versioned")
                                                         @DefaultValue("false")

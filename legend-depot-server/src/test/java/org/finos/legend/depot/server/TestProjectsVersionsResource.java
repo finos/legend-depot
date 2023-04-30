@@ -25,6 +25,8 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Optional;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public class TestProjectsVersionsResource extends TestBaseServices
 {
 
@@ -41,6 +43,19 @@ public class TestProjectsVersionsResource extends TestBaseServices
         Assert.assertEquals(versionData.get().getVersionData().getDependencies().get(0), new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"));
 
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = projectsVersionsResource.getProjectVersion("somethig.random", "test","latest");
+        Assert.assertFalse(versionData1.isPresent());
+    }
+
+    @Test
+    public void canQueryHeadProjectVersionData()
+    {
+        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = projectsVersionsResource.getProjectVersion("examples.metadata", "test","head");
+        Assert.assertTrue(versionData.isPresent());
+        Assert.assertEquals(versionData.get().getGroupId(), "examples.metadata");
+        Assert.assertEquals(versionData.get().getArtifactId(), "test");
+        Assert.assertEquals(versionData.get().getVersionId(), MASTER_SNAPSHOT);
+
+        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = projectsVersionsResource.getProjectVersion("somethig.random", "test","head");
         Assert.assertFalse(versionData1.isPresent());
     }
 }
