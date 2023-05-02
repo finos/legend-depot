@@ -17,12 +17,11 @@ package org.finos.legend.depot.store.mongo.admin.migrations;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.FindOneAndReplaceOptions;
+import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.Property;
-import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
@@ -115,25 +114,23 @@ public final class ProjectToProjectVersionMigration
         {
             String groupId = document.getString(GROUP_ID);
             String artifactId = document.getString(ARTIFACT_ID);
-            String projectId = document.getString(PROJECT_ID);
             try
             {
                 projectCollection
-                        .findOneAndReplace(and(eq(GROUP_ID, groupId),
+                        .updateOne(and(eq(GROUP_ID, groupId),
                                 eq(ARTIFACT_ID, artifactId)),
-                                buildDocument(new StoreProjectData(projectId, groupId, artifactId)),
-                                new FindOneAndReplaceOptions().upsert(true));
+                                Updates.combine(Updates.unset("versions"), Updates.unset("dependencies"), Updates.unset("properties"), Updates.unset("latestVersion")));
                 i.incrementAndGet();
-                LOGGER.info(String.format("%s-%s insertion completed", groupId, artifactId));
+                LOGGER.info(String.format("%s-%s updation completed", groupId, artifactId));
             }
             catch (Exception e)
             {
-                LOGGER.info("Error while inserting data: " + e);
+                LOGGER.info("Error while updating data: " + e);
 
-                LOGGER.info(String.format("versions inserted [%s] before error", i.get()));
-                LOGGER.info(String.format("%s-%s insertion could not be completed", groupId, artifactId));
+                LOGGER.info(String.format("versions updated [%s] before error", i.get()));
+                LOGGER.info(String.format("%s-%s updated could not be completed", groupId, artifactId));
             }
         });
-        LOGGER.info(String.format("versions inserted [%s]", i.get()));
+        LOGGER.info(String.format("versions updated [%s]", i.get()));
     }
 }
