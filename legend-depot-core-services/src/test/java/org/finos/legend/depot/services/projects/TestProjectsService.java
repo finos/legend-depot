@@ -299,7 +299,7 @@ public class TestProjectsService extends TestBaseServices
         versionData.setEvicted(true);
         try
         {
-            projectsService.checkExists("examples.metadata", "art106", "1.0.0");
+            projectsService.resolveAliasesAndCheckVersionExists("examples.metadata", "art106", "1.0.0");
             Assert.assertTrue(false);
         }
         catch (IllegalArgumentException e)

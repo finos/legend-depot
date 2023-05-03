@@ -75,6 +75,4 @@ public interface ProjectsService
     List<ProjectDependencyWithPlatformVersions> getDependentProjects(String groupId, String artifactId, String versionId);
 
     void checkExists(String groupId, String artifactId) throws IllegalArgumentException;
-
-    void checkExists(String groupId, String artifactId,String versionId) throws IllegalArgumentException;
 }

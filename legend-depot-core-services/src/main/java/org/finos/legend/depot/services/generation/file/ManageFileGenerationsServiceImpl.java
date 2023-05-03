@@ -52,14 +52,14 @@ public class ManageFileGenerationsServiceImpl extends  FileGenerationsServiceImp
     @Override
     public List<StoredFileGeneration> getStoredFileGenerations(String groupId, String artifactId, String versionId)
     {
-        this.projects.checkExists(groupId, artifactId, versionId);
+        versionId = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
         return fileGenerations.find(groupId, artifactId, versionId);
     }
 
     @Override
     public List<StoredFileGeneration> findByType(String groupId, String artifactId, String versionId, String type)
     {
-        this.projects.checkExists(groupId, artifactId, versionId);
+        versionId = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
         return fileGenerations.findByType(groupId, artifactId, versionId, type);
     }
 
