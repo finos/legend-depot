@@ -284,7 +284,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
                             {
                                 try
                                 {
-                                    projects.checkExists(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
+                                    projects.resolveAliasesAndCheckVersionExists(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
                                 }
                                 catch (IllegalArgumentException exception)
                                 {

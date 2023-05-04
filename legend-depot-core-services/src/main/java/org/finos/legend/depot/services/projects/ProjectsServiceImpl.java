@@ -158,17 +158,6 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
-    public void checkExists(String groupId, String artifactId, String versionId) throws IllegalArgumentException
-    {
-        Optional<StoreProjectVersionData> projectVersion = this.projectsVersions.find(groupId, artifactId, versionId);
-        if (!projectVersion.isPresent())
-        {
-            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
-        }
-        validateStoreProjectVersionData(projectVersion.get());
-    }
-
-    @Override
     public Optional<VersionId> getLatestVersion(String groupId, String artifactId)
     {
         return this.getVersions(groupId, artifactId,false).stream().map(v -> VersionId.parseVersionId(v)).max(VersionId::compareTo);
