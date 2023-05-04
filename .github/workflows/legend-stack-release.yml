@@ -48,13 +48,13 @@ jobs:
           echo "Legend Shared version: $sharedVersion, Legend Engine version: $engineVersion, Legend SDLC version: $sdlcVersion"
           
           if [ -n "$sharedVersion" ]; then
-            sed -i "s#<legend.shared.version>.*</legend.shared.version>#<legend.shared.version>${sharedVersion}</legend.shared.version>#g" pom.xml
+            mvn versions:set-property -Dproperty=legend.shared.version -DnewVersion=${sharedVersion}
           fi
           if [ -n "$engineVersion" ]; then
-            sed -i "s#<legend.engine.version>.*</legend.engine.version>#<legend.engine.version>${engineVersion}</legend.engine.version>#g" pom.xml
+            mvn versions:set-property -Dproperty=legend.engine.version -DnewVersion=${engineVersion}
           fi
           if [ -n "$sdlcVersion" ]; then
-            sed -i "s#<legend.sdlc.version>.*</legend.sdlc.version>#<legend.sdlc.version>${sdlcVersion}</legend.sdlc.version>#g" pom.xml
+            mvn versions:set-property -Dproperty=legend.sdlc.version -DnewVersion=${sdlcVersion}
           fi
           
           if [ -n "$sharedVersion" ] || [ -n "$engineVersion" ] || [ -n "$sdlcVersion" ]; then
