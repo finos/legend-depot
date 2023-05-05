@@ -192,4 +192,15 @@ public class TestFileGenerationsService extends TestStoreMongo
         Assert.assertEquals(2, service.getFileGenerationsByElementPath("group.test", "test", "latest", "examples::metadata::test::ClientBasic").size());
         Assert.assertEquals(12, service.getFileGenerationsByElementPath("group.test", "test", "latest", "examples::avrogen").size());
     }
+
+    @Test
+    public void canQueryFileGenerationEntitiesWithHeadAlias()
+    {
+
+        List<FileGeneration> gens1 = service.getFileGenerations("group.test", "test", "head");
+        Assert.assertEquals(14, gens1.size());
+        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "head", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "head", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
+        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "head", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
+    }
 }

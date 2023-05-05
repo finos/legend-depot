@@ -25,6 +25,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
@@ -56,7 +57,7 @@ public class ProjectsVersionsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<ProjectVersionDTO> getProjectVersion(@PathParam("groupId") String groupId,
                                                          @PathParam("artifactId") String artifactId,
-                                                         @PathParam("versionId") @ApiParam(value = "a valid versionId, released version X.Y.Z,master-SNAPSHOT or alias", example = "latest = last released version") String versionId)
+                                                         @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
     {
         return handle(ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV, ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV + groupId + artifactId + versionId, () ->
         {

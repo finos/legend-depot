@@ -337,4 +337,10 @@ public class TestProjectsService extends TestBaseServices
     {
         Assert.assertThrows("project version not found for examples.metadata-test1-1.0.0", IllegalArgumentException.class, () -> projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test1", "1.0.0"));
     }
+
+    @Test
+    public void testCanGetMasterSnapshotVersionIdUsingAlias()
+    {
+        Assert.assertEquals(MASTER_SNAPSHOT, projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test", "head"));
+    }
 }

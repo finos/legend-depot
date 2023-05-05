@@ -17,7 +17,8 @@ package org.finos.legend.depot.domain.version;
 
 public enum VersionAlias
 {
-    LATEST("latest","last released version");
+    LATEST("latest","last released version"),
+    HEAD("head","latest unreleased revision");
 
 
     String name;

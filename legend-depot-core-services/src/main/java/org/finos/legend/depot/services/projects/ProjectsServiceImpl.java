@@ -43,6 +43,8 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public class ProjectsServiceImpl implements ProjectsService
 {
 
@@ -114,6 +116,10 @@ public class ProjectsServiceImpl implements ProjectsService
         if (VersionAlias.LATEST.getName().equals(versionId))
         {
             return projectsVersions.find(groupId, artifactId).stream().filter(v -> !VersionValidator.isSnapshotVersion(v.getVersionId()) && !v.getVersionData().isExcluded()).max(Comparator.comparing(o -> VersionId.parseVersionId(o.getVersionId())));
+        }
+        else if (VersionAlias.HEAD.getName().equals(versionId))
+        {
+            return projectsVersions.find(groupId, artifactId, MASTER_SNAPSHOT);
         }
         return projectsVersions.find(groupId, artifactId, versionId);
     }
