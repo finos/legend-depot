@@ -20,7 +20,6 @@ import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
@@ -55,19 +54,16 @@ public class TestStatusServices extends TestStoreMongo
         setUpEntitiesDataFromFile(TestStoreMongo.class.getClassLoader().getResource("data/versioned-entities.json"));
         setUpEntitiesDataFromFile(TestStoreMongo.class.getClassLoader().getResource("data/revision-entities.json"));
 
-        QueryMetricsContainer.flush();
         metricsStore.getCollection().drop();
-        QueryMetricsContainer.record("examples.metadata", "test", "2.2.0");
-        QueryMetricsContainer.record("examples.metadata", "test", "2.2.0");
-        QueryMetricsContainer.record("examples.metadata", "test", "2.2.0");
-        QueryMetricsContainer.record("examples.metadata", "test", "1.0.0");
-        queryMetricsHandler.persistMetrics();
+        metricsStore.record("examples.metadata", "test", "2.2.0");
+        metricsStore.record("examples.metadata", "test", "2.2.0");
+        metricsStore.record("examples.metadata", "test", "2.2.0");
+        metricsStore.record("examples.metadata", "test", "1.0.0");
     }
 
     @After
     public void tearDown()
     {
-        QueryMetricsContainer.flush();
         metricsStore.getCollection().drop();
     }
 
@@ -99,6 +95,13 @@ public class TestStatusServices extends TestStoreMongo
         Assert.assertEquals(8, counts.totalVersionEntities);
     }
 
-
+    @Test
+    public void getMetricsStoreStatus()
+    {
+        metricsStore.record("examples.metadata", "test", "1.0.0");
+        Assert.assertEquals(5, metricsStore.getAll().size());
+        Assert.assertNotNull(metricsStore.get("examples.metadata","test","2.2.0").get(0).getLastQueryTime());
+        Assert.assertNotNull(metricsStore.get("examples.metadata","test","1.0.0").get(0).getLastQueryTime());
+    }
 
 }

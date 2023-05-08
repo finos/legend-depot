@@ -19,18 +19,19 @@ import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.server.resources.ProjectsVersionsResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.mockito.Mockito.mock;
 
 public class TestProjectsVersionsResource extends TestBaseServices
 {
-
-    private ProjectsVersionsResource projectsVersionsResource = new ProjectsVersionsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore));
+    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    private ProjectsVersionsResource projectsVersionsResource = new ProjectsVersionsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics));
 
     @Test
     public void canQueryLatestProjectVersionData()

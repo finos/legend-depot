@@ -28,6 +28,7 @@ import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithP
 import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
@@ -52,20 +53,24 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private final Projects projects;
 
+    private final QueryMetricsStore metrics;
+
     private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
     private static final String NOT_FOUND_IN_STORE = "project version not found for %s-%s-%s";
 
     @Inject
-    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects)
+    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, QueryMetricsStore metrics)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
+        this.metrics = metrics;
     }
 
-    public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects)
+    public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
+        this.metrics = metrics;
     }
 
     @Override
@@ -151,6 +156,7 @@ public class ProjectsServiceImpl implements ProjectsService
             throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
         }
         validateStoreProjectVersionData(projectVersion.get());
+        metrics.record(groupId, artifactId, version);
         return version;
     }
 

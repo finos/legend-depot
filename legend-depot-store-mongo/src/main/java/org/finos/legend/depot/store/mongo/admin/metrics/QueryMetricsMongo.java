@@ -20,10 +20,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
-import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryCounter;
+import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import com.mongodb.client.model.IndexModel;
 
@@ -36,7 +35,7 @@ import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 
 
-public class QueryMetricsMongo extends BaseMongo<VersionQueryCounter> implements QueryMetricsStore
+public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements QueryMetricsStore
 {
 
     public static final String COLLECTION = "query-metrics";
@@ -45,7 +44,7 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryCounter> implements
     @Inject
     public QueryMetricsMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
     {
-        super(databaseProvider, VersionQueryCounter.class, new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY));
+        super(databaseProvider, VersionQueryMetric.class, new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY));
     }
 
     public MongoCollection getCollection()
@@ -54,27 +53,28 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryCounter> implements
     }
 
     @Override
-    public List<VersionQueryCounter> getAll()
+    public List<VersionQueryMetric> getAll()
     {
         return getAllStoredEntities();
     }
 
     @Override
-    public List<VersionQueryCounter> get(String groupId, String artifactId, String versionId)
+    public List<VersionQueryMetric> get(String groupId, String artifactId, String versionId)
     {
         return find(getKeyFilter(groupId, artifactId, versionId));
     }
 
     @Override
-    public void persistMetrics(List<VersionQueryCounter> metrics)
+    public void record(String groupId, String artifactId, String versionId)
     {
-        metrics.forEach(metric -> getCollection().insertOne(BaseMongo.buildDocument(metric)));
+        VersionQueryMetric metric = new VersionQueryMetric(groupId, artifactId, versionId);
+        getCollection().insertOne(buildDocument(metric));
     }
 
     @Override
-    protected Bson getKeyFilter(VersionQueryCounter data)
+    protected Bson getKeyFilter(VersionQueryMetric data)
     {
-        return new BsonDocument();
+        return getKeyFilter(data.getGroupId(), data.getArtifactId(), data.getVersionId());
     }
 
     protected Bson getKeyFilter(String groupId, String artifactId, String versionId)
@@ -84,7 +84,7 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryCounter> implements
     }
 
     @Override
-    protected void validateNewData(VersionQueryCounter data)
+    protected void validateNewData(VersionQueryMetric data)
     {
         //no specific validation
     }

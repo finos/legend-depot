@@ -17,10 +17,10 @@ package org.finos.legend.depot.store.status.services;
 
 import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
+import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
-import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.status.domain.StoreStatus;
 
@@ -78,10 +78,9 @@ public class StoreStatusService
         {
             StoreStatus.VersionStatus versionStatus = new StoreStatus.VersionStatus(groupId, artifactId, v);
             Optional<RefreshStatus> updateStatus = statusService.get(groupId, artifactId, v);
-            Optional<VersionQuerySummary> versionQueryCounter = queryMetricsHandler.getSummary(groupId, artifactId, v);
+            Optional<VersionQueryMetric> versionQueryCounter = queryMetricsHandler.getSummary(groupId, artifactId, v);
             if (versionQueryCounter.isPresent())
             {
-                versionStatus.queryCount = versionQueryCounter.get().getQueryCount();
                 versionStatus.lastQueried = versionQueryCounter.get().getLastQueryTime();
             }
             versionStatus.updating = updateStatus.isPresent();
@@ -90,12 +89,4 @@ public class StoreStatusService
 
         return projectStatus;
     }
-
-
-    public List<VersionQuerySummary> summaryByProjectVersion()
-    {
-        return queryMetricsHandler.getSummaryByProjectVersion();
-    }
-
-
 }

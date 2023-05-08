@@ -23,7 +23,7 @@ import org.finos.legend.depot.domain.HasIdentifier;
 import java.util.Date;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VersionQueryCounter implements HasIdentifier
+public class VersionQueryMetric implements HasIdentifier
 {
 
     @JsonProperty
@@ -35,12 +35,12 @@ public class VersionQueryCounter implements HasIdentifier
     @JsonProperty
     private Date lastQueryTime;
 
-    public VersionQueryCounter()
+    public VersionQueryMetric()
     {
     }
 
 
-    public VersionQueryCounter(String groupId, String artifactId, String versionId)
+    public VersionQueryMetric(String groupId, String artifactId, String versionId)
     {
         this.versionId = versionId;
         this.groupId = groupId;
@@ -48,7 +48,7 @@ public class VersionQueryCounter implements HasIdentifier
         this.lastQueryTime = new Date();
     }
 
-    public VersionQueryCounter(String groupId, String artifactId, String versionId, Date lastQueryTime)
+    public VersionQueryMetric(String groupId, String artifactId, String versionId, Date lastQueryTime)
     {
         this.versionId = versionId;
         this.groupId = groupId;
