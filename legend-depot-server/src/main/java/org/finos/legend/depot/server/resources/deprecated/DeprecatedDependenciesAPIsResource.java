@@ -18,11 +18,8 @@ package org.finos.legend.depot.server.resources.deprecated;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Info;
-import io.swagger.annotations.Tag;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 
 import javax.inject.Inject;
@@ -67,7 +64,6 @@ public class DeprecatedDependenciesAPIsResource extends BaseResource
                                                                           @QueryParam("includeOrigin") @DefaultValue("false")
                                                                           @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
-        QueryMetricsContainer.record(groupId, artifactId, MASTER_SNAPSHOT);
         return handle(GET_REVISION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId,MASTER_SNAPSHOT, versioned, transitive, includeOrigin));
     }
 }

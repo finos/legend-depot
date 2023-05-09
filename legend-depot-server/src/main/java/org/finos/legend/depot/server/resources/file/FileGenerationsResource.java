@@ -21,7 +21,6 @@ import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
@@ -61,7 +60,6 @@ public class FileGenerationsResource extends BaseResource
                                                      @PathParam("artifactId") String artifactId,
                                                      @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getGenerations(groupId, artifactId, versionId));
     }
 
@@ -74,7 +72,6 @@ public class FileGenerationsResource extends BaseResource
                                                    @PathParam("artifactId") String artifactId,
                                                    @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION, () -> this.generationsService.getFileGenerations(groupId, artifactId, versionId));
     }
 
@@ -87,7 +84,6 @@ public class FileGenerationsResource extends BaseResource
                                                          @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT)String versionId,
                                                                 @PathParam("elementPath") String elementPath)
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH, () -> this.generationsService.getFileGenerationsByElementPath(groupId, artifactId, versionId, elementPath));
     }
 
@@ -99,7 +95,6 @@ public class FileGenerationsResource extends BaseResource
                                                              @PathParam("artifactId") String artifactId,
                                                              @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath)
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFilePath(groupId, artifactId, versionId, filePath));
     }
 
@@ -111,7 +106,6 @@ public class FileGenerationsResource extends BaseResource
                                                            @PathParam("artifactId") String artifactId,
                                                            @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath)
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationContentByFilePath(groupId, artifactId, versionId, filePath));
     }
 

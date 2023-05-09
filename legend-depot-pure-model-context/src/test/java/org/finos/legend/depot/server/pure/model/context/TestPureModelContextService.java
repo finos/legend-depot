@@ -24,7 +24,9 @@ import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
 import org.finos.legend.engine.protocol.pure.v1.model.context.AlloySDLC;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -37,6 +39,7 @@ import java.net.URL;
 import java.util.List;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.mockito.Mockito.mock;
 
 public class TestPureModelContextService extends TestBaseServices
 {
@@ -48,8 +51,9 @@ public class TestPureModelContextService extends TestBaseServices
     private static final URL entities_10855 = TestPureModelContextService.class.getClassLoader().getResource("versioned-entities_PROD-10855.json");
     public static final String TEST_GROUP_ID = "examples.metadata";
     public static final String CLIENT_VERSION = "vX_X_X";
+    private final QueryMetricsStore metrics = new QueryMetricsMongo(mongoProvider);
 
-    ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore);
+    ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics);
     private final PureModelContextService service = new PureModelContextServiceImpl(new EntitiesServiceImpl(entitiesStore, projectsService), projectsService);
 
 
@@ -145,6 +149,15 @@ public class TestPureModelContextService extends TestBaseServices
         String modelContextDataAsString = service.getPureModelContextDataAsString("test.legend", "blank-prod", "latest", CLIENT_VERSION, true, false);
         Assert.assertNotNull(modelContextDataAsString);
         Assert.assertEquals("{\"_type\":\"data\",\"elements\":[{\"_type\":\"service\",\"autoActivateUpdates\":true,\"documentation\":\"\",\"execution\":{\"_type\":\"pureMultiExecution\",\"executionKey\":\"env\",\"executionParameters\":[{\"key\":\"PROD\",\"mapping\":\"mapping::SomeMapping\",\"runtime\":{\"_type\":\"runtimePointer\",\"runtime\":\"runtime::H2Runtime\"}},{\"key\":\"DEV\",\"mapping\":\"mapping::SomeMapping\",\"runtime\":{\"_type\":\"runtimePointer\",\"runtime\":\"runtime::H2Runtime\"}}],\"func\":{\"_type\":\"lambda\",\"body\":[{\"_type\":\"func\",\"function\":\"project\",\"parameters\":[{\"_type\":\"func\",\"function\":\"getAll\",\"parameters\":[{\"_type\":\"packageableElementPtr\",\"fullPath\":\"domain::COVIDData\"}]},{\"_type\":\"collection\",\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"values\":[{\"_type\":\"lambda\",\"body\":[{\"_type\":\"property\",\"parameters\":[{\"_type\":\"var\",\"name\":\"x\"}],\"property\":\"cases\"}],\"parameters\":[{\"_type\":\"var\",\"name\":\"x\"}]}]},{\"_type\":\"collection\",\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"values\":[{\"_type\":\"string\",\"value\":\"Cases\"}]}]}],\"parameters\":[]}},\"name\":\"SomeService\",\"owners\":[\"anonymous\",\"akphi\"],\"package\":\"service\",\"pattern\":\"/9566f101-2108-408f-863f-6d7e154dc17a\",\"postValidations\":[],\"stereotypes\":[],\"taggedValues\":[]},{\"_type\":\"class\",\"constraints\":[],\"name\":\"Person\",\"originalMilestonedProperties\":[],\"package\":\"test::legend::blank_prod::v2_0_0::blank\",\"properties\":[],\"qualifiedProperties\":[],\"sourceInformation\":{\"endColumn\":1,\"endLine\":3,\"sourceId\":\"\",\"startColumn\":1,\"startLine\":1},\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]}],\"origin\":{\"_type\":\"pointer\",\"sdlcInfo\":{\"_type\":\"alloy\",\"baseVersion\":\"2.0.0\",\"packageableElementPointers\":[],\"project\":\"test.legend:blank-prod\",\"version\":\"none\"},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}}", modelContextDataAsString);
+    }
+
+    @Test
+    public void canGetEntitiesForProjectAsPureModelContextDataWithMetricsStored()
+    {
+        service.getPureModelContextDataAsString("examples.metadata", "test", "2.3.1", CLIENT_VERSION, true, true);
+        Assert.assertEquals(metrics.getAll().size(), 4);
+        Assert.assertNotNull(metrics.get("examples.metadata", "test-dependencies", "1.0.0").get(0).getLastQueryTime());
+        Assert.assertNotNull(metrics.get("examples.metadata", "test", "2.3.1").get(0).getLastQueryTime());
     }
 
     @Test

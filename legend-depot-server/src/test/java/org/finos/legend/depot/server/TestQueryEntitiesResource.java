@@ -16,15 +16,17 @@
 package org.finos.legend.depot.server;
 
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.server.resources.entities.EntitiesResource;
 import org.finos.legend.depot.services.TestBaseServices;
+import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -36,6 +38,7 @@ import org.junit.Test;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
@@ -46,7 +49,10 @@ public class TestQueryEntitiesResource extends TestBaseServices
 {
     private UpdateProjects projects = mock(UpdateProjects.class);
     private UpdateProjectsVersions projectsVersions = mock(UpdateProjectsVersions.class);
-    private EntitiesResource entitiesResource = new EntitiesResource(new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projectsVersions, projects)));
+
+    private final QueryMetricsStore metrics = new QueryMetricsMongo(mongoProvider);
+    private final EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projectsVersions, projects, metrics));
+    private EntitiesResource entitiesResource = new EntitiesResource(entitiesService);
     private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
     private QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metricsStore);
 
@@ -59,7 +65,6 @@ public class TestQueryEntitiesResource extends TestBaseServices
     public void setupMetadata()
     {
         super.setUpData();
-        QueryMetricsContainer.flush();
         metricsStore.getCollection().drop();
         loadEntities("PROD-A", "2.3.0");
         loadEntities("PROD-A", MASTER_SNAPSHOT);
@@ -73,7 +78,6 @@ public class TestQueryEntitiesResource extends TestBaseServices
     public void tearDown()
     {
         metricsStore.getCollection().drop();
-        QueryMetricsContainer.flush();
     }
 
     @Test
@@ -107,22 +111,39 @@ public class TestQueryEntitiesResource extends TestBaseServices
     public void canGetMetrics() throws InterruptedException
     {
         Assert.assertTrue(metricsStore.getAllStoredEntities().isEmpty());
-        Assert.assertEquals(0, QueryMetricsContainer.getMetrics("examples.metadata", "test", "2.3.0").size());
+        Assert.assertEquals(0, metricsStore.get("examples.metadata", "test", "2.3.0").size());
 
+        when(projects.find("examples.metadata","test")).thenReturn(Optional.of(new StoreProjectData("mock","examples.metadata","test")));
         entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", false, null, true);
 
-        Assert.assertEquals(1, QueryMetricsContainer.getMetrics("examples.metadata", "test", "2.3.0").size());
-        Date lastQueryTime = QueryMetricsContainer.getMetrics("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime();
+        Assert.assertEquals(1, metricsStore.get("examples.metadata", "test", "2.3.0").size());
+        Date lastQueryTime = metrics.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime();
         Assert.assertNotNull(lastQueryTime);
         TimeUnit.SECONDS.sleep(30);
 
         entitiesResource.getEntities("example.services.test", "test", "1.0.1", false);
 
-        QueryMetricsContainer.getMetrics("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime();
-
-        metricsHandler.persistMetrics();
+        Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
 
         Assert.assertEquals(2, metricsStore.getAllStoredEntities().size());
+    }
+
+    @Test
+    public void canGetMetricsForTransitiveDependencies() throws InterruptedException
+    {
+        Assert.assertTrue(metricsStore.getAllStoredEntities().isEmpty());
+        Assert.assertEquals(0, metricsStore.get("examples.metadata", "test", "2.3.0").size());
+
+        StoreProjectVersionData versionData = new StoreProjectVersionData("examples.metadata", "test-master", "2.3.0");
+        versionData.getVersionData().setDependencies(Collections.singletonList(new ProjectVersion("examples.metadata","test", "2.3.0")));
+        when(projects.find("examples.metadata","test-master")).thenReturn(Optional.of(new StoreProjectData("mock02","examples.metadata","test-master")));
+        when(projectsVersions.find("examples.metadata","test-master", "2.3.0")).thenReturn(Optional.of(versionData));
+
+        entitiesService.getDependenciesEntities("examples.metadata", "test-master", "2.3.0", false, true, false);
+
+        Assert.assertEquals(2, metricsStore.getAll().size());
+        Assert.assertNotNull(metrics.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
+        Assert.assertNotNull(metricsStore.get("examples.metadata", "test-master", "2.3.0").get(0).getLastQueryTime());
     }
 
 

@@ -18,15 +18,18 @@ package org.finos.legend.depot.server;
 import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 
+import static org.mockito.Mockito.mock;
+
 public class TestProjectsResource extends TestBaseServices
 {
-
-    private ProjectsResource projectsVersionsResource = new ProjectsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore));
+    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    private ProjectsResource projectsVersionsResource = new ProjectsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics));
 
     @Test
     public void canQueryVersionsForProjectGA()

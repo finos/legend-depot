@@ -32,7 +32,6 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 
 import javax.inject.Inject;
@@ -117,7 +116,6 @@ public class DependenciesResource extends BaseResource
                                                                     @QueryParam("includeOrigin") @DefaultValue("false")
                                                                     @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, versioned, transitive, includeOrigin));
     }
 
@@ -133,8 +131,6 @@ public class DependenciesResource extends BaseResource
                                                                        @QueryParam("includeOrigin") @DefaultValue("false")
                                                                        @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
-        projectDependencies.forEach(dep ->
-            QueryMetricsContainer.record(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()));
         return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, versioned, transitive, includeOrigin));
     }
 

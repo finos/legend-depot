@@ -18,9 +18,7 @@ package org.finos.legend.depot.server.resources.deprecated;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.Tag;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
@@ -66,7 +64,6 @@ public class DeprecatedEntitiesAPIsResource extends BaseResource
                                           @DefaultValue("false")
                                           @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned)
     {
-        QueryMetricsContainer.record(groupId, artifactId, MASTER_SNAPSHOT);
         return handle(GET_REVISION_ENTITIES, () -> this.entitiesService.getEntities(groupId, artifactId, MASTER_SNAPSHOT,versioned));
     }
 
@@ -80,7 +77,6 @@ public class DeprecatedEntitiesAPIsResource extends BaseResource
                                            @PathParam("artifactId") String artifactId,
                                            @PathParam("path") String entityPath)
     {
-        QueryMetricsContainer.record(groupId, artifactId, MASTER_SNAPSHOT);
         return handle(GET_REVISION_ENTITY, GET_REVISION_ENTITY + entityPath, () -> this.entitiesService.getEntity(groupId, artifactId,MASTER_SNAPSHOT, entityPath));
     }
 
@@ -100,7 +96,6 @@ public class DeprecatedEntitiesAPIsResource extends BaseResource
                                           @DefaultValue("true")
                                           @ApiParam("Whether to include ENTITIES from subpackages or only directly in one of the given packages") boolean includeSubPackages)
     {
-        QueryMetricsContainer.record(groupId, artifactId, MASTER_SNAPSHOT);
         return handle(GET_REVISION_ENTITIES_BY_PACKAGE, GET_REVISION_ENTITIES_BY_PACKAGE + packageName, () -> this.entitiesService.getEntitiesByPackage(groupId, artifactId, MASTER_SNAPSHOT,packageName, versioned, classifierPaths, includeSubPackages));
     }
 }

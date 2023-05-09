@@ -27,6 +27,7 @@ import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithP
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,11 +39,12 @@ import java.util.Collections;
 import java.util.Arrays;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.mockito.Mockito.mock;
 
 public class TestProjectsService extends TestBaseServices
 {
-
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore);
+    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics);
 
     @Before
     public void setUpData()

@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 
@@ -62,7 +61,6 @@ public class PureModelContextResource extends BaseResource
                                                         @DefaultValue("true")
                                                         @ApiParam("Whether to include entities from dependencies") boolean getDependencies)
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, versioned, getDependencies));
     }
 }

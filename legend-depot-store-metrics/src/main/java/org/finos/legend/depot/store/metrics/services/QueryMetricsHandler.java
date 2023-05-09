@@ -15,10 +15,9 @@
 
 package org.finos.legend.depot.store.metrics.services;
 
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
-import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryCounter;
-import org.finos.legend.depot.store.metrics.domain.MetricKey;
-import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
+import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 
 import javax.inject.Inject;
 import java.util.Comparator;
@@ -30,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class QueryMetricsHandler
 {
-    public static final Comparator<VersionQueryCounter> MOST_RECENTLY_QUERIED = (o1, o2) -> o2.getLastQueryTime().compareTo(o1.getLastQueryTime());
+    public static final Comparator<VersionQueryMetric> MOST_RECENTLY_QUERIED = (o1, o2) -> o2.getLastQueryTime().compareTo(o1.getLastQueryTime());
 
     private final QueryMetricsStore metricsStore;
 
@@ -40,34 +39,33 @@ public class QueryMetricsHandler
         this.metricsStore = metricsStore;
     }
 
-    public void persistMetrics()
+    public Optional<VersionQueryMetric> getSummary(String groupId, String artifactId, String versionId)
     {
-        metricsStore.persistMetrics(QueryMetricsContainer.getAll());
-        QueryMetricsContainer.flush();
-    }
-
-
-    public Optional<VersionQuerySummary> getSummary(String groupId, String artifactId, String versionId)
-    {
-        List<VersionQueryCounter> queryCounters = metricsStore.get(groupId, artifactId, versionId);
+        List<VersionQueryMetric> queryCounters = metricsStore.get(groupId, artifactId, versionId);
         if (queryCounters.isEmpty())
         {
             return Optional.empty();
         }
-        Optional<VersionQueryCounter> latest = queryCounters.stream().max(MOST_RECENTLY_QUERIED);
-        return latest.map(versionQueryCounter -> new VersionQuerySummary(groupId, artifactId, versionId, versionQueryCounter.getLastQueryTime(), queryCounters.size()));
+        Optional<VersionQueryMetric> latest = queryCounters.stream().max(MOST_RECENTLY_QUERIED);
+        return latest;
     }
 
 
-    public List<VersionQuerySummary> getSummaryByProjectVersion()
+    public List<VersionQueryMetric> getSummaryByProjectVersion()
     {
-        Map<MetricKey, VersionQuerySummary> all = new HashMap<>();
+        Map<ProjectVersion, VersionQueryMetric> all = new HashMap<>();
         metricsStore.getAll().forEach(m ->
         {
-            MetricKey key = new MetricKey(m.getGroupId(), m.getArtifactId(), m.getVersionId());
-            VersionQuerySummary inSummary = all.getOrDefault(key, new VersionQuerySummary(m.getGroupId(), m.getArtifactId(), m.getVersionId(), m.getLastQueryTime(), 0));
-            inSummary.addToSummary(m);
-            all.put(key, inSummary);
+            ProjectVersion key = new ProjectVersion(m.getGroupId(), m.getArtifactId(), m.getVersionId());
+            VersionQueryMetric inSummary = all.getOrDefault(key, m);
+            if (inSummary.getLastQueryTime().before(m.getLastQueryTime()))
+            {
+                all.put(key, m);
+            }
+            else
+            {
+                all.put(key, inSummary);
+            }
         });
         return all.values().stream().sorted(MOST_RECENTLY_QUERIED).collect(Collectors.toList());
     }

@@ -13,19 +13,30 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.admin.api.metrics;
+package org.finos.legend.depot.store.mongo.admin.metrics;
 
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 
+import java.util.Collections;
 import java.util.List;
 
-public interface QueryMetricsStore
+public class VoidQueryMetricsStore implements QueryMetricsStore
 {
+    @Override
+    public List<VersionQueryMetric> get(String groupId, String artifactId, String versionId)
+    {
+        return Collections.emptyList();
+    }
 
-    List<VersionQueryMetric> get(String groupId, String artifactId, String versionId);
+    @Override
+    public List<VersionQueryMetric> getAll()
+    {
+        return Collections.emptyList();
+    }
 
-    List<VersionQueryMetric> getAll();
-
-    void record(String groupId, String artifactId, String versionId);
-
+    @Override
+    public void record(String groupId, String artifactId, String versionId)
+    {
+    }
 }
