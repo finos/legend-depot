@@ -37,10 +37,10 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 @Api("Deprecated")
 public class DeprecatedFileGenerationAPIsResource extends BaseResource
 {
-    private static final String GET_REVISION_FILE_GENERATION_ENTITIES = "get revision generation entities";
-    private static final String GET_REVISION_FILE_GENERATION = "get revision file generations";
-    private static final String GET_REVISION_FILE_GENERATION_BY_ELEMENT_PATH = "get revision file generations by element path";
-    private static final String GET_REVISION_FILE_GENERATION_BY_FILEPATH = "get revision file generations by file";
+    private static final String GET_REVISION_FILE_GENERATION_ENTITIES = "get revision generation entities deprecated";
+    private static final String GET_REVISION_FILE_GENERATION = "get revision file generations deprecated";
+    private static final String GET_REVISION_FILE_GENERATION_BY_ELEMENT_PATH = "get revision file generations by element path deprecated";
+    private static final String GET_REVISION_FILE_GENERATION_BY_FILEPATH = "get revision file generations by file deprecated";
     private final FileGenerationsService generationsService;
 
     @Inject

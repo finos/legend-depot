@@ -50,8 +50,8 @@ import java.util.stream.Collectors;
 public class DeprecatedProjectAPIsResource extends BaseResource
 {
 
-    private static final String GET_ALL_LEGACY_PROJECTS = "get all projects legacy";
-    private static final String GET_PROJECT_BY_GA = "get project by ga";
+    private static final String GET_ALL_LEGACY_PROJECTS = "get all projects deprecated";
+    private static final String GET_PROJECT_BY_GA = "get project by ga deprecated";
 
     private final ProjectsService projectApi;
 

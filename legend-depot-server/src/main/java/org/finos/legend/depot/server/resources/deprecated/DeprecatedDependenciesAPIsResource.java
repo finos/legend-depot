@@ -39,7 +39,7 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class DeprecatedDependenciesAPIsResource extends BaseResource
 {
 
-    private static final String GET_REVISION_DEPENDENCY_ENTITIES = "get latest dependencies entities";
+    private static final String GET_REVISION_DEPENDENCY_ENTITIES = "get latest dependencies entities deprecated";
     private final EntitiesService entitiesService;
 
 
