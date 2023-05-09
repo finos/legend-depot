@@ -39,7 +39,7 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class DeprecatedPureModelContextAPIsResource extends BaseResource
 {
 
-    private static final String GET_REVISION_ENTITIES_AS_PMCD = "get revision entities as PMCD";
+    private static final String GET_REVISION_ENTITIES_AS_PMCD = "get revision entities as PMCD deprecated";
     private final PureModelContextService service;
 
     @Inject

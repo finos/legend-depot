@@ -172,11 +172,7 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
                 if (m.isAnnotationPresent(ApiOperation.class))
                 {
                     ApiOperation val = m.getAnnotation(ApiOperation.class);
-                    String metricName = "api " + (val.nickname() != null && !val.nickname().isEmpty() ? val.nickname() : val.value());
-                    if (m.isAnnotationPresent(Deprecated.class))
-                    {
-                        metricName = metricName + " deprecated";
-                    }
+                    String metricName = (val.nickname() != null && !val.nickname().isEmpty() ? val.nickname() : val.value());
                     this.registerSummary(metricName, metricName);
                 }
             });

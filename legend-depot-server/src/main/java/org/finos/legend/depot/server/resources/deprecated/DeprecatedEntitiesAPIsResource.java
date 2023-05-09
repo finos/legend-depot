@@ -41,9 +41,9 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class DeprecatedEntitiesAPIsResource extends BaseResource
 {
 
-    private static final String GET_REVISION_ENTITIES = "get revision entities";
-    private static final String GET_REVISION_ENTITY = "get revision entity";
-    private static final String GET_REVISION_ENTITIES_BY_PACKAGE = "get revision entities by package";
+    private static final String GET_REVISION_ENTITIES = "get revision entities deprecated";
+    private static final String GET_REVISION_ENTITY = "get revision entity deprecated";
+    private static final String GET_REVISION_ENTITIES_BY_PACKAGE = "get revision entities by package deprecated";
     private final EntitiesService entitiesService;
 
     @Inject
