@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_DEPENDANT_PROJECTS;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCIES;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCY_TREE;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSIONS_DEPENDENCY_ENTITIES;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_DEPENDENCY_ENTITIES;
 
 @Path("")
@@ -121,7 +122,7 @@ public class DependenciesResource extends BaseResource
 
     @POST
     @Path("/projects/dependencies")
-    @ApiOperation(GET_VERSION_DEPENDENCY_ENTITIES)
+    @ApiOperation(GET_VERSIONS_DEPENDENCY_ENTITIES)
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProjectVersionEntities> getAllEntitiesFromDependencies(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies,
                                                                        @QueryParam("versioned") @DefaultValue("false")
@@ -131,7 +132,7 @@ public class DependenciesResource extends BaseResource
                                                                        @QueryParam("includeOrigin") @DefaultValue("false")
                                                                        @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
-        return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, versioned, transitive, includeOrigin));
+        return handle(GET_VERSIONS_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, versioned, transitive, includeOrigin));
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
