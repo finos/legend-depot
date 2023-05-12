@@ -23,6 +23,7 @@ import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProvide
 import org.finos.legend.depot.artifacts.repository.api.VoidArtifactRepositoryProvider;
 import org.finos.legend.depot.core.http.guice.BaseModule;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
+import org.finos.legend.depot.store.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
@@ -43,6 +44,7 @@ public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfigura
         binder.bind(ArtifactRepository.class).toProvider(this::getArtifactRepository);
         binder.bind(ArtifactRepositoryProviderConfiguration.class).toProvider(this::getArtifactRepositoryConfiguration);
         binder.bind(IncludeProjectPropertiesConfiguration.class).toProvider(this::getIncludePropertiesConfiguration);
+        binder.bind(ArtifactsRetentionPolicyConfiguration.class).toProvider(this::getRetentionPolicyConfiguration);
         binder.bind(QueueManagerConfiguration.class).toProvider(this::getQueueManagerConfiguration);
     }
 
@@ -54,6 +56,11 @@ public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfigura
     private IncludeProjectPropertiesConfiguration getIncludePropertiesConfiguration()
     {
         return getConfiguration().getIncludeProjectPropertiesConfiguration();
+    }
+
+    private ArtifactsRetentionPolicyConfiguration getRetentionPolicyConfiguration()
+    {
+        return getConfiguration().getRetentionPolicyConfiguration();
     }
 
     private ArtifactRepositoryProviderConfiguration getArtifactRepositoryConfiguration()

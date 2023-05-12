@@ -52,6 +52,8 @@ public interface ProjectsService
 
     List<StoreProjectVersionData> findVersion(Boolean excluded);
 
+    List<StoreProjectVersionData> findSnapshotVersions(String groupId, String artifactId);
+
     Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId);
 
     String resolveAliasesAndCheckVersionExists(String groupId, String artifactId, String versionId);

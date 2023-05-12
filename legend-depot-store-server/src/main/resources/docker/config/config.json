@@ -105,5 +105,8 @@
   "includeProjectPropertiesConfiguration": {
     "properties": []
   },
+  "artifactsRetentionPolicyConfiguration": {
+    "maximumSnapshotsAllowed": 5
+  }
   "queue-interval": 30
 }

@@ -110,6 +110,12 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
+    public List<StoreProjectVersionData> findSnapshotVersions(String groupId, String artifactId)
+    {
+        return this.find(groupId, artifactId).stream().filter(v -> VersionValidator.isSnapshotVersion(v.getVersionId()) && !v.getVersionData().isExcluded()).collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<StoreProjectData> findCoordinates(String groupId, String artifactId)
     {
         return projects.find(groupId, artifactId);

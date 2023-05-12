@@ -87,7 +87,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
 
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore, artifactsStore, new IncludeProjectPropertiesConfiguration(properties), dependencyManager);
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore, artifactsStore, new IncludeProjectPropertiesConfiguration(properties), dependencyManager, 3);
 
 
     @Before
@@ -261,5 +261,17 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         versionHandler.deleteExpiredRefresh();
         Assert.assertEquals(0, refreshStatusStore.getAll().size());
 
+    }
+
+    @Test
+    public void cannotLoadSnapshotVersionIfLimitExceeded()
+    {
+        projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch1-SNAPSHOT"));
+        projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch2-SNAPSHOT"));
+        projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch3-SNAPSHOT"));
+
+        List<String> errors = versionHandler.validateEvent(new MetadataNotification("PROD-1", "examples.metadata", "test", "branch3-SNAPSHOT"));
+
+        Assert.assertEquals(1, errors.size());
     }
 }
