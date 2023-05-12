@@ -39,4 +39,10 @@ public class VoidQueryMetricsStore implements QueryMetricsStore
     public void record(String groupId, String artifactId, String versionId)
     {
     }
+
+    @Override
+    public long consolidate(VersionQueryMetric metric)
+    {
+        return 0;
+    }
 }

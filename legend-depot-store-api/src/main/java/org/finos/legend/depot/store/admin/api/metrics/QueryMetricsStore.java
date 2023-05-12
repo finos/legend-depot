@@ -28,4 +28,6 @@ public interface QueryMetricsStore
 
     void record(String groupId, String artifactId, String versionId);
 
+    long consolidate(VersionQueryMetric metric);
+
 }
