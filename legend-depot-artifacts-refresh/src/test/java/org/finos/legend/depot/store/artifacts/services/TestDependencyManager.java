@@ -57,7 +57,7 @@ public class TestDependencyManager extends TestStoreMongo
     protected RefreshStatusStore refreshStatusStore = new ArtifactsRefreshStatusMongo(mongoProvider);
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(null), dependencyManager);
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(null), dependencyManager, 10);
 
     private static final String GROUPID = "examples.metadata";
 

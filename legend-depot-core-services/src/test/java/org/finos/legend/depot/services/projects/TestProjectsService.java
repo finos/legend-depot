@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Collections;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import static org.mockito.Mockito.mock;
@@ -344,5 +345,17 @@ public class TestProjectsService extends TestBaseServices
     public void testCanGetMasterSnapshotVersionIdUsingAlias()
     {
         Assert.assertEquals(MASTER_SNAPSHOT, projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test", "head"));
+    }
+
+    @Test
+    public void canGetSnapshotVersions()
+    {
+        projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata", "test", "branch1-SNAPSHOT"));
+        StoreProjectVersionData projectVersionData = new StoreProjectVersionData("examples.metadata", "test", "branch2-SNAPSHOT");
+        projectVersionData.getVersionData().setExcluded(true);
+        projectsService.createOrUpdate(projectVersionData);
+        List<StoreProjectVersionData> versionData = projectsService.findSnapshotVersions("examples.metadata", "test");
+        Assert.assertEquals(2, versionData.size());
+        Assert.assertEquals(Arrays.asList("master-SNAPSHOT", "branch1-SNAPSHOT"), versionData.stream().map(x -> x.getVersionId()).collect(Collectors.toList()));
     }
 }

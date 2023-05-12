@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.core.http.ServersConfiguration;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
+import org.finos.legend.depot.store.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
 
 import javax.validation.constraints.NotNull;
@@ -38,6 +39,9 @@ public class DepotStoreServerConfiguration extends ServersConfiguration
     @NotNull
     @JsonProperty("includeProjectPropertiesConfiguration")
     private IncludeProjectPropertiesConfiguration includeProjectPropertiesConfiguration;
+
+    @JsonProperty("artifactsRetentionPolicyConfiguration")
+    private ArtifactsRetentionPolicyConfiguration artifactsRetentionPolicyConfiguration;
 
     public QueueManagerConfiguration getQueueManagerConfiguration()
     {
@@ -69,4 +73,13 @@ public class DepotStoreServerConfiguration extends ServersConfiguration
         this.includeProjectPropertiesConfiguration = includeProjectPropertiesConfiguration;
     }
 
+    public ArtifactsRetentionPolicyConfiguration getRetentionPolicyConfiguration()
+    {
+        return artifactsRetentionPolicyConfiguration;
+    }
+
+    public void setRetentionPolicyConfiguration(ArtifactsRetentionPolicyConfiguration artifactsRetentionPolicyConfiguration)
+    {
+        this.artifactsRetentionPolicyConfiguration = artifactsRetentionPolicyConfiguration;
+    }
 }

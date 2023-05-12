@@ -22,6 +22,7 @@ import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProvide
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.ParentEvent;
+import org.finos.legend.depot.store.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactRefreshStatusResource;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactsRefreshResource;
 import org.finos.legend.depot.store.artifacts.resources.DependenciesResource;
@@ -90,5 +91,13 @@ public class ArtifactsRefreshModule extends PrivateModule
     {
         schedulesFactory.register(CLEANUP_REFRESH_SCHEDULE, SchedulesFactory.MINUTE,SchedulesFactory.MINUTE, () -> refreshHandler.deleteExpiredRefresh());
         return true;
+    }
+
+    @Provides
+    @Singleton
+    @Named("maximumSnapshotsAllowed")
+    int getNoOfSnapshotVersionsToRetain(ArtifactsRetentionPolicyConfiguration artifactsRetentionPolicyConfiguration)
+    {
+        return artifactsRetentionPolicyConfiguration.getMaximumSnapshotsAllowed();
     }
 }
