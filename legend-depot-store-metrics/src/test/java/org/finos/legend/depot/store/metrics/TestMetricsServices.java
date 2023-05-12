@@ -24,9 +24,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import static org.finos.legend.depot.domain.DatesHandler.toDate;
 
 public class TestMetricsServices extends TestStoreMongo
 {
@@ -72,9 +76,43 @@ public class TestMetricsServices extends TestStoreMongo
         Assert.assertEquals(4, metricsStore.getAllStoredEntities().size());
         List<VersionQueryMetric> metrics = metricsHandler.getSummaryByProjectVersion();
         Assert.assertEquals(2, metrics.size());
-        Assert.assertEquals("1.0.0", metrics.get(0).getVersionId());
-        Assert.assertEquals("2.2.0", metrics.get(1).getVersionId());
+        Assert.assertEquals("2.2.0", metrics.get(0).getVersionId());
+        Assert.assertEquals("1.0.0", metrics.get(1).getVersionId());
     }
 
+    @Test
+    public void canConsolidateQueryMetrics() throws InterruptedException
+    {
+        metricsStore.record("group1", "art1", "3.0.0");
+        Thread.sleep(10);
+        metricsStore.record("group1", "art1", "3.0.0");
+        Assert.assertEquals(6, metricsStore.getAllStoredEntities().size());
+        List<VersionQueryMetric> summary = metricsHandler.getSummaryByProjectVersion();
+        metricsHandler.consolidateMetrics();
+        List<VersionQueryMetric> metrics = metricsStore.getAllStoredEntities();
+        Assert.assertEquals(3, metrics.size());
+        Assert.assertEquals("2.2.0", metrics.get(0).getVersionId());
+        Assert.assertEquals("2.2.0", summary.get(1).getVersionId());
+        Assert.assertEquals(summary.get(1).getLastQueryTime(), metrics.get(0).getLastQueryTime());
+        Assert.assertEquals("1.0.0", metrics.get(1).getVersionId());
+        Assert.assertEquals("1.0.0", summary.get(2).getVersionId());
+        Assert.assertEquals(summary.get(2).getLastQueryTime(), metrics.get(1).getLastQueryTime());
+        Assert.assertEquals("3.0.0", metrics.get(2).getVersionId());
+        Assert.assertEquals("3.0.0", summary.get(0).getVersionId());
+        Assert.assertEquals(summary.get(0).getLastQueryTime(), metrics.get(2).getLastQueryTime());
+    }
 
+    @Test
+    public void canConsolidateMetricsAtDiffDates()
+    {
+        metricsStore.insert(new VersionQueryMetric("group1", "art1", "3.0.0", toDate(LocalDateTime.parse("2023-03-22T14:02:49", DateTimeFormatter.ISO_DATE_TIME))));
+        metricsStore.insert(new VersionQueryMetric("group1", "art1", "3.0.0", toDate(LocalDateTime.parse("2023-03-21T14:02:49", DateTimeFormatter.ISO_DATE_TIME))));
+
+        Assert.assertEquals(6, metricsStore.getAllStoredEntities().size());
+        metricsHandler.consolidateMetrics();
+        List<VersionQueryMetric> metrics = metricsStore.getAllStoredEntities();
+        Assert.assertEquals(3, metrics.size());
+        Assert.assertEquals("3.0.0", metrics.get(2).getVersionId());
+        Assert.assertEquals(toDate(LocalDateTime.parse("2023-03-22T14:02:49", DateTimeFormatter.ISO_DATE_TIME)), metrics.get(2).getLastQueryTime());
+    }
 }

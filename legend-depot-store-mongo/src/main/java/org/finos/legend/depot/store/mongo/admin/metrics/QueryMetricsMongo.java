@@ -33,7 +33,7 @@ import java.util.Arrays;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-
+import static com.mongodb.client.model.Filters.lt;
 
 public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements QueryMetricsStore
 {
@@ -69,6 +69,13 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
     {
         VersionQueryMetric metric = new VersionQueryMetric(groupId, artifactId, versionId);
         getCollection().insertOne(buildDocument(metric));
+    }
+
+    @Override
+    public long consolidate(VersionQueryMetric metric)
+    {
+        // We are deleting every metric with same gav except the one passed in the function
+        return super.delete(and(getKeyFilter(metric),lt("lastQueryTime", metric.getLastQueryTime().getTime())));
     }
 
     @Override

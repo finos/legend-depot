@@ -18,19 +18,18 @@ package org.finos.legend.depot.store.metrics.services;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class QueryMetricsHandler
 {
-    public static final Comparator<VersionQueryMetric> MOST_RECENTLY_QUERIED = (o1, o2) -> o2.getLastQueryTime().compareTo(o1.getLastQueryTime());
-
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QueryMetricsHandler.class);
     private final QueryMetricsStore metricsStore;
 
     @Inject
@@ -46,27 +45,35 @@ public class QueryMetricsHandler
         {
             return Optional.empty();
         }
-        Optional<VersionQueryMetric> latest = queryCounters.stream().max(MOST_RECENTLY_QUERIED);
+        Optional<VersionQueryMetric> latest = queryCounters.stream().max(Comparator.comparing(VersionQueryMetric::getLastQueryTime));
         return latest;
     }
 
 
     public List<VersionQueryMetric> getSummaryByProjectVersion()
     {
-        Map<ProjectVersion, VersionQueryMetric> all = new HashMap<>();
-        metricsStore.getAll().forEach(m ->
+        Stream<VersionQueryMetric> all = metricsStore.getAll().stream()
+                .collect(Collectors.groupingBy(versionQueryMetric -> new ProjectVersion(versionQueryMetric.getGroupId(), versionQueryMetric.getArtifactId(), versionQueryMetric.getVersionId()),
+                         Collectors.collectingAndThen(Collectors.maxBy(Comparator.comparing(VersionQueryMetric::getLastQueryTime)), Optional::get))).values().stream();
+        return all.collect(Collectors.toList());
+    }
+
+    public void consolidateMetrics()
+    {
+        List<VersionQueryMetric> versionQueryMetric = getSummaryByProjectVersion();
+        LOGGER.info("Started consolidating metrics for all project versions");
+        versionQueryMetric.forEach(metric ->
         {
-            ProjectVersion key = new ProjectVersion(m.getGroupId(), m.getArtifactId(), m.getVersionId());
-            VersionQueryMetric inSummary = all.getOrDefault(key, m);
-            if (inSummary.getLastQueryTime().before(m.getLastQueryTime()))
+            try
             {
-                all.put(key, m);
+                long deletedResult = metricsStore.consolidate(metric);
+                LOGGER.info(String.format("Deleted [%s] records for project version: %s-%s-%s", deletedResult, metric.getGroupId(), metric.getArtifactId(), metric.getVersionId()));
             }
-            else
+            catch (Exception e)
             {
-                all.put(key, inSummary);
+                LOGGER.error(String.format("Error consolidating metrics for %s-%s-%s with error: %s", metric.getGroupId(), metric.getArtifactId(), metric.getVersionId(), e.getMessage()));
             }
         });
-        return all.values().stream().sorted(MOST_RECENTLY_QUERIED).collect(Collectors.toList());
+        LOGGER.info("Completed consolidating metrics for all project version");
     }
 }

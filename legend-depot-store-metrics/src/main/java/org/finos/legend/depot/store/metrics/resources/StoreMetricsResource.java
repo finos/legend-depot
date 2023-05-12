@@ -48,6 +48,6 @@ public class StoreMetricsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<VersionQueryMetric> getVersionsByLastUsed()
     {
-        return handle(ResourceLoggingAndTracing.GET_VERSIONS_BY_LAST_USED, this.queryMetrics::getSummaryByProjectVersion);
+        return handle(ResourceLoggingAndTracing.GET_VERSIONS_BY_LAST_USED, () -> this.queryMetrics.getSummaryByProjectVersion());
     }
 }
