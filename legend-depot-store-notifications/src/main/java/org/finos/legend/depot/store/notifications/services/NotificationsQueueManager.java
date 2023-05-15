@@ -154,7 +154,9 @@ public final class NotificationsQueueManager implements NotificationsManager
         }
         else
         {
-         throw new IllegalArgumentException(String.format("Notification failed validation : project[%s] [%s-%s-%s]",projectId, groupId, artifactId, versionId, String.join(",",validationResponse)));
+            String errorMessage = String.format("Notification failed validation for project :[%s] gav:[%s-%s-%s] %s",projectId, groupId, artifactId, versionId, String.join(",",validationResponse));
+            LOGGER.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
         }
 
     }

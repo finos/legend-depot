@@ -17,7 +17,7 @@ package org.finos.legend.depot.store.metrics.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.finos.legend.depot.store.metrics.domain.VersionQuerySummary;
+import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
@@ -46,8 +46,8 @@ public class StoreMetricsResource extends BaseResource
     @Path("/metrics/lastQuery")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS_BY_LAST_USED)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<VersionQuerySummary> getVersionsByLastUsed()
+    public List<VersionQueryMetric> getVersionsByLastUsed()
     {
-        return handle(ResourceLoggingAndTracing.GET_VERSIONS_BY_LAST_USED, this.queryMetrics::getSummaryByProjectVersion);
+        return handle(ResourceLoggingAndTracing.GET_VERSIONS_BY_LAST_USED, () -> this.queryMetrics.getSummaryByProjectVersion());
     }
 }

@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 
@@ -40,7 +39,7 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class DeprecatedPureModelContextAPIsResource extends BaseResource
 {
 
-    private static final String GET_REVISION_ENTITIES_AS_PMCD = "get revision entities as PMCD";
+    private static final String GET_REVISION_ENTITIES_AS_PMCD = "get revision entities as PMCD deprecated";
     private final PureModelContextService service;
 
     @Inject
@@ -65,7 +64,6 @@ public class DeprecatedPureModelContextAPIsResource extends BaseResource
                                                         @DefaultValue("true")
                                                         @ApiParam("Whether to return ENTITIES with version in entity path") boolean getDependencies)
     {
-        QueryMetricsContainer.record(groupId, artifactId, MASTER_SNAPSHOT);
         return handle(GET_REVISION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId,MASTER_SNAPSHOT, clientVersion, versioned, getDependencies));
     }
 }

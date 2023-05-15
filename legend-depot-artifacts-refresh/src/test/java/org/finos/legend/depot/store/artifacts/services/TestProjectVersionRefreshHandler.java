@@ -31,6 +31,7 @@ import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
 import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
@@ -77,8 +78,8 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     protected RefreshStatusStore refreshStatusStore = new ArtifactsRefreshStatusMongo(mongoProvider);
     protected UpdateProjectsVersions versionsStore = new ProjectsVersionsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
-
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(versionsStore, projectsStore);
+    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(versionsStore, projectsStore, metrics);
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore,projectsService);
     protected EntityArtifactsProvider entitiesProvider = new EntityProvider();
     protected RepositoryServices repositoryServices = mock(RepositoryServices.class);
@@ -86,7 +87,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
 
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore, artifactsStore, new IncludeProjectPropertiesConfiguration(properties), dependencyManager);
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore, artifactsStore, new IncludeProjectPropertiesConfiguration(properties), dependencyManager, 3);
 
 
     @Before
@@ -176,7 +177,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("prod-1",TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0",true,false,PARENT_EVENT_ID));
         Assert.assertNotNull(response);
         Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
-        Assert.assertEquals("Version 1.0.0 does not exists for examples.metadata-test", response.getErrors().get(0));
+        Assert.assertEquals("Version 1.0.0 does not exist for examples.metadata-test in repository", response.getErrors().get(0));
     }
 
     @Test
@@ -260,5 +261,17 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         versionHandler.deleteExpiredRefresh();
         Assert.assertEquals(0, refreshStatusStore.getAll().size());
 
+    }
+
+    @Test
+    public void cannotLoadSnapshotVersionIfLimitExceeded()
+    {
+        projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch1-SNAPSHOT"));
+        projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch2-SNAPSHOT"));
+        projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch3-SNAPSHOT"));
+
+        List<String> errors = versionHandler.validateEvent(new MetadataNotification("PROD-1", "examples.metadata", "test", "branch3-SNAPSHOT"));
+
+        Assert.assertEquals(1, errors.size());
     }
 }

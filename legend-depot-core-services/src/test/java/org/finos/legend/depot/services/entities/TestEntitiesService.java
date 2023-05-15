@@ -26,6 +26,7 @@ import org.finos.legend.depot.domain.project.dependencies.VersionDependencyRepor
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,10 +37,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static org.mockito.Mockito.mock;
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+
 public class TestEntitiesService extends TestBaseServices
 {
-
-    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsVersionsStore, projectsStore));
+    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics));
 
     @Before
     public void setUpData()
@@ -147,6 +151,59 @@ public class TestEntitiesService extends TestBaseServices
         Assert.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","1.0.0",false).size());
         Assert.assertEquals(2, entitiesService.getEntitiesByPackage("examples.metadata","test1","1.0.0",pkgName,false, Collections.EMPTY_SET,true).size());
         Assert.assertEquals(0, entitiesService.getEntitiesByPackage("examples.metadata","test1","1.0.0",pkgName,true, Collections.EMPTY_SET,true).size());
+
+    }
+
+    @Test
+    public void canQueryEntitiesWithLatestVersionAlias()
+    {
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata","test1","1.0.0"));
+        loadEntities("PROD-D", "1.0.0");
+
+        String pkgName = "examples::metadata::test::dependency::v1_2_3";
+
+        Assert.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","latest",true).size());
+        Assert.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","latest",false).size());
+        Assert.assertEquals(2, entitiesService.getEntitiesByPackage("examples.metadata","test1","latest",pkgName,false, Collections.EMPTY_SET,true).size());
+        Assert.assertEquals(0, entitiesService.getEntitiesByPackage("examples.metadata","test1","latest",pkgName,true, Collections.EMPTY_SET,true).size());
+
+    }
+
+    @Test
+    public void canGetDependenciesMapWithLatestAlias()
+    {
+        List<ProjectVersion> projectVersions = Arrays.asList(new ProjectVersion("examples.metadata", "test", "latest"), new ProjectVersion("examples.metadata", "test-dependencies", "latest"));
+        List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities(projectVersions, false, true, true);
+        Assert.assertFalse(dependencyList3.isEmpty());
+        Assert.assertEquals(4, dependencyList3.size());
+        Assert.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
+        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+    }
+
+    @Test
+    public void canGetDependenciesMapWithHeadAlias()
+    {
+        List<ProjectVersion> projectVersions = Arrays.asList(new ProjectVersion("examples.metadata", "test", "head"), new ProjectVersion("examples.metadata", "test-dependencies", "latest"));
+        List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities(projectVersions, false, true, true);
+        Assert.assertFalse(dependencyList3.isEmpty());
+        Assert.assertEquals(4, dependencyList3.size());
+        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+    }
+
+    @Test
+    public void canQueryEntitiesWithHeadVersionAlias()
+    {
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata","test", MASTER_SNAPSHOT));
+        loadEntities("PROD-A", MASTER_SNAPSHOT);
+
+        String pkgName = "examples::metadata::test::v2_3_1::examples::metadata::test";
+
+        Assert.assertEquals(7, entitiesService.getEntities("examples.metadata","test","head",true).size());
+        Assert.assertEquals(7, entitiesService.getEntities("examples.metadata","test","head",false).size());
+        Assert.assertEquals(0, entitiesService.getEntitiesByPackage("examples.metadata","test","head",pkgName,false, Collections.EMPTY_SET,true).size());
+        Assert.assertEquals(4, entitiesService.getEntitiesByPackage("examples.metadata","test","head",pkgName,true, Collections.EMPTY_SET,true).size());
 
     }
 }

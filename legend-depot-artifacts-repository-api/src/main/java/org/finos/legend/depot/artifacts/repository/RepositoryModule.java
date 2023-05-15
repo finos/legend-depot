@@ -36,7 +36,6 @@ import static org.finos.legend.depot.artifacts.repository.services.RepositorySer
 
 public class RepositoryModule extends PrivateModule
 {
-    public static final String GET_REPOSITORY_VERSIONS = "get_repository_versions";
     private static final String REPOSITORY_METRICS_SCHEDULE = "repository-metrics-schedule";
 
     @Override

@@ -18,8 +18,8 @@ package org.finos.legend.depot.server.resources.entities;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
@@ -57,12 +57,11 @@ public class EntitiesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<Entity> getEntities(@PathParam("groupId") String groupId,
                                     @PathParam("artifactId") String artifactId,
-                                    @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId,
+                                    @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                     @QueryParam("versioned")
                                     @DefaultValue("false")
                                     @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned)
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntities(groupId, artifactId, versionId, versioned));
     }
 
@@ -73,10 +72,9 @@ public class EntitiesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public Optional<Entity> getEntity(@PathParam("groupId") String groupId,
                                       @PathParam("artifactId") String artifactId,
-                                      @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId,
+                                      @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                       @PathParam("path") String entityPath)
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_ENTITY, GET_VERSION_ENTITY + entityPath, () -> this.entitiesService.getEntity(groupId, artifactId, versionId, entityPath));
     }
 
@@ -86,7 +84,7 @@ public class EntitiesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<Entity> getEntities(@PathParam("groupId") String groupId,
                                     @PathParam("artifactId") String artifactId,
-                                    @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId,
+                                    @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                     @QueryParam("package") String packageName,
                                     @QueryParam("versioned")
                                     @DefaultValue("false")
@@ -97,7 +95,6 @@ public class EntitiesResource extends BaseResource
                                     @ApiParam("Whether to include ENTITIES from subpackages or only directly in one of the given packages") boolean includeSubPackages
     )
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_ENTITIES_BY_PACKAGE, GET_VERSION_ENTITIES_BY_PACKAGE + packageName, () -> entitiesService.getEntitiesByPackage(groupId, artifactId, versionId, packageName, versioned, classifierPaths, includeSubPackages));
     }
 

@@ -28,6 +28,7 @@ import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithP
 import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
@@ -35,13 +36,15 @@ import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.stream.Collectors;
+
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public class ProjectsServiceImpl implements ProjectsService
 {
@@ -50,20 +53,24 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private final Projects projects;
 
+    private final QueryMetricsStore metrics;
+
     private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
     private static final String NOT_FOUND_IN_STORE = "project version not found for %s-%s-%s";
 
     @Inject
-    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects)
+    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, QueryMetricsStore metrics)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
+        this.metrics = metrics;
     }
 
-    public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects)
+    public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
+        this.metrics = metrics;
     }
 
     @Override
@@ -81,8 +88,7 @@ public class ProjectsServiceImpl implements ProjectsService
     @Override
     public List<String> getVersions(String groupId, String artifactId,boolean includeSnapshots)
     {
-        List<StoreProjectVersionData> storeProjectsVersions = this.find(groupId, artifactId);
-        return storeProjectsVersions.isEmpty() ? Collections.EMPTY_LIST : storeProjectsVersions.stream().filter(pv -> includeSnapshots || !VersionValidator.isSnapshotVersion(pv.getVersionId()) && !pv.getVersionData().isExcluded()).map(pv -> pv.getVersionId()).collect(Collectors.toList());
+        return this.find(groupId, artifactId).stream().filter(pv -> (includeSnapshots || !VersionValidator.isSnapshotVersion(pv.getVersionId())) && !pv.getVersionData().isExcluded()).map(pv -> pv.getVersionId()).collect(Collectors.toList());
     }
 
     @Override
@@ -104,6 +110,12 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
+    public List<StoreProjectVersionData> findSnapshotVersions(String groupId, String artifactId)
+    {
+        return this.find(groupId, artifactId).stream().filter(v -> VersionValidator.isSnapshotVersion(v.getVersionId()) && !v.getVersionData().isExcluded()).collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<StoreProjectData> findCoordinates(String groupId, String artifactId)
     {
         return projects.find(groupId, artifactId);
@@ -114,17 +126,44 @@ public class ProjectsServiceImpl implements ProjectsService
     {
         if (VersionAlias.LATEST.getName().equals(versionId))
         {
-            Optional<VersionId> latest = this.getLatestVersion(groupId, artifactId);
-            if (latest.isPresent())
-            {
-                return projectsVersions.find(groupId, artifactId,latest.get().toVersionIdString());
-            }
-            else
-            {
-                return Optional.empty();
-            }
+            return projectsVersions.find(groupId, artifactId).stream().filter(v -> !VersionValidator.isSnapshotVersion(v.getVersionId()) && !v.getVersionData().isExcluded()).max(Comparator.comparing(o -> VersionId.parseVersionId(o.getVersionId())));
+        }
+        else if (VersionAlias.HEAD.getName().equals(versionId))
+        {
+            return projectsVersions.find(groupId, artifactId, MASTER_SNAPSHOT);
         }
         return projectsVersions.find(groupId, artifactId, versionId);
+    }
+
+    private void validateStoreProjectVersionData(StoreProjectVersionData projectVersion) throws IllegalArgumentException
+    {
+        ProjectVersionData versionData = projectVersion.getVersionData();
+        if (versionData.isExcluded())
+        {
+            throw new IllegalArgumentException(String.format(EXCLUSION_FOUND_IN_STORE, projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId(), versionData.getExclusionReason()));
+        }
+        else if (projectVersion.isEvicted())
+        {
+            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()));
+        }
+    }
+
+    @Override
+    public String resolveAliasesAndCheckVersionExists(String groupId, String artifactId, String versionId)
+    {
+        String version = versionId;
+        Optional<StoreProjectVersionData> projectVersion = this.find(groupId, artifactId, version);
+        if (projectVersion.isPresent())
+        {
+            version = projectVersion.get().getVersionId();
+        }
+        else
+        {
+            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
+        }
+        validateStoreProjectVersionData(projectVersion.get());
+        metrics.record(groupId, artifactId, version);
+        return version;
     }
 
     @Override
@@ -137,28 +176,9 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
-    public void checkExists(String groupId, String artifactId, String versionId) throws IllegalArgumentException
-    {
-        Optional<StoreProjectVersionData> projectVersion = this.projectsVersions.find(groupId, artifactId, versionId);
-        if (!projectVersion.isPresent())
-        {
-            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
-        }
-        ProjectVersionData versionData = projectVersion.get().getVersionData();
-        if (versionData.isExcluded())
-        {
-            throw new IllegalArgumentException(String.format(EXCLUSION_FOUND_IN_STORE, groupId, artifactId, versionId, versionData.getExclusionReason()));
-        }
-        else if (projectVersion.get().isEvicted())
-        {
-            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
-        }
-    }
-
-    @Override
     public Optional<VersionId> getLatestVersion(String groupId, String artifactId)
     {
-        return this.getVersions(groupId, artifactId).stream().filter(v -> !VersionValidator.isSnapshotVersion(v)).map(v -> VersionId.parseVersionId(v)).max(VersionId::compareTo);
+        return this.getVersions(groupId, artifactId,false).stream().map(v -> VersionId.parseVersionId(v)).max(VersionId::compareTo);
     }
 
     @Override
@@ -167,7 +187,8 @@ public class ProjectsServiceImpl implements ProjectsService
         Set<ProjectVersion> dependencies = new HashSet<>();
         projectVersions.forEach(pv ->
         {
-            StoreProjectVersionData projectData = this.getProject(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+            String version = this.resolveAliasesAndCheckVersionExists(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+            StoreProjectVersionData projectData = this.getProject(pv.getGroupId(), pv.getArtifactId(), version);
             List<ProjectVersion> projectVersionDependencies = projectData.getVersionData().getDependencies();
             dependencies.addAll(projectVersionDependencies);
             if (transitive && !projectVersionDependencies.isEmpty())
@@ -260,8 +281,9 @@ public class ProjectsServiceImpl implements ProjectsService
                     .map(dep -> new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep,projectData.getVersionData().getProperties()))
                     .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
         }
+        String version =  this.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
         return projectsVersions.getAll().stream().map(projectData -> projectData.getVersionData().getDependencies().stream()
-                .filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId) && dep.getVersionId().equals(versionId))
+                .filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId) && dep.getVersionId().equals(version))
                 .map(dep -> new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep,projectData.getVersionData().getProperties()))
                 .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
     }
@@ -269,7 +291,7 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private StoreProjectVersionData getProject(String groupId, String artifactId, String versionId)
     {
-        Optional<StoreProjectVersionData> projectData = projectsVersions.find(groupId, artifactId, versionId);
+        Optional<StoreProjectVersionData> projectData = this.find(groupId, artifactId, versionId);
         if (!projectData.isPresent())
         {
             throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));

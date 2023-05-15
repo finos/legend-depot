@@ -20,6 +20,7 @@ import org.finos.legend.depot.domain.version.ReleaseInfo;
 import org.finos.legend.depot.server.resources.ProjectsVersionsResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,10 +29,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
 
+import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.mockito.Mockito.mock;
+
 public class TestProjectsVersionsResource extends TestBaseServices
 {
-
-    private ProjectsVersionsResource projectsVersionsResource = new ProjectsVersionsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore));
+    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    private ProjectsVersionsResource projectsVersionsResource = new ProjectsVersionsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics));
 
     @Test
     public void canQueryLatestProjectVersionData()
@@ -45,6 +49,19 @@ public class TestProjectsVersionsResource extends TestBaseServices
         Assert.assertTrue(versionData.get().getVersionData().getReleaseInfo().equals(new ReleaseInfo("test-author", Date.from(ZonedDateTime.parse("2023-04-11T14:48:27+00:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant()))));
 
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = projectsVersionsResource.getProjectVersion("somethig.random", "test","latest");
+        Assert.assertFalse(versionData1.isPresent());
+    }
+
+    @Test
+    public void canQueryHeadProjectVersionData()
+    {
+        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = projectsVersionsResource.getProjectVersion("examples.metadata", "test","head");
+        Assert.assertTrue(versionData.isPresent());
+        Assert.assertEquals(versionData.get().getGroupId(), "examples.metadata");
+        Assert.assertEquals(versionData.get().getArtifactId(), "test");
+        Assert.assertEquals(versionData.get().getVersionId(), MASTER_SNAPSHOT);
+
+        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = projectsVersionsResource.getProjectVersion("somethig.random", "test","head");
         Assert.assertFalse(versionData1.isPresent());
     }
 }

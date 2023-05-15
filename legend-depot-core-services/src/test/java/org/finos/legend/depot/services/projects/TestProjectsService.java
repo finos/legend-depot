@@ -21,11 +21,13 @@ import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,13 +37,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Collections;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.mockito.Mockito.mock;
 
 public class TestProjectsService extends TestBaseServices
 {
-
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore);
+    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics);
 
     @Before
     public void setUpData()
@@ -273,6 +277,13 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertTrue(projectsService.find("examples.metadata", "test","latest").isPresent());
         Assert.assertEquals("2.3.1", projectsService.getLatestVersion("examples.metadata", "test").get().toVersionIdString());
 
+        Assert.assertFalse(projectsService.find("dont","exist","latest").isPresent());
+
+        StoreProjectVersionData noVersions = new StoreProjectVersionData("noversion","examples",MASTER_SNAPSHOT);
+        projectsService.createOrUpdate(noVersions);
+
+        Assert.assertFalse(projectsService.find("noversion","examples", VersionAlias.LATEST.getName()).isPresent());
+
 
     }
 
@@ -291,12 +302,60 @@ public class TestProjectsService extends TestBaseServices
         versionData.setEvicted(true);
         try
         {
-            projectsService.checkExists("examples.metadata", "art106", "1.0.0");
+            projectsService.resolveAliasesAndCheckVersionExists("examples.metadata", "art106", "1.0.0");
             Assert.assertTrue(false);
         }
         catch (IllegalArgumentException e)
         {
             Assert.assertTrue(true);
         }
+    }
+
+    @Test
+    public void testGetVersions()
+    {
+        Assert.assertEquals(2, projectsService.getVersions("examples.metadata","test", false).size());
+        Assert.assertEquals(3, projectsService.getVersions("examples.metadata","test", true).size());
+        projectsService.excludeProjectVersion("examples.metadata","test",MASTER_SNAPSHOT,"test");
+        Assert.assertEquals(2, projectsService.getVersions("examples.metadata","test", true).size());
+        projectsService.excludeProjectVersion("examples.metadata","test","2.3.1","test");
+        Assert.assertEquals(1, projectsService.getVersions("examples.metadata","test", true).size());
+
+    }
+
+    @Test
+    public void testCanGetLatestVersionIdUsingAlias()
+    {
+        Assert.assertEquals("2.3.1", projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test", "latest"));
+    }
+
+    @Test
+    public void testErrorThrownWhenIncorrectAliasIsUsed()
+    {
+        Assert.assertThrows("project version not found for examples.metadata-test-lastest", IllegalArgumentException.class, () -> projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test", "lastest"));
+    }
+
+    @Test
+    public void testErrorThrownWhenNoProjectVersionFound()
+    {
+        Assert.assertThrows("project version not found for examples.metadata-test1-1.0.0", IllegalArgumentException.class, () -> projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test1", "1.0.0"));
+    }
+
+    @Test
+    public void testCanGetMasterSnapshotVersionIdUsingAlias()
+    {
+        Assert.assertEquals(MASTER_SNAPSHOT, projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test", "head"));
+    }
+
+    @Test
+    public void canGetSnapshotVersions()
+    {
+        projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata", "test", "branch1-SNAPSHOT"));
+        StoreProjectVersionData projectVersionData = new StoreProjectVersionData("examples.metadata", "test", "branch2-SNAPSHOT");
+        projectVersionData.getVersionData().setExcluded(true);
+        projectsService.createOrUpdate(projectVersionData);
+        List<StoreProjectVersionData> versionData = projectsService.findSnapshotVersions("examples.metadata", "test");
+        Assert.assertEquals(2, versionData.size());
+        Assert.assertEquals(Arrays.asList("master-SNAPSHOT", "branch1-SNAPSHOT"), versionData.stream().map(x -> x.getVersionId()).collect(Collectors.toList()));
     }
 }

@@ -22,7 +22,6 @@ import org.finos.legend.depot.services.api.generation.file.FileGenerationsServic
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.generation.file.FileGenerations;
-import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import javax.inject.Inject;
@@ -52,30 +51,30 @@ public class FileGenerationsServiceImpl implements FileGenerationsService
     @Override
     public List<Entity> getGenerations(String groupId, String artifactId, String versionId)
     {
-        this.projects.checkExists(groupId, artifactId, versionId);
-        List<StoredEntity> storedEntities = entities.findEntitiesByClassifier(groupId, artifactId, versionId, GENERATION_CONFIGURATION, false, false);
+        String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+        List<StoredEntity> storedEntities = entities.findEntitiesByClassifier(groupId, artifactId, version, GENERATION_CONFIGURATION, false, false);
         return storedEntities.stream().map(StoredEntity::getEntity).collect(Collectors.toList());
     }
 
     @Override
     public List<FileGeneration> getFileGenerations(String groupId, String artifactId, String versionId)
     {
-        this.projects.checkExists(groupId, artifactId, versionId);
-        return fileGenerations.find(groupId, artifactId, versionId).stream().map(StoredFileGeneration::getFile).collect(Collectors.toList());
+        String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+        return fileGenerations.find(groupId, artifactId, version).stream().map(StoredFileGeneration::getFile).collect(Collectors.toList());
     }
 
     @Override
     public List<FileGeneration> getFileGenerationsByElementPath(String groupId, String artifactId, String versionId, String elementPath)
     {
-        this.projects.checkExists(groupId, artifactId, versionId);
-        return fileGenerations.findByElementPath(groupId, artifactId, versionId, elementPath).stream().map(StoredFileGeneration::getFile).collect(Collectors.toList());
+        String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+        return fileGenerations.findByElementPath(groupId, artifactId, version, elementPath).stream().map(StoredFileGeneration::getFile).collect(Collectors.toList());
     }
 
     @Override
     public Optional<FileGeneration> getFileGenerationsByFilePath(String groupId, String artifactId, String versionId, String filePath)
     {
-        this.projects.checkExists(groupId, artifactId, versionId);
-        Optional<StoredFileGeneration> found = fileGenerations.findByFilePath(groupId, artifactId, versionId, filePath);
+        String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+        Optional<StoredFileGeneration> found = fileGenerations.findByFilePath(groupId, artifactId, version, filePath);
         return found.map(StoredFileGeneration::getFile);
     }
 }

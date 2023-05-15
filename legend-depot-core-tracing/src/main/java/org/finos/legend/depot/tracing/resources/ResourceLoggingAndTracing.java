@@ -26,11 +26,12 @@ public class ResourceLoggingAndTracing
     public static final String CREATE_EMPTY_PROJECT = "create empty project";
     public static final String GET_PROJECT_DEPENDENCIES = "get upstream project dependencies";
     public static final String GET_PROJECT_DEPENDENCY_TREE = "get project dependency tree";
-    public static final String GET_DEPENDANT_PROJECTS = "downstream projects";
+    public static final String GET_DEPENDANT_PROJECTS = "get downstream projects";
     public static final String UPDATE_ALL_SNAPSHOTS = "refresh all snapshots";
     public static final String UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES = "update project transitive dependencies";
     public static final String GET_VERSION_ENTITIES = "get version entities";
     public static final String GET_VERSION_DEPENDENCY_ENTITIES = "get version dependencies entities";
+    public static final String GET_VERSIONS_DEPENDENCY_ENTITIES = "get versions dependencies entities";
     public static final String GET_VERSION_STORE_ENTITIES = "get stored version entities";
     public static final String GET_VERSION_ENTITIES_AS_PMCD = "get version entities as PMCD";
     public static final String GET_VERSION_ENTITY = "get version entity";

@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.artifacts.services;
 
+import com.google.inject.name.Named;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.maven.model.Model;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
@@ -90,10 +91,11 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
     private final List<String> projectPropertiesInScope;
     private final Queue workQueue;
     private final DependencyManager dependencyManager;
+    private final int maximumSnapshotsAllowed;
 
 
     @Inject
-    public ProjectVersionRefreshHandler(ManageProjectsService projects, RepositoryServices repositoryServices, Queue workQueue, RefreshStatusStore store, ArtifactsFilesStore artifacts, IncludeProjectPropertiesConfiguration includePropertyConfig, DependencyManager dependencyManager)
+    public ProjectVersionRefreshHandler(ManageProjectsService projects, RepositoryServices repositoryServices, Queue workQueue, RefreshStatusStore store, ArtifactsFilesStore artifacts, IncludeProjectPropertiesConfiguration includePropertyConfig, DependencyManager dependencyManager, @Named("maximumSnapshotsAllowed") int maximumSnapshotsAllowed)
     {
         this.projects = projects;
         this.workQueue = workQueue;
@@ -102,6 +104,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         this.repositoryServices = repositoryServices;
         this.projectPropertiesInScope = includePropertyConfig.getProperties();
         this.dependencyManager = dependencyManager;
+        this.maximumSnapshotsAllowed = maximumSnapshotsAllowed;
 
         try
         {
@@ -152,6 +155,10 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         {
             errors.add(String.format("Invalid projectId [%s]. Existing project [%s] has same [%s-%s] coordinates",event.getProjectId(),projectData.get().getProjectId(),event.getGroupId(),event.getArtifactId()));
         }
+        if (projects.findSnapshotVersions(event.getGroupId(), event.getArtifactId()).size() >= maximumSnapshotsAllowed)
+        {
+            errors.add(String.format("Number of snapshot versions stored for project %s-%s, has reached the limit [%s]", event.getGroupId(), event.getArtifactId(), maximumSnapshotsAllowed));
+        }
         return errors;
     }
 
@@ -180,7 +187,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             {
                 if (!this.repositoryServices.findVersion(groupId, artifactId, versionId).isPresent())
                 {
-                    String missingVersion = String.format("Version %s does not exists for %s-%s", versionId, groupId, artifactId);
+                    String missingVersion = String.format("Version %s does not exist for %s-%s in repository", versionId, groupId, artifactId);
                     response.addError(missingVersion);
                     LOGGER.error(missingVersion);
                     return response;
@@ -188,7 +195,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             }
             catch (ArtifactRepositoryException e)
             {
-                PrometheusMetricsFactory.getInstance().incrementCount(REPO_EXCEPTIONS);
+                PrometheusMetricsFactory.getInstance().increaseGauge(REPO_EXCEPTIONS,1);
                 response.addError(e.getMessage());
             }
         }
@@ -293,7 +300,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
                             {
                                 try
                                 {
-                                    projects.checkExists(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
+                                    projects.resolveAliasesAndCheckVersionExists(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
                                 }
                                 catch (IllegalArgumentException exception)
                                 {

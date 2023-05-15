@@ -19,6 +19,7 @@ import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 
@@ -32,9 +33,9 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
     private final UpdateProjects projects;
 
     @Inject
-    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects)
+    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics)
     {
-        super(projectsVersions,projects);
+        super(projectsVersions,projects, metrics);
         this.projects = projects;
         this.projectsVersions = projectsVersions;
     }
@@ -74,14 +75,8 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
     public StoreProjectVersionData excludeProjectVersion(String groupId, String artifactId, String versionId, String exclusionReason)
     {
         StoreProjectVersionData storeProjectVersionData = new StoreProjectVersionData(groupId, artifactId, versionId);
-        return this.createOrUpdate(excludeProjectVersion(storeProjectVersionData, exclusionReason));
+        storeProjectVersionData.getVersionData().setExcluded(true);
+        storeProjectVersionData.getVersionData().setExclusionReason(exclusionReason);
+        return this.createOrUpdate(storeProjectVersionData);
     }
-
-    private StoreProjectVersionData excludeProjectVersion(StoreProjectVersionData projectVersionData, String exclusionReason)
-    {
-        projectVersionData.getVersionData().setExcluded(true);
-        projectVersionData.getVersionData().setExclusionReason(exclusionReason);
-        return projectVersionData;
-    }
-
 }

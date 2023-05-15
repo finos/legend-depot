@@ -52,7 +52,11 @@ public interface ProjectsService
 
     List<StoreProjectVersionData> findVersion(Boolean excluded);
 
+    List<StoreProjectVersionData> findSnapshotVersions(String groupId, String artifactId);
+
     Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId);
+
+    String resolveAliasesAndCheckVersionExists(String groupId, String artifactId, String versionId);
 
     Optional<StoreProjectData> findCoordinates(String groupId, String artifactId);
 
@@ -73,6 +77,4 @@ public interface ProjectsService
     List<ProjectDependencyWithPlatformVersions> getDependentProjects(String groupId, String artifactId, String versionId);
 
     void checkExists(String groupId, String artifactId) throws IllegalArgumentException;
-
-    void checkExists(String groupId, String artifactId,String versionId) throws IllegalArgumentException;
 }

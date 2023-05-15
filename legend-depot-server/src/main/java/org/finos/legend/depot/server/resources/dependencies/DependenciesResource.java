@@ -28,10 +28,10 @@ import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.Property;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsContainer;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 
 import javax.inject.Inject;
@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_DEPENDANT_PROJECTS;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCIES;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCY_TREE;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSIONS_DEPENDENCY_ENTITIES;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_DEPENDENCY_ENTITIES;
 
 @Path("")
@@ -73,7 +74,7 @@ public class DependenciesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public Set<ProjectVersion> getProjectDependencies(@PathParam("groupId") String groupId,
                                                       @PathParam("artifactId") String artifactId,
-                                                      @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId,
+                                                      @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                                       @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to return transitive dependencies") boolean transitive)
     {
         return handle(GET_PROJECT_DEPENDENCIES, GET_PROJECT_DEPENDENCIES + groupId + artifactId, () -> this.projectApi.getDependencies(groupId, artifactId, versionId, transitive));
@@ -94,7 +95,7 @@ public class DependenciesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProjectVersionPlatformDependency> getProjectDependencies(@PathParam("groupId") String groupId,
                                                                          @PathParam("artifactId") String artifactId,
-                                                                         @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId
+                                                                         @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId
     )
     {
         return handle(GET_DEPENDANT_PROJECTS, GET_DEPENDANT_PROJECTS + groupId + artifactId, () -> transform(this.projectApi.getDependentProjects(groupId, artifactId, versionId)));
@@ -108,7 +109,7 @@ public class DependenciesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProjectVersionEntities> getEntitiesFromDependencies(@PathParam("groupId") String groupId,
                                                                     @PathParam("artifactId") String artifactId,
-                                                                    @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId,
+                                                                    @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                                                     @QueryParam("versioned") @DefaultValue("false")
                                                                     @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
                                                                     @QueryParam("transitive") @DefaultValue("false")
@@ -116,13 +117,12 @@ public class DependenciesResource extends BaseResource
                                                                     @QueryParam("includeOrigin") @DefaultValue("false")
                                                                     @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
-        QueryMetricsContainer.record(groupId, artifactId, versionId);
         return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, versioned, transitive, includeOrigin));
     }
 
     @POST
     @Path("/projects/dependencies")
-    @ApiOperation(GET_VERSION_DEPENDENCY_ENTITIES)
+    @ApiOperation(GET_VERSIONS_DEPENDENCY_ENTITIES)
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProjectVersionEntities> getAllEntitiesFromDependencies(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies,
                                                                        @QueryParam("versioned") @DefaultValue("false")
@@ -132,9 +132,7 @@ public class DependenciesResource extends BaseResource
                                                                        @QueryParam("includeOrigin") @DefaultValue("false")
                                                                        @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
-        projectDependencies.forEach(dep ->
-            QueryMetricsContainer.record(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()));
-        return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, versioned, transitive, includeOrigin));
+        return handle(GET_VERSIONS_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, versioned, transitive, includeOrigin));
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

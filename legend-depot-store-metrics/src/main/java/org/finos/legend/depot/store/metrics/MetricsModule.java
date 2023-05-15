@@ -18,10 +18,9 @@ package org.finos.legend.depot.store.metrics;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
-
-import javax.inject.Named;
 
 public class MetricsModule extends PrivateModule
 {
@@ -32,18 +31,16 @@ public class MetricsModule extends PrivateModule
         expose(QueryMetricsHandler.class);
     }
 
-
     @Provides
     @Singleton
-    @Named("persist-metrics")
+    @Named("consolidate-query-metrics")
     boolean scheduleMetricsPersistence(SchedulesFactory schedulesFactory, QueryMetricsHandler queryMetrics)
     {
-        schedulesFactory.register("persist-metrics", SchedulesFactory.MINUTE, 2016000 * SchedulesFactory.MINUTE, () ->
+        schedulesFactory.registerSingleInstance("consolidate-query-metrics", SchedulesFactory.MINUTE, 12 * SchedulesFactory.HOUR, () ->
         {
-            queryMetrics.persistMetrics();
+            queryMetrics.consolidateMetrics();
             return true;
         });
         return true;
     }
-
 }

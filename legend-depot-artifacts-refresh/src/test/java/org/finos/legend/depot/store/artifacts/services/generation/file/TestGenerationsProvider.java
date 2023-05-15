@@ -27,6 +27,7 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
@@ -62,7 +63,8 @@ public class TestGenerationsProvider extends TestStoreMongo
     private final UpdateProjects projects = mock(UpdateProjects.class);
     private final UpdateProjectsVersions projectsVersions = mock(UpdateProjectsVersions.class);
     private final UpdateEntities entities = new EntitiesMongo(mongoProvider);
-    private final ManageFileGenerationsService generations = new ManageFileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities, new ProjectsServiceImpl(projectsVersions,projects));
+    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    private final ManageFileGenerationsService generations = new ManageFileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities, new ProjectsServiceImpl(projectsVersions,projects, metrics));
 
     @Before
     public void setup()
