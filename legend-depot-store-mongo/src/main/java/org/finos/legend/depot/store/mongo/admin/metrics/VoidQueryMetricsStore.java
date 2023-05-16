@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.mongo.admin.metrics;
 
+import com.google.inject.Inject;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 
@@ -23,6 +24,11 @@ import java.util.List;
 
 public class VoidQueryMetricsStore implements QueryMetricsStore
 {
+    @Inject
+    public VoidQueryMetricsStore()
+    {
+    }
+
     @Override
     public List<VersionQueryMetric> get(String groupId, String artifactId, String versionId)
     {
