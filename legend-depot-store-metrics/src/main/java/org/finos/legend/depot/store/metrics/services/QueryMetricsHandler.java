@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.metrics.services;
 
-import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.slf4j.Logger;
@@ -25,12 +24,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class QueryMetricsHandler
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QueryMetricsHandler.class);
     private final QueryMetricsStore metricsStore;
+
+    //TODO: will require different implementation for recording and consolidating query metrics for different stores
 
     @Inject
     public QueryMetricsHandler(QueryMetricsStore metricsStore)
@@ -52,26 +52,26 @@ public class QueryMetricsHandler
 
     public List<VersionQueryMetric> getSummaryByProjectVersion()
     {
-        Stream<VersionQueryMetric> all = metricsStore.getAll().stream()
-                .collect(Collectors.groupingBy(versionQueryMetric -> new ProjectVersion(versionQueryMetric.getGroupId(), versionQueryMetric.getArtifactId(), versionQueryMetric.getVersionId()),
-                         Collectors.collectingAndThen(Collectors.maxBy(Comparator.comparing(VersionQueryMetric::getLastQueryTime)), Optional::get))).values().stream();
-        return all.collect(Collectors.toList());
+        return metricsStore.getAllStoredEntitiesCoordinates().parallelStream()
+                .map(pv -> getSummary(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()).get())
+                .collect(Collectors.toList());
+
     }
 
     public void consolidateMetrics()
     {
-        List<VersionQueryMetric> versionQueryMetric = getSummaryByProjectVersion();
         LOGGER.info("Started consolidating metrics for all project versions");
-        versionQueryMetric.forEach(metric ->
+        metricsStore.getAllStoredEntitiesCoordinates().parallelStream().forEach(pv ->
         {
             try
             {
+                VersionQueryMetric metric = getSummary(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()).get();
                 long deletedResult = metricsStore.consolidate(metric);
-                LOGGER.info(String.format("Deleted [%s] records for project version: %s-%s-%s", deletedResult, metric.getGroupId(), metric.getArtifactId(), metric.getVersionId()));
+                LOGGER.info(String.format("Deleted [%s] records for project version: %s-%s-%s", deletedResult, pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()));
             }
             catch (Exception e)
             {
-                LOGGER.error(String.format("Error consolidating metrics for %s-%s-%s with error: %s", metric.getGroupId(), metric.getArtifactId(), metric.getVersionId(), e.getMessage()));
+                LOGGER.error(String.format("Error consolidating metrics for %s-%s-%s with error: %s", pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), e.getMessage()));
             }
         });
         LOGGER.info("Completed consolidating metrics for all project version");

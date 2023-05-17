@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.metrics;
 
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
@@ -26,6 +27,7 @@ import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -63,12 +65,18 @@ public class TestMetricsServices extends TestStoreMongo
     @Test
     public void canGetMetricsSummary()
     {
-
         Optional<VersionQueryMetric> metrics = metricsHandler.getSummary("group1", "art1", "2.2.0");
         Assert.assertTrue(metrics.isPresent());
         Assert.assertEquals("2.2.0", metrics.get().getVersionId());
     }
 
+    @Test
+    public void canGetAllStoredCoordinates()
+    {
+        List<ProjectVersion> projectVersions = metricsStore.getAllStoredEntitiesCoordinates();
+        Assert.assertEquals(2, projectVersions.size());
+        Assert.assertEquals(Arrays.asList(new ProjectVersion("group1", "art1", "1.0.0"),new ProjectVersion("group1", "art1", "2.2.0")), projectVersions);
+    }
 
     @Test
     public void canGetMostRecentlyQueriedMetrics()
@@ -76,8 +84,8 @@ public class TestMetricsServices extends TestStoreMongo
         Assert.assertEquals(4, metricsStore.getAllStoredEntities().size());
         List<VersionQueryMetric> metrics = metricsHandler.getSummaryByProjectVersion();
         Assert.assertEquals(2, metrics.size());
-        Assert.assertEquals("2.2.0", metrics.get(0).getVersionId());
-        Assert.assertEquals("1.0.0", metrics.get(1).getVersionId());
+        Assert.assertEquals("1.0.0", metrics.get(0).getVersionId());
+        Assert.assertEquals("2.2.0", metrics.get(1).getVersionId());
     }
 
     @Test
@@ -95,11 +103,11 @@ public class TestMetricsServices extends TestStoreMongo
         Assert.assertEquals("2.2.0", summary.get(1).getVersionId());
         Assert.assertEquals(summary.get(1).getLastQueryTime(), metrics.get(0).getLastQueryTime());
         Assert.assertEquals("1.0.0", metrics.get(1).getVersionId());
-        Assert.assertEquals("1.0.0", summary.get(2).getVersionId());
-        Assert.assertEquals(summary.get(2).getLastQueryTime(), metrics.get(1).getLastQueryTime());
+        Assert.assertEquals("1.0.0", summary.get(0).getVersionId());
+        Assert.assertEquals(summary.get(0).getLastQueryTime(), metrics.get(1).getLastQueryTime());
         Assert.assertEquals("3.0.0", metrics.get(2).getVersionId());
-        Assert.assertEquals("3.0.0", summary.get(0).getVersionId());
-        Assert.assertEquals(summary.get(0).getLastQueryTime(), metrics.get(2).getLastQueryTime());
+        Assert.assertEquals("3.0.0", summary.get(2).getVersionId());
+        Assert.assertEquals(summary.get(2).getLastQueryTime(), metrics.get(2).getLastQueryTime());
     }
 
     @Test

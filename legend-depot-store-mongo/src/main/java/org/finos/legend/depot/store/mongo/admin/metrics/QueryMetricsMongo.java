@@ -18,9 +18,15 @@ package org.finos.legend.depot.store.mongo.admin.metrics;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Projections;
+import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
@@ -28,9 +34,13 @@ import com.mongodb.client.model.IndexModel;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.StringTokenizer;
+import java.util.function.Consumer;
 
+import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.lt;
@@ -56,6 +66,30 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
     public List<VersionQueryMetric> getAll()
     {
         return getAllStoredEntities();
+    }
+
+    @Override
+    public List<ProjectVersion> getAllStoredEntitiesCoordinates()
+    {
+        List<ProjectVersion> result = new ArrayList<>();
+        BasicDBList concat = new BasicDBList();
+        concat.add("$groupId");
+        concat.add(":");
+        concat.add("$artifactId");
+        concat.add(":");
+        concat.add("$versionId");
+        Bson allCoordinates = Aggregates.project(Projections.fields(
+                Projections.excludeId(),
+                Projections.include(GROUP_ID, ARTIFACT_ID, VERSION_ID),
+                Projections.computed("coordinate", new BasicDBObject("$concat", concat))));
+
+        getCollection().aggregate(Arrays.asList(allCoordinates, group("$coordinate"))).forEach((Consumer<Document>) document ->
+                {
+                    StringTokenizer tokenizer = new StringTokenizer(document.getString("_id"), ":");
+                    result.add(new ProjectVersion(tokenizer.nextToken(), tokenizer.nextToken(), tokenizer.nextToken()));
+                }
+        );
+        return result;
     }
 
     @Override
