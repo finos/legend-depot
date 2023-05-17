@@ -26,6 +26,7 @@ import org.finos.legend.depot.core.http.BaseServer;
 import org.finos.legend.depot.core.http.resources.InfoPageModule;
 import org.finos.legend.depot.services.ManageServicesModule;
 import org.finos.legend.depot.schedules.AdminSchedulesModule;
+import org.finos.legend.depot.store.api.StorageConfiguration;
 import org.finos.legend.depot.store.artifacts.ArtifactsHandlersModule;
 import org.finos.legend.depot.store.artifacts.ArtifactsRefreshModule;
 import org.finos.legend.depot.store.artifacts.purge.ArtifactsPurgeModule;
@@ -58,7 +59,6 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
     public void initialize(Bootstrap<DepotStoreServerConfiguration> bootstrap)
     {
         super.initialize(bootstrap);
-        // artifact repo specific initialization
         ArtifactRepositoryProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
     }
 
