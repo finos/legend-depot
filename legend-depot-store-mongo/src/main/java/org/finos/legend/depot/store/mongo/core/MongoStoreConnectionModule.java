@@ -42,7 +42,7 @@ public class MongoStoreConnectionModule extends PrivateModule
     @Singleton
     MongoConfiguration getMongoConfiguration(StorageConfiguration configuration)
     {
-        if (configuration !=null && configuration instanceof MongoConfiguration)
+        if (configuration != null && configuration instanceof MongoConfiguration)
         {
             return (MongoConfiguration) configuration;
         }
