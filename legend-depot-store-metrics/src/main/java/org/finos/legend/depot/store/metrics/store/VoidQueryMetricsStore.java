@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.mongo.admin.metrics;
+package org.finos.legend.depot.store.metrics.store;
 
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import com.google.inject.Inject;
