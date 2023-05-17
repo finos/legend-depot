@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.mongo.admin.metrics;
 
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import com.google.inject.Inject;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
@@ -37,6 +38,12 @@ public class VoidQueryMetricsStore implements QueryMetricsStore
 
     @Override
     public List<VersionQueryMetric> getAll()
+    {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ProjectVersion> getAllStoredEntitiesCoordinates()
     {
         return Collections.emptyList();
     }
