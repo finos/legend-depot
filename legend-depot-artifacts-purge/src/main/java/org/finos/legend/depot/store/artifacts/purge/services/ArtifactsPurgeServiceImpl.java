@@ -16,24 +16,31 @@
 package org.finos.legend.depot.store.artifacts.purge.services;
 
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.purge.api.ArtifactsPurgeService;
 import org.finos.legend.depot.store.artifacts.services.ProjectArtifactHandlerFactory;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import static org.finos.legend.depot.domain.DatesHandler.toDate;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.DELETE_VERSION;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.EVICT_VERSION;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.DEPRECATE_VERSION;
@@ -52,14 +59,13 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     private static final String EVICT_OLDEST = "evict_old";
 
     private final ManageProjectsService projects;
-    private final RepositoryServices repository;
-
+    private final QueryMetricsHandler metrics;
 
     @Inject
-    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, RepositoryServices repository)
+    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, QueryMetricsHandler metrics)
     {
         this.projects = projects;
-        this.repository = repository;
+        this.metrics = metrics;
     }
 
 
@@ -180,9 +186,31 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     }
 
     @Override
-    public MetadataEventResponse evictLeastRecentlyUsedVersions(int numberOfDays)
+    public MetadataEventResponse evictLeastRecentlyUsed(int ttlForVersionsInDays, int ttlForSnapshotsInDays)
     {
-        throw new UnsupportedOperationException("not implemented yet");
+        Set<ProjectVersion> evictProjectVersions = new HashSet<>();
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        MetadataEventResponse response = new MetadataEventResponse();
+        try
+        {
+            LOGGER.info("Started finding eviction candidates for snapshot versions");
+            metrics.findSnapshotVersionMetricsBefore(toDate(currentDateTime.minusDays(ttlForSnapshotsInDays)))
+                    .parallelStream().forEach(pv -> evictProjectVersions.add(new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId())));
+            LOGGER.info("Started finding eviction candidates for non-snapshot versions");
+            metrics.findReleasedVersionMetricsBefore(toDate(currentDateTime.minusDays(ttlForVersionsInDays)))
+                    .parallelStream().forEach(pv -> evictProjectVersions.add(new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId())));
+            LOGGER.info("Completed finding eviction candidates");
+        }
+        catch (Exception e)
+        {
+            LOGGER.error(String.format("Error while applying retention policy: %s", e.getMessage()));
+        }
+        evictProjectVersions.parallelStream().forEach(pv ->
+        {
+            evict(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+            response.addMessage(String.format("Evicted project version: %s", pv.getGav()));
+        });
+        return response;
     }
 
 }

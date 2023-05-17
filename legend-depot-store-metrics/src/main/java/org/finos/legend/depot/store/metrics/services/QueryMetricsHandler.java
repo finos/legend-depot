@@ -15,12 +15,14 @@
 
 package org.finos.legend.depot.store.metrics.services;
 
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,6 +58,16 @@ public class QueryMetricsHandler
                 .map(pv -> getSummary(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()).get())
                 .collect(Collectors.toList());
 
+    }
+
+    public List<VersionQueryMetric> findReleasedVersionMetricsBefore(Date date)
+    {
+        return metricsStore.findMetricsBefore(date).parallelStream().filter(metric -> !VersionValidator.isSnapshotVersion(metric.getVersionId())).collect(Collectors.toList());
+    }
+
+    public List<VersionQueryMetric> findSnapshotVersionMetricsBefore(Date date)
+    {
+        return metricsStore.findMetricsBefore(date).parallelStream().filter(metric -> VersionValidator.isSnapshotVersion(metric.getVersionId())).collect(Collectors.toList());
     }
 
     public void consolidateMetrics()

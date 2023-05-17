@@ -16,6 +16,11 @@
 package org.finos.legend.depot.store.artifacts.purge;
 
 import com.google.inject.PrivateModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import org.finos.legend.depot.schedules.services.SchedulesFactory;
+import org.finos.legend.depot.store.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.store.artifacts.purge.api.ArtifactsPurgeService;
 import org.finos.legend.depot.store.artifacts.purge.resources.ArtifactsPurgeResource;
 import org.finos.legend.depot.store.artifacts.purge.services.ArtifactsPurgeServiceImpl;
@@ -29,5 +34,18 @@ public class ArtifactsPurgeModule extends PrivateModule
         expose(ArtifactsPurgeResource.class);
 
         bind(ArtifactsPurgeService.class).to(ArtifactsPurgeServiceImpl.class);
+    }
+
+    @Provides
+    @Singleton
+    @Named("evict-LRU-project-versions")
+    boolean scheduleEvictionOfProjectVersions(SchedulesFactory schedulesFactory, ArtifactsPurgeService artifactsPurgeService, ArtifactsRetentionPolicyConfiguration retentionPolicyConfiguration)
+    {
+        schedulesFactory.registerSingleInstance("evict-LRU-project-versions", SchedulesFactory.MINUTE, 24 * SchedulesFactory.HOUR, () ->
+        {
+            artifactsPurgeService.evictLeastRecentlyUsed(retentionPolicyConfiguration.getTtlForVersions(), retentionPolicyConfiguration.getTtlForSnapshots());
+            return true;
+        });
+        return true;
     }
 }

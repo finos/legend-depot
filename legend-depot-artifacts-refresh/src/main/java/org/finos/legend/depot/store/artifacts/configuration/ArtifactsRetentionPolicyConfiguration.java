@@ -16,24 +16,47 @@
 package org.finos.legend.depot.store.artifacts.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.ws.rs.DefaultValue;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ArtifactsRetentionPolicyConfiguration
 {
+    private static final int DEFAULT_TTL_FOR_SNAPSHOTS = 30;
+    private static final int DEFAULT_TTL_FOR_VERSIONS = 365;
+    private static final int DEFAULT_MAX_SNAPSHOTS_ALLOWED = 5;
+
     @JsonProperty
-    @DefaultValue(value = "5")
-    private final int maximumSnapshotsAllowed;
+    private int maximumSnapshotsAllowed = DEFAULT_MAX_SNAPSHOTS_ALLOWED;
+
+    @JsonProperty
+    private int ttlForVersionsInDays = DEFAULT_TTL_FOR_VERSIONS;
+
+    @JsonProperty
+    private int ttlForSnapshotsInDays = DEFAULT_TTL_FOR_SNAPSHOTS;
 
     @JsonCreator
-    public ArtifactsRetentionPolicyConfiguration(@JsonProperty("maximumSnapshotsAllowed") int maximumSnapshotsAllowed)
+    public ArtifactsRetentionPolicyConfiguration(@JsonProperty(value = "maximumSnapshotsAllowed") int maximumSnapshotsAllowed,
+                                                 @JsonProperty(value = "ttlForVersionsInDays") int ttlForVersionsInDays,
+                                                 @JsonProperty(value = "ttlForSnapshotsInDay") int ttlForSnapshotsInDays)
     {
         this.maximumSnapshotsAllowed = maximumSnapshotsAllowed;
+        this.ttlForSnapshotsInDays = ttlForSnapshotsInDays;
+        this.ttlForVersionsInDays = ttlForVersionsInDays;
     }
 
     public int getMaximumSnapshotsAllowed()
     {
         return maximumSnapshotsAllowed;
+    }
+
+    public int getTtlForVersions()
+    {
+        return ttlForVersionsInDays;
+    }
+
+    public int getTtlForSnapshots()
+    {
+        return ttlForSnapshotsInDays;
     }
 }
