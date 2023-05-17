@@ -107,7 +107,9 @@
     "properties": []
   },
   "artifactsRetentionPolicyConfiguration": {
-    "maximumSnapshotsAllowed": 5
+    "maximumSnapshotsAllowed": 5,
+    "ttlForVersionsInDays": 365,
+    "ttlForSnapshotsInDays": 30
   }
   "queue-interval": 30
 }

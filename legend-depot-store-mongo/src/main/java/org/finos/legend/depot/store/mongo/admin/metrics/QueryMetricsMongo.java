@@ -35,6 +35,7 @@ import com.mongodb.client.model.IndexModel;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
 import java.util.StringTokenizer;
@@ -44,6 +45,8 @@ import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.lt;
+import static com.mongodb.client.model.Filters.lte;
+import static com.mongodb.client.model.Filters.regex;
 
 public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements QueryMetricsStore
 {
@@ -102,6 +105,11 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
     public void record(String groupId, String artifactId, String versionId)
     {
         VersionQueryMetric metric = new VersionQueryMetric(groupId, artifactId, versionId);
+        record(metric);
+    }
+
+    public void record(VersionQueryMetric metric)
+    {
         getCollection().insertOne(buildDocument(metric));
     }
 
@@ -110,6 +118,12 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
     {
         // We are deleting every metric with same gav except the one passed in the function
         return super.delete(and(getKeyFilter(metric),lt("lastQueryTime", metric.getLastQueryTime().getTime())));
+    }
+
+    @Override
+    public List<VersionQueryMetric> findMetricsBefore(Date date)
+    {
+        return find(lte("lastQueryTime", date.getTime()));
     }
 
     @Override

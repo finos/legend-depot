@@ -21,6 +21,7 @@ import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class VoidQueryMetricsStore implements QueryMetricsStore
@@ -57,5 +58,11 @@ public class VoidQueryMetricsStore implements QueryMetricsStore
     public long consolidate(VersionQueryMetric metric)
     {
         return 0;
+    }
+
+    @Override
+    public List<VersionQueryMetric> findMetricsBefore(Date date)
+    {
+        return Collections.emptyList();
     }
 }
