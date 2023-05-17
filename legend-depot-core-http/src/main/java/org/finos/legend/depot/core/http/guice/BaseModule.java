@@ -20,7 +20,7 @@ import com.google.inject.Provides;
 import com.google.inject.servlet.RequestScoped;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import org.finos.legend.depot.core.http.ServersConfiguration;
-import org.finos.legend.depot.store.mongo.core.MongoConfiguration;
+import org.finos.legend.depot.store.api.StorageConfiguration;
 import org.finos.legend.depot.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
 
@@ -34,7 +34,7 @@ public abstract class BaseModule<T extends ServersConfiguration> extends Dropwiz
     @Override
     public void configure(Binder binder)
     {
-        binder.bind(MongoConfiguration.class).toProvider(this::getMongoConfig);
+        binder.bind(StorageConfiguration.class).toProvider(this::getStorageConfig);
         binder.bind(OpenTracingConfiguration.class).toProvider(this::getTracingConfig);
         binder.bind(PrometheusConfiguration.class).toProvider(this::getPrometheusConfig);
     }
@@ -55,9 +55,9 @@ public abstract class BaseModule<T extends ServersConfiguration> extends Dropwiz
         return configuration.getApplicationName();
     }
 
-    private MongoConfiguration getMongoConfig()
+    private StorageConfiguration getStorageConfig()
     {
-        return getConfiguration().getMongoConfiguration();
+        return getConfiguration().getStorageConfiguration();
     }
 
     private OpenTracingConfiguration getTracingConfig()

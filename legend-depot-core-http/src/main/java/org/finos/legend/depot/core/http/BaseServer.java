@@ -33,6 +33,7 @@ import io.prometheus.client.exporter.MetricsServlet;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.eclipse.jetty.util.component.LifeCycle;
+import org.finos.legend.depot.store.api.StorageConfiguration;
 import org.finos.legend.depot.tracing.configuration.PrometheusMetricsProviderConfiguration;
 import org.finos.legend.depot.tracing.configuration.TracingAuthenticationProviderConfiguration;
 import org.finos.legend.sdlc.server.error.LegendSDLCServerExceptionMapper;
@@ -77,7 +78,7 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
         // Enable variable substitution with environment variables
         bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(true)));
         bootstrap.addBundle(buildGuiceBundle(getServerModules()));
-
+        StorageConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
         TracingAuthenticationProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
         PrometheusMetricsProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
     }

@@ -31,10 +31,11 @@
       ]
     }
   },
-  "mongo": {
-    "url": "${MONGODB_URI}",
-    "database": "depot"
-  },
+  "storage": {
+    "org.finos.legend.depot.store.mongo.core.MongoConfiguration": {
+      "url": "${MONGODB_URI}",
+      "database": "depot"}
+},
   "openTracing": {
     "openTracingUri": "your URL here",
     "serviceName": "legend-depot-store",
