@@ -44,7 +44,8 @@
         <module>legend-depot-core-schedules</module>
         <module>legend-depot-store-status</module>
         <module>legend-depot-store-metrics</module>
-        <module>legend-depot-store-notifications</module>
+        <module>legend-depot-store-notifications-api</module>
+        <module>legend-depot-store-notifications-impl</module>
 
         <module>legend-depot-core-services</module>
         <module>legend-depot-core-http</module>
@@ -409,7 +410,12 @@
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.depot</groupId>
-                <artifactId>legend-depot-store-notifications</artifactId>
+                <artifactId>legend-depot-store-notifications-impl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-store-notifications-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

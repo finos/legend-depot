@@ -16,7 +16,7 @@
 package org.finos.legend.depot.store.notifications.store.mongo;
 
 import com.mongodb.client.MongoDatabase;
-import org.finos.legend.depot.store.notifications.store.api.NotificationsStore;
+import org.finos.legend.depot.store.notifications.api.NotificationsStore;
 
 import javax.inject.Inject;
 import javax.inject.Named;

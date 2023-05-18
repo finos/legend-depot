@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>Legend Depot - Store - Notifications</name>
-    <artifactId>legend-depot-store-notifications</artifactId>
+    <artifactId>legend-depot-store-notifications-impl</artifactId>
 
     <dependencies>
         <!-- DEPOT -->
@@ -48,6 +48,10 @@
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-notifications-api</artifactId>
         </dependency>
 
         <dependency>
@@ -89,6 +93,10 @@
             <groupId>de.bwaldvogel</groupId>
             <artifactId>mongo-java-server</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-notifications-api</artifactId>
         </dependency>
     </dependencies>
 </project>

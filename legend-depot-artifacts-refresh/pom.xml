@@ -57,7 +57,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-notifications</artifactId>
+            <artifactId>legend-depot-store-notifications-impl</artifactId>
         </dependency>
         <!-- DEPOT -->
 

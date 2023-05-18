@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.notifications.store.api;
+package org.finos.legend.depot.store.notifications.api;
 
 import java.util.List;
 
