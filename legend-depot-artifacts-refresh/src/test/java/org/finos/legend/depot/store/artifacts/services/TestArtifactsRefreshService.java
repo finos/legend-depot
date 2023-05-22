@@ -104,7 +104,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
 
     protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(properties), dependencyManager, 10);
 
-    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices, queue, versionHandler);
+    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices, queue);
 
     protected NotificationsQueueManager notificationsQueueManager = new NotificationsQueueManager(new NotificationsMongo(mongoProvider),queue, versionHandler);
 

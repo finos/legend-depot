@@ -121,7 +121,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             response.addMessage(newProjectMessage);
             LOGGER.info(newProjectMessage);
         }
-        return response.combine(process(versionEvent));
+        return response.combine(executeWithTrace(PROCESS_EVENT, versionEvent, () -> doRefresh(versionEvent)));
     }
 
     @Override
@@ -199,7 +199,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         return TracerFactory.get().executeWithTrace(label, () ->
         {
             decorateSpanWithVersionInfo(notification.getGroupId(), notification.getArtifactId(), notification.getVersionId());
-            return execute(notification, functionToExecute);
+            return ensureSingleExecution(notification, functionToExecute);
         });
     }
 
@@ -212,7 +212,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         TracerFactory.get().addTags(tags);
     }
 
-    private MetadataEventResponse execute(MetadataNotification event, Supplier<MetadataEventResponse> functionToExecute)
+    private MetadataEventResponse ensureSingleExecution(MetadataNotification event, Supplier<MetadataEventResponse> functionToExecute)
     {
         MetadataEventResponse response = new MetadataEventResponse();
         LOGGER.info("Starting [{}-{}-{}] refresh", event.getGroupId(), event.getArtifactId(), event.getVersionId());
@@ -248,10 +248,9 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         return response;
     }
 
-    private MetadataEventResponse process(MetadataNotification event)
+
+    MetadataEventResponse doRefresh(MetadataNotification event)
     {
-        return executeWithTrace(PROCESS_EVENT, event, () ->
-        {
             long refreshStartTime = System.currentTimeMillis();
             MetadataEventResponse response = new MetadataEventResponse();
             String message = String.format("Executing: [%s-%s-%s], eventId: [%s], parentEventId: [%s], full/transitive: [%s/%s], attempts: [%s]", event.getGroupId(), event.getArtifactId(),
@@ -283,7 +282,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
                     if (!response.hasErrors())
                     {
                         List<Property> newProperties = calculateProjectProperties(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                        updateProjectVersion(project, event.getVersionId(),newProperties,newDependencies);
+                        updateProjectVersion(project, event.getVersionId(), newProperties, newDependencies);
                         //we let the version load but will check dependencies exists and report missing dependencies as errors
                         if (!event.isTransitive())
                         {
@@ -313,14 +312,13 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             catch (Exception e)
             {
                 String errorMessage = String.format("Exception executing: [%s-%s-%s], eventId: [%s], parentEventId: [%s], full/transitive: [%s/%s], attempts: [%s], exception[%s]", event.getGroupId(), event.getArtifactId(),
-                        event.getVersionId(), event.getEventId(), event.getParentEventId(), event.isFullUpdate(), event.isTransitive(), event.getAttempt(),e.getMessage());
+                        event.getVersionId(), event.getEventId(), event.getParentEventId(), event.isFullUpdate(), event.isTransitive(), event.getAttempt(), e.getMessage());
                 response.addError(errorMessage);
                 LOGGER.error(errorMessage);
             }
             long refreshEndTime = System.currentTimeMillis();
             PrometheusMetricsFactory.getInstance().observeHistogram(VERSION_REFRESH_DURATION, refreshStartTime, refreshEndTime);
             return response;
-        });
     }
 
     private void updateProjectVersion(StoreProjectData project, String versionId, List<Property> properties,List<ProjectVersion> newDependencies)

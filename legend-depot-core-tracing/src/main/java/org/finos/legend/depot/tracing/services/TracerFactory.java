@@ -32,6 +32,7 @@ import zipkin2.reporter.InMemoryReporterMetrics;
 
 import javax.inject.Singleton;
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -150,8 +151,13 @@ public final class TracerFactory
 
     public <T> T executeWithTrace(String label, Supplier<T> supplier)
     {
-        Span child = INSTANCE.startSpan(label);
+       return (T) executeWithTrace(label,supplier, Collections.EMPTY_MAP);
+    }
 
+    public <T> T executeWithTrace(String label, Supplier<T> supplier, Map<String,String> tags)
+    {
+        Span child = INSTANCE.startSpan(label);
+        child.log(tags);
         try
         {
             return supplier.get();

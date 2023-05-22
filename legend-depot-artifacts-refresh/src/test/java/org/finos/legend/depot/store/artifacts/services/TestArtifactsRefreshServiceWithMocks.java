@@ -86,10 +86,8 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);
     protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
-    protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(properties), dependencyManager, 10);
 
-    protected ArtifactsRefreshServiceImpl artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices,queue,versionHandler);
+    protected ArtifactsRefreshServiceImpl artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices,queue);
 
 
     @Before

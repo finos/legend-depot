@@ -26,7 +26,6 @@ import org.finos.legend.depot.core.http.BaseServer;
 import org.finos.legend.depot.core.http.resources.InfoPageModule;
 import org.finos.legend.depot.services.ManageServicesModule;
 import org.finos.legend.depot.schedules.AdminSchedulesModule;
-import org.finos.legend.depot.store.api.StorageConfiguration;
 import org.finos.legend.depot.store.artifacts.ArtifactsHandlersModule;
 import org.finos.legend.depot.store.artifacts.ArtifactsRefreshModule;
 import org.finos.legend.depot.store.artifacts.purge.ArtifactsPurgeModule;
