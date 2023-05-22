@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 
@@ -32,7 +33,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 @Path("")
 @Api("Deprecated")
@@ -64,6 +65,6 @@ public class DeprecatedPureModelContextAPIsResource extends BaseResource
                                                         @DefaultValue("true")
                                                         @ApiParam("Whether to return ENTITIES with version in entity path") boolean getDependencies)
     {
-        return handle(GET_REVISION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId,MASTER_SNAPSHOT, clientVersion, versioned, getDependencies));
+        return handle(GET_REVISION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId,BRANCH_SNAPSHOT("master"), clientVersion, versioned, getDependencies));
     }
 }

@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 public class TestFileGenerationsStore extends TestStoreMongo
 {
@@ -59,7 +59,7 @@ public class TestFileGenerationsStore extends TestStoreMongo
         Assert.assertEquals(3, result.size());
 
         Assert.assertEquals(0, generations.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "12.3.2", "com::avrogen").size());
-        Assert.assertEquals(0, generations.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT, "com::jsonGen").size());
+        Assert.assertEquals(0, generations.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"), "com::jsonGen").size());
 
         List<StoredFileGeneration> result2 = generations.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "com::avrogen");
         Assert.assertEquals(3, result2.size());
@@ -75,7 +75,7 @@ public class TestFileGenerationsStore extends TestStoreMongo
         Assert.assertEquals(3, result.size());
 
         Assert.assertEquals(0, generations.findByType(TEST_GROUP_ID, TEST_ARTIFACT_ID, "12.3.2", "java").size());
-        Assert.assertEquals(0, generations.findByType(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT, "java").size());
+        Assert.assertEquals(0, generations.findByType(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"), "java").size());
 
     }
 
@@ -85,7 +85,7 @@ public class TestFileGenerationsStore extends TestStoreMongo
         Assert.assertTrue(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "/examples/metadata/test/ClientBasic.avro").isPresent());
         Assert.assertTrue(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "/examples/generated/test/other/MyOutput.json").isPresent());
         Assert.assertFalse(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "0.01.1", "/examples/metadata/test/ClientBasic.avro").isPresent());
-        Assert.assertFalse(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT, "com/finos/sdgashdf").isPresent());
+        Assert.assertFalse(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"), "com/finos/sdgashdf").isPresent());
     }
 
 }

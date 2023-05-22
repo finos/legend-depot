@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 public class TestMavenArtifactsRepository extends MavenArtifactRepository implements ArtifactRepository
 {
@@ -41,9 +41,9 @@ public class TestMavenArtifactsRepository extends MavenArtifactRepository implem
 
     static
     {
-        TESTING_VERSIONS.put("examples.metadata.test", Arrays.asList(MASTER_SNAPSHOT, "2.0.0", "1.0.0"));
-        TESTING_VERSIONS.put("examples.metadata.test-dependencies", Arrays.asList(MASTER_SNAPSHOT,"1.0.0"));
-        TESTING_VERSIONS.put("examples.metadata.art101", Arrays.asList(MASTER_SNAPSHOT));
+        TESTING_VERSIONS.put("examples.metadata.test", Arrays.asList(BRANCH_SNAPSHOT("master"), "2.0.0", "1.0.0"));
+        TESTING_VERSIONS.put("examples.metadata.test-dependencies", Arrays.asList(BRANCH_SNAPSHOT("master"),"1.0.0"));
+        TESTING_VERSIONS.put("examples.metadata.art101", Arrays.asList(BRANCH_SNAPSHOT("master")));
     }
 
     public TestMavenArtifactsRepository()
@@ -54,7 +54,7 @@ public class TestMavenArtifactsRepository extends MavenArtifactRepository implem
     @Override
     public List<VersionId> findVersions(String group, String artifact)
     {
-        return TESTING_VERSIONS.getOrDefault(group + DOT + artifact, Collections.emptyList()).stream().filter(v -> !v.equals(MASTER_SNAPSHOT)).map(v -> VersionId.parseVersionId(v)).collect(Collectors.toList());
+        return TESTING_VERSIONS.getOrDefault(group + DOT + artifact, Collections.emptyList()).stream().filter(v -> !v.equals(BRANCH_SNAPSHOT("master"))).map(v -> VersionId.parseVersionId(v)).collect(Collectors.toList());
     }
 
     @Override

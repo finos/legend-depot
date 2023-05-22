@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 
 public class TestQueryVersions extends TestStoreMongo
@@ -120,7 +120,7 @@ public class TestQueryVersions extends TestStoreMongo
 
         Set<String> paths = entities.stream().map(en -> en.getEntity().getPath()).collect(Collectors.toSet());
 
-        List<Entity> withoutVersions = versionsMongo.getEntities("examples.metadata", "test", MASTER_SNAPSHOT, true);
+        List<Entity> withoutVersions = versionsMongo.getEntities("examples.metadata", "test", BRANCH_SNAPSHOT("master"), true);
         Assert.assertNotNull(withoutVersions);
         Set<String> allPaths = withoutVersions.stream().map(Entity::getPath).collect(Collectors.toSet());
 

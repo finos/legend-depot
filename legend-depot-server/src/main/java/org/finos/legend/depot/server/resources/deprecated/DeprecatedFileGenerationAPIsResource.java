@@ -19,6 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
@@ -31,7 +32,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Optional;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 @Path("")
 @Api("Deprecated")
@@ -57,7 +58,7 @@ public class DeprecatedFileGenerationAPIsResource extends BaseResource
     public List<Entity> getLatestGenerations(@PathParam("groupId") String groupId,
                                              @PathParam("artifactId") String artifactId)
     {
-        return handle(GET_REVISION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getGenerations(groupId, artifactId, MASTER_SNAPSHOT));
+        return handle(GET_REVISION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getGenerations(groupId, artifactId, BRANCH_SNAPSHOT("master")));
     }
 
 
@@ -69,7 +70,7 @@ public class DeprecatedFileGenerationAPIsResource extends BaseResource
     public List<FileGeneration> getLatestFileGenerations(@PathParam("groupId") String groupId,
                                                           @PathParam("artifactId") String artifactId)
     {
-        return handle(GET_REVISION_FILE_GENERATION, () -> this.generationsService.getFileGenerations(groupId, artifactId,MASTER_SNAPSHOT));
+        return handle(GET_REVISION_FILE_GENERATION, () -> this.generationsService.getFileGenerations(groupId, artifactId,BRANCH_SNAPSHOT("master")));
     }
 
     @GET
@@ -81,7 +82,7 @@ public class DeprecatedFileGenerationAPIsResource extends BaseResource
                                                                @PathParam("artifactId") String artifactId,
                                                                @PathParam("elementPath") String elementPath)
     {
-        return handle(GET_REVISION_FILE_GENERATION_BY_ELEMENT_PATH, () -> this.generationsService.getFileGenerationsByElementPath(groupId, artifactId, MASTER_SNAPSHOT,elementPath));
+        return handle(GET_REVISION_FILE_GENERATION_BY_ELEMENT_PATH, () -> this.generationsService.getFileGenerationsByElementPath(groupId, artifactId, BRANCH_SNAPSHOT("master"),elementPath));
     }
 
     @GET
@@ -93,7 +94,7 @@ public class DeprecatedFileGenerationAPIsResource extends BaseResource
                                                                    @PathParam("artifactId") String artifactId,
                                                                    @PathParam("filePath") String filePath)
     {
-        return handle(GET_REVISION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFilePath(groupId, artifactId, MASTER_SNAPSHOT,filePath));
+        return handle(GET_REVISION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFilePath(groupId, artifactId, BRANCH_SNAPSHOT("master"),filePath));
     }
 
 }

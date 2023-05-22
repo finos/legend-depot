@@ -27,6 +27,7 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
@@ -48,7 +49,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -66,13 +67,13 @@ public class TestGenerationsProvider extends TestStoreMongo
     private final UpdateEntities entities = new EntitiesMongo(mongoProvider);
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
     private final Queue queue = mock(Queue.class);
-    private final ManageFileGenerationsService generations = new ManageFileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities, new ProjectsServiceImpl(projectsVersions,projects,metrics,queue));
+    private final ManageFileGenerationsService generations = new ManageFileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities, new ProjectsServiceImpl(projectsVersions,projects,metrics,queue,new ProjectsConfiguration("master")));
 
     @Before
     public void setup()
     {
        when(projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID)).thenReturn(Optional.of(new StoreProjectData(PRODUCT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID)));
-       when(projectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT)).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT)));
+       when(projectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"))).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"))));
         when(projectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0")).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0")));
     }
 
@@ -107,7 +108,7 @@ public class TestGenerationsProvider extends TestStoreMongo
         Assert.assertTrue(generations.getAll().isEmpty());
         FileGenerationHandlerImpl handler = new FileGenerationHandlerImpl(repository, fileGenerationsProvider, generations);
         StoreProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
-        MetadataEventResponse response = handler.refreshProjectVersionArtifacts(projectData, MASTER_SNAPSHOT, getFiles(MASTER_SNAPSHOT));
+        MetadataEventResponse response = handler.refreshProjectVersionArtifacts(projectData, BRANCH_SNAPSHOT("master"), getFiles(BRANCH_SNAPSHOT("master")));
         Assert.assertNotNull(response);
         Assert.assertFalse(response.hasErrors());
         List<StoredFileGeneration> fileGenerations = generations.getAll();
@@ -124,7 +125,7 @@ public class TestGenerationsProvider extends TestStoreMongo
         FileGenerationHandlerImpl handler = new FileGenerationHandlerImpl(repository, fileGenerationsProvider, generations);
         StoreProjectData projectData = projects.find(TEST_GROUP_ID, TEST_ARTIFACT_ID).get();
         //deleted one generation as part of new master snapshot version
-        MetadataEventResponse response = handler.refreshProjectVersionArtifacts(projectData, MASTER_SNAPSHOT,Arrays.asList(new File(filePath.getFile())));
+        MetadataEventResponse response = handler.refreshProjectVersionArtifacts(projectData, BRANCH_SNAPSHOT("master"),Arrays.asList(new File(filePath.getFile())));
         Assert.assertNotNull(response);
         Assert.assertFalse(response.hasErrors());
         List<StoredFileGeneration> fileGenerations = generations.getAll();
