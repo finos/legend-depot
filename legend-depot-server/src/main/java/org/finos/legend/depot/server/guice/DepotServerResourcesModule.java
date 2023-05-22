@@ -19,10 +19,6 @@ import com.google.inject.PrivateModule;
 import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.server.resources.ProjectsVersionsResource;
 import org.finos.legend.depot.server.resources.dependencies.DependenciesResource;
-import org.finos.legend.depot.server.resources.deprecated.DeprecatedDependenciesAPIsResource;
-import org.finos.legend.depot.server.resources.deprecated.DeprecatedEntitiesAPIsResource;
-import org.finos.legend.depot.server.resources.deprecated.DeprecatedFileGenerationAPIsResource;
-import org.finos.legend.depot.server.resources.deprecated.DeprecatedProjectAPIsResource;
 import org.finos.legend.depot.server.resources.entities.EntitiesResource;
 import org.finos.legend.depot.server.resources.entities.EntityClassifierResource;
 import org.finos.legend.depot.server.resources.file.FileGenerationsResource;
@@ -39,10 +35,6 @@ public class DepotServerResourcesModule extends PrivateModule
         bind(DependenciesResource.class);
         bind(FileGenerationsResource.class);
 
-        bind(DeprecatedProjectAPIsResource.class);
-        bind(DeprecatedEntitiesAPIsResource.class);
-        bind(DeprecatedFileGenerationAPIsResource.class);
-        bind(DeprecatedDependenciesAPIsResource.class);
 
         expose(ProjectsResource.class);
         expose(ProjectsVersionsResource.class);
@@ -51,9 +43,5 @@ public class DepotServerResourcesModule extends PrivateModule
         expose(DependenciesResource.class);
         expose(FileGenerationsResource.class);
 
-        expose(DeprecatedProjectAPIsResource.class);
-        expose(DeprecatedEntitiesAPIsResource.class);
-        expose(DeprecatedFileGenerationAPIsResource.class);
-        expose(DeprecatedDependenciesAPIsResource.class);
     }
 }
