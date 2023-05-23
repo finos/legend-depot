@@ -18,7 +18,8 @@ package org.finos.legend.depot.store.notifications.store.mongo;
 import org.finos.legend.depot.domain.notifications.EventPriority;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.finos.legend.depot.store.notifications.api.Queue;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
 import org.junit.Assert;
 import org.junit.Test;
 

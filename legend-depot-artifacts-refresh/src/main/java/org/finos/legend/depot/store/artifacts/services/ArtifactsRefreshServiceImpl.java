@@ -26,7 +26,7 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.ParentEvent;
-import org.finos.legend.depot.store.notifications.api.Queue;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;

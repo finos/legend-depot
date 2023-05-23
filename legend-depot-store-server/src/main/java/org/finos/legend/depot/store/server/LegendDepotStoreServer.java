@@ -35,6 +35,7 @@ import org.finos.legend.depot.store.metrics.AdminMetricsModule;
 import org.finos.legend.depot.store.mongo.admin.ManageAdminDataStoreMongoModule;
 import org.finos.legend.depot.store.mongo.ManageDataStoreMongoModule;
 import org.finos.legend.depot.store.notifications.NotificationsModule;
+import org.finos.legend.depot.store.notifications.queue.NotificationsQueueModule;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
 import org.finos.legend.depot.store.status.StoreStatusModule;
 import org.finos.legend.depot.tracing.TracingModule;
@@ -81,7 +82,8 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new ArtifactsPurgeModule(),
                 new RepositoryModule(),
                 new TracingModule(),
-                new NotificationsModule());
+                new NotificationsModule(),
+                new NotificationsQueueModule());
     }
 
     @Override

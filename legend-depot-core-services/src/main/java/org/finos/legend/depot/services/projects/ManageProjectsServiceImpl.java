@@ -22,6 +22,7 @@ import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -33,9 +34,9 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
     private final UpdateProjects projects;
 
     @Inject
-    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics)
+    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics, Queue queue)
     {
-        super(projectsVersions,projects, metrics);
+        super(projectsVersions,projects, metrics, queue);
         this.projects = projects;
         this.projectsVersions = projectsVersions;
     }

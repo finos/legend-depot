@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.notifications.store.mongo;
+package org.finos.legend.depot.store.notifications.queue.store.mongo;
 
 import com.mongodb.client.model.Filters;
 import org.bson.conversions.Bson;
@@ -21,7 +21,7 @@ import org.bson.types.ObjectId;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
-class NotificationKeyFilter
+public class NotificationKeyFilter
 {
     private NotificationKeyFilter()
     {

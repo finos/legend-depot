@@ -44,8 +44,8 @@ import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
-import org.finos.legend.depot.store.notifications.api.Queue;
-import org.finos.legend.depot.store.notifications.store.mongo.NotificationsQueueMongo;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.Assert;
 import org.junit.Before;
@@ -79,11 +79,12 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     protected UpdateProjectsVersions versionsStore = new ProjectsVersionsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(versionsStore, projectsStore, metrics);
+
+    protected Queue queue = new NotificationsQueueMongo(mongoProvider);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(versionsStore, projectsStore, metrics, queue);
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore,projectsService);
     protected EntityArtifactsProvider entitiesProvider = new EntityProvider();
     protected RepositoryServices repositoryServices = mock(RepositoryServices.class);
-    protected Queue queue = new NotificationsQueueMongo(mongoProvider);
 
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 

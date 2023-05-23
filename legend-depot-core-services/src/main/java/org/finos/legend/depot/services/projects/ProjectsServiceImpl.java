@@ -16,6 +16,8 @@
 package org.finos.legend.depot.services.projects;
 
 import org.eclipse.collections.api.factory.Sets;
+import org.finos.legend.depot.domain.notifications.EventPriority;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
@@ -33,6 +35,7 @@ import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
@@ -55,22 +58,26 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private final QueryMetricsStore metrics;
 
+    private final Queue queue;
+
     private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
     private static final String NOT_FOUND_IN_STORE = "project version not found for %s-%s-%s";
 
     @Inject
-    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, QueryMetricsStore metrics)
+    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, QueryMetricsStore metrics, Queue queue)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
         this.metrics = metrics;
+        this.queue = queue;
     }
 
-    public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics)
+    public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics, Queue queue)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
         this.metrics = metrics;
+        this.queue = queue;
     }
 
     @Override
@@ -135,7 +142,7 @@ public class ProjectsServiceImpl implements ProjectsService
         return projectsVersions.find(groupId, artifactId, versionId);
     }
 
-    private void validateStoreProjectVersionData(StoreProjectVersionData projectVersion) throws IllegalArgumentException
+    private void validateStoreProjectVersionData(StoreProjectVersionData projectVersion)
     {
         ProjectVersionData versionData = projectVersion.getVersionData();
         if (versionData.isExcluded())
@@ -144,8 +151,17 @@ public class ProjectsServiceImpl implements ProjectsService
         }
         else if (projectVersion.isEvicted())
         {
-            throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()));
+            restoreEvictedProjectVersion(projectVersion);
+            throw new IllegalStateException(String.format("Project version: %s-%s-%s is being restored, please retry in 5 minutes", projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()));
         }
+    }
+
+    private void restoreEvictedProjectVersion(StoreProjectVersionData projectVersion)
+    {
+        String groupId = projectVersion.getGroupId();
+        String artifactId = projectVersion.getArtifactId();
+        StoreProjectData projectData = this.findCoordinates(groupId, artifactId).get();
+        this.queue.push(new MetadataNotification(projectData.getProjectId(), groupId, artifactId, projectVersion.getVersionId(),true, false, null, EventPriority.HIGH));
     }
 
     @Override

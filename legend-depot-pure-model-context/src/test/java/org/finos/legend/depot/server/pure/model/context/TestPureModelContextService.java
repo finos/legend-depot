@@ -27,6 +27,7 @@ import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.engine.protocol.pure.v1.model.context.AlloySDLC;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -52,8 +53,8 @@ public class TestPureModelContextService extends TestBaseServices
     public static final String TEST_GROUP_ID = "examples.metadata";
     public static final String CLIENT_VERSION = "vX_X_X";
     private final QueryMetricsStore metrics = new QueryMetricsMongo(mongoProvider);
-
-    ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics);
+    private final Queue queue = mock(Queue.class);
+    ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue);
     private final PureModelContextService service = new PureModelContextServiceImpl(new EntitiesServiceImpl(entitiesStore, projectsService), projectsService);
 
 

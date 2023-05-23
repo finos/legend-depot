@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.notifications.store.mongo;
+package org.finos.legend.depot.store.notifications.queue.store.mongo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,7 +29,7 @@ import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.finos.legend.depot.store.notifications.api.Queue;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,7 +43,7 @@ import java.util.function.Consumer;
 public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> implements Queue
 {
 
-    static final String COLLECTION = "notifications-queue";
+    public static final String COLLECTION = "notifications-queue";
     private static final String EVENT_PRIORITY = "eventPriority";
 
     @Inject
@@ -55,7 +55,7 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("eventPriority-created", "eventPriority","created"));
+        return Arrays.asList(BaseMongo.buildIndex("eventPriority-created", "eventPriority","created"));
     }
 
     @Override
@@ -110,7 +110,7 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
     @Override
     public Optional<MetadataNotification> getFirstInQueue()
     {
-        Document first = (Document)getCollection().findOneAndDelete(Filters.exists(ID_FIELD),new FindOneAndDeleteOptions().sort(Sorts.ascending(EVENT_PRIORITY, CREATED)));
+        Document first = (Document)getCollection().findOneAndDelete(Filters.exists(BaseMongo.ID_FIELD),new FindOneAndDeleteOptions().sort(Sorts.ascending(EVENT_PRIORITY, BaseMongo.CREATED)));
         if (first != null)
         {
             return Optional.of(convert(first, MetadataNotification.class));
@@ -122,7 +122,7 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
     @Override
     public Optional<MetadataNotification> get(String eventId)
     {
-        return findOne(Filters.eq(ID_FIELD, new ObjectId(eventId)));
+        return findOne(Filters.eq(BaseMongo.ID_FIELD, new ObjectId(eventId)));
     }
 
     public List<MetadataNotification> getAll()
@@ -135,7 +135,7 @@ public class NotificationsQueueMongo extends BaseMongo<MetadataNotification> imp
     @Override
     public long deleteAll()
     {
-        DeleteResult result = getCollection().deleteMany(Filters.exists(GROUP_ID));
+        DeleteResult result = getCollection().deleteMany(Filters.exists(BaseMongo.GROUP_ID));
         return result.getDeletedCount();
     }
 }
