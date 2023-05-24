@@ -46,8 +46,8 @@ import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvi
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
-import org.finos.legend.depot.store.notifications.api.Queue;
-import org.finos.legend.depot.store.notifications.store.mongo.NotificationsQueueMongo;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.After;
 import org.junit.Assert;
@@ -83,12 +83,13 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     protected UpdateProjects mongoProjects = mock(UpdateProjects.class);
     protected UpdateProjectsVersions mongoProjectsVersions = mock(UpdateProjectsVersions.class);
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(mongoProjectsVersions,mongoProjects,metrics);
+    protected Queue queue = new NotificationsQueueMongo(mongoProvider);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(mongoProjectsVersions,mongoProjects,metrics,queue);
     protected UpdateEntities mongoEntities = mock(UpdateEntities.class);
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(mongoEntities,projectsService);
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);
     protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
-    protected Queue queue = new NotificationsQueueMongo(mongoProvider);
+    protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 
     protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices, queue);
 

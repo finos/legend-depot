@@ -29,6 +29,7 @@ import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.notifications.api.Notifications;
+import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationKeyFilter;
 
 import javax.inject.Inject;
 import javax.inject.Named;

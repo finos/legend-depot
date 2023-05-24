@@ -33,6 +33,8 @@ import static org.finos.legend.depot.artifacts.repository.services.RepositorySer
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.REPO_EXCEPTIONS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.REPO_VERSIONS;
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.STORE_VERSIONS;
+import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.EXCLUDED_VERSIONS;
+import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.EVICTED_VERSIONS;
 
 public class RepositoryModule extends PrivateModule
 {
@@ -59,6 +61,8 @@ public class RepositoryModule extends PrivateModule
         metricsHandler.registerGauge(MISSING_REPO_VERSIONS, MISSING_REPO_VERSIONS);
         metricsHandler.registerGauge(MISSING_STORE_VERSIONS, MISSING_STORE_VERSIONS);
         metricsHandler.registerGauge(REPO_EXCEPTIONS, REPO_EXCEPTIONS);
+        metricsHandler.registerGauge(EXCLUDED_VERSIONS, EXCLUDED_VERSIONS);
+        metricsHandler.registerGauge(EVICTED_VERSIONS, EVICTED_VERSIONS);
         schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE,repositoryServices::findVersionsMismatches);
         return true;
     }

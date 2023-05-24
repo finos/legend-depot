@@ -56,6 +56,10 @@
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-pure-model-context</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-notifications-queue</artifactId>
+        </dependency>
         <!-- DEPOT -->
 
         <!-- ENGINE -->

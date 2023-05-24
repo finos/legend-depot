@@ -27,6 +27,7 @@ import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;
 import org.junit.Before;
@@ -43,7 +44,8 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class TestEntitiesService extends TestBaseServices
 {
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
-    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics));
+    private final Queue queue = mock(Queue.class);
+    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue));
 
     @Before
     public void setUpData()

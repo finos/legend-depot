@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.notifications.api;
+package org.finos.legend.depot.store.notifications.queue.api;
 
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 

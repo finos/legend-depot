@@ -38,7 +38,7 @@ import org.finos.legend.depot.store.admin.domain.artifacts.ArtifactFile;
 import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
-import org.finos.legend.depot.store.notifications.api.Queue;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.slf4j.Logger;
