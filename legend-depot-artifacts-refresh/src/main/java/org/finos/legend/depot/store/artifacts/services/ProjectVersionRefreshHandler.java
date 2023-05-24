@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +95,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         this.statusStore = store;
         this.artifacts = artifacts;
         this.repositoryServices = repositoryServices;
-        this.projectPropertiesInScope = includePropertyConfig.getProperties();
+        this.projectPropertiesInScope = includePropertyConfig != null ? includePropertyConfig.getProperties() : Collections.EMPTY_LIST;
         this.dependencyManager = dependencyManager;
         this.maximumSnapshotsAllowed = maximumSnapshotsAllowed;
 

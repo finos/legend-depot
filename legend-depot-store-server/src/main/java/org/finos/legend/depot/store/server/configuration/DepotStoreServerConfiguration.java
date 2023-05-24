@@ -36,7 +36,6 @@ public class DepotStoreServerConfiguration extends ServersConfiguration
     @JsonProperty("artifactRepositoryProviderConfiguration")
     private ArtifactRepositoryProviderConfiguration artifactRepositoryProviderConfiguration;
 
-    @NotNull
     @JsonProperty("includeProjectPropertiesConfiguration")
     private IncludeProjectPropertiesConfiguration includeProjectPropertiesConfiguration;
 
