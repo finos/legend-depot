@@ -18,10 +18,15 @@ package org.finos.legend.depot.artifacts.repository;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
+import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
+import org.finos.legend.depot.artifacts.repository.api.VoidArtifactRepositoryProvider;
 import org.finos.legend.depot.artifacts.repository.resources.RepositoryResource;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
+import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
+import org.slf4j.Logger;
 
 import javax.inject.Named;
 
@@ -38,6 +43,7 @@ import static org.finos.legend.depot.artifacts.repository.services.RepositorySer
 
 public class RepositoryModule extends PrivateModule
 {
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(RepositoryModule.class);
     private static final String REPOSITORY_METRICS_SCHEDULE = "repository-metrics-schedule";
 
     @Override
@@ -47,23 +53,43 @@ public class RepositoryModule extends PrivateModule
        bind(RepositoryServices.class);
        expose(RepositoryResource.class);
        expose(RepositoryServices.class);
+       expose(ArtifactRepository.class);
     }
 
 
     @Provides
+    @Singleton
+    public ArtifactRepository getArtifactRepository(ArtifactRepositoryProviderConfiguration configuration)
+    {
+        if (configuration != null)
+        {
+            ArtifactRepository configuredProvider = configuration.initialiseArtifactRepositoryProvider();
+            if (configuredProvider != null)
+            {
+                LOGGER.info("Artifact Repository from provider config [{}] : [{}]", configuration.getName(), configuration);
+                return configuredProvider;
+            }
+        }
+        LOGGER.info("Using void Artifact Repository provider, artifacts cant/wont be updated");
+        return new VoidArtifactRepositoryProvider(configuration);
+    }
+
+    @Provides
     @Named("repository-metrics")
     @Singleton
-    boolean registerMetrics(SchedulesFactory schedulesFactory, PrometheusMetricsHandler metricsHandler, RepositoryServices repositoryServices)
+    boolean registerMetrics(PrometheusConfiguration prometheusConfiguration,SchedulesFactory schedulesFactory,RepositoryServices repositoryServices)
     {
-        metricsHandler.registerGauge(PROJECTS, PROJECTS);
-        metricsHandler.registerGauge(REPO_VERSIONS, REPO_VERSIONS);
-        metricsHandler.registerGauge(STORE_VERSIONS, STORE_VERSIONS);
-        metricsHandler.registerGauge(MISSING_REPO_VERSIONS, MISSING_REPO_VERSIONS);
-        metricsHandler.registerGauge(MISSING_STORE_VERSIONS, MISSING_STORE_VERSIONS);
-        metricsHandler.registerGauge(REPO_EXCEPTIONS, REPO_EXCEPTIONS);
-        metricsHandler.registerGauge(EXCLUDED_VERSIONS, EXCLUDED_VERSIONS);
-        metricsHandler.registerGauge(EVICTED_VERSIONS, EVICTED_VERSIONS);
-        schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE,repositoryServices::findVersionsMismatches);
+        if (prometheusConfiguration.isEnabled())
+        {
+            PrometheusMetricsHandler metricsHandler = prometheusConfiguration.getMetricsHandler();
+            metricsHandler.registerGauge(PROJECTS, PROJECTS);
+            metricsHandler.registerGauge(REPO_VERSIONS, REPO_VERSIONS);
+            metricsHandler.registerGauge(STORE_VERSIONS, STORE_VERSIONS);
+            metricsHandler.registerGauge(MISSING_REPO_VERSIONS, MISSING_REPO_VERSIONS);
+            metricsHandler.registerGauge(MISSING_STORE_VERSIONS, MISSING_STORE_VERSIONS);
+            metricsHandler.registerGauge(REPO_EXCEPTIONS, REPO_EXCEPTIONS);
+            schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE, repositoryServices::findVersionsMismatches);
+        }
         return true;
     }
 }

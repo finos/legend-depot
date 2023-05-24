@@ -18,30 +18,24 @@ package org.finos.legend.depot.store.guice;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
-import org.finos.legend.depot.artifacts.repository.api.VoidArtifactRepositoryProvider;
 import org.finos.legend.depot.core.http.guice.BaseModule;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
-import org.finos.legend.depot.store.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
+import org.finos.legend.depot.store.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
-import org.slf4j.Logger;
 
 import javax.inject.Named;
 
 public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfiguration>
 {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DepotStoreServerModule.class);
-    private ArtifactRepository artifactRepository;
 
     @Override
     public void configure(Binder binder)
     {
         super.configure(binder);
-        binder.bind(ArtifactRepository.class).toProvider(this::getArtifactRepository);
         binder.bind(ArtifactRepositoryProviderConfiguration.class).toProvider(this::getArtifactRepositoryConfiguration);
         binder.bind(IncludeProjectPropertiesConfiguration.class).toProvider(this::getIncludePropertiesConfiguration);
         binder.bind(ArtifactsRetentionPolicyConfiguration.class).toProvider(this::getRetentionPolicyConfiguration);
@@ -67,32 +61,6 @@ public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfigura
     {
         ArtifactRepositoryProviderConfiguration configuration = getConfiguration().getArtifactRepositoryProviderConfiguration();
         return (configuration == null) ? ArtifactRepositoryProviderConfiguration.voidConfiguration() : configuration;
-    }
-
-    private ArtifactRepository getArtifactRepository()
-    {
-        if (artifactRepository == null)
-        {
-            LOGGER.info("resolving Artifact Repository provider");
-            artifactRepository = resolveArtifactRepositoryProvider();
-        }
-        return artifactRepository;
-    }
-
-    private ArtifactRepository resolveArtifactRepositoryProvider()
-    {
-        ArtifactRepositoryProviderConfiguration configuration = getConfiguration().getArtifactRepositoryProviderConfiguration();
-        if (configuration != null)
-        {
-            ArtifactRepository configuredProvider = configuration.initialiseArtifactRepositoryProvider();
-            if (configuredProvider != null)
-            {
-                LOGGER.info("Artifact Repository from provider config [{}] : [{}]", configuration.getName(), configuration);
-                return configuredProvider;
-            }
-        }
-        LOGGER.error("Using void Artifact Repository provider, artifacts cant/wont be updated");
-        return new VoidArtifactRepositoryProvider(configuration);
     }
 
     @Provides

@@ -28,6 +28,7 @@ import org.finos.legend.depot.store.notifications.store.api.NotificationsStore;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsStoreImpl;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
+import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
 
 import javax.inject.Named;
 
@@ -76,11 +77,15 @@ public class NotificationsModule extends PrivateModule
     @Provides
     @Named("notifications-metrics")
     @Singleton
-    boolean registerMetrics(PrometheusMetricsHandler metricsHandler)
+    boolean registerMetrics(PrometheusConfiguration configuration)
     {
-        metricsHandler.registerCounter(NOTIFICATIONS_COUNTER, NOTIFICATIONS_COUNTER_HELP);
-        metricsHandler.registerGauge(QUEUE_WAITING, QUEUE_WAITING_HELP);
-        metricsHandler.registerHistogram(NOTIFICATION_COMPLETE, NOTIFICATION_COMPLETE_HELP);
+        if (configuration.isEnabled())
+        {
+            PrometheusMetricsHandler metricsHandler = configuration.getMetricsHandler();
+            metricsHandler.registerCounter(NOTIFICATIONS_COUNTER, NOTIFICATIONS_COUNTER_HELP);
+            metricsHandler.registerGauge(QUEUE_WAITING, QUEUE_WAITING_HELP);
+            metricsHandler.registerHistogram(NOTIFICATION_COMPLETE, NOTIFICATION_COMPLETE_HELP);
+        }
         return true;
     }
 
