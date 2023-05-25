@@ -47,6 +47,8 @@ public class RepositoryServices
 
     public static final String REPO_VERSIONS = "repo_versions";
     public static final String STORE_VERSIONS = "store_versions";
+    public static final String EXCLUDED_VERSIONS = "excluded_versions";
+    public static final String EVICTED_VERSIONS = "evicted_versions";
     public static final String MISSING_REPO_VERSIONS = "missing_repo_versions";
     public static final String MISSING_STORE_VERSIONS = "missing_store_versions";
     public static final String REPO_EXCEPTIONS = "repo_exceptions";
@@ -70,6 +72,8 @@ public class RepositoryServices
         AtomicLong missingRepoVersions = new AtomicLong(0);
         AtomicLong missingStoreVersions = new AtomicLong(0);
         AtomicLong repoExceptions = new AtomicLong(0);
+        AtomicLong evictedVersionsCount = new AtomicLong(0);
+        AtomicLong excludedVersionsCount = new AtomicLong(0);
         long startTime = System.currentTimeMillis();
         List<StoreProjectData> allProjects = projects.getAllProjectCoordinates();
         LOGGER.info("Starting findVersionsMismatches {}",allProjects.size());
@@ -82,6 +86,12 @@ public class RepositoryServices
                 storeVersionsCount.addAndGet(storeVersions.size());
                 final List<String> repositoryVersions = repository.findVersions(p.getGroupId(), p.getArtifactId()).stream().map(v -> v.toVersionIdString()).collect(Collectors.toList());
                 repoVersions.addAndGet(repositoryVersions.size());
+
+                //check evicted versions
+                long noOfEvictedVersions = projectVersions.stream().filter(pv -> pv.isEvicted()).count();
+                long noOfExcludedVersions = projectVersions.stream().filter(pv -> pv.getVersionData().isExcluded()).count();
+                evictedVersionsCount.addAndGet(noOfEvictedVersions);
+                excludedVersionsCount.addAndGet(noOfExcludedVersions);
 
                 //check versions not in store
                 List<String> versionsNotInStore = repositoryVersions.stream().filter(repoVersion -> !storeVersions.contains(repoVersion)).collect(Collectors.toList());
@@ -118,6 +128,8 @@ public class RepositoryServices
         PrometheusMetricsFactory.getInstance().setGauge(MISSING_REPO_VERSIONS,missingRepoVersions.get());
         PrometheusMetricsFactory.getInstance().setGauge(MISSING_STORE_VERSIONS,missingStoreVersions.get());
         PrometheusMetricsFactory.getInstance().setGauge(REPO_EXCEPTIONS,repoExceptions.get());
+        PrometheusMetricsFactory.getInstance().setGauge(EXCLUDED_VERSIONS,excludedVersionsCount.get());
+        PrometheusMetricsFactory.getInstance().setGauge(EVICTED_VERSIONS, evictedVersionsCount.get());
         LOGGER.info("Finished findVersionsMismatches {} ({}) ms",versionMismatches.size(),System.currentTimeMillis() - startTime);
         return versionMismatches;
     }

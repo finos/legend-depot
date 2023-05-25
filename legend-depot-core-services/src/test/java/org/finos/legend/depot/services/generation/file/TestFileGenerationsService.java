@@ -31,6 +31,7 @@ import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +57,8 @@ public class TestFileGenerationsService extends TestStoreMongo
     UpdateProjectsVersions projectsVersionsStore = mock(UpdateProjectsVersions.class);
     UpdateProjects projectsStore = mock(UpdateProjects.class);
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
-    private ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics);
+    private final Queue queue = mock(Queue.class);
+    private ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue);
     private ManageFileGenerationsService service = new ManageFileGenerationsServiceImpl(generations, entities, projectsService);
 
     @Before

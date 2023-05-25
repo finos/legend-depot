@@ -29,6 +29,7 @@ import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.After;
 import org.junit.Assert;
@@ -51,7 +52,8 @@ public class TestQueryEntitiesResource extends TestBaseServices
     private UpdateProjectsVersions projectsVersions = mock(UpdateProjectsVersions.class);
 
     private final QueryMetricsStore metrics = new QueryMetricsMongo(mongoProvider);
-    private final EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projectsVersions, projects, metrics));
+    private final Queue queue = mock(Queue.class);
+    private final EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projectsVersions, projects, metrics, queue));
     private EntitiesResource entitiesResource = new EntitiesResource(entitiesService);
     private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
     private QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metricsStore);

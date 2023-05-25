@@ -26,14 +26,19 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.ParentEvent;
-import org.finos.legend.depot.store.notifications.api.Queue;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
 
 
 public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
@@ -46,21 +51,22 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     private static final String REFRESH_ALL_VERSIONS_FOR_PROJECT = "refreshAllVersionsForProject";
     private static final String REFRESH_PROJECT_VERSION_ARTIFACTS = "refreshProjectVersionArtifacts";
     private static final String ALL_SNAPSHOT = "all-SNAPSHOT";
+    private static final String GROUP_ID = "groupId";
+    private static final String ARTIFACT_ID = "artifactId";
+    private static final String VERSION_ID = "versionId";
 
 
     private final ProjectsService projects;
     private final RepositoryServices repositoryServices;
     private final Queue workQueue;
-    private final ProjectVersionRefreshHandler versionRefreshHandler;
 
 
     @Inject
-    public ArtifactsRefreshServiceImpl(ProjectsService projects, RepositoryServices repositoryServices, Queue refreshWorkQueue, ProjectVersionRefreshHandler versionRefreshHandler)
+    public ArtifactsRefreshServiceImpl(ProjectsService projects, RepositoryServices repositoryServices, Queue refreshWorkQueue)
     {
         this.projects = projects;
         this.repositoryServices = repositoryServices;
         this.workQueue = refreshWorkQueue;
-        this.versionRefreshHandler = versionRefreshHandler;
     }
 
     @Override
@@ -68,7 +74,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     {
         String parentEvent = ParentEvent.build(ALL, ALL, ALL,parentEventId);
         MetadataNotification allVersionAllProjects = new MetadataNotification(ALL,ALL,ALL,ALL,fullUpdate,transitive,parentEvent);
-        return versionRefreshHandler.executeWithTrace(REFRESH_ALL_VERSIONS_FOR_ALL_PROJECTS,allVersionAllProjects, () ->
+        return executeWithTrace(REFRESH_ALL_VERSIONS_FOR_ALL_PROJECTS,allVersionAllProjects, () ->
                 {
                     MetadataEventResponse result = new MetadataEventResponse();
                     String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/allVersions/transitive :[%s/%s/%s]",ALL,ALL,ALL,parentEvent,fullUpdate,allVersions,transitive);
@@ -80,12 +86,22 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         );
     }
 
+    private MetadataEventResponse executeWithTrace(String label, MetadataNotification event, Supplier<MetadataEventResponse> supplier)
+    {
+
+        Map<String, String> tags = new HashMap<>();
+        tags.put(GROUP_ID, event.getGroupId());
+        tags.put(ARTIFACT_ID, event.getArtifactId());
+        tags.put(VERSION_ID, event.getVersionId());
+        return TracerFactory.get().executeWithTrace(label,supplier,tags);
+    }
+
     @Override
     public MetadataEventResponse refreshSnapshotsForAllProjects(boolean fullUpdate, boolean transitive, String parentEventId)
     {
         String parentEvent = ParentEvent.build(ALL, ALL, ALL_SNAPSHOT,parentEventId);
         MetadataNotification masterSnapshotAllProjects = new MetadataNotification(ALL,ALL,ALL,ALL_SNAPSHOT,fullUpdate,transitive,parentEvent);
-        return versionRefreshHandler.executeWithTrace(REFRESH_ALL_SNAPSHOT_FOR_ALL_PROJECTS,masterSnapshotAllProjects, () ->
+        return executeWithTrace(REFRESH_ALL_SNAPSHOT_FOR_ALL_PROJECTS,masterSnapshotAllProjects, () ->
                 {
                     MetadataEventResponse result = new MetadataEventResponse();
                     String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",ALL,ALL,ALL_SNAPSHOT,parentEvent,fullUpdate,transitive);
@@ -103,7 +119,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         String parentEvent = ParentEvent.build(groupId, artifactId, ALL, parentEventId);
         StoreProjectData projectData = getProject(groupId, artifactId);
         MetadataNotification allVersionForProject = new MetadataNotification(projectData.getProjectId(),groupId,artifactId,ALL,fullUpdate,transitive,parentEvent);
-        return versionRefreshHandler.executeWithTrace(REFRESH_ALL_VERSIONS_FOR_PROJECT, allVersionForProject, () ->
+        return executeWithTrace(REFRESH_ALL_VERSIONS_FOR_PROJECT, allVersionForProject, () ->
         {
             MetadataEventResponse result = new MetadataEventResponse();
             String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/allVersions/transitive :[%s/%s/%s]", groupId, artifactId, ALL, parentEvent, fullUpdate, allVersions, transitive);
@@ -136,7 +152,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
         String parentEvent = ParentEvent.build(groupId, artifactId, versionId, parentEventId);
         StoreProjectData projectData = getProject(groupId, artifactId);
         MetadataNotification versionForProject = new MetadataNotification(projectData.getProjectId(),groupId,artifactId,versionId,fullUpdate,transitive,parentEvent);
-        return versionRefreshHandler.executeWithTrace(REFRESH_PROJECT_VERSION_ARTIFACTS, versionForProject, () ->
+        return executeWithTrace(REFRESH_PROJECT_VERSION_ARTIFACTS, versionForProject, () ->
         {
             MetadataEventResponse result = new MetadataEventResponse();
             String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",groupId,artifactId,versionId,parentEvent,fullUpdate,transitive);

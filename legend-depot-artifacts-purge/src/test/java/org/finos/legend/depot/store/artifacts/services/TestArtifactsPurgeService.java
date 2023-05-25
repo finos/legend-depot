@@ -18,6 +18,7 @@ package org.finos.legend.depot.store.artifacts.services;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
+import org.finos.legend.depot.domain.DatesHandler;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
@@ -26,7 +27,7 @@ import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
+import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
@@ -39,18 +40,23 @@ import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntitie
 import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntityProvider;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvider;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Date;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 import static org.mockito.Mockito.mock;
@@ -64,14 +70,15 @@ public class TestArtifactsPurgeService extends TestStoreMongo
 
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
     protected UpdateProjectsVersions projectsVersionsStore = new ProjectsVersionsMongo(mongoProvider);
-    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics);
+    private final QueryMetricsMongo metrics = new QueryMetricsMongo(mongoProvider);
+    private final QueryMetricsHandler metricHandler = new QueryMetricsHandler(metrics);
+    private final Queue queue = mock(Queue.class);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     protected UpdateFileGenerations fileGenerationsStore = new FileGenerationsMongo(mongoProvider);
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
-    protected RepositoryServices repositoryServices = new RepositoryServices(repository, projectsService);
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, projectsService);
-    protected ArtifactsPurgeService purgeService = new ArtifactsPurgeServiceImpl(projectsService, repositoryServices);
+    protected ArtifactsPurgeService purgeService = new ArtifactsPurgeServiceImpl(projectsService, metricHandler);
 
 
 
@@ -207,6 +214,23 @@ public class TestArtifactsPurgeService extends TestStoreMongo
         Assert.assertEquals(1, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
         Optional<StoreProjectVersionData> storeProjectData = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
         Assert.assertTrue(storeProjectData.get().getVersionData().isDeprecated());
+    }
+
+    @Test
+    public void canEvictLeastRecentlyUsed()
+    {
+        projectsService.createOrUpdate(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID,"branch1-SNAPSHOT"));
+        metrics.record(new VersionQueryMetric(TEST_GROUP_ID, TEST_ARTIFACT_ID,"2.0.0", DatesHandler.toDate(LocalDateTime.now().minusDays(366))));
+        metrics.record(new VersionQueryMetric(TEST_GROUP_ID, TEST_ARTIFACT_ID, "branch1-SNAPSHOT", DatesHandler.toDate(LocalDateTime.now().minusDays(30))));
+        metrics.record(new VersionQueryMetric(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT", new Date()));
+        purgeService.evictLeastRecentlyUsed(365, 30);
+
+        StoreProjectVersionData version1 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get();
+        Assert.assertTrue(version1.isEvicted());
+        StoreProjectVersionData version2 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "branch1-SNAPSHOT").get();
+        Assert.assertTrue(version2.isEvicted());
+        StoreProjectVersionData version3 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT").get();
+        Assert.assertFalse(version3.isEvicted());
     }
 
 }

@@ -17,6 +17,7 @@ package org.finos.legend.depot.services.projects;
 
 import org.eclipse.collections.api.factory.Sets;
 import org.eclipse.collections.api.map.MutableMap;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
@@ -28,6 +29,8 @@ import org.finos.legend.depot.domain.project.dependencies.VersionDependencyRepor
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +48,8 @@ import static org.mockito.Mockito.mock;
 public class TestProjectsService extends TestBaseServices
 {
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics);
+    private final Queue queue = new NotificationsQueueMongo(mongoProvider);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue);
 
     @Before
     public void setUpData()
@@ -236,6 +240,18 @@ public class TestProjectsService extends TestBaseServices
 
         Optional<StoreProjectData> storeProjectData1 = projectsService.findCoordinates("dummy.dep", "test");
         Assert.assertFalse(storeProjectData1.isPresent());
+    }
+
+    @Test
+    public void canRestoreEvictedProjectVersion()
+    {
+        StoreProjectVersionData versionData = new StoreProjectVersionData("examples.metadata", "test", "1.0.0");
+        versionData.setEvicted(true);
+        projectsVersionsStore.createOrUpdate(versionData);
+
+        Assert.assertThrows("Project version: examples.metadata-test-1.0.0 is being restored, please retry in 5 minutes", IllegalStateException.class, () -> projectsService.resolveAliasesAndCheckVersionExists("examples.metadata", "test", "1.0.0"));
+        List<MetadataNotification> notifications = queue.getAll();
+        Assert.assertEquals(1, notifications.size());
     }
 
     @Test

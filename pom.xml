@@ -27,7 +27,7 @@
     <name>Legend Depot</name>
     <groupId>org.finos.legend.depot</groupId>
     <artifactId>legend-depot</artifactId>
-    <version>1.12.1-SNAPSHOT</version>
+    <version>1.14.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -45,6 +45,7 @@
         <module>legend-depot-store-status</module>
         <module>legend-depot-store-metrics</module>
         <module>legend-depot-store-notifications</module>
+        <module>legend-depot-store-notifications-queue</module>
 
         <module>legend-depot-core-services</module>
         <module>legend-depot-core-http</module>
@@ -410,6 +411,11 @@
             <dependency>
                 <groupId>org.finos.legend.depot</groupId>
                 <artifactId>legend-depot-store-notifications</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-store-notifications-queue</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

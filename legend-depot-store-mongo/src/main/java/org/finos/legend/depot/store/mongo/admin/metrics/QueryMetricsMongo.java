@@ -18,9 +18,15 @@ package org.finos.legend.depot.store.mongo.admin.metrics;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Projections;
+import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
@@ -28,12 +34,19 @@ import com.mongodb.client.model.IndexModel;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
+import java.util.StringTokenizer;
+import java.util.function.Consumer;
 
+import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.lt;
+import static com.mongodb.client.model.Filters.lte;
+import static com.mongodb.client.model.Filters.regex;
 
 public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements QueryMetricsStore
 {
@@ -59,6 +72,30 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
     }
 
     @Override
+    public List<ProjectVersion> getAllStoredEntitiesCoordinates()
+    {
+        List<ProjectVersion> result = new ArrayList<>();
+        BasicDBList concat = new BasicDBList();
+        concat.add("$groupId");
+        concat.add(":");
+        concat.add("$artifactId");
+        concat.add(":");
+        concat.add("$versionId");
+        Bson allCoordinates = Aggregates.project(Projections.fields(
+                Projections.excludeId(),
+                Projections.include(GROUP_ID, ARTIFACT_ID, VERSION_ID),
+                Projections.computed("coordinate", new BasicDBObject("$concat", concat))));
+
+        getCollection().aggregate(Arrays.asList(allCoordinates, group("$coordinate"))).forEach((Consumer<Document>) document ->
+                {
+                    StringTokenizer tokenizer = new StringTokenizer(document.getString("_id"), ":");
+                    result.add(new ProjectVersion(tokenizer.nextToken(), tokenizer.nextToken(), tokenizer.nextToken()));
+                }
+        );
+        return result;
+    }
+
+    @Override
     public List<VersionQueryMetric> get(String groupId, String artifactId, String versionId)
     {
         return find(getKeyFilter(groupId, artifactId, versionId));
@@ -68,6 +105,11 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
     public void record(String groupId, String artifactId, String versionId)
     {
         VersionQueryMetric metric = new VersionQueryMetric(groupId, artifactId, versionId);
+        record(metric);
+    }
+
+    public void record(VersionQueryMetric metric)
+    {
         getCollection().insertOne(buildDocument(metric));
     }
 
@@ -76,6 +118,12 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
     {
         // We are deleting every metric with same gav except the one passed in the function
         return super.delete(and(getKeyFilter(metric),lt("lastQueryTime", metric.getLastQueryTime().getTime())));
+    }
+
+    @Override
+    public List<VersionQueryMetric> findMetricsBefore(Date date)
+    {
+        return find(lte("lastQueryTime", date.getTime()));
     }
 
     @Override

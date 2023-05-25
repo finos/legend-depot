@@ -13,16 +13,24 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.mongo.admin.metrics;
+package org.finos.legend.depot.store.metrics.store;
 
+import org.finos.legend.depot.domain.project.ProjectVersion;
+import com.google.inject.Inject;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class VoidQueryMetricsStore implements QueryMetricsStore
 {
+    @Inject
+    public VoidQueryMetricsStore()
+    {
+    }
+
     @Override
     public List<VersionQueryMetric> get(String groupId, String artifactId, String versionId)
     {
@@ -36,6 +44,12 @@ public class VoidQueryMetricsStore implements QueryMetricsStore
     }
 
     @Override
+    public List<ProjectVersion> getAllStoredEntitiesCoordinates()
+    {
+        return Collections.emptyList();
+    }
+
+    @Override
     public void record(String groupId, String artifactId, String versionId)
     {
     }
@@ -44,5 +58,11 @@ public class VoidQueryMetricsStore implements QueryMetricsStore
     public long consolidate(VersionQueryMetric metric)
     {
         return 0;
+    }
+
+    @Override
+    public List<VersionQueryMetric> findMetricsBefore(Date date)
+    {
+        return Collections.emptyList();
     }
 }

@@ -17,10 +17,11 @@ package org.finos.legend.depot.store.mongo.core;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.finos.legend.depot.store.api.StorageConfiguration;
 
 import javax.validation.constraints.NotNull;
 
-public class MongoConfiguration
+public class MongoConfiguration extends StorageConfiguration
 {
     @NotNull
     @JsonProperty
@@ -37,6 +38,7 @@ public class MongoConfiguration
     @JsonCreator
     public MongoConfiguration(@JsonProperty("database") String database, @JsonProperty("url") String url,@JsonProperty("tracing") boolean tracing)
     {
+        super();
         this.database = database;
         this.url = url;
         this.tracing = tracing;

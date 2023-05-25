@@ -15,13 +15,14 @@
 
 package org.finos.legend.depot.store.admin.api.metrics;
 
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 
+import java.util.Date;
 import java.util.List;
 
 public interface QueryMetricsStore
 {
-
     List<VersionQueryMetric> get(String groupId, String artifactId, String versionId);
 
     List<VersionQueryMetric> getAll();
@@ -30,4 +31,7 @@ public interface QueryMetricsStore
 
     long consolidate(VersionQueryMetric metric);
 
+    List<ProjectVersion> getAllStoredEntitiesCoordinates();
+
+    List<VersionQueryMetric> findMetricsBefore(Date date);
 }

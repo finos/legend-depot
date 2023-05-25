@@ -20,7 +20,7 @@
     <parent>
         <artifactId>legend-depot</artifactId>
         <groupId>org.finos.legend.depot</groupId>
-        <version>1.12.1-SNAPSHOT</version>
+        <version>1.14.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -48,6 +48,10 @@
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-notifications-queue</artifactId>
         </dependency>
 
         <dependency>

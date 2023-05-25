@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
+import org.finos.legend.depot.store.api.StorageConfiguration;
 import org.finos.legend.depot.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 
@@ -35,6 +36,20 @@ public class MongoStoreConnectionModule extends PrivateModule
         expose(MongoDatabase.class).annotatedWith(Names.named("mongoDatabase"));
         expose(Boolean.class).annotatedWith(Names.named("transactionMode"));
         expose(MongoClient.class);
+    }
+
+    @Provides
+    @Singleton
+    MongoConfiguration getMongoConfiguration(StorageConfiguration configuration)
+    {
+        if (configuration != null && configuration instanceof MongoConfiguration)
+        {
+            return (MongoConfiguration) configuration;
+        }
+        else
+        {
+            throw new IllegalArgumentException("mongo configuration not provided");
+        }
     }
 
     @Provides

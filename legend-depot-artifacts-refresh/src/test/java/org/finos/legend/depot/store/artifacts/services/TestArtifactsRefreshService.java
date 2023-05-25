@@ -57,10 +57,10 @@ import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
-import org.finos.legend.depot.store.notifications.api.Queue;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.depot.store.notifications.services.NotificationsQueueManager;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
-import org.finos.legend.depot.store.notifications.store.mongo.NotificationsQueueMongo;
+import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.After;
 import org.junit.Assert;
@@ -92,7 +92,8 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
     protected UpdateProjectsVersions projectsVersionsStore = new ProjectsVersionsMongo(mongoProvider);
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore,projectsStore, metrics);
+    protected Queue queue = new NotificationsQueueMongo(mongoProvider);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore,projectsStore,metrics,queue);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     protected List<String> properties = Arrays.asList("[a-zA-Z0-9]+.version");
     protected UpdateFileGenerations fileGenerationsStore = new FileGenerationsMongo(mongoProvider);
@@ -104,12 +105,11 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, projectsService);
     protected ArtifactRepository repository = new TestMavenArtifactsRepository();
     protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
-    protected Queue queue = new NotificationsQueueMongo(mongoProvider);
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 
     protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(properties), dependencyManager, 10);
 
-    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices, queue, versionHandler);
+    protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices, queue);
 
     protected NotificationsQueueManager notificationsQueueManager = new NotificationsQueueManager(new NotificationsMongo(mongoProvider),queue, versionHandler);
 
@@ -248,6 +248,23 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertNull(storeProjectVersionData.getVersionData().getExclusionReason());
         Assert.assertEquals(storeProjectVersionData.getVersionData().getDependencies().size(), 1);
         Assert.assertTrue(storeProjectVersionData.getVersionData().getReleaseInfo().equals(new ReleaseInfo("test-author", Date.from(ZonedDateTime.parse("2023-04-11T14:48:27+00:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant()))));
+    }
+
+    @Test
+    public void canRefreshEvictedProjectVersion()
+    {
+        StoreProjectVersionData storeProjectVersionData = new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0");
+        storeProjectVersionData.setEvicted(true);
+        projectsService.createOrUpdate(storeProjectVersionData);
+        Assert.assertTrue(storeProjectVersionData.isEvicted());
+
+        Assert.assertThrows("Project version: examples.metadata-test-2.0.0 is being restored, please retry in 5 minutes", IllegalStateException.class, () -> projectsService.resolveAliasesAndCheckVersionExists(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0"));
+        Assert.assertEquals(1, notificationsQueueManager.getAllInQueue().size());
+        notificationsQueueManager.handleAll();
+
+        storeProjectVersionData = projectsVersionsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get();
+        Assert.assertFalse(storeProjectVersionData.isEvicted());
+
     }
 
     @Test

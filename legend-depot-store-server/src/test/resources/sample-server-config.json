@@ -31,10 +31,12 @@
       ]
     }
   },
-  "mongo": {
-    "url": "mongodb://127.0.0.1:27017",
-    "database": "depot-dev",
-    "tracing": false
+  "storage": {
+    "org.finos.legend.depot.store.mongo.core.MongoConfiguration": {
+      "url": "mongodb://127.0.0.1:27017",
+      "database": "depot-dev",
+      "tracing": false
+    }
   },
   "openTracing": {
     "openTracingUri": "your URL here",

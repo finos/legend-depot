@@ -39,7 +39,7 @@ import org.finos.legend.depot.store.admin.domain.artifacts.ArtifactFile;
 import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
-import org.finos.legend.depot.store.notifications.api.Queue;
+import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.slf4j.Logger;
@@ -54,6 +54,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -102,7 +103,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         this.statusStore = store;
         this.artifacts = artifacts;
         this.repositoryServices = repositoryServices;
-        this.projectPropertiesInScope = includePropertyConfig.getProperties();
+        this.projectPropertiesInScope = includePropertyConfig != null ? includePropertyConfig.getProperties() : Collections.EMPTY_LIST;
         this.dependencyManager = dependencyManager;
         this.maximumSnapshotsAllowed = maximumSnapshotsAllowed;
 
@@ -129,7 +130,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             response.addMessage(newProjectMessage);
             LOGGER.info(newProjectMessage);
         }
-        return response.combine(process(versionEvent));
+        return response.combine(executeWithTrace(PROCESS_EVENT, versionEvent, () -> doRefresh(versionEvent)));
     }
 
     @Override
@@ -207,7 +208,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         return TracerFactory.get().executeWithTrace(label, () ->
         {
             decorateSpanWithVersionInfo(notification.getGroupId(), notification.getArtifactId(), notification.getVersionId());
-            return execute(notification, functionToExecute);
+            return ensureSingleExecution(notification, functionToExecute);
         });
     }
 
@@ -220,7 +221,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         TracerFactory.get().addTags(tags);
     }
 
-    private MetadataEventResponse execute(MetadataNotification event, Supplier<MetadataEventResponse> functionToExecute)
+    private MetadataEventResponse ensureSingleExecution(MetadataNotification event, Supplier<MetadataEventResponse> functionToExecute)
     {
         MetadataEventResponse response = new MetadataEventResponse();
         LOGGER.info("Starting [{}-{}-{}] refresh", event.getGroupId(), event.getArtifactId(), event.getVersionId());
@@ -256,10 +257,9 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         return response;
     }
 
-    private MetadataEventResponse process(MetadataNotification event)
+
+    MetadataEventResponse doRefresh(MetadataNotification event)
     {
-        return executeWithTrace(PROCESS_EVENT, event, () ->
-        {
             long refreshStartTime = System.currentTimeMillis();
             MetadataEventResponse response = new MetadataEventResponse();
             String message = String.format("Executing: [%s-%s-%s], eventId: [%s], parentEventId: [%s], full/transitive: [%s/%s], attempts: [%s]", event.getGroupId(), event.getArtifactId(),
@@ -322,14 +322,13 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             catch (Exception e)
             {
                 String errorMessage = String.format("Exception executing: [%s-%s-%s], eventId: [%s], parentEventId: [%s], full/transitive: [%s/%s], attempts: [%s], exception[%s]", event.getGroupId(), event.getArtifactId(),
-                        event.getVersionId(), event.getEventId(), event.getParentEventId(), event.isFullUpdate(), event.isTransitive(), event.getAttempt(),e.getMessage());
+                        event.getVersionId(), event.getEventId(), event.getParentEventId(), event.isFullUpdate(), event.isTransitive(), event.getAttempt(), e.getMessage());
                 response.addError(errorMessage);
                 LOGGER.error(errorMessage);
             }
             long refreshEndTime = System.currentTimeMillis();
             PrometheusMetricsFactory.getInstance().observeHistogram(VERSION_REFRESH_DURATION, refreshStartTime, refreshEndTime);
             return response;
-        });
     }
 
     private void updateProjectVersion(StoreProjectData project, String versionId, List<Property> properties, List<ProjectVersion> newDependencies, ReleaseInfo releaseInfo)

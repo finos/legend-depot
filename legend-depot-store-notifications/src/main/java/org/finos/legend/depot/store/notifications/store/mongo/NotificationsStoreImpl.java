@@ -16,6 +16,7 @@
 package org.finos.legend.depot.store.notifications.store.mongo;
 
 import com.mongodb.client.MongoDatabase;
+import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
 import org.finos.legend.depot.store.notifications.store.api.NotificationsStore;
 
 import javax.inject.Inject;
@@ -40,7 +41,7 @@ public class NotificationsStoreImpl implements NotificationsStore
     {
         List<String> results = new ArrayList<>();
         results.addAll(createIndexesIfAbsent(mongoDatabase,NotificationsMongo.COLLECTION,NotificationsMongo.buildIndexes()));
-        results.addAll(createIndexesIfAbsent(mongoDatabase,NotificationsQueueMongo.COLLECTION,NotificationsQueueMongo.buildIndexes()));
+        results.addAll(createIndexesIfAbsent(mongoDatabase, NotificationsQueueMongo.COLLECTION,NotificationsQueueMongo.buildIndexes()));
         return results;
     }
 }
