@@ -27,14 +27,24 @@ public class IncludeProjectPropertiesConfiguration
     @JsonProperty
     private final List<String> properties;
 
+    @NotNull
+    @JsonProperty
+    private final List<String> manifestProperties;
+
     @JsonCreator
-    public IncludeProjectPropertiesConfiguration(@JsonProperty("properties") List<String> properties)
+    public IncludeProjectPropertiesConfiguration(@JsonProperty("properties") List<String> properties, @JsonProperty("manifestProperties") List<String> manifestProperties)
     {
         this.properties = properties;
+        this.manifestProperties = manifestProperties;
     }
 
     public List<String> getProperties()
     {
         return properties;
+    }
+
+    public List<String> getManifestProperties()
+    {
+        return manifestProperties;
     }
 }

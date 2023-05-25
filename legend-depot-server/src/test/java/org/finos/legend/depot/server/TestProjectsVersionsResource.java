@@ -16,7 +16,6 @@
 package org.finos.legend.depot.server;
 
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.version.ReleaseInfo;
 import org.finos.legend.depot.server.resources.ProjectsVersionsResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
@@ -25,9 +24,7 @@ import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
@@ -48,7 +45,11 @@ public class TestProjectsVersionsResource extends TestBaseServices
         Assert.assertEquals(versionData.get().getArtifactId(), "test");
         Assert.assertEquals(versionData.get().getVersionId(), "2.3.1");
         Assert.assertEquals(versionData.get().getVersionData().getDependencies().get(0), new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"));
-        Assert.assertTrue(versionData.get().getVersionData().getReleaseInfo().equals(new ReleaseInfo("test-author", Date.from(ZonedDateTime.parse("2023-04-11T14:48:27+00:00", DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant()))));
+
+        Map<String, String> manifestProperties = versionData.get().getVersionData().getManifestProperties();
+        Assert.assertNotNull(manifestProperties);
+        Assert.assertEquals(manifestProperties.get("commit-author"), "test-author");
+        Assert.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
 
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = projectsVersionsResource.getProjectVersion("somethig.random", "test","latest");
         Assert.assertFalse(versionData1.isPresent());

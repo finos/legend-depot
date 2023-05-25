@@ -73,6 +73,7 @@ import static org.mockito.Mockito.when;
 public class TestProjectVersionRefreshHandler extends TestStoreMongo
 {
     protected List<String> properties = Arrays.asList("[a-zA-Z0-9]+.version");
+    protected List<String> manifestProperties = Arrays.asList("commit-[a-zA-Z0-9]+", "release-[a-zA-Z0-9]+");
     protected UpdateProjects projectsStore = mock(UpdateProjects.class);
     protected ArtifactsFilesStore artifactsStore =  new ArtifactsFilesMongo(mongoProvider);
     protected RefreshStatusStore refreshStatusStore = new ArtifactsRefreshStatusMongo(mongoProvider);
@@ -88,7 +89,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
 
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore, artifactsStore, new IncludeProjectPropertiesConfiguration(properties), dependencyManager, 3);
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore, artifactsStore, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), dependencyManager, 3);
 
 
     @Before

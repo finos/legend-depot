@@ -30,7 +30,6 @@ import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.Property;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
-import org.finos.legend.depot.domain.version.ReleaseInfo;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
@@ -50,10 +49,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -61,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
@@ -82,14 +77,13 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
     private static final String GROUP_ID = "groupId";
     private static final String ARTIFACT_ID = "artifactId";
     private static final String VERSION_ID = "versionId";
-    private static final String COMMIT_AUTHOR = "commit-author";
-    private static final String COMMIT_TIMESTAMP = "commit-timestamp";
 
     private final ManageProjectsService projects;
     private final RefreshStatusStore statusStore;
     private final ArtifactsFilesStore artifacts;
     private final RepositoryServices repositoryServices;
     private final List<String> projectPropertiesInScope;
+    private final List<String> manifestPropertiesInScope;
     private final Queue workQueue;
     private final DependencyManager dependencyManager;
     private final int maximumSnapshotsAllowed;
@@ -104,6 +98,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         this.artifacts = artifacts;
         this.repositoryServices = repositoryServices;
         this.projectPropertiesInScope = includePropertyConfig != null ? includePropertyConfig.getProperties() : Collections.EMPTY_LIST;
+        this.manifestPropertiesInScope = includePropertyConfig != null ? includePropertyConfig.getManifestProperties() : Collections.EMPTY_LIST;
         this.dependencyManager = dependencyManager;
         this.maximumSnapshotsAllowed = maximumSnapshotsAllowed;
 
@@ -291,8 +286,8 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
                     if (!response.hasErrors())
                     {
                         List<Property> newProperties = calculateProjectProperties(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                        ReleaseInfo releaseInfo = getReleaseInfoFromManifest(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                        updateProjectVersion(project, event.getVersionId(), newProperties, newDependencies, releaseInfo);
+                        Map<String, String> manifestProperties = getPropertiesFromManifest(event.getGroupId(), event.getArtifactId(), event.getVersionId());
+                        updateProjectVersion(project, event.getVersionId(), newProperties, newDependencies, manifestProperties);
                         //we let the version load but will check dependencies exists and report missing dependencies as errors
                         if (!event.isTransitive())
                         {
@@ -331,7 +326,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             return response;
     }
 
-    private void updateProjectVersion(StoreProjectData project, String versionId, List<Property> properties, List<ProjectVersion> newDependencies, ReleaseInfo releaseInfo)
+    private void updateProjectVersion(StoreProjectData project, String versionId, List<Property> properties, List<ProjectVersion> newDependencies, Map<String, String> manifestProperties)
     {
         Optional<StoreProjectVersionData> projectVersionData = projects.find(project.getGroupId(), project.getArtifactId(), versionId);
         StoreProjectVersionData storeProjectVersionData = projectVersionData.isPresent() ? projectVersionData.get() : new StoreProjectVersionData(project.getGroupId(), project.getArtifactId(), versionId);
@@ -339,7 +334,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         versionData.setDependencies(newDependencies);
         this.dependencyManager.setProjectDataTransitiveDependencies(storeProjectVersionData);
         versionData.setProperties(properties);
-        versionData.setReleaseInfo(releaseInfo);
+        versionData.setManifestProperties(manifestProperties);
         storeProjectVersionData.setVersionData(versionData);
         storeProjectVersionData.setEvicted(false);
         storeProjectVersionData.getVersionData().setExcluded(false);
@@ -374,20 +369,26 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         return projectPropertyList;
     }
 
-    private ReleaseInfo getReleaseInfoFromManifest(String groupId, String artifactId, String versionId)
+    private Map<String, String> getPropertiesFromManifest(String groupId, String artifactId, String versionId)
     {
-        ReleaseInfo releaseInfo = null;
+        Map<String, String> manifestProperties = new HashMap<>();
         File jarFile = this.repositoryServices.getJarFile(groupId, artifactId + "-" + ArtifactType.ENTITIES.getModuleName(), versionId);
         Manifest manifest = ManifestLoader.readManifest(jarFile);
 
         if (manifest != null)
         {
-            Attributes attributes = manifest.getMainAttributes();
-            String author = attributes.containsKey(new Attributes.Name(COMMIT_AUTHOR)) ? attributes.getValue(COMMIT_AUTHOR) : null;
-            Date date = attributes.containsKey(new Attributes.Name(COMMIT_TIMESTAMP)) ? Date.from(ZonedDateTime.parse(attributes.getValue(COMMIT_TIMESTAMP), DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant()) : null;
-            releaseInfo = new ReleaseInfo(author, date);
+            manifest.getMainAttributes().entrySet().forEach(entry ->
+            {
+                String key = entry.getKey().toString();
+                String value = entry.getValue().toString();
+                if (manifestPropertiesInScope != null && (manifestPropertiesInScope.contains(key) || manifestPropertiesInScope.stream().anyMatch(key::matches)))
+                {
+                    manifestProperties.put(key, value);
+                }
+            });
         }
-        return releaseInfo;
+
+        return manifestProperties;
     }
 
     private MetadataEventResponse handleDependencies(StoreProjectData projectData, String versionId, List<ProjectVersion> dependencies, boolean fullUpdate, boolean transitive, String parentEventId)

@@ -39,9 +39,9 @@
           "versionId": "1.0.0"
         }
       ],
-      "releaseInfo": {
-        "author": "test-author",
-        "releaseTime": "2023-04-11T14:48:27+00:00"
+      "manifestProperties": {
+        "commit-author": "test-author",
+        "commit-timestamp": "2023-04-11T14:48:27+00:00"
       }
     }
   },
