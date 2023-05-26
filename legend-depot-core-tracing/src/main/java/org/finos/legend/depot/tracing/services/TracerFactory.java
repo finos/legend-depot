@@ -124,28 +124,37 @@ public final class TracerFactory
 
     public void addTags(Map<String, String> tags)
     {
-        Span currentSpan = GlobalTracer.get().activeSpan();
-        if (currentSpan != null)
+        if (tags != null & !tags.keySet().isEmpty())
         {
-            tags.keySet().forEach(key -> currentSpan.setTag(key, tags.get(key)));
+            Span currentSpan = GlobalTracer.get().activeSpan();
+            if (currentSpan != null)
+            {
+                tags.keySet().forEach(key -> currentSpan.setTag(key, tags.get(key)));
+            }
         }
     }
 
-    public void addLog(Map<String, String> tags)
+    public void addLog(Map<String, String> logs)
     {
-        Span currentSpan = GlobalTracer.get().activeSpan();
-        if (currentSpan != null)
+        if (logs != null & !logs.keySet().isEmpty())
         {
-            currentSpan.log(tags);
+            Span currentSpan = GlobalTracer.get().activeSpan();
+            if (currentSpan != null)
+            {
+                currentSpan.log(logs);
+            }
         }
     }
 
     public void log(String value)
     {
-        Span currentSpan = GlobalTracer.get().activeSpan();
-        if (currentSpan != null)
+        if (value != null)
         {
-            currentSpan.log(value);
+            Span currentSpan = GlobalTracer.get().activeSpan();
+            if (currentSpan != null)
+            {
+                currentSpan.log(value);
+            }
         }
     }
 
@@ -156,10 +165,11 @@ public final class TracerFactory
 
     public <T> T executeWithTrace(String label, Supplier<T> supplier, Map<String,String> tags)
     {
-        Span child = INSTANCE.startSpan(label);
-        child.log(tags);
+        Span child = null;
         try
         {
+            child = INSTANCE.startSpan(label);
+            addLog(tags);
             return supplier.get();
         }
         catch (Exception e)
@@ -192,10 +202,4 @@ public final class TracerFactory
         }
     }
 
-
-    public String getActiveSpanTraceId()
-    {
-        Span activeSpan = GlobalTracer.get().activeSpan();
-        return activeSpan != null ? activeSpan.context().toTraceId() : "no traceId, no current span";
-    }
 }

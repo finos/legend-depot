@@ -307,12 +307,12 @@ public class MavenArtifactRepository implements ArtifactRepository
         {
             String message = String.format("Error resolveVersionsFromRepository %s-%s version resolution issue", group, artifact,ex.getMessage());
             LOGGER.error(message);
-            throw new ArtifactRepositoryException(message);
+            throw new ArtifactRepositoryException(ex);
         }
         catch (Exception e)
         {
             LOGGER.error("unknown error executing resolveVersionsFromRepository", e);
-            throw new ArtifactRepositoryException(e.getMessage());
+            throw new ArtifactRepositoryException(e);
         }
         long endTime = System.currentTimeMillis();
         LOGGER.info("resolveVersionsFromRepository {}{}, took [{}] ms", group, artifact, endTime - start);

@@ -190,6 +190,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             {
                 PrometheusMetricsFactory.getInstance().increaseGauge(REPO_EXCEPTIONS,1);
                 response.addError(e.getMessage());
+                LOGGER.error("error validating gav",e);
             }
         }
         return response;

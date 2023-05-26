@@ -17,6 +17,11 @@ package org.finos.legend.depot.artifacts.repository.api;
 
 public class ArtifactRepositoryException extends Exception
 {
+    public ArtifactRepositoryException(Throwable cause)
+    {
+        super(cause);
+    }
+
     public ArtifactRepositoryException(String message)
     {
         super(message);
