@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProjectVersionData
@@ -28,6 +29,8 @@ public class ProjectVersionData
     private List<ProjectVersion> dependencies = new ArrayList<>();
     @JsonProperty
     private List<Property> properties = new ArrayList<>();
+    @JsonProperty
+    private Map<String, String> manifestProperties = null;
     @JsonProperty
     private boolean deprecated = false;
     @JsonProperty
@@ -89,6 +92,16 @@ public class ProjectVersionData
     public void addProperties(List<Property> propertyList)
     {
         propertyList.stream().filter(property -> !properties.contains(property)).forEach(property -> this.properties.add(property));
+    }
+
+    public Map<String, String> getManifestProperties()
+    {
+        return manifestProperties;
+    }
+
+    public void setManifestProperties(Map<String, String> manifestProperties)
+    {
+        this.manifestProperties = manifestProperties;
     }
 
     public boolean isDeprecated()

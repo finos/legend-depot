@@ -154,6 +154,11 @@ public class RepositoryServices
         return repository.getPOM(groupId, artifactId, versionId);
     }
 
+    public File getJarFile(String groupId, String artifactId, String versionId)
+    {
+        return repository.getJarFile(groupId, artifactId, versionId);
+    }
+
     public boolean areValidCoordinates(String groupId, String artifactId)
     {
         return this.repository.areValidCoordinates(groupId, artifactId);

@@ -38,7 +38,6 @@ import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenVersionRangeResult;
 import org.jboss.shrinkwrap.resolver.api.maven.PackagingType;
-import org.jboss.shrinkwrap.resolver.api.maven.coordinate.MavenCoordinate;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -274,6 +273,30 @@ public class MavenArtifactRepository implements ArtifactRepository
         }
     }
 
+    @Override
+    public File getJarFile(String group, String artifact, String version)
+    {
+        URL[] jar = null;
+        try
+        {
+            jar = resolveJarFromRepository(group, artifact, version);
+        }
+        catch (Exception e)
+        {
+            LOGGER.error("Unable to resolve jar for group: {}, artifact: {}, version: {}. Exception: {}", group, artifact, version, e.getMessage());
+            return null;
+        }
+
+        if (jar == null || jar.length == 0)
+        {
+            return null;
+        }
+
+        String jarFileLocation = jar[0].getFile();
+        LOGGER.info("Jar file for group: {}, artifact: {}, version: {} has been successfully resolved - {}", group, artifact, version, jarFileLocation);
+        return new File(jarFileLocation);
+    }
+
     protected File[] resolveArtifactFilesFromRepository(String group, String artifact, String version)
     {
         return (File[]) executeWithTrace("resolveArtifactFilesFromRepository",group,artifact,version,() -> getResolver().resolve(gavCoordinates(group, artifact, version)).withoutTransitivity().asFile());
@@ -281,7 +304,12 @@ public class MavenArtifactRepository implements ArtifactRepository
 
     protected URL[] resolvePOMFromRepository(String group, String artifact, String version)
     {
-        return (URL[]) executeWithTrace("resolvePOMFromRepository",group,artifact,version, () -> getResolver().resolve(gavCoordinates(group, artifact, PackagingType.POM, version)).withoutTransitivity().as(URL.class));
+        return (URL[]) executeWithTrace("resolvePOMFromRepository",group,artifact,version, () -> getResolver().resolve(gavCoordinates(group, artifact, PackagingType.POM, version)).withTransitivity().as(URL.class));
+    }
+
+    protected URL[] resolveJarFromRepository(String group, String artifact, String version)
+    {
+        return (URL[]) executeWithTrace("resolveJarFromRepository",group,artifact,version, () -> getResolver().resolve(gavCoordinates(group, artifact, PackagingType.JAR, version)).withoutTransitivity().as(URL.class));
     }
 
     @Override

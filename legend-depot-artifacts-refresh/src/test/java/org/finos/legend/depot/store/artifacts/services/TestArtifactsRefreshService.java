@@ -24,6 +24,7 @@ import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
@@ -68,6 +69,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -91,6 +93,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore,projectsStore,metrics,queue);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     protected List<String> properties = Arrays.asList("[a-zA-Z0-9]+.version");
+    protected List<String> manifestProperties = Arrays.asList("commit-[a-zA-Z0-9]+", "release-[a-zA-Z0-9]+");
     protected UpdateFileGenerations fileGenerationsStore = new FileGenerationsMongo(mongoProvider);
     protected RefreshStatusStore refreshStatusStore = new ArtifactsRefreshStatusMongo(mongoProvider);
 
@@ -102,7 +105,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(properties), dependencyManager, 10);
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), dependencyManager, 10);
 
     protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices, queue);
 
@@ -179,6 +182,11 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Optional<StoreProjectVersionData> updatedProjectData = projectsVersionsStore.find(TEST_GROUP_ID, "art101", MASTER_SNAPSHOT);
         Assert.assertTrue(updatedProjectData.isPresent());
         Assert.assertEquals("0.0.0", updatedProjectData.get().getVersionData().getProperties().get(0).getValue());
+
+        Map<String, String> manifestProperties = updatedProjectData.get().getVersionData().getManifestProperties();
+        Assert.assertNotNull(manifestProperties);
+        Assert.assertEquals(manifestProperties.get("commit-author"), "test-author");
+        Assert.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
     }
 
     @Test
@@ -240,6 +248,11 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertFalse(storeProjectVersionData.getVersionData().isExcluded());
         Assert.assertNull(storeProjectVersionData.getVersionData().getExclusionReason());
         Assert.assertEquals(storeProjectVersionData.getVersionData().getDependencies().size(), 1);
+
+        Map<String, String> manifestProperties = storeProjectVersionData.getVersionData().getManifestProperties();
+        Assert.assertNotNull(manifestProperties);
+        Assert.assertEquals(manifestProperties.get("commit-author"), "test-author");
+        Assert.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
     }
 
     @Test
@@ -375,8 +388,15 @@ public class TestArtifactsRefreshService extends TestStoreMongo
 
         Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
 
-        List<ProjectVersion> dependencies = projectsVersionsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).get().getVersionData().getDependencies();
+        ProjectVersionData projectVersionData = projectsVersionsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT).get().getVersionData();
+        List<ProjectVersion> dependencies = projectVersionData.getDependencies();
         Assert.assertEquals(2, dependencies.size());
+
+        Map<String, String> manifestProperties = projectVersionData.getManifestProperties();
+        Assert.assertNotNull(manifestProperties);
+        Assert.assertEquals(manifestProperties.get("commit-author"), "test-author");
+        Assert.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
+
         List<RefreshStatus> statuses = refreshStatusStore.getAll();
         Assert.assertNotNull(statuses);
         Assert.assertTrue(statuses.isEmpty());

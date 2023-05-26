@@ -38,11 +38,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.mockito.Mockito.mock;
-
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Arrays;
+
+import static org.mockito.Mockito.mock;
 
 public class TestDependencyManager extends TestStoreMongo
 {
@@ -57,7 +57,7 @@ public class TestDependencyManager extends TestStoreMongo
     protected RefreshStatusStore refreshStatusStore = new ArtifactsRefreshStatusMongo(mongoProvider);
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(null), dependencyManager, 10);
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(null, null), dependencyManager, 10);
 
     private static final String GROUPID = "examples.metadata";
 

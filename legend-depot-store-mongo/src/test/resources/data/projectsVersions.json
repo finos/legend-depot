@@ -38,7 +38,11 @@
           "artifactId": "test-dependencies",
           "versionId": "1.0.0"
         }
-      ]
+      ],
+      "manifestProperties": {
+        "commit-author": "test-author",
+        "commit-timestamp": "2023-04-11T14:48:27+00:00"
+      }
     }
   },
   {

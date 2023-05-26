@@ -32,6 +32,8 @@ public interface ArtifactRepository
 
     Model getPOM(String group, String artifact, String version);
 
+    File getJarFile(String group, String artifact, String version);
+
     List<String> getModulesFromPOM(ArtifactType type, String group, String artifact, String version);
 
     List<VersionId> findVersions(String group, String artifact) throws ArtifactRepositoryException;

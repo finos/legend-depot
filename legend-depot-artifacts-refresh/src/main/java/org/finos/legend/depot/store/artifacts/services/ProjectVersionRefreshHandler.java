@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.REPO_EXCEPTIONS;
@@ -82,6 +83,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
     private final ArtifactsFilesStore artifacts;
     private final RepositoryServices repositoryServices;
     private final List<String> projectPropertiesInScope;
+    private final List<String> manifestPropertiesInScope;
     private final Queue workQueue;
     private final DependencyManager dependencyManager;
     private final int maximumSnapshotsAllowed;
@@ -96,6 +98,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         this.artifacts = artifacts;
         this.repositoryServices = repositoryServices;
         this.projectPropertiesInScope = includePropertyConfig != null ? includePropertyConfig.getProperties() : Collections.EMPTY_LIST;
+        this.manifestPropertiesInScope = includePropertyConfig != null ? includePropertyConfig.getManifestProperties() : Collections.EMPTY_LIST;
         this.dependencyManager = dependencyManager;
         this.maximumSnapshotsAllowed = maximumSnapshotsAllowed;
 
@@ -284,7 +287,8 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
                     if (!response.hasErrors())
                     {
                         List<Property> newProperties = calculateProjectProperties(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                        updateProjectVersion(project, event.getVersionId(), newProperties, newDependencies);
+                        Map<String, String> manifestProperties = getPropertiesFromManifest(event.getGroupId(), event.getArtifactId(), event.getVersionId());
+                        updateProjectVersion(project, event.getVersionId(), newProperties, newDependencies, manifestProperties);
                         //we let the version load but will check dependencies exists and report missing dependencies as errors
                         if (!event.isTransitive())
                         {
@@ -323,7 +327,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             return response;
     }
 
-    private void updateProjectVersion(StoreProjectData project, String versionId, List<Property> properties,List<ProjectVersion> newDependencies)
+    private void updateProjectVersion(StoreProjectData project, String versionId, List<Property> properties, List<ProjectVersion> newDependencies, Map<String, String> manifestProperties)
     {
         Optional<StoreProjectVersionData> projectVersionData = projects.find(project.getGroupId(), project.getArtifactId(), versionId);
         StoreProjectVersionData storeProjectVersionData = projectVersionData.isPresent() ? projectVersionData.get() : new StoreProjectVersionData(project.getGroupId(), project.getArtifactId(), versionId);
@@ -331,6 +335,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         versionData.setDependencies(newDependencies);
         this.dependencyManager.setProjectDataTransitiveDependencies(storeProjectVersionData);
         versionData.setProperties(properties);
+        versionData.setManifestProperties(manifestProperties);
         storeProjectVersionData.setVersionData(versionData);
         storeProjectVersionData.setEvicted(false);
         storeProjectVersionData.getVersionData().setExcluded(false);
@@ -363,6 +368,28 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             }
         }
         return projectPropertyList;
+    }
+
+    private Map<String, String> getPropertiesFromManifest(String groupId, String artifactId, String versionId)
+    {
+        Map<String, String> manifestProperties = new HashMap<>();
+        File jarFile = this.repositoryServices.getJarFile(groupId, artifactId + "-" + ArtifactType.ENTITIES.getModuleName(), versionId);
+        Manifest manifest = ManifestLoader.readManifest(jarFile);
+
+        if (manifest != null)
+        {
+            manifest.getMainAttributes().entrySet().forEach(entry ->
+            {
+                String key = entry.getKey().toString();
+                String value = entry.getValue().toString();
+                if (manifestPropertiesInScope != null && (manifestPropertiesInScope.contains(key) || manifestPropertiesInScope.stream().anyMatch(key::matches)))
+                {
+                    manifestProperties.put(key, value);
+                }
+            });
+        }
+
+        return manifestProperties;
     }
 
     private MetadataEventResponse handleDependencies(StoreProjectData projectData, String versionId, List<ProjectVersion> dependencies, boolean fullUpdate, boolean transitive, String parentEventId)

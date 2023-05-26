@@ -70,6 +70,7 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
 
     protected ArtifactsFilesStore artifacts = new ArtifactsFilesMongo(mongoProvider);
     protected List<String> properties = Arrays.asList("[a-zA-Z0-9]+.version");
+    protected List<String> manifestProperties = Arrays.asList("commit-[a-zA-Z0-9]+", "release-[a-zA-Z0-9]+");
     protected RefreshStatusStore refreshStatusStore = new ArtifactsRefreshStatusMongo(mongoProvider);
 
     protected EntityArtifactsProvider entitiesProvider = new EntityProvider();
@@ -87,7 +88,7 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);
     protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(properties), dependencyManager, 10);
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), dependencyManager, 10);
 
     protected ArtifactsRefreshServiceImpl artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices,queue);
 

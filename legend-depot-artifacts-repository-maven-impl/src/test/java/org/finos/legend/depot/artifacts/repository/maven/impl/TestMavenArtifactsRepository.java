@@ -77,6 +77,20 @@ public class TestMavenArtifactsRepository extends MavenArtifactRepository implem
         return new URL[]{filePath};
     }
 
+    @Override
+    protected URL[] resolveJarFromRepository(String group, String artifact, String version)
+    {
+        String jarFile = getFilePath(group, artifact, version, "jar");
+        LOGGER.info("test jar file {}", jarFile);
+
+        URL filePath = this.getClass().getClassLoader().getResource(jarFile);
+        if (filePath == null)
+        {
+            throw new RuntimeException("could not find " + getFilePath(group, artifact, version, "jar"));
+        }
+        return new URL[]{filePath};
+    }
+
     private String getFilePath(String group, String artifact, String version, String type)
     {
         return "repository" + SEPARATOR + group.replace(DOT, SEPARATOR) + SEPARATOR + artifact
