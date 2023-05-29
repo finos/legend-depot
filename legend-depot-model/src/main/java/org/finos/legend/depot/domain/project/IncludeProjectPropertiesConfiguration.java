@@ -23,11 +23,9 @@ import java.util.List;
 
 public class IncludeProjectPropertiesConfiguration
 {
-    @NotNull
     @JsonProperty
     private final List<String> properties;
 
-    @NotNull
     @JsonProperty
     private final List<String> manifestProperties;
 
