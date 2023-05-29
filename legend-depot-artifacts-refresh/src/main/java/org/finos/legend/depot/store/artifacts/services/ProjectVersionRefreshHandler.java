@@ -24,7 +24,7 @@ import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.CoordinateValidator;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
-import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
+import org.finos.legend.depot.store.artifacts.configuration.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.Property;
@@ -286,9 +286,8 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
                     LOGGER.info("Finished processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
                     if (!response.hasErrors())
                     {
-                        List<Property> newProperties = calculateProjectProperties(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                        Map<String, String> manifestProperties = getPropertiesFromManifest(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                        updateProjectVersion(project, event.getVersionId(), newProperties, newDependencies, manifestProperties);
+
+                        updateProjectVersionData(project, event.getVersionId(), newDependencies);
                         //we let the version load but will check dependencies exists and report missing dependencies as errors
                         if (!event.isTransitive())
                         {
@@ -327,15 +326,26 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             return response;
     }
 
-    private void updateProjectVersion(StoreProjectData project, String versionId, List<Property> properties, List<ProjectVersion> newDependencies, Map<String, String> manifestProperties)
+    private void updateProjectVersionData(StoreProjectData project, String versionId, List<ProjectVersion> newDependencies)
     {
         Optional<StoreProjectVersionData> projectVersionData = projects.find(project.getGroupId(), project.getArtifactId(), versionId);
         StoreProjectVersionData storeProjectVersionData = projectVersionData.isPresent() ? projectVersionData.get() : new StoreProjectVersionData(project.getGroupId(), project.getArtifactId(), versionId);
         ProjectVersionData versionData = storeProjectVersionData.getVersionData();
         versionData.setDependencies(newDependencies);
         this.dependencyManager.setProjectDataTransitiveDependencies(storeProjectVersionData);
-        versionData.setProperties(properties);
-        versionData.setManifestProperties(manifestProperties);
+
+        if (this.projectPropertiesInScope != null && !this.projectPropertiesInScope.isEmpty())
+        {
+            List<Property> properties = calculateProjectProperties(project.getGroupId(), project.getArtifactId(), versionId);
+            versionData.setProperties(properties);
+        }
+
+        if (this.manifestPropertiesInScope != null && !this.manifestPropertiesInScope.isEmpty())
+        {
+            Map<String, String> manifestProperties = getPropertiesFromManifest(project.getGroupId(), project.getArtifactId(),versionId);
+            versionData.setManifestProperties(manifestProperties);
+        }
+
         storeProjectVersionData.setVersionData(versionData);
         storeProjectVersionData.setEvicted(false);
         storeProjectVersionData.getVersionData().setExcluded(false);
