@@ -142,33 +142,17 @@ public class ProjectsServiceImpl implements ProjectsService
         return projectsVersions.find(groupId, artifactId, versionId);
     }
 
-    private void validateStoreProjectVersionData(StoreProjectVersionData projectVersion)
+    private void restoreEvictedProjectVersion(String groupId, String artifactId, String versionId)
     {
-        ProjectVersionData versionData = projectVersion.getVersionData();
-        if (versionData.isExcluded())
-        {
-            throw new IllegalArgumentException(String.format(EXCLUSION_FOUND_IN_STORE, projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId(), versionData.getExclusionReason()));
-        }
-        else if (projectVersion.isEvicted())
-        {
-            restoreEvictedProjectVersion(projectVersion);
-            throw new IllegalStateException(String.format("Project version: %s-%s-%s is being restored, please retry in 5 minutes", projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()));
-        }
-    }
-
-    private void restoreEvictedProjectVersion(StoreProjectVersionData projectVersion)
-    {
-        String groupId = projectVersion.getGroupId();
-        String artifactId = projectVersion.getArtifactId();
         StoreProjectData projectData = this.findCoordinates(groupId, artifactId).get();
-        this.queue.push(new MetadataNotification(projectData.getProjectId(), groupId, artifactId, projectVersion.getVersionId(),true, false, null, EventPriority.HIGH));
+        this.queue.push(new MetadataNotification(projectData.getProjectId(), groupId, artifactId, versionId,true, false, null, EventPriority.HIGH));
     }
 
     @Override
     public String resolveAliasesAndCheckVersionExists(String groupId, String artifactId, String versionId)
     {
-        String version = versionId;
-        Optional<StoreProjectVersionData> projectVersion = this.find(groupId, artifactId, version);
+        String version;
+        Optional<StoreProjectVersionData> projectVersion = this.find(groupId, artifactId, versionId);
         if (projectVersion.isPresent())
         {
             version = projectVersion.get().getVersionId();
@@ -177,7 +161,16 @@ public class ProjectsServiceImpl implements ProjectsService
         {
             throw new IllegalArgumentException(String.format(NOT_FOUND_IN_STORE, groupId, artifactId, versionId));
         }
-        validateStoreProjectVersionData(projectVersion.get());
+        ProjectVersionData versionData = projectVersion.get().getVersionData();
+        if (versionData.isExcluded())
+        {
+            throw new IllegalArgumentException(String.format(EXCLUSION_FOUND_IN_STORE, groupId, artifactId, version, versionData.getExclusionReason()));
+        }
+        else if (projectVersion.get().isEvicted())
+        {
+            restoreEvictedProjectVersion(groupId, artifactId, version);
+            throw new IllegalStateException(String.format("Project version: %s-%s-%s is being restored, please retry in 5 minutes", groupId, artifactId, version));
+        }
         metrics.record(groupId, artifactId, version);
         return version;
     }
