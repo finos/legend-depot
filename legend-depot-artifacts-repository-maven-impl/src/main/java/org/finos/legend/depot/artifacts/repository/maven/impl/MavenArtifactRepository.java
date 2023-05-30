@@ -304,7 +304,7 @@ public class MavenArtifactRepository implements ArtifactRepository
 
     protected URL[] resolvePOMFromRepository(String group, String artifact, String version)
     {
-        return (URL[]) executeWithTrace("resolvePOMFromRepository",group,artifact,version, () -> getResolver().resolve(gavCoordinates(group, artifact, PackagingType.POM, version)).withTransitivity().as(URL.class));
+        return (URL[]) executeWithTrace("resolvePOMFromRepository",group,artifact,version, () -> getResolver().resolve(gavCoordinates(group, artifact, PackagingType.POM, version)).withoutTransitivity().as(URL.class));
     }
 
     protected URL[] resolveJarFromRepository(String group, String artifact, String version)
