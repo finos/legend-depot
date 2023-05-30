@@ -293,11 +293,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
                         {
                             newDependencies.stream().forEach(dep ->
                             {
-                                try
-                                {
-                                    projects.resolveAliasesAndCheckVersionExists(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
-                                }
-                                catch (IllegalArgumentException exception)
+                                if (!projects.find(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()).isPresent())
                                 {
                                     String missingDepError = String.format("Dependency %s-%s-%s not found in store", dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
                                     response.addError(missingDepError);
