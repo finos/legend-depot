@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.services.api.projects;
 
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 
@@ -34,9 +33,9 @@ public interface ManageProjectsService extends ProjectsService
 
     StoreProjectData createOrUpdate(StoreProjectData projectData);
 
-    MetadataEventResponse delete(String groupId,String artifactId);
+    long delete(String groupId,String artifactId);
 
-    MetadataEventResponse delete(String groupId,String artifactId, String versionId);
+    long delete(String groupId,String artifactId, String versionId);
 
     StoreProjectVersionData excludeProjectVersion(String groupId, String artifactId, String versionId, String exclusionReason);
 

@@ -29,11 +29,11 @@ public interface ManageEntitiesService extends EntitiesService
 
     List<StoredEntity> getStoredEntities(String groupId, String artifactId, String versionId);
 
-    MetadataEventResponse deleteAll(String groupId, String artifactId);
+    long  delete(String groupId, String artifactId);
 
-    MetadataEventResponse delete(String groupId, String artifactId, String versionId,boolean versioned);
+    long delete(String groupId, String artifactId, String versionId,boolean versioned);
 
-    MetadataEventResponse createOrUpdate(List<StoredEntity> versionedEntities);
+    void createOrUpdate(List<StoredEntity> versionedEntities);
 
     List<Pair<String, String>> getOrphanedStoredEntities();
 }

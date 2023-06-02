@@ -28,7 +28,7 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class TestQueryClassifierPath extends TestStoreMongo
 {
     private static final URL ENTITIES_FILE = TestUpdateVersions.class.getClassLoader().getResource("data/classifiers.json");
-    private EntitiesMongo mongo = new EntitiesMongo(mongoProvider, getMongoClient());
+    private EntitiesMongo mongo = new EntitiesMongo(mongoProvider);
 
 
     @Test

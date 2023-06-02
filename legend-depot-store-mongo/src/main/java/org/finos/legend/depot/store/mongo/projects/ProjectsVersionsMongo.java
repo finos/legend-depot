@@ -22,7 +22,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.domain.CoordinateValidator;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
@@ -89,19 +88,15 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
     }
 
     @Override
-    public MetadataEventResponse delete(String groupId, String artifactId)
+    public long delete(String groupId, String artifactId)
     {
-        MetadataEventResponse response = new MetadataEventResponse();
-        getCollection().deleteMany(getArtifactFilter(groupId, artifactId));
-        return response;
+        return delete((getArtifactFilter(groupId, artifactId)));
     }
 
     @Override
-    public MetadataEventResponse deleteByVersionId(String groupId, String artifactId, String versionId)
+    public long delete(String groupId, String artifactId, String versionId)
     {
-        MetadataEventResponse response = new MetadataEventResponse();
-        getCollection().findOneAndDelete(getArtifactAndVersionFilter(groupId, artifactId, versionId));
-        return response;
+        return delete(getArtifactAndVersionFilter(groupId, artifactId, versionId));
     }
 
     @Override

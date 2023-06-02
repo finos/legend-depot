@@ -58,7 +58,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
     abstract List<StoredEntity> transformVersionedEntities(StoreProjectData projectData, String versionId, List<Entity> entityList);
 
 
-    protected MetadataEventResponse delete(String groupId, String artifactId, String versionId,boolean versioned)
+    protected long delete(String groupId, String artifactId, String versionId,boolean versioned)
     {
         return getEntitiesApi().delete(groupId, artifactId, versionId,versioned);
     }
@@ -88,10 +88,10 @@ public abstract class AbstractEntityRefreshHandlerImpl
                 {
                     message = String.format("removing prior %s artifacts for [%s-%s]",this.entitiesProvider.getType(),gavCoordinates,versionId);
                     response.addMessage(message);
-                    response.combine(getEntitiesApi().delete(projectData.getGroupId(), projectData.getArtifactId(),versionId,this.entitiesProvider.getType().equals(ArtifactType.VERSIONED_ENTITIES)));
+                    response.addMessage("deleted " + getEntitiesApi().delete(projectData.getGroupId(), projectData.getArtifactId(),versionId,this.entitiesProvider.getType().equals(ArtifactType.VERSIONED_ENTITIES)));
                     LOGGER.info(message);
                 }
-                response.combine(getEntitiesApi().createOrUpdate(storedEntities));
+                getEntitiesApi().createOrUpdate(storedEntities);
             }
             else
             {

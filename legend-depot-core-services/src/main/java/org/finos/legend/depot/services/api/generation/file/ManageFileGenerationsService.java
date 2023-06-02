@@ -22,7 +22,7 @@ import java.util.List;
 public interface ManageFileGenerationsService extends FileGenerationsService
 {
 
-    void delete(String groupId, String artifactId, String versionId);
+    long delete(String groupId, String artifactId, String versionId);
 
     List<StoredFileGeneration> getStoredFileGenerations(String groupId, String artifactId, String versionId);
 

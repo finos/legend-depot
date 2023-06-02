@@ -18,21 +18,22 @@ package org.finos.legend.depot.store.mongo.entities;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.finos.legend.depot.domain.entity.StoredEntity;
-import org.finos.legend.depot.domain.status.StoreOperationResult;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class TestUpdateVersions extends TestStoreMongo
 {
 
     private static final URL ENTITIES_FILE = TestUpdateVersions.class.getClassLoader().getResource("data/versioned-entities.json");
-    private EntitiesMongo entitiesMongo = new EntitiesMongo(mongoProvider, getMongoClient());
+    private EntitiesMongo entitiesMongo = new EntitiesMongo(mongoProvider);
 
     @Test
     public void canStoreANewVersion()
@@ -41,10 +42,9 @@ public class TestUpdateVersions extends TestStoreMongo
         List<StoredEntity> entitiesList = readEntitiesFile(ENTITIES_FILE);
         Assert.assertNotNull(entitiesList);
         StoredEntity entity = entitiesList.get(0);
-        StoreOperationResult result = entitiesMongo.newOrUpdate(entity);
+        List result = entitiesMongo.createOrUpdate(Arrays.asList(entity));
         Assert.assertNotNull(result);
-        Assert.assertEquals(1, result.getInsertedCount());
-        Assert.assertEquals(0, result.getModifiedCount());
+        Assert.assertEquals(1, result.size());
 
         MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
         Assert.assertNotNull(entities);
@@ -63,10 +63,9 @@ public class TestUpdateVersions extends TestStoreMongo
         List<StoredEntity> entitiesList = readEntitiesFile(ENTITIES_FILE);
         Assert.assertNotNull(entitiesList);
         StoredEntity entity = entitiesList.get(0);
-        StoreOperationResult result = entitiesMongo.newOrUpdate(entity);
+        List result = entitiesMongo.createOrUpdate(Arrays.asList(entity));
         Assert.assertNotNull(result);
-        Assert.assertEquals(1, result.getInsertedCount());
-        Assert.assertEquals(0, result.getModifiedCount());
+        Assert.assertEquals(1, result.size());
 
         MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
         Assert.assertNotNull(entities);
@@ -76,10 +75,10 @@ public class TestUpdateVersions extends TestStoreMongo
         Assert.assertEquals(entity.getEntity().getPath(), ((Map)doc.get(EntitiesMongo.ENTITY)).get("path"));
         Assert.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc.get(EntitiesMongo.ENTITY)).get("classifierPath"));
 
-        StoreOperationResult result2 = entitiesMongo.newOrUpdate(entity);
+        List result2 = entitiesMongo.createOrUpdate(Arrays.asList(entity));
         Assert.assertNotNull(result2);
-        Assert.assertEquals(0, result2.getInsertedCount());
-        Assert.assertEquals(1, result2.getModifiedCount());
+        Assert.assertEquals(1, result2.size());
+        Assert.assertEquals(1, entities.countDocuments());
 
         MongoCollection entities1 = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
         Assert.assertNotNull(entities1);
@@ -97,10 +96,8 @@ public class TestUpdateVersions extends TestStoreMongo
         List<StoredEntity> entitiesList = readEntitiesFile(ENTITIES_FILE);
         Assert.assertNotNull(entitiesList);
         StoredEntity entity = entitiesList.get(0);
-        StoreOperationResult result = entitiesMongo.newOrUpdate(entity);
-        Assert.assertNotNull(result);
-        StoreOperationResult result1 = entitiesMongo.newOrUpdate(entity);
-        Assert.assertNotNull(result1);
+        entitiesMongo.createOrUpdate(Arrays.asList(entity));
+        entitiesMongo.createOrUpdate(Arrays.asList(entity));
 
         List<Entity> entities = entitiesMongo.getAllEntities("examples.metadata", "test", entity.getVersionId());
         Assert.assertNotNull(entities);
@@ -126,7 +123,7 @@ public class TestUpdateVersions extends TestStoreMongo
         setUpEntitiesDataFromFile(ENTITIES_FILE);
         long count = entitiesMongo.getEntityCount("examples.metadata", "test");
         Assert.assertEquals(3, count);
-        entitiesMongo.deleteAll("examples.metadata", "test");
+        entitiesMongo.delete("examples.metadata", "test");
         Assert.assertEquals(0, entitiesMongo.getEntityCount("examples.metadata", "test"));
     }
 
@@ -135,14 +132,17 @@ public class TestUpdateVersions extends TestStoreMongo
     {
         List<StoredEntity> entities = readEntitiesFile(ENTITIES_FILE);
         Assert.assertEquals(3, entities.size());
-        StoreOperationResult result = entitiesMongo.createOrUpdate(entities);
-        Assert.assertEquals(3, result.getInsertedCount());
 
         //lets do a change
-        Map<String,Object> entity = (Map<String, Object>) entities.get(0).getEntity().getContent();
+        StoredEntity first = entities.get(0);
+        Map<String,Object> entity = (Map<String, Object>) first.getEntity().getContent();
         entity.put("new","stuff");
-        StoreOperationResult result1 = entitiesMongo.createOrUpdate(entities);
-        Assert.assertEquals(3,result1.getModifiedCount());
+        entitiesMongo.createOrUpdate(entities);
+
+       Optional<Entity> found = entitiesMongo.getEntity(first.getGroupId(),first.getArtifactId(),first.getVersionId(),first.getEntity().getPath());
+       Assert.assertTrue(found.isPresent());
+       Assert.assertTrue(found.get().getContent().containsKey("new"));
+       Assert.assertEquals("stuff",found.get().getContent().get("new"));
     }
 
 }

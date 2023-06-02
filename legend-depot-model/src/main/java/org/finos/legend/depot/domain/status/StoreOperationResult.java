@@ -93,16 +93,4 @@ public class StoreOperationResult
     {
         return String.format("inserted: [%s], modified:[%s], deleted:[%s] ", insertedCount, modifiedCount, deletionCount);
     }
-
-
-    public void combine(StoreOperationResult result)
-    {
-        if (result != null)
-        {
-            this.insertedCount += result.getInsertedCount();
-            this.modifiedCount += result.getModifiedCount();
-            this.deletionCount += result.getDeletionCount();
-            this.errors.addAll(result.getErrors());
-        }
-    }
 }

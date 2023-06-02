@@ -60,16 +60,16 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
     }
 
     @Override
-    public MetadataEventResponse delete(String groupId, String artifactId)
+    public long delete(String groupId, String artifactId)
     {
         projects.delete(groupId, artifactId);
         return projectsVersions.delete(groupId, artifactId);
     }
 
     @Override
-    public MetadataEventResponse delete(String groupId, String artifactId, String versionId)
+    public long delete(String groupId, String artifactId, String versionId)
     {
-        return projectsVersions.deleteByVersionId(groupId, artifactId, versionId);
+        return projectsVersions.delete(groupId, artifactId, versionId);
     }
 
     @Override

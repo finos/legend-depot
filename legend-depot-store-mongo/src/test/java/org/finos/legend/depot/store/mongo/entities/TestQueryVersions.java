@@ -34,7 +34,7 @@ import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAP
 public class TestQueryVersions extends TestStoreMongo
 {
 
-    private EntitiesMongo versionsMongo = new EntitiesMongo(mongoProvider, getMongoClient());
+    private EntitiesMongo versionsMongo = new EntitiesMongo(mongoProvider);
 
     @Before
     public void setupMetadata()

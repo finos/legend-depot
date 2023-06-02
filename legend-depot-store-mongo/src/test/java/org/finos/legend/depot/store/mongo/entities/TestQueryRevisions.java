@@ -15,6 +15,8 @@
 
 package org.finos.legend.depot.store.mongo.entities;
 
+import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.domain.entity.StoredEntityOverview;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;
@@ -127,4 +129,17 @@ public class TestQueryRevisions extends TestStoreMongo
         }
     }
 
+    @Test
+    public void canQueryByClassifier()
+    {
+    //    {
+//        setUpEntitiesDataFromFile(ENTITIES_FILE);
+        List<StoredEntity> entities = revisionsMongo.findLatestEntitiesByClassifier("meta::pure::metamodel::type::Class", null, null, true, true);
+        Assert.assertNotNull(entities);
+        Assert.assertEquals(2, entities.size());
+        for (StoredEntity entity : entities)
+        {
+            Assert.assertEquals("meta::pure::metamodel::type::Class", ((StoredEntityOverview)entity).getClassifierPath());
+        }
+    }
 }
