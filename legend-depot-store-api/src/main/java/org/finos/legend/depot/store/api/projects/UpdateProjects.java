@@ -15,13 +15,12 @@
 
 package org.finos.legend.depot.store.api.projects;
 
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 
 public interface UpdateProjects extends Projects
 {
     StoreProjectData createOrUpdate(StoreProjectData projectCoordinates);
 
-    MetadataEventResponse delete(String groupId, String artifactId);
+    long delete(String groupId, String artifactId);
 }
 

@@ -77,7 +77,7 @@ public class ManageProjectsResource extends BaseAuthorisedResource
     @Path("/projects/{groupId}/{artifactId}")
     @ApiOperation(ResourceLoggingAndTracing.DELETE_PROJECT)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse deleteProject(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
+    public long deleteProject(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
     {
 
         return handle(

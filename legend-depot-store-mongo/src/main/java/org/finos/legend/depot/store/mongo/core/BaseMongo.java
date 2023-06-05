@@ -25,7 +25,6 @@ import com.mongodb.client.model.IndexModel;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReturnDocument;
-import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -59,27 +58,24 @@ public abstract class BaseMongo<T extends HasIdentifier>
     private static final String INDEX_NAME = "name";
     public static final String ID_FIELD = "_id";
     public static final String ID = "id";
-    public static final UpdateOptions INSERT_IF_ABSENT = new UpdateOptions().upsert(true);
     public static final FindOneAndReplaceOptions FIND_ONE_AND_REPLACE_OPTIONS = new FindOneAndReplaceOptions().upsert(true).returnDocument(ReturnDocument.AFTER);
     protected static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BaseMongo.class);
     private final ObjectMapper objectMapper;
     private final MongoDatabase mongoDatabase;
     private final Class<T> documentClass;
 
-
-    public BaseMongo(MongoDatabase databaseProvider, Class<T> documentClass)
+    public BaseMongo(MongoDatabase mongoDatabase,Class<T> documentClass,ObjectMapper objectMapper)
     {
-        this.mongoDatabase = databaseProvider;
+        this.mongoDatabase = mongoDatabase;
         this.documentClass = documentClass;
-        objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
 
-    public BaseMongo(MongoDatabase databaseProvider, Class<T> documentClass, ObjectMapper mapper)
+    public BaseMongo(MongoDatabase mongoDatabase,Class<T> documentClass)
     {
-        this.mongoDatabase = databaseProvider;
-        this.documentClass = documentClass;
-        objectMapper = mapper;
+        this(mongoDatabase,documentClass,new ObjectMapper());
     }
+
 
     public static <T extends HasIdentifier> Document buildDocument(T object)
     {

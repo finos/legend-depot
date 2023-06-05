@@ -17,12 +17,6 @@ package org.finos.legend.depot.store.mongo.entities;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.ReadConcern;
-import com.mongodb.ReadPreference;
-import com.mongodb.TransactionOptions;
-import com.mongodb.WriteConcern;
-import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -30,8 +24,6 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexModel;
 import com.mongodb.client.model.Projections;
-import com.mongodb.client.result.DeleteResult;
-import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.eclipse.collections.api.tuple.Pair;
@@ -42,27 +34,23 @@ import org.finos.legend.depot.domain.entity.EntityValidationErrors;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.entity.StoredEntityOverview;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.status.StoreOperationResult;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.finos.legend.sdlc.tools.entity.EntityPaths;
-import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,53 +61,25 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.ne;
 import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Filters.regex;
-import static com.mongodb.client.model.Updates.combine;
-import static com.mongodb.client.model.Updates.currentDate;
-import static com.mongodb.client.model.Updates.set;
 import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
 
 public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, UpdateEntities
 {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(EntitiesMongo.class);
     public static final String COLLECTION = "entities";
 
     public static final String ENTITY = "entity";
     public static final String ENTITY_CLASSIFIER_PATH = "entity.classifierPath";
     public static final String CLASSIFIER_PATH = "classifierPath";
-    public static final String ENTITY_CONTENT = "entity.content";
     public static final String ENTITY_PATH = "entity.path";
     public static final String PATH = "path";
     public static final String ENTITY_PACKAGE = "entity.content.package";
     public static final String VERSIONED_ENTITY = "versionedEntity";
-    private static final TransactionOptions TRANSACTION_OPTIONS = TransactionOptions.builder()
-            .readConcern(ReadConcern.MAJORITY)
-            .writeConcern(WriteConcern.ACKNOWLEDGED)
-            .readPreference(ReadPreference.primary()).build();
-
-
-    public final boolean transactionMode;
-
-    private final MongoClient mongoClient;
-
 
     @Inject
-    public EntitiesMongo(@Named("mongoDatabase") MongoDatabase databaseProvider, MongoClient mongoClient, @Named("transactionMode") boolean transactionMode)
+    public EntitiesMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
     {
-        super(databaseProvider, StoredEntity.class);
-        this.mongoClient = mongoClient;
-        this.transactionMode = transactionMode;
+        super(databaseProvider,StoredEntity.class);
     }
-
-    public EntitiesMongo(@Named("mongoDatabase") MongoDatabase mongoProvider, MongoClient mongoClient)
-    {
-        this(mongoProvider, mongoClient, false);
-    }
-
-    public EntitiesMongo(@Named("mongoDatabase") MongoDatabase mongoProvider)
-    {
-        this(mongoProvider, null, false);
-    }
-
 
 
     public static List<IndexModel> buildIndexes()
@@ -144,13 +104,6 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
                 eq(ENTITY_PATH, data.getEntity().getPath()));
     }
 
-
-    private Bson getEntityPathFilter(StoredEntity entity)
-    {
-        return and(getArtifactAndVersionFilter(entity.getGroupId(), entity.getArtifactId(), entity.getVersionId()),
-                eq(ENTITY_PATH, entity.getEntity().getPath()));
-    }
-
     private Bson getEntityPathFilter(String groupId, String artifactId, String versionId, String path)
     {
         return and(getArtifactAndVersionFilter(groupId, artifactId, versionId), eq(ENTITY_PATH, path));
@@ -162,143 +115,37 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     }
 
     @Override
-    protected void validateNewData(StoredEntity data)
+    protected void validateNewData(StoredEntity entity)
     {
-        StoreOperationResult result = validateEntity(data);
-        if (result.hasErrors())
-        {
-            throw new IllegalArgumentException("invalid data " + result.getErrors());
-        }
-    }
-
-
-    protected Bson combineDocument(StoredEntity entity)
-    {
-        return combine(
-                set(GROUP_ID, entity.getGroupId()),
-                set(ARTIFACT_ID, entity.getArtifactId()),
-                set(VERSION_ID, entity.getVersionId()),
-                set(VERSIONED_ENTITY, entity.isVersionedEntity()),
-                set(ENTITY_PATH, entity.getEntity().getPath()),
-                set(ENTITY_CLASSIFIER_PATH, entity.getEntity().getClassifierPath()),
-                set(ENTITY_CONTENT, entity.getEntity().getContent()),
-                currentDate(UPDATED));
-    }
-
-    private StoreOperationResult validateEntity(StoredEntity entity)
-    {
-        StoreOperationResult result = new StoreOperationResult();
+        List<String> errors = new ArrayList<>();
         if (!CoordinateValidator.isValidGroupId(entity.getGroupId()))
         {
-            result.logError(String.format(EntityValidationErrors.INVALID_GROUP_ID, entity.getGroupId()));
+            errors.add(String.format(EntityValidationErrors.INVALID_GROUP_ID, entity.getGroupId()));
         }
         if (!CoordinateValidator.isValidArtifactId(entity.getArtifactId()))
         {
-            result.logError(String.format(EntityValidationErrors.INVALID_ARTIFACT_ID, entity.getArtifactId()));
+            errors.add(String.format(EntityValidationErrors.INVALID_ARTIFACT_ID, entity.getArtifactId()));
         }
         if (!VersionValidator.isValid(entity.getVersionId()))
         {
-            result.logError(String.format(EntityValidationErrors.INVALID_VERSION_ID, entity.getVersionId()));
+            errors.add(String.format(EntityValidationErrors.INVALID_VERSION_ID, entity.getVersionId()));
         }
         if (!EntityPaths.isValidEntityPath(entity.getEntity().getPath()))
         {
-            result.logError(String.format(EntityValidationErrors.INVALID_ENTITY_PATH, entity.getEntity().getPath()));
+            errors.add(String.format(EntityValidationErrors.INVALID_ENTITY_PATH, entity.getEntity().getPath()));
         }
-        return result;
-    }
-
-    StoreOperationResult newOrUpdate(ClientSession clientSession, StoredEntity entity)
-    {
-        StoreOperationResult report = validateEntity(entity);
-        if (report.hasErrors())
+        if (!errors.isEmpty())
         {
-            return report;
+            throw new IllegalArgumentException("invalid data :" + String.join(",",errors));
         }
-
-        UpdateResult result;
-        if (clientSession != null)
-        {
-            result = getCollection().updateOne(clientSession, getEntityPathFilter(entity), combineDocument(entity), INSERT_IF_ABSENT);
-        }
-        else
-        {
-            result = getCollection().updateOne(getEntityPathFilter(entity), combineDocument(entity), INSERT_IF_ABSENT);
-        }
-        return combineResult(result);
-    }
-
-    private StoreOperationResult combineResult(UpdateResult result)
-    {
-        StoreOperationResult report = new StoreOperationResult();
-        if (result.getUpsertedId() != null)
-        {
-            report.addInsertedCount();
-        }
-        else
-        {
-            report.addModifiedCount();
-        }
-        return report;
-    }
-
-    StoreOperationResult newOrUpdate(List<StoredEntity> entities)
-    {
-        return newOrUpdate(null, entities);
-    }
-
-    StoreOperationResult newOrUpdate(StoredEntity entity)
-    {
-        return newOrUpdate(null, entity);
-    }
-
-    private StoreOperationResult newOrUpdate(ClientSession clientSession, List<StoredEntity> versionedEntities)
-    {
-        StoreOperationResult report = new StoreOperationResult();
-        for (StoredEntity versionedEntity : versionedEntities)
-        {
-            report.combine(newOrUpdate(clientSession, versionedEntity));
-        }
-        if (report.getInsertedCount() + report.getModifiedCount() != versionedEntities.size())
-        {
-            report.logError("error creating/updating entities,did not get acknowledgment for all");
-        }
-        return report;
-    }
-
-    private StoreOperationResult executeWithinTransaction(Function<ClientSession,StoreOperationResult> atomicTransaction)
-    {
-        StoreOperationResult report = new StoreOperationResult();
-        ClientSession clientSession = mongoClient.startSession();
-        try
-        {
-            clientSession.startTransaction(TRANSACTION_OPTIONS);
-            report.combine(atomicTransaction.apply(clientSession));
-        }
-        catch (RuntimeException e)
-        {
-            report.logError(e.getMessage());
-            LOGGER.error("error executing atomic new/update",e);
-        }
-        finally
-        {
-            if (report.hasErrors())
-            {
-                clientSession.abortTransaction();
-                report.logError("transaction aborted");
-            }
-            else
-            {
-                clientSession.commitTransaction();
-            }
-            clientSession.close();
-        }
-        return report;
     }
 
     @Override
-    public StoreOperationResult createOrUpdate(List<StoredEntity> versionedEntities)
+    public List<StoredEntity> createOrUpdate(List<StoredEntity> versionedEntities)
     {
-        return transactionMode ? executeWithinTransaction((clientSession) -> newOrUpdate(clientSession,versionedEntities)) : newOrUpdate(versionedEntities);
+        List<StoredEntity> entities = new ArrayList<>();
+        versionedEntities.forEach(item -> entities.add(createOrUpdate(item)));
+        return entities;
     }
 
     @Override
@@ -455,21 +302,15 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
 
 
     @Override
-    public StoreOperationResult delete(String groupId, String artifactId, String versionId, boolean versioned)
+    public long delete(String groupId, String artifactId, String versionId, boolean versioned)
     {
-        Bson filter = and(eq(VERSIONED_ENTITY, versioned), getArtifactAndVersionFilter(groupId, artifactId, versionId));
-        DeleteResult result = getCollection().deleteMany(filter);
-        LOGGER.info("delete result {}-{}-{} {} :{}",groupId,artifactId,versionId,versioned,result);
-        return new StoreOperationResult(0, 0, result.getDeletedCount(), Collections.emptyList());
+        return delete(and(eq(VERSIONED_ENTITY, versioned), getArtifactAndVersionFilter(groupId, artifactId, versionId)));
     }
 
     @Override
-    public StoreOperationResult deleteAll(String groupId, String artifactId)
+    public long delete(String groupId, String artifactId)
     {
-        Bson filter = getArtifactFilter(groupId, artifactId);
-        DeleteResult result = getCollection().deleteMany(filter);
-        LOGGER.info("deleteAll result {}-{} :{}",groupId,artifactId,result);
-        return new StoreOperationResult(0, 0, result.getDeletedCount(), Collections.emptyList());
+        return delete(getArtifactFilter(groupId, artifactId));
     }
 
 

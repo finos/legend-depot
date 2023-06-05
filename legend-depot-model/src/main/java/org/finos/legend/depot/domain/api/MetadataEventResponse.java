@@ -18,7 +18,6 @@ package org.finos.legend.depot.domain.api;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
-import org.finos.legend.depot.domain.status.StoreOperationResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,16 +82,6 @@ public class MetadataEventResponse
     public boolean hasErrors()
     {
         return getErrors() != null && !getErrors().isEmpty();
-    }
-
-    public MetadataEventResponse combine(StoreOperationResult storeResult)
-    {
-        if (storeResult != null)
-        {
-            this.errors.addAll(storeResult.getErrors());
-            addMessage(storeResult.toString());
-        }
-        return this;
     }
 
     public MetadataEventResponse combine(MetadataEventResponse eventResponse)

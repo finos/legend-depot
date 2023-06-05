@@ -17,18 +17,17 @@ package org.finos.legend.depot.store.api.entities;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.finos.legend.depot.domain.entity.StoredEntity;
-import org.finos.legend.depot.domain.status.StoreOperationResult;
 
 import java.util.List;
 
 public interface UpdateEntities extends Entities
 {
 
-    StoreOperationResult createOrUpdate(List<StoredEntity> versionedEntities);
+    List<StoredEntity> createOrUpdate(List<StoredEntity> versionedEntities);
 
-    StoreOperationResult deleteAll(String groupId, String artifactId);
+    long delete(String groupId, String artifactId);
 
-    StoreOperationResult delete(String groupId, String artifactId, String versionId,boolean versioned);
+    long delete(String groupId, String artifactId, String versionId,boolean versioned);
 
     List<StoredEntity> getStoredEntities(String groupId, String artifactId);
 

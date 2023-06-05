@@ -21,7 +21,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
 import org.bson.conversions.Bson;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectValidator;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.store.StoreException;
@@ -108,10 +107,8 @@ public class ProjectsMongo extends BaseMongo<StoreProjectData> implements Projec
     }
 
     @Override
-    public MetadataEventResponse delete(String groupId, String artifactId)
+    public long delete(String groupId, String artifactId)
     {
-        MetadataEventResponse response = new MetadataEventResponse();
-        getCollection().findOneAndDelete(getArtifactFilter(groupId, artifactId));
-        return response;
+        return delete(getArtifactFilter(groupId, artifactId));
     }
 }

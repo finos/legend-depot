@@ -55,23 +55,23 @@ public class ManageEntitiesServiceImpl extends EntitiesServiceImpl implements Ma
 
 
     @Override
-    public MetadataEventResponse delete(String groupId, String artifactId, String versionId, boolean versioned)
+    public long delete(String groupId, String artifactId, String versionId, boolean versioned)
     {
         this.projects.checkExists(groupId, artifactId);
-        return new MetadataEventResponse().combine(entities.delete(groupId, artifactId, versionId, versioned));
+        return entities.delete(groupId, artifactId, versionId, versioned);
     }
 
     @Override
-    public MetadataEventResponse deleteAll(String groupId, String artifactId)
+    public long delete(String groupId, String artifactId)
     {
         this.projects.checkExists(groupId, artifactId);
-        return new MetadataEventResponse().combine(entities.deleteAll(groupId, artifactId));
+        return entities.delete(groupId, artifactId);
     }
 
     @Override
-    public MetadataEventResponse createOrUpdate(List<StoredEntity> versionedEntities)
+    public void createOrUpdate(List<StoredEntity> versionedEntities)
     {
-        return new MetadataEventResponse().combine(entities.createOrUpdate(versionedEntities));
+        entities.createOrUpdate(versionedEntities);
     }
 
     @Override

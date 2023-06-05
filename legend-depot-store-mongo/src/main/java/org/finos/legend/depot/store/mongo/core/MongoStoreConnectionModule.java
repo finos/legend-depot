@@ -34,7 +34,6 @@ public class MongoStoreConnectionModule extends PrivateModule
     {
         expose(ConnectionFactory.class);
         expose(MongoDatabase.class).annotatedWith(Names.named("mongoDatabase"));
-        expose(Boolean.class).annotatedWith(Names.named("transactionMode"));
         expose(MongoClient.class);
     }
 
@@ -80,11 +79,4 @@ public class MongoStoreConnectionModule extends PrivateModule
         return connectionFactory.getClient();
     }
 
-    @Provides
-    @Singleton
-    @Named("transactionMode")
-    Boolean getTransactionsMode()
-    {
-        return false;
-    }
 }
