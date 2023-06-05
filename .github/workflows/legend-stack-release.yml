@@ -69,7 +69,7 @@ jobs:
           fi
           
           if [ -n "$sharedVersion" ] || [ -n "$engineVersion" ] || [ -n "$sdlcVersion" ]; then
-            git add .
+            git add pom.xml
             git commit -m "Legend Stack Versions upgrade"
             git push origin master
           fi
