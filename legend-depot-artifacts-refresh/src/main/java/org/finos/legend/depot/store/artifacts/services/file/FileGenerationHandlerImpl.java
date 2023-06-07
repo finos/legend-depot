@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -117,7 +118,8 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
                     {
                         String elementPath = entityMap.get(entityPath.get()).getPath();
                         FileGeneration generation = new FileGeneration(generatedFile.getPath(), generatedFile.getContent());
-                        generations.createOrUpdate(new StoredFileGeneration(projectData.getGroupId(), projectData.getArtifactId(), versionId, elementPath, null, generation));
+                        String generationType = this.getExtensionKeyFromGeneration(generation.getPath(), entityPath.get());
+                        generations.createOrUpdate(new StoredFileGeneration(projectData.getGroupId(), projectData.getArtifactId(), versionId, elementPath, generationType, generation));
                     }
                 }
             });
@@ -132,6 +134,11 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
            response.addError(message);
         }
         return response;
+    }
+
+    private String getExtensionKeyFromGeneration(String path, String entityPath)
+    {
+        return Arrays.stream(path.replace(PATH + entityPath + PATH, "").split(PATH)).collect(Collectors.toList()).get(0);
     }
 
     private Map<String, Entity> buildEntitiesByElementPathMap(List<Entity> entities)
