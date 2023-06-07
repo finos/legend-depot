@@ -36,6 +36,7 @@ import java.util.Optional;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_FILEPATH;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_CONTENT;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_ENTITIES;
 
 @Path("")
@@ -100,13 +101,13 @@ public class FileGenerationsResource extends BaseResource
 
     @GET
     @Path("/generationFileContent/{groupId}/{artifactId}/versions/{versionId}/file/{filePath}")
-    @ApiOperation(GET_VERSION_FILE_GENERATION_BY_FILEPATH)
+    @ApiOperation(GET_VERSION_FILE_GENERATION_CONTENT)
     @Produces(MediaType.TEXT_PLAIN)
     public Optional<String> getFileGenerationContentByFilePath(@PathParam("groupId") String groupId,
                                                            @PathParam("artifactId") String artifactId,
                                                            @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath)
     {
-        return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationContentByFilePath(groupId, artifactId, versionId, filePath));
+        return handle(GET_VERSION_FILE_GENERATION_CONTENT, () -> this.generationsService.getFileGenerationContentByFilePath(groupId, artifactId, versionId, filePath));
     }
 
 }
