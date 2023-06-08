@@ -89,8 +89,8 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>${junit.groupId}</groupId>
+            <artifactId>${junit.artifactId}</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
