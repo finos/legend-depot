@@ -64,8 +64,8 @@
             <artifactId>eclipse-collections</artifactId>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+              <groupId>${junit.groupId}</groupId>
+            <artifactId>${junit.artifactId}</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -83,10 +83,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

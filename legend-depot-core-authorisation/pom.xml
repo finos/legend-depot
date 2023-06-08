@@ -45,8 +45,8 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+              <groupId>${junit.groupId}</groupId>
+            <artifactId>${junit.artifactId}</artifactId>
         </dependency>
     </dependencies>
 </project>
