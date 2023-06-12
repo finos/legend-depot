@@ -151,9 +151,13 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         {
             errors.add(String.format("Invalid projectId [%s]. Existing project [%s] has same [%s-%s] coordinates",event.getProjectId(),projectData.get().getProjectId(),event.getGroupId(),event.getArtifactId()));
         }
-        if (VersionValidator.isSnapshotVersion(event.getVersionId()) && projects.findSnapshotVersions(event.getGroupId(), event.getArtifactId()).size() >= maximumSnapshotsAllowed)
+        if (VersionValidator.isSnapshotVersion(event.getVersionId()))
         {
-            errors.add(String.format("Number of snapshot versions stored for project %s-%s, has reached the limit [%s]", event.getGroupId(), event.getArtifactId(), maximumSnapshotsAllowed));
+            List<String> snapshotVersions = projects.findSnapshotVersions(event.getGroupId(), event.getArtifactId()).stream().map(versionData -> versionData.getVersionId()).collect(Collectors.toList());
+            if (!snapshotVersions.contains(event.getVersionId()) && snapshotVersions.size() >= maximumSnapshotsAllowed)
+            {
+                errors.add(String.format("Number of snapshot versions stored for project %s-%s, has reached the limit [%s]", event.getGroupId(), event.getArtifactId(), maximumSnapshotsAllowed));
+            }
         }
         return errors;
     }
