@@ -272,8 +272,20 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch2-SNAPSHOT"));
         projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch3-SNAPSHOT"));
 
-        List<String> errors = versionHandler.validateEvent(new MetadataNotification("PROD-1", "examples.metadata", "test", "branch3-SNAPSHOT"));
+        List<String> errors = versionHandler.validateEvent(new MetadataNotification("PROD-1", "examples.metadata", "test", "branch4-SNAPSHOT"));
 
         Assert.assertEquals(1, errors.size());
+    }
+
+    @Test
+    public void canLoadSnapshotVersionIfAlreadyStored()
+    {
+        projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch1-SNAPSHOT"));
+        projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch2-SNAPSHOT"));
+        projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch3-SNAPSHOT"));
+
+        List<String> errors = versionHandler.validateEvent(new MetadataNotification("PROD-1", "examples.metadata", "test", "branch3-SNAPSHOT"));
+
+        Assert.assertEquals(0, errors.size());
     }
 }
