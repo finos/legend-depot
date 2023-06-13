@@ -50,6 +50,7 @@ public class ResourceLoggingAndTracing
     public static final String GET_VERSION_FILE_GENERATION_BY_TYPE = "get version file generations by type";
     public static final String GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH = "get version file generations by element path";
     public static final String GET_VERSION_FILE_GENERATION_BY_FILEPATH = "get version file generations by file";
+    public static final String GET_VERSION_FILE_GENERATION_CONTENT = "get version file generation content";
     public static final String GET_ALL_EVENTS_IN_QUEUE = "get all queue events";
     public static final String FIND_PAST_EVENTS = "find past events";
     public static final String ENQUEUE_EVENT = "queue event";

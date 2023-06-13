@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.finos.legend.depot</groupId>
         <artifactId>legend-depot</artifactId>
-        <version>1.16.2-SNAPSHOT</version>
+        <version>1.16.7-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -72,8 +72,8 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+              <groupId>${junit.groupId}</groupId>
+            <artifactId>${junit.artifactId}</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -86,10 +86,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
