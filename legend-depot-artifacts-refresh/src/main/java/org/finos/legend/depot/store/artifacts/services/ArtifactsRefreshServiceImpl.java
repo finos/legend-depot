@@ -135,7 +135,8 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     {
         String parentEventId = ParentEvent.build(projectData.getGroupId(), projectData.getArtifactId(), ALL_SNAPSHOT, parentEvent);
         MetadataEventResponse response = new MetadataEventResponse();
-        List<String> snapshots = this.projects.getVersions(projectData.getGroupId(),projectData.getArtifactId(),true).stream().filter(v -> VersionValidator.isSnapshotVersion(v)).collect(Collectors.toList());
+        List<String> snapshots = this.projects.findSnapshotVersions(projectData.getGroupId(), projectData.getArtifactId())
+                .stream().filter(versionData -> !versionData.isEvicted()).map(versionData -> versionData.getVersionId()).collect(Collectors.toList());
         snapshots.forEach(v ->
         {
             String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]", projectData.getGroupId(), projectData.getArtifactId(), v, parentEvent, fullUpdate, transitive);

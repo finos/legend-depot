@@ -297,6 +297,26 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertTrue(statuses.isEmpty());
 
     }
+    
+    @Test
+    public void canRefreshAllVersionExceptForEvictedSnapshot()
+    {
+        MetadataEventResponse response = artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, true, true,true,PARENT_EVENT_ID);
+        Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
+
+        Assert.assertEquals(3,notificationsQueueManager.getAllInQueue().size());
+        notificationsQueueManager.handleAll();
+
+        StoreProjectVersionData pv = new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "dummy-SNAPSHOT");
+        pv.setEvicted(true);
+        projectsService.createOrUpdate(pv);
+
+        response = artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, true, true,true,PARENT_EVENT_ID);
+        Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
+
+        Assert.assertEquals(3,notificationsQueueManager.getAllInQueue().size());
+        notificationsQueueManager.handleAll();
+    }
 
     @Test
     public void canRefreshAllVersionForProjectWithExcludedVersion()
