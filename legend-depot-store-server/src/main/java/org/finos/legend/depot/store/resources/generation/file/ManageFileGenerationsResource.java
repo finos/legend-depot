@@ -63,13 +63,4 @@ public class ManageFileGenerationsResource extends BaseAuthorisedResource
         validateUser();
         return handle(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION, () -> this.generationsService.getStoredFileGenerations(groupId, artifactId, versionId));
     }
-
-    @GET
-    @Path("/generations/{groupId}/{artifactId}/{versionId}/{type}")
-    @ApiOperation(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<StoredFileGeneration> getFileGenerations(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("type") String type)
-    {
-        return handle(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE, () -> this.generationsService.findByType(groupId, artifactId, versionId, type));
-    }
 }

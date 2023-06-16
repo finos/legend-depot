@@ -16,6 +16,7 @@
 package org.finos.legend.depot.services.api.generation.file;
 
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
+import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import java.util.List;
@@ -32,6 +33,8 @@ public interface FileGenerationsService
     List<FileGeneration> getFileGenerationsByElementPath(String groupId, String artifactId, String versionId, String elementPath);
 
     Optional<FileGeneration> getFileGenerationsByFilePath(String groupId, String artifactId, String versionsId, String filePath);
+
+    List<StoredFileGeneration> findByType(String groupId, String artifactId, String versionId, String type);
 
     default  Optional<String> getFileGenerationContentByFilePath(String groupId, String artifactId, String versionsId, String filePath)
     {

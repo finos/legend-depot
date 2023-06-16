@@ -30,5 +30,4 @@ public interface ManageFileGenerationsService extends FileGenerationsService
 
     List<StoredFileGeneration> getAll();
 
-    List<StoredFileGeneration> findByType(String groupId, String artifactId, String versionId, String type);
 }
