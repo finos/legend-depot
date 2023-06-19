@@ -16,6 +16,7 @@
 package org.finos.legend.depot.store.artifacts.purge.services;
 
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
+import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
@@ -59,13 +60,15 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     private static final String EVICT_OLDEST = "evict_old";
 
     private final ManageProjectsService projects;
+    private final RepositoryServices repository;
     private final QueryMetricsHandler metrics;
 
     @Inject
-    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, QueryMetricsHandler metrics)
+    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, RepositoryServices repository, QueryMetricsHandler metrics)
     {
         this.projects = projects;
         this.metrics = metrics;
+        this.repository = repository;
     }
 
 
@@ -138,7 +141,6 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
         });
     }
 
-    //TODO: add more to this method once deprecation policy is setup
     @Override
     public MetadataEventResponse deprecate(String groupId, String artifactId, String versionId)
     {
@@ -152,6 +154,25 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
             projects.createOrUpdate(projectData);
             return response;
         });
+    }
+
+    @Override
+    public MetadataEventResponse deprecateVersionsNotInRepository()
+    {
+        MetadataEventResponse response = new MetadataEventResponse();
+        repository.findVersionsMismatches().parallelStream().forEach(versionMismatch ->
+        {
+            if (!versionMismatch.versionsNotInRepository.isEmpty())
+            {
+                versionMismatch.versionsNotInRepository.forEach(versionId ->
+                {
+                    LOGGER.info(String.format("Deprecating project version: %s-%s-%s", versionMismatch.groupId, versionMismatch.artifactId, versionId));
+                    deprecate(versionMismatch.groupId, versionMismatch.artifactId, versionId);
+                    response.addMessage(String.format("Deprecated project version: %s-%s-%s", versionMismatch.groupId, versionMismatch.artifactId, versionId));
+                });
+            }
+        });
+        return response;
     }
 
     @Override

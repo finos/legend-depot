@@ -29,4 +29,6 @@ public interface ArtifactsPurgeService
 
     MetadataEventResponse deprecate(String groupId, String artifactId, String version);
 
+    MetadataEventResponse deprecateVersionsNotInRepository();
+
   }
