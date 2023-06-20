@@ -31,9 +31,7 @@ import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
-import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
-import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
@@ -42,7 +40,6 @@ import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerI
 import org.finos.legend.depot.store.artifacts.services.entities.EntityProvider;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
-import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
@@ -52,7 +49,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -60,7 +56,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.finos.legend.depot.domain.DatesHandler.toDate;
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 import static org.finos.legend.depot.store.artifacts.services.TestArtifactsRefreshServiceExceptionEscenarios.PARENT_EVENT_ID;
 import static org.finos.legend.depot.store.artifacts.services.TestArtifactsRefreshServiceWithMocks.PROJECT_A;
@@ -77,7 +72,6 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     protected List<String> manifestProperties = Arrays.asList("commit-[a-zA-Z0-9]+", "release-[a-zA-Z0-9]+");
     protected UpdateProjects projectsStore = mock(UpdateProjects.class);
     protected ArtifactsFilesStore artifactsStore =  new ArtifactsFilesMongo(mongoProvider);
-    protected RefreshStatusStore refreshStatusStore = new ArtifactsRefreshStatusMongo(mongoProvider);
     protected UpdateProjectsVersions versionsStore = new ProjectsVersionsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
@@ -90,7 +84,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
 
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore, artifactsStore, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), dependencyManager, 3);
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, artifactsStore, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), dependencyManager, 3);
 
 
     @Before
@@ -225,45 +219,6 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("",TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0", true,false, PARENT_EVENT_ID));
         Assert.assertNotNull(response);
         Assert.assertEquals(MetadataEventStatus.FAILED, response.getStatus());
-    }
-
-    @Test
-    public void dealWithOverrunningRefresh()
-    {
-        RefreshStatus overrun = new RefreshStatus(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, BRANCH_SNAPSHOT("master"));
-        Assert.assertFalse(overrun.isExpired());
-        overrun.setExpires(toDate(LocalDateTime.now().minusMinutes(100)));
-        Assert.assertTrue(overrun.isExpired());
-        refreshStatusStore.insert(overrun);
-        RefreshStatus fromStore = refreshStatusStore.get(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).get();
-        Assert.assertTrue(fromStore.isExpired());
-
-        RefreshStatus isOk = new RefreshStatus(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0");
-        Assert.assertFalse(isOk.isExpired());
-        isOk.setExpires(toDate(LocalDateTime.now().plusMinutes(9)));
-        Assert.assertFalse(isOk.isExpired());
-        refreshStatusStore.insert(isOk);
-        RefreshStatus fromStore2 = refreshStatusStore.get(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").get();
-        Assert.assertFalse(fromStore2.isExpired());
-    }
-
-
-    @Test
-    public void canDeleteStatuses()
-    {
-        RefreshStatus status1 = new RefreshStatus("test","artifact","2.0.0");
-        status1.setExpires(toDate(LocalDateTime.now().plusMinutes(100)));
-        RefreshStatus expiredStatus = new RefreshStatus("test","artifact","1.0.0");
-        expiredStatus.setExpires(toDate(LocalDateTime.now().minusMinutes(100)));
-        refreshStatusStore.insert(status1);
-        refreshStatusStore.insert(expiredStatus);
-        Assert.assertEquals(2, refreshStatusStore.getAll().size());
-        refreshStatusStore.delete("test","artifact","2.0.0");
-        Assert.assertEquals(1, refreshStatusStore.getAll().size());
-
-        versionHandler.deleteExpiredRefresh();
-        Assert.assertEquals(0, refreshStatusStore.getAll().size());
-
     }
 
     @Test
