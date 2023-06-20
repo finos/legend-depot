@@ -19,6 +19,7 @@ import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
@@ -34,9 +35,9 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
     private final UpdateProjects projects;
 
     @Inject
-    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics, Queue queue)
+    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics, Queue queue, ProjectsConfiguration configuration)
     {
-        super(projectsVersions,projects, metrics, queue);
+        super(projectsVersions,projects, metrics, queue, configuration);
         this.projects = projects;
         this.projectsVersions = projectsVersions;
     }

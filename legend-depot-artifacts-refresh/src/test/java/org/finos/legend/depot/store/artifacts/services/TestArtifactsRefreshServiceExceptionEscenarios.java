@@ -28,6 +28,7 @@ import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
 import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
@@ -84,7 +85,7 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     protected UpdateProjectsVersions mongoProjectsVersions = mock(UpdateProjectsVersions.class);
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(mongoProjectsVersions,mongoProjects,metrics,queue);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(mongoProjectsVersions,mongoProjects,metrics,queue,new ProjectsConfiguration("master"));
     protected UpdateEntities mongoEntities = mock(UpdateEntities.class);
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(mongoEntities,projectsService);
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);

@@ -19,7 +19,11 @@ import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 public class VersionValidator
 {
-    public static final String MASTER_SNAPSHOT = "master-SNAPSHOT";
+    public static String BRANCH_SNAPSHOT(String branchName)
+    {
+        return branchName + SNAPSHOT;
+    }
+
     private static final String SNAPSHOT = "-SNAPSHOT";
     public static final String VALID_VERSION_ID_TXT = "a valid version string: x.y.z, master-SNAPSHOT or alias: latest = last released version, head = latest unreleased revision";
 

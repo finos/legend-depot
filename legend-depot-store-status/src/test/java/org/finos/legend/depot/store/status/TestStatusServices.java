@@ -34,7 +34,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 public class TestStatusServices extends TestStoreMongo
 {
@@ -90,7 +90,7 @@ public class TestStatusServices extends TestStoreMongo
     @Test
     public void getRevisionsCount()
     {
-        StoreStatus.DocumentCounts counts = statusService.getDocumentCounts("examples.metadata", "test",MASTER_SNAPSHOT);
+        StoreStatus.DocumentCounts counts = statusService.getDocumentCounts("examples.metadata", "test",BRANCH_SNAPSHOT("master"));
         Assert.assertNotNull(counts);
         Assert.assertEquals(8, counts.totalVersionEntities);
     }

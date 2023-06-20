@@ -48,4 +48,17 @@ public class ArtifactsPurgeModule extends PrivateModule
         });
         return true;
     }
+
+    @Provides
+    @Singleton
+    @Named("deprecate-versions-notInRepository")
+    boolean scheduleDeprecationOfProjectVersions(SchedulesFactory schedulesFactory, ArtifactsPurgeService artifactsPurgeService)
+    {
+        schedulesFactory.registerSingleInstance("deprecate-versions-notInRepository", SchedulesFactory.MINUTE, 48 * SchedulesFactory.HOUR, () ->
+        {
+            artifactsPurgeService.deprecateVersionsNotInRepository();
+            return true;
+        });
+        return true;
+    }
 }

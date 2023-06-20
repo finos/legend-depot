@@ -57,6 +57,20 @@ public class TestUpdateVersions extends TestStoreMongo
     }
 
     @Test
+    public void canStoreEntitiesWithDotCharacterAsFieldContent()
+    {
+        List<StoredEntity> entitiesList = readEntitiesFile(TestUpdateVersions.class.getClassLoader().getResource("data/versioned-entity-dot-character.json"));
+        Assert.assertNotNull(entitiesList);
+        List result = entitiesMongo.createOrUpdate(entitiesList);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(1, result.size());
+
+        MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
+        Assert.assertNotNull(entities);
+        Assert.assertEquals(1, entities.countDocuments());
+    }
+
+    @Test
     public void canUpdateAVersion()
     {
 

@@ -24,6 +24,7 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexModel;
 import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.UpdateOptions;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.eclipse.collections.api.tuple.Pair;
@@ -58,10 +59,13 @@ import java.util.stream.Stream;
 import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.ne;
+import static com.mongodb.client.model.Filters.not;
 import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Filters.regex;
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static com.mongodb.client.model.Updates.combine;
+import static com.mongodb.client.model.Updates.currentDate;
+import static com.mongodb.client.model.Updates.set;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, UpdateEntities
 {
@@ -74,6 +78,8 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     public static final String PATH = "path";
     public static final String ENTITY_PACKAGE = "entity.content.package";
     public static final String VERSIONED_ENTITY = "versionedEntity";
+    public static final String ENTITY_CONTENT = "entity.content";
+    public static final UpdateOptions INSERT_IF_ABSENT = new UpdateOptions().upsert(true);
 
     @Inject
     public EntitiesMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -143,9 +149,22 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     @Override
     public List<StoredEntity> createOrUpdate(List<StoredEntity> versionedEntities)
     {
-        List<StoredEntity> entities = new ArrayList<>();
-        versionedEntities.forEach(item -> entities.add(createOrUpdate(item)));
-        return entities;
+        versionedEntities.forEach(item ->
+                getCollection().updateOne(getEntityPathFilter(item.getGroupId(), item.getArtifactId(), item.getVersionId(), item.getEntity().getPath()), combineDocument(item), INSERT_IF_ABSENT));
+        return versionedEntities;
+    }
+
+    private Bson combineDocument(StoredEntity entity)
+    {
+        return combine(
+                set(GROUP_ID, entity.getGroupId()),
+                set(ARTIFACT_ID, entity.getArtifactId()),
+                set(VERSION_ID, entity.getVersionId()),
+                set(VERSIONED_ENTITY, entity.isVersionedEntity()),
+                set(ENTITY_PATH, entity.getEntity().getPath()),
+                set(ENTITY_CLASSIFIER_PATH, entity.getEntity().getClassifierPath()),
+                set(ENTITY_CONTENT, entity.getEntity().getContent()),
+                currentDate(UPDATED));
     }
 
     @Override
@@ -248,7 +267,7 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
         List<Bson> filters = new ArrayList<>();
         filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
         filters.add(eq(VERSIONED_ENTITY, versioned));
-        filters.add(eq(VERSION_ID, MASTER_SNAPSHOT));
+        filters.add(regex(VERSION_ID, BRANCH_SNAPSHOT("")));
         if (search != null)
         {
             filters.add(Filters.regex(ENTITY_PATH, Pattern.quote(search), "i"));
@@ -263,13 +282,13 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     @Override
     public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary, boolean versionedEntities)
     {
-        return transform(summary, executeFind(and(and(eq(ENTITY_CLASSIFIER_PATH, classifier), eq(VERSIONED_ENTITY, versionedEntities)), ne(VERSION_ID, MASTER_SNAPSHOT))));
+        return transform(summary, executeFind(and(and(eq(ENTITY_CLASSIFIER_PATH, classifier), eq(VERSIONED_ENTITY, versionedEntities)), not(regex(VERSION_ID, BRANCH_SNAPSHOT(""))))));
     }
 
     @Override
     public List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
     {
-        return transform(summary, executeFind(and(and(eq(ENTITY_CLASSIFIER_PATH, classifier), eq(VERSION_ID, MASTER_SNAPSHOT)), eq(VERSIONED_ENTITY, versioned))));
+        return transform(summary, executeFind(and(and(eq(ENTITY_CLASSIFIER_PATH, classifier), regex(VERSION_ID, BRANCH_SNAPSHOT(""))), eq(VERSIONED_ENTITY, versioned))));
     }
 
     public List<StoredEntity> findEntitiesByClassifier(String classifier, boolean summary, boolean versioned)
@@ -316,7 +335,7 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
 
     public long getVersionEntityCount()
     {
-        return getCollection().countDocuments(ne(VERSION_ID, MASTER_SNAPSHOT));
+        return getCollection().countDocuments(not(regex(VERSION_ID, BRANCH_SNAPSHOT(""))));
     }
 
 

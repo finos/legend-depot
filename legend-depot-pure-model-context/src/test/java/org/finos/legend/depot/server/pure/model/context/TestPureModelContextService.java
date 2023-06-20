@@ -24,6 +24,7 @@ import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
@@ -39,7 +40,7 @@ import org.mockito.Mockito;
 import java.net.URL;
 import java.util.List;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 import static org.mockito.Mockito.mock;
 
 public class TestPureModelContextService extends TestBaseServices
@@ -54,7 +55,7 @@ public class TestPureModelContextService extends TestBaseServices
     public static final String CLIENT_VERSION = "vX_X_X";
     private final QueryMetricsStore metrics = new QueryMetricsMongo(mongoProvider);
     private final Queue queue = mock(Queue.class);
-    ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue);
+    ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
     private final PureModelContextService service = new PureModelContextServiceImpl(new EntitiesServiceImpl(entitiesStore, projectsService), projectsService);
 
 
@@ -95,7 +96,7 @@ public class TestPureModelContextService extends TestBaseServices
     @Test
     public void canGetEntitiesAsPureModelContextData()
     {
-        String modelContextDataAsString = service.getPureModelContextDataAsString(TEST_GROUP_ID, "test", MASTER_SNAPSHOT, CLIENT_VERSION, false, false);
+        String modelContextDataAsString = service.getPureModelContextDataAsString(TEST_GROUP_ID, "test", BRANCH_SNAPSHOT("master"), CLIENT_VERSION, false, false);
         Assert.assertNotNull(modelContextDataAsString);
         Assert.assertEquals("{\"_type\":\"data\",\"elements\":[{\"_type\":\"class\",\"constraints\":[],\"name\":\"ClassWithDependency\",\"originalMilestonedProperties\":[],\"package\":\"examples::metadata::test\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"Name\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"profile\",\"name\":\"TestProfile\",\"package\":\"examples::metadata::test\",\"stereotypes\":[],\"tags\":[]},{\"_type\":\"class\",\"constraints\":[],\"name\":\"ClientBasic\",\"originalMilestonedProperties\":[],\"package\":\"examples::metadata::test\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"Name\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"EntityId\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Integer\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IsActive\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Boolean\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"RiskScore\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Float\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IncorporationDate\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"StrictDate\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"OptionalAlternativeName\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"newProperty\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"profile\",\"name\":\"TestProfileTwo\",\"package\":\"examples::metadata::test::subpackage\",\"stereotypes\":[],\"tags\":[]}],\"origin\":{\"_type\":\"pointer\",\"sdlcInfo\":{\"_type\":\"alloy\",\"baseVersion\":\"master-SNAPSHOT\",\"packageableElementPointers\":[],\"project\":\"examples.metadata:test\",\"version\":\"none\"},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}}", modelContextDataAsString);
     }
@@ -103,7 +104,7 @@ public class TestPureModelContextService extends TestBaseServices
     @Test(expected = IllegalArgumentException.class)
     public void testNonExistentProject()
     {
-        service.getPureModelContextDataAsString("non.existent.project", "test",MASTER_SNAPSHOT, CLIENT_VERSION, false, false);
+        service.getPureModelContextDataAsString("non.existent.project", "test",BRANCH_SNAPSHOT("master"), CLIENT_VERSION, false, false);
     }
 
     @Test
@@ -112,7 +113,7 @@ public class TestPureModelContextService extends TestBaseServices
 
         EntitiesService mockVersions = Mockito.mock(EntitiesService.class);
         PureModelContextService newService = new PureModelContextServiceImpl(mockVersions, projectsService);
-        Assert.assertThrows("project version not found for test.legend-blank-prod-master-SNAPSHOT", IllegalArgumentException.class, () -> newService.getPureModelContextDataAsString("test.legend", "blank-prod", MASTER_SNAPSHOT, CLIENT_VERSION, false, false));
+        Assert.assertThrows("project version not found for test.legend-blank-prod-master-SNAPSHOT", IllegalArgumentException.class, () -> newService.getPureModelContextDataAsString("test.legend", "blank-prod", BRANCH_SNAPSHOT("master"), CLIENT_VERSION, false, false));
     }
 
     @Test

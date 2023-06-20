@@ -28,6 +28,7 @@ import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithP
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
@@ -42,14 +43,14 @@ import java.util.Collections;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 import static org.mockito.Mockito.mock;
 
 public class TestProjectsService extends TestBaseServices
 {
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
     private final Queue queue = new NotificationsQueueMongo(mongoProvider);
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
 
     @Before
     public void setUpData()
@@ -210,7 +211,7 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertFalse(dependencyList2.isEmpty());
         Assert.assertEquals(2, dependencyList2.size());
         Assert.assertTrue(dependencyList2.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
-        Assert.assertTrue(dependencyList2.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", MASTER_SNAPSHOT, new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
+        Assert.assertTrue(dependencyList2.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", BRANCH_SNAPSHOT("master"), new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
 
         List<ProjectDependencyWithPlatformVersions> dependencyList3 = projectsService.getDependentProjects("example.services.test", "test", "1.0.0");
         Assert.assertFalse(dependencyList3.isEmpty());
@@ -265,7 +266,7 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertFalse(dependencyList2.isEmpty());
         Assert.assertEquals(2, dependencyList2.size());
         Assert.assertTrue(dependencyList2.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
-        Assert.assertTrue(dependencyList2.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", MASTER_SNAPSHOT, new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
+        Assert.assertTrue(dependencyList2.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", BRANCH_SNAPSHOT("master"), new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
 
         StoreProjectVersionData projectData = projectsService.find("examples.metadata", "test-dependencies", "1.0.0").get();
         projectData.getVersionData().addDependency(new ProjectVersion("example.services.test", "test", "2.0.0"));
@@ -295,7 +296,7 @@ public class TestProjectsService extends TestBaseServices
 
         Assert.assertFalse(projectsService.find("dont","exist","latest").isPresent());
 
-        StoreProjectVersionData noVersions = new StoreProjectVersionData("noversion","examples",MASTER_SNAPSHOT);
+        StoreProjectVersionData noVersions = new StoreProjectVersionData("noversion","examples",BRANCH_SNAPSHOT("master"));
         projectsService.createOrUpdate(noVersions);
 
         Assert.assertFalse(projectsService.find("noversion","examples", VersionAlias.LATEST.getName()).isPresent());
@@ -332,7 +333,7 @@ public class TestProjectsService extends TestBaseServices
     {
         Assert.assertEquals(2, projectsService.getVersions("examples.metadata","test", false).size());
         Assert.assertEquals(3, projectsService.getVersions("examples.metadata","test", true).size());
-        projectsService.excludeProjectVersion("examples.metadata","test",MASTER_SNAPSHOT,"test");
+        projectsService.excludeProjectVersion("examples.metadata","test",BRANCH_SNAPSHOT("master"),"test");
         Assert.assertEquals(2, projectsService.getVersions("examples.metadata","test", true).size());
         projectsService.excludeProjectVersion("examples.metadata","test","2.3.1","test");
         Assert.assertEquals(1, projectsService.getVersions("examples.metadata","test", true).size());
@@ -360,7 +361,7 @@ public class TestProjectsService extends TestBaseServices
     @Test
     public void testCanGetMasterSnapshotVersionIdUsingAlias()
     {
-        Assert.assertEquals(MASTER_SNAPSHOT, projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test", "head"));
+        Assert.assertEquals(BRANCH_SNAPSHOT("master"), projectsService.resolveAliasesAndCheckVersionExists("examples.metadata","test", "head"));
     }
 
     @Test

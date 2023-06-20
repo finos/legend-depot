@@ -24,6 +24,7 @@ import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
@@ -42,7 +43,7 @@ import java.util.Optional;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -53,7 +54,7 @@ public class TestQueryEntitiesResource extends TestBaseServices
 
     private final QueryMetricsStore metrics = new QueryMetricsMongo(mongoProvider);
     private final Queue queue = mock(Queue.class);
-    private final EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projectsVersions, projects, metrics, queue));
+    private final EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projectsVersions, projects, metrics, queue, new ProjectsConfiguration("master")));
     private EntitiesResource entitiesResource = new EntitiesResource(entitiesService);
     private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
     private QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metricsStore);
@@ -69,7 +70,7 @@ public class TestQueryEntitiesResource extends TestBaseServices
         super.setUpData();
         metricsStore.getCollection().drop();
         loadEntities("PROD-A", "2.3.0");
-        loadEntities("PROD-A", MASTER_SNAPSHOT);
+        loadEntities("PROD-A", BRANCH_SNAPSHOT("master"));
         when(projects.find("examples.metadata","test")).thenReturn(Optional.of(new StoreProjectData("mock","examples.metadata","test")));
         when(projects.find("example.services.test", "test")).thenReturn(Optional.of(new StoreProjectData("mock","example.services.test", "test")));
         when(projectsVersions.find("examples.metadata","test", "2.3.0")).thenReturn(Optional.of(new StoreProjectVersionData("examples.metadata","test", "2.3.0")));

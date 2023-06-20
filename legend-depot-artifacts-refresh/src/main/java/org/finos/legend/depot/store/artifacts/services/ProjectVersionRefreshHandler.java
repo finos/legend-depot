@@ -153,7 +153,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         }
         if (VersionValidator.isSnapshotVersion(event.getVersionId()))
         {
-            List<String> snapshotVersions = projects.findSnapshotVersions(event.getGroupId(), event.getArtifactId()).stream().map(versionData -> versionData.getVersionId()).collect(Collectors.toList());
+            List<String> snapshotVersions = projects.findSnapshotVersions(event.getGroupId(), event.getArtifactId()).stream().filter(v -> !v.isEvicted()).map(versionData -> versionData.getVersionId()).collect(Collectors.toList());
             if (!snapshotVersions.contains(event.getVersionId()) && snapshotVersions.size() >= maximumSnapshotsAllowed)
             {
                 errors.add(String.format("Number of snapshot versions stored for project %s-%s, has reached the limit [%s]", event.getGroupId(), event.getArtifactId(), maximumSnapshotsAllowed));

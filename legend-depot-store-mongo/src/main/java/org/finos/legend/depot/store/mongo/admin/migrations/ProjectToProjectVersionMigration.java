@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 import static org.finos.legend.depot.store.mongo.core.BaseMongo.ARTIFACT_ID;
 import static org.finos.legend.depot.store.mongo.core.BaseMongo.GROUP_ID;
 import static org.finos.legend.depot.store.mongo.core.BaseMongo.VERSION_ID;
@@ -85,8 +85,8 @@ public final class ProjectToProjectVersionMigration
                 List<String> versions = document.getList("versions",String.class);
 
                 LOGGER.info(String.format("versions that should be inserted [%s]",versions.size()));
-                versionCollection.insertOne(buildDocument(createStoreProjectData(document, MASTER_SNAPSHOT)));
-                LOGGER.info(String.format("%s-%s-%s insertion completed",groupId,artifactId, MASTER_SNAPSHOT));
+                versionCollection.insertOne(buildDocument(createStoreProjectData(document, BRANCH_SNAPSHOT("master"))));
+                LOGGER.info(String.format("%s-%s-%s insertion completed",groupId,artifactId, BRANCH_SNAPSHOT("master")));
 
                 versions.forEach(version ->
                 {

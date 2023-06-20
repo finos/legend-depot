@@ -30,6 +30,7 @@ import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithP
 import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
@@ -47,7 +48,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 public class ProjectsServiceImpl implements ProjectsService
 {
@@ -60,24 +61,28 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private final Queue queue;
 
+    private final ProjectsConfiguration configuration;
+
     private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
     private static final String NOT_FOUND_IN_STORE = "project version not found for %s-%s-%s";
 
     @Inject
-    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, QueryMetricsStore metrics, Queue queue)
+    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, QueryMetricsStore metrics, Queue queue, ProjectsConfiguration configuration)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
         this.metrics = metrics;
         this.queue = queue;
+        this.configuration = configuration;
     }
 
-    public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics, Queue queue)
+    public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics, Queue queue, ProjectsConfiguration configuration)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
         this.metrics = metrics;
         this.queue = queue;
+        this.configuration = configuration;
     }
 
     @Override
@@ -122,6 +127,12 @@ public class ProjectsServiceImpl implements ProjectsService
         return this.find(groupId, artifactId).stream().filter(v -> VersionValidator.isSnapshotVersion(v.getVersionId()) && !v.getVersionData().isExcluded()).collect(Collectors.toList());
     }
 
+    private String defaultBranch(StoreProjectData project)
+    {
+        String defaultBranch = project.getDefaultBranch();
+        return defaultBranch != null ? defaultBranch : configuration.getDefaultBranch();
+    }
+
     @Override
     public Optional<StoreProjectData> findCoordinates(String groupId, String artifactId)
     {
@@ -137,7 +148,15 @@ public class ProjectsServiceImpl implements ProjectsService
         }
         else if (VersionAlias.HEAD.getName().equals(versionId))
         {
-            return projectsVersions.find(groupId, artifactId, MASTER_SNAPSHOT);
+            Optional<StoreProjectData> project = this.findCoordinates(groupId, artifactId);
+            if (project.isPresent())
+            {
+                return projectsVersions.find(groupId, artifactId, BRANCH_SNAPSHOT(defaultBranch(project.get())));
+            }
+            else
+            {
+                return Optional.empty();
+            }
         }
         return projectsVersions.find(groupId, artifactId, versionId);
     }

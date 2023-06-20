@@ -1,0 +1,18 @@
+[
+  {
+    "versionId": "2.2.0",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionedEntity": false,
+    "entity": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "content": {
+        "_type": "profile",
+        "name": "dataProfile.profile",
+        "package": "examples::metadata::test"
+      }
+    },
+    "id": ""
+  }
+]

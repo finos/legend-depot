@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.StorageConfiguration;
 import org.finos.legend.depot.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
@@ -57,6 +58,10 @@ public class ServersConfiguration extends Configuration
     @JsonProperty("storage")
     private StorageConfiguration storage;
 
+    @NotNull
+    @JsonProperty("projects")
+    private ProjectsConfiguration projects;
+
     @JsonProperty("openTracing")
     private OpenTracingConfiguration openTracingConfiguration;
 
@@ -74,6 +79,11 @@ public class ServersConfiguration extends Configuration
     public StorageConfiguration getStorageConfiguration()
     {
         return storage;
+    }
+
+    public ProjectsConfiguration getProjectsConfiguration()
+    {
+        return projects;
     }
 
     public void setStorage(StorageConfiguration storage)
