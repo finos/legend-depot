@@ -19,6 +19,7 @@ import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.server.resources.ProjectsVersionsResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.junit.Assert;
@@ -27,14 +28,14 @@ import org.junit.Test;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 import static org.mockito.Mockito.mock;
 
 public class TestProjectsVersionsResource extends TestBaseServices
 {
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
     private final Queue queue = mock(Queue.class);
-    private ProjectsVersionsResource projectsVersionsResource = new ProjectsVersionsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue));
+    private ProjectsVersionsResource projectsVersionsResource = new ProjectsVersionsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master")));
 
     @Test
     public void canQueryLatestProjectVersionData()
@@ -62,7 +63,7 @@ public class TestProjectsVersionsResource extends TestBaseServices
         Assert.assertTrue(versionData.isPresent());
         Assert.assertEquals(versionData.get().getGroupId(), "examples.metadata");
         Assert.assertEquals(versionData.get().getArtifactId(), "test");
-        Assert.assertEquals(versionData.get().getVersionId(), MASTER_SNAPSHOT);
+        Assert.assertEquals(versionData.get().getVersionId(), BRANCH_SNAPSHOT("master"));
 
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = projectsVersionsResource.getProjectVersion("somethig.random", "test","head");
         Assert.assertFalse(versionData1.isPresent());

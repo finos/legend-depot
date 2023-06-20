@@ -27,6 +27,7 @@ import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
 import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
@@ -56,7 +57,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -82,7 +83,7 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
     protected UpdateProjectsVersions mongoProjectsVersions = mock(UpdateProjectsVersions.class);
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(mongoProjectsVersions,mongoProjects, metrics, queue);
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(mongoProjectsVersions,mongoProjects, metrics, queue, new ProjectsConfiguration("master"));
     protected UpdateEntities mongoEntities = mock(UpdateEntities.class);
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(mongoEntities,projectsService);
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);
@@ -106,8 +107,8 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
         when(mongoProjects.getAll()).thenReturn(projects);
         when(mongoProjects.find(TEST_GROUP_ID,TEST_ARTIFACT_ID)).thenReturn(Optional.of(new StoreProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID)));
         when(mongoProjects.find(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID)).thenReturn(Optional.of(new StoreProjectData(PROJECT_B,TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID)));
-        when(mongoProjectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID,MASTER_SNAPSHOT)).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, MASTER_SNAPSHOT)));
-        when(mongoProjectsVersions.find(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID,MASTER_SNAPSHOT)).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, MASTER_SNAPSHOT)));
+        when(mongoProjectsVersions.find(TEST_GROUP_ID, TEST_ARTIFACT_ID,BRANCH_SNAPSHOT("master"))).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"))));
+        when(mongoProjectsVersions.find(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID,BRANCH_SNAPSHOT("master"))).thenReturn(Optional.of(new StoreProjectVersionData(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, BRANCH_SNAPSHOT("master"))));
         when(repository.findVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID)).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0"), VersionId.parseVersionId("2.0.0")));
         when(repository.findVersions(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID)).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
         when(repository.findVersions(TEST_GROUP_ID,"c")).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));

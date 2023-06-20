@@ -17,6 +17,7 @@ package org.finos.legend.depot.store.resources.projects;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
@@ -32,8 +33,10 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.security.Principal;
+import java.util.Optional;
 
 @Path("")
 @Api("Projects")
@@ -61,7 +64,7 @@ public class ManageProjectsResource extends BaseAuthorisedResource
     @Path("/projects/{projectId}/{groupId}/{artifactId}")
     @ApiOperation(ResourceLoggingAndTracing.CREATE_EMPTY_PROJECT)
     @Produces(MediaType.APPLICATION_JSON)
-    public StoreProjectData updateProject(@PathParam("projectId") String projectId, @PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
+    public StoreProjectData updateProject(@PathParam("projectId") String projectId, @PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @QueryParam("defaultBranch") @ApiParam String defaultBranch)
     {
         return handle(
                 ResourceLoggingAndTracing.CREATE_EMPTY_PROJECT,
@@ -69,7 +72,7 @@ public class ManageProjectsResource extends BaseAuthorisedResource
                 () ->
                 {
                     validateUser();
-                    return projectApi.createOrUpdate(new StoreProjectData(projectId, groupId, artifactId));
+                    return projectApi.createOrUpdate(new StoreProjectData(projectId, groupId, artifactId, defaultBranch));
                 });
     }
 

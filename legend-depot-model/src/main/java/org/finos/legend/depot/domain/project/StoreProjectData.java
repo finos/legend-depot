@@ -26,6 +26,8 @@ import org.finos.legend.depot.domain.CoordinateData;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoreProjectData extends CoordinateData implements HasIdentifier
 {
+    @JsonProperty
+    private String defaultBranch;
 
     @JsonProperty
     private String projectId;
@@ -35,12 +37,27 @@ public class StoreProjectData extends CoordinateData implements HasIdentifier
         super();
     }
 
+    public StoreProjectData(String projectId, String groupId, String artifactId, String defaultBranch)
+    {
+        this(projectId, groupId, artifactId);
+        this.defaultBranch = defaultBranch;
+    }
+
     public StoreProjectData(String projectId,String groupId,String artifactId)
     {
         super(groupId, artifactId);
         this.projectId = projectId;
     }
 
+    public String getDefaultBranch()
+    {
+        return defaultBranch;
+    }
+
+    public void setDefaultBranch(String defaultBranch)
+    {
+        this.defaultBranch = defaultBranch;
+    }
 
     public String getProjectId()
     {

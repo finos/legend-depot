@@ -1,4 +1,4 @@
-//  Copyright 2021 Goldman Sachs
+//  Copyright 2023 Goldman Sachs
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,22 +13,27 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.domain.version;
+package org.finos.legend.depot.services.projects.configuration;
 
-import org.junit.Assert;
-import org.junit.Test;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
+import javax.validation.constraints.NotNull;
 
-public class TestVersionValidator
+public class ProjectsConfiguration
 {
-    @Test
-    public void testVersionsAreCorrect()
+    @NotNull
+    @JsonProperty
+    private final String defaultBranch;
+
+    @JsonCreator
+    public ProjectsConfiguration(@JsonProperty("defaultBranch") String defaultBranch)
     {
-        Assert.assertTrue(VersionValidator.isValid("1.1.1"));
-        Assert.assertTrue(VersionValidator.isValid(BRANCH_SNAPSHOT("master")));
-        Assert.assertFalse(VersionValidator.isValid("jkwhfkjasf-jhdfjks"));
-        Assert.assertTrue(VersionValidator.isValid("my-SNAPSHOT"));
+        this.defaultBranch = defaultBranch;
     }
 
+    public String getDefaultBranch()
+    {
+        return defaultBranch;
+    }
 }

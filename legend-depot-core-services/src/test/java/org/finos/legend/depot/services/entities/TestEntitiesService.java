@@ -26,6 +26,7 @@ import org.finos.legend.depot.domain.project.dependencies.VersionDependencyRepor
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -39,13 +40,13 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static org.mockito.Mockito.mock;
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 public class TestEntitiesService extends TestBaseServices
 {
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
     private final Queue queue = mock(Queue.class);
-    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue));
+    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master")));
 
     @Before
     public void setUpData()
@@ -197,8 +198,8 @@ public class TestEntitiesService extends TestBaseServices
     @Test
     public void canQueryEntitiesWithHeadVersionAlias()
     {
-        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata","test", MASTER_SNAPSHOT));
-        loadEntities("PROD-A", MASTER_SNAPSHOT);
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata","test", BRANCH_SNAPSHOT("master")));
+        loadEntities("PROD-A", BRANCH_SNAPSHOT("master"));
 
         String pkgName = "examples::metadata::test::v2_3_1::examples::metadata::test";
 

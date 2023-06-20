@@ -88,6 +88,10 @@
             <groupId>org.finos.legend.sdlc</groupId>
             <artifactId>legend-sdlc-server-shared</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-services</artifactId>
+        </dependency>
         <!-- SDLC -->
     </dependencies>
 </project>

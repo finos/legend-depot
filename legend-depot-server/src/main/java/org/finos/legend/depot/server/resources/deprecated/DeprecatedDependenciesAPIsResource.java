@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 
 import javax.inject.Inject;
@@ -32,7 +33,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 @Path("")
 @Api("Deprecated")
@@ -64,6 +65,6 @@ public class DeprecatedDependenciesAPIsResource extends BaseResource
                                                                           @QueryParam("includeOrigin") @DefaultValue("false")
                                                                           @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
-        return handle(GET_REVISION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId,MASTER_SNAPSHOT, versioned, transitive, includeOrigin));
+        return handle(GET_REVISION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId,BRANCH_SNAPSHOT("master"), versioned, transitive, includeOrigin));
     }
 }

@@ -23,6 +23,7 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
@@ -43,7 +44,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.MASTER_SNAPSHOT;
+import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +59,7 @@ public class TestFileGenerationsService extends TestStoreMongo
     UpdateProjects projectsStore = mock(UpdateProjects.class);
     private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
     private final Queue queue = mock(Queue.class);
-    private ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue);
+    private ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
     private ManageFileGenerationsService service = new ManageFileGenerationsServiceImpl(generations, entities, projectsService);
 
     @Before
@@ -74,14 +75,14 @@ public class TestFileGenerationsService extends TestStoreMongo
                 if (gen.getPath().startsWith("/examples/metadata"))
                 {
                     FileGeneration generation = new FileGeneration(gen.getPath(), gen.getContent());
-                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test",  MASTER_SNAPSHOT, null, null, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test",  BRANCH_SNAPSHOT("master"), null, null, generation));
                     generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.0", "examples::metadata::test::ClientBasic", null, generation));
                     generations.createOrUpdate(new StoredFileGeneration("group.test.otherproject", "test", "1.0.0", "examples::metadata::test::ClientBasic", null, generation));
                 }
                 else
                 {
                     FileGeneration generation = new FileGeneration(gen.getPath().replace("examples_avrogen/", ""), gen.getContent());
-                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test", MASTER_SNAPSHOT, "examples::avrogen", AVRO, generation));
+                    generations.createOrUpdate(new StoredFileGeneration("group.test", "test", BRANCH_SNAPSHOT("master"), "examples::avrogen", AVRO, generation));
                     generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.1", "examples::avrogen", AVRO, generation));
                     generations.createOrUpdate(new StoredFileGeneration("group.test", "test", "1.0.0", "examples::avrogen", AVRO, generation));
                     generations.createOrUpdate(new StoredFileGeneration("group.test.otherproject", "test", "1.0.0", "examples::avrogen1", AVRO, generation));
@@ -93,7 +94,7 @@ public class TestFileGenerationsService extends TestStoreMongo
 
         when(projectsStore.find("group.test","test")).thenReturn(Optional.of(new StoreProjectData("prod-1","group.test","test")));
         when(projectsStore.find("group.test.otherproject", "test")).thenReturn(Optional.of(new StoreProjectData("prod-2","group.test.otherproject", "test")));
-        when(projectsVersionsStore.find("group.test","test",MASTER_SNAPSHOT)).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test",MASTER_SNAPSHOT)));
+        when(projectsVersionsStore.find("group.test","test",BRANCH_SNAPSHOT("master"))).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test",BRANCH_SNAPSHOT("master"))));
         when(projectsVersionsStore.find("group.test","test","1.0.0")).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test","1.0.0")));
         when(projectsVersionsStore.find("group.test","test")).thenReturn(Arrays.asList(new StoreProjectVersionData("group-test","test","1.0.0")));
         when(projectsVersionsStore.find("i.dont","exist","version")).thenReturn(Optional.empty());
@@ -104,7 +105,7 @@ public class TestFileGenerationsService extends TestStoreMongo
     public void canDelete()
     {
 
-        service.delete("group.test", "test",MASTER_SNAPSHOT);
+        service.delete("group.test", "test",BRANCH_SNAPSHOT("master"));
         Assert.assertEquals(40, generations.getAll().size());
         service.delete("group.test.otherproject", "test", "1.0.0");
         Assert.assertEquals(26, generations.getAll().size());
@@ -125,7 +126,7 @@ public class TestFileGenerationsService extends TestStoreMongo
     public void canQueryFileGenerationEntities()
     {
 
-        List<FileGeneration> generations = service.getFileGenerations("group.test", "test",MASTER_SNAPSHOT);
+        List<FileGeneration> generations = service.getFileGenerations("group.test", "test",BRANCH_SNAPSHOT("master"));
         Assert.assertEquals(14, generations.size());
 
         List<FileGeneration> gens1 = service.getFileGenerations("group.test", "test", "1.0.0");
@@ -169,7 +170,7 @@ public class TestFileGenerationsService extends TestStoreMongo
         Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
         Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
         Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
-        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test", "test",MASTER_SNAPSHOT,  "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test", "test",BRANCH_SNAPSHOT("master"),  "/examples/metadata/test/ClientBasic.avro").isPresent());
     }
 
     @Test(expected = IllegalArgumentException.class)
