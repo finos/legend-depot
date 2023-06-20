@@ -23,7 +23,6 @@ import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.ParentEvent;
 import org.finos.legend.depot.store.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
-import org.finos.legend.depot.store.artifacts.resources.ArtifactRefreshStatusResource;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactsRefreshResource;
 import org.finos.legend.depot.store.artifacts.resources.DependenciesResource;
 import org.finos.legend.depot.store.artifacts.services.ArtifactsRefreshServiceImpl;
@@ -48,7 +47,6 @@ public class ArtifactsRefreshModule extends PrivateModule
     protected void configure()
     {
         bind(ArtifactsRefreshResource.class);
-        bind(ArtifactRefreshStatusResource.class);
         bind(DependenciesResource.class);
 
         bind(ArtifactsRefreshService.class).to(ArtifactsRefreshServiceImpl.class);
@@ -59,7 +57,6 @@ public class ArtifactsRefreshModule extends PrivateModule
         expose(ArtifactsRefreshService.class);
         expose(NotificationEventHandler.class);
         expose(ArtifactsRefreshResource.class);
-        expose(ArtifactRefreshStatusResource.class);
         expose(DependenciesResource.class);
     }
 
@@ -74,22 +71,12 @@ public class ArtifactsRefreshModule extends PrivateModule
         return true;
     }
 
-
     @Provides
     @Singleton
     @Named("refresh-all-versions")
     boolean initVersions(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
     {
         schedulesFactory.registerSingleInstance(ParentEvent.REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE.name(), configuration.getVersionsUpdateIntervalInMillis(), configuration.getVersionsUpdateIntervalInMillis(),() -> artifactsRefreshService.refreshAllVersionsForAllProjects(false,false,false, ParentEvent.REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE.name()));
-        return true;
-    }
-
-    @Provides
-    @Singleton
-    @Named("cleanup-refresh-status")
-    boolean cleanUpSchedule(SchedulesFactory schedulesFactory, ProjectVersionRefreshHandler refreshHandler)
-    {
-        schedulesFactory.register(CLEANUP_REFRESH_SCHEDULE, SchedulesFactory.MINUTE,SchedulesFactory.MINUTE, () -> refreshHandler.deleteExpiredRefresh());
         return true;
     }
 

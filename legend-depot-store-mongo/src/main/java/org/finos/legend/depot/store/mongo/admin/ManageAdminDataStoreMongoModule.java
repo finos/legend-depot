@@ -16,10 +16,8 @@
 package org.finos.legend.depot.store.mongo.admin;
 
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
-import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
-import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
 import org.finos.legend.depot.store.mongo.admin.metrics.StorageMetricsHandler;
 import org.finos.legend.depot.store.mongo.resources.StoreAdministrationResource;
 
@@ -32,12 +30,10 @@ public class ManageAdminDataStoreMongoModule extends AdminDataStoreMongoModule
         super.configure();
         bind(StoreAdministrationResource.class);
         bind(ArtifactsFilesStore.class).to(ArtifactsFilesMongo.class);
-        bind(RefreshStatusStore.class).to(ArtifactsRefreshStatusMongo.class);
         bind(MongoAdminStore.class);
         bind(StorageMetrics.class).to(StorageMetricsHandler.class);
 
         expose(StoreAdministrationResource.class);
-        expose(RefreshStatusStore.class);
         expose(ArtifactsFilesStore.class);
         expose(StorageMetrics.class);
         expose(MongoAdminStore.class);
