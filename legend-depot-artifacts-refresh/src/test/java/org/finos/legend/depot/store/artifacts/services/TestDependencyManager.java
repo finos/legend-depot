@@ -17,19 +17,16 @@ package org.finos.legend.depot.store.artifacts.services;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.maven.impl.TestMavenArtifactsRepository;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
-import org.finos.legend.depot.domain.project.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
-import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
-import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsRefreshStatusMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
@@ -54,10 +51,7 @@ public class TestDependencyManager extends TestStoreMongo
     protected ArtifactRepository repository = mock(TestMavenArtifactsRepository.class);
     protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
     protected ArtifactsFilesStore artifacts = new ArtifactsFilesMongo(mongoProvider);
-    protected RefreshStatusStore refreshStatusStore = new ArtifactsRefreshStatusMongo(mongoProvider);
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
-
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, refreshStatusStore,artifacts, new IncludeProjectPropertiesConfiguration(null, null), dependencyManager, 10);
 
     private static final String GROUPID = "examples.metadata";
 

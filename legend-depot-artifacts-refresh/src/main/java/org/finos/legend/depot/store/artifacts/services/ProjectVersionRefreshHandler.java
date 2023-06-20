@@ -33,9 +33,7 @@ import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
-import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
 import org.finos.legend.depot.store.admin.domain.artifacts.ArtifactFile;
-import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
@@ -79,7 +77,6 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
     private static final String VERSION_ID = "versionId";
 
     private final ManageProjectsService projects;
-    private final RefreshStatusStore statusStore;
     private final ArtifactsFilesStore artifacts;
     private final RepositoryServices repositoryServices;
     private final List<String> projectPropertiesInScope;
@@ -90,11 +87,10 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
 
 
     @Inject
-    public ProjectVersionRefreshHandler(ManageProjectsService projects, RepositoryServices repositoryServices, Queue workQueue, RefreshStatusStore store, ArtifactsFilesStore artifacts, IncludeProjectPropertiesConfiguration includePropertyConfig, DependencyManager dependencyManager, @Named("maximumSnapshotsAllowed") int maximumSnapshotsAllowed)
+    public ProjectVersionRefreshHandler(ManageProjectsService projects, RepositoryServices repositoryServices, Queue workQueue, ArtifactsFilesStore artifacts, IncludeProjectPropertiesConfiguration includePropertyConfig, DependencyManager dependencyManager, @Named("maximumSnapshotsAllowed") int maximumSnapshotsAllowed)
     {
         this.projects = projects;
         this.workQueue = workQueue;
-        this.statusStore = store;
         this.artifacts = artifacts;
         this.repositoryServices = repositoryServices;
         this.projectPropertiesInScope = includePropertyConfig != null ? includePropertyConfig.getProperties() : Collections.EMPTY_LIST;
@@ -208,7 +204,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         return TracerFactory.get().executeWithTrace(label, () ->
         {
             decorateSpanWithVersionInfo(notification.getGroupId(), notification.getArtifactId(), notification.getVersionId());
-            return ensureSingleExecution(notification, functionToExecute);
+            return functionToExecute.get();
         });
     }
 
@@ -220,43 +216,6 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         tags.put(VERSION_ID, versionId);
         TracerFactory.get().addTags(tags);
     }
-
-    private MetadataEventResponse ensureSingleExecution(MetadataNotification event, Supplier<MetadataEventResponse> functionToExecute)
-    {
-        MetadataEventResponse response = new MetadataEventResponse();
-        LOGGER.info("Starting [{}-{}-{}] refresh", event.getGroupId(), event.getArtifactId(), event.getVersionId());
-        Optional<RefreshStatus> exitingRefresh = statusStore.get(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-        if (exitingRefresh.isPresent() && !exitingRefresh.get().isExpired())
-        {
-            String skip = String.format("Skipping [%s-%s-%s] refresh", event.getGroupId(), event.getArtifactId(), event.getVersionId());
-            LOGGER.info(skip);
-            response.addMessage(skip);
-            return response;
-        }
-        try
-        {
-            PrometheusMetricsFactory.getInstance().incrementCount(VERSION_REFRESH_COUNTER);
-            statusStore.insert(RefreshStatus.from(event));
-            response = functionToExecute.get();
-        }
-        catch (Exception e)
-        {
-            String message = String.format("Error refreshing [%s-%s-%s] : %s",event.getGroupId(), event.getArtifactId(), event.getVersionId(),e.getMessage());
-            response.addError(message);
-            LOGGER.error("Error refreshing [{}-{}-{}] : {} ",event.getGroupId(), event.getArtifactId(), event.getVersionId(),e);
-        }
-        finally
-        {
-            if (response.hasErrors())
-            {
-                PrometheusMetricsFactory.getInstance().incrementErrorCount(VERSION_REFRESH_COUNTER);
-            }
-            statusStore.delete(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-            LOGGER.info("Finished [{}-{}-{}] refresh", event.getGroupId(), event.getArtifactId(), event.getVersionId());
-        }
-        return response;
-    }
-
 
     MetadataEventResponse doRefresh(MetadataNotification event)
     {
@@ -485,13 +444,5 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             return true;
         }
         return false;
-    }
-
-    public long deleteExpiredRefresh()
-    {
-        List<RefreshStatus> expired = statusStore.getAll().stream().filter(status -> status.isExpired()).collect(Collectors.toList());
-        expired.forEach(refresh -> statusStore.delete(refresh.getGroupId(),refresh.getArtifactId(),refresh.getVersionId()));
-        LOGGER.info("Deleted {} expired versions refresh");
-        return expired.size();
     }
 }
