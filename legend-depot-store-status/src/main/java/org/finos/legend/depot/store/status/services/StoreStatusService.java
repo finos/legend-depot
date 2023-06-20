@@ -15,8 +15,6 @@
 
 package org.finos.legend.depot.store.status.services;
 
-import org.finos.legend.depot.store.admin.api.artifacts.RefreshStatusStore;
-import org.finos.legend.depot.store.admin.domain.artifacts.RefreshStatus;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.projects.Projects;
@@ -35,16 +33,14 @@ public class StoreStatusService
     private final ProjectsVersions projectVersionsApi;
     private final Projects projectsApi;
     private final Entities entities;
-    private final RefreshStatusStore statusService;
     private final QueryMetricsHandler queryMetricsHandler;
 
     @Inject
-    public StoreStatusService(ProjectsVersions projectVersionsApi, Projects projectsApi, Entities versions, RefreshStatusStore statusService, QueryMetricsHandler queryMetrics)
+    public StoreStatusService(ProjectsVersions projectVersionsApi, Projects projectsApi, Entities versions, QueryMetricsHandler queryMetrics)
     {
         this.projectVersionsApi = projectVersionsApi;
         this.projectsApi = projectsApi;
         this.entities = versions;
-        this.statusService = statusService;
         this.queryMetricsHandler = queryMetrics;
     }
 
@@ -77,13 +73,12 @@ public class StoreStatusService
         versions.forEach(v ->
         {
             StoreStatus.VersionStatus versionStatus = new StoreStatus.VersionStatus(groupId, artifactId, v);
-            Optional<RefreshStatus> updateStatus = statusService.get(groupId, artifactId, v);
             Optional<VersionQueryMetric> versionQueryCounter = queryMetricsHandler.getSummary(groupId, artifactId, v);
             if (versionQueryCounter.isPresent())
             {
                 versionStatus.lastQueried = versionQueryCounter.get().getLastQueryTime();
             }
-            versionStatus.updating = updateStatus.isPresent();
+            versionStatus.updating = false;
             projectStatus.addVersionStatus(versionStatus);
         });
 
