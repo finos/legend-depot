@@ -45,7 +45,7 @@ public class MetricsModule extends PrivateModule
     @Named("consolidate-query-metrics")
     boolean scheduleMetricsConsolidation(SchedulesFactory schedulesFactory, QueryMetricsHandler queryMetrics)
     {
-        schedulesFactory.registerSingleInstance("consolidate-query-metrics", SchedulesFactory.MINUTE, 12 * SchedulesFactory.HOUR, () ->
+        schedulesFactory.registerSingleInstance("consolidate-query-metrics", SchedulesFactory.MINUTE, 6 * SchedulesFactory.HOUR, () ->
         {
             queryMetrics.consolidateMetrics();
             return true;
