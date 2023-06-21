@@ -31,15 +31,16 @@ import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Collection;
@@ -57,7 +58,7 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private final Projects projects;
 
-    private final QueryMetricsStore metrics;
+    private final QueryMetricsRegistry metricsRegistry;
 
     private final Queue queue;
 
@@ -67,20 +68,20 @@ public class ProjectsServiceImpl implements ProjectsService
     private static final String NOT_FOUND_IN_STORE = "project version not found for %s-%s-%s";
 
     @Inject
-    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, QueryMetricsStore metrics, Queue queue, ProjectsConfiguration configuration)
+    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
-        this.metrics = metrics;
+        this.metricsRegistry = metricsRegistry;
         this.queue = queue;
         this.configuration = configuration;
     }
 
-    public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics, Queue queue, ProjectsConfiguration configuration)
+    public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
-        this.metrics = metrics;
+        this.metricsRegistry = metricsRegistry;
         this.queue = queue;
         this.configuration = configuration;
     }
@@ -190,7 +191,7 @@ public class ProjectsServiceImpl implements ProjectsService
             restoreEvictedProjectVersion(groupId, artifactId, version);
             throw new IllegalStateException(String.format("Project version: %s-%s-%s is being restored, please retry in 5 minutes", groupId, artifactId, version));
         }
-        metrics.record(groupId, artifactId, version);
+        metricsRegistry.record(groupId, artifactId, version);
         return version;
     }
 

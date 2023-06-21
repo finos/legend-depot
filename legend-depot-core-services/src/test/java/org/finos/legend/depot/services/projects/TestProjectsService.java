@@ -28,8 +28,8 @@ import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithP
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
 import org.junit.Assert;
@@ -48,7 +48,7 @@ import static org.mockito.Mockito.mock;
 
 public class TestProjectsService extends TestBaseServices
 {
-    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
     private final Queue queue = new NotificationsQueueMongo(mongoProvider);
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
 

@@ -40,6 +40,10 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-metrics</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-store-mongo</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>

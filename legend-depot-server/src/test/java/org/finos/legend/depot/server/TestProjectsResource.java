@@ -18,8 +18,8 @@ package org.finos.legend.depot.server;
 import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.mock;
 
 public class TestProjectsResource extends TestBaseServices
 {
-    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
     private final Queue queue = mock(Queue.class);
     private ProjectsResource projectsVersionsResource = new ProjectsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master")));
 

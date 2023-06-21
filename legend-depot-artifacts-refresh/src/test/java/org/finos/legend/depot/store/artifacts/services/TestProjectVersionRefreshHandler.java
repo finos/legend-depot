@@ -31,13 +31,13 @@ import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntityProvider;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
@@ -74,7 +74,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     protected ArtifactsFilesStore artifactsStore =  new ArtifactsFilesMongo(mongoProvider);
     protected UpdateProjectsVersions versionsStore = new ProjectsVersionsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
-    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
 
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(versionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));

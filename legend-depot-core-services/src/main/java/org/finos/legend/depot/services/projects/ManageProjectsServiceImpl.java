@@ -15,17 +15,17 @@
 
 package org.finos.legend.depot.services.projects;
 
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.util.List;
 
 public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements ManageProjectsService
@@ -35,9 +35,9 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
     private final UpdateProjects projects;
 
     @Inject
-    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsStore metrics, Queue queue, ProjectsConfiguration configuration)
+    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration)
     {
-        super(projectsVersions,projects, metrics, queue, configuration);
+        super(projectsVersions,projects, metricsRegistry, queue, configuration);
         this.projects = projects;
         this.projectsVersions = projectsVersions;
     }

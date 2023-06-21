@@ -14,7 +14,7 @@
 //
 
 
-package org.finos.legend.depot.store.mongo.admin.metrics;
+package org.finos.legend.depot.store.metrics.store.mongo;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,8 +27,8 @@ import com.mongodb.client.model.Projections;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
+import org.finos.legend.depot.store.metrics.store.api.QueryMetrics;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import com.mongodb.client.model.IndexModel;
 
@@ -46,18 +46,19 @@ import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.lt;
 import static com.mongodb.client.model.Filters.lte;
-import static com.mongodb.client.model.Filters.regex;
 
-public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements QueryMetricsStore
+public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements QueryMetrics
 {
 
     public static final String COLLECTION = "query-metrics";
 
+    private final MongoDatabase mongoDatabase;
 
     @Inject
     public QueryMetricsMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
     {
         super(databaseProvider, VersionQueryMetric.class, new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_EMPTY));
+        this.mongoDatabase = databaseProvider;
     }
 
     public MongoCollection getCollection()
@@ -102,13 +103,7 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
     }
 
     @Override
-    public void record(String groupId, String artifactId, String versionId)
-    {
-        VersionQueryMetric metric = new VersionQueryMetric(groupId, artifactId, versionId);
-        record(metric);
-    }
-
-    public void record(VersionQueryMetric metric)
+    public void insert(VersionQueryMetric metric)
     {
         getCollection().insertOne(buildDocument(metric));
     }
@@ -142,6 +137,14 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
     protected void validateNewData(VersionQueryMetric data)
     {
         //no specific validation
+    }
+
+    @Override
+    public List<String> createIndexes()
+    {
+        List<String> results = new ArrayList<>();
+        results.addAll(createIndexesIfAbsent(mongoDatabase,COLLECTION,this.buildIndexes()));
+        return results;
     }
 
     public static List<IndexModel> buildIndexes()

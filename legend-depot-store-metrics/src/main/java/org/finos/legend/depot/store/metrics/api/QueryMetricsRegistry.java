@@ -13,22 +13,21 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.metrics;
+package org.finos.legend.depot.store.metrics.api;
 
-import org.finos.legend.depot.store.metrics.resources.StoreMetricsManagerResource;
-import org.finos.legend.depot.store.metrics.resources.StoreMetricsResource;
+import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 
-public class AdminMetricsModule extends MetricsModule
+import java.util.Date;
+import java.util.Optional;
+
+public interface QueryMetricsRegistry
 {
-    @Override
-    protected void configure()
+    default void record(String groupId, String artifactId, String versionId)
     {
-        super.configure();
-        bind(StoreMetricsResource.class);
-        bind(StoreMetricsManagerResource.class);
-
-        expose(StoreMetricsResource.class);
-        expose(StoreMetricsManagerResource.class);
+        record(groupId, artifactId, versionId, new Date());
     }
 
+    void record(String groupId, String artifactId, String versionId, Date date);
+
+    Optional<VersionQueryMetric> findFirst();
 }

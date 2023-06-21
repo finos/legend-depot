@@ -15,17 +15,18 @@
 
 package org.finos.legend.depot.store.status;
 
+import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
+import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
-import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
+import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
-import org.finos.legend.depot.store.notifications.queue.api.Queue;
-import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
 import org.finos.legend.depot.store.status.domain.StoreStatus;
 import org.finos.legend.depot.store.status.services.StoreStatusService;
 import org.junit.After;
@@ -40,8 +41,10 @@ import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAP
 public class TestStatusServices extends TestStoreMongo
 {
     private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
-    private QueryMetricsHandler queryMetricsHandler = new QueryMetricsHandler(metricsStore);
+    private QueryMetricsRegistry metricsRegistry = new InMemoryQueryMetricsRegistry();
+    private QueryMetricsHandler queryMetricsHandler = new QueryMetricsHandler(metricsStore, metricsRegistry);
     private UpdateProjectsVersions projectsVersions  = new ProjectsVersionsMongo(mongoProvider);
+
     private UpdateProjects projects = new ProjectsMongo(mongoProvider);
     private UpdateEntities entities = new EntitiesMongo(mongoProvider);
     private StoreStatusService statusService = new StoreStatusService(projectsVersions, projects, entities, queryMetricsHandler);
@@ -54,10 +57,10 @@ public class TestStatusServices extends TestStoreMongo
         setUpEntitiesDataFromFile(TestStoreMongo.class.getClassLoader().getResource("data/revision-entities.json"));
 
         metricsStore.getCollection().drop();
-        metricsStore.record("examples.metadata", "test", "2.2.0");
-        metricsStore.record("examples.metadata", "test", "2.2.0");
-        metricsStore.record("examples.metadata", "test", "2.2.0");
-        metricsStore.record("examples.metadata", "test", "1.0.0");
+        metricsStore.insert(new VersionQueryMetric("examples.metadata", "test", "2.2.0"));
+        metricsStore.insert(new VersionQueryMetric("examples.metadata", "test", "2.2.0"));
+        metricsStore.insert(new VersionQueryMetric("examples.metadata", "test", "2.2.0"));
+        metricsStore.insert(new VersionQueryMetric("examples.metadata", "test", "1.0.0"));
     }
 
     @After
@@ -97,7 +100,7 @@ public class TestStatusServices extends TestStoreMongo
     @Test
     public void getMetricsStoreStatus()
     {
-        metricsStore.record("examples.metadata", "test", "1.0.0");
+        metricsStore.insert(new VersionQueryMetric("examples.metadata", "test", "1.0.0"));
         Assert.assertEquals(5, metricsStore.getAll().size());
         Assert.assertNotNull(metricsStore.get("examples.metadata","test","2.2.0").get(0).getLastQueryTime());
         Assert.assertNotNull(metricsStore.get("examples.metadata","test","1.0.0").get(0).getLastQueryTime());

@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
-import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.admin.migrations.ProjectToProjectVersionMigration;
 import org.finos.legend.depot.store.mongo.admin.migrations.DependenciesMigration;
 import org.finos.legend.depot.store.mongo.admin.schedules.ScheduleInstancesMongo;
@@ -92,7 +91,6 @@ public class MongoAdminStore
         results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsFilesMongo.COLLECTION,ArtifactsFilesMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,SchedulesMongo.COLLECTION,SchedulesMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase, ScheduleInstancesMongo.COLLECTION,ScheduleInstancesMongo.buildIndexes()));
-        results.addAll(createIndexesIfAbsent(mongoDatabase,QueryMetricsMongo.COLLECTION,QueryMetricsMongo.buildIndexes()));
         return results;
     }
 
