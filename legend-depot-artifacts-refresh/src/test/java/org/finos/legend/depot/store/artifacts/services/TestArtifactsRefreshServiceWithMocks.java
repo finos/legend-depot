@@ -28,7 +28,6 @@ import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServ
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
@@ -40,6 +39,7 @@ import org.finos.legend.depot.store.artifacts.services.entities.EntityProvider;
 import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntityProvider;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvider;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
@@ -76,7 +76,7 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
     protected UpdateProjects mongoProjects = mock(UpdateProjects.class);
     protected UpdateProjectsVersions mongoProjectsVersions = mock(UpdateProjectsVersions.class);
-    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(mongoProjectsVersions,mongoProjects, metrics, queue, new ProjectsConfiguration("master"));
     protected UpdateEntities mongoEntities = mock(UpdateEntities.class);

@@ -24,10 +24,13 @@ import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.metrics.store.api.QueryMetrics;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
+import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
+import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
+import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.engine.protocol.pure.v1.model.context.AlloySDLC;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
@@ -53,9 +56,11 @@ public class TestPureModelContextService extends TestBaseServices
     private static final URL entities_10855 = TestPureModelContextService.class.getClassLoader().getResource("versioned-entities_PROD-10855.json");
     public static final String TEST_GROUP_ID = "examples.metadata";
     public static final String CLIENT_VERSION = "vX_X_X";
-    private final QueryMetricsStore metrics = new QueryMetricsMongo(mongoProvider);
+    private final QueryMetrics metrics = new QueryMetricsMongo(mongoProvider);
+    private final QueryMetricsRegistry metricsRegistry = new InMemoryQueryMetricsRegistry();
+    private final QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metrics, metricsRegistry);
     private final Queue queue = mock(Queue.class);
-    ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
+    ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metricsRegistry, queue, new ProjectsConfiguration("master"));
     private final PureModelContextService service = new PureModelContextServiceImpl(new EntitiesServiceImpl(entitiesStore, projectsService), projectsService);
 
 
@@ -157,6 +162,7 @@ public class TestPureModelContextService extends TestBaseServices
     public void canGetEntitiesForProjectAsPureModelContextDataWithMetricsStored()
     {
         service.getPureModelContextDataAsString("examples.metadata", "test", "2.3.1", CLIENT_VERSION, true, true);
+        metricsHandler.persistMetrics();
         Assert.assertEquals(metrics.getAll().size(), 4);
         Assert.assertNotNull(metrics.get("examples.metadata", "test-dependencies", "1.0.0").get(0).getLastQueryTime());
         Assert.assertNotNull(metrics.get("examples.metadata", "test", "2.3.1").get(0).getLastQueryTime());

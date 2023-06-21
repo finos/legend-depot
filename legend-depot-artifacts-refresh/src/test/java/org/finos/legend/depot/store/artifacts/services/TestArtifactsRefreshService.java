@@ -34,7 +34,6 @@ import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServ
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.generation.file.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
@@ -48,6 +47,7 @@ import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntitie
 import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntityProvider;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvider;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
@@ -86,7 +86,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected ArtifactsFilesStore artifacts = new ArtifactsFilesMongo(mongoProvider);
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
     protected UpdateProjectsVersions projectsVersionsStore = new ProjectsVersionsMongo(mongoProvider);
-    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore,projectsStore,metrics,queue,new ProjectsConfiguration("master"));
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
@@ -285,7 +285,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
 
     }
-    
+
     @Test
     public void canRefreshAllVersionExceptForEvictedSnapshot()
     {

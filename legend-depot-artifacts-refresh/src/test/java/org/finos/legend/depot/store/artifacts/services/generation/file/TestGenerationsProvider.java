@@ -23,18 +23,17 @@ import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
-import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvider;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
@@ -65,7 +64,7 @@ public class TestGenerationsProvider extends TestStoreMongo
     private final UpdateProjects projects = mock(UpdateProjects.class);
     private final UpdateProjectsVersions projectsVersions = mock(UpdateProjectsVersions.class);
     private final UpdateEntities entities = new EntitiesMongo(mongoProvider);
-    private final QueryMetricsStore metrics = mock(QueryMetricsStore.class);
+    private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
     private final Queue queue = mock(Queue.class);
     private final ManageFileGenerationsService generations = new ManageFileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities, new ProjectsServiceImpl(projectsVersions,projects,metrics,queue,new ProjectsConfiguration("master")));
 

@@ -15,9 +15,11 @@
 
 package org.finos.legend.depot.store.metrics.services;
 
+import com.google.inject.name.Named;
 import org.finos.legend.depot.domain.version.VersionValidator;
-import org.finos.legend.depot.store.admin.api.metrics.QueryMetricsStore;
+import org.finos.legend.depot.store.metrics.store.api.QueryMetrics;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -30,14 +32,16 @@ import java.util.stream.Collectors;
 public class QueryMetricsHandler
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QueryMetricsHandler.class);
-    private final QueryMetricsStore metricsStore;
+    private final QueryMetrics metricsStore;
+    private final QueryMetricsRegistry queryMetricsRegistry;
 
     //TODO: will require different implementation for recording and consolidating query metrics for different stores
 
     @Inject
-    public QueryMetricsHandler(QueryMetricsStore metricsStore)
+    public QueryMetricsHandler(QueryMetrics metricsStore, @Named("queryMetricsRegistry") QueryMetricsRegistry queryMetricsRegistry)
     {
         this.metricsStore = metricsStore;
+        this.queryMetricsRegistry = queryMetricsRegistry;
     }
 
     public Optional<VersionQueryMetric> getSummary(String groupId, String artifactId, String versionId)
@@ -68,6 +72,16 @@ public class QueryMetricsHandler
     public List<VersionQueryMetric> findSnapshotVersionMetricsBefore(Date date)
     {
         return metricsStore.findMetricsBefore(date).parallelStream().filter(metric -> VersionValidator.isSnapshotVersion(metric.getVersionId())).collect(Collectors.toList());
+    }
+
+    public void persistMetrics()
+    {
+        Optional<VersionQueryMetric> versionQueryMetric = queryMetricsRegistry.findFirst();
+        while (versionQueryMetric.isPresent())
+        {
+            metricsStore.insert(versionQueryMetric.get());
+            versionQueryMetric = queryMetricsRegistry.findFirst();
+        }
     }
 
     public void consolidateMetrics()

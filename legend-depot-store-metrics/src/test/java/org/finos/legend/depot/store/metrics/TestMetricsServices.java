@@ -17,8 +17,10 @@ package org.finos.legend.depot.store.metrics;
 
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
-import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
+import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
+import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.junit.After;
 import org.junit.Assert;
@@ -30,6 +32,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.finos.legend.depot.domain.DatesHandler.toDate;
@@ -38,7 +45,8 @@ public class TestMetricsServices extends TestStoreMongo
 {
 
     private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
-    private QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metricsStore);
+    private QueryMetricsRegistry metricsRegistry = new InMemoryQueryMetricsRegistry();
+    private QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metricsStore, metricsRegistry);
 
     @Before
     public void setup() throws InterruptedException
@@ -48,11 +56,11 @@ public class TestMetricsServices extends TestStoreMongo
         setUpEntitiesDataFromFile(TestStoreMongo.class.getClassLoader().getResource("data/revision-entities.json"));
 
         metricsStore.getCollection().drop();
-        metricsStore.record("group1", "art1", "2.2.0");
-        metricsStore.record("group1", "art1", "2.2.0");
-        metricsStore.record("group1", "art1", "2.2.0");
+        metricsStore.insert(new VersionQueryMetric("group1", "art1", "2.2.0"));
+        metricsStore.insert(new VersionQueryMetric("group1", "art1", "2.2.0"));
+        metricsStore.insert(new VersionQueryMetric("group1", "art1", "2.2.0"));
         TimeUnit.SECONDS.sleep(1);
-        metricsStore.record("group1", "art1", "1.0.0");
+        metricsStore.insert(new VersionQueryMetric("group1", "art1", "1.0.0"));
     }
 
     @After
@@ -91,9 +99,10 @@ public class TestMetricsServices extends TestStoreMongo
     @Test
     public void canConsolidateQueryMetrics() throws InterruptedException
     {
-        metricsStore.record("group1", "art1", "3.0.0");
+        metricsRegistry.record("group1", "art1", "3.0.0");
         Thread.sleep(10);
-        metricsStore.record("group1", "art1", "3.0.0");
+        metricsRegistry.record("group1", "art1", "3.0.0");
+        metricsHandler.persistMetrics();
         Assert.assertEquals(6, metricsStore.getAllStoredEntities().size());
         List<VersionQueryMetric> summary = metricsHandler.getSummaryByProjectVersion();
         metricsHandler.consolidateMetrics();
@@ -122,5 +131,46 @@ public class TestMetricsServices extends TestStoreMongo
         Assert.assertEquals(3, metrics.size());
         Assert.assertEquals("3.0.0", metrics.get(2).getVersionId());
         Assert.assertEquals(toDate(LocalDateTime.parse("2023-03-22T14:02:49", DateTimeFormatter.ISO_DATE_TIME)), metrics.get(2).getLastQueryTime());
+    }
+
+    @Test
+    public void canPersistMetrics() throws InterruptedException
+    {
+        Assert.assertEquals(4, metricsStore.getAllStoredEntities().size());
+        metricsRegistry.record("group1", "art1", "3.0.0");
+        Thread.sleep(10);
+        metricsRegistry.record("group1", "art1", "3.0.0");
+        metricsRegistry.record("group1", "art1", "2.0.0");
+        metricsHandler.persistMetrics();
+        Assert.assertEquals(7, metricsStore.getAllStoredEntities().size());
+    }
+
+    @Test
+    public void testMetricsForThreadSafety() throws ExecutionException, InterruptedException
+    {
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+
+        Runnable recordTask1 = () -> metricsRegistry.record("examples.metadata", "test", "2.0.0");
+        Runnable recordTask2 = () -> metricsRegistry.record("examples.metadata", "test", "2.0.0");
+        Runnable recordTask3 = () -> metricsRegistry.record("examples.metadata", "test", "2.0.0");
+
+        Callable<VersionQueryMetric> pollTask = () ->
+        {
+            Optional<VersionQueryMetric> versionQueryMetric = metricsRegistry.findFirst();
+            while (versionQueryMetric.isPresent())
+            {
+                return versionQueryMetric.get();
+            }
+            return null;
+        };
+
+        executorService.submit(recordTask1);
+        executorService.submit(recordTask2);
+        executorService.submit(recordTask3);
+        Future<VersionQueryMetric> returnedElement = executorService.submit(pollTask);
+        Thread.sleep(10);
+        Assert.assertEquals(returnedElement.get().getGroupId(), "examples.metadata");
+        Assert.assertEquals(returnedElement.get().getArtifactId(), "test");
+        Assert.assertEquals(returnedElement.get().getVersionId(), "2.0.0");
     }
 }

@@ -42,9 +42,11 @@ import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntitie
 import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntityProvider;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvider;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
+import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.finos.legend.depot.store.mongo.admin.metrics.QueryMetricsMongo;
+import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
@@ -75,9 +77,10 @@ public class TestArtifactsPurgeService extends TestStoreMongo
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
     protected UpdateProjectsVersions projectsVersionsStore = new ProjectsVersionsMongo(mongoProvider);
     private final QueryMetricsMongo metrics = new QueryMetricsMongo(mongoProvider);
-    private final QueryMetricsHandler metricHandler = new QueryMetricsHandler(metrics);
+    private final QueryMetricsRegistry metricsRegistry = new InMemoryQueryMetricsRegistry();
+    private final QueryMetricsHandler metricHandler = new QueryMetricsHandler(metrics, metricsRegistry);
     private final Queue queue = mock(Queue.class);
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metricsRegistry, queue, new ProjectsConfiguration("master"));
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     protected UpdateFileGenerations fileGenerationsStore = new FileGenerationsMongo(mongoProvider);
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
@@ -243,9 +246,9 @@ public class TestArtifactsPurgeService extends TestStoreMongo
     public void canEvictLeastRecentlyUsed()
     {
         projectsService.createOrUpdate(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID,"branch1-SNAPSHOT"));
-        metrics.record(new VersionQueryMetric(TEST_GROUP_ID, TEST_ARTIFACT_ID,"2.0.0", DatesHandler.toDate(LocalDateTime.now().minusDays(366))));
-        metrics.record(new VersionQueryMetric(TEST_GROUP_ID, TEST_ARTIFACT_ID, "branch1-SNAPSHOT", DatesHandler.toDate(LocalDateTime.now().minusDays(30))));
-        metrics.record(new VersionQueryMetric(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT", new Date()));
+        metrics.insert(new VersionQueryMetric(TEST_GROUP_ID, TEST_ARTIFACT_ID,"2.0.0", DatesHandler.toDate(LocalDateTime.now().minusDays(366))));
+        metrics.insert(new VersionQueryMetric(TEST_GROUP_ID, TEST_ARTIFACT_ID, "branch1-SNAPSHOT", DatesHandler.toDate(LocalDateTime.now().minusDays(30))));
+        metrics.insert(new VersionQueryMetric(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT", new Date()));
         purgeService.evictLeastRecentlyUsed(365, 30);
 
         StoreProjectVersionData version1 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get();

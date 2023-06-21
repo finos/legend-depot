@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.admin.api.metrics;
+package org.finos.legend.depot.store.metrics.store.api;
 
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
@@ -21,17 +21,19 @@ import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import java.util.Date;
 import java.util.List;
 
-public interface QueryMetricsStore
+public interface QueryMetrics
 {
     List<VersionQueryMetric> get(String groupId, String artifactId, String versionId);
 
     List<VersionQueryMetric> getAll();
 
-    void record(String groupId, String artifactId, String versionId);
+    void insert(VersionQueryMetric versionQueryMetric);
 
     long consolidate(VersionQueryMetric metric);
 
     List<ProjectVersion> getAllStoredEntitiesCoordinates();
 
     List<VersionQueryMetric> findMetricsBefore(Date date);
+
+    List<String> createIndexes();
 }
