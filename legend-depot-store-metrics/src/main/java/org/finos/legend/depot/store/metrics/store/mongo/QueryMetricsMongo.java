@@ -103,6 +103,12 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
     }
 
     @Override
+    public List<VersionQueryMetric> find(String groupId, String artifactId)
+    {
+        return find(getArtifactFilter(groupId, artifactId));
+    }
+
+    @Override
     public void insert(VersionQueryMetric metric)
     {
         getCollection().insertOne(buildDocument(metric));

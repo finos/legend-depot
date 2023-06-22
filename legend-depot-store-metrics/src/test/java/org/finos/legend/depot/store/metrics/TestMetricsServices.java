@@ -31,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.Callable;
@@ -38,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.DatesHandler.toDate;
 
@@ -76,6 +78,21 @@ public class TestMetricsServices extends TestStoreMongo
         Optional<VersionQueryMetric> metrics = metricsHandler.getSummary("group1", "art1", "2.2.0");
         Assert.assertTrue(metrics.isPresent());
         Assert.assertEquals("2.2.0", metrics.get().getVersionId());
+    }
+
+    @Test
+    public void canFindMetricsUsingProjectCoordinates()
+    {
+        List<VersionQueryMetric> metrics = metricsHandler.findMetricsForProjectCoordinates("group1", "art1");
+        Assert.assertEquals(4, metrics.size());
+
+        Set<String> versionsUsed = metrics.stream().map(metric -> metric.getVersionId()).collect(Collectors.toSet());
+
+        Assert.assertEquals(2, versionsUsed.size());
+
+        Assert.assertTrue(versionsUsed.contains("1.0.0"));
+        Assert.assertTrue(versionsUsed.contains("2.2.0"));
+        Assert.assertFalse(versionsUsed.contains("master-SNAPSHOT"));
     }
 
     @Test

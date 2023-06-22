@@ -21,6 +21,8 @@ public interface ArtifactsPurgeService
 {
     MetadataEventResponse evictLeastRecentlyUsed(int ttlForVersionsInDays, int ttlForSnapshotsInDays);
 
+    MetadataEventResponse evictVersionsNotUsed();
+
     MetadataEventResponse evictOldestProjectVersions(String groupId, String artifactId, int versionsToKeep);
 
     void evict(String groupId, String artifactId, String versionId);

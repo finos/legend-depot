@@ -259,4 +259,19 @@ public class TestArtifactsPurgeService extends TestStoreMongo
         Assert.assertFalse(version3.isEvicted());
     }
 
+    @Test
+    public void canEvictVersionsNotUsed()
+    {
+        projectsService.createOrUpdate(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID,"branch1-SNAPSHOT"));
+        metrics.insert(new VersionQueryMetric(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT", new Date()));
+        purgeService.evictVersionsNotUsed();
+
+        StoreProjectVersionData version1 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get();
+        Assert.assertTrue(version1.isEvicted());
+        StoreProjectVersionData version2 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "branch1-SNAPSHOT").get();
+        Assert.assertTrue(version2.isEvicted());
+        StoreProjectVersionData version3 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT").get();
+        Assert.assertFalse(version3.isEvicted());
+    }
+
 }

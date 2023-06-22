@@ -17,10 +17,11 @@ package org.finos.legend.depot.store.artifacts.purge.services;
 
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
+import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
-import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.purge.api.ArtifactsPurgeService;
@@ -35,11 +36,10 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.DatesHandler.toDate;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.DELETE_VERSION;
@@ -225,6 +225,38 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
         catch (Exception e)
         {
             LOGGER.error(String.format("Error while applying retention policy: %s", e.getMessage()));
+        }
+        evictProjectVersions.parallelStream().forEach(pv ->
+        {
+            evict(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+            response.addMessage(String.format("Evicted project version: %s", pv.getGav()));
+        });
+        return response;
+    }
+
+    @Override
+    public MetadataEventResponse evictVersionsNotUsed()
+    {
+        Set<ProjectVersion> evictProjectVersions = new HashSet<>();
+        MetadataEventResponse response = new MetadataEventResponse();
+        try
+        {
+            LOGGER.info("Started finding versions not being used for eviction");
+            List<StoreProjectData> allProjects = projects.getAllProjectCoordinates();
+            allProjects.parallelStream().forEach(project ->
+            {
+                Set<String> allVersions = projects.find(project.getGroupId(), project.getArtifactId()).stream()
+                        .filter(versionData -> !versionData.isEvicted() && !versionData.getVersionData().isExcluded())
+                        .map(VersionedData::getVersionId).collect(Collectors.toSet());
+                Set<String> versionsUsed = metrics.findMetricsForProjectCoordinates(project.getGroupId(), project.getArtifactId()).stream().map(metric -> metric.getVersionId()).collect(Collectors.toSet());
+                allVersions.removeAll(versionsUsed);
+                allVersions.parallelStream().forEach(version -> evictProjectVersions.add(new ProjectVersion(project.getGroupId(), project.getArtifactId(), version)));
+            });
+            LOGGER.info("Completed finding versions not being used");
+        }
+        catch (Exception e)
+        {
+            LOGGER.error(String.format("Error while evicting versions not being used: %s", e.getMessage()));
         }
         evictProjectVersions.parallelStream().forEach(pv ->
         {
