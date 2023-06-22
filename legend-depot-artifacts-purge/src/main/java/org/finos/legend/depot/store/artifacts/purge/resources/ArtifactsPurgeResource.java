@@ -119,6 +119,20 @@ public class ArtifactsPurgeResource extends BaseAuthorisedResource
         });
     }
 
+    @DELETE
+    @Path("/artifactEviction/versions/notUsed")
+    @ApiOperation(ResourceLoggingAndTracing.EVICT_VERSIONS_NOT_USED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public MetadataEventResponse evictVersionsNotUsed()
+    {
+
+        return handle(ResourceLoggingAndTracing.EVICT_VERSIONS_NOT_USED, () ->
+        {
+            validateUser();
+            return artifactsPurgeService.evictVersionsNotUsed();
+        });
+    }
+
     @Override
     protected String getResourceName()
     {

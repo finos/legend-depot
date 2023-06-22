@@ -25,6 +25,8 @@ public interface QueryMetrics
 {
     List<VersionQueryMetric> get(String groupId, String artifactId, String versionId);
 
+    List<VersionQueryMetric> find(String groupId, String artifactId);
+
     List<VersionQueryMetric> getAll();
 
     void insert(VersionQueryMetric versionQueryMetric);

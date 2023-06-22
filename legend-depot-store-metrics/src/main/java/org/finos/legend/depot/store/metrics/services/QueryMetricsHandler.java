@@ -64,6 +64,11 @@ public class QueryMetricsHandler
 
     }
 
+    public List<VersionQueryMetric> findMetricsForProjectCoordinates(String groupId, String artifactId)
+    {
+        return metricsStore.find(groupId, artifactId);
+    }
+
     public List<VersionQueryMetric> findReleasedVersionMetricsBefore(Date date)
     {
         return metricsStore.findMetricsBefore(date).parallelStream().filter(metric -> !VersionValidator.isSnapshotVersion(metric.getVersionId())).collect(Collectors.toList());

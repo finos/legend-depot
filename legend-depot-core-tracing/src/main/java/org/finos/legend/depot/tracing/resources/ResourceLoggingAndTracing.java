@@ -45,6 +45,7 @@ public class ResourceLoggingAndTracing
     public static final String DELETE_VERSION = "delete version";
     public static final String DEPRECATE_VERSION = "deprecate version";
     public static final String EVICT_VERSION = "evict version";
+    public static final String EVICT_VERSIONS_NOT_USED = "evict versions not used";
     public static final String GET_VERSION_FILE_GENERATION_ENTITIES = "get version generation entities";
     public static final String GET_VERSION_FILE_GENERATION = "get version file generations";
     public static final String GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH = "get version file generations by element path";
