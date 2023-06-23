@@ -74,7 +74,12 @@ public interface ProjectsService
         return getProjectDependencyReport(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)));
     }
 
-    List<ProjectDependencyWithPlatformVersions> getDependentProjects(String groupId, String artifactId, String versionId);
+    default List<ProjectDependencyWithPlatformVersions> getDependantProjects(String groupId, String artifactId, String versionId)
+    {
+        return getDependantProjects(groupId, artifactId, versionId, false);
+    }
+
+    List<ProjectDependencyWithPlatformVersions> getDependantProjects(String groupId, String artifactId, String versionId, boolean latestOnly);
 
     void checkExists(String groupId, String artifactId) throws IllegalArgumentException;
 }

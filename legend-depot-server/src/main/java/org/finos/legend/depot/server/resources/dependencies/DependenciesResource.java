@@ -93,12 +93,14 @@ public class DependenciesResource extends BaseResource
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/dependantProjects")
     @ApiOperation(GET_DEPENDANT_PROJECTS)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<ProjectVersionPlatformDependency> getProjectDependencies(@PathParam("groupId") String groupId,
-                                                                         @PathParam("artifactId") String artifactId,
-                                                                         @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId
+    public List<ProjectVersionPlatformDependency> getDependantProjects(@PathParam("groupId") String groupId,
+                                                                       @PathParam("artifactId") String artifactId,
+                                                                       @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                                                       @QueryParam("latestOnly") @DefaultValue("false")
+                                                                       @ApiParam("Whether to only return the latest version of dependant projects") boolean latestOnly
     )
     {
-        return handle(GET_DEPENDANT_PROJECTS, GET_DEPENDANT_PROJECTS + groupId + artifactId, () -> transform(this.projectApi.getDependentProjects(groupId, artifactId, versionId)));
+        return handle(GET_DEPENDANT_PROJECTS, GET_DEPENDANT_PROJECTS + groupId + artifactId, () -> transform(this.projectApi.getDependantProjects(groupId, artifactId, versionId, latestOnly)));
     }
 
 

@@ -42,11 +42,13 @@ import org.finos.legend.sdlc.domain.model.version.VersionId;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
@@ -301,20 +303,38 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
-    public List<ProjectDependencyWithPlatformVersions> getDependentProjects(String groupId, String artifactId, String versionId)
+    public List<ProjectDependencyWithPlatformVersions> getDependantProjects(String groupId, String artifactId, String versionId, boolean latestOnly)
     {
+        List<ProjectDependencyWithPlatformVersions> result;
         if (versionId.equalsIgnoreCase("ALL"))
         {
-            return projectsVersions.getAll().stream().map(projectData -> projectData.getVersionData().getDependencies().stream()
+            result = projectsVersions.getAll().stream().map(projectData -> projectData.getVersionData().getDependencies().stream()
                     .filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId))
                     .map(dep -> new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep,projectData.getVersionData().getProperties()))
                     .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
         }
-        String version =  this.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
-        return projectsVersions.getAll().stream().map(projectData -> projectData.getVersionData().getDependencies().stream()
-                .filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId) && dep.getVersionId().equals(version))
-                .map(dep -> new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep,projectData.getVersionData().getProperties()))
-                .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
+        else
+        {
+            String version =  this.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+            result = projectsVersions.getAll().stream().map(projectData -> projectData.getVersionData().getDependencies().stream()
+                    .filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId) && dep.getVersionId().equals(version))
+                    .map(dep -> new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep,projectData.getVersionData().getProperties()))
+                    .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
+        }
+        if (latestOnly)
+        {
+            Map<String, List<ProjectDependencyWithPlatformVersions>> groupedProjectDependencyWithPlatformVersions = result.stream().filter(p -> !VersionValidator.isSnapshotVersion(p.getVersionId())).collect(Collectors.groupingBy(p -> p.getGroupId() + p.getArtifactId()));
+            return groupedProjectDependencyWithPlatformVersions.entrySet().stream().map(set ->
+            {
+                Collections.sort(set.getValue(), (o1, o2) ->
+                        VersionId.parseVersionId(o2.getVersionId()).compareTo(VersionId.parseVersionId(o1.getVersionId())));
+                return set.getValue().get(0);
+            }).collect(Collectors.toList());
+        }
+        else
+        {
+            return result;
+        }
     }
 
 

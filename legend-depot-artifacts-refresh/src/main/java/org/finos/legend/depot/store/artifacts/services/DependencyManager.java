@@ -121,7 +121,7 @@ public class DependencyManager
         projectData = this.projects.createOrUpdate(projectData);
         if (VersionValidator.isSnapshotVersion(projectData.getVersionId()))
         {
-            List<ProjectDependencyWithPlatformVersions> dependantProjects = this.projects.getDependentProjects(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId());
+            List<ProjectDependencyWithPlatformVersions> dependantProjects = this.projects.getDependantProjects(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId());
             dependantProjects.forEach(d -> updateTransitiveDependencies(d.getGroupId(), d.getArtifactId(), d.getVersionId()));
         }
         return projectData;
