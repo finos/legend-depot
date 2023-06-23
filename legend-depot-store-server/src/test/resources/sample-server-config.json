@@ -31,6 +31,10 @@
       ]
     }
   },
+  "artifactRepositoryProviderConfiguration": {},
+  "includeProjectPropertiesConfiguration": {},
+  "artifactsRetentionPolicyConfiguration": {},
+  "projects": {"defaultBranch": "master"},
   "storage": {
     "org.finos.legend.depot.store.mongo.core.MongoConfiguration": {
       "url": "mongodb://127.0.0.1:27017",
@@ -100,7 +104,6 @@
     "CORS": 5
   },
   "artifactRepositoryProviderConfiguration": {
-
     "org.finos.legend.depot.artifacts.repository.maven.impl.MavenArtifactRepositoryConfiguration": {
       "settingsLocation": "legend-depot-store-server/src/test/resources/sample-repository-settings.xml",
       "versionsUpdateIntervalInMillis": 7200000,

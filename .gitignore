@@ -13,6 +13,7 @@ Thumbs.db
 **/surefire-reports-aggregate
 **/dependency-reduced-pom.xml
 **/jsconfig.json
+/temp/
 .settings
 .project
 .classpath
