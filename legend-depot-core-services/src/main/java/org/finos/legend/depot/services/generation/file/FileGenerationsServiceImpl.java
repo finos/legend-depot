@@ -77,4 +77,11 @@ public class FileGenerationsServiceImpl implements FileGenerationsService
         Optional<StoredFileGeneration> found = fileGenerations.findByFilePath(groupId, artifactId, version, filePath);
         return found.map(StoredFileGeneration::getFile);
     }
+
+    @Override
+    public List<StoredFileGeneration> findByType(String groupId, String artifactId, String versionId, String type)
+    {
+        versionId = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+        return fileGenerations.findByType(groupId, artifactId, versionId, type);
+    }
 }

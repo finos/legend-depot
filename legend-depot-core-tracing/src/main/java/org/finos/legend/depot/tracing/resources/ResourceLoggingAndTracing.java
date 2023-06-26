@@ -47,6 +47,7 @@ public class ResourceLoggingAndTracing
     public static final String EVICT_VERSION = "evict version";
     public static final String GET_VERSION_FILE_GENERATION_ENTITIES = "get version generation entities";
     public static final String GET_VERSION_FILE_GENERATION = "get version file generations";
+    public static final String GET_VERSION_FILE_GENERATION_BY_TYPE = "get version file generations by type";
     public static final String GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH = "get version file generations by element path";
     public static final String GET_VERSION_FILE_GENERATION_BY_FILEPATH = "get version file generations by file";
     public static final String GET_VERSION_FILE_GENERATION_CONTENT = "get version file generation content";

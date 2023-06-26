@@ -19,9 +19,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
+import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
+import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import javax.inject.Inject;
@@ -108,6 +110,15 @@ public class FileGenerationsResource extends BaseResource
                                                            @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath)
     {
         return handle(GET_VERSION_FILE_GENERATION_CONTENT, () -> this.generationsService.getFileGenerationContentByFilePath(groupId, artifactId, versionId, filePath));
+    }
+
+    @GET
+    @Path("/generations/{groupId}/{artifactId}/{versionId}/types/{type}")
+    @ApiOperation(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<StoredFileGeneration> getFileGenerations(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("type") String type)
+    {
+        return handle(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE, () -> this.generationsService.findByType(groupId, artifactId, versionId, type));
     }
 
 }
