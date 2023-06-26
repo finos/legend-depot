@@ -321,22 +321,14 @@ public class ProjectsServiceImpl implements ProjectsService
                     .map(dep -> new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep,projectData.getVersionData().getProperties()))
                     .collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
         }
-        if (latestOnly)
-        {
-            Map<String, List<ProjectDependencyWithPlatformVersions>> groupedProjectDependencyWithPlatformVersions = result.stream().filter(p -> !VersionValidator.isSnapshotVersion(p.getVersionId())).collect(Collectors.groupingBy(p -> p.getGroupId() + p.getArtifactId()));
-            return groupedProjectDependencyWithPlatformVersions.entrySet().stream().map(set ->
-            {
-                Collections.sort(set.getValue(), (o1, o2) ->
-                        VersionId.parseVersionId(o2.getVersionId()).compareTo(VersionId.parseVersionId(o1.getVersionId())));
-                return set.getValue().get(0);
-            }).collect(Collectors.toList());
-        }
-        else
-        {
-            return result;
-        }
+        return latestOnly ? filterProjectByLatest(result) : result;
     }
 
+    private List<ProjectDependencyWithPlatformVersions> filterProjectByLatest(List<ProjectDependencyWithPlatformVersions> projects)
+    {
+        Map<String, List<ProjectDependencyWithPlatformVersions>> groupedProjectDependencyWithPlatformVersions = projects.stream().filter(p -> !VersionValidator.isSnapshotVersion(p.getVersionId())).collect(Collectors.groupingBy(p -> p.getGroupId() + p.getArtifactId()));
+        return groupedProjectDependencyWithPlatformVersions.entrySet().stream().map(set -> set.getValue().stream().max(Comparator.comparing(ProjectDependencyWithPlatformVersions::getVersionId)).get()).collect(Collectors.toList());
+    }
 
     private StoreProjectVersionData getProject(String groupId, String artifactId, String versionId)
     {
