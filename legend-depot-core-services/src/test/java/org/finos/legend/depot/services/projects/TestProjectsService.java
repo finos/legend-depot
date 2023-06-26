@@ -204,16 +204,16 @@ public class TestProjectsService extends TestBaseServices
     public void canGetDependantProjects()
     {
 
-        List<ProjectDependencyWithPlatformVersions> dependencyList = projectsService.getDependentProjects("examples.metadata", "test", "2.3.1");
+        List<ProjectDependencyWithPlatformVersions> dependencyList = projectsService.getDependantProjects("examples.metadata", "test", "2.3.1");
         Assert.assertTrue(dependencyList.isEmpty());
 
-        List<ProjectDependencyWithPlatformVersions> dependencyList2 = projectsService.getDependentProjects("examples.metadata", "test-dependencies", "1.0.0");
+        List<ProjectDependencyWithPlatformVersions> dependencyList2 = projectsService.getDependantProjects("examples.metadata", "test-dependencies", "1.0.0");
         Assert.assertFalse(dependencyList2.isEmpty());
         Assert.assertEquals(2, dependencyList2.size());
         Assert.assertTrue(dependencyList2.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
         Assert.assertTrue(dependencyList2.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", BRANCH_SNAPSHOT("master"), new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
 
-        List<ProjectDependencyWithPlatformVersions> dependencyList3 = projectsService.getDependentProjects("example.services.test", "test", "1.0.0");
+        List<ProjectDependencyWithPlatformVersions> dependencyList3 = projectsService.getDependantProjects("example.services.test", "test", "1.0.0");
         Assert.assertFalse(dependencyList3.isEmpty());
         Assert.assertEquals(1, dependencyList3.size());
         Assert.assertTrue(dependencyList3.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test-dependencies", "1.0.0", new ProjectVersion("example.services.test", "test", "1.0.0"), Collections.emptyList())));
@@ -258,27 +258,47 @@ public class TestProjectsService extends TestBaseServices
     @Test
     public void canGetDependantProjectsWithAllVersions()
     {
-
-        List<ProjectDependencyWithPlatformVersions> dependencyList = projectsService.getDependentProjects("examples.metadata", "test", "all");
+        List<ProjectDependencyWithPlatformVersions> dependencyList = projectsService.getDependantProjects("examples.metadata", "test", "all");
         Assert.assertTrue(dependencyList.isEmpty());
 
-        List<ProjectDependencyWithPlatformVersions> dependencyList2 = projectsService.getDependentProjects("examples.metadata", "test-dependencies", "all");
+        List<ProjectDependencyWithPlatformVersions> dependencyList2 = projectsService.getDependantProjects("examples.metadata", "test-dependencies", "all");
         Assert.assertFalse(dependencyList2.isEmpty());
         Assert.assertEquals(2, dependencyList2.size());
         Assert.assertTrue(dependencyList2.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
         Assert.assertTrue(dependencyList2.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", BRANCH_SNAPSHOT("master"), new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
 
+        List<ProjectDependencyWithPlatformVersions> dependencyList3 = projectsService.getDependantProjects("examples.metadata", "test-dependencies", "all", true);
+        Assert.assertFalse(dependencyList3.isEmpty());
+        Assert.assertEquals(1, dependencyList3.size());
+        Assert.assertTrue(dependencyList3.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
+
+
         StoreProjectVersionData projectData = projectsService.find("examples.metadata", "test-dependencies", "1.0.0").get();
         projectData.getVersionData().addDependency(new ProjectVersion("example.services.test", "test", "2.0.0"));
         projectsVersionsStore.createOrUpdate(projectData);
 
-        List<ProjectDependencyWithPlatformVersions> dependencyList3 = projectsService.getDependentProjects("example.services.test", "test", "all");
-        Assert.assertFalse(dependencyList3.isEmpty());
-        Assert.assertEquals(2, dependencyList3.size());
-        Assert.assertTrue(dependencyList3.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test-dependencies", "1.0.0", new ProjectVersion("example.services.test", "test", "1.0.0"), Collections.emptyList())));
-        Assert.assertTrue(dependencyList3.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test-dependencies", "1.0.0", new ProjectVersion("example.services.test", "test", "2.0.0"), Collections.emptyList())));
-        Assert.assertFalse(dependencyList3.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
+        List<ProjectDependencyWithPlatformVersions> dependencyList4 = projectsService.getDependantProjects("example.services.test", "test", "all");
+        Assert.assertFalse(dependencyList4.isEmpty());
+        Assert.assertEquals(2, dependencyList4.size());
+        Assert.assertTrue(dependencyList4.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test-dependencies", "1.0.0", new ProjectVersion("example.services.test", "test", "1.0.0"), Collections.emptyList())));
+        Assert.assertTrue(dependencyList4.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test-dependencies", "1.0.0", new ProjectVersion("example.services.test", "test", "2.0.0"), Collections.emptyList())));
+        Assert.assertFalse(dependencyList4.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
 
+        StoreProjectVersionData projectData1 = projectsService.find("examples.metadata", "test", "3.0.0").get();
+        projectData1.getVersionData().addDependency(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"));
+        projectsVersionsStore.createOrUpdate(projectData1);
+
+        List<ProjectDependencyWithPlatformVersions> dependencyList5 = projectsService.getDependantProjects("examples.metadata", "test-dependencies", "all", true);
+        Assert.assertFalse(dependencyList5.isEmpty());
+        Assert.assertEquals(1, dependencyList5.size());
+        Assert.assertTrue(dependencyList5.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "3.0.0", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
+
+        List<ProjectDependencyWithPlatformVersions> dependencyList6 = projectsService.getDependantProjects("examples.metadata", "test-dependencies", "all", false);
+        Assert.assertFalse(dependencyList6.isEmpty());
+        Assert.assertEquals(3, dependencyList6.size());
+        Assert.assertTrue(dependencyList6.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
+        Assert.assertTrue(dependencyList6.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "master-SNAPSHOT", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
+        Assert.assertTrue(dependencyList6.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "3.0.0", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
     }
 
     @Test
