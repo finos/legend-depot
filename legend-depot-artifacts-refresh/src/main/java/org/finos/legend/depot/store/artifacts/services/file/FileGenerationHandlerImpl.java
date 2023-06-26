@@ -119,18 +119,12 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
                     {
                         String elementPath = entityMap.get(entityPath.get()).getPath();
                         FileGeneration generation = new FileGeneration(generatedFile.getPath(), generatedFile.getContent());
-                        Optional<String> optionalType = this.getExtensionKeyFromGeneration(generation.getPath(), entityPath.get());
-                        if (!optionalType.isPresent())
+                        String type = this.getExtensionKeyFromGeneration(generation.getPath(), entityPath.get());
+                        if (type.equals(UNKNOWN_TYPE))
                         {
                             response.addError(String.format("Generation type for file %s is not present", generation.getPath()));
-                            generations.createOrUpdate(new StoredFileGeneration(projectData.getGroupId(), projectData.getArtifactId(), versionId, elementPath, UNKNOWN_TYPE, generation));
                         }
-                        else
-                        {
-                            String type = FilenameUtils.getExtension(optionalType.get()).isEmpty() ? optionalType.get() : null;
-                            generations.createOrUpdate(new StoredFileGeneration(projectData.getGroupId(), projectData.getArtifactId(), versionId, elementPath, type, generation));
-
-                        }
+                        generations.createOrUpdate(new StoredFileGeneration(projectData.getGroupId(), projectData.getArtifactId(), versionId, elementPath, type, generation));
                     }
                 }
             });
@@ -147,9 +141,10 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
         return response;
     }
 
-    private Optional<String> getExtensionKeyFromGeneration(String path, String entityPath)
+    private String getExtensionKeyFromGeneration(String path, String entityPath)
     {
-        return Arrays.stream(path.replace(PATH_SEPARATOR + entityPath + PATH_SEPARATOR, "").split(PATH_SEPARATOR)).findFirst();
+        Optional<String> optionalType = Arrays.stream(path.replace(PATH_SEPARATOR + entityPath + PATH_SEPARATOR, "").split(PATH_SEPARATOR)).findFirst();
+        return optionalType.isPresent() && FilenameUtils.getExtension(optionalType.get()).isEmpty() ? optionalType.get() : UNKNOWN_TYPE ;
     }
 
     private Map<String, Entity> buildEntitiesByElementPathMap(List<Entity> entities)
