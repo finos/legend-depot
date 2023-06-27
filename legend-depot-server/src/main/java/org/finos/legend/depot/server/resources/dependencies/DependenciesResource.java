@@ -43,9 +43,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.EntityTag;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_DEPENDANT_PROJECTS;
@@ -72,12 +76,13 @@ public class DependenciesResource extends BaseResource
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/projectDependencies")
     @ApiOperation(GET_PROJECT_DEPENDENCIES)
     @Produces(MediaType.APPLICATION_JSON)
-    public Set<ProjectVersion> getProjectDependencies(@PathParam("groupId") String groupId,
-                                                      @PathParam("artifactId") String artifactId,
-                                                      @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
-                                                      @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to return transitive dependencies") boolean transitive)
+    public Response getProjectDependencies(@PathParam("groupId") String groupId,
+                                           @PathParam("artifactId") String artifactId,
+                                           @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                           @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to return transitive dependencies") boolean transitive,
+                                           @Context Request request)
     {
-        return handle(GET_PROJECT_DEPENDENCIES, GET_PROJECT_DEPENDENCIES + groupId + artifactId, () -> this.projectApi.getDependencies(groupId, artifactId, versionId, transitive));
+        return handle(GET_PROJECT_DEPENDENCIES, GET_PROJECT_DEPENDENCIES + groupId + artifactId, () -> this.projectApi.getDependencies(groupId, artifactId, versionId, transitive), request, () -> this.generateETag(groupId, artifactId, versionId));
     }
 
     @POST
@@ -109,15 +114,16 @@ public class DependenciesResource extends BaseResource
     @ApiOperation(GET_VERSION_DEPENDENCY_ENTITIES)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<ProjectVersionEntities> getEntitiesFromDependencies(@PathParam("groupId") String groupId,
+    public Response getEntitiesFromDependencies(@PathParam("groupId") String groupId,
                                                                     @PathParam("artifactId") String artifactId,
                                                                     @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                                                     @QueryParam("transitive") @DefaultValue("false")
                                                                     @ApiParam("Whether to return transitive dependencies") boolean transitive,
                                                                     @QueryParam("includeOrigin") @DefaultValue("false")
-                                                                    @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
+                                                                    @ApiParam("Whether to return start of dependency tree") boolean includeOrigin,
+                                                                    @Context Request request)
     {
-        return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, transitive, includeOrigin));
+        return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, transitive, includeOrigin), request, () -> this.generateETag(groupId, artifactId, versionId));
     }
 
     @POST
@@ -181,5 +187,17 @@ public class DependenciesResource extends BaseResource
     private List<ProjectsResource.ProjectVersionProperty> transformPropertyToProjectProperty(List<Property> properties, String versionId)
     {
         return properties.stream().map(p -> new ProjectsResource.ProjectVersionProperty(p.getPropertyName(), p.getValue(), versionId)).collect(Collectors.toList());
+    }
+
+    private EntityTag generateETag(String groupId, String artifactId, String versionId)
+    {
+        if (!VersionValidator.isSnapshotVersion(versionId) && !VersionValidator.isVersionAlias(versionId))
+        {
+            return calculateEtag(Arrays.asList(groupId, artifactId, versionId));
+        }
+        else
+        {
+            return null;
+        }
     }
 }

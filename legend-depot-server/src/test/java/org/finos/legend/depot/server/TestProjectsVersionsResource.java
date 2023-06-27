@@ -15,9 +15,12 @@
 
 package org.finos.legend.depot.server;
 
+import com.squarespace.jersey2.guice.JerseyGuiceUtils;
+import org.finos.legend.depot.core.http.resources.InfoResource;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.server.resources.ProjectsVersionsResource;
 import org.finos.legend.depot.services.TestBaseServices;
+import org.finos.legend.depot.services.api.serverInfo.InfoService;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
@@ -25,6 +28,7 @@ import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.junit.Assert;
 import org.junit.Test;
 
+import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,12 +39,18 @@ public class TestProjectsVersionsResource extends TestBaseServices
 {
     private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
     private final Queue queue = mock(Queue.class);
-    private ProjectsVersionsResource projectsVersionsResource = new ProjectsVersionsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master")));
+    private ProjectsVersionsResource projectsVersionsResource = new ProjectsVersionsResource(new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master")), new InfoService());
+
+    static
+    {
+        JerseyGuiceUtils.install((s, serviceLocator) -> null);
+    }
 
     @Test
     public void canQueryLatestProjectVersionData()
     {
-        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = projectsVersionsResource.getProjectVersion("examples.metadata", "test","latest");
+        Response responseOne = projectsVersionsResource.getProjectVersion("examples.metadata", "test","latest", null);
+        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseOne.getEntity();
         Assert.assertTrue(versionData.isPresent());
         Assert.assertEquals(versionData.get().getGroupId(), "examples.metadata");
         Assert.assertEquals(versionData.get().getArtifactId(), "test");
@@ -52,20 +62,23 @@ public class TestProjectsVersionsResource extends TestBaseServices
         Assert.assertEquals(manifestProperties.get("commit-author"), "test-author");
         Assert.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
 
-        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = projectsVersionsResource.getProjectVersion("somethig.random", "test","latest");
+        Response responseTwo = projectsVersionsResource.getProjectVersion("somethig.random", "test","latest", null);
+        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseTwo.getEntity();
         Assert.assertFalse(versionData1.isPresent());
     }
 
     @Test
     public void canQueryHeadProjectVersionData()
     {
-        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = projectsVersionsResource.getProjectVersion("examples.metadata", "test","head");
+        Response responseOne = projectsVersionsResource.getProjectVersion("examples.metadata", "test","head", null);
+        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseOne.getEntity();
         Assert.assertTrue(versionData.isPresent());
         Assert.assertEquals(versionData.get().getGroupId(), "examples.metadata");
         Assert.assertEquals(versionData.get().getArtifactId(), "test");
         Assert.assertEquals(versionData.get().getVersionId(), BRANCH_SNAPSHOT("master"));
 
-        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = projectsVersionsResource.getProjectVersion("somethig.random", "test","head");
+        Response responseTwo = projectsVersionsResource.getProjectVersion("somethig.random", "test","head", null);
+        Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseTwo.getEntity();
         Assert.assertFalse(versionData1.isPresent());
     }
 }

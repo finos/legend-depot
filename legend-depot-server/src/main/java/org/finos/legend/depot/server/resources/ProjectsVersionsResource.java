@@ -27,6 +27,7 @@ import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.services.api.serverInfo.InfoService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
@@ -35,7 +36,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.EntityTag;
+import java.util.Arrays;
 import java.util.Optional;
 
 @Path("")
@@ -44,20 +50,23 @@ public class ProjectsVersionsResource extends BaseResource
 {
 
     private final ProjectsService projectVersionApi;
+    private final InfoService infoService;
 
     @Inject
-    public ProjectsVersionsResource(ProjectsService projectVersionApi)
+    public ProjectsVersionsResource(ProjectsService projectVersionApi, InfoService infoService)
     {
         this.projectVersionApi = projectVersionApi;
+        this.infoService = infoService;
     }
 
     @GET
     @Path("/versions/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(value = ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV, response = ProjectVersionDTO.class)
     @Produces(MediaType.APPLICATION_JSON)
-    public Optional<ProjectVersionDTO> getProjectVersion(@PathParam("groupId") String groupId,
-                                                         @PathParam("artifactId") String artifactId,
-                                                         @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
+    public Response getProjectVersion(@PathParam("groupId") String groupId,
+                                      @PathParam("artifactId") String artifactId,
+                                      @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                      @Context Request request)
     {
         return handle(ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV, ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV + groupId + artifactId + versionId, () ->
         {
@@ -68,7 +77,7 @@ public class ProjectsVersionsResource extends BaseResource
                 return Optional.of(new ProjectVersionDTO(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), pv.getVersionData()));
             }
             return Optional.empty();
-        });
+        }, request, () -> this.generateETag(groupId, artifactId, versionId, this.infoService.getServerInfo().getPlatform().getVersion()));
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -108,6 +117,18 @@ public class ProjectsVersionsResource extends BaseResource
         public int hashCode()
         {
             return HashCodeBuilder.reflectionHashCode(this);
+        }
+    }
+
+    private EntityTag generateETag(String groupId, String artifactId, String versionId, String serverVersion)
+    {
+        if (!VersionValidator.isSnapshotVersion(versionId) && !VersionValidator.isVersionAlias(versionId))
+        {
+            return calculateEtag(Arrays.asList(groupId, artifactId, versionId, serverVersion));
+        }
+        else
+        {
+            return null;
         }
     }
 

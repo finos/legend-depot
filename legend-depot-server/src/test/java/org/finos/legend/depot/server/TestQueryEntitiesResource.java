@@ -38,6 +38,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
 import java.util.Collections;
@@ -86,7 +87,8 @@ public class TestQueryEntitiesResource extends TestBaseServices
     @Test
     public void canGetEntitiesForProjectAndVersion()
     {
-        List<Entity> entityList = entitiesResource.getEntities("examples.metadata", "test", "2.3.0");
+        Response response = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", null);
+        List<Entity> entityList = (List<Entity>) response.getEntity();
         Assert.assertNotNull(entityList);
         Assert.assertEquals(7, entityList.size());
     }
@@ -94,7 +96,8 @@ public class TestQueryEntitiesResource extends TestBaseServices
     @Test
     public void canGetEntityByPathForProjectAndVersion()
     {
-        Entity entity = entitiesResource.getEntity("examples.metadata", "test", "2.3.0", "examples::metadata::test::TestProfile").get();
+        Response response = entitiesResource.getEntity("examples.metadata", "test", "2.3.0", "examples::metadata::test::TestProfile", null);
+        Entity entity = ((Optional<Entity>) response.getEntity()).get();
         Assert.assertNotNull(entity);
         Assert.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
 
@@ -103,7 +106,8 @@ public class TestQueryEntitiesResource extends TestBaseServices
     @Test
     public void canGetEntitiesByPackageForProjectAndVersion()
     {
-        List<Entity> entityList = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true);
+        Response response = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true, null);
+        List<Entity> entityList = (List<Entity>) response.getEntity();
         Assert.assertNotNull(entityList);
         Assert.assertEquals(4, entityList.size());
 
@@ -117,14 +121,16 @@ public class TestQueryEntitiesResource extends TestBaseServices
         Assert.assertEquals(0, metricsStore.get("examples.metadata", "test", "2.3.0").size());
 
         when(projects.find("examples.metadata","test")).thenReturn(Optional.of(new StoreProjectData("mock","examples.metadata","test")));
-        entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true);
+        Response responseOne  = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true, null);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), responseOne.getStatus());
         metricsHandler.persistMetrics();
 
         Assert.assertEquals(1, metricsStore.get("examples.metadata", "test", "2.3.0").size());
         Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
         TimeUnit.SECONDS.sleep(30);
 
-        entitiesResource.getEntities("example.services.test", "test", "1.0.1");
+        Response responseTwo = entitiesResource.getEntities("example.services.test", "test", "1.0.1", null);
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), responseTwo.getStatus());
         metricsHandler.persistMetrics();
 
         Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
@@ -154,7 +160,8 @@ public class TestQueryEntitiesResource extends TestBaseServices
     @Test
     public void canGetEntityByElementPath()
     {
-        Entity entity = entitiesResource.getEntity("examples.metadata", "test", "2.3.0", "examples::metadata::test::TestProfile").get();
+        Response response = entitiesResource.getEntity("examples.metadata", "test", "2.3.0", "examples::metadata::test::TestProfile", null);
+        Entity entity = ((Optional<Entity>) response.getEntity()).get();
         Assert.assertNotNull(entity);
         Assert.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
     }
@@ -162,7 +169,8 @@ public class TestQueryEntitiesResource extends TestBaseServices
     @Test
     public void canGetEntityByPathWithVersion()
     {
-        Entity entity = entitiesResource.getEntity("examples.metadata", "test", "2.3.0", "examples::metadata::test::TestProfile").get();
+        Response response = entitiesResource.getEntity("examples.metadata", "test", "2.3.0", "examples::metadata::test::TestProfile", null);
+        Entity entity = ((Optional<Entity>) response.getEntity()).get();
         Assert.assertNotNull(entity);
         Assert.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
     }
@@ -170,7 +178,8 @@ public class TestQueryEntitiesResource extends TestBaseServices
     @Test
     public void canGetEntitiesByPackage()
     {
-        List<Entity> entityList = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true);
+        Response response = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true, null);
+        List<Entity> entityList = (List<Entity>) response.getEntity();
         Assert.assertNotNull(entityList);
         Assert.assertEquals(4, entityList.size());
 

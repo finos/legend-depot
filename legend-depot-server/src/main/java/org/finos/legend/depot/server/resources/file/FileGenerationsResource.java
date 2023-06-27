@@ -18,22 +18,22 @@ package org.finos.legend.depot.server.resources.file;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.finos.legend.depot.domain.generation.file.FileGeneration;
-import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
-import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
-import java.util.Optional;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.EntityTag;
+import java.util.Arrays;
 
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH;
@@ -59,11 +59,12 @@ public class FileGenerationsResource extends BaseResource
     @Path("/projects/{groupId}/{artifactId}/{versionId}/generations")
     @ApiOperation(GET_VERSION_FILE_GENERATION_ENTITIES)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Entity> getVersionGenerationsEntities(@PathParam("groupId") String groupId,
-                                                     @PathParam("artifactId") String artifactId,
-                                                     @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
+    public Response getVersionGenerationsEntities(@PathParam("groupId") String groupId,
+                                                  @PathParam("artifactId") String artifactId,
+                                                  @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                                  @Context Request request)
     {
-        return handle(GET_VERSION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getGenerations(groupId, artifactId, versionId));
+        return handle(GET_VERSION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getGenerations(groupId, artifactId, versionId), request, () -> this.generateETag(groupId, artifactId, versionId));
     }
 
 
@@ -71,54 +72,67 @@ public class FileGenerationsResource extends BaseResource
     @Path("/generations/{groupId}/{artifactId}/versions/{versionId}")
     @ApiOperation(GET_VERSION_FILE_GENERATION)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<FileGeneration> getFileGenerations(@PathParam("groupId") String groupId,
+    public Response getFileGenerations(@PathParam("groupId") String groupId,
                                                    @PathParam("artifactId") String artifactId,
-                                                   @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
+                                                   @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                                   @Context Request request)
     {
-        return handle(GET_VERSION_FILE_GENERATION, () -> this.generationsService.getFileGenerations(groupId, artifactId, versionId));
+        return handle(GET_VERSION_FILE_GENERATION, () -> this.generationsService.getFileGenerations(groupId, artifactId, versionId), request, () -> this.generateETag(groupId, artifactId, versionId));
     }
 
     @GET
     @Path("/generations/{groupId}/{artifactId}/versions/{versionId}/{elementPath}")
     @ApiOperation(GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<FileGeneration> getFileGenerationsByElementPath(@PathParam("groupId") String groupId,
+    public Response getFileGenerationsByElementPath(@PathParam("groupId") String groupId,
                                                          @PathParam("artifactId") String artifactId,
                                                          @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT)String versionId,
-                                                                @PathParam("elementPath") String elementPath)
+                                                                @PathParam("elementPath") String elementPath,
+                                                                @Context Request request)
     {
-        return handle(GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH, () -> this.generationsService.getFileGenerationsByElementPath(groupId, artifactId, versionId, elementPath));
+        return handle(GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH, () -> this.generationsService.getFileGenerationsByElementPath(groupId, artifactId, versionId, elementPath), request, () -> this.generateETag(groupId, artifactId, versionId));
     }
 
     @GET
     @Path("/generations/{groupId}/{artifactId}/versions/{versionId}/file/{filePath}")
     @ApiOperation(GET_VERSION_FILE_GENERATION_BY_FILEPATH)
     @Produces(MediaType.APPLICATION_JSON)
-    public Optional<FileGeneration> getFileGenerationsByFilePath(@PathParam("groupId") String groupId,
+    public Response getFileGenerationsByFilePath(@PathParam("groupId") String groupId,
                                                              @PathParam("artifactId") String artifactId,
-                                                             @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath)
+                                                             @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath, @Context Request request)
     {
-        return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFilePath(groupId, artifactId, versionId, filePath));
+        return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFilePath(groupId, artifactId, versionId, filePath), request, () -> this.generateETag(groupId, artifactId, versionId));
     }
 
     @GET
     @Path("/generationFileContent/{groupId}/{artifactId}/versions/{versionId}/file/{filePath}")
     @ApiOperation(GET_VERSION_FILE_GENERATION_CONTENT)
     @Produces(MediaType.TEXT_PLAIN)
-    public Optional<String> getFileGenerationContentByFilePath(@PathParam("groupId") String groupId,
+    public Response getFileGenerationContentByFilePath(@PathParam("groupId") String groupId,
                                                            @PathParam("artifactId") String artifactId,
-                                                           @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath)
+                                                           @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath, @Context Request request)
     {
-        return handle(GET_VERSION_FILE_GENERATION_CONTENT, () -> this.generationsService.getFileGenerationContentByFilePath(groupId, artifactId, versionId, filePath));
+        return handle(GET_VERSION_FILE_GENERATION_CONTENT, () -> this.generationsService.getFileGenerationContentByFilePath(groupId, artifactId, versionId, filePath), request, () -> this.generateETag(groupId, artifactId, versionId));
     }
 
     @GET
     @Path("/generations/{groupId}/{artifactId}/{versionId}/types/{type}")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<StoredFileGeneration> getFileGenerations(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("type") String type)
+    public Response getFileGenerations(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("type") String type, @Context Request request)
     {
-        return handle(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE, () -> this.generationsService.findByType(groupId, artifactId, versionId, type));
+        return handle(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE, () -> this.generationsService.findByType(groupId, artifactId, versionId, type), request, () -> this.generateETag(groupId, artifactId, versionId));
     }
 
+    private EntityTag generateETag(String groupId, String artifactId, String versionId)
+    {
+        if (!VersionValidator.isSnapshotVersion(versionId) && !VersionValidator.isVersionAlias(versionId))
+        {
+            return calculateEtag(Arrays.asList(groupId, artifactId, versionId));
+        }
+        else
+        {
+            return null;
+        }
+    }
 }
