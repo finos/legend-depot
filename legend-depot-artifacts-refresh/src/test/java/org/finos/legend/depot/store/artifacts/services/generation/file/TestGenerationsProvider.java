@@ -164,6 +164,7 @@ public class TestGenerationsProvider extends TestStoreMongo
         Assert.assertEquals(12, fileGenerations.size());
 
         Assert.assertEquals(4, generations.findByType(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "java").size());
+        Assert.assertEquals(2, generations.findByType(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "my-ext").size());
     }
 
     @Test(expected = IllegalArgumentException.class)

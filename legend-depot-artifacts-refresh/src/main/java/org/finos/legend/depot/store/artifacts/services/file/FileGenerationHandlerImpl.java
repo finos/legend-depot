@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.artifacts.services.file;
 
+import org.apache.commons.io.FilenameUtils;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
@@ -23,7 +24,6 @@ import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
-import org.finos.legend.depot.store.artifacts.ArtifactLoadingException;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -47,11 +48,12 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
 {
 
     public static final String TYPE = "type";
-    public static final String PATH = "/";
+    public static final String PATH_SEPARATOR = "/";
     public static final String GENERATION_OUTPUT_PATH = "generationOutputPath";
     public static final String PURE_PACKAGE_SEPARATOR = "::";
     public static final String UNDERSCORE = "_";
     public static final String BLANK = "";
+    public static final String UNKNOWN_TYPE = "UNKNOWN";
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(FileGenerationHandlerImpl.class);
     protected final ManageFileGenerationsService generations;
     private final FileGenerationsArtifactsProvider provider;
@@ -89,7 +91,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
             fileGenerationEntities.forEach(entity ->
             {
                 String generationPath = (String) entity.getContent().get(GENERATION_OUTPUT_PATH);
-                String elementPath = PATH + (generationPath != null ? generationPath : entity.getPath().replace(PURE_PACKAGE_SEPARATOR, UNDERSCORE));
+                String elementPath = PATH_SEPARATOR + (generationPath != null ? generationPath : entity.getPath().replace(PURE_PACKAGE_SEPARATOR, UNDERSCORE));
                 String codeSchemaGenerationType = (String) entity.getContent().get(TYPE);
 
                 generatedFiles.stream().filter(gen -> gen.getPath().startsWith(elementPath)).forEach(gen ->
@@ -107,7 +109,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
             {
                 if (!processedGeneratedFiles.contains(generatedFile))
                 {
-                    Optional<String> entityPath = entityPaths.stream().filter(s -> generatedFile.getPath().startsWith(PATH + s)).findFirst();
+                    Optional<String> entityPath = entityPaths.stream().filter(s -> generatedFile.getPath().startsWith(PATH_SEPARATOR + s)).findFirst();
                     if (!entityPath.isPresent())
                     {
                         String unableToHandle = String.format("Can't find element path for generated file with path %s",generatedFile.getPath());
@@ -117,7 +119,12 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
                     {
                         String elementPath = entityMap.get(entityPath.get()).getPath();
                         FileGeneration generation = new FileGeneration(generatedFile.getPath(), generatedFile.getContent());
-                        generations.createOrUpdate(new StoredFileGeneration(projectData.getGroupId(), projectData.getArtifactId(), versionId, elementPath, null, generation));
+                        String type = this.getExtensionKeyFromGeneration(generation.getPath(), entityPath.get());
+                        if (type.equals(UNKNOWN_TYPE))
+                        {
+                            response.addError(String.format("Generation type for file %s is not present", generation.getPath()));
+                        }
+                        generations.createOrUpdate(new StoredFileGeneration(projectData.getGroupId(), projectData.getArtifactId(), versionId, elementPath, type, generation));
                     }
                 }
             });
@@ -134,10 +141,16 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
         return response;
     }
 
+    private String getExtensionKeyFromGeneration(String path, String entityPath)
+    {
+        Optional<String> optionalType = Arrays.stream(path.replace(PATH_SEPARATOR + entityPath + PATH_SEPARATOR, "").split(PATH_SEPARATOR)).findFirst();
+        return optionalType.isPresent() && FilenameUtils.getExtension(optionalType.get()).isEmpty() ? optionalType.get() : UNKNOWN_TYPE ;
+    }
+
     private Map<String, Entity> buildEntitiesByElementPathMap(List<Entity> entities)
     {
         Map<String, Entity> entityMap = new HashMap<>();
-        entities.forEach(entity -> entityMap.put(entity.getPath().replace(PURE_PACKAGE_SEPARATOR, PATH), entity));
+        entities.forEach(entity -> entityMap.put(entity.getPath().replace(PURE_PACKAGE_SEPARATOR, PATH_SEPARATOR), entity));
         return entityMap;
     }
 
