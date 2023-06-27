@@ -144,7 +144,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
     private String getExtensionKeyFromGeneration(String path, String entityPath)
     {
         Optional<String> optionalType = Arrays.stream(path.replace(PATH_SEPARATOR + entityPath + PATH_SEPARATOR, "").split(PATH_SEPARATOR)).findFirst();
-        return optionalType.isPresent() && FilenameUtils.getExtension(optionalType.get()).isEmpty() ? optionalType.get() : UNKNOWN_TYPE ;
+        return optionalType.isPresent() && FilenameUtils.getExtension(optionalType.get()).isEmpty() ? optionalType.get() : UNKNOWN_TYPE;
     }
 
     private Map<String, Entity> buildEntitiesByElementPathMap(List<Entity> entities)
