@@ -31,6 +31,7 @@ import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
 
 import javax.inject.Named;
+import java.util.Arrays;
 
 import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.NOTIFICATIONS_COUNTER;
 import static org.finos.legend.depot.store.notifications.services.NotificationsQueueManager.NOTIFICATIONS_COUNTER_HELP;
@@ -84,7 +85,7 @@ public class NotificationsModule extends PrivateModule
             PrometheusMetricsHandler metricsHandler = configuration.getMetricsHandler();
             metricsHandler.registerCounter(NOTIFICATIONS_COUNTER, NOTIFICATIONS_COUNTER_HELP);
             metricsHandler.registerGauge(QUEUE_WAITING, QUEUE_WAITING_HELP);
-            metricsHandler.registerHistogram(NOTIFICATION_COMPLETE, NOTIFICATION_COMPLETE_HELP);
+            metricsHandler.registerHistogram(NOTIFICATION_COMPLETE, NOTIFICATION_COMPLETE_HELP, Arrays.asList("eventPriority"));
         }
         return true;
     }
