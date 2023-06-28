@@ -18,6 +18,7 @@ import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.maven.impl.TestMavenArtifactsRepository;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
@@ -61,6 +62,8 @@ public class TestDependencyManager extends TestStoreMongo
     {
         List<StoreProjectVersionData> projectVersionData = readProjectVersionsConfigsFile(this.getClass().getClassLoader().getResource("data/projectsVersions.json"));
         projectVersionData.forEach(pv -> this.projectsVersionsStore.createOrUpdate(pv));
+        List<StoreProjectData> projectData = readProjectConfigsFile(this.getClass().getClassLoader().getResource("data/projects.json"));
+        projectData.forEach(p -> this.projectsStore.createOrUpdate(p));
         Assert.assertEquals(5, projectsVersionsStore.getAll().size());
     }
 
