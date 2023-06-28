@@ -116,7 +116,7 @@ public final class NotificationsQueueManager implements NotificationsManager
                     event.addError(messageRetry);
                     LOGGER.error(messageRetry);
                     events.createOrUpdate(event.combineResponse(response).complete());
-                    PrometheusMetricsFactory.getInstance().observeHistogram(NOTIFICATION_COMPLETE,event.getCreated().getTime(),System.currentTimeMillis());
+                    PrometheusMetricsFactory.getInstance().observeHistogram(NOTIFICATION_COMPLETE,event.getCreated().getTime(),System.currentTimeMillis(),event.getEventPriority().name());
                 }
                 else
                 {
