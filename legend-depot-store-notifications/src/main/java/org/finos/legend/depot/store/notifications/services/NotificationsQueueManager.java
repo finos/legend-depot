@@ -130,7 +130,7 @@ public final class NotificationsQueueManager implements NotificationsManager
             else
             {
                 events.createOrUpdate(event.combineResponse(response).complete());
-                PrometheusMetricsFactory.getInstance().observeHistogram(NOTIFICATION_COMPLETE,event.getCreated().getTime(),System.currentTimeMillis());
+                PrometheusMetricsFactory.getInstance().observeHistogram(NOTIFICATION_COMPLETE,event.getCreated().getTime(),System.currentTimeMillis(),event.getEventPriority().name());
                 LOGGER.info("eventId:[{}],parentEventId:[{}],gav: [{}-{}-{}] ,attempt [{}] completed successfully", event.getEventId(), event.getParentEventId(), event.getGroupId(), event.getArtifactId(), event.getVersionId(), event.getAttempt());
             }
         }
