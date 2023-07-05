@@ -37,7 +37,6 @@ import org.finos.legend.depot.store.mongo.ManageDataStoreMongoModule;
 import org.finos.legend.depot.store.notifications.NotificationsModule;
 import org.finos.legend.depot.store.notifications.queue.NotificationsQueueModule;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
-import org.finos.legend.depot.store.status.StoreStatusModule;
 import org.finos.legend.depot.tracing.TracingModule;
 
 import java.util.Arrays;
@@ -73,7 +72,6 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new ManageServicesModule(),
                 new ManageDataStoreMongoModule(),
                 new ManageAdminDataStoreMongoModule(),
-                new StoreStatusModule(),
                 new AdminSchedulesModule(),
                 new AdminMetricsModule(),
                 new AuthorisationModule(),

@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
@@ -36,7 +35,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.security.Principal;
-import java.util.Optional;
 
 @Path("")
 @Api("Projects")
@@ -62,13 +60,13 @@ public class ManageProjectsResource extends BaseAuthorisedResource
 
     @PUT
     @Path("/projects/{projectId}/{groupId}/{artifactId}")
-    @ApiOperation(ResourceLoggingAndTracing.CREATE_EMPTY_PROJECT)
+    @ApiOperation(ResourceLoggingAndTracing.CREATE_UPDATE_PROJECT)
     @Produces(MediaType.APPLICATION_JSON)
     public StoreProjectData updateProject(@PathParam("projectId") String projectId, @PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @QueryParam("defaultBranch") @ApiParam String defaultBranch)
     {
         return handle(
-                ResourceLoggingAndTracing.CREATE_EMPTY_PROJECT,
-                ResourceLoggingAndTracing.CREATE_EMPTY_PROJECT + projectId,
+                ResourceLoggingAndTracing.CREATE_UPDATE_PROJECT,
+                ResourceLoggingAndTracing.CREATE_UPDATE_PROJECT + projectId,
                 () ->
                 {
                     validateUser();

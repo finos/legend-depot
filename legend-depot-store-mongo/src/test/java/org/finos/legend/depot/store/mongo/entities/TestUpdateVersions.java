@@ -123,11 +123,11 @@ public class TestUpdateVersions extends TestStoreMongo
     public void canDeleteVersion()
     {
         setUpEntitiesDataFromFile(ENTITIES_FILE);
-        long count = entitiesMongo.getVersionEntityCount("examples.metadata", "test", "2.2.0");
+        long count = entitiesMongo.getAllEntities("examples.metadata", "test", "2.2.0").size();
         Assert.assertEquals(3, count);
         entitiesMongo.delete("examples.metadata", "test", "2.2.0",true);
         entitiesMongo.delete("examples.metadata", "test", "2.2.0",false);
-        Assert.assertEquals(0, entitiesMongo.getVersionEntityCount("examples.metadata", "test", "2.2.0"));
+        Assert.assertEquals(0, entitiesMongo.getAllEntities("examples.metadata", "test", "2.2.0").size());
     }
 
 
@@ -135,10 +135,10 @@ public class TestUpdateVersions extends TestStoreMongo
     public void canDeleteStoreEntities()
     {
         setUpEntitiesDataFromFile(ENTITIES_FILE);
-        long count = entitiesMongo.getEntityCount("examples.metadata", "test");
+        long count = entitiesMongo.getStoredEntities("examples.metadata", "test").stream().count();
         Assert.assertEquals(3, count);
         entitiesMongo.delete("examples.metadata", "test");
-        Assert.assertEquals(0, entitiesMongo.getEntityCount("examples.metadata", "test"));
+        Assert.assertEquals(0, entitiesMongo.getStoredEntities("examples.metadata", "test").size());
     }
 
     @Test

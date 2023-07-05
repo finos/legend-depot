@@ -19,13 +19,13 @@ import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.generation.file.FileGenerations;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
-import org.finos.legend.depot.store.mongo.core.MongoStoreConnectionModule;
+import org.finos.legend.depot.store.mongo.core.MongoClientModule;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 
-public class DataStoreMongoModule extends MongoStoreConnectionModule
+public class DataStoreMongoModule extends MongoClientModule
 {
     @Override
     protected void configure()

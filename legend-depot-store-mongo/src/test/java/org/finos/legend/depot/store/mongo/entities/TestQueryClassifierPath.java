@@ -36,8 +36,6 @@ public class TestQueryClassifierPath extends TestStoreMongo
     {
         String CPATH = "meta::pure::metamodel::extension::Profile";
         setUpEntitiesDataFromFile(ENTITIES_FILE);
-        Assert.assertEquals(2, mongo.getVersionEntityCount("examples.metadata", "test",BRANCH_SNAPSHOT("master")));
-        Assert.assertEquals(1, mongo.getVersionEntityCount("examples.metadata", "test2",BRANCH_SNAPSHOT("master")));
         Assert.assertEquals(3, mongo.findLatestEntitiesByClassifier(CPATH, null, null, false, false).size());
         Assert.assertEquals(2, mongo.findLatestEntitiesByClassifier(CPATH, null, 2, false, false).size());
         Assert.assertEquals(1, mongo.findLatestEntitiesByClassifier(CPATH, "TestProfileTwo", 2, false, false).size());
@@ -48,8 +46,6 @@ public class TestQueryClassifierPath extends TestStoreMongo
     {
         String CPATH = "meta::pure::metamodel::extension::Profile";
         setUpEntitiesDataFromFile(ENTITIES_FILE);
-        Assert.assertEquals(2, mongo.getVersionEntityCount("examples.metadata", "test",BRANCH_SNAPSHOT("master")));
-        Assert.assertEquals(1, mongo.getVersionEntityCount("examples.metadata", "test2",BRANCH_SNAPSHOT("master")));
         Assert.assertEquals(8, mongo.findReleasedEntitiesByClassifier(CPATH, null, null, null, false, false).size());
         Assert.assertEquals(2, mongo.findReleasedEntitiesByClassifier(CPATH, null, null, 2, false, false).size());
         Assert.assertEquals(4, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfileTwo", null, null, false, false).size());

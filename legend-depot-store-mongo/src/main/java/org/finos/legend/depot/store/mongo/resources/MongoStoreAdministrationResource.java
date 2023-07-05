@@ -42,8 +42,8 @@ import java.util.List;
 import java.util.Map;
 
 @Path("")
-@Api("Store Administration")
-public class StoreAdministrationResource extends BaseAuthorisedResource
+@Api("Mongo Store Administration")
+public class MongoStoreAdministrationResource extends BaseAuthorisedResource
 {
 
     public static final String STORE_ADMINISTRATION_RESOURCE = "Store Administration";
@@ -51,9 +51,9 @@ public class StoreAdministrationResource extends BaseAuthorisedResource
     private final StorageMetrics storageMetrics;
 
     @Inject
-    protected StoreAdministrationResource(MongoAdminStore manageStoreService,
-                                          AuthorisationProvider authorisationProvider,
-                                          @Named("requestPrincipal") Provider<Principal> principalProvider, StorageMetrics storageMetrics)
+    protected MongoStoreAdministrationResource(MongoAdminStore manageStoreService,
+                                               AuthorisationProvider authorisationProvider,
+                                               @Named("requestPrincipal") Provider<Principal> principalProvider, StorageMetrics storageMetrics)
     {
         super(authorisationProvider, principalProvider);
         this.manageStoreService = manageStoreService;

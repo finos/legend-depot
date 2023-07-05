@@ -141,16 +141,6 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-status</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-schedules</artifactId>
             <exclusions>
                 <exclusion>

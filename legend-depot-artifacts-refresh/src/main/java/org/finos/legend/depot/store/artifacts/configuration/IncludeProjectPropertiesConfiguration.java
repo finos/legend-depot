@@ -13,12 +13,11 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.domain.project;
+package org.finos.legend.depot.store.artifacts.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class IncludeProjectPropertiesConfiguration

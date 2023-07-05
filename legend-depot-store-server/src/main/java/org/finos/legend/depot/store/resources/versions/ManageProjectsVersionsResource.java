@@ -60,16 +60,6 @@ public class ManageProjectsVersionsResource extends BaseAuthorisedResource
     }
 
     @GET
-    @Path("/versions/{groupId}/{artifactId}")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<StoreProjectVersionData> getProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
-    {
-        validateUser();
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA, ResourceLoggingAndTracing.GET_PROJECT_VERSIONS_BY_GA + groupId + artifactId, () -> projectVersionApi.find(groupId, artifactId));
-    }
-
-    @GET
     @Path("/versions")
     @ApiOperation(ResourceLoggingAndTracing.FIND_PROJECT_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)

@@ -19,21 +19,21 @@ import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
 import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.metrics.StorageMetricsHandler;
-import org.finos.legend.depot.store.mongo.resources.StoreAdministrationResource;
+import org.finos.legend.depot.store.mongo.resources.MongoStoreAdministrationResource;
 
-public class ManageAdminDataStoreMongoModule extends AdminDataStoreMongoModule
+public class ManageAdminDataStoreMongoModule extends SchedulesStoreMongoModule
 {
   
     @Override
     protected void configure()
     {
         super.configure();
-        bind(StoreAdministrationResource.class);
+        bind(MongoStoreAdministrationResource.class);
         bind(ArtifactsFilesStore.class).to(ArtifactsFilesMongo.class);
         bind(MongoAdminStore.class);
         bind(StorageMetrics.class).to(StorageMetricsHandler.class);
 
-        expose(StoreAdministrationResource.class);
+        expose(MongoStoreAdministrationResource.class);
         expose(ArtifactsFilesStore.class);
         expose(StorageMetrics.class);
         expose(MongoAdminStore.class);

@@ -333,25 +333,6 @@ public class EntitiesMongo extends BaseMongo<StoredEntity> implements Entities, 
     }
 
 
-    public long getVersionEntityCount()
-    {
-        return getCollection().countDocuments(not(regex(VERSION_ID, BRANCH_SNAPSHOT(""))));
-    }
-
-
-    @Override
-    public long getVersionEntityCount(String groupId, String artifactId, String versionId)
-    {
-        return getCollection().countDocuments(getArtifactAndVersionFilter(groupId, artifactId, versionId));
-    }
-
-
-    @Override
-    public long getEntityCount(String groupId, String artifactId)
-    {
-        return getCollection().countDocuments(getArtifactFilter(groupId, artifactId));
-    }
-
     @Override
     public List<Pair<String, String>> getStoredEntitiesCoordinates()
     {
