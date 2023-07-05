@@ -58,27 +58,6 @@ public class ManageEntitiesResource extends BaseAuthorisedResource
     }
 
     @GET
-    @Path("/projects/{groupId}/{artifactId}/versions/entities")
-    @ApiOperation(ResourceLoggingAndTracing.GET_VERSION_STORE_ENTITIES)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<StoredEntity> getEntities(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
-    {
-        validateUser();
-        return handle(ResourceLoggingAndTracing.GET_VERSION_STORE_ENTITIES, () -> entitiesService.getStoredEntities(groupId, artifactId));
-    }
-
-    @GET
-    @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/entities")
-    @ApiOperation(ResourceLoggingAndTracing.GET_VERSION_STORE_ENTITIES)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<StoredEntity> getEntities(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
-    {
-        validateUser();
-        return handle(ResourceLoggingAndTracing.GET_VERSION_STORE_ENTITIES, () -> entitiesService.getStoredEntities(groupId, artifactId, versionId));
-    }
-
-
-    @GET
     @Path("/projects/orphan/entities")
     @ApiOperation(ResourceLoggingAndTracing.ORPHAN_STORE_ENTITIES)
     @Produces(MediaType.APPLICATION_JSON)

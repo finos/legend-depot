@@ -41,8 +41,6 @@ import static org.finos.legend.depot.store.artifacts.services.ProjectVersionRefr
 public class ArtifactsRefreshModule extends PrivateModule
 {
 
-    private static final String CLEANUP_REFRESH_SCHEDULE = "clean-refresh-status-schedule";
-
     @Override
     protected void configure()
     {

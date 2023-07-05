@@ -33,12 +33,6 @@ public interface Entities
 
     List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, boolean versioned, Set<String> classifierPaths, boolean includeSubPackages);
 
-    long getVersionEntityCount();
-
-    long getEntityCount(String groupId, String artifactId);
-
-    long getVersionEntityCount(String groupId, String artifactId, String versionId);
-
     List<StoredEntity> getAllStoredEntities();
 
     List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary, boolean versionedEntities);

@@ -28,7 +28,7 @@ import org.finos.legend.depot.services.ReadDataServicesModule;
 import org.finos.legend.depot.schedules.SchedulesModule;
 import org.finos.legend.depot.store.metrics.MetricsModule;
 import org.finos.legend.depot.store.mongo.DataStoreMongoModule;
-import org.finos.legend.depot.store.mongo.admin.AdminDataStoreMongoModule;
+import org.finos.legend.depot.store.mongo.admin.SchedulesStoreMongoModule;
 import org.finos.legend.depot.store.notifications.queue.NotificationsQueueModule;
 import org.finos.legend.depot.tracing.TracingModule;
 
@@ -55,9 +55,9 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
                 new ReadDataServicesModule(),
                 new DataStoreMongoModule(),
                 new PureModelContextModule(),
-                new AdminDataStoreMongoModule(),
-                new MetricsModule(),
                 new SchedulesModule(),
+                new SchedulesStoreMongoModule(),
+                new MetricsModule(),
                 new TracingModule(),
                 new NotificationsQueueModule());
     }

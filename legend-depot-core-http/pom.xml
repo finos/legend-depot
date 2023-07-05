@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-mongo</artifactId>
+            <artifactId>legend-depot-store-api</artifactId>
         </dependency>
         <!-- DEPOT -->
 

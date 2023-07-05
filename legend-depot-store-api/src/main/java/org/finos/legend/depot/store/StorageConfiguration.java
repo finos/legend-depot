@@ -13,23 +13,26 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.status;
+package org.finos.legend.depot.store;
 
-import com.google.inject.PrivateModule;
-import org.finos.legend.depot.store.status.resources.StatusStoreResource;
-import org.finos.legend.depot.store.status.services.StoreStatusService;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class StoreStatusModule extends PrivateModule
+public abstract class StorageConfiguration
 {
-    @Override
-    protected void configure()
-    {
-        bind(StoreStatusService.class);
-        expose(StoreStatusService.class);
 
-        bind(StatusStoreResource.class);
-        expose(StatusStoreResource.class);
+    protected StorageConfiguration()
+    {
     }
 
+    public static ObjectMapper configureObjectMapper(ObjectMapper objectMapper)
+    {
+        @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_OBJECT)
+        abstract class WrapperMixin
+        {
+        }
 
+        return objectMapper
+                .addMixIn(StorageConfiguration.class, WrapperMixin.class);
+    }
 }

@@ -18,6 +18,7 @@ package org.finos.legend.depot.services.projects;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.api.projects.ProjectSummary;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
@@ -26,6 +27,7 @@ import org.finos.legend.depot.store.notifications.queue.api.Queue;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements ManageProjectsService
@@ -80,5 +82,16 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
         storeProjectVersionData.getVersionData().setExcluded(true);
         storeProjectVersionData.getVersionData().setExclusionReason(exclusionReason);
         return this.createOrUpdate(storeProjectVersionData);
+    }
+
+    public List<ProjectSummary> getProjectsSummary()
+    {
+        List<ProjectSummary> status = new ArrayList();
+        projects.getAll().forEach(p ->
+        {
+            ProjectSummary summry = new ProjectSummary(p.getProjectId(), p.getGroupId(), p.getArtifactId(), projectsVersions.getVersionCount(p.getGroupId(), p.getArtifactId()));
+            status.add(summry);
+        });
+        return status;
     }
 }

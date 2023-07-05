@@ -39,4 +39,6 @@ public interface ManageProjectsService extends ProjectsService
 
     StoreProjectVersionData excludeProjectVersion(String groupId, String artifactId, String versionId, String exclusionReason);
 
+    List<ProjectSummary> getProjectsSummary();
+
 }

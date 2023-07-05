@@ -21,7 +21,7 @@ import org.finos.legend.depot.store.admin.api.schedules.SchedulesStore;
 import org.finos.legend.depot.store.mongo.admin.schedules.ScheduleInstancesMongo;
 import org.finos.legend.depot.store.mongo.admin.schedules.SchedulesMongo;
 
-public class AdminDataStoreMongoModule extends PrivateModule
+public class SchedulesStoreMongoModule extends PrivateModule
 {
     @Override
     protected void configure()
