@@ -60,12 +60,9 @@ public class DeprecatedEntitiesAPIsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     @Deprecated
     public List<Entity> getLatestEntities(@PathParam("groupId") String groupId,
-                                          @PathParam("artifactId") String artifactId,
-                                          @QueryParam("versioned")
-                                          @DefaultValue("false")
-                                          @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned)
+                                          @PathParam("artifactId") String artifactId)
     {
-        return handle(GET_REVISION_ENTITIES, () -> this.entitiesService.getEntities(groupId, artifactId, BRANCH_SNAPSHOT("master"),versioned));
+        return handle(GET_REVISION_ENTITIES, () -> this.entitiesService.getEntities(groupId, artifactId, BRANCH_SNAPSHOT("master")));
     }
 
 
@@ -89,14 +86,11 @@ public class DeprecatedEntitiesAPIsResource extends BaseResource
     public List<Entity> getLatestEntities(@PathParam("groupId") String groupId,
                                           @PathParam("artifactId") String artifactId,
                                           @QueryParam("package") String packageName,
-                                          @QueryParam("versioned")
-                                          @DefaultValue("false")
-                                          @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
                                           @QueryParam("classifierPath") @ApiParam("Only include ENTITIES with one of these classifier paths.") Set<String> classifierPaths,
                                           @QueryParam("includeSubPackages")
                                           @DefaultValue("true")
                                           @ApiParam("Whether to include ENTITIES from subpackages or only directly in one of the given packages") boolean includeSubPackages)
     {
-        return handle(GET_REVISION_ENTITIES_BY_PACKAGE, GET_REVISION_ENTITIES_BY_PACKAGE + packageName, () -> this.entitiesService.getEntitiesByPackage(groupId, artifactId, BRANCH_SNAPSHOT("master"),packageName, versioned, classifierPaths, includeSubPackages));
+        return handle(GET_REVISION_ENTITIES_BY_PACKAGE, GET_REVISION_ENTITIES_BY_PACKAGE + packageName, () -> this.entitiesService.getEntitiesByPackage(groupId, artifactId, BRANCH_SNAPSHOT("master"),packageName, classifierPaths, includeSubPackages));
     }
 }

@@ -36,7 +36,6 @@ import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvid
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.services.entities.EntitiesHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.entities.EntityProvider;
-import org.finos.legend.depot.store.artifacts.services.entities.VersionedEntityProvider;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationHandlerImpl;
 import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvider;
 import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
@@ -70,7 +69,6 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
     protected List<String> properties = Arrays.asList("[a-zA-Z0-9]+.version");
 
     protected EntityArtifactsProvider entitiesProvider = new EntityProvider();
-    protected VersionedEntityProvider versionedEntityProvider = new VersionedEntityProvider();
     protected FileGenerationsArtifactsProvider fileGenerationsProvider = new FileGenerationsProvider();
 
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
@@ -91,7 +89,6 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
     public void setUpData() throws ArtifactRepositoryException
     {
         ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
-        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, new EntitiesHandlerImpl(entitiesService, versionedEntityProvider));
         ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repository, fileGenerationsProvider, new ManageFileGenerationsServiceImpl(mongoGenerations, mongoEntities, projectsService)));
 
         List<StoreProjectData> projects = Arrays.asList(new StoreProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID),

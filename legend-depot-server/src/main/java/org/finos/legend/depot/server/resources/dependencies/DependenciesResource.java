@@ -112,14 +112,12 @@ public class DependenciesResource extends BaseResource
     public List<ProjectVersionEntities> getEntitiesFromDependencies(@PathParam("groupId") String groupId,
                                                                     @PathParam("artifactId") String artifactId,
                                                                     @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
-                                                                    @QueryParam("versioned") @DefaultValue("false")
-                                                                    @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
                                                                     @QueryParam("transitive") @DefaultValue("false")
                                                                     @ApiParam("Whether to return transitive dependencies") boolean transitive,
                                                                     @QueryParam("includeOrigin") @DefaultValue("false")
                                                                     @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
-        return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, versioned, transitive, includeOrigin));
+        return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, transitive, includeOrigin));
     }
 
     @POST
@@ -127,14 +125,12 @@ public class DependenciesResource extends BaseResource
     @ApiOperation(GET_VERSIONS_DEPENDENCY_ENTITIES)
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProjectVersionEntities> getAllEntitiesFromDependencies(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies,
-                                                                       @QueryParam("versioned") @DefaultValue("false")
-                                                                       @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
                                                                        @QueryParam("transitive") @DefaultValue("false")
                                                                        @ApiParam("Whether to return transitive dependencies") boolean transitive,
                                                                        @QueryParam("includeOrigin") @DefaultValue("false")
                                                                        @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
-        return handle(GET_VERSIONS_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, versioned, transitive, includeOrigin));
+        return handle(GET_VERSIONS_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, transitive, includeOrigin));
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

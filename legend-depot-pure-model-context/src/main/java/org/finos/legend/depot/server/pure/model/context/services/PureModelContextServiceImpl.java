@@ -56,16 +56,16 @@ public class PureModelContextServiceImpl implements PureModelContextService
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
-    public String getPureModelContextDataAsString(String groupId, String artifactId, String versionId, String clientVersion, boolean versioned, boolean getDependencies)
+    public String getPureModelContextDataAsString(String groupId, String artifactId, String versionId, String clientVersion, boolean getDependencies)
     {
-        return toString(getPureModelContextData(groupId, artifactId, versionId, clientVersion, versioned, getDependencies));
+        return toString(getPureModelContextData(groupId, artifactId, versionId, clientVersion, getDependencies));
     }
 
     @Override
-    public PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean versioned, boolean getDependencies)
+    public PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean getDependencies)
     {
         String version = this.projectsService.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
-        List<Entity> entities = this.entitiesService.getEntities(groupId, artifactId, version, versioned);
+        List<Entity> entities = this.entitiesService.getEntities(groupId, artifactId, version);
         PureModelContextData pureModelContextData = getPureModelContextData(entities, groupId, artifactId, version, clientVersion);
         if (!getDependencies)
         {
@@ -73,7 +73,7 @@ public class PureModelContextServiceImpl implements PureModelContextService
         }
         else
         {
-            List<ProjectVersionEntities> dependencyProjectVersionEntities = this.entitiesService.getDependenciesEntities(groupId, artifactId, version, versioned, true, false);      // always get transitive dependencies and include entities of project itself
+            List<ProjectVersionEntities> dependencyProjectVersionEntities = this.entitiesService.getDependenciesEntities(groupId, artifactId, version, true, true);      // always get transitive dependencies and include entities of project itself
 
             List<PureModelContextData> dependenciesPMCD = new ArrayList<>();
             for (ProjectVersionEntities projectVersionEntities : dependencyProjectVersionEntities)

@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.artifacts.services.entities;
 
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.StoreProjectData;
@@ -58,9 +57,9 @@ public abstract class AbstractEntityRefreshHandlerImpl
     abstract List<StoredEntity> transformVersionedEntities(StoreProjectData projectData, String versionId, List<Entity> entityList);
 
 
-    protected long delete(String groupId, String artifactId, String versionId,boolean versioned)
+    protected long deleteByVersion(String groupId, String artifactId, String versionId)
     {
-        return getEntitiesApi().delete(groupId, artifactId, versionId,versioned);
+        return getEntitiesApi().delete(groupId, artifactId, versionId);
     }
 
 
@@ -88,7 +87,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
                 {
                     message = String.format("removing prior %s artifacts for [%s-%s]",this.entitiesProvider.getType(),gavCoordinates,versionId);
                     response.addMessage(message);
-                    response.addMessage("deleted " + getEntitiesApi().delete(projectData.getGroupId(), projectData.getArtifactId(),versionId,this.entitiesProvider.getType().equals(ArtifactType.VERSIONED_ENTITIES)));
+                    response.addMessage("deleted " + getEntitiesApi().delete(projectData.getGroupId(), projectData.getArtifactId(),versionId));
                     LOGGER.info(message);
                 }
                 getEntitiesApi().createOrUpdate(storedEntities);
@@ -114,6 +113,4 @@ public abstract class AbstractEntityRefreshHandlerImpl
     {
         return entitiesProvider.extractArtifacts(files);
     }
-
-
 }

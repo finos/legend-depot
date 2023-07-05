@@ -16,19 +16,16 @@
 package org.finos.legend.depot.services.entities;
 
 import org.eclipse.collections.api.tuple.Pair;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
-import org.finos.legend.depot.tracing.services.TracerFactory;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class ManageEntitiesServiceImpl extends EntitiesServiceImpl implements ManageEntitiesService
+public class ManageEntitiesServiceImpl<T extends StoredEntity> extends EntitiesServiceImpl<T> implements ManageEntitiesService<T>
 {
 
     private final UpdateEntities entities;
@@ -42,23 +39,23 @@ public class ManageEntitiesServiceImpl extends EntitiesServiceImpl implements Ma
 
 
     @Override
-    public List<StoredEntity> getStoredEntities(String groupId, String artifactId)
+    public List<T> getStoredEntities(String groupId, String artifactId)
     {
         return entities.getStoredEntities(groupId, artifactId);
     }
 
     @Override
-    public List<StoredEntity> getStoredEntities(String groupId, String artifactId, String versionId)
+    public List<T> getStoredEntities(String groupId, String artifactId, String versionId)
     {
         return entities.getStoredEntities(groupId, artifactId, versionId);
     }
 
 
     @Override
-    public long delete(String groupId, String artifactId, String versionId, boolean versioned)
+    public long delete(String groupId, String artifactId, String versionId)
     {
         this.projects.checkExists(groupId, artifactId);
-        return entities.delete(groupId, artifactId, versionId, versioned);
+        return entities.delete(groupId, artifactId, versionId);
     }
 
     @Override
@@ -69,9 +66,9 @@ public class ManageEntitiesServiceImpl extends EntitiesServiceImpl implements Ma
     }
 
     @Override
-    public void createOrUpdate(List<StoredEntity> versionedEntities)
+    public void createOrUpdate(List<T> entityList)
     {
-        entities.createOrUpdate(versionedEntities);
+        entities.createOrUpdate(entityList);
     }
 
     @Override
@@ -79,10 +76,5 @@ public class ManageEntitiesServiceImpl extends EntitiesServiceImpl implements Ma
     {
         List<Pair<String, String>> allArtifacts = entities.getStoredEntitiesCoordinates();
         return allArtifacts.stream().filter(art -> !projects.findCoordinates(art.getOne(), art.getTwo()).isPresent()).collect(Collectors.toList());
-    }
-
-    private Object executeWithTrace(String label, Supplier<Object> functionToExecute)
-    {
-        return TracerFactory.get().executeWithTrace(label, () -> functionToExecute.get());
     }
 }

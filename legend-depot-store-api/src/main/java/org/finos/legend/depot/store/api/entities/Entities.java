@@ -23,28 +23,26 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public interface Entities
+public interface Entities<T extends StoredEntity>
 {
     List<Entity> getAllEntities(String groupId, String artifactId, String versionId);
 
-    List<Entity> getEntities(String groupId, String artifactId, String versionId, boolean versionedEntities);
-
     Optional<Entity> getEntity(String groupId, String artifactId, String versionId, String path);
 
-    List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, boolean versioned, Set<String> classifierPaths, boolean includeSubPackages);
+    List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages);
 
-    List<StoredEntity> getAllStoredEntities();
+    List<T> getAllStoredEntities();
 
-    List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary, boolean versionedEntities);
+    List<T> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary);
 
-    List<StoredEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary, boolean versioned);
+    List<T> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary);
 
-    List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary, boolean versionedEntities);
+    List<T> findReleasedEntitiesByClassifier(String classifier, boolean summary);
 
-    List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary, boolean versionedEntities);
+    List<T> findLatestEntitiesByClassifier(String classifier, boolean summary);
 
-    List<StoredEntity> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier, boolean summary, boolean versionedEntities);
+    List<T> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier, boolean summary);
 
-    List<StoredEntity> getStoredEntities(String groupId, String artifactId, String versionId, boolean versioned);
+    List<T> getStoredEntities(String groupId, String artifactId, String versionId);
 
 }

@@ -17,8 +17,9 @@ package org.finos.legend.depot.store.artifacts.services.entities;
 
 import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.domain.entity.StoredVersionedEntity;
 import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
+import org.finos.legend.depot.services.api.versionedEntities.ManageVersionedEntitiesService;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
 import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntitiesArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.entities.VersionedEntityArtifactsProvider;
@@ -31,15 +32,15 @@ import java.util.List;
 public class VersionedEntitiesHandlerImpl extends EntitiesHandlerImpl implements VersionedEntitiesArtifactsHandler
 {
     @Inject
-    public VersionedEntitiesHandlerImpl(ManageEntitiesService entitiesService, VersionedEntityArtifactsProvider artifactProvider)
+    public VersionedEntitiesHandlerImpl(ManageVersionedEntitiesService versionedEntitiesService, VersionedEntityArtifactsProvider artifactProvider)
     {
-        super(entitiesService, (EntityArtifactsProvider) artifactProvider);
+        super(versionedEntitiesService, (EntityArtifactsProvider) artifactProvider);
     }
 
     @Override
     public void delete(String groupId, String artifactId, String versionId)
     {
-        super.delete(groupId, artifactId, versionId, true);
+        super.deleteByVersion(groupId, artifactId, versionId);
     }
 
 
@@ -50,7 +51,7 @@ public class VersionedEntitiesHandlerImpl extends EntitiesHandlerImpl implements
         for (Entity entity : entityList)
         {
             EntityDefinition entityDefinition = new EntityDefinition(entity.getPath(), entity.getClassifierPath(), entity.getContent());
-            StoredEntity storedEntity = new StoredEntity(projectData.getGroupId(), projectData.getArtifactId(), versionId, true,entityDefinition);
+            StoredEntity storedEntity = new StoredVersionedEntity(projectData.getGroupId(), projectData.getArtifactId(), versionId, entityDefinition);
             versionedEntities.add(storedEntity);
         }
         return versionedEntities;

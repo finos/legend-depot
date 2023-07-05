@@ -45,48 +45,6 @@
     "versionId": "1.0.0",
     "groupId": "examples.metadata",
     "artifactId": "test1",
-    "versionedEntity": true,
-    "entity": {
-      "path": "examples::metadata::test_dependencies::v1_0_0::examples::metadata::test::dependency::v1_2_3::Dependency",
-      "classifierPath": "meta::pure::metamodel::type::Class",
-      "content": {
-        "_type": "class",
-        "name": "Dependency",
-        "package": "examples::metadata::test_dependencies::v1_0_0::examples::metadata::test::dependency::v1_2_3",
-        "properties": [
-          {
-            "multiplicity": {
-              "lowerBound": 1,
-              "upperBound": 1
-            },
-            "name": "Name",
-            "type": "String"
-          },
-          {
-            "multiplicity": {
-              "lowerBound": 1,
-              "upperBound": 1
-            },
-            "name": "EntityId",
-            "type": "Integer"
-          },
-          {
-            "multiplicity": {
-              "lowerBound": 1,
-              "upperBound": 1
-            },
-            "name": "IsActive",
-            "type": "Boolean"
-          }
-        ]
-      }
-    },
-    "id": ""
-  },
-  {
-    "versionId": "1.0.0",
-    "groupId": "examples.metadata",
-    "artifactId": "test1",
     "versionedEntity": false,
     "entity": {
       "path": "examples::metadata::test::dependency::v1_2_3::subp::Dependency1",
@@ -95,48 +53,6 @@
         "_type": "class",
         "name": "Dependency1",
         "package": "examples::metadata::test::dependency::v1_2_3::subp",
-        "properties": [
-          {
-            "multiplicity": {
-              "lowerBound": 1,
-              "upperBound": 1
-            },
-            "name": "Name",
-            "type": "String"
-          },
-          {
-            "multiplicity": {
-              "lowerBound": 1,
-              "upperBound": 1
-            },
-            "name": "EntityId",
-            "type": "Integer"
-          },
-          {
-            "multiplicity": {
-              "lowerBound": 1,
-              "upperBound": 1
-            },
-            "name": "IsActive",
-            "type": "Boolean"
-          }
-        ]
-      }
-    },
-    "id": ""
-  },
-  {
-    "versionId": "1.0.0",
-    "groupId": "examples.metadata",
-    "artifactId": "test1",
-    "versionedEntity": true,
-    "entity": {
-      "path": "examples::metadata::test_dependencies::v1_0_0::examples::metadata::test::dependency::v1_2_3::subp::Dependency1",
-      "classifierPath": "meta::pure::metamodel::type::Class",
-      "content": {
-        "_type": "class",
-        "name": "Dependency1",
-        "package": "examples::metadata::test_dependencies::v1_0_0::examples::metadata::test::dependency::subp::v1_2_3",
         "properties": [
           {
             "multiplicity": {

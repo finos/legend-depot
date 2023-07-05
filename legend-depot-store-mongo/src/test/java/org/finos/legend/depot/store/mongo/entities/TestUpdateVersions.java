@@ -125,8 +125,7 @@ public class TestUpdateVersions extends TestStoreMongo
         setUpEntitiesDataFromFile(ENTITIES_FILE);
         long count = entitiesMongo.getAllEntities("examples.metadata", "test", "2.2.0").size();
         Assert.assertEquals(3, count);
-        entitiesMongo.delete("examples.metadata", "test", "2.2.0",true);
-        entitiesMongo.delete("examples.metadata", "test", "2.2.0",false);
+        entitiesMongo.delete("examples.metadata", "test", "2.2.0");
         Assert.assertEquals(0, entitiesMongo.getAllEntities("examples.metadata", "test", "2.2.0").size());
     }
 

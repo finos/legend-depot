@@ -36,9 +36,9 @@ public class TestQueryClassifierPath extends TestStoreMongo
     {
         String CPATH = "meta::pure::metamodel::extension::Profile";
         setUpEntitiesDataFromFile(ENTITIES_FILE);
-        Assert.assertEquals(3, mongo.findLatestEntitiesByClassifier(CPATH, null, null, false, false).size());
-        Assert.assertEquals(2, mongo.findLatestEntitiesByClassifier(CPATH, null, 2, false, false).size());
-        Assert.assertEquals(1, mongo.findLatestEntitiesByClassifier(CPATH, "TestProfileTwo", 2, false, false).size());
+        Assert.assertEquals(3, mongo.findLatestEntitiesByClassifier(CPATH, null, null, false).size());
+        Assert.assertEquals(2, mongo.findLatestEntitiesByClassifier(CPATH, null, 2, false).size());
+        Assert.assertEquals(1, mongo.findLatestEntitiesByClassifier(CPATH, "TestProfileTwo", 2, false).size());
     }
 
     @Test
@@ -46,17 +46,17 @@ public class TestQueryClassifierPath extends TestStoreMongo
     {
         String CPATH = "meta::pure::metamodel::extension::Profile";
         setUpEntitiesDataFromFile(ENTITIES_FILE);
-        Assert.assertEquals(8, mongo.findReleasedEntitiesByClassifier(CPATH, null, null, null, false, false).size());
-        Assert.assertEquals(2, mongo.findReleasedEntitiesByClassifier(CPATH, null, null, 2, false, false).size());
-        Assert.assertEquals(4, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfileTwo", null, null, false, false).size());
-        Assert.assertEquals(8, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfile", null, null, false, false).size());
-        Assert.assertEquals(0, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "1.0.0")), null, false, false).size());
-        Assert.assertEquals(2, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.2.0")), null, false, false).size());
-        Assert.assertEquals(1, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.3.0")), null, false, false).size());
-        Assert.assertEquals(2, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test2", "2.3.0")), null, false, false).size());
-        Assert.assertEquals(3, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.3.0"), new ProjectVersion("examples.metadata", "test2", "2.3.0")), null, false, false).size());
-        Assert.assertEquals(1, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfileTwo", Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.3.0")), null, false, false).size());
-        Assert.assertEquals(1, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfileTwo", Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test2", "2.3.0")), null, false, false).size());
-        Assert.assertEquals(2, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfileTwo", Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.3.0"), new ProjectVersion("examples.metadata", "test2", "2.3.0")), null, false, false).size());
+        Assert.assertEquals(8, mongo.findReleasedEntitiesByClassifier(CPATH, null, null, null, false).size());
+        Assert.assertEquals(2, mongo.findReleasedEntitiesByClassifier(CPATH, null, null, 2, false).size());
+        Assert.assertEquals(4, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfileTwo", null, null, false).size());
+        Assert.assertEquals(8, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfile", null, null, false).size());
+        Assert.assertEquals(0, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "1.0.0")), null, false).size());
+        Assert.assertEquals(2, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.2.0")), null, false).size());
+        Assert.assertEquals(1, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.3.0")), null, false).size());
+        Assert.assertEquals(2, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test2", "2.3.0")), null, false).size());
+        Assert.assertEquals(3, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.3.0"), new ProjectVersion("examples.metadata", "test2", "2.3.0")), null, false).size());
+        Assert.assertEquals(1, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfileTwo", Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.3.0")), null, false).size());
+        Assert.assertEquals(1, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfileTwo", Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test2", "2.3.0")), null, false).size());
+        Assert.assertEquals(2, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfileTwo", Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.3.0"), new ProjectVersion("examples.metadata", "test2", "2.3.0")), null, false).size());
     }
 }

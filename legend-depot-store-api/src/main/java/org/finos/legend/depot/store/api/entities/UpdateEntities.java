@@ -20,18 +20,16 @@ import org.finos.legend.depot.domain.entity.StoredEntity;
 
 import java.util.List;
 
-public interface UpdateEntities extends Entities
+public interface UpdateEntities<T extends StoredEntity> extends Entities<T>
 {
 
-    List<StoredEntity> createOrUpdate(List<StoredEntity> versionedEntities);
+    List<T> createOrUpdate(List<T> entities);
 
     long delete(String groupId, String artifactId);
 
-    long delete(String groupId, String artifactId, String versionId,boolean versioned);
+    long delete(String groupId, String artifactId, String versionId);
 
-    List<StoredEntity> getStoredEntities(String groupId, String artifactId);
-
-    List<StoredEntity> getStoredEntities(String groupId, String artifactId, String versionId);
+    List<T> getStoredEntities(String groupId, String artifactId);
 
     List<Pair<String, String>> getStoredEntitiesCoordinates();
 }

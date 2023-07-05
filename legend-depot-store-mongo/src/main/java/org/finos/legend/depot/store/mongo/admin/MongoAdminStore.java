@@ -19,16 +19,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.migrations.ProjectToProjectVersionMigration;
 import org.finos.legend.depot.store.mongo.admin.migrations.DependenciesMigration;
+import org.finos.legend.depot.store.mongo.admin.migrations.VersionedEntitiesMigration;
 import org.finos.legend.depot.store.mongo.admin.schedules.ScheduleInstancesMongo;
 import org.finos.legend.depot.store.mongo.admin.schedules.SchedulesMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
+import org.finos.legend.depot.store.mongo.versionedEntities.VersionedEntitiesMongo;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -87,6 +90,7 @@ public class MongoAdminStore
         results.addAll(createIndexesIfAbsent(mongoDatabase,ProjectsMongo.COLLECTION,ProjectsMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase, ProjectsVersionsMongo.COLLECTION, ProjectsVersionsMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,EntitiesMongo.COLLECTION,EntitiesMongo.buildIndexes()));
+        results.addAll(createIndexesIfAbsent(mongoDatabase, VersionedEntitiesMongo.COLLECTION,EntitiesMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,FileGenerationsMongo.COLLECTION,FileGenerationsMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsFilesMongo.COLLECTION,ArtifactsFilesMongo.buildIndexes()));
         results.addAll(createIndexesIfAbsent(mongoDatabase,SchedulesMongo.COLLECTION,SchedulesMongo.buildIndexes()));
@@ -142,5 +146,11 @@ public class MongoAdminStore
     public void addTransitiveDependenciesToVersionData()
     {
         new DependenciesMigration(mongoDatabase).addTransitiveDependenciesToVersionData();
+    }
+
+    @Deprecated
+    public DeleteResult deleteVersionedEntities()
+    {
+        return new VersionedEntitiesMigration(mongoDatabase).versionedEntitiesDeletion();
     }
 }

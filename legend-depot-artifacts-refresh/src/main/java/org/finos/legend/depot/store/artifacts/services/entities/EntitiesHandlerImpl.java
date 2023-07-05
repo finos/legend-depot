@@ -19,7 +19,6 @@ import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.store.artifacts.api.entities.EntitiesArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
@@ -47,7 +46,7 @@ public class EntitiesHandlerImpl extends AbstractEntityRefreshHandlerImpl implem
     @Override
     public void delete(String groupId, String artifactId, String versionId)
     {
-       super.delete(groupId,artifactId,versionId,false);
+        super.deleteByVersion(groupId,artifactId,versionId);
     }
 
     @Override
@@ -57,7 +56,7 @@ public class EntitiesHandlerImpl extends AbstractEntityRefreshHandlerImpl implem
         for (Entity entity : entityList)
         {
             EntityDefinition entityDefinition = new EntityDefinition(entity.getPath(), entity.getClassifierPath(), entity.getContent());
-            StoredEntity storedEntity = new StoredEntity(projectData.getGroupId(), projectData.getArtifactId(), versionId, false,entityDefinition);
+            StoredEntity storedEntity = new StoredEntity(projectData.getGroupId(), projectData.getArtifactId(), versionId, entityDefinition);
             versionedEntities.add(storedEntity);
         }
         return versionedEntities;

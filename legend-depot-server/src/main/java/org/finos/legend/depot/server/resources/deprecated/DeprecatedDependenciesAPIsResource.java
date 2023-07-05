@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 
 import javax.inject.Inject;
@@ -57,14 +56,11 @@ public class DeprecatedDependenciesAPIsResource extends BaseResource
     @Deprecated
     public List<ProjectVersionEntities> getLatestEntitiesFromDependencies(@PathParam("groupId") String groupId,
                                                                           @PathParam("artifactId") String artifactId,
-                                                                          @QueryParam("versioned")
-                                                                          @DefaultValue("false")
-                                                                          @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
                                                                           @QueryParam("transitive") @DefaultValue("false")
                                                                           @ApiParam("Whether to return transitive dependencies") boolean transitive,
                                                                           @QueryParam("includeOrigin") @DefaultValue("false")
                                                                           @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
-        return handle(GET_REVISION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId,BRANCH_SNAPSHOT("master"), versioned, transitive, includeOrigin));
+        return handle(GET_REVISION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId,BRANCH_SNAPSHOT("master"), transitive, includeOrigin));
     }
 }

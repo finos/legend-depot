@@ -57,12 +57,9 @@ public class EntitiesResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public List<Entity> getEntities(@PathParam("groupId") String groupId,
                                     @PathParam("artifactId") String artifactId,
-                                    @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
-                                    @QueryParam("versioned")
-                                    @DefaultValue("false")
-                                    @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned)
+                                    @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
     {
-        return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntities(groupId, artifactId, versionId, versioned));
+        return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntities(groupId, artifactId, versionId));
     }
 
 
@@ -86,16 +83,13 @@ public class EntitiesResource extends BaseResource
                                     @PathParam("artifactId") String artifactId,
                                     @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                     @QueryParam("package") String packageName,
-                                    @QueryParam("versioned")
-                                    @DefaultValue("false")
-                                    @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
                                     @QueryParam("classifierPath") @ApiParam("Only include ENTITIES with one of these classifier paths.") Set<String> classifierPaths,
                                     @QueryParam("includeSubPackages")
                                     @DefaultValue("true")
                                     @ApiParam("Whether to include ENTITIES from subpackages or only directly in one of the given packages") boolean includeSubPackages
     )
     {
-        return handle(GET_VERSION_ENTITIES_BY_PACKAGE, GET_VERSION_ENTITIES_BY_PACKAGE + packageName, () -> entitiesService.getEntitiesByPackage(groupId, artifactId, versionId, packageName, versioned, classifierPaths, includeSubPackages));
+        return handle(GET_VERSION_ENTITIES_BY_PACKAGE, GET_VERSION_ENTITIES_BY_PACKAGE + packageName, () -> entitiesService.getEntitiesByPackage(groupId, artifactId, versionId, packageName, classifierPaths, includeSubPackages));
     }
 
 }

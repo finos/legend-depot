@@ -16,24 +16,23 @@
 package org.finos.legend.depot.services.api.entities;
 
 import org.eclipse.collections.api.tuple.Pair;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 
 import java.util.List;
 
 
-public interface ManageEntitiesService extends EntitiesService
+public interface ManageEntitiesService<T extends StoredEntity> extends EntitiesService<T>
 {
 
-    List<StoredEntity> getStoredEntities(String groupId, String artifactId);
+    List<T> getStoredEntities(String groupId, String artifactId);
 
-    List<StoredEntity> getStoredEntities(String groupId, String artifactId, String versionId);
+    List<T> getStoredEntities(String groupId, String artifactId, String versionId);
 
     long  delete(String groupId, String artifactId);
 
-    long delete(String groupId, String artifactId, String versionId,boolean versioned);
+    long delete(String groupId, String artifactId, String versionId);
 
-    void createOrUpdate(List<StoredEntity> versionedEntities);
+    void createOrUpdate(List<T> entities);
 
     List<Pair<String, String>> getOrphanedStoredEntities();
 }

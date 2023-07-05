@@ -30,9 +30,9 @@ public class StoredEntityOverview extends StoredEntity
     private String classifierPath;
 
 
-    public StoredEntityOverview(String groupId, String artifactId, String versionId, boolean versioned,String path, String classifierPath)
+    public StoredEntityOverview(String groupId, String artifactId, String versionId, String path, String classifierPath)
     {
-        super(groupId, artifactId, versionId,versioned);
+        super(groupId, artifactId, versionId);
         this.path = path;
         this.classifierPath = classifierPath;
     }

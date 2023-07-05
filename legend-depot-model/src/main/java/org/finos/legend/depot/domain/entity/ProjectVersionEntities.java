@@ -27,6 +27,7 @@ import java.util.List;
 public class ProjectVersionEntities extends VersionedData
 {
     @JsonProperty
+    @Deprecated
     private boolean versionedEntity;
 
     @JsonProperty
@@ -37,11 +38,11 @@ public class ProjectVersionEntities extends VersionedData
 
     }
 
-    public ProjectVersionEntities(String groupId, String artifactId, String versionId, boolean versionedEntity, List<EntityDefinition> entities)
+    public ProjectVersionEntities(String groupId, String artifactId, String versionId, List<EntityDefinition> entities)
     {
         super(groupId,artifactId,versionId);
-        this.versionedEntity = versionedEntity;
         this.entities = entities;
+        this.versionedEntity = false;
     }
 
     public boolean isVersionedEntity()

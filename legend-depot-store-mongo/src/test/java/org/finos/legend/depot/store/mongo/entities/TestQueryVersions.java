@@ -28,9 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
-
-
 public class TestQueryVersions extends TestStoreMongo
 {
 
@@ -61,7 +58,7 @@ public class TestQueryVersions extends TestStoreMongo
     @Test
     public void canQueryEntityMetadataByProjectVersionPath()
     {
-        Entity entity = versionsMongo.getEntity("examples.metadata", "test", "2.2.0", "examples::metadata::test::TestProfile").get();
+        Entity entity = (Entity) versionsMongo.getEntity("examples.metadata", "test", "2.2.0", "examples::metadata::test::TestProfile").get();
         Assert.assertNotNull(entity);
         Assert.assertEquals("examples::metadata::test::TestProfile", entity.getPath());
         Assert.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
@@ -72,7 +69,7 @@ public class TestQueryVersions extends TestStoreMongo
     @Test
     public void canQueryEntityMetadataByProjectVersionPackage()
     {
-        List<Entity> entities = versionsMongo.getEntitiesByPackage("examples.metadata", "test", "2.2.0", "examples::metadata::test", false, null, false);
+        List<Entity> entities = versionsMongo.getEntitiesByPackage("examples.metadata", "test", "2.2.0", "examples::metadata::test",  null, false);
         Assert.assertNotNull(entities);
         Assert.assertEquals(2, entities.size());
         for (Entity entity : entities)
@@ -84,7 +81,7 @@ public class TestQueryVersions extends TestStoreMongo
     @Test
     public void canQueryEntityMetadataByProjectVersionAndSubPackage()
     {
-        List<Entity> entities = versionsMongo.getEntitiesByPackage("examples.metadata", "test", "2.2.0", "examples::metadata::test", false, null, true);
+        List<Entity> entities = versionsMongo.getEntitiesByPackage("examples.metadata", "test", "2.2.0", "examples::metadata::test",  null, true);
         Assert.assertNotNull(entities);
         Assert.assertEquals(3, entities.size());
         for (Entity entity : entities)
@@ -101,7 +98,7 @@ public class TestQueryVersions extends TestStoreMongo
         List<Entity> entities = versionsMongo.getEntitiesByPackage(
                 "examples.metadata", "test",
                 "2.2.0",
-                "examples::metadata::test", false,
+                "examples::metadata::test",
                 classifiers, true);
         Assert.assertNotNull(entities);
         Assert.assertEquals(2, entities.size());
@@ -111,30 +108,14 @@ public class TestQueryVersions extends TestStoreMongo
         }
     }
 
-
-    @Test
-    public void getEntitiesWithVersionInPath()
-    {
-        List<StoredEntity> entities = versionsMongo.getStoredEntities("examples.metadata", "test");
-        Assert.assertNotNull(entities);
-
-        Set<String> paths = entities.stream().map(en -> en.getEntity().getPath()).collect(Collectors.toSet());
-
-        List<Entity> withoutVersions = versionsMongo.getEntities("examples.metadata", "test", BRANCH_SNAPSHOT("master"), true);
-        Assert.assertNotNull(withoutVersions);
-        Set<String> allPaths = withoutVersions.stream().map(Entity::getPath).collect(Collectors.toSet());
-
-        Assert.assertTrue(allPaths.stream().anyMatch(ent -> ent.contains("vX_X_X")));
-    }
-
     @Test
     public void getMasterVersionWithoutVersionInPath()
     {
         List<StoredEntity> entities = versionsMongo.getStoredEntities("examples.metadata", "test");
         Assert.assertNotNull(entities);
-        Assert.assertEquals(11, entities.size());
+        Assert.assertEquals(7, entities.size());
 
-        List<Entity> withoutVersions = versionsMongo.getEntities("examples.metadata", "test", "2.2.0", false);
+        List<Entity> withoutVersions = versionsMongo.getAllEntities("examples.metadata", "test", "2.2.0");
         Assert.assertNotNull(withoutVersions);
         Set<String> allPaths = withoutVersions.stream().map(Entity::getPath).collect(Collectors.toSet());
         Assert.assertTrue(allPaths.stream().noneMatch(ent -> ent.contains("v2_2_0")));
