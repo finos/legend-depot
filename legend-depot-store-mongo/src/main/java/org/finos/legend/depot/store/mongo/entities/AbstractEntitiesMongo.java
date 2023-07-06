@@ -69,17 +69,30 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
 
     protected Bson getEntityPathFilter(String groupId, String artifactId, String versionId, String path)
     {
-        return and(getArtifactAndVersionFilter(groupId, artifactId, versionId), eq(ENTITY_PATH, path));
+        return and(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId), eq(ENTITY_PATH, path));
+    }
+
+    protected Bson getArtifactAndVersionVersionedFilter(String groupId, String artifactId, String versionId)
+    {
+        return and(eq(VERSIONED_ENTITY, this.isVersioned()), getArtifactAndVersionFilter(groupId, artifactId, versionId));
+    }
+
+    protected Bson getArtifactVersionedFilter(String groupId, String artifactId)
+    {
+        return and(eq(VERSIONED_ENTITY, this.isVersioned()), getArtifactFilter(groupId, artifactId));
     }
 
     protected abstract Bson getKeyFilter(T data);
 
     protected abstract void validateNewData(T data);
 
+    protected abstract boolean isVersioned();
+
     public FindIterable findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions)
     {
         List<Bson> filters = new ArrayList<>();
         filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
+        filters.add(eq(VERSIONED_ENTITY, this.isVersioned()));
         if (projectVersions != null && !projectVersions.isEmpty())
         {
             filters.add(or(ListIterate.collect(projectVersions, projectVersion -> getArtifactAndVersionFilter(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()))));
@@ -95,6 +108,7 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
     {
         List<Bson> filters = new ArrayList<>();
         filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
+        filters.add(eq(VERSIONED_ENTITY, this.isVersioned()));
         filters.add(regex(VERSION_ID, BRANCH_SNAPSHOT("")));
         if (search != null)
         {
@@ -111,22 +125,22 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
 
     public List<T> getStoredEntities(String groupId, String artifactId)
     {
-        return find(getArtifactFilter(groupId, artifactId));
+        return find(getArtifactVersionedFilter(groupId, artifactId));
     }
 
     public List<T> getStoredEntities(String groupId, String artifactId, String versionId)
     {
-        return find(getArtifactAndVersionFilter(groupId, artifactId, versionId));
+        return find(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId));
     }
 
     public List<Entity> getAllEntities(String groupId, String artifactId, String versionId)
     {
-        return find(getArtifactAndVersionFilter(groupId, artifactId, versionId)).stream().map(T::getEntity).collect(Collectors.toList());
+        return find(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId)).stream().map(T::getEntity).collect(Collectors.toList());
     }
 
     public List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages)
     {
-        Bson filter = getArtifactAndVersionFilter(groupId, artifactId, versionId);
+        Bson filter = getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId);
         if (includeSubPackages)
         {
             filter = and(filter, regex(ENTITY_PACKAGE, "^" + packageName + "*"));
@@ -145,27 +159,27 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
 
     public FindIterable findReleasedEntitiesByClassifier(String classifier)
     {
-        return executeFind(and(eq(ENTITY_CLASSIFIER_PATH, classifier), not(regex(VERSION_ID, BRANCH_SNAPSHOT("")))));
+        return executeFind(and(eq(VERSIONED_ENTITY, this.isVersioned()), and(eq(ENTITY_CLASSIFIER_PATH, classifier), not(regex(VERSION_ID, BRANCH_SNAPSHOT(""))))));
     }
 
     public FindIterable findLatestEntitiesByClassifier(String classifier)
     {
-        return executeFind(and(eq(ENTITY_CLASSIFIER_PATH, classifier), regex(VERSION_ID, BRANCH_SNAPSHOT(""))));
+        return executeFind(and(eq(VERSIONED_ENTITY, this.isVersioned()), and(eq(ENTITY_CLASSIFIER_PATH, classifier), regex(VERSION_ID, BRANCH_SNAPSHOT("")))));
     }
 
     public FindIterable findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier)
     {
-        return executeFind(and(getArtifactAndVersionFilter(groupId, artifactId, versionId), eq(ENTITY_CLASSIFIER_PATH, classifier)));
+        return executeFind(and(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId), eq(ENTITY_CLASSIFIER_PATH, classifier)));
     }
 
     public long delete(String groupId, String artifactId, String versionId)
     {
-        return delete(getArtifactAndVersionFilter(groupId, artifactId, versionId));
+        return delete(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId));
     }
 
     public long delete(String groupId, String artifactId)
     {
-        return delete(getArtifactFilter(groupId, artifactId));
+        return delete(getArtifactVersionedFilter(groupId, artifactId));
     }
 
     public List<Pair<String, String>> getStoredEntitiesCoordinates()

@@ -65,9 +65,10 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("groupId-artifactId-versionId-entityPath", true, GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH),
-        buildIndex("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE),
-        buildIndex("classifier", ENTITY_CLASSIFIER_PATH)
+        return Arrays.asList(buildIndex("versioned-groupId-artifactId-versionId-versioned", VERSIONED_ENTITY,GROUP_ID, ARTIFACT_ID, VERSION_ID),
+                buildIndex("groupId-artifactId-versionId-entityPath", true, GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH),
+                buildIndex("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE),
+                buildIndex("versioned-entity-classifier", VERSIONED_ENTITY,ENTITY_CLASSIFIER_PATH)
         );
     }
 
@@ -129,6 +130,12 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
                 set(ENTITY_CONTENT, entity.getEntity().getContent()),
                 set(VERSIONED_ENTITY, entity.isVersionedEntity()),
                 currentDate(UPDATED));
+    }
+
+    @Override
+    protected boolean isVersioned()
+    {
+        return false;
     }
 
     @Override
