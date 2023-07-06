@@ -30,7 +30,7 @@ public class StoredEntity extends VersionedData implements HasIdentifier
     private EntityDefinition entity;
 
     @JsonProperty
-    private boolean versionedEntity;
+    private boolean versionedEntity = false;
 
     @JsonCreator
     public StoredEntity(@JsonProperty(value = "groupId") String groupId,
@@ -40,12 +40,16 @@ public class StoredEntity extends VersionedData implements HasIdentifier
     {
         super(groupId, artifactId, versionId);
         this.entity = entity;
-        this.versionedEntity = false;
     }
 
     StoredEntity(String groupId, String artifactId, String versionId)
     {
         super(groupId, artifactId, versionId);
+    }
+
+    public void setVersionedEntity(boolean versionedEntity)
+    {
+        this.versionedEntity = versionedEntity;
     }
 
     @Override
