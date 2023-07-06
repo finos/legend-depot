@@ -27,8 +27,6 @@ import org.finos.legend.depot.domain.HasIdentifier;
 public class StoredEntity extends VersionedData implements HasIdentifier
 {
     @JsonProperty
-    private boolean versionedEntity;
-    @JsonProperty
     private EntityDefinition entity;
 
 
@@ -36,29 +34,21 @@ public class StoredEntity extends VersionedData implements HasIdentifier
     public StoredEntity(@JsonProperty(value = "groupId") String groupId,
                         @JsonProperty(value = "artifactId") String artifactId,
                         @JsonProperty(value = "versionId") String versionId,
-                        @JsonProperty(value = "versionedEntity") boolean versionedEntity,
                         @JsonProperty(value = "entity") EntityDefinition entity)
     {
         super(groupId, artifactId, versionId);
-        this.versionedEntity = versionedEntity;
         this.entity = entity;
     }
 
-    StoredEntity(String groupId, String artifactId, String versionId,boolean versionedEntity)
+    StoredEntity(String groupId, String artifactId, String versionId)
     {
         super(groupId, artifactId, versionId);
-        this.versionedEntity = versionedEntity;
     }
 
     @Override
     public String getId()
     {
         return "";
-    }
-
-    public boolean isVersionedEntity()
-    {
-        return versionedEntity;
     }
 
     public EntityDefinition getEntity()

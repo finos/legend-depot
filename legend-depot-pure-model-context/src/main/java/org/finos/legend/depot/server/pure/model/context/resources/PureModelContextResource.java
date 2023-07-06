@@ -54,13 +54,10 @@ public class PureModelContextResource extends BaseResource
                                                         @PathParam("artifactId") String artifactId,
                                                         @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT)  String versionId,
                                                         @QueryParam("clientVersion") String clientVersion,
-                                                        @QueryParam("versioned")
-                                                        @DefaultValue("false")
-                                                        @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
                                                         @QueryParam("getDependencies")
                                                         @DefaultValue("true")
                                                         @ApiParam("Whether to include entities from dependencies") boolean getDependencies)
     {
-        return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, versioned, getDependencies));
+        return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, getDependencies));
     }
 }

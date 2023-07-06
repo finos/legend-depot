@@ -86,7 +86,7 @@ public class TestQueryEntitiesResource extends TestBaseServices
     @Test
     public void canGetEntitiesForProjectAndVersion()
     {
-        List<Entity> entityList = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", false);
+        List<Entity> entityList = entitiesResource.getEntities("examples.metadata", "test", "2.3.0");
         Assert.assertNotNull(entityList);
         Assert.assertEquals(7, entityList.size());
     }
@@ -103,7 +103,7 @@ public class TestQueryEntitiesResource extends TestBaseServices
     @Test
     public void canGetEntitiesByPackageForProjectAndVersion()
     {
-        List<Entity> entityList = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", false, null, true);
+        List<Entity> entityList = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true);
         Assert.assertNotNull(entityList);
         Assert.assertEquals(4, entityList.size());
 
@@ -117,14 +117,14 @@ public class TestQueryEntitiesResource extends TestBaseServices
         Assert.assertEquals(0, metricsStore.get("examples.metadata", "test", "2.3.0").size());
 
         when(projects.find("examples.metadata","test")).thenReturn(Optional.of(new StoreProjectData("mock","examples.metadata","test")));
-        entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", false, null, true);
+        entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true);
         metricsHandler.persistMetrics();
 
         Assert.assertEquals(1, metricsStore.get("examples.metadata", "test", "2.3.0").size());
         Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
         TimeUnit.SECONDS.sleep(30);
 
-        entitiesResource.getEntities("example.services.test", "test", "1.0.1", false);
+        entitiesResource.getEntities("example.services.test", "test", "1.0.1");
         metricsHandler.persistMetrics();
 
         Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
@@ -142,7 +142,7 @@ public class TestQueryEntitiesResource extends TestBaseServices
         when(projects.find("examples.metadata","test-master")).thenReturn(Optional.of(new StoreProjectData("mock02","examples.metadata","test-master")));
         when(projectsVersions.find("examples.metadata","test-master", "2.3.0")).thenReturn(Optional.of(versionData));
 
-        entitiesService.getDependenciesEntities("examples.metadata", "test-master", "2.3.0", false, true, false);
+        entitiesService.getDependenciesEntities("examples.metadata", "test-master", "2.3.0", true, false);
         metricsHandler.persistMetrics();
 
         Assert.assertEquals(2, metricsStore.getAll().size());
@@ -170,7 +170,7 @@ public class TestQueryEntitiesResource extends TestBaseServices
     @Test
     public void canGetEntitiesByPackage()
     {
-        List<Entity> entityList = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", false, null, true);
+        List<Entity> entityList = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true);
         Assert.assertNotNull(entityList);
         Assert.assertEquals(4, entityList.size());
 

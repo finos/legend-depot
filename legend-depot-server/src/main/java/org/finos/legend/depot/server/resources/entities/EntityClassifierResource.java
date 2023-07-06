@@ -58,9 +58,8 @@ public class EntityClassifierResource extends BaseResource
                                           @QueryParam("search") @ApiParam("The search string that the entity path contains") String search,
                                           @QueryParam("scope") @ApiParam("Whether to return entities for the latest released version or snapshot") @DefaultValue("RELEASES") Scope scope,
                                           @QueryParam("limit") @ApiParam("Limit the number of entities returned") Integer limit,
-                                          @QueryParam("summary") @DefaultValue("false") @ApiParam("Whether to return the summary view of the ENTITIES or the full entity") boolean summary,
-                                          @QueryParam("versioned") @DefaultValue("false") @ApiParam("Whether to return the ENTITIES with version in entity path") boolean versioned)
+                                          @QueryParam("summary") @DefaultValue("false") @ApiParam("Whether to return the summary view of the ENTITIES or the full entity") boolean summary)
     {
-        return handle(GET_ENTITIES_BY_CLASSIFIER_PATH, () -> this.graphService.getEntitiesByClassifierPath(classifierPath, search, limit, scope, summary, versioned));
+        return handle(GET_ENTITIES_BY_CLASSIFIER_PATH, () -> this.graphService.getEntitiesByClassifierPath(classifierPath, search, limit, scope, summary));
     }
 }

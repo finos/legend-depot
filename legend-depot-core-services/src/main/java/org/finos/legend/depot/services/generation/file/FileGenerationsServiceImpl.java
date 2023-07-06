@@ -52,7 +52,7 @@ public class FileGenerationsServiceImpl implements FileGenerationsService
     public List<Entity> getGenerations(String groupId, String artifactId, String versionId)
     {
         String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
-        List<StoredEntity> storedEntities = entities.findEntitiesByClassifier(groupId, artifactId, version, GENERATION_CONFIGURATION, false, false);
+        List<StoredEntity> storedEntities = entities.findEntitiesByClassifier(groupId, artifactId, version, GENERATION_CONFIGURATION, false);
         return storedEntities.stream().map(StoredEntity::getEntity).collect(Collectors.toList());
     }
 

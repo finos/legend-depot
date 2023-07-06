@@ -19,9 +19,9 @@ import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.version.Scope;
-import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
@@ -34,11 +34,11 @@ import java.util.stream.Collectors;
 public class EntityClassifierServiceImpl implements EntityClassifierService
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(EntityClassifierServiceImpl.class);
-    private final EntitiesService entities;
+    private final Entities entities;
     private final ProjectsService projects;
 
     @Inject
-    public EntityClassifierServiceImpl(ProjectsService projects, EntitiesService versions)
+    public EntityClassifierServiceImpl(ProjectsService projects, Entities versions)
     {
         this.projects = projects;
         this.entities = versions;
@@ -54,11 +54,11 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
     }
 
     @Override
-    public List<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit, Scope scope, boolean summary, boolean versioned)
+    public List<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit, Scope scope, boolean summary)
     {
         if (Scope.SNAPSHOT.equals(scope))
         {
-            return this.entities.findLatestEntitiesByClassifier(classifierPath, search, limit, summary, versioned);
+            return this.findLatestEntitiesByClassifier(classifierPath, search, limit, summary);
         }
         List<StoredEntity> result = new ArrayList<>();
         int PAGE_SIZE = 100;
@@ -66,7 +66,7 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
         List<ProjectVersion> projectVersions = this.getProjectsInfo(currentPage, PAGE_SIZE);
         while (!projectVersions.isEmpty())
         {
-            List<StoredEntity> entities = this.entities.findReleasedEntitiesByClassifier(classifierPath, search, projectVersions, limit, summary, versioned);
+            List<StoredEntity> entities = this.findReleasedEntitiesByClassifier(classifierPath, search, projectVersions, limit, summary);
             result.addAll(entities);
             if (limit != null && result.size() >= limit)
             {
@@ -80,5 +80,29 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
             result = result.stream().limit(limit).collect(Collectors.toList());
         }
         return result;
+    }
+
+    @Override
+    public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary)
+    {
+        return entities.findReleasedEntitiesByClassifier(classifier, search, projectVersions, limit, summary);
+    }
+
+    @Override
+    public List<StoredEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary)
+    {
+        return entities.findLatestEntitiesByClassifier(classifier, search, limit, summary);
+    }
+
+    @Override
+    public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary)
+    {
+        return entities.findReleasedEntitiesByClassifier(classifier, summary);
+    }
+
+    @Override
+    public List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary)
+    {
+        return entities.findLatestEntitiesByClassifier(classifier, summary);
     }
 }

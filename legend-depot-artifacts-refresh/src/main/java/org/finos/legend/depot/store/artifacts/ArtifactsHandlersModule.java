@@ -64,15 +64,6 @@ public class ArtifactsHandlersModule extends PrivateModule
     }
 
     @Provides
-    @Named("versionedEntityHandler")
-    @Singleton
-    boolean registerVersionedEntityHandler(VersionedEntitiesArtifactsHandler versionedEntitiesArtifactsHandler)
-    {
-        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.VERSIONED_ENTITIES, versionedEntitiesArtifactsHandler);
-        return true;
-    }
-
-    @Provides
     @Named("fileGenerationHandler")
     @Singleton
     boolean registerFileGenerationHandler(FileGenerationsArtifactsHandler versionArtifactsHandler)

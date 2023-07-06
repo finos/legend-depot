@@ -1,33 +1,6 @@
 [
   {
-    "id": null,
-    "groupId": "examples.metadata",
-    "artifactId": "test",
-    "versionId": "master-SNAPSHOT",
-    "versionedEntity": false,
-    "entity": {
-      "path": "examples::metadata::test::ClassWithDependency",
-      "classifierPath": "meta::pure::metamodel::type::Class",
-      "content": {
-        "_type": "class",
-        "name": "ClassWithDependency",
-        "package": "examples::metadata::test",
-        "properties": [
-          {
-            "multiplicity": {
-              "lowerBound": 1,
-              "upperBound": 1
-            },
-            "name": "Name",
-            "type": "String"
-          }
-        ]
-      }
-    }
-  },
-  {
-    "id": null,
-    "versionId": "master-SNAPSHOT",
+    "versionId": "2.2.0",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
@@ -39,11 +12,11 @@
         "name": "TestProfile",
         "package": "examples::metadata::test"
       }
-    }
+    },
+    "id": ""
   },
   {
-    "id": null,
-    "versionId": "master-SNAPSHOT",
+    "versionId": "2.2.0",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
@@ -113,14 +86,14 @@
           }
         ]
       }
-    }
+    },
+    "id": ""
   },
   {
-    "id": null,
-    "versionId": "master-SNAPSHOT",
+    "versionId": "2.2.0",
     "groupId": "examples.metadata",
     "artifactId": "test",
-    "versionedEntity": false,
+    "versionedEntity": true,
     "entity": {
       "path": "examples::metadata::test::subpackage::TestProfileTwo",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -129,6 +102,7 @@
         "name": "TestProfileTwo",
         "package": "examples::metadata::test::subpackage"
       }
-    }
+    },
+    "id": ""
   }
 ]

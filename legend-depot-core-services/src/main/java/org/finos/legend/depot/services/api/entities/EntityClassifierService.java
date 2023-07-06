@@ -16,11 +16,20 @@
 package org.finos.legend.depot.services.api.entities;
 
 import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.version.Scope;
 
 import java.util.List;
 
 public interface EntityClassifierService
 {
-    List<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit, Scope scope, boolean summary, boolean versioned);
+    List<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit, Scope scope, boolean summary);
+
+    List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary);
+
+    List<StoredEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary);
+
+    List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary);
+
+    List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary);
 }

@@ -1,4 +1,4 @@
-//  Copyright 2022 Goldman Sachs
+//  Copyright 2021 Goldman Sachs
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -13,13 +13,11 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.server.pure.model.context.api;
+package org.finos.legend.depot.services.api.versionedEntities;
 
-import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
+import org.finos.legend.depot.domain.entity.StoredVersionedEntity;
+import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 
-public interface PureModelContextService
+public interface ManageVersionedEntitiesService extends VersionedEntitiesService, ManageEntitiesService<StoredVersionedEntity>
 {
-    String getPureModelContextDataAsString(String groupId, String artifactId, String versionId, String clientVersion, boolean getDependencies);
-
-    PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean getDependencies);
 }

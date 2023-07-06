@@ -16,6 +16,7 @@
 package org.finos.legend.depot.store.mongo.resources;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.mongodb.client.result.DeleteResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.bson.Document;
@@ -209,6 +210,20 @@ public class MongoStoreAdministrationResource extends BaseAuthorisedResource
             validateUser();
             manageStoreService.addTransitiveDependenciesToVersionData();
             return Response.status(Response.Status.NO_CONTENT).build();
+        });
+    }
+
+    @DELETE
+    @Path("/migrations/deleteVersionedEntities")
+    @ApiOperation("Delete versioned entities from entities collection")
+    @Deprecated
+    public Response deleteVersionedEntities()
+    {
+        return handle("Delete versioned entities from entities collection", () ->
+        {
+            validateUser();
+            DeleteResult deleteResult = manageStoreService.deleteVersionedEntities();
+            return Response.ok().entity(deleteResult).build();
         });
     }
 

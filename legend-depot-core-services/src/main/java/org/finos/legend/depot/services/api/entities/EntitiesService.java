@@ -26,28 +26,19 @@ import java.util.Optional;
 import java.util.Set;
 
 
-public interface EntitiesService
+public interface EntitiesService<T extends StoredEntity>
 {
 
-    List<Entity> getEntities(String groupId, String artifactId, String versionId, boolean versioned);
+    List<Entity> getEntities(String groupId, String artifactId, String versionId);
 
     Optional<Entity> getEntity(String groupId, String artifactId, String versionId, String entityPath);
 
-    List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, boolean versioned, Set<String> classifierPaths, boolean includeSubPackages);
+    List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages);
 
+    List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin);
 
-    List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean versioned, boolean transitive, boolean includeOrigin);
-
-    default List<ProjectVersionEntities> getDependenciesEntities(String groupId, String artifactId, String versionId, boolean versioned, boolean transitive, boolean includeOrigin)
+    default List<ProjectVersionEntities> getDependenciesEntities(String groupId, String artifactId, String versionId, boolean transitive, boolean includeOrigin)
     {
-        return getDependenciesEntities(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)), versioned, transitive, includeOrigin);
+        return getDependenciesEntities(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)), transitive, includeOrigin);
     }
-
-    List<StoredEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary, boolean versioned);
-
-    List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary, boolean versioned);
-
-    List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary, boolean versioned);
-
-    List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary, boolean versioned);
 }

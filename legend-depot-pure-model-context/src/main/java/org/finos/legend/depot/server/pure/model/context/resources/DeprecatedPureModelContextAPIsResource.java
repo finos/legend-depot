@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 
@@ -58,13 +57,10 @@ public class DeprecatedPureModelContextAPIsResource extends BaseResource
     public PureModelContextData getPureModelContextData(@PathParam("groupId") String groupId,
                                                         @PathParam("artifactId") String artifactId,
                                                         @QueryParam("clientVersion") String clientVersion,
-                                                        @QueryParam("versioned")
-                                                        @DefaultValue("false")
-                                                        @ApiParam("Whether to return ENTITIES with version in entity path") boolean versioned,
                                                         @QueryParam("getDependencies")
                                                         @DefaultValue("true")
                                                         @ApiParam("Whether to return ENTITIES with version in entity path") boolean getDependencies)
     {
-        return handle(GET_REVISION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId,BRANCH_SNAPSHOT("master"), clientVersion, versioned, getDependencies));
+        return handle(GET_REVISION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId,BRANCH_SNAPSHOT("master"), clientVersion, getDependencies));
     }
 }

@@ -18,9 +18,11 @@ package org.finos.legend.depot.services;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.api.versionedEntities.ManageVersionedEntitiesService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
+import org.finos.legend.depot.services.versionedEntities.ManageVersionedEntitiesServiceImpl;
 
 public class ManageServicesModule extends ReadDataServicesModule
 {
@@ -31,10 +33,12 @@ public class ManageServicesModule extends ReadDataServicesModule
 
         bind(ManageProjectsService.class).to(ManageProjectsServiceImpl.class);
         bind(ManageEntitiesService.class).to(ManageEntitiesServiceImpl.class);
+        bind(ManageVersionedEntitiesService.class).to(ManageVersionedEntitiesServiceImpl.class);
         bind(ManageFileGenerationsService.class).to(ManageFileGenerationsServiceImpl.class);
 
         expose(ManageProjectsService.class);
         expose(ManageEntitiesService.class);
+        expose(ManageVersionedEntitiesService.class);
         expose(ManageFileGenerationsService.class);
     }
 }

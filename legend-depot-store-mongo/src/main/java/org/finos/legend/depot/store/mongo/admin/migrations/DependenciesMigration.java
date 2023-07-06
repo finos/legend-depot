@@ -54,7 +54,7 @@ import static org.finos.legend.depot.store.mongo.core.BaseMongo.VERSION_ID;
 @Deprecated
 public final class DependenciesMigration
 {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ProjectToProjectVersionMigration.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DependenciesMigration.class);
     private final MongoDatabase mongoDatabase;
     private static final String NOT_FOUND_IN_STORE = "%s-%s-%s not found in store";
     private static final String INVALID_DEPENDENCIES = "%s-%s-%s has invalid transitive dependencies";
