@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.mongo.admin.migrations;
 
+import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.DeleteResult;
 import org.bson.conversions.Bson;
