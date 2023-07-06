@@ -30,7 +30,6 @@ public class StoredEntity extends VersionedData implements HasIdentifier
     private EntityDefinition entity;
 
     @JsonProperty
-    @Deprecated
     private boolean versionedEntity;
 
     @JsonCreator
