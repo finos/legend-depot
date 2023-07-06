@@ -51,10 +51,10 @@ public class TestVersionedEntitiesMigration extends TestStoreMongo
     @Test
     public void canDeleteVersionedEntities()
     {
-        mongoProvider.getCollection("entities").updateOne(getArtifactAndVersionFilter("examples.metadata", "test", "2.2.0"),
+        mongoProvider.getCollection("entities").updateOne(and(Filters.eq("entity.path", "examples::metadata::test::TestProfile"), getArtifactAndVersionFilter("examples.metadata", "test", "2.2.0")),
                 Updates.combine(Updates.set("versionedEntity", true)));
         DeleteResult result = mongoAdminStore.deleteVersionedEntities();
-        Assert.assertEquals(2,mongoProvider.getCollection("entities").countDocuments());
+        Assert.assertEquals(1, mongoProvider.getCollection("entities").countDocuments());
     }
 
     @Test
@@ -63,6 +63,6 @@ public class TestVersionedEntitiesMigration extends TestStoreMongo
         mongoProvider.getCollection("entities").updateMany(getArtifactAndVersionFilter("examples.metadata", "test", "2.2.0"),
                 Updates.combine(Updates.set("versionedEntity", true)));
         DeleteResult result = mongoAdminStore.deleteVersionedEntities();
-        Assert.assertEquals(0,mongoProvider.getCollection("entities").countDocuments());
+        Assert.assertEquals(0, mongoProvider.getCollection("entities").countDocuments());
     }
 }
