@@ -4,7 +4,7 @@
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::Source_Employee",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -37,7 +37,7 @@
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::MyProfile",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -55,7 +55,7 @@
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::Source_Person",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -97,7 +97,7 @@
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version::RootClasses",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -127,7 +127,7 @@
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version::Source_Employee",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -205,7 +205,7 @@
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version::Source_Person",
       "classifierPath": "meta::pure::metamodel::type::Class",

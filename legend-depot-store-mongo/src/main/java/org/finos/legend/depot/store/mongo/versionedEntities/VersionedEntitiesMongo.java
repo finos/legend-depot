@@ -41,8 +41,10 @@ public class VersionedEntitiesMongo extends EntitiesMongo<StoredVersionedEntity>
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("groupId-artifactId-versionId-entityPath", true, GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH),
-                buildIndex("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE)
+        return Arrays.asList(buildIndex("versioned-groupId-artifactId-versionId-versioned", VERSIONED_ENTITY,GROUP_ID, ARTIFACT_ID, VERSION_ID),
+                buildIndex("groupId-artifactId-versionId-entityPath", true, GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH),
+                buildIndex("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE),
+                buildIndex("versioned-entity-classifier", VERSIONED_ENTITY,ENTITY_CLASSIFIER_PATH)
         );
     }
 
@@ -51,4 +53,11 @@ public class VersionedEntitiesMongo extends EntitiesMongo<StoredVersionedEntity>
     {
         return getMongoCollection(COLLECTION);
     }
+
+    @Override
+    protected boolean isVersioned()
+    {
+        return true;
+    }
+
 }

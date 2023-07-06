@@ -4,7 +4,7 @@
     "groupId": "test.legend",
     "artifactId": "blank-prod",
     "versionId": "2.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "service::SomeService",
       "classifierPath": "meta::legend::service::metamodel::Service",
@@ -122,7 +122,7 @@
     "groupId": "test.legend",
     "artifactId": "blank-prod",
     "versionId": "2.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::blank_prod::v2_0_0::blank::Person",
       "classifierPath": "meta::pure::metamodel::type::Class",

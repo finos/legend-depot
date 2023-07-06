@@ -4,7 +4,7 @@
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionId": "3.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::metadata::test::v3_0_0::com::test",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -20,7 +20,7 @@
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionId": "3.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::ClassWithDependency",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -46,7 +46,7 @@
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionId": "3.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::TestProfile",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -62,7 +62,7 @@
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionId": "3.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::ClientBasic",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -136,7 +136,7 @@
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionId": "3.0.0",
-    "versionedEntity": true,
+    "versionedEntity": false,
     "entity": {
       "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::subpackage::TestProfileTwo",
       "classifierPath": "meta::pure::metamodel::extension::Profile",

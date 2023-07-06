@@ -32,3 +32,11 @@ The solution here is storing the transitive dependencies in the store itself. Th
 2. Use the API /migrations/addTransitiveDependenciesToVersionData, to update the "versions" collection with "versionsTemp" collection delta, which in this case is transitive dependencies.
 3. After verifying everything works, dop the collection "versionsTemp", using API /collections/{id}
 PS: The first step ensures that we are not corrupting the old data in cases on rollback.
+
+## 3. Deletion of versioned entities from entities collection (for version 1.20.0 and up)
+### Why is this deletion required?
+Versioned Entities are entities stored with the versioned flag being true. They have extra information of versioning in their path.
+We want to segregate the versioned entities from the entities collection and have separate implementations for both.
+The driver for this change is to increase the performance of querying entities whether it be versioned or not versioned.
+### Steps to follow:
+1. Use the API /migrations/migrations/deleteVersionedEntities, this will delete all versioned entities from the "entities" collection.
