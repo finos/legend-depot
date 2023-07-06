@@ -27,6 +27,7 @@ public class StoredVersionedEntity extends StoredEntity
                                  @JsonProperty(value = "entity") EntityDefinition entity)
     {
         super(groupId, artifactId, versionId, entity);
+        this.setVersionedEntity(true);
     }
 
     StoredVersionedEntity(String groupId, String artifactId, String versionId)
