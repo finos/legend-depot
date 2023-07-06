@@ -29,6 +29,9 @@ public class StoredEntity extends VersionedData implements HasIdentifier
     @JsonProperty
     private EntityDefinition entity;
 
+    @JsonProperty
+    @Deprecated
+    private boolean versionedEntity;
 
     @JsonCreator
     public StoredEntity(@JsonProperty(value = "groupId") String groupId,
@@ -38,6 +41,7 @@ public class StoredEntity extends VersionedData implements HasIdentifier
     {
         super(groupId, artifactId, versionId);
         this.entity = entity;
+        this.versionedEntity = false;
     }
 
     StoredEntity(String groupId, String artifactId, String versionId)
