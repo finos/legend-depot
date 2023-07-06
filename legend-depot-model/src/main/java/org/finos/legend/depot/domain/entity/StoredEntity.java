@@ -51,6 +51,11 @@ public class StoredEntity extends VersionedData implements HasIdentifier
     {
         this.versionedEntity = versionedEntity;
     }
+    
+    public boolean isVersionedEntity()
+    {
+        return versionedEntity;
+    }
 
     @Override
     public String getId()

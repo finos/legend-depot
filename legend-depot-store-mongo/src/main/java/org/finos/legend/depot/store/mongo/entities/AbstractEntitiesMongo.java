@@ -60,6 +60,7 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
     public static final String PATH = "path";
     public static final String ENTITY_PACKAGE = "entity.content.package";
     public static final String ENTITY_CONTENT = "entity.content";
+    public static final String VERSIONED_ENTITY = "versionedEntity";
 
     protected AbstractEntitiesMongo(MongoDatabase mongoDatabase, Class documentClass)
     {

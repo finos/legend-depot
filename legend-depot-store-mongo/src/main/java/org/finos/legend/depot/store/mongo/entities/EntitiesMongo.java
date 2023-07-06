@@ -127,6 +127,7 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
                 set(ENTITY_PATH, entity.getEntity().getPath()),
                 set(ENTITY_CLASSIFIER_PATH, entity.getEntity().getClassifierPath()),
                 set(ENTITY_CONTENT, entity.getEntity().getContent()),
+                set(VERSIONED_ENTITY, entity.isVersionedEntity()),
                 currentDate(UPDATED));
     }
 
