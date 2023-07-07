@@ -108,7 +108,7 @@ public final class NotificationsQueueManager implements NotificationsManager
         {
             if (response.hasErrors())
             {
-                PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
+            
                 if (event.retriesExceeded())
                 {
                     String messageRetry = String.format("eventId:[%s],parentEventId:[%s],gav:[%s-%s-%s], attempt [%s] completed with errors [%s] will not retry [%s] maximum retries exceeded",
@@ -117,6 +117,7 @@ public final class NotificationsQueueManager implements NotificationsManager
                     LOGGER.error(messageRetry);
                     events.createOrUpdate(event.combineResponse(response).complete());
                     PrometheusMetricsFactory.getInstance().observeHistogram(NOTIFICATION_COMPLETE,event.getCreated().getTime(),System.currentTimeMillis(),event.getEventPriority().name());
+                    PrometheusMetricsFactory.getInstance().incrementErrorCount(NOTIFICATIONS_COUNTER);
                 }
                 else
                 {
