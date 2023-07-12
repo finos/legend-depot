@@ -17,7 +17,6 @@ package org.finos.legend.depot.schedules.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.schedules.services.SchedulesFactory;
@@ -26,7 +25,6 @@ import org.finos.legend.depot.store.admin.api.schedules.SchedulesStore;
 import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInfo;
 import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInstance;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;

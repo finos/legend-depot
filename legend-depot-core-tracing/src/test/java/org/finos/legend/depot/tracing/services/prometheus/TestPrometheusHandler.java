@@ -88,16 +88,7 @@ public class TestPrometheusHandler
         Assert.assertEquals(1.0D, prometheusMetrics.allErrorCounters.get("test_test2_errors").get(),0.0);
     }
 
-    @Test
-    public void testMetricRegistrationForResource()
-    {
-         new TestBaseResource();
-         Assert.assertEquals(1,prometheusMetrics.allSummaries.keySet().size());
-         Assert.assertEquals(1, prometheusMetrics.registeredResources.size());
-         new TestBaseResource();
-         Assert.assertEquals(1,prometheusMetrics.allSummaries.keySet().size());
-         Assert.assertEquals(1, prometheusMetrics.registeredResources.size());
-    }
+
 
     @Test
     public void testSummaryRegistration()

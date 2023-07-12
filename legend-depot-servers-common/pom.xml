@@ -24,8 +24,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Legend Depot - Core - HTTP Server</name>
-    <artifactId>legend-depot-core-http</artifactId>
+    <name>Legend Depot - Servers Common</name>
+    <artifactId>legend-depot-servers-common</artifactId>
 
     <dependencies>
         <!-- DEPOT -->
@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-authorisation</artifactId>
+            <artifactId>legend-depot-store-api</artifactId>
         </dependency>
         <!-- DEPOT -->
 
@@ -83,6 +83,15 @@
         </dependency>
         <!-- SHARED -->
 
+        <!-- SDLC -->
+        <dependency>
+            <groupId>org.finos.legend.sdlc</groupId>
+            <artifactId>legend-sdlc-server-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-services</artifactId>
+        </dependency>
         <!-- SDLC -->
         <dependency>
             <groupId>${junit.groupId}</groupId>

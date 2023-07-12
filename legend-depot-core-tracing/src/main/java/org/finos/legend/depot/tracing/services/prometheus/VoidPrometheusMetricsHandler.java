@@ -16,18 +16,12 @@
 package org.finos.legend.depot.tracing.services.prometheus;
 
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
-import org.finos.legend.depot.tracing.resources.BaseResource;
 
 import java.util.List;
 
 
 public class VoidPrometheusMetricsHandler implements PrometheusMetricsHandler
 {
-    @Override
-    public void registerResourceApis(BaseResource baseResource)
-    {
-    }
-
     @Override
     public void incrementCount(String counter)
     {

@@ -56,6 +56,7 @@
         <module>legend-depot-artifacts-repository-api</module>
         <module>legend-depot-artifacts-repository-maven-impl</module>
 
+        <module>legend-depot-servers-common</module>
         <module>legend-depot-server</module>
         <module>legend-depot-store-server</module>
 
@@ -76,9 +77,10 @@
         <maven.compiler>1.8</maven.compiler>
 
         <!-- Legend dependency versions -->
+        <legend.shared.version>0.23.8</legend.shared.version>
         <legend.engine.version>4.17.0</legend.engine.version>
         <legend.sdlc.version>0.136.0</legend.sdlc.version>
-        <legend.shared.version>0.23.8</legend.shared.version>
+
 
         <!-- Dependency versions -->
         <apache.httpcomponents.client.version>4.5.13</apache.httpcomponents.client.version>
@@ -473,6 +475,11 @@
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-servers-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
                 <artifactId>legend-depot-core-http</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -660,31 +667,13 @@
                         <groupId>org.finos.legend.shared</groupId>
                         <artifactId>legend-shared-pac4j-kerberos</artifactId>
                     </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.engine</groupId>
-                <artifactId>legend-engine-protocol</artifactId>
-                <version>${legend.engine.version}</version>
-                <exclusions>
                     <exclusion>
-                        <groupId>pure</groupId>
-                        <artifactId>pure-m2-dsl-lake</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.engine</groupId>
-                <artifactId>legend-engine-protocol-pure</artifactId>
-                <version>${legend.engine.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.mongodb</groupId>
-                        <artifactId>bson</artifactId>
+                        <groupId>org.finos.legend.engine</groupId>
+                        <artifactId>legend-engine-protocol</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>org.finos.legend.shared</groupId>
-                        <artifactId>legend-shared-pac4j</artifactId>
+                        <groupId>org.finos.legend.engine</groupId>
+                        <artifactId>legend-engine-protocol-pure</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -721,17 +710,6 @@
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.sdlc</groupId>
-                <artifactId>legend-sdlc-protocol-pure</artifactId>
-                <version>${legend.sdlc.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.commons</groupId>
-                        <artifactId>commons-text</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.sdlc</groupId>
                 <artifactId>legend-sdlc-server-shared</artifactId>
                 <version>${legend.sdlc.version}</version>
                 <exclusions>
@@ -763,8 +741,14 @@
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.sdlc</groupId>
-                <artifactId>legend-sdlc-protocol</artifactId>
+                <artifactId>legend-sdlc-protocol-pure</artifactId>
                 <version>${legend.sdlc.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-text</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.sdlc</groupId>

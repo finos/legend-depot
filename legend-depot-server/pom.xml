@@ -37,6 +37,10 @@
         <!-- DEPOT -->
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-servers-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-http</artifactId>
         </dependency>
         <dependency>
@@ -62,17 +66,6 @@
         </dependency>
         <!-- DEPOT -->
 
-        <!-- ENGINE -->
-        <dependency>
-            <groupId>org.finos.legend.engine</groupId>
-            <artifactId>legend-engine-protocol-pure</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.engine</groupId>
-            <artifactId>legend-engine-extensions-collection-generation</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <!-- ENGINE -->
 
         <!-- SHARED -->
         <dependency>

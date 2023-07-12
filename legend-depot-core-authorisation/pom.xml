@@ -28,14 +28,6 @@
     <artifactId>legend-depot-core-authorisation</artifactId>
 
     <dependencies>
-        <!-- DEPOT -->
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-tracing</artifactId>
-            <scope>compile</scope>
-        </dependency>
-        <!-- DEPOT -->
-
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>

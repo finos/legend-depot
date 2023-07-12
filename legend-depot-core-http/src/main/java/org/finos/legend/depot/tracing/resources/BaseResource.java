@@ -15,19 +15,23 @@
 
 package org.finos.legend.depot.tracing.resources;
 
-import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
+import io.swagger.annotations.ApiOperation;
+import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
 import org.finos.legend.depot.tracing.services.TracerFactory;
+import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.WebApplicationException;
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 public class BaseResource
 {
+    static final ConcurrentHashMap<String,String> resourceMetricsRegistration = ConcurrentHashMap.newMap();
+
     public BaseResource()
     {
-        PrometheusMetricsFactory.getInstance().registerResourceApis(this);
+        registerResourceApisMetrics(this);
     }
 
     private Logger getLogger()
@@ -87,18 +91,29 @@ public class BaseResource
 
     protected <T> T handle(String resourceAPIMetricName, String label, Supplier<T> supplier)
     {
-        try
-        {
-            return TracerFactory.get().executeWithTrace(label, () -> handleWithLogging(resourceAPIMetricName, label, supplier));
-        }
-        catch (Exception e)
-        {
-            throw new WebApplicationException(e.getMessage(), e);
-        }
+        return TracerFactory.get().executeWithTrace(label, () -> handleWithLogging(resourceAPIMetricName, label, supplier));
     }
 
     protected <T> T handle(String label, Supplier<T> supplier)
     {
         return handle(label, label, supplier);
+    }
+
+
+    private void registerResourceApisMetrics(BaseResource baseResource)
+    {
+        resourceMetricsRegistration.getIfAbsentPutWithKey(baseResource.getClass().getCanonicalName(), resourceName ->
+        {
+            Arrays.stream(baseResource.getClass().getMethods()).forEach(m ->
+            {
+                if (m.isAnnotationPresent(ApiOperation.class))
+                {
+                    ApiOperation val = m.getAnnotation(ApiOperation.class);
+                    String metricName = (val.nickname() != null && !val.nickname().isEmpty() ? val.nickname() : val.value());
+                    PrometheusMetricsFactory.getInstance().registerSummary(metricName, metricName);
+                }
+            });
+            return resourceName;
+        });
     }
 }

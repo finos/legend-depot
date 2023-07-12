@@ -13,11 +13,10 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.tracing.services.prometheus;
+package org.finos.legend.depot.tracing.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.finos.legend.depot.tracing.resources.BaseResource;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
