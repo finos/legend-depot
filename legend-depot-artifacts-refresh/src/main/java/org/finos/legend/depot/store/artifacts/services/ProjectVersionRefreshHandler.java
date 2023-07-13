@@ -203,19 +203,16 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
     public MetadataEventResponse executeWithTrace(String label, MetadataNotification notification, Supplier<MetadataEventResponse> functionToExecute)
     {
         return TracerFactory.get().executeWithTrace(label, () ->
-        {
-            decorateSpanWithVersionInfo(notification.getGroupId(), notification.getArtifactId(), notification.getVersionId());
-            return functionToExecute.get();
-        });
+                functionToExecute.get(),decorateSpanWithVersionInfo(notification.getGroupId(), notification.getArtifactId(), notification.getVersionId()));
     }
 
-    private void decorateSpanWithVersionInfo(String groupId,String artifactId, String versionId)
+    private  Map<String, String> decorateSpanWithVersionInfo(String groupId,String artifactId, String versionId)
     {
         Map<String, String> tags = new HashMap<>();
         tags.put(GROUP_ID, groupId);
         tags.put(ARTIFACT_ID, artifactId);
         tags.put(VERSION_ID, versionId);
-        TracerFactory.get().addTags(tags);
+        return tags;
     }
 
     MetadataEventResponse doRefresh(MetadataNotification event)
