@@ -24,8 +24,6 @@ import java.util.List;
 public interface ManageEntitiesService<T extends StoredEntity> extends EntitiesService<T>
 {
 
-    List<T> getStoredEntities(String groupId, String artifactId);
-
     List<T> getStoredEntities(String groupId, String artifactId, String versionId);
 
     long  delete(String groupId, String artifactId);
