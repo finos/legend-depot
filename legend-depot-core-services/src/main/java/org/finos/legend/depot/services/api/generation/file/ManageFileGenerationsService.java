@@ -24,8 +24,6 @@ public interface ManageFileGenerationsService extends FileGenerationsService
 
     long delete(String groupId, String artifactId, String versionId);
 
-    List<StoredFileGeneration> getStoredFileGenerations(String groupId, String artifactId, String versionId);
-
     void createOrUpdate(StoredFileGeneration storedFileGeneration);
 
     List<StoredFileGeneration> getAll();
