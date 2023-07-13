@@ -16,6 +16,7 @@
 package org.finos.legend.depot.tracing.services.prometheus;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.istack.NotNull;
 import io.prometheus.client.Counter;
@@ -41,6 +42,7 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
 
     final ConcurrentMutableMap<String, Counter> allCounters = new ConcurrentHashMap<>();
     final ConcurrentMutableMap<String, Counter> allErrorCounters = new ConcurrentHashMap<>();
+    @JsonIgnore
     public final ConcurrentMutableMap<String, Summary> allSummaries = new ConcurrentHashMap<>();
     final ConcurrentMutableMap<String, Gauge> allGauges = new ConcurrentHashMap<>();
     final ConcurrentMutableMap<String, Histogram> allHistograms = new ConcurrentHashMap<>();
