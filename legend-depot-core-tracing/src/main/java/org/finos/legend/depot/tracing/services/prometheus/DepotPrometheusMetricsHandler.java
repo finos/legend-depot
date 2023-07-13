@@ -16,26 +16,20 @@
 package org.finos.legend.depot.tracing.services.prometheus;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.istack.NotNull;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
 import io.prometheus.client.Histogram;
 import io.prometheus.client.Summary;
-import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.eclipse.collections.api.map.ConcurrentMutableMap;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
-
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 
-import org.finos.legend.depot.tracing.resources.BaseResource;
+import java.util.Collections;
+import java.util.List;
 
 public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
 {
@@ -48,10 +42,10 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
 
     final ConcurrentMutableMap<String, Counter> allCounters = new ConcurrentHashMap<>();
     final ConcurrentMutableMap<String, Counter> allErrorCounters = new ConcurrentHashMap<>();
-    final ConcurrentMutableMap<String, Summary> allSummaries = new ConcurrentHashMap<>();
+    @JsonIgnore
+    public final ConcurrentMutableMap<String, Summary> allSummaries = new ConcurrentHashMap<>();
     final ConcurrentMutableMap<String, Gauge> allGauges = new ConcurrentHashMap<>();
     final ConcurrentMutableMap<String, Histogram> allHistograms = new ConcurrentHashMap<>();
-    final List<String> registeredResources = new ArrayList<>();
 
 
     @JsonProperty
@@ -160,24 +154,6 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
             throw new UnsupportedOperationException("Please register the histogram first if you need labels");
         }
         this.allHistograms.get(getKeyName(name)).labels(labelValues).observe(end - start);
-    }
-
-    @Override
-    public void registerResourceApis(BaseResource baseResource)
-    {
-        if (!registeredResources.contains(baseResource.getClass().getCanonicalName()))
-        {
-            Arrays.stream(baseResource.getClass().getMethods()).forEach(m ->
-            {
-                if (m.isAnnotationPresent(ApiOperation.class))
-                {
-                    ApiOperation val = m.getAnnotation(ApiOperation.class);
-                    String metricName = (val.nickname() != null && !val.nickname().isEmpty() ? val.nickname() : val.value());
-                    this.registerSummary(metricName, metricName);
-                }
-            });
-            registeredResources.add(baseResource.getClass().getCanonicalName());
-        }
     }
 
 

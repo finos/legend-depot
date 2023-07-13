@@ -15,8 +15,6 @@
 
 package org.finos.legend.depot.tracing.api;
 
-import org.finos.legend.depot.tracing.resources.BaseResource;
-
 import java.util.List;
 
 public interface PrometheusMetricsHandler
@@ -48,7 +46,5 @@ public interface PrometheusMetricsHandler
     void registerGauge(String name, String help,List<String> labelNames);
 
     void increaseGauge(String name, int value);
-
-    void registerResourceApis(BaseResource baseResource);
 
 }

@@ -41,6 +41,10 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-servers-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-services</artifactId>
         </dependency>
         <dependency>

@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-authorisation</artifactId>
+            <artifactId>legend-depot-core-http</artifactId>
         </dependency>
         <dependency>
               <groupId>${junit.groupId}</groupId>
@@ -46,6 +46,10 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <!-- DEPOT -->
     </dependencies>

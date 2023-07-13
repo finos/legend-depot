@@ -50,13 +50,6 @@ public class ManageFileGenerationsServiceImpl extends  FileGenerationsServiceImp
     }
 
     @Override
-    public List<StoredFileGeneration> getStoredFileGenerations(String groupId, String artifactId, String versionId)
-    {
-        versionId = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
-        return fileGenerations.find(groupId, artifactId, versionId);
-    }
-
-    @Override
     public long delete(String groupId, String artifactId, String versionId)
     {
         this.projects.checkExists(groupId, artifactId);

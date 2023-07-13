@@ -19,7 +19,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 

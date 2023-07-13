@@ -18,6 +18,7 @@ package org.finos.legend.depot.store.artifacts.services;
 import com.google.inject.name.Named;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.maven.model.Model;
+import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
@@ -237,15 +238,8 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
                 if (!response.hasErrors())
                 {
                     LOGGER.info("Processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                    for (ArtifactType artifactType : ProjectArtifactHandlerFactory.getSupportedTypes())
-                    {
-                        response.combine(handleArtifacts(artifactType, project, event.getVersionId(), event.isFullUpdate()));
-                        if (response.hasErrors())
-                        {
-                            LOGGER.error("Processing {} artifacts for [{}{}{}] failed, skipping other artifacts", artifactType, event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                            break;
-                        }
-                    }
+
+                    ParallelIterate.forEach(ProjectArtifactHandlerFactory.getSupportedTypes(), artifactType -> response.combine(handleArtifacts(artifactType, project, event.getVersionId(), event.isFullUpdate())));
                     LOGGER.info("Finished processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
                     if (!response.hasErrors())
                     {

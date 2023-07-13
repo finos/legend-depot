@@ -197,11 +197,14 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                 {
                     candidateVersions  = repoVersions;
                 }
-                String versionInfoMessage = String.format("%s found [%s] versions to update: %s", projectArtifacts, candidateVersions.size(), candidateVersions);
-                LOGGER.info(versionInfoMessage);
-                response.addMessage(versionInfoMessage);
-                candidateVersions.forEach(v -> response.addMessage(queueWorkToRefreshProjectVersion(projectData, v.toVersionIdString(),true, transitive, parentEventId)));
-                LOGGER.info("Finished processing all versions {}{}", projectData.getGroupId(), projectData.getArtifactId());
+                if (!candidateVersions.isEmpty())
+                {
+                    String versionInfoMessage = String.format("%s found [%s] versions to update: %s", projectArtifacts, candidateVersions.size(), candidateVersions);
+                    LOGGER.info(versionInfoMessage);
+                    response.addMessage(versionInfoMessage);
+                    candidateVersions.forEach(v -> response.addMessage(queueWorkToRefreshProjectVersion(projectData, v.toVersionIdString(), true, transitive, parentEventId)));
+                    LOGGER.info("Finished processing all versions {}{}", projectData.getGroupId(), projectData.getArtifactId());
+                }
             }
         }
         else

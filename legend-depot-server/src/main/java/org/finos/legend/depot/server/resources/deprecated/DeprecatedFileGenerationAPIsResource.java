@@ -19,7 +19,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.finos.legend.depot.domain.generation.file.FileGeneration;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 

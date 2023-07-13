@@ -17,11 +17,9 @@ package org.finos.legend.depot.store.resources.entities;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.eclipse.collections.api.tuple.Pair;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
-import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
@@ -30,7 +28,6 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.security.Principal;

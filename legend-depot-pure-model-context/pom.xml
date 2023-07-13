@@ -46,6 +46,10 @@
             <groupId>org.finos.legend.sdlc</groupId>
             <artifactId>legend-sdlc-protocol-pure</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.finos.legend.engine</groupId>
+            <artifactId>legend-engine-extensions-collection-generation</artifactId>
+        </dependency>
 
         <!-- TEST -->
         <dependency>
@@ -77,11 +81,7 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.finos.legend.engine</groupId>
-            <artifactId>legend-engine-extensions-collection-generation</artifactId>
-            <scope>test</scope>
-        </dependency>
+
         <!-- TEST -->
     </dependencies>
 </project>

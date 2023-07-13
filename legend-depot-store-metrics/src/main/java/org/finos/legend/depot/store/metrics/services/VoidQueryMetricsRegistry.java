@@ -13,24 +13,24 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.services.api.entities;
+package org.finos.legend.depot.store.metrics.services;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
+import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 
-import java.util.List;
+import java.util.Date;
+import java.util.Optional;
 
-
-public interface ManageEntitiesService<T extends StoredEntity> extends EntitiesService<T>
+public class VoidQueryMetricsRegistry implements QueryMetricsRegistry
 {
+    @Override
+    public void record(String groupId, String artifactId, String versionId, Date date)
+    {
+    }
 
-    List<T> getStoredEntities(String groupId, String artifactId, String versionId);
-
-    long  delete(String groupId, String artifactId);
-
-    long delete(String groupId, String artifactId, String versionId);
-
-    void createOrUpdate(List<T> entities);
-
-    List<Pair<String, String>> getOrphanedStoredEntities();
+    @Override
+    public Optional<VersionQueryMetric> findFirst()
+    {
+        return Optional.empty();
+    }
 }
