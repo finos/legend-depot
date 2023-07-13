@@ -356,14 +356,10 @@ public class MavenArtifactRepository implements ArtifactRepository
 
     private Object executeWithTrace(String label, String groupId, String artifactId, String version, Supplier<Object> functionToExecute)
     {
-        return TracerFactory.get().executeWithTrace(label, () ->
-        {
-            Map<String, String> tags = new HashMap<>();
-            tags.put(GROUP_ID, groupId);
-            tags.put(ARTIFACT_ID, artifactId);
-            tags.put(VERSION_ID, version);
-            TracerFactory.get().addTags(tags);
-            return functionToExecute.get();
-        });
+        Map<String, String> tags = new HashMap<>();
+        tags.put(GROUP_ID, groupId);
+        tags.put(ARTIFACT_ID, artifactId);
+        tags.put(VERSION_ID, version);
+        return TracerFactory.get().executeWithTrace(label, () -> functionToExecute.get(),tags);
     }
 }

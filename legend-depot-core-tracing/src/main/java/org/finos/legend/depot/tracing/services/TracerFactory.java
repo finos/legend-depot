@@ -19,6 +19,7 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import io.opentracing.log.Fields;
 import io.opentracing.noop.NoopTracerFactory;
+import io.opentracing.tag.StringTag;
 import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
 import io.prometheus.client.CollectorRegistry;
@@ -122,27 +123,11 @@ public final class TracerFactory
         }
     }
 
-    public void addTags(Map<String, String> tags)
+    public void addTags(Map<String, String> tags,Span span)
     {
-        if (tags != null & !tags.keySet().isEmpty())
+        if (tags != null & !tags.keySet().isEmpty() && span != null)
         {
-            Span currentSpan = GlobalTracer.get().activeSpan();
-            if (currentSpan != null)
-            {
-                tags.keySet().forEach(key -> currentSpan.setTag(key, tags.get(key)));
-            }
-        }
-    }
-
-    public void addLog(Map<String, String> logs)
-    {
-        if (logs != null & !logs.keySet().isEmpty())
-        {
-            Span currentSpan = GlobalTracer.get().activeSpan();
-            if (currentSpan != null)
-            {
-                currentSpan.log(logs);
-            }
+            tags.keySet().forEach(key -> new StringTag(key).set(span,tags.get(key)));
         }
     }
 
@@ -169,7 +154,7 @@ public final class TracerFactory
         try
         {
             child = INSTANCE.startSpan(label);
-            addLog(tags);
+            addTags(tags,child);
             return supplier.get();
         }
         catch (Exception e)
