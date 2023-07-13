@@ -37,13 +37,6 @@ public class ManageEntitiesServiceImpl<T extends StoredEntity> extends EntitiesS
         this.entities = entities;
     }
 
-
-    @Override
-    public List<T> getStoredEntities(String groupId, String artifactId)
-    {
-        return entities.getStoredEntities(groupId, artifactId);
-    }
-
     @Override
     public List<T> getStoredEntities(String groupId, String artifactId, String versionId)
     {
