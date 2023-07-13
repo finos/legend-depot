@@ -77,13 +77,13 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
         return ProjectArtifactHandlerFactory.getSupportedTypes();
     }
 
-    private void decorateSpanWithVersionInfo(String groupId,String artifactId, String versionId)
+    private Map<String, String> decorateSpanWithVersionInfo(String groupId,String artifactId, String versionId)
     {
         Map<String, String> tags = new HashMap<>();  
         tags.put(GROUP_ID, groupId);
         tags.put(ARTIFACT_ID, artifactId);
         tags.put(VERSION_ID, versionId);
-        TracerFactory.get().addTags(tags);
+        return tags;
     }
 
     private StoreProjectVersionData getProjectVersion(String groupId, String artifactId, String versionId)
@@ -96,13 +96,10 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
         return found.get();
     }
 
-    //TODO: whenever we delete versions we need a way to recompute/deal with the dependencies cache for that project version
-
     @Override
     public void delete(String groupId, String artifactId, String versionId)
     {
-        decorateSpanWithVersionInfo(groupId, artifactId, versionId);
-        TracerFactory.get().executeWithTrace(DELETE_VERSION, () ->
+        TracerFactory.get().executeWithTrace(DELETE_VERSION,  () ->
         {
             getSupportedArtifactTypes().forEach(artifactType ->
             {
@@ -115,13 +112,12 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
             PrometheusMetricsFactory.getInstance().incrementCount(VERSION_DELETE_COUNTER);
             LOGGER.info(String.format("%s-%s-%s artifacts deleted", groupId, artifactId, versionId));
             return projects.delete(groupId, artifactId, versionId);
-        });
+        },decorateSpanWithVersionInfo(groupId, artifactId, versionId));
     }
 
     @Override
     public void evict(String groupId, String artifactId, String versionId)
     {
-        decorateSpanWithVersionInfo(groupId, artifactId, versionId);
         TracerFactory.get().executeWithTrace(EVICT_VERSION, () ->
         {
             getSupportedArtifactTypes().forEach(artifactType ->
@@ -138,13 +134,12 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
             LOGGER.info(String.format("%s-%s-%s evicted", groupId, artifactId, versionId));
             PrometheusMetricsFactory.getInstance().incrementCount(VERSION_PURGE_COUNTER);
             return projects.createOrUpdate(projectData);
-        });
+        },decorateSpanWithVersionInfo(groupId, artifactId, versionId));
     }
 
     @Override
     public MetadataEventResponse deprecate(String groupId, String artifactId, String versionId)
     {
-        decorateSpanWithVersionInfo(groupId, artifactId, versionId);
         return TracerFactory.get().executeWithTrace(DEPRECATE_VERSION, () ->
         {
             MetadataEventResponse response = new MetadataEventResponse();
@@ -153,7 +148,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
             response.addMessage(String.format("%s-%s-%s deprecated", groupId, artifactId, versionId));
             projects.createOrUpdate(projectData);
             return response;
-        });
+        },decorateSpanWithVersionInfo(groupId, artifactId, versionId));
     }
 
     @Override
