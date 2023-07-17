@@ -31,6 +31,6 @@ public interface ArtifactsRefreshService
 
     MetadataEventResponse refreshAllVersionsForAllProjects(boolean fullUpdate,boolean allVersions,boolean transitive, String parentEventId);
 
-    MetadataEventResponse refreshSnapshotsForAllProjects(boolean fullUpdate, boolean transitive, String parentEventId);
+    MetadataEventResponse refreshDefaultSnapshotsForAllProjects(boolean fullUpdate, boolean transitive, String parentEventId);
 
 }

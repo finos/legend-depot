@@ -281,6 +281,22 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     }
 
     @Test
+    public void canRefreshOnlyDefaultSnapshotVersions()
+    {
+        MetadataEventResponse response = artifactsRefreshService.refreshDefaultSnapshotsForAllProjects(false, false, PARENT_EVENT_ID);
+        Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
+        Assert.assertEquals(2,notificationsQueueManager.getAllInQueue().size());
+        notificationsQueueManager.handleAll();
+
+        projectsService.createOrUpdate(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "branch1-SNAPSHOT"));
+
+        response = artifactsRefreshService.refreshDefaultSnapshotsForAllProjects(false, false, PARENT_EVENT_ID);
+        Assert.assertEquals(MetadataEventStatus.SUCCESS, response.getStatus());
+        Assert.assertEquals(2,notificationsQueueManager.getAllInQueue().size());
+        notificationsQueueManager.handleAll();
+    }
+
+    @Test
     public void canRefreshAllVersionExceptForEvictedSnapshot()
     {
         MetadataEventResponse response = artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, true, true,true,PARENT_EVENT_ID);
