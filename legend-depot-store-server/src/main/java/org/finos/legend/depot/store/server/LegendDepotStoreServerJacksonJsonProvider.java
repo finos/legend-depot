@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.server;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
@@ -33,8 +32,7 @@ public class LegendDepotStoreServerJacksonJsonProvider extends JacksonJsonProvid
     {
         objectMapper = new ObjectMapper()
                 .setTimeZone(TimeZone.getDefault())
-                .setDateFormat(SIMPLE_DATE_FORMAT)
-                .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+                .setDateFormat(SIMPLE_DATE_FORMAT);
     }
 
     @Override
