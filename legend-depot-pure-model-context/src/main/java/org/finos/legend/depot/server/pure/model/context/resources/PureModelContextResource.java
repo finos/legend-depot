@@ -56,8 +56,8 @@ public class PureModelContextResource extends BaseResource
                                                         @QueryParam("clientVersion") String clientVersion,
                                                         @QueryParam("getDependencies")
                                                         @DefaultValue("true")
-                                                        @ApiParam("Whether to include entities from dependencies") boolean getDependencies)
+                                                        @ApiParam("Whether to include entities from dependencies") boolean transitive)
     {
-        return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, getDependencies));
+        return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, transitive));
     }
 }

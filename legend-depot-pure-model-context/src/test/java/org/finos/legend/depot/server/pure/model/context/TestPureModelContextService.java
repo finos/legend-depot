@@ -15,9 +15,13 @@
 
 package org.finos.legend.depot.server.pure.model.context;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
+import org.finos.legend.depot.server.pure.model.context.api.PureModelContextServiceException;
 import org.finos.legend.depot.server.pure.model.context.services.PureModelContextServiceImpl;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
@@ -34,6 +38,7 @@ import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.engine.protocol.pure.v1.model.context.AlloySDLC;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
+import org.finos.legend.engine.shared.core.ObjectMapperFactory;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;
 import org.junit.Before;
@@ -63,6 +68,30 @@ public class TestPureModelContextService extends TestBaseServices
     ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metricsRegistry, queue, new ProjectsConfiguration("master"));
     private final PureModelContextService service = new PureModelContextServiceImpl(new EntitiesServiceImpl(entitiesStore, projectsService), projectsService);
 
+    private final ObjectMapper objectMapper = ObjectMapperFactory.getNewStandardObjectMapperWithPureProtocolExtensionSupports().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+    private String getPureModelContextDataAsString(String groupId, String artifactId, String versionId, String clientVersion, boolean getDependencies)
+    {
+        return toString(service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, getDependencies));
+    }
+
+    private String toString(PureModelContextData contextData)
+    {
+        if (contextData.getElements().isEmpty())
+        {
+            return null;
+        }
+        try
+        {
+            return objectMapper.writeValueAsString(contextData);
+        }
+        catch (JsonProcessingException e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+    }
 
     @Before
     public void setupMetadata()
@@ -81,7 +110,7 @@ public class TestPureModelContextService extends TestBaseServices
     public void canGetEntitiesForProjectAsPureModelContextData()
     {
 
-        String modelContextDataAsString = service.getPureModelContextDataAsString(TEST_GROUP_ID, "test", "2.2.0", CLIENT_VERSION, false);
+        String modelContextDataAsString = getPureModelContextDataAsString(TEST_GROUP_ID, "test", "2.2.0", CLIENT_VERSION, false);
         Assert.assertNotNull(modelContextDataAsString);
         Assert.assertEquals("{\"_type\":\"data\",\"elements\":[{\"_type\":\"profile\",\"name\":\"TestProfile\",\"package\":\"examples::metadata::test\",\"stereotypes\":[],\"tags\":[]},{\"_type\":\"class\",\"constraints\":[],\"name\":\"ClientBasic\",\"originalMilestonedProperties\":[],\"package\":\"examples::metadata::test\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"Name\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"EntityId\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Integer\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IsActive\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Boolean\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"RiskScore\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Float\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IncorporationDate\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"StrictDate\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"OptionalAlternativeName\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"newProperty\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"profile\",\"name\":\"TestProfileTwo\",\"package\":\"examples::metadata::test::subpackage\",\"stereotypes\":[],\"tags\":[]}],\"origin\":{\"_type\":\"pointer\",\"sdlcInfo\":{\"_type\":\"alloy\",\"baseVersion\":\"2.2.0\",\"packageableElementPointers\":[],\"project\":\"examples.metadata:test\",\"version\":\"none\"},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}}", modelContextDataAsString);
     }
@@ -89,19 +118,19 @@ public class TestPureModelContextService extends TestBaseServices
     @Test(expected = RuntimeException.class)
     public void testNonExistentProjectOrVersion()
     {
-        service.getPureModelContextDataAsString("non-existent-project", "tst", "2.0.0", CLIENT_VERSION, false);
+        getPureModelContextDataAsString("non-existent-project", "tst", "2.0.0", CLIENT_VERSION, false);
     }
 
     @Test(expected = RuntimeException.class)
     public void testNonExistentProjectOrVersion1()
     {
-        service.getPureModelContextDataAsString(TEST_GROUP_ID, "non-existent-version", "test", CLIENT_VERSION, false);
+        getPureModelContextDataAsString(TEST_GROUP_ID, "non-existent-version", "test", CLIENT_VERSION, false);
     }
 
     @Test
     public void canGetEntitiesAsPureModelContextData()
     {
-        String modelContextDataAsString = service.getPureModelContextDataAsString(TEST_GROUP_ID, "test", BRANCH_SNAPSHOT("master"), CLIENT_VERSION, false);
+        String modelContextDataAsString = getPureModelContextDataAsString(TEST_GROUP_ID, "test", BRANCH_SNAPSHOT("master"), CLIENT_VERSION, false);
         Assert.assertNotNull(modelContextDataAsString);
         Assert.assertEquals("{\"_type\":\"data\",\"elements\":[{\"_type\":\"class\",\"constraints\":[],\"name\":\"ClassWithDependency\",\"originalMilestonedProperties\":[],\"package\":\"examples::metadata::test\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"Name\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"profile\",\"name\":\"TestProfile\",\"package\":\"examples::metadata::test\",\"stereotypes\":[],\"tags\":[]},{\"_type\":\"class\",\"constraints\":[],\"name\":\"ClientBasic\",\"originalMilestonedProperties\":[],\"package\":\"examples::metadata::test\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"Name\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"EntityId\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Integer\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IsActive\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Boolean\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"RiskScore\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Float\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IncorporationDate\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"StrictDate\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"OptionalAlternativeName\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"newProperty\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"profile\",\"name\":\"TestProfileTwo\",\"package\":\"examples::metadata::test::subpackage\",\"stereotypes\":[],\"tags\":[]}],\"origin\":{\"_type\":\"pointer\",\"sdlcInfo\":{\"_type\":\"alloy\",\"baseVersion\":\"master-SNAPSHOT\",\"packageableElementPointers\":[],\"project\":\"examples.metadata:test\",\"version\":\"none\"},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}}", modelContextDataAsString);
     }
@@ -109,7 +138,7 @@ public class TestPureModelContextService extends TestBaseServices
     @Test(expected = IllegalArgumentException.class)
     public void testNonExistentProject()
     {
-        service.getPureModelContextDataAsString("non.existent.project", "test",BRANCH_SNAPSHOT("master"), CLIENT_VERSION, false);
+        getPureModelContextDataAsString("non.existent.project", "test",BRANCH_SNAPSHOT("master"), CLIENT_VERSION, false);
     }
 
     @Test
@@ -118,7 +147,7 @@ public class TestPureModelContextService extends TestBaseServices
 
         EntitiesService mockVersions = Mockito.mock(EntitiesService.class);
         PureModelContextService newService = new PureModelContextServiceImpl(mockVersions, projectsService);
-        Assert.assertThrows("project version not found for test.legend-blank-prod-master-SNAPSHOT", IllegalArgumentException.class, () -> newService.getPureModelContextDataAsString("test.legend", "blank-prod", BRANCH_SNAPSHOT("master"), CLIENT_VERSION, false));
+        Assert.assertThrows("project version not found for test.legend-blank-prod-master-SNAPSHOT", IllegalArgumentException.class, () -> getPureModelContextDataAsString("test.legend", "blank-prod", BRANCH_SNAPSHOT("master"), CLIENT_VERSION, false));
     }
 
     @Test
@@ -136,7 +165,7 @@ public class TestPureModelContextService extends TestBaseServices
         Assert.assertEquals(5, entityList2.size());
         Assert.assertEquals(6, entityList3.size());
 
-        String modelContextDataAsString = service.getPureModelContextDataAsString("test.legend", "blank-prod", "2.0.0", CLIENT_VERSION, true);
+        String modelContextDataAsString = getPureModelContextDataAsString("test.legend", "blank-prod", "2.0.0", CLIENT_VERSION, true);
         Assert.assertNotNull(modelContextDataAsString);
         Assert.assertEquals("{\"_type\":\"data\",\"elements\":[{\"_type\":\"service\",\"autoActivateUpdates\":true,\"documentation\":\"\",\"execution\":{\"_type\":\"pureMultiExecution\",\"executionKey\":\"env\",\"executionParameters\":[{\"key\":\"PROD\",\"mapping\":\"mapping::SomeMapping\",\"runtime\":{\"_type\":\"runtimePointer\",\"runtime\":\"runtime::H2Runtime\"}},{\"key\":\"DEV\",\"mapping\":\"mapping::SomeMapping\",\"runtime\":{\"_type\":\"runtimePointer\",\"runtime\":\"runtime::H2Runtime\"}}],\"func\":{\"_type\":\"lambda\",\"body\":[{\"_type\":\"func\",\"function\":\"project\",\"parameters\":[{\"_type\":\"func\",\"function\":\"getAll\",\"parameters\":[{\"_type\":\"packageableElementPtr\",\"fullPath\":\"domain::COVIDData\"}]},{\"_type\":\"collection\",\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"values\":[{\"_type\":\"lambda\",\"body\":[{\"_type\":\"property\",\"parameters\":[{\"_type\":\"var\",\"name\":\"x\"}],\"property\":\"cases\"}],\"parameters\":[{\"_type\":\"var\",\"name\":\"x\"}]}]},{\"_type\":\"collection\",\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"values\":[{\"_type\":\"string\",\"value\":\"Cases\"}]}]}],\"parameters\":[]}},\"name\":\"SomeService\",\"owners\":[\"anonymous\",\"akphi\"],\"package\":\"service\",\"pattern\":\"/9566f101-2108-408f-863f-6d7e154dc17a\",\"postValidations\":[],\"stereotypes\":[],\"taggedValues\":[]},{\"_type\":\"class\",\"constraints\":[],\"name\":\"Person\",\"originalMilestonedProperties\":[],\"package\":\"test::legend::blank_prod::v2_0_0::blank\",\"properties\":[],\"qualifiedProperties\":[],\"sourceInformation\":{\"endColumn\":1,\"endLine\":3,\"sourceId\":\"\",\"startColumn\":1,\"startLine\":1},\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"class\",\"constraints\":[],\"name\":\"test\",\"originalMilestonedProperties\":[],\"package\":\"test::legend::metadata::test::v3_0_0::com\",\"properties\":[],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"class\",\"constraints\":[],\"name\":\"ClassWithDependency\",\"originalMilestonedProperties\":[],\"package\":\"test::legend::metadata::test::v3_0_0::test::legend::metadata::test\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"Name\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"class\",\"constraints\":[],\"name\":\"ClientBasic\",\"originalMilestonedProperties\":[],\"package\":\"test::legend::metadata::test::v3_0_0::test::legend::metadata::test\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"Name\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"EntityId\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Integer\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IsActive\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Boolean\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"RiskScore\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Float\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IncorporationDate\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"StrictDate\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"OptionalAlternativeName\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"newProperty\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"profile\",\"name\":\"TestProfile\",\"package\":\"test::legend::metadata::test::v3_0_0::test::legend::metadata::test\",\"stereotypes\":[],\"tags\":[]},{\"_type\":\"profile\",\"name\":\"TestProfileTwo\",\"package\":\"test::legend::metadata::test::v3_0_0::test::legend::metadata::test::subpackage\",\"stereotypes\":[],\"tags\":[]}],\"origin\":{\"_type\":\"pointer\",\"sdlcInfo\":{\"_type\":\"alloy\",\"baseVersion\":\"2.0.0\",\"packageableElementPointers\":[],\"project\":\"test.legend:blank-prod\",\"version\":\"none\"},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}}", modelContextDataAsString);
 
@@ -153,7 +182,7 @@ public class TestPureModelContextService extends TestBaseServices
         Assert.assertNotNull(entityList1);
         Assert.assertEquals(2, entityList1.size());
 
-        String modelContextDataAsString = service.getPureModelContextDataAsString("test.legend", "blank-prod", "latest", CLIENT_VERSION,  false);
+        String modelContextDataAsString = getPureModelContextDataAsString("test.legend", "blank-prod", "latest", CLIENT_VERSION,  false);
         Assert.assertNotNull(modelContextDataAsString);
         Assert.assertEquals("{\"_type\":\"data\",\"elements\":[{\"_type\":\"service\",\"autoActivateUpdates\":true,\"documentation\":\"\",\"execution\":{\"_type\":\"pureMultiExecution\",\"executionKey\":\"env\",\"executionParameters\":[{\"key\":\"PROD\",\"mapping\":\"mapping::SomeMapping\",\"runtime\":{\"_type\":\"runtimePointer\",\"runtime\":\"runtime::H2Runtime\"}},{\"key\":\"DEV\",\"mapping\":\"mapping::SomeMapping\",\"runtime\":{\"_type\":\"runtimePointer\",\"runtime\":\"runtime::H2Runtime\"}}],\"func\":{\"_type\":\"lambda\",\"body\":[{\"_type\":\"func\",\"function\":\"project\",\"parameters\":[{\"_type\":\"func\",\"function\":\"getAll\",\"parameters\":[{\"_type\":\"packageableElementPtr\",\"fullPath\":\"domain::COVIDData\"}]},{\"_type\":\"collection\",\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"values\":[{\"_type\":\"lambda\",\"body\":[{\"_type\":\"property\",\"parameters\":[{\"_type\":\"var\",\"name\":\"x\"}],\"property\":\"cases\"}],\"parameters\":[{\"_type\":\"var\",\"name\":\"x\"}]}]},{\"_type\":\"collection\",\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"values\":[{\"_type\":\"string\",\"value\":\"Cases\"}]}]}],\"parameters\":[]}},\"name\":\"SomeService\",\"owners\":[\"anonymous\",\"akphi\"],\"package\":\"service\",\"pattern\":\"/9566f101-2108-408f-863f-6d7e154dc17a\",\"postValidations\":[],\"stereotypes\":[],\"taggedValues\":[]},{\"_type\":\"class\",\"constraints\":[],\"name\":\"Person\",\"originalMilestonedProperties\":[],\"package\":\"test::legend::blank_prod::v2_0_0::blank\",\"properties\":[],\"qualifiedProperties\":[],\"sourceInformation\":{\"endColumn\":1,\"endLine\":3,\"sourceId\":\"\",\"startColumn\":1,\"startLine\":1},\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]}],\"origin\":{\"_type\":\"pointer\",\"sdlcInfo\":{\"_type\":\"alloy\",\"baseVersion\":\"2.0.0\",\"packageableElementPointers\":[],\"project\":\"test.legend:blank-prod\",\"version\":\"none\"},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}}", modelContextDataAsString);
     }
@@ -161,7 +190,7 @@ public class TestPureModelContextService extends TestBaseServices
     @Test
     public void canGetEntitiesForProjectAsPureModelContextDataWithMetricsStored()
     {
-        service.getPureModelContextDataAsString("examples.metadata", "test", "2.3.1", CLIENT_VERSION,  true);
+        getPureModelContextDataAsString("examples.metadata", "test", "2.3.1", CLIENT_VERSION,  true);
         metricsHandler.persistMetrics();
         Assert.assertEquals(metrics.getAll().size(), 5);
         Assert.assertNotNull(metrics.get("examples.metadata", "test-dependencies", "1.0.0").get(0).getLastQueryTime());
@@ -171,7 +200,7 @@ public class TestPureModelContextService extends TestBaseServices
     @Test
     public void canGetEntitiesAsPureModelContextDataWithHeadVersionAlias()
     {
-        String modelContextDataAsString = service.getPureModelContextDataAsString(TEST_GROUP_ID, "test", "head", CLIENT_VERSION, false);
+        String modelContextDataAsString = getPureModelContextDataAsString(TEST_GROUP_ID, "test", "head", CLIENT_VERSION, false);
         Assert.assertNotNull(modelContextDataAsString);
         Assert.assertEquals("{\"_type\":\"data\",\"elements\":[{\"_type\":\"class\",\"constraints\":[],\"name\":\"ClassWithDependency\",\"originalMilestonedProperties\":[],\"package\":\"examples::metadata::test\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"Name\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"profile\",\"name\":\"TestProfile\",\"package\":\"examples::metadata::test\",\"stereotypes\":[],\"tags\":[]},{\"_type\":\"class\",\"constraints\":[],\"name\":\"ClientBasic\",\"originalMilestonedProperties\":[],\"package\":\"examples::metadata::test\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"Name\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"EntityId\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Integer\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IsActive\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Boolean\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"RiskScore\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"Float\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"IncorporationDate\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"StrictDate\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"OptionalAlternativeName\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":0,\"upperBound\":1},\"name\":\"newProperty\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},{\"_type\":\"profile\",\"name\":\"TestProfileTwo\",\"package\":\"examples::metadata::test::subpackage\",\"stereotypes\":[],\"tags\":[]}],\"origin\":{\"_type\":\"pointer\",\"sdlcInfo\":{\"_type\":\"alloy\",\"baseVersion\":\"master-SNAPSHOT\",\"packageableElementPointers\":[],\"project\":\"examples.metadata:test\",\"version\":\"none\"},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}},\"serializer\":{\"name\":\"pure\",\"version\":\"vX_X_X\"}}", modelContextDataAsString);
     }
