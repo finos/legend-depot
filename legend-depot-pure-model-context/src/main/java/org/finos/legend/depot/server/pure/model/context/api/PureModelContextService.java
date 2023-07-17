@@ -19,7 +19,5 @@ import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextDa
 
 public interface PureModelContextService
 {
-    String getPureModelContextDataAsString(String groupId, String artifactId, String versionId, String clientVersion, boolean getDependencies);
-
-    PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean getDependencies);
+    PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean transitive);
 }
