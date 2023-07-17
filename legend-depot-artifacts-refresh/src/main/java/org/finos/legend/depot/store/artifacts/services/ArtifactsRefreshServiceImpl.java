@@ -22,6 +22,7 @@ import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
@@ -97,7 +98,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     }
 
     @Override
-    public MetadataEventResponse refreshSnapshotsForAllProjects(boolean fullUpdate, boolean transitive, String parentEventId)
+    public MetadataEventResponse refreshDefaultSnapshotsForAllProjects(boolean fullUpdate, boolean transitive, String parentEventId)
     {
         String parentEvent = ParentEvent.build(ALL, ALL, ALL_SNAPSHOT,parentEventId);
         MetadataNotification masterSnapshotAllProjects = new MetadataNotification(ALL,ALL,ALL,ALL_SNAPSHOT,fullUpdate,transitive,parentEvent);
@@ -107,7 +108,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                     String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",ALL,ALL,ALL_SNAPSHOT,parentEvent,fullUpdate,transitive);
                     result.addMessage(message);
                     LOGGER.info(message);
-                    ParallelIterate.forEach(projects.getAllProjectCoordinates(),project -> result.combine(refreshAllSNAPSHOTVersionsForProject(project,fullUpdate,transitive,parentEvent)));
+                    ParallelIterate.forEach(projects.getAllProjectCoordinates(),project -> result.combine(refreshAllDefaultSNAPSHOTVersionsForProject(project,fullUpdate,transitive,parentEvent)));
                     return result;
                 }
         );
@@ -125,24 +126,23 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
             String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/allVersions/transitive :[%s/%s/%s]", groupId, artifactId, ALL, parentEvent, fullUpdate, allVersions, transitive);
             result.addMessage(message);
             LOGGER.info(message);
-            result.combine(refreshAllSNAPSHOTVersionsForProject(projectData, fullUpdate, transitive, parentEvent));
+            result.combine(refreshAllDefaultSNAPSHOTVersionsForProject(projectData, fullUpdate, transitive, parentEvent));
             result.combine(refreshAllVersionsForProject(projectData, allVersions, transitive, parentEvent));
             return result;
         });
     }
 
-    private MetadataEventResponse refreshAllSNAPSHOTVersionsForProject(StoreProjectData projectData,boolean fullUpdate, boolean transitive, String parentEvent)
+    private MetadataEventResponse refreshAllDefaultSNAPSHOTVersionsForProject(StoreProjectData projectData, boolean fullUpdate, boolean transitive, String parentEvent)
     {
         String parentEventId = ParentEvent.build(projectData.getGroupId(), projectData.getArtifactId(), ALL_SNAPSHOT, parentEvent);
         MetadataEventResponse response = new MetadataEventResponse();
-        List<String> snapshots = this.projects.findSnapshotVersions(projectData.getGroupId(), projectData.getArtifactId())
-                .stream().filter(versionData -> !versionData.isEvicted()).map(versionData -> versionData.getVersionId()).collect(Collectors.toList());
-        snapshots.forEach(v ->
+        Optional<StoreProjectVersionData> storeProjectVersionData = this.projects.find(projectData.getGroupId(), projectData.getArtifactId(), VersionAlias.HEAD.getName());
+        if (storeProjectVersionData.isPresent() && !storeProjectVersionData.get().isEvicted())
         {
-            String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]", projectData.getGroupId(), projectData.getArtifactId(), v, parentEvent, fullUpdate, transitive);
+            String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]", projectData.getGroupId(), projectData.getArtifactId(), storeProjectVersionData.get().getVersionData(), parentEvent, fullUpdate, transitive);
             LOGGER.info(message);
-            response.addMessage(queueWorkToRefreshProjectVersion(projectData, v, fullUpdate,transitive, parentEventId));
-        });
+            response.addMessage(queueWorkToRefreshProjectVersion(projectData, storeProjectVersionData.get().getVersionId(), fullUpdate,transitive, parentEventId));
+        }
         return response;
     }
 

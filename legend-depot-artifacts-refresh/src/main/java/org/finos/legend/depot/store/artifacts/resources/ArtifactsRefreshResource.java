@@ -112,7 +112,7 @@ public class ArtifactsRefreshResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.UPDATE_ALL_SNAPSHOTS, () ->
         {
             validateUser();
-            return artifactsRefreshService.refreshSnapshotsForAllProjects(fullUpdate,transitive, ParentEvent.UPDATE_ALL_PROJECT_ALL_SNAPSHOTS.name());
+            return artifactsRefreshService.refreshDefaultSnapshotsForAllProjects(fullUpdate,transitive, ParentEvent.UPDATE_ALL_PROJECT_ALL_SNAPSHOTS.name());
         });
     }
 
