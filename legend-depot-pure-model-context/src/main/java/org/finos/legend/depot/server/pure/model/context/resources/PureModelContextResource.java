@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
-import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
+import org.finos.legend.engine.protocol.pure.PureClientVersions;
 
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -30,7 +30,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.EntityTag;
+
+import java.util.Arrays;
 
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_AS_PMCD;
 
@@ -39,6 +45,7 @@ import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing
 public class PureModelContextResource extends BaseResource
 {
     private final PureModelContextService service;
+    private final String headAlias = "vX_X_X";
 
     @Inject
     public PureModelContextResource(PureModelContextService service)
@@ -50,14 +57,31 @@ public class PureModelContextResource extends BaseResource
     @Path("projects/{groupId}/{artifactId}/versions/{versionId}/pureModelContextData")
     @ApiOperation(GET_VERSION_ENTITIES_AS_PMCD)
     @Produces(MediaType.APPLICATION_JSON)
-    public PureModelContextData getPureModelContextData(@PathParam("groupId") String groupId,
-                                                        @PathParam("artifactId") String artifactId,
-                                                        @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT)  String versionId,
-                                                        @QueryParam("clientVersion") String clientVersion,
-                                                        @QueryParam("getDependencies")
+    public Response getPureModelContextData(@PathParam("groupId") String groupId,
+                                            @PathParam("artifactId") String artifactId,
+                                            @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT)  String versionId,
+                                            @QueryParam("clientVersion") String clientVersion,
+                                            @QueryParam("getDependencies")
                                                         @DefaultValue("true")
-                                                        @ApiParam("Whether to include entities from dependencies") boolean transitive)
+                                                        @ApiParam("Whether to include entities from dependencies") boolean transitive,
+                                                        @Context Request request)
     {
-        return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, transitive));
+        return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, transitive), request, () -> this.generateETag(groupId, artifactId, versionId, clientVersion));
+    }
+
+    private EntityTag generateETag(String groupId, String artifactId, String versionId, String clientVersion)
+    {
+        if (!VersionValidator.isSnapshotVersion(versionId) && !VersionValidator.isVersionAlias(versionId))
+        {
+            if (clientVersion != null && clientVersion.equalsIgnoreCase(headAlias))
+            {
+                return null;
+            }
+            return calculateEtag(Arrays.asList(groupId, artifactId, versionId, clientVersion == null ? PureClientVersions.production : clientVersion));
+        }
+        else
+        {
+            return null;
+        }
     }
 }

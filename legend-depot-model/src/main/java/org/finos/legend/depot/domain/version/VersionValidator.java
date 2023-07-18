@@ -17,6 +17,8 @@ package org.finos.legend.depot.domain.version;
 
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
+import java.util.Arrays;
+
 public class VersionValidator
 {
     public static String BRANCH_SNAPSHOT(String branchName)
@@ -52,5 +54,10 @@ public class VersionValidator
     public static boolean isSnapshotVersion(String versionId)
     {
         return versionId.endsWith(SNAPSHOT);
+    }
+
+    public static boolean isVersionAlias(String versionId)
+    {
+        return Arrays.stream(VersionAlias.values()).filter(alias -> alias.getName().equalsIgnoreCase(versionId)).count() != 0;
     }
 }

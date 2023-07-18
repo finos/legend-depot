@@ -20,6 +20,7 @@ import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.services.api.serverInfo.InfoService;
 import org.finos.legend.depot.services.api.versionedEntities.VersionedEntitiesService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.entities.EntityClassifierServiceImpl;
@@ -38,11 +39,13 @@ public class ReadDataServicesModule extends PrivateModule
         bind(EntityClassifierService.class).to(EntityClassifierServiceImpl.class);
         bind(ProjectsService.class).to(ProjectsServiceImpl.class);
         bind(FileGenerationsService.class).to(FileGenerationsServiceImpl.class);
+        bind(InfoService.class);
 
         expose(ProjectsService.class);
         expose(EntitiesService.class);
         expose(VersionedEntitiesService.class);
         expose(EntityClassifierService.class);
         expose(FileGenerationsService.class);
+        expose(InfoService.class);
     }
 }

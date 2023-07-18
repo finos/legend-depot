@@ -23,6 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class BaseResource
@@ -94,11 +98,36 @@ public class BaseResource
         return TracerFactory.get().executeWithTrace(label, () -> handleWithLogging(resourceAPIMetricName, label, supplier));
     }
 
+    protected <T> Response handle(String resourceAPIMetricName, String label, Supplier<T> supplier, Request request, Supplier<EntityTag> etagSupplier)
+    {
+        Logger logger = this.getLogger();
+        EntityTag serverTag;
+        try
+        {
+            serverTag = etagSupplier.get();
+        }
+        catch (Exception e)
+        {
+            logger.error("Etag generation failed ", e);
+            serverTag = null;
+        }
+        if (serverTag != null && request != null && request.evaluatePreconditions(serverTag) != null)
+        {
+            return Response.noContent().status(Response.Status.NOT_MODIFIED).build();
+        }
+        T output = handle(resourceAPIMetricName, label, supplier);
+        Response.ResponseBuilder responseBuilder = Response.ok(output);
+        if (serverTag != null)
+        {
+            responseBuilder.tag(serverTag);
+        }
+        return responseBuilder.build();
+    }
+
     protected <T> T handle(String label, Supplier<T> supplier)
     {
         return handle(label, label, supplier);
     }
-
 
     private void registerResourceApisMetrics(BaseResource baseResource)
     {
@@ -115,5 +144,17 @@ public class BaseResource
             });
             return resourceName;
         });
+    }
+
+    protected <T> Response handle(String label, Supplier<T> supplier, Request request, Supplier<EntityTag> entityTagSupplier)
+    {
+        return handle(label, label, supplier, request, entityTagSupplier);
+    }
+
+    protected EntityTag calculateEtag(List<String> params)
+    {
+        StringBuilder etagBuilder = new StringBuilder();
+        params.forEach(param -> etagBuilder.append(param));
+        return new EntityTag(etagBuilder.toString());
     }
 }
