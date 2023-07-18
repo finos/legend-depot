@@ -16,8 +16,7 @@
 package org.finos.legend.depot.server;
 
 import com.google.inject.Module;
-import com.hubspot.dropwizard.guicier.GuiceBundle;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.jersey.setup.JerseyEnvironment;
 import org.finos.legend.depot.core.http.BaseServer;
 import org.finos.legend.depot.core.http.resources.InfoPageModule;
 import org.finos.legend.depot.server.configuration.DepotServerConfiguration;
@@ -63,15 +62,8 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
     }
 
     @Override
-    protected GuiceBundle<DepotServerConfiguration> buildGuiceBundle(List<Module> serverModules)
+    public void registerJacksonJsonProvider(JerseyEnvironment jerseyEnvironment)
     {
-        return GuiceBundle.defaultBuilder(DepotServerConfiguration.class).modules(serverModules).build();
-    }
-
-    @Override
-    public void run(DepotServerConfiguration configuration, Environment environment)
-    {
-        super.run(configuration, environment);
-        environment.jersey().register(LegendDepotServerJacksonJsonProvider.class);
+        jerseyEnvironment.register(new LegendDepotServerJacksonJsonProvider());
     }
 }

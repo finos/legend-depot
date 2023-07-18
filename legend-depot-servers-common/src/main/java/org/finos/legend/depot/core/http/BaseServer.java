@@ -23,6 +23,7 @@ import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
+import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
@@ -76,17 +77,24 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
         });
 
         // Enable variable substitution with environment variables
-        bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(true)));
-        bootstrap.addBundle(buildGuiceBundle(getServerModules()));
+        bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(isEnvironmentVariableSubstitutionStrict())));
+        bootstrap.addBundle(GuiceBundle.defaultBuilder(bootstrap.getApplication().getConfigurationClass()).modules(getServerModules()).build());
+        configureObjectMapper(bootstrap);
+    }
+
+    protected boolean isEnvironmentVariableSubstitutionStrict()
+    {
+        return true;
+    }
+
+    protected void configureObjectMapper(Bootstrap<T> bootstrap)
+    {
         StorageConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
         TracingAuthenticationProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
         PrometheusMetricsProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
     }
 
     protected abstract List<Module> getServerModules();
-
-    protected abstract GuiceBundle<T> buildGuiceBundle(List<Module> serverModules);
-
 
     @Override
     public void run(T configuration, Environment environment)
@@ -112,6 +120,7 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
         environment.jersey().register(MultiPartFeature.class);
         environment.jersey().register(new LegendSDLCServerExceptionMapper());
         environment.jersey().register(new JsonProcessingExceptionMapper(true));
+        registerJacksonJsonProvider(environment.jersey());
 
         environment.healthChecks().register("HealthCheck", new HealthCheck()
         {
@@ -126,6 +135,8 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
         initialisePrometheusMetrics(environment);
         initialiseOpenTracing(environment);
     }
+
+    protected abstract void registerJacksonJsonProvider(JerseyEnvironment jerseyEnvironment);
 
     private void registerLifeCycleListener(T configuration, Environment environment)
     {
