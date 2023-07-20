@@ -27,7 +27,6 @@ import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.services.api.serverInfo.InfoService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
@@ -40,8 +39,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.EntityTag;
-import java.util.Arrays;
 import java.util.Optional;
 
 @Path("")
@@ -50,13 +47,11 @@ public class ProjectsVersionsResource extends BaseResource
 {
 
     private final ProjectsService projectVersionApi;
-    private final InfoService infoService;
 
     @Inject
-    public ProjectsVersionsResource(ProjectsService projectVersionApi, InfoService infoService)
+    public ProjectsVersionsResource(ProjectsService projectVersionApi)
     {
         this.projectVersionApi = projectVersionApi;
-        this.infoService = infoService;
     }
 
     @GET
@@ -77,7 +72,7 @@ public class ProjectsVersionsResource extends BaseResource
                 return Optional.of(new ProjectVersionDTO(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), pv.getVersionData()));
             }
             return Optional.empty();
-        }, request, () -> this.generateETag(groupId, artifactId, versionId, this.infoService.getServerInfo().getPlatform().getVersion()));
+        }, request, () -> null);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -117,18 +112,6 @@ public class ProjectsVersionsResource extends BaseResource
         public int hashCode()
         {
             return HashCodeBuilder.reflectionHashCode(this);
-        }
-    }
-
-    private EntityTag generateETag(String groupId, String artifactId, String versionId, String serverVersion)
-    {
-        if (!VersionValidator.isSnapshotVersion(versionId) && !VersionValidator.isVersionAlias(versionId))
-        {
-            return calculateEtag(Arrays.asList(groupId, artifactId, versionId, serverVersion));
-        }
-        else
-        {
-            return null;
         }
     }
 
