@@ -71,13 +71,10 @@ public class PureModelContextResource extends BaseResource
 
     private EntityTag generateETag(String groupId, String artifactId, String versionId, String clientVersion)
     {
-        if (!VersionValidator.isSnapshotVersion(versionId) && !VersionValidator.isVersionAlias(versionId))
+        if (VersionValidator.isSnapshotVersion(versionId) || VersionValidator.isVersionAlias(versionId) || (clientVersion != null && clientVersion.equalsIgnoreCase(HEAD_PROTOCOL_VERSION)))
         {
-            if (clientVersion == null || clientVersion.equalsIgnoreCase(HEAD_PROTOCOL_VERSION))
-            {
-                return calculateEtag(Arrays.asList(groupId, artifactId, versionId, clientVersion == null ? PureClientVersions.production : clientVersion));
-            }
-        }
-       return null;
+           return null;
+        }  
+        return calculateEtag(Arrays.asList(groupId, artifactId, versionId, clientVersion == null ? PureClientVersions.production : clientVersion));
     }
 }
