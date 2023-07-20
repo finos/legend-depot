@@ -99,13 +99,10 @@ public class EntitiesResource extends BaseResource
 
     private EntityTag generateETag(String groupId, String artifactId, String versionId)
     {
-        if (!VersionValidator.isSnapshotVersion(versionId) && !VersionValidator.isVersionAlias(versionId))
+        if (VersionValidator.isSnapshotVersion(versionId) || VersionValidator.isVersionAlias(versionId))
         {
-            return calculateEtag(Arrays.asList(groupId, artifactId, versionId));
+           return null;
         }
-        else
-        {
-            return null;
-        }
+        return calculateEtag(Arrays.asList(groupId, artifactId, versionId));
     }
 }

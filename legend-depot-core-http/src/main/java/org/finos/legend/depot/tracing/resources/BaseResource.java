@@ -81,15 +81,15 @@ public class BaseResource
             }
             return result;
         }
-        catch (Exception var15)
+        catch (Exception e)
         {
             PrometheusMetricsFactory.getInstance().incrementErrorCount(resourceAPIMetricName);
             if (logger.isErrorEnabled())
             {
                 duration = System.nanoTime() - start;
-                logger.error(this.buildLoggingErrorMessage(var15, logsLabel, duration), var15);
+                logger.error(this.buildLoggingErrorMessage(e, logsLabel, duration), e);
             }
-            throw var15;
+            throw e;
         }
     }
 
@@ -100,23 +100,12 @@ public class BaseResource
 
     protected <T> Response handle(String resourceAPIMetricName, String label, Supplier<T> supplier, Request request, Supplier<EntityTag> etagSupplier)
     {
-        Logger logger = this.getLogger();
-        EntityTag serverTag;
-        try
-        {
-            serverTag = etagSupplier.get();
-        }
-        catch (Exception e)
-        {
-            logger.error("Etag generation failed ", e);
-            serverTag = null;
-        }
+        EntityTag serverTag = etagSupplier.get();
         if (serverTag != null && request != null && request.evaluatePreconditions(serverTag) != null)
         {
             return Response.noContent().status(Response.Status.NOT_MODIFIED).build();
         }
-        T output = handle(resourceAPIMetricName, label, supplier);
-        Response.ResponseBuilder responseBuilder = Response.ok(output);
+        Response.ResponseBuilder responseBuilder = Response.ok(handle(resourceAPIMetricName, label, supplier));
         if (serverTag != null)
         {
             responseBuilder.tag(serverTag);

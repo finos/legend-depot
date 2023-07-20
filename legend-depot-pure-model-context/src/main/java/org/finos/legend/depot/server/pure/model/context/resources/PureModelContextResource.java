@@ -45,7 +45,7 @@ import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing
 public class PureModelContextResource extends BaseResource
 {
     private final PureModelContextService service;
-    private final String headAlias = "vX_X_X";
+    private static final String HEAD_PROTOCOL_VERSION = "vX_X_X";
 
     @Inject
     public PureModelContextResource(PureModelContextService service)
@@ -71,17 +71,10 @@ public class PureModelContextResource extends BaseResource
 
     private EntityTag generateETag(String groupId, String artifactId, String versionId, String clientVersion)
     {
-        if (!VersionValidator.isSnapshotVersion(versionId) && !VersionValidator.isVersionAlias(versionId))
+        if (VersionValidator.isSnapshotVersion(versionId) || VersionValidator.isVersionAlias(versionId) || (clientVersion != null && clientVersion.equalsIgnoreCase(HEAD_PROTOCOL_VERSION)))
         {
-            if (clientVersion != null && clientVersion.equalsIgnoreCase(headAlias))
-            {
-                return null;
-            }
-            return calculateEtag(Arrays.asList(groupId, artifactId, versionId, clientVersion == null ? PureClientVersions.production : clientVersion));
-        }
-        else
-        {
-            return null;
-        }
+           return null;
+        }  
+        return calculateEtag(Arrays.asList(groupId, artifactId, versionId, clientVersion == null ? PureClientVersions.production : clientVersion));
     }
 }
