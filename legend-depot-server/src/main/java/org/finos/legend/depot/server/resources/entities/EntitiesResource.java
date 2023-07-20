@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
+import org.finos.legend.depot.tracing.resources.EtagBuilder;
 
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -33,8 +34,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.EntityTag;
-import java.util.Arrays;
 import java.util.Set;
 
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES;
@@ -62,7 +61,7 @@ public class EntitiesResource extends BaseResource
                                 @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                 @Context Request request)
     {
-        return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntities(groupId, artifactId, versionId), request, () -> this.generateETag(groupId, artifactId, versionId));
+        return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntities(groupId, artifactId, versionId), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
 
@@ -76,7 +75,7 @@ public class EntitiesResource extends BaseResource
                                       @PathParam("path") String entityPath,
                                       @Context Request request)
     {
-        return handle(GET_VERSION_ENTITY, GET_VERSION_ENTITY + entityPath, () -> this.entitiesService.getEntity(groupId, artifactId, versionId, entityPath), request, () -> this.generateETag(groupId, artifactId, versionId));
+        return handle(GET_VERSION_ENTITY, GET_VERSION_ENTITY + entityPath, () -> this.entitiesService.getEntity(groupId, artifactId, versionId, entityPath), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
     @GET
@@ -94,15 +93,6 @@ public class EntitiesResource extends BaseResource
                                     @Context Request request
     )
     {
-        return handle(GET_VERSION_ENTITIES_BY_PACKAGE, GET_VERSION_ENTITIES_BY_PACKAGE + packageName, () -> entitiesService.getEntitiesByPackage(groupId, artifactId, versionId, packageName, classifierPaths, includeSubPackages), request, () -> this.generateETag(groupId, artifactId, versionId));
-    }
-
-    private EntityTag generateETag(String groupId, String artifactId, String versionId)
-    {
-        if (VersionValidator.isSnapshotVersion(versionId) || VersionValidator.isVersionAlias(versionId))
-        {
-           return null;
-        }
-        return calculateEtag(Arrays.asList(groupId, artifactId, versionId));
+        return handle(GET_VERSION_ENTITIES_BY_PACKAGE, GET_VERSION_ENTITIES_BY_PACKAGE + packageName, () -> entitiesService.getEntitiesByPackage(groupId, artifactId, versionId, packageName, classifierPaths, includeSubPackages), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 }

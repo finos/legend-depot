@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
-import org.finos.legend.engine.protocol.pure.PureClientVersions;
+import org.finos.legend.depot.tracing.resources.EtagBuilder;
 
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -34,9 +34,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.EntityTag;
-
-import java.util.Arrays;
 
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_AS_PMCD;
 
@@ -45,7 +42,7 @@ import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing
 public class PureModelContextResource extends BaseResource
 {
     private final PureModelContextService service;
-    private static final String HEAD_PROTOCOL_VERSION = "vX_X_X";
+
 
     @Inject
     public PureModelContextResource(PureModelContextService service)
@@ -66,15 +63,8 @@ public class PureModelContextResource extends BaseResource
                                                         @ApiParam("Whether to include entities from dependencies") boolean transitive,
                                                         @Context Request request)
     {
-        return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, transitive), request, () -> this.generateETag(groupId, artifactId, versionId, clientVersion));
+        return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, transitive), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).withProtocolVersion(clientVersion).build());
     }
 
-    private EntityTag generateETag(String groupId, String artifactId, String versionId, String clientVersion)
-    {
-        if (VersionValidator.isSnapshotVersion(versionId) || VersionValidator.isVersionAlias(versionId) || (clientVersion != null && clientVersion.equalsIgnoreCase(HEAD_PROTOCOL_VERSION)))
-        {
-           return null;
-        }  
-        return calculateEtag(Arrays.asList(groupId, artifactId, versionId, clientVersion == null ? PureClientVersions.production : clientVersion));
-    }
+
 }

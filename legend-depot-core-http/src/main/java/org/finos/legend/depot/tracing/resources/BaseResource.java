@@ -139,11 +139,4 @@ public class BaseResource
     {
         return handle(label, label, supplier, request, entityTagSupplier);
     }
-
-    protected EntityTag calculateEtag(List<String> params)
-    {
-        StringBuilder etagBuilder = new StringBuilder();
-        params.forEach(param -> etagBuilder.append(param));
-        return new EntityTag(etagBuilder.toString());
-    }
 }

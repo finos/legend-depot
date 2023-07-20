@@ -89,5 +89,9 @@
             <artifactId>${junit.artifactId}</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-model</artifactId>
+        </dependency>
     </dependencies>
 </project>
