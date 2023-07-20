@@ -33,6 +33,7 @@ import org.finos.legend.depot.server.resources.ProjectsResource;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
+import org.finos.legend.depot.tracing.resources.EtagBuilder;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -47,8 +48,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.EntityTag;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,7 +81,7 @@ public class DependenciesResource extends BaseResource
                                            @QueryParam("transitive") @DefaultValue("false") @ApiParam("Whether to return transitive dependencies") boolean transitive,
                                            @Context Request request)
     {
-        return handle(GET_PROJECT_DEPENDENCIES, GET_PROJECT_DEPENDENCIES + groupId + artifactId, () -> this.projectApi.getDependencies(groupId, artifactId, versionId, transitive), request, () -> this.generateETag(groupId, artifactId, versionId));
+        return handle(GET_PROJECT_DEPENDENCIES, GET_PROJECT_DEPENDENCIES + groupId + artifactId, () -> this.projectApi.getDependencies(groupId, artifactId, versionId, transitive), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
     @POST
@@ -123,7 +122,7 @@ public class DependenciesResource extends BaseResource
                                                                     @ApiParam("Whether to return start of dependency tree") boolean includeOrigin,
                                                                     @Context Request request)
     {
-        return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, transitive, includeOrigin), request, () -> this.generateETag(groupId, artifactId, versionId));
+        return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, transitive, includeOrigin), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
     @POST
@@ -189,12 +188,4 @@ public class DependenciesResource extends BaseResource
         return properties.stream().map(p -> new ProjectsResource.ProjectVersionProperty(p.getPropertyName(), p.getValue(), versionId)).collect(Collectors.toList());
     }
 
-    private EntityTag generateETag(String groupId, String artifactId, String versionId)
-    {
-        if (VersionValidator.isSnapshotVersion(versionId) || VersionValidator.isVersionAlias(versionId))
-        {
-            return null;
-        }
-        return calculateEtag(Arrays.asList(groupId, artifactId, versionId));
-    }
 }

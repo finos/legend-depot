@@ -21,6 +21,7 @@ import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
+import org.finos.legend.depot.tracing.resources.EtagBuilder;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
@@ -32,8 +33,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.EntityTag;
-import java.util.Arrays;
 
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH;
@@ -64,7 +63,7 @@ public class FileGenerationsResource extends BaseResource
                                                   @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                                   @Context Request request)
     {
-        return handle(GET_VERSION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getGenerations(groupId, artifactId, versionId), request, () -> this.generateETag(groupId, artifactId, versionId));
+        return handle(GET_VERSION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getGenerations(groupId, artifactId, versionId), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
 
@@ -77,7 +76,7 @@ public class FileGenerationsResource extends BaseResource
                                                    @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                                    @Context Request request)
     {
-        return handle(GET_VERSION_FILE_GENERATION, () -> this.generationsService.getFileGenerations(groupId, artifactId, versionId), request, () -> this.generateETag(groupId, artifactId, versionId));
+        return handle(GET_VERSION_FILE_GENERATION, () -> this.generationsService.getFileGenerations(groupId, artifactId, versionId), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
     @GET
@@ -90,7 +89,7 @@ public class FileGenerationsResource extends BaseResource
                                                                 @PathParam("elementPath") String elementPath,
                                                                 @Context Request request)
     {
-        return handle(GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH, () -> this.generationsService.getFileGenerationsByElementPath(groupId, artifactId, versionId, elementPath), request, () -> this.generateETag(groupId, artifactId, versionId));
+        return handle(GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH, () -> this.generationsService.getFileGenerationsByElementPath(groupId, artifactId, versionId, elementPath), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
     @GET
@@ -101,7 +100,7 @@ public class FileGenerationsResource extends BaseResource
                                                              @PathParam("artifactId") String artifactId,
                                                              @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath, @Context Request request)
     {
-        return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFilePath(groupId, artifactId, versionId, filePath), request, () -> this.generateETag(groupId, artifactId, versionId));
+        return handle(GET_VERSION_FILE_GENERATION_BY_FILEPATH, () -> this.generationsService.getFileGenerationsByFilePath(groupId, artifactId, versionId, filePath), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
     @GET
@@ -112,7 +111,7 @@ public class FileGenerationsResource extends BaseResource
                                                            @PathParam("artifactId") String artifactId,
                                                            @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId, @PathParam("filePath") String filePath, @Context Request request)
     {
-        return handle(GET_VERSION_FILE_GENERATION_CONTENT, () -> this.generationsService.getFileGenerationContentByFilePath(groupId, artifactId, versionId, filePath), request, () -> this.generateETag(groupId, artifactId, versionId));
+        return handle(GET_VERSION_FILE_GENERATION_CONTENT, () -> this.generationsService.getFileGenerationContentByFilePath(groupId, artifactId, versionId, filePath), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
     @GET
@@ -121,15 +120,7 @@ public class FileGenerationsResource extends BaseResource
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFileGenerations(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("type") String type, @Context Request request)
     {
-        return handle(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE, () -> this.generationsService.findByType(groupId, artifactId, versionId, type), request, () -> this.generateETag(groupId, artifactId, versionId));
+        return handle(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE, () -> this.generationsService.findByType(groupId, artifactId, versionId, type), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
-    private EntityTag generateETag(String groupId, String artifactId, String versionId)
-    {
-        if (VersionValidator.isSnapshotVersion(versionId) || VersionValidator.isVersionAlias(versionId))
-        {
-            return null;
-        }
-        return calculateEtag(Arrays.asList(groupId, artifactId, versionId));
-    }
 }
