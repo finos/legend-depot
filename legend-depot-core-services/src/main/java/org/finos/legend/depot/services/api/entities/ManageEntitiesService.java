@@ -16,10 +16,10 @@
 package org.finos.legend.depot.services.api.entities;
 
 import org.eclipse.collections.api.tuple.Pair;
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
+import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import java.util.List;
-
 
 public interface ManageEntitiesService<T extends StoredEntity> extends EntitiesService<T>
 {
@@ -30,7 +30,7 @@ public interface ManageEntitiesService<T extends StoredEntity> extends EntitiesS
 
     long delete(String groupId, String artifactId, String versionId);
 
-    void createOrUpdate(List<T> entities);
+    void createOrUpdate(String groupId, String artifactId, String versionId, List<Entity> entities);
 
     List<Pair<String, String>> getOrphanedStoredEntities();
 }

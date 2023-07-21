@@ -1,10 +1,15 @@
 [
   {
-
+    "_type": "entityData",
     "versionId": "2.3.1",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "com::MyGenerationSpecification",
+      "classifierPath": "meta::pure::generation::metamodel::GenerationSpecification",
+      "package": "com"
+    },
     "entity": {
       "path": "com::MyGenerationSpecification",
       "classifierPath": "meta::pure::generation::metamodel::GenerationSpecification",
@@ -28,11 +33,16 @@
     "id": ""
   },
   {
-
+    "_type": "entityData",
     "versionId": "2.3.1",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "com::jsons",
+      "classifierPath": "meta::pure::generation::metamodel::GenerationConfiguration",
+      "package": "com"
+    },
     "entity": {
       "path": "com::jsons",
       "classifierPath": "meta::pure::generation::metamodel::GenerationConfiguration",
@@ -50,11 +60,16 @@
     "id": ""
   },
   {
-
+    "_type": "entityData",
     "versionId": "2.3.1",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "com::avrogen",
+      "classifierPath": "meta::pure::generation::metamodel::GenerationConfiguration",
+      "package": "com"
+    },
     "entity": {
       "path": "com::avrogen",
       "classifierPath": "meta::pure::generation::metamodel::GenerationConfiguration",
@@ -72,11 +87,16 @@
     "id": ""
   },
   {
-
+    "_type": "entityData",
     "versionId": "2.3.1",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test"
+    },
     "entity": {
       "path": "examples::metadata::test::TestProfile",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -89,11 +109,16 @@
     "id": ""
   },
   {
-
+    "_type": "entityData",
     "versionId": "2.3.1",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::ClientBasic",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "examples::metadata::test"
+    },
     "entity": {
       "path": "examples::metadata::test::ClientBasic",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -164,11 +189,16 @@
     "id": ""
   },
   {
-
+    "_type": "entityData",
     "versionId": "2.3.1",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::ClassWithDependency",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "examples::metadata::test"
+    },
     "entity": {
       "path": "examples::metadata::test::ClassWithDependency",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -191,11 +221,16 @@
     "id": ""
   },
   {
-
+    "_type": "entityData",
     "versionId": "2.3.1",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::subpackage::TestProfileTwo",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test::subpackage"
+    },
     "entity": {
       "path": "examples::metadata::test::subpackage::TestProfileTwo",
       "classifierPath": "meta::pure::metamodel::extension::Profile",

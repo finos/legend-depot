@@ -19,41 +19,32 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.VersionedData;
-import org.finos.legend.sdlc.domain.model.entity.Entity;
-
-import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProjectVersionEntities extends VersionedData
+public class DepotEntityOverview extends DepotEntity
 {
-    @JsonProperty
-    @Deprecated
-    private boolean versionedEntity;
 
     @JsonProperty
-    private List<Entity> entities;
+    private String path;
+    @JsonProperty
+    private String classifierPath;
 
-    public ProjectVersionEntities()
+
+    public DepotEntityOverview(String groupId, String artifactId, String versionId, String path, String classifierPath)
     {
-
+        super(groupId, artifactId, versionId);
+        this.path = path;
+        this.classifierPath = classifierPath;
     }
 
-    public ProjectVersionEntities(String groupId, String artifactId, String versionId, List<Entity> entities)
+    public String getPath()
     {
-        super(groupId,artifactId,versionId);
-        this.entities = entities;
-        this.versionedEntity = false;
+        return path;
     }
 
-    public boolean isVersionedEntity()
+    public String getClassifierPath()
     {
-        return versionedEntity;
-    }
-
-    public List<Entity> getEntities()
-    {
-        return entities;
+        return classifierPath;
     }
 
     @Override

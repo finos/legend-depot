@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.store.api.versionedEntities;
 
-import org.finos.legend.depot.domain.entity.StoredVersionedEntity;
+import org.finos.legend.depot.store.model.versionedEntities.StoredVersionedEntity;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 
 public interface UpdateVersionedEntities extends VersionedEntities, UpdateEntities<StoredVersionedEntity>

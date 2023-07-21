@@ -16,7 +16,6 @@
 package org.finos.legend.depot.store.artifacts.services.entities;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.entity.StoredEntity;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
@@ -54,9 +53,6 @@ public abstract class AbstractEntityRefreshHandlerImpl
     }
 
 
-    abstract List<StoredEntity> transformVersionedEntities(StoreProjectData projectData, String versionId, List<Entity> entityList);
-
-
     protected long deleteByVersion(String groupId, String artifactId, String versionId)
     {
         return getEntitiesApi().delete(groupId, artifactId, versionId);
@@ -82,7 +78,6 @@ public abstract class AbstractEntityRefreshHandlerImpl
                 String message = String.format("found [%s] %s for [%s] ", entityList.size(), this.entitiesProvider.getType(), gavCoordinates);
                 getLOGGER().info(message);
                 response.addMessage(message);
-                List<StoredEntity> storedEntities = transformVersionedEntities(projectData, versionId, entityList);
                 if (VersionValidator.isSnapshotVersion(versionId))
                 {
                     message = String.format("removing prior %s artifacts for [%s-%s]",this.entitiesProvider.getType(),gavCoordinates,versionId);
@@ -90,7 +85,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
                     response.addMessage("deleted " + getEntitiesApi().delete(projectData.getGroupId(), projectData.getArtifactId(),versionId));
                     LOGGER.info(message);
                 }
-                getEntitiesApi().createOrUpdate(storedEntities);
+                getEntitiesApi().createOrUpdate(projectData.getGroupId(), projectData.getArtifactId(), versionId, entityList);
             }
             else
             {

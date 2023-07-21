@@ -24,7 +24,7 @@ import org.bson.Document;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.migrations.ProjectToProjectVersionMigration;
 import org.finos.legend.depot.store.mongo.admin.migrations.DependenciesMigration;
-import org.finos.legend.depot.store.mongo.admin.migrations.VersionedEntitiesMigration;
+import org.finos.legend.depot.store.mongo.admin.migrations.EntitiesMigration;
 import org.finos.legend.depot.store.mongo.admin.schedules.ScheduleInstancesMongo;
 import org.finos.legend.depot.store.mongo.admin.schedules.SchedulesMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
@@ -151,6 +151,12 @@ public class MongoAdminStore
     @Deprecated
     public DeleteResult deleteVersionedEntities()
     {
-        return new VersionedEntitiesMigration(mongoDatabase).versionedEntitiesDeletion();
+        return new EntitiesMigration(mongoDatabase).versionedEntitiesDeletion();
+    }
+
+    @Deprecated
+    public void migrateEntitiesToStoredEntityData()
+    {
+        new EntitiesMigration(mongoDatabase).entitiesToStoredEntityDataMigration();
     }
 }

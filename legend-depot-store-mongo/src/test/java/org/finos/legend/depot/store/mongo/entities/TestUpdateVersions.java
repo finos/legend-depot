@@ -17,7 +17,8 @@ package org.finos.legend.depot.store.mongo.entities;
 
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntityData;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;
@@ -28,6 +29,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.finos.legend.depot.store.mongo.entities.AbstractEntitiesMongo.CLASSIFIER_PATH;
+import static org.finos.legend.depot.store.mongo.entities.AbstractEntitiesMongo.PATH;
 
 public class TestUpdateVersions extends TestStoreMongo
 {
@@ -41,7 +45,7 @@ public class TestUpdateVersions extends TestStoreMongo
 
         List<StoredEntity> entitiesList = readEntitiesFile(ENTITIES_FILE);
         Assert.assertNotNull(entitiesList);
-        StoredEntity entity = entitiesList.get(0);
+        StoredEntityData entity = (StoredEntityData) entitiesList.get(0);
         List result = entitiesMongo.createOrUpdate(Arrays.asList(entity));
         Assert.assertNotNull(result);
         Assert.assertEquals(1, result.size());
@@ -51,8 +55,8 @@ public class TestUpdateVersions extends TestStoreMongo
         Assert.assertEquals(1, entities.countDocuments());
         Document doc = (Document)entities.find().iterator().next();
         Assert.assertEquals(entity.getVersionId(), doc.getString(EntitiesMongo.VERSION_ID));
-        Assert.assertEquals(entity.getEntity().getPath(), ((Map)doc.get(EntitiesMongo.ENTITY)).get("path"));
-        Assert.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc.get(EntitiesMongo.ENTITY)).get("classifierPath"));
+        Assert.assertEquals(entity.getEntity().getPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(PATH));
+        Assert.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(CLASSIFIER_PATH));
 
     }
 
@@ -76,7 +80,7 @@ public class TestUpdateVersions extends TestStoreMongo
 
         List<StoredEntity> entitiesList = readEntitiesFile(ENTITIES_FILE);
         Assert.assertNotNull(entitiesList);
-        StoredEntity entity = entitiesList.get(0);
+        StoredEntityData entity = (StoredEntityData) entitiesList.get(0);
         List result = entitiesMongo.createOrUpdate(Arrays.asList(entity));
         Assert.assertNotNull(result);
         Assert.assertEquals(1, result.size());
@@ -86,8 +90,8 @@ public class TestUpdateVersions extends TestStoreMongo
         Assert.assertEquals(1, entities.countDocuments());
         Document doc = (Document)entities.find().iterator().next();
         Assert.assertEquals(entity.getVersionId(), doc.getString(EntitiesMongo.VERSION_ID));
-        Assert.assertEquals(entity.getEntity().getPath(), ((Map)doc.get(EntitiesMongo.ENTITY)).get("path"));
-        Assert.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc.get(EntitiesMongo.ENTITY)).get("classifierPath"));
+        Assert.assertEquals(entity.getEntity().getPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(PATH));
+        Assert.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(CLASSIFIER_PATH));
 
         List result2 = entitiesMongo.createOrUpdate(Arrays.asList(entity));
         Assert.assertNotNull(result2);
@@ -99,8 +103,8 @@ public class TestUpdateVersions extends TestStoreMongo
         Assert.assertEquals(1, entities1.countDocuments());
         Document doc1 = (Document)entities.find().iterator().next();
         Assert.assertEquals(entity.getVersionId(), doc1.getString(EntitiesMongo.VERSION_ID));
-        Assert.assertEquals(entity.getEntity().getPath(), ((Map)doc1.get(EntitiesMongo.ENTITY)).get("path"));
-        Assert.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc1.get(EntitiesMongo.ENTITY)).get("classifierPath"));
+        Assert.assertEquals(entity.getEntity().getPath(), ((Map)doc1.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(PATH));
+        Assert.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc1.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(CLASSIFIER_PATH));
 
     }
 
@@ -147,7 +151,7 @@ public class TestUpdateVersions extends TestStoreMongo
         Assert.assertEquals(3, entities.size());
 
         //lets do a change
-        StoredEntity first = entities.get(0);
+        StoredEntityData first = (StoredEntityData) entities.get(0);
         Map<String,Object> entity = (Map<String, Object>) first.getEntity().getContent();
         entity.put("new","stuff");
         entitiesMongo.createOrUpdate(entities);

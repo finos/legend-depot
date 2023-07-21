@@ -13,38 +13,41 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.domain.entity;
+package org.finos.legend.depot.store.model.versionedEntities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import java.util.Map;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StoredEntityOverview extends StoredEntity
+public class StoredVersionedEntityReference extends StoredVersionedEntity
 {
-
     @JsonProperty
-    private String path;
-    @JsonProperty
-    private String classifierPath;
+    private String reference;
 
+    @JsonCreator
+    public StoredVersionedEntityReference(@JsonProperty(value = "groupId") String groupId,
+                                          @JsonProperty(value = "artifactId") String artifactId,
+                                          @JsonProperty(value = "versionId") String versionId,
+                                          @JsonProperty(value = "reference") String reference,
+                                          @JsonProperty(value = "entityAttributes") Map<String, ?> entityAttributes)
+    {
+        super(groupId, artifactId, versionId, entityAttributes);
+        this.reference = reference;
+    }
 
-    public StoredEntityOverview(String groupId, String artifactId, String versionId, String path, String classifierPath)
+    public StoredVersionedEntityReference(String groupId, String artifactId, String versionId)
     {
         super(groupId, artifactId, versionId);
-        this.path = path;
-        this.classifierPath = classifierPath;
     }
 
-    public String getPath()
+    public String getReference()
     {
-        return path;
-    }
-
-    public String getClassifierPath()
-    {
-        return classifierPath;
+        return reference;
     }
 
     @Override
@@ -58,5 +61,4 @@ public class StoredEntityOverview extends StoredEntity
     {
         return HashCodeBuilder.reflectionHashCode(this);
     }
-
 }

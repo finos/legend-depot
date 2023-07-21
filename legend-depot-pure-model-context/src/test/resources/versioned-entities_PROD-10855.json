@@ -1,10 +1,16 @@
 [
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::Source_Employee",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio"
+    },
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::Source_Employee",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -34,10 +40,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::MyProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio"
+    },
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::MyProfile",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -52,10 +64,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::Source_Person",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio"
+    },
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::Source_Person",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -94,10 +112,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version::RootClasses",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version"
+    },
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version::RootClasses",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -124,10 +148,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version::Source_Employee",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version"
+    },
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version::Source_Employee",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -202,10 +232,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionId": "2.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version::Source_Person",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version"
+    },
     "entity": {
       "path": "test::legend::metadata::test_dependencies::v2_0_0::test::legend::metadata::test::studio::version::Source_Person",
       "classifierPath": "meta::pure::metamodel::type::Class",

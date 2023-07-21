@@ -227,4 +227,17 @@ public class MongoStoreAdministrationResource extends BaseAuthorisedResource
         });
     }
 
+    @PUT
+    @Path("/migrations/migrateToStoredEntityData")
+    @ApiOperation("Migrate entities to stored entity data")
+    @Deprecated
+    public Response migrateEntitiesToStoredEntityData()
+    {
+        return handle("Migrate entities to stored entity data", () ->
+        {
+            validateUser();
+             manageStoreService.migrateEntitiesToStoredEntityData();
+            return Response.ok().build();
+        });
+    }
 }

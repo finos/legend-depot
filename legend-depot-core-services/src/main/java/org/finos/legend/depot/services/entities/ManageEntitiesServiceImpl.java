@@ -16,10 +16,11 @@
 package org.finos.legend.depot.services.entities;
 
 import org.eclipse.collections.api.tuple.Pair;
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
+import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -59,9 +60,9 @@ public class ManageEntitiesServiceImpl<T extends StoredEntity> extends EntitiesS
     }
 
     @Override
-    public void createOrUpdate(List<T> entityList)
+    public void createOrUpdate(String groupId, String artifactId, String versionId, List<Entity> entityList)
     {
-        entities.createOrUpdate(entityList);
+        entities.createOrUpdate(groupId, artifactId, versionId, entityList);
     }
 
     @Override

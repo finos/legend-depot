@@ -1,9 +1,29 @@
 [
   {
+    "_type": "entityStringData",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "2.2.0",
+    "data": "{\"path\":\"examples::metadata::test::TestProfile\",\"classifierPath\":\"meta::pure::metamodel::extension::Profile\",\"content\":{\"_type\":\"profile\",\"name\":\"TestProfile\",\"package\":\"examples::metadata::test\"}}",
+    "entityAttributes": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test"
+    },
+    "versionedEntity": false,
+    "id": ""
+  },
+  {
+    "_type": "entityData",
     "versionId": "2.2.0",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test"
+    },
     "entity": {
       "path": "examples::metadata::test::TestProfile",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -16,10 +36,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.2.0",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::ClientBasic",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "examples::metadata::test"
+    },
     "entity": {
       "path": "examples::metadata::test::ClientBasic",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -90,10 +116,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.2.0",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::subpackage::TestProfileTwo",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test::subpackage"
+    },
     "entity": {
       "path": "examples::metadata::test::subpackage::TestProfileTwo",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -106,10 +138,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "master-SNAPSHOT",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test"
+    },
     "entity": {
       "path": "examples::metadata::test::TestProfile",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -122,10 +160,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "master-SNAPSHOT",
     "groupId": "examples.metadata",
     "artifactId": "test2",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test"
+    },
     "entity": {
       "path": "examples::metadata::test::TestProfile",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -138,9 +182,15 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "master-SNAPSHOT",
     "groupId": "examples.metadata",
     "artifactId": "test",
+    "entityAttributes": {
+      "path": "examples::metadata::test::subpackage::TestProfileTwo",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test::subpackage"
+    },
     "versionedEntity": false,
     "entity": {
       "path": "examples::metadata::test::subpackage::TestProfileTwo",
@@ -154,10 +204,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.3.0",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::subpackage::TestProfileTwo",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test::subpackage"
+    },
     "entity": {
       "path": "examples::metadata::test::subpackage::TestProfileTwo",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -170,10 +226,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.3.0",
     "groupId": "examples.metadata",
     "artifactId": "test2",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::subpackage::TestProfileTwo",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test::subpackage"
+    },
     "entity": {
       "path": "examples::metadata::test::subpackage::TestProfileTwo",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -186,10 +248,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.3.0",
     "groupId": "examples.metadata",
     "artifactId": "test2",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::subpackage::TestProfileThree",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test::subpackage"
+    },
     "entity": {
       "path": "examples::metadata::test::subpackage::TestProfileThree",
       "classifierPath": "meta::pure::metamodel::extension::Profile",

@@ -16,7 +16,7 @@
 package org.finos.legend.depot.services.versionedEntities;
 
 import com.google.inject.Inject;
-import org.finos.legend.depot.domain.entity.StoredVersionedEntity;
+import org.finos.legend.depot.store.model.versionedEntities.StoredVersionedEntity;
 import org.finos.legend.depot.services.api.versionedEntities.ManageVersionedEntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;

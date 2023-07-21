@@ -13,60 +13,42 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.domain.entity;
+package org.finos.legend.depot.store.model.versionedEntities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.EqualsExclude;
-import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class EntityDefinition implements Entity
+public class StoredVersionedEntityStringData extends StoredVersionedEntity
 {
     @JsonProperty
-    private String path;
-    @JsonProperty
-    private String classifierPath;
-    @EqualsExclude
-    @JsonProperty
-    private Map<String, ?> content;
+    private String data;
 
     @JsonCreator
-    public EntityDefinition(@JsonProperty(value = "path") String path,
-                            @JsonProperty(value = "classifierPath") String classifierPath,
-                            @JsonProperty(value = "content") Map<String, ?> content)
+    public StoredVersionedEntityStringData(@JsonProperty(value = "groupId") String groupId,
+                                           @JsonProperty(value = "artifactId") String artifactId,
+                                           @JsonProperty(value = "versionId") String versionId,
+                                           @JsonProperty(value = "data") String data,
+                                           @JsonProperty(value = "entityAttributes") Map<String, ?> entityAttributes)
     {
-        this.path = path;
-        this.classifierPath = classifierPath;
-        this.content = content;
+        super(groupId, artifactId, versionId, entityAttributes);
+        this.data = data;
     }
 
-    @Override
-    public String getPath()
+    public StoredVersionedEntityStringData(String groupId, String artifactId, String versionId)
     {
-        return this.path;
+        super(groupId, artifactId, versionId);
     }
 
-    @Override
-    public String getClassifierPath()
+    public String getData()
     {
-        return this.classifierPath;
-    }
-
-    public void setClassifierPath(String path)
-    {
-        this.classifierPath = path;
-    }
-
-    @Override
-    public Map<String, ?> getContent()
-    {
-        return this.content;
+        return data;
     }
 
     @Override

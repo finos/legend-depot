@@ -1,9 +1,15 @@
 [
   {
+    "_type": "entityData",
     "versionId": "1.0.0",
     "groupId": "examples.metadata",
     "artifactId": "test-dependencies",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::dependency::Dependency",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "examples::metadata::test::dependency"
+    },
     "entity": {
       "path": "examples::metadata::test::dependency::Dependency",
       "classifierPath": "meta::pure::metamodel::type::Class",
