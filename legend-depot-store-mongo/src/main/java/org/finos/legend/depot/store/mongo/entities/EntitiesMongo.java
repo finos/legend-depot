@@ -122,7 +122,7 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
         entityDefinitions.forEach(item ->
         {
             StoredEntity storedEntity = new StoredEntityStringData(groupId, artifactId, versionId);
-            getCollection().updateOne(getEntityPathFilter(groupId, artifactId, versionId, item.getPath()), combineDocument((T) storedEntity, item), INSERT_IF_ABSENT);
+            getCollection().updateOne(getEntityPathFilter(groupId, artifactId, versionId, item.getPath()), combineDocument((T) storedEntity, item, ENTITY_TYPE_STRING_DATA), INSERT_IF_ABSENT);
             versionedEntities.add(storedEntity);
         });
         return (List<T>) versionedEntities;
