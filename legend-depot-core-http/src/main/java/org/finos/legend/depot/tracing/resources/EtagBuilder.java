@@ -25,6 +25,8 @@ import java.util.List;
 public final class EtagBuilder
 {
     private static final String HEAD_PROTOCOL_VERSION = "vX_X_X";
+    //can only calculate an eTag if all parameters are non changeable ( ie no aliases, etc)
+    private boolean constantParams = true;
 
     private EtagBuilder()
     {
@@ -41,15 +43,22 @@ public final class EtagBuilder
     {
         if (VersionValidator.isSnapshotVersion(versionId) || VersionValidator.isVersionAlias(versionId))
         {
-            return this;
+            this.constantParams = false;
         }
-        params.addAll(Arrays.asList(groupId, artifactId, versionId));
+        else
+        {
+            params.addAll(Arrays.asList(groupId, artifactId, versionId));
+        }
         return this;
     }
 
     public EtagBuilder withProtocolVersion(String clientProtocolVersion)
     {
-        if (clientProtocolVersion != null && !clientProtocolVersion.equalsIgnoreCase(HEAD_PROTOCOL_VERSION))
+        if (clientProtocolVersion == null || clientProtocolVersion.equalsIgnoreCase(HEAD_PROTOCOL_VERSION))
+        {
+           this.constantParams = false;
+        }
+        else
         {
             params.add(clientProtocolVersion);
         }
@@ -58,8 +67,12 @@ public final class EtagBuilder
 
     public EntityTag build()
     {
-        StringBuilder etagBuilder = new StringBuilder();
-        params.forEach(param -> etagBuilder.append(param));
-        return new EntityTag(etagBuilder.toString());
+        if (this.constantParams)
+        {
+            StringBuilder etagBuilder = new StringBuilder();
+            params.forEach(param -> etagBuilder.append(param));
+            return new EntityTag(etagBuilder.toString());
+        }
+        return null;
     }
 }
