@@ -66,7 +66,7 @@ public final class EntitiesMigration
     {
         MongoCollection<Document> entitiesCollection = mongoDatabase.getCollection(EntitiesMongo.COLLECTION);
         AtomicInteger i = new AtomicInteger();
-        entitiesCollection.find().forEach((Consumer<Document>) document ->
+        entitiesCollection.find().spliterator().forEachRemaining((Consumer<Document>) document ->
         {
             String groupId = document.getString(GROUP_ID);
             String artifactId = document.getString(ARTIFACT_ID);
