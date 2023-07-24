@@ -160,19 +160,6 @@ public class TestEntitiesMigration extends TestStoreMongo
 
         }
 
-        /*public LegacyStoredEntities(String groupId, String artifactId, String versionId)
-        {
-            super(groupId, artifactId, versionId);
-        }
-
-        @JsonCreator
-        public LegacyStoredEntities(String groupId, String artifactId, String versionId, EntityDefinition entity)
-        {
-            super(groupId, artifactId, versionId);
-            this.entity = entity;
-            this.versionedEntity = false;
-        }*/
-
         public boolean isVersionedEntity()
         {
             return versionedEntity;
