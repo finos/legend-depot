@@ -73,6 +73,7 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
     static final String PACKAGE = "package";
     protected static final String ENTITY_PACKAGE = "entityAttributes.package";
     static final String ENTITY_TYPE_STRING_DATA = "entityStringData";
+    protected static final String VERSIONED_ENTITY_TYPE_STRING_DATA = "versionedEntityStringData";
     protected static final ObjectMapper objectMapper = new ObjectMapper().configure(SerializationFeature.WRITE_NULL_MAP_VALUES, true);
 
     protected AbstractEntitiesMongo(MongoDatabase mongoDatabase, Class documentClass)
@@ -239,14 +240,14 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
     }
 
 
-    protected Bson combineDocument(T storedEntity, Entity entity)
+    protected Bson combineDocument(T storedEntity, Entity entity, String entityType)
     {
         return combine(
                 set(GROUP_ID, storedEntity.getGroupId()),
                 set(ARTIFACT_ID, storedEntity.getArtifactId()),
                 set(VERSION_ID, storedEntity.getVersionId()),
                 set(ENTITY_ATTRIBUTES, buildEntityAttributes(entity)),
-                set(ENTITY_TYPE, ENTITY_TYPE_STRING_DATA),
+                set(ENTITY_TYPE, entityType),
                 set(ENTITY_DATA, serializeEntity(entity)),
                 currentDate(UPDATED));
     }

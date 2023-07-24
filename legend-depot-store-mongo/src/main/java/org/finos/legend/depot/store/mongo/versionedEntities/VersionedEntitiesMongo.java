@@ -67,7 +67,7 @@ public class VersionedEntitiesMongo extends EntitiesMongo<StoredVersionedEntity>
         entityDefinitions.forEach(item ->
         {
             StoredVersionedEntity storedEntity = new StoredVersionedEntityStringData(groupId, artifactId, versionId);
-            getCollection().updateOne(getEntityPathFilter(groupId, artifactId, versionId, item.getPath()), combineDocument(storedEntity, item), INSERT_IF_ABSENT);
+            getCollection().updateOne(getEntityPathFilter(groupId, artifactId, versionId, item.getPath()), combineDocument(storedEntity, item, VERSIONED_ENTITY_TYPE_STRING_DATA), INSERT_IF_ABSENT);
             versionedEntities.add(storedEntity);
         });
         return versionedEntities;
