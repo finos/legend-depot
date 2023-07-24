@@ -13,47 +13,60 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.domain.entity;
+package org.finos.legend.depot.store.model.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.VersionedData;
+import org.apache.commons.lang3.builder.EqualsExclude;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
-import java.util.List;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProjectVersionEntities extends VersionedData
+public final class EntityDefinition implements Entity
 {
     @JsonProperty
-    @Deprecated
-    private boolean versionedEntity;
-
+    private String path;
     @JsonProperty
-    private List<Entity> entities;
+    private String classifierPath;
+    @EqualsExclude
+    @JsonProperty
+    private Map<String, ?> content;
 
-    public ProjectVersionEntities()
+    @JsonCreator
+    public EntityDefinition(@JsonProperty(value = "path") String path,
+                            @JsonProperty(value = "classifierPath") String classifierPath,
+                            @JsonProperty(value = "content") Map<String, ?> content)
     {
-
+        this.path = path;
+        this.classifierPath = classifierPath;
+        this.content = content;
     }
 
-    public ProjectVersionEntities(String groupId, String artifactId, String versionId, List<Entity> entities)
+    @Override
+    public String getPath()
     {
-        super(groupId,artifactId,versionId);
-        this.entities = entities;
-        this.versionedEntity = false;
+        return this.path;
     }
 
-    public boolean isVersionedEntity()
+    @Override
+    public String getClassifierPath()
     {
-        return versionedEntity;
+        return this.classifierPath;
     }
 
-    public List<Entity> getEntities()
+    public void setClassifierPath(String path)
     {
-        return entities;
+        this.classifierPath = path;
+    }
+
+    @Override
+    public Map<String, ?> getContent()
+    {
+        return this.content;
     }
 
     @Override
@@ -67,5 +80,4 @@ public class ProjectVersionEntities extends VersionedData
     {
         return HashCodeBuilder.reflectionHashCode(this);
     }
-
 }

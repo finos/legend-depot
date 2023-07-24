@@ -26,7 +26,7 @@ import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 import org.bson.Document;
 import org.finos.legend.depot.domain.HasIdentifier;
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.domain.generation.file.StoredFileGeneration;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;

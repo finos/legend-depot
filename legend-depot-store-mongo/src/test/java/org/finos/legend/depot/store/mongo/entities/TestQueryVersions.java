@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.store.mongo.entities;
 
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;

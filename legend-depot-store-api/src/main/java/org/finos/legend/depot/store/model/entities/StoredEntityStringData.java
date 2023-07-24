@@ -13,59 +13,42 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.domain.entity;
+package org.finos.legend.depot.store.model.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.VersionedData;
-import org.finos.legend.depot.domain.HasIdentifier;
+
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StoredEntity extends VersionedData implements HasIdentifier
+public class StoredEntityStringData extends StoredEntity
 {
     @JsonProperty
-    private EntityDefinition entity;
-
-    @JsonProperty
-    private boolean versionedEntity = false;
+    private String data;
 
     @JsonCreator
-    public StoredEntity(@JsonProperty(value = "groupId") String groupId,
-                        @JsonProperty(value = "artifactId") String artifactId,
-                        @JsonProperty(value = "versionId") String versionId,
-                        @JsonProperty(value = "entity") EntityDefinition entity)
+    public StoredEntityStringData(@JsonProperty(value = "groupId") String groupId,
+                                  @JsonProperty(value = "artifactId") String artifactId,
+                                  @JsonProperty(value = "versionId") String versionId,
+                                  @JsonProperty(value = "data") String data,
+                                  @JsonProperty(value = "entityAttributes") Map<String, ?> entityAttributes)
+    {
+        super(groupId, artifactId, versionId, entityAttributes);
+        this.data = data;
+    }
+
+    public StoredEntityStringData(String groupId, String artifactId, String versionId)
     {
         super(groupId, artifactId, versionId);
-        this.entity = entity;
     }
 
-    StoredEntity(String groupId, String artifactId, String versionId)
+    public String getData()
     {
-        super(groupId, artifactId, versionId);
-    }
-
-    public void setVersionedEntity(boolean versionedEntity)
-    {
-        this.versionedEntity = versionedEntity;
-    }
-    
-    public boolean isVersionedEntity()
-    {
-        return versionedEntity;
-    }
-
-    @Override
-    public String getId()
-    {
-        return "";
-    }
-
-    public EntityDefinition getEntity()
-    {
-        return entity;
+        return data;
     }
 
     @Override

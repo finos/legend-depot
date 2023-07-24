@@ -16,7 +16,7 @@
 package org.finos.legend.depot.services.entities;
 
 import org.eclipse.collections.impl.utility.ListIterate;
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.domain.entity.DepotEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.version.Scope;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
@@ -54,19 +54,19 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
     }
 
     @Override
-    public List<StoredEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit, Scope scope, boolean summary)
+    public List<DepotEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit, Scope scope, boolean summary)
     {
         if (Scope.SNAPSHOT.equals(scope))
         {
             return this.findLatestEntitiesByClassifier(classifierPath, search, limit, summary);
         }
-        List<StoredEntity> result = new ArrayList<>();
+        List<DepotEntity> result = new ArrayList<>();
         int PAGE_SIZE = 100;
         int currentPage = 1;
         List<ProjectVersion> projectVersions = this.getProjectsInfo(currentPage, PAGE_SIZE);
         while (!projectVersions.isEmpty())
         {
-            List<StoredEntity> entities = this.findReleasedEntitiesByClassifier(classifierPath, search, projectVersions, limit, summary);
+            List<DepotEntity> entities = this.findReleasedEntitiesByClassifier(classifierPath, search, projectVersions, limit, summary);
             result.addAll(entities);
             if (limit != null && result.size() >= limit)
             {
@@ -83,25 +83,25 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
     }
 
     @Override
-    public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary)
+    public List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary)
     {
         return entities.findReleasedEntitiesByClassifier(classifier, search, projectVersions, limit, summary);
     }
 
     @Override
-    public List<StoredEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary)
+    public List<DepotEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary)
     {
         return entities.findLatestEntitiesByClassifier(classifier, search, limit, summary);
     }
 
     @Override
-    public List<StoredEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary)
+    public List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary)
     {
         return entities.findReleasedEntitiesByClassifier(classifier, summary);
     }
 
     @Override
-    public List<StoredEntity> findLatestEntitiesByClassifier(String classifier, boolean summary)
+    public List<DepotEntity> findLatestEntitiesByClassifier(String classifier, boolean summary)
     {
         return entities.findLatestEntitiesByClassifier(classifier, summary);
     }

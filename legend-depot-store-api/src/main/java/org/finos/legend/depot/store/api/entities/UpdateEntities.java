@@ -16,14 +16,15 @@
 package org.finos.legend.depot.store.api.entities;
 
 import org.eclipse.collections.api.tuple.Pair;
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
+import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import java.util.List;
 
 public interface UpdateEntities<T extends StoredEntity> extends Entities<T>
 {
 
-    List<T> createOrUpdate(List<T> entities);
+    List<T> createOrUpdate(String groupId, String artifactId, String versionId, List<Entity> entityDefinitions);
 
     long delete(String groupId, String artifactId);
 
@@ -32,4 +33,6 @@ public interface UpdateEntities<T extends StoredEntity> extends Entities<T>
     List<T> getStoredEntities(String groupId, String artifactId);
 
     List<Pair<String, String>> getStoredEntitiesCoordinates();
+
+    List<T> getAllStoredEntities();
 }

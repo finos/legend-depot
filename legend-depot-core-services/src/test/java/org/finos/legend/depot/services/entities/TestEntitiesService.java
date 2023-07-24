@@ -17,9 +17,10 @@ package org.finos.legend.depot.services.entities;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.finos.legend.depot.domain.entity.EntityDefinition;
+import org.finos.legend.depot.store.model.entities.EntityDefinition;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntityData;
+import org.finos.legend.depot.store.model.entities.StoredEntityStringData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
@@ -37,6 +38,8 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.function.Predicate;
 
 import static org.mockito.Mockito.mock;
@@ -128,10 +131,8 @@ public class TestEntitiesService extends TestBaseServices
     @Test
     public void canGetOrphanedEntities()
     {
-        entitiesService.createOrUpdate(Arrays.asList(
-                new StoredEntity("example.one", "orphaned", "1.0.0",new EntityDefinition("path::entity", "la", null)),
-                new StoredEntity("example.two", "orphaned", "1.0.1", new EntityDefinition("path::lala", "la", null))
-        ));
+        entitiesService.createOrUpdate("example.one", "orphaned", "1.0.0", Arrays.asList(new EntityDefinition("path::entity", "la", null)));
+        entitiesService.createOrUpdate("example.two", "orphaned", "1.0.1", Arrays.asList(new EntityDefinition("path::lala", "la", null)));
 
         List<Pair<String, String>> orphaned = entitiesService.getOrphanedStoredEntities();
         Assert.assertEquals(2, orphaned.size());
@@ -147,8 +148,8 @@ public class TestEntitiesService extends TestBaseServices
 
         String pkgName = "examples::metadata::test::dependency::v1_2_3";
         Assert.assertEquals(2, entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").size());
-        entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").stream().allMatch(e -> ((StoredEntity)e).getEntity().getPath().startsWith(pkgName));
-        entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").stream().allMatch(e -> ((String)(((StoredEntity)e).getEntity().getContent().get("package"))).startsWith(pkgName));;
+        entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").stream().allMatch(e -> ((StoredEntityData)e).getEntity().getPath().startsWith(pkgName));
+        entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").stream().allMatch(e -> ((String)(((StoredEntityData)e).getEntity().getContent().get("package"))).startsWith(pkgName));;
 
         Assert.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","1.0.0").size());
         Assert.assertEquals(2, entitiesService.getEntitiesByPackage("examples.metadata","test1","1.0.0",pkgName, Collections.EMPTY_SET,true).size());
@@ -202,5 +203,34 @@ public class TestEntitiesService extends TestBaseServices
         Assert.assertEquals(7, entitiesService.getEntities("examples.metadata","test","head").size());
         Assert.assertEquals(0, entitiesService.getEntitiesByPackage("examples.metadata","test","head",pkgName, Collections.EMPTY_SET,true).size());
 
+    }
+
+    @Test
+    public void canCreateAndUpdateEntities()
+    {
+        EntityDefinition entity = new EntityDefinition("examples::metadata::test::subpackage::TestProfileTwo", "meta::pure::metamodel::extension::Profile", null);
+        entitiesService.createOrUpdate("examples.metadata", "test", "3.0.0", Arrays.asList(entity));
+
+        List storedEntities = entitiesService.getStoredEntities("examples.metadata", "test", "3.0.0");
+        Assert.assertEquals(1, storedEntities.size());
+        Assert.assertTrue(storedEntities.get(0) instanceof StoredEntityStringData);
+
+    }
+
+
+    @Test
+    public void canSerializeEntityDefinitionWithNulls()
+    {
+        Map<String, Object> content = new HashMap<>();
+        content.put("package", "examples.metadata.test.TestProfile");
+        content.put("stereoTypes", null);
+        content.put("superTypes", Collections.emptyList());
+        EntityDefinition entityDefinition = new EntityDefinition("examples.metadata.test.TestProfile", "meta::pure::metamodel::extension::Profile", content);
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata", "test", "5.0.0"));
+        entitiesService.createOrUpdate("examples.metadata", "test", "5.0.0", Arrays.asList(entityDefinition));
+
+        // check entities serialization and deserialization
+        Entity entity = (Entity) entitiesService.getEntities("examples.metadata", "test", "5.0.0").get(0);
+        Assert.assertEquals(content, entity.getContent());
     }
 }

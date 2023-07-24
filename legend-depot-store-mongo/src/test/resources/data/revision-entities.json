@@ -1,10 +1,16 @@
 [
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionId": "master-SNAPSHOT",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::ClassWithDependency",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "examples::metadata::test"
+    },
     "entity": {
       "path": "examples::metadata::test::ClassWithDependency",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -27,10 +33,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "versionId": "master-SNAPSHOT",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test"
+    },
     "entity": {
       "path": "examples::metadata::test::TestProfile",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -43,10 +55,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "versionId": "master-SNAPSHOT",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::ClientBasic",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "examples::metadata::test"
+    },
     "entity": {
       "path": "examples::metadata::test::ClientBasic",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -117,10 +135,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "versionId": "master-SNAPSHOT",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::subpackage::TestProfileTwo",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test::subpackage"
+    },
     "entity": {
       "path": "examples::metadata::test::subpackage::TestProfileTwo",
       "classifierPath": "meta::pure::metamodel::extension::Profile",

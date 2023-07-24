@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.services.api.versionedEntities;
 
-import org.finos.legend.depot.domain.entity.StoredVersionedEntity;
+import org.finos.legend.depot.store.model.versionedEntities.StoredVersionedEntity;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 
 public interface VersionedEntitiesService extends EntitiesService<StoredVersionedEntity>

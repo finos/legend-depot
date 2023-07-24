@@ -15,7 +15,8 @@
 
 package org.finos.legend.depot.store.api.entities;
 
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.domain.entity.DepotEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
@@ -31,17 +32,15 @@ public interface Entities<T extends StoredEntity>
 
     List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages);
 
-    List<T> getAllStoredEntities();
+    List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary);
 
-    List<T> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary);
+    List<DepotEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary);
 
-    List<T> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary);
+    List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary);
 
-    List<T> findReleasedEntitiesByClassifier(String classifier, boolean summary);
+    List<DepotEntity> findLatestEntitiesByClassifier(String classifier, boolean summary);
 
-    List<T> findLatestEntitiesByClassifier(String classifier, boolean summary);
-
-    List<T> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier, boolean summary);
+    List<Entity> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier);
 
     List<T> getStoredEntities(String groupId, String artifactId, String versionId);
 

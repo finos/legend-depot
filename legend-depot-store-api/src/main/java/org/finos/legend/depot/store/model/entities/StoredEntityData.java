@@ -13,47 +13,47 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.domain.entity;
+package org.finos.legend.depot.store.model.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.domain.VersionedData;
-import org.finos.legend.sdlc.domain.model.entity.Entity;
 
-import java.util.List;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProjectVersionEntities extends VersionedData
+public class StoredEntityData extends StoredEntity
 {
     @JsonProperty
-    @Deprecated
-    private boolean versionedEntity;
+    private EntityDefinition entity;
 
-    @JsonProperty
-    private List<Entity> entities;
-
-    public ProjectVersionEntities()
+    @JsonCreator
+    public StoredEntityData(@JsonProperty(value = "groupId") String groupId,
+                            @JsonProperty(value = "artifactId") String artifactId,
+                            @JsonProperty(value = "versionId") String versionId,
+                            @JsonProperty(value = "entity") EntityDefinition entity,
+                            @JsonProperty(value = "entityAttributes") Map<String, ?> entityAttributes)
     {
-
+        super(groupId, artifactId, versionId, entityAttributes);
+        this.entity = entity;
     }
 
-    public ProjectVersionEntities(String groupId, String artifactId, String versionId, List<Entity> entities)
+    public StoredEntityData(String groupId, String artifactId, String versionId)
     {
-        super(groupId,artifactId,versionId);
-        this.entities = entities;
-        this.versionedEntity = false;
+        super(groupId, artifactId, versionId);
     }
 
-    public boolean isVersionedEntity()
+    @Override
+    public String getId()
     {
-        return versionedEntity;
+        return "";
     }
 
-    public List<Entity> getEntities()
+    public EntityDefinition getEntity()
     {
-        return entities;
+        return entity;
     }
 
     @Override
@@ -67,5 +67,4 @@ public class ProjectVersionEntities extends VersionedData
     {
         return HashCodeBuilder.reflectionHashCode(this);
     }
-
 }

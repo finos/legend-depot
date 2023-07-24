@@ -22,27 +22,30 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
-import java.util.List;
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProjectVersionEntities extends VersionedData
+public class DepotEntity extends VersionedData
 {
     @JsonProperty
     @Deprecated
     private boolean versionedEntity;
 
     @JsonProperty
-    private List<Entity> entities;
+    private Entity entity;
 
-    public ProjectVersionEntities()
+    public DepotEntity()
     {
 
     }
 
-    public ProjectVersionEntities(String groupId, String artifactId, String versionId, List<Entity> entities)
+    public DepotEntity(String groupId, String artifactId, String versionId)
     {
-        super(groupId,artifactId,versionId);
-        this.entities = entities;
+        super(groupId, artifactId, versionId);
+    }
+
+    public DepotEntity(String groupId, String artifactId, String versionId, Entity entity)
+    {
+        super(groupId, artifactId, versionId);
+        this.entity = entity;
         this.versionedEntity = false;
     }
 
@@ -51,9 +54,9 @@ public class ProjectVersionEntities extends VersionedData
         return versionedEntity;
     }
 
-    public List<Entity> getEntities()
+    public Entity getEntity()
     {
-        return entities;
+        return entity;
     }
 
     @Override
@@ -67,5 +70,4 @@ public class ProjectVersionEntities extends VersionedData
     {
         return HashCodeBuilder.reflectionHashCode(this);
     }
-
 }

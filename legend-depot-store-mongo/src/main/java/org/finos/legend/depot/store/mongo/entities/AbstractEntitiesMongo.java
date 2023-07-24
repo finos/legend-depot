@@ -15,6 +15,9 @@
 
 package org.finos.legend.depot.store.mongo.entities;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
@@ -27,7 +30,7 @@ import org.bson.conversions.Bson;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -38,6 +41,8 @@ import java.util.StringTokenizer;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -49,18 +54,26 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.not;
 import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Filters.regex;
+import static com.mongodb.client.model.Updates.combine;
+import static com.mongodb.client.model.Updates.set;
+import static com.mongodb.client.model.Updates.currentDate;
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends BaseMongo<T>
 {
-    public static final String ENTITY = "entity";
-    public static final String ENTITY_CLASSIFIER_PATH = "entity.classifierPath";
-    public static final String CLASSIFIER_PATH = "classifierPath";
-    public static final String ENTITY_PATH = "entity.path";
-    public static final String PATH = "path";
-    public static final String ENTITY_PACKAGE = "entity.content.package";
-    public static final String ENTITY_CONTENT = "entity.content";
-    public static final String VERSIONED_ENTITY = "versionedEntity";
+    static final String ENTITY = "entity";
+    static final String ENTITY_TYPE = "_type";
+    static final String ENTITY_DATA = "data";
+    static final String ENTITY_TYPE_DATA = "entityData";
+    static final String ENTITY_ATTRIBUTES = "entityAttributes";
+    protected static final String ENTITY_CLASSIFIER_PATH = "entityAttributes.classifierPath";
+    static final String CLASSIFIER_PATH = "classifierPath";
+    protected static final String ENTITY_PATH = "entityAttributes.path";
+    static final String PATH = "path";
+    static final String PACKAGE = "package";
+    protected static final String ENTITY_PACKAGE = "entityAttributes.package";
+    static final String ENTITY_TYPE_STRING_DATA = "entityStringData";
+    protected static final ObjectMapper objectMapper = new ObjectMapper().configure(SerializationFeature.WRITE_NULL_MAP_VALUES, true);
 
     protected AbstractEntitiesMongo(MongoDatabase mongoDatabase, Class documentClass)
     {
@@ -74,25 +87,24 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
 
     protected Bson getArtifactAndVersionVersionedFilter(String groupId, String artifactId, String versionId)
     {
-        return and(eq(VERSIONED_ENTITY, this.isVersioned()), getArtifactAndVersionFilter(groupId, artifactId, versionId));
+        return getArtifactAndVersionFilter(groupId, artifactId, versionId);
     }
 
     protected Bson getArtifactVersionedFilter(String groupId, String artifactId)
     {
-        return and(eq(VERSIONED_ENTITY, this.isVersioned()), getArtifactFilter(groupId, artifactId));
+        return getArtifactFilter(groupId, artifactId);
     }
 
     protected abstract Bson getKeyFilter(T data);
 
     protected abstract void validateNewData(T data);
 
-    protected abstract boolean isVersioned();
+    protected abstract Entity resolvedToEntityDefinition(T storedEntity);
 
     public FindIterable findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions)
     {
         List<Bson> filters = new ArrayList<>();
         filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
-        filters.add(eq(VERSIONED_ENTITY, this.isVersioned()));
         if (projectVersions != null && !projectVersions.isEmpty())
         {
             filters.add(or(ListIterate.collect(projectVersions, projectVersion -> getArtifactAndVersionFilter(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()))));
@@ -108,7 +120,6 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
     {
         List<Bson> filters = new ArrayList<>();
         filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
-        filters.add(eq(VERSIONED_ENTITY, this.isVersioned()));
         filters.add(regex(VERSION_ID, BRANCH_SNAPSHOT("")));
         if (search != null)
         {
@@ -120,7 +131,7 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
     public Optional<Entity> getEntity(String groupId, String artifactId, String versionId, String path)
     {
         Bson filterByKey = getEntityPathFilter(groupId, artifactId, versionId, path);
-        return findOne(filterByKey).map(T::getEntity);
+        return findOne(filterByKey).map(this::resolvedToEntityDefinition);
     }
 
     public List<T> getStoredEntities(String groupId, String artifactId)
@@ -135,7 +146,7 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
 
     public List<Entity> getAllEntities(String groupId, String artifactId, String versionId)
     {
-        return find(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId)).stream().map(T::getEntity).collect(Collectors.toList());
+        return find(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId)).stream().map(this::resolvedToEntityDefinition).collect(Collectors.toList());
     }
 
     public List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages)
@@ -149,7 +160,7 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
         {
             filter = and(filter, eq(ENTITY_PACKAGE, packageName));
         }
-        Stream<Entity> entities = find(filter).stream().map(T::getEntity);
+        Stream<Entity> entities = find(filter).stream().map(this::resolvedToEntityDefinition);
         if (classifierPaths != null && !classifierPaths.isEmpty())
         {
             entities = entities.filter(entity -> classifierPaths.contains(entity.getClassifierPath()));
@@ -159,17 +170,17 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
 
     public FindIterable findReleasedEntitiesByClassifier(String classifier)
     {
-        return executeFind(and(eq(VERSIONED_ENTITY, this.isVersioned()), and(eq(ENTITY_CLASSIFIER_PATH, classifier), not(regex(VERSION_ID, BRANCH_SNAPSHOT(""))))));
+        return executeFind(and(eq(ENTITY_CLASSIFIER_PATH, classifier), not(regex(VERSION_ID, BRANCH_SNAPSHOT("")))));
     }
 
     public FindIterable findLatestEntitiesByClassifier(String classifier)
     {
-        return executeFind(and(eq(VERSIONED_ENTITY, this.isVersioned()), and(eq(ENTITY_CLASSIFIER_PATH, classifier), regex(VERSION_ID, BRANCH_SNAPSHOT("")))));
+        return executeFind(and(eq(ENTITY_CLASSIFIER_PATH, classifier), regex(VERSION_ID, BRANCH_SNAPSHOT(""))));
     }
 
-    public FindIterable findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier)
+    public List<Entity> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier)
     {
-        return executeFind(and(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId), eq(ENTITY_CLASSIFIER_PATH, classifier)));
+        return find(and(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId), eq(ENTITY_CLASSIFIER_PATH, classifier))).stream().map(this::resolvedToEntityDefinition).collect(Collectors.toList());
     }
 
     public long delete(String groupId, String artifactId, String versionId)
@@ -201,5 +212,42 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
                 }
         );
         return result;
+    }
+
+    protected String serializeEntity(Entity entity)
+    {
+        try
+        {
+            return objectMapper.writeValueAsString(entity);
+        }
+        catch (JsonProcessingException e)
+        {
+            throw new IllegalStateException(String.format("Error: %s while storing entity: %s", e.getMessage(), entity.getPath()));
+        }
+    }
+
+    protected Map<String, ?> buildEntityAttributes(Entity entity)
+    {
+        Map<String, String> entityAttributes = new HashMap<>();
+        entityAttributes.put(PATH, entity.getPath());
+        entityAttributes.put(CLASSIFIER_PATH, entity.getClassifierPath());
+        if (entity.getContent() != null)
+        {
+            entityAttributes.put(PACKAGE, entity.getContent().get(PACKAGE).toString());
+        }
+        return entityAttributes;
+    }
+
+
+    protected Bson combineDocument(T storedEntity, Entity entity)
+    {
+        return combine(
+                set(GROUP_ID, storedEntity.getGroupId()),
+                set(ARTIFACT_ID, storedEntity.getArtifactId()),
+                set(VERSION_ID, storedEntity.getVersionId()),
+                set(ENTITY_ATTRIBUTES, buildEntityAttributes(entity)),
+                set(ENTITY_TYPE, ENTITY_TYPE_STRING_DATA),
+                set(ENTITY_DATA, serializeEntity(entity)),
+                currentDate(UPDATED));
     }
 }

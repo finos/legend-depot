@@ -15,17 +15,23 @@
 
 package org.finos.legend.depot.store.mongo.versionedEntities;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.client.MongoCollection;
 
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
-import org.finos.legend.depot.domain.entity.StoredVersionedEntity;
+import org.finos.legend.depot.store.model.entities.EntityDefinition;
+import org.finos.legend.depot.store.model.versionedEntities.StoredVersionedEntity;
 import org.finos.legend.depot.store.api.versionedEntities.UpdateVersionedEntities;
 import org.finos.legend.depot.store.api.versionedEntities.VersionedEntities;
+import org.finos.legend.depot.store.model.versionedEntities.StoredVersionedEntityData;
+import org.finos.legend.depot.store.model.versionedEntities.StoredVersionedEntityStringData;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
+import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,10 +47,10 @@ public class VersionedEntitiesMongo extends EntitiesMongo<StoredVersionedEntity>
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("versioned-groupId-artifactId-versionId-versioned", VERSIONED_ENTITY,GROUP_ID, ARTIFACT_ID, VERSION_ID),
+        return Arrays.asList(buildIndex("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID),
                 buildIndex("groupId-artifactId-versionId-entityPath", true, GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH),
                 buildIndex("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE),
-                buildIndex("versioned-entity-classifier", VERSIONED_ENTITY,ENTITY_CLASSIFIER_PATH)
+                buildIndex("entity-classifier", ENTITY_CLASSIFIER_PATH)
         );
     }
 
@@ -55,9 +61,40 @@ public class VersionedEntitiesMongo extends EntitiesMongo<StoredVersionedEntity>
     }
 
     @Override
-    protected boolean isVersioned()
+    public List<StoredVersionedEntity> createOrUpdate(String groupId, String artifactId, String versionId, List<Entity> entityDefinitions)
     {
-        return true;
+        List<StoredVersionedEntity> versionedEntities = new ArrayList<>();
+        entityDefinitions.forEach(item ->
+        {
+            StoredVersionedEntity storedEntity = new StoredVersionedEntityStringData(groupId, artifactId, versionId);
+            getCollection().updateOne(getEntityPathFilter(groupId, artifactId, versionId, item.getPath()), combineDocument(storedEntity, item), INSERT_IF_ABSENT);
+            versionedEntities.add(storedEntity);
+        });
+        return versionedEntities;
+    }
+
+    @Override
+    protected Entity resolvedToEntityDefinition(StoredVersionedEntity storedEntity)
+    {
+        if (storedEntity instanceof StoredVersionedEntityData)
+        {
+            return ((StoredVersionedEntityData) storedEntity).getEntity();
+        }
+        else if (storedEntity instanceof StoredVersionedEntityStringData)
+        {
+            try
+            {
+                return objectMapper.readValue(((StoredVersionedEntityStringData)storedEntity).getData(), EntityDefinition.class);
+            }
+            catch (JsonProcessingException e)
+            {
+                throw new IllegalStateException(String.format("Error: %s while fetching entity: %s-%s-%s-%s", e.getMessage(), storedEntity.getGroupId(), storedEntity.getArtifactId(), storedEntity.getVersionId(), ((StoredVersionedEntityStringData)storedEntity).getEntityAttributes().get("path")));
+            }
+        }
+        else
+        {
+            throw new IllegalStateException("Unknown stored entity type");
+        }
     }
 
 }

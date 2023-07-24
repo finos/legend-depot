@@ -40,3 +40,11 @@ We want to segregate the versioned entities from the entities collection and hav
 The driver for this change is to increase the performance of querying entities whether it be versioned or not versioned.
 ### Steps to follow:
 1. Use the API /migrations/migrations/deleteVersionedEntities, this will delete all versioned entities from the "entities" collection.
+
+## 4. Storing entity's content as string (for version 1.22.0 and up)
+### Why is this stringification required for entity's content?
+Currently, with Mongo implementation there is limit on how much nesting of an object we can store. Entities sometimes tend to be huge nested objects. Due to Mongo's constraint we can't store such entities and hence it creates a bottleneck in what we can and can't store.
+In order to store such entities and also make the storage  of entities scalable to other databases, we are going to be storing the content as string.
+With this change we have also introduced three kinds of entity storage which will further help the cause of scalability.
+### Steps to follow:
+1. Use the API /migrations/migrateToStoredEntityData, this will update the entities collection to be identified as one form of entity data.

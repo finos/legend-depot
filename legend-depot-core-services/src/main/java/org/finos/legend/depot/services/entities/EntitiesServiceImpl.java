@@ -18,9 +18,8 @@ package org.finos.legend.depot.services.entities;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.parallel.ParallelIterate;
-import org.finos.legend.depot.domain.entity.EntityDefinition;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
@@ -95,7 +94,7 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
             ParallelIterate.forEach(dependencies, dep ->
             {
                 String version = this.projects.resolveAliasesAndCheckVersionExists(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
-                List<EntityDefinition> deps = (List<EntityDefinition>) entities.getStoredEntities(dep.getGroupId(), dep.getArtifactId(), version).stream().map(entity -> ((StoredEntity) entity).getEntity()).collect(Collectors.toList());
+                List<Entity> deps = (List<Entity>) entities.getAllEntities(dep.getGroupId(), dep.getArtifactId(), version).stream().collect(Collectors.toList());
                 depEntities.add(new ProjectVersionEntities(dep.getGroupId(), dep.getArtifactId(), version, deps));
                 totalEntities.addAndGet(deps.size());
                 TracerFactory.get().log(String.format("Total [%s-%s-%s]: [%s] entities",dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(),deps.size()));

@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.mongo.entities;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -23,13 +24,18 @@ import com.mongodb.client.model.UpdateOptions;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.domain.CoordinateValidator;
+import org.finos.legend.depot.store.model.entities.EntityDefinition;
 import org.finos.legend.depot.domain.entity.EntityValidationErrors;
-import org.finos.legend.depot.domain.entity.StoredEntity;
-import org.finos.legend.depot.domain.entity.StoredEntityOverview;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
+import org.finos.legend.depot.domain.entity.DepotEntityOverview;
+import org.finos.legend.depot.domain.entity.DepotEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntityData;
+import org.finos.legend.depot.store.model.entities.StoredEntityStringData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
+import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.finos.legend.sdlc.tools.entity.EntityPaths;
 
 import javax.inject.Inject;
@@ -39,12 +45,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Updates.combine;
-import static com.mongodb.client.model.Updates.currentDate;
-import static com.mongodb.client.model.Updates.set;
 
 public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo<T> implements Entities<T>, UpdateEntities<T>
 {
@@ -65,10 +69,10 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
 
     public static List<IndexModel> buildIndexes()
     {
-        return Arrays.asList(buildIndex("versioned-groupId-artifactId-versionId-versioned", VERSIONED_ENTITY,GROUP_ID, ARTIFACT_ID, VERSION_ID),
+        return Arrays.asList(buildIndex("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID),
                 buildIndex("groupId-artifactId-versionId-entityPath", true, GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH),
                 buildIndex("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE),
-                buildIndex("versioned-entity-classifier", VERSIONED_ENTITY,ENTITY_CLASSIFIER_PATH)
+                buildIndex("entity-classifier", ENTITY_CLASSIFIER_PATH)
         );
     }
 
@@ -79,14 +83,14 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
     }
 
     @Override
-    protected Bson getKeyFilter(StoredEntity data)
+    protected Bson getKeyFilter(T data)
     {
         return and(getArtifactAndVersionFilter(data.getGroupId(), data.getArtifactId(), data.getVersionId()),
-                eq(ENTITY_PATH, data.getEntity().getPath()));
+                eq(ENTITY_PATH, data.getEntityAttributes().get(PATH)));
     }
 
     @Override
-    protected void validateNewData(StoredEntity entity)
+    protected void validateNewData(T entity)
     {
         List<String> errors = new ArrayList<>();
         if (!CoordinateValidator.isValidGroupId(entity.getGroupId()))
@@ -101,9 +105,9 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
         {
             errors.add(String.format(EntityValidationErrors.INVALID_VERSION_ID, entity.getVersionId()));
         }
-        if (!EntityPaths.isValidEntityPath(entity.getEntity().getPath()))
+        if (!EntityPaths.isValidEntityPath(entity.getEntityAttributes().get(PATH).toString()))
         {
-            errors.add(String.format(EntityValidationErrors.INVALID_ENTITY_PATH, entity.getEntity().getPath()));
+            errors.add(String.format(EntityValidationErrors.INVALID_ENTITY_PATH, entity.getEntityAttributes().get(PATH).toString()));
         }
         if (!errors.isEmpty())
         {
@@ -112,34 +116,26 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
     }
 
     @Override
+    public List<T> createOrUpdate(String groupId, String artifactId, String versionId, List<Entity> entityDefinitions)
+    {
+        List<StoredEntity> versionedEntities = new ArrayList<>();
+        entityDefinitions.forEach(item ->
+        {
+            StoredEntity storedEntity = new StoredEntityStringData(groupId, artifactId, versionId);
+            getCollection().updateOne(getEntityPathFilter(groupId, artifactId, versionId, item.getPath()), combineDocument((T) storedEntity, item), INSERT_IF_ABSENT);
+            versionedEntities.add(storedEntity);
+        });
+        return (List<T>) versionedEntities;
+    }
+
     public List<T> createOrUpdate(List<T> versionedEntities)
     {
-        versionedEntities.forEach(item ->
-                getCollection().updateOne(getEntityPathFilter(item.getGroupId(), item.getArtifactId(), item.getVersionId(), item.getEntity().getPath()), combineDocument(item), INSERT_IF_ABSENT));
+        versionedEntities.forEach(item -> createOrUpdate(item));
         return versionedEntities;
     }
 
-    private Bson combineDocument(StoredEntity entity)
-    {
-        return combine(
-                set(GROUP_ID, entity.getGroupId()),
-                set(ARTIFACT_ID, entity.getArtifactId()),
-                set(VERSION_ID, entity.getVersionId()),
-                set(ENTITY_PATH, entity.getEntity().getPath()),
-                set(ENTITY_CLASSIFIER_PATH, entity.getEntity().getClassifierPath()),
-                set(ENTITY_CONTENT, entity.getEntity().getContent()),
-                set(VERSIONED_ENTITY, entity.isVersionedEntity()),
-                currentDate(UPDATED));
-    }
-
     @Override
-    protected boolean isVersioned()
-    {
-        return false;
-    }
-
-    @Override
-    public List<T> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary)
+    public List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary)
     {
         FindIterable findIterable = super.findReleasedEntitiesByClassifier(classifier, search, projectVersions);
         if (limit != null)
@@ -150,7 +146,7 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
     }
 
     @Override
-    public List<T> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary)
+    public List<DepotEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary)
     {
         FindIterable findIterable = super.findLatestEntitiesByClassifier(classifier, search);
         if (limit != null)
@@ -161,35 +157,71 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
     }
 
     @Override
-    public List<T> findReleasedEntitiesByClassifier(String classifier, boolean summary)
+    public List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary)
     {
         return transform(summary, super.findReleasedEntitiesByClassifier(classifier));
     }
 
     @Override
-    public List<T> findLatestEntitiesByClassifier(String classifier, boolean summary)
+    public List<DepotEntity> findLatestEntitiesByClassifier(String classifier, boolean summary)
     {
         return transform(summary, super.findLatestEntitiesByClassifier(classifier));
     }
 
     @Override
-    public List<T> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier, boolean summary)
+    public List<Entity> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier)
     {
-        return transform(summary, super.findEntitiesByClassifier(groupId, artifactId, versionId, classifier));
+        return super.findEntitiesByClassifier(groupId, artifactId, versionId, classifier);
     }
 
-    protected List<T> transform(boolean summary, FindIterable query)
+    protected List<DepotEntity> transform(boolean summary, FindIterable query)
     {
         if (!summary)
         {
-            return convert(query);
+            List<T> storedEntities = convert(query);
+            if (!storedEntities.isEmpty())
+            {
+                return storedEntities.stream().map(storedEntity -> new DepotEntity(storedEntity.getGroupId(), storedEntity.getArtifactId(), storedEntity.getVersionId(), resolvedToEntityDefinition(storedEntity))).collect(Collectors.toList());
+            }
         }
-        List<T> result = new ArrayList<>();
+        List<DepotEntity> result = new ArrayList<>();
         query.forEach((Consumer<Document>) doc ->
         {
-            Map<String, Object> entity = (Map<String, Object>) doc.get(ENTITY);
-            result.add((T)new StoredEntityOverview(doc.getString(GROUP_ID), doc.getString(ARTIFACT_ID), doc.getString(VERSION_ID), (String) entity.get(PATH), (String) entity.get(CLASSIFIER_PATH)));
+            Map<String, ?> entity = null;
+            if (doc.getString(ENTITY_TYPE).equals(ENTITY_TYPE_DATA))
+            {
+                entity = (Map<String, Object>) doc.get(ENTITY);
+            }
+            else if (doc.getString(ENTITY_TYPE).equals(ENTITY_TYPE_STRING_DATA))
+            {
+                entity = (Map<String, ?>) doc.get(ENTITY_ATTRIBUTES);
+            }
+            result.add(new DepotEntityOverview(doc.getString(GROUP_ID), doc.getString(ARTIFACT_ID), doc.getString(VERSION_ID), (String) entity.get(PATH), (String) entity.get(CLASSIFIER_PATH)));
         });
         return result;
+    }
+
+    @Override
+    protected Entity resolvedToEntityDefinition(T storedEntity)
+    {
+        if (storedEntity instanceof StoredEntityData)
+        {
+            return ((StoredEntityData) storedEntity).getEntity();
+        }
+        else if (storedEntity instanceof StoredEntityStringData)
+        {
+            try
+            {
+                return objectMapper.readValue(((StoredEntityStringData)storedEntity).getData(), EntityDefinition.class);
+            }
+            catch (JsonProcessingException e)
+            {
+                throw new IllegalStateException(String.format("Error: %s while fetching entity: %s-%s-%s-%s", e.getMessage(), storedEntity.getGroupId(), storedEntity.getArtifactId(), storedEntity.getVersionId(), ((StoredEntityStringData)storedEntity).getEntityAttributes().get("path")));
+            }
+        }
+        else
+        {
+            throw new IllegalStateException("Unknown stored entity type");
+        }
     }
 }

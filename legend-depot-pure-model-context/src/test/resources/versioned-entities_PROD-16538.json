@@ -1,10 +1,16 @@
 [
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "test.legend",
     "artifactId": "blank-prod",
     "versionId": "2.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "service::SomeService",
+      "classifierPath": "meta::legend::service::metamodel::Service",
+      "package": "service"
+    },
     "entity": {
       "path": "service::SomeService",
       "classifierPath": "meta::legend::service::metamodel::Service",
@@ -119,10 +125,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "test.legend",
     "artifactId": "blank-prod",
     "versionId": "2.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::blank_prod::v2_0_0::blank::Person",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "test::legend::blank_prod::v2_0_0::blank"
+    },
     "entity": {
       "path": "test::legend::blank_prod::v2_0_0::blank::Person",
       "classifierPath": "meta::pure::metamodel::type::Class",

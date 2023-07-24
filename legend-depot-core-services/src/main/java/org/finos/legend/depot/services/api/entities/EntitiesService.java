@@ -16,7 +16,7 @@
 package org.finos.legend.depot.services.api.entities;
 
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
-import org.finos.legend.depot.domain.entity.StoredEntity;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 

@@ -1,10 +1,16 @@
 [
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionId": "3.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::metadata::test::v3_0_0::com::test",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "test::legend::metadata::test::v3_0_0::com"
+    },
     "entity": {
       "path": "test::legend::metadata::test::v3_0_0::com::test",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -17,10 +23,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionId": "3.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::ClassWithDependency",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test"
+    },
     "entity": {
       "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::ClassWithDependency",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -43,10 +55,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionId": "3.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test"
+    },
     "entity": {
       "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::TestProfile",
       "classifierPath": "meta::pure::metamodel::extension::Profile",
@@ -59,10 +77,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionId": "3.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::ClientBasic",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test"
+    },
     "entity": {
       "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::ClientBasic",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -133,10 +157,16 @@
   },
   {
     "id": null,
+    "_type": "entityData",
     "groupId": "examples.metadata",
     "artifactId": "test",
     "versionId": "3.0.0",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::subpackage::TestProfileTwo",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::subpackage"
+    },
     "entity": {
       "path": "test::legend::metadata::test::v3_0_0::test::legend::metadata::test::subpackage::TestProfileTwo",
       "classifierPath": "meta::pure::metamodel::extension::Profile",

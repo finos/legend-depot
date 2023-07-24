@@ -1,9 +1,15 @@
 [
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "domain::covid::JHUCovid19",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "domain::covid"
+    },
     "entity": {
       "path": "domain::covid::JHUCovid19",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -138,10 +144,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "domain::covid::Demographics",
+      "classifierPath": "meta::pure::metamodel::type::Class",
+      "package": "domain::covid"
+    },
     "entity": {
       "path": "domain::covid::Demographics",
       "classifierPath": "meta::pure::metamodel::type::Class",
@@ -236,10 +248,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "mapping::CovidDataMapping",
+      "classifierPath": "meta::pure::mapping::Mapping",
+      "package": "mapping"
+    },
     "entity": {
       "path": "mapping::CovidDataMapping",
       "classifierPath": "meta::pure::mapping::Mapping",
@@ -1016,10 +1034,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "presentation::SourceCode",
+      "classifierPath": "meta::pure::metamodel::text::Text",
+      "package": "presentation"
+    },
     "entity": {
       "path": "presentation::SourceCode",
       "classifierPath": "meta::pure::metamodel::text::Text",
@@ -1034,10 +1058,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "presentation::07_Register_A_Service",
+      "classifierPath": "meta::pure::metamodel::text::Text",
+      "package": "presentation"
+    },
     "entity": {
       "path": "presentation::07_Register_A_Service",
       "classifierPath": "meta::pure::metamodel::text::Text",
@@ -1052,10 +1082,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "presentation::03_Define_A_Store",
+      "classifierPath": "meta::pure::metamodel::text::Text",
+      "package": "presentation"
+    },
     "entity": {
       "path": "presentation::03_Define_A_Store",
       "classifierPath": "meta::pure::metamodel::text::Text",
@@ -1070,10 +1106,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "presentation::02_Create_A_Connection",
+      "classifierPath": "meta::pure::metamodel::text::Text",
+      "package": "presentation"
+    },
     "entity": {
       "path": "presentation::02_Create_A_Connection",
       "classifierPath": "meta::pure::metamodel::text::Text",
@@ -1088,10 +1130,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "presentation::01_Introduction",
+      "classifierPath": "meta::pure::metamodel::text::Text",
+      "package": "presentation"
+    },
     "entity": {
       "path": "presentation::01_Introduction",
       "classifierPath": "meta::pure::metamodel::text::Text",
@@ -1106,10 +1154,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "presentation::05_Create_A_Mapping",
+      "classifierPath": "meta::pure::metamodel::text::Text",
+      "package": "presentation"
+    },
     "entity": {
       "path": "presentation::05_Create_A_Mapping",
       "classifierPath": "meta::pure::metamodel::text::Text",
@@ -1124,10 +1178,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "presentation::00_Welcome",
+      "classifierPath": "meta::pure::metamodel::text::Text",
+      "package": "presentation"
+    },
     "entity": {
       "path": "presentation::00_Welcome",
       "classifierPath": "meta::pure::metamodel::text::Text",
@@ -1142,10 +1202,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "presentation::04_Model_Your_Data",
+      "classifierPath": "meta::pure::metamodel::text::Text",
+      "package": "presentation"
+    },
     "entity": {
       "path": "presentation::04_Model_Your_Data",
       "classifierPath": "meta::pure::metamodel::text::Text",
@@ -1160,10 +1226,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "presentation::06_Build_A_Query",
+      "classifierPath": "meta::pure::metamodel::text::Text",
+      "package": "presentation"
+    },
     "entity": {
       "path": "presentation::06_Build_A_Query",
       "classifierPath": "meta::pure::metamodel::text::Text",
@@ -1178,10 +1250,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "runtime::SnowflakeRuntime",
+      "classifierPath": "meta::pure::runtime::PackageableRuntime",
+      "package": "runtime"
+    },
     "entity": {
       "path": "runtime::SnowflakeRuntime",
       "classifierPath": "meta::pure::runtime::PackageableRuntime",
@@ -1220,10 +1298,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "runtime::connection::SecDivSnowflakeConnection",
+      "classifierPath": "meta::pure::runtime::PackageableConnection",
+      "package": "runtime::connection"
+    },
     "entity": {
       "path": "runtime::connection::SecDivSnowflakeConnection",
       "classifierPath": "meta::pure::runtime::PackageableConnection",
@@ -1253,10 +1337,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "service::MyService",
+      "classifierPath": "meta::pure::service::metamodel::Service",
+      "package": "service"
+    },
     "entity": {
       "path": "service::MyService",
       "classifierPath": "meta::pure::service::metamodel::Service",
@@ -1525,10 +1615,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "service::MyService2",
+      "classifierPath": "meta::pure::service::metamodel::Service",
+      "package": "service"
+    },
     "entity": {
       "path": "service::MyService2",
       "classifierPath": "meta::pure::service::metamodel::Service",
@@ -1799,10 +1895,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "service::MyService1",
+      "classifierPath": "meta::pure::service::metamodel::Service",
+      "package": "service"
+    },
     "entity": {
       "path": "service::MyService1",
       "classifierPath": "meta::pure::service::metamodel::Service",
@@ -2073,10 +2175,16 @@
     "id": ""
   },
   {
+    "_type": "entityData",
     "versionId": "2.0.1",
     "groupId": "example.services.test",
     "artifactId": "test",
     "versionedEntity": false,
+    "entityAttributes": {
+      "path": "store::CovidDataStore",
+      "classifierPath": "meta::relational::metamodel::Database",
+      "package": "store"
+    },
     "entity": {
       "path": "store::CovidDataStore",
       "classifierPath": "meta::relational::metamodel::Database",
