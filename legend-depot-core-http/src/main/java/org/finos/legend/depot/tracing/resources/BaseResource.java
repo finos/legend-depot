@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
@@ -105,11 +106,20 @@ public class BaseResource
         {
             return Response.noContent().status(Response.Status.NOT_MODIFIED).build();
         }
+        CacheControl cc = new CacheControl();
         Response.ResponseBuilder responseBuilder = Response.ok(handle(resourceAPIMetricName, label, supplier));
         if (serverTag != null)
         {
             responseBuilder.tag(serverTag);
+            cc.setMustRevalidate(true);
         }
+        else
+        {
+            cc.setNoCache(true);
+            cc.setNoStore(true);
+        }
+
+        responseBuilder.cacheControl(cc);
         return responseBuilder.build();
     }
 
