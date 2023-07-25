@@ -147,7 +147,7 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
 
     public List<Entity> getAllEntities(String groupId, String artifactId, String versionId)
     {
-        return find(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId)).stream().map(this::resolvedToEntityDefinition).collect(Collectors.toList());
+        return find(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId)).parallelStream().map(this::resolvedToEntityDefinition).collect(Collectors.toList());
     }
 
     public List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages)
@@ -161,7 +161,7 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
         {
             filter = and(filter, eq(ENTITY_PACKAGE, packageName));
         }
-        Stream<Entity> entities = find(filter).stream().map(this::resolvedToEntityDefinition);
+        Stream<Entity> entities = find(filter).parallelStream().map(this::resolvedToEntityDefinition);
         if (classifierPaths != null && !classifierPaths.isEmpty())
         {
             entities = entities.filter(entity -> classifierPaths.contains(entity.getClassifierPath()));
@@ -181,7 +181,7 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
 
     public List<Entity> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier)
     {
-        return find(and(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId), eq(ENTITY_CLASSIFIER_PATH, classifier))).stream().map(this::resolvedToEntityDefinition).collect(Collectors.toList());
+        return find(and(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId), eq(ENTITY_CLASSIFIER_PATH, classifier))).parallelStream().map(this::resolvedToEntityDefinition).collect(Collectors.toList());
     }
 
     public long delete(String groupId, String artifactId, String versionId)
