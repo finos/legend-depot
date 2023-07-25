@@ -50,6 +50,7 @@ public class PureModelContextServiceImpl implements PureModelContextService
     @Override
     public PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean transitive)
     {
+        validateClientVersion(clientVersion);
         String version = this.projectsService.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
         List<Entity> entities = this.entitiesService.getEntities(groupId, artifactId, version);
         PureModelContextData pureModelContextData = getPureModelContextData(entities, groupId, artifactId, version, clientVersion);
@@ -82,6 +83,14 @@ public class PureModelContextServiceImpl implements PureModelContextService
                 .withSDLC(getAlloySDLC(groupId, artifactId, versionId))
                 .withEntities(entities)
                 .build();
+    }
+
+    private void validateClientVersion(String clientVersion)
+    {
+        if (clientVersion != null && !PureClientVersions.versions.contains(clientVersion))
+        {
+            throw new IllegalArgumentException(String.format("Client version provided is invalid, following are the valid client versions: %s", String.join(", ", PureClientVersions.versions)));
+        }
     }
 
     private AlloySDLC getAlloySDLC(String groupId, String artifactId, String versionId)
