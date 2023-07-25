@@ -70,9 +70,9 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
     public static List<IndexModel> buildIndexes()
     {
         return Arrays.asList(buildIndex("groupId-artifactId-versionId", GROUP_ID, ARTIFACT_ID, VERSION_ID),
-                buildIndex("groupId-artifactId-versionId-entityPath", true, GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH),
-                buildIndex("groupId-artifactId-versionId-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE),
-                buildIndex("entity-classifier", ENTITY_CLASSIFIER_PATH)
+                buildIndex("groupId-artifactId-versionId-entityAttributes-path", true, GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PATH),
+                buildIndex("groupId-artifactId-versionId-entityAttributes-package", GROUP_ID, ARTIFACT_ID, VERSION_ID, ENTITY_PACKAGE),
+                buildIndex("entityAttributes-classifier", ENTITY_CLASSIFIER_PATH)
         );
     }
 
