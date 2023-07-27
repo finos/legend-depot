@@ -27,7 +27,7 @@
     <name>Legend Depot</name>
     <groupId>org.finos.legend.depot</groupId>
     <artifactId>legend-depot</artifactId>
-    <version>1.22.5-SNAPSHOT</version>
+    <version>legend-depot-1.22.5</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -160,7 +160,7 @@
 
     <scm>
         <developerConnection>scm:git:https://github.com/finos/legend-depot</developerConnection>
-        <tag>HEAD</tag>
+        <tag>legend-depot-legend-depot-1.22.5</tag>
     </scm>
 
     <build>
