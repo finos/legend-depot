@@ -16,12 +16,12 @@
 package org.finos.legend.depot.store.artifacts.purge.services;
 
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.services.VersionsMismatchService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 import org.finos.legend.depot.store.artifacts.purge.api.ArtifactsPurgeService;
@@ -60,15 +60,15 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     private static final String EVICT_OLDEST = "evict_old";
 
     private final ManageProjectsService projects;
-    private final RepositoryServices repository;
+    private final VersionsMismatchService versionsMismatchService;
     private final QueryMetricsHandler metrics;
 
     @Inject
-    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, RepositoryServices repository, QueryMetricsHandler metrics)
+    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, VersionsMismatchService versionsMismatchService, QueryMetricsHandler metrics)
     {
         this.projects = projects;
         this.metrics = metrics;
-        this.repository = repository;
+        this.versionsMismatchService = versionsMismatchService;
     }
 
 
@@ -155,7 +155,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     public MetadataEventResponse deprecateVersionsNotInRepository()
     {
         MetadataEventResponse response = new MetadataEventResponse();
-        repository.findVersionsMismatches().parallelStream().forEach(versionMismatch ->
+        versionsMismatchService.findVersionsMismatches().parallelStream().forEach(versionMismatch ->
         {
             if (!versionMismatch.versionsNotInRepository.isEmpty())
             {

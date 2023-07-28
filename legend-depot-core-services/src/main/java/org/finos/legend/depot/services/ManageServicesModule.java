@@ -15,6 +15,9 @@
 
 package org.finos.legend.depot.services;
 
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import org.finos.legend.depot.schedules.services.SchedulesFactory;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
@@ -23,9 +26,22 @@ import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.services.versionedEntities.ManageVersionedEntitiesServiceImpl;
+import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
+import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
+
+import javax.inject.Named;
+
+import static org.finos.legend.depot.services.VersionsMismatchService.PROJECTS;
+import static org.finos.legend.depot.services.VersionsMismatchService.REPO_VERSIONS;
+import static org.finos.legend.depot.services.VersionsMismatchService.REPO_EXCEPTIONS;
+import static org.finos.legend.depot.services.VersionsMismatchService.MISSING_REPO_VERSIONS;
+import static org.finos.legend.depot.services.VersionsMismatchService.MISSING_STORE_VERSIONS;
+import static org.finos.legend.depot.services.VersionsMismatchService.STORE_VERSIONS;
 
 public class ManageServicesModule extends ReadDataServicesModule
 {
+    private static final String REPOSITORY_METRICS_SCHEDULE = "repository-metrics-schedule";
+
     @Override
     protected void configure()
     {
@@ -35,10 +51,31 @@ public class ManageServicesModule extends ReadDataServicesModule
         bind(ManageEntitiesService.class).to(ManageEntitiesServiceImpl.class);
         bind(ManageVersionedEntitiesService.class).to(ManageVersionedEntitiesServiceImpl.class);
         bind(ManageFileGenerationsService.class).to(ManageFileGenerationsServiceImpl.class);
+        bind(VersionsMismatchService.class);
 
         expose(ManageProjectsService.class);
         expose(ManageEntitiesService.class);
         expose(ManageVersionedEntitiesService.class);
         expose(ManageFileGenerationsService.class);
+        expose(VersionsMismatchService.class);
+    }
+
+    @Provides
+    @Named("repository-metrics")
+    @Singleton
+    boolean registerMetrics(PrometheusConfiguration prometheusConfiguration, SchedulesFactory schedulesFactory, VersionsMismatchService versionsMismatchService)
+    {
+        if (prometheusConfiguration.isEnabled())
+        {
+            PrometheusMetricsHandler metricsHandler = prometheusConfiguration.getMetricsHandler();
+            metricsHandler.registerGauge(PROJECTS, PROJECTS);
+            metricsHandler.registerGauge(REPO_VERSIONS, REPO_VERSIONS);
+            metricsHandler.registerGauge(STORE_VERSIONS, STORE_VERSIONS);
+            metricsHandler.registerGauge(MISSING_REPO_VERSIONS, MISSING_REPO_VERSIONS);
+            metricsHandler.registerGauge(MISSING_STORE_VERSIONS, MISSING_STORE_VERSIONS);
+            metricsHandler.registerGauge(REPO_EXCEPTIONS, REPO_EXCEPTIONS);
+            schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE, versionsMismatchService::findVersionsMismatches);
+        }
+        return true;
     }
 }

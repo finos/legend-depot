@@ -21,6 +21,8 @@ import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.domain.version.VersionMismatch;
+import org.finos.legend.depot.services.VersionsMismatchService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
@@ -44,12 +46,14 @@ public class ManageProjectsVersionsResource extends BaseAuthorisedResource
 
     public static final String PROJECTS_VERSIONS_RESOURCE = "Versions";
     private final ManageProjectsService projectVersionApi;
+    private final VersionsMismatchService repositoryService;
 
     @Inject
-    public ManageProjectsVersionsResource(ManageProjectsService projectVersionApi, AuthorisationProvider authorisationProvider, @Named("requestPrincipal") Provider<Principal> principalProvider)
+    public ManageProjectsVersionsResource(ManageProjectsService projectVersionApi, VersionsMismatchService repositoryService, AuthorisationProvider authorisationProvider, @Named("requestPrincipal") Provider<Principal> principalProvider)
     {
         super(authorisationProvider, principalProvider);
         this.projectVersionApi = projectVersionApi;
+        this.repositoryService = repositoryService;
 
     }
 
@@ -78,6 +82,15 @@ public class ManageProjectsVersionsResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION, ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION + groupId + artifactId + versionId + exclusionReason, () ->
             projectVersionApi.excludeProjectVersion(groupId, artifactId, versionId, exclusionReason)
         );
+    }
+
+    @GET
+    @Path("/versions/mismatch")
+    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<VersionMismatch> getVersionMissMatches()
+    {
+        return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES, () -> this.repositoryService.findVersionsMismatches());
     }
 
 }

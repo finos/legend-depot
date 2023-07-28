@@ -51,8 +51,7 @@ public class TestDependencyManager extends TestStoreMongo
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore,projectsStore,metrics,queue,new ProjectsConfiguration("master"));
     protected ArtifactRepository repository = mock(TestMavenArtifactsRepository.class);
-    protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
-    protected ArtifactsFilesStore artifacts = new ArtifactsFilesMongo(mongoProvider);
+    protected RepositoryServices repositoryServices = new RepositoryServices(repository);
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 
     private static final String GROUPID = "examples.metadata";
