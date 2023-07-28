@@ -13,14 +13,14 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.artifacts.resources;
+package org.finos.legend.depot.store.resources.dependencies;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
-import org.finos.legend.depot.store.artifacts.services.DependencyManager;
+import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
@@ -36,18 +36,18 @@ import java.security.Principal;
 
 @Path("")
 @Api("Dependencies")
-public class DependenciesResource extends BaseAuthorisedResource
+public class ManageDependenciesResource extends BaseAuthorisedResource
 {
     public static final String DEPENDENCIES_RESOURCE = "Dependencies";
-    private final DependencyManager dependencyManager;
+    private final ManageDependenciesService manageDependenciesService;
 
     @Inject
-    public DependenciesResource(DependencyManager dependencyManager,
-                                    AuthorisationProvider authorisationProvider,
-                                    @Named("requestPrincipal") Provider<Principal> principalProvider)
+    public ManageDependenciesResource(ManageDependenciesService manageDependenciesService,
+                                      AuthorisationProvider authorisationProvider,
+                                      @Named("requestPrincipal") Provider<Principal> principalProvider)
     {
         super(authorisationProvider, principalProvider);
-        this.dependencyManager = dependencyManager;
+        this.manageDependenciesService = manageDependenciesService;
     }
 
     @PUT
@@ -61,7 +61,7 @@ public class DependenciesResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES, ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES + groupId + artifactId + versionId, () ->
                 {
                     validateUser();
-                    return dependencyManager.updateTransitiveDependencies(groupId, artifactId, versionId);
+                    return manageDependenciesService.updateTransitiveDependencies(groupId, artifactId, versionId);
                 });
     }
 

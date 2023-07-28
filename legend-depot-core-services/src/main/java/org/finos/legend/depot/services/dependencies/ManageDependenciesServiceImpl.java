@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.artifacts.services;
+package org.finos.legend.depot.services.dependencies;
 
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
@@ -22,33 +22,44 @@ import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.domain.version.VersionValidator;
+import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
+import javax.inject.Named;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
-import java.util.HashSet;
 import java.util.Optional;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
-public class DependencyManager
+public class ManageDependenciesServiceImpl implements ManageDependenciesService
 {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DependencyManager.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ManageDependenciesServiceImpl.class);
 
     private final ManageProjectsService projects;
     private final RepositoryServices repositoryServices;
-
+    private final DependencyUtil dependencyUtil;
 
     @Inject
-    public DependencyManager(ManageProjectsService projects, RepositoryServices repositoryServices)
+    public ManageDependenciesServiceImpl(ManageProjectsService projects, RepositoryServices repositoryServices, @Named("dependencyUtil") DependencyUtil dependencyUtil)
     {
         this.projects = projects;
         this.repositoryServices = repositoryServices;
+        this.dependencyUtil = dependencyUtil;
     }
 
-    protected List<ProjectVersion> calculateDependencies(String groupId, String artifactId, String versionId)
+    public ManageDependenciesServiceImpl(ManageProjectsService projects, RepositoryServices repositoryServices)
+    {
+        this.projects = projects;
+        this.repositoryServices = repositoryServices;
+        this.dependencyUtil = new DependencyUtil();
+    }
+
+    @Override
+    public List<ProjectVersion> calculateDependencies(String groupId, String artifactId, String versionId)
     {
         List<ProjectVersion> versionDependencies = new ArrayList<>();
         LOGGER.info("Finding dependencies for [{}-{}-{}]", groupId, artifactId, versionId);
@@ -58,7 +69,8 @@ public class DependencyManager
         return versionDependencies;
     }
 
-    protected VersionDependencyReport calculateTransitiveDependencies(List<ProjectVersion> directDependencies)
+    @Override
+    public VersionDependencyReport calculateTransitiveDependencies(List<ProjectVersion> directDependencies)
     {
         Set<ProjectVersion> projectDependencies = new HashSet<>();
         try
@@ -78,7 +90,7 @@ public class DependencyManager
                         throw new IllegalStateException(String.format("Cannot calculate dependencies for project version: %s", deps.getGav()));
                     }
                     projectDependencies.addAll(projectData.get().getVersionData().getDependencies());
-                    projectDependencies.addAll(projectData.get().getTransitiveDependenciesReport().getTransitiveDependencies());
+                    projectDependencies.addAll(this.dependencyUtil.overrideDependencies(directDependencies, projectData.get().getTransitiveDependenciesReport().getTransitiveDependencies(), this::getCalculatedTransitiveDependencies));
                 }
                 else
                 {
@@ -107,6 +119,27 @@ public class DependencyManager
         return new VersionDependencyReport(projectDependencies.stream().collect(Collectors.toList()), true);
     }
 
+    private Set<ProjectVersion> getCalculatedTransitiveDependencies(List<ProjectVersion> directDependencies, boolean transitive)
+    {
+        return this.calculateTransitiveDependencies(directDependencies).getTransitiveDependencies().stream().collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<String> validateDependencies(List<ProjectVersion> dependencies, String versionId)
+    {
+        List<String> errors = new ArrayList<>();
+        dependencies.stream().forEach(dep ->
+        {
+            if (VersionValidator.isValidReleaseVersion(versionId) && VersionValidator.isSnapshotVersion(dep.getVersionId()))
+            {
+                String illegalDepError = String.format("Snapshot dependency %s-%s-%s not allowed in versions", dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
+                errors.add(illegalDepError);
+                LOGGER.error(illegalDepError);
+            }
+        });
+        return errors;
+    }
+
     public StoreProjectVersionData updateTransitiveDependencies(String groupId, String artifactId, String versionId)
     {
         Optional<StoreProjectVersionData> projectVersionData = this.projects.find(groupId, artifactId, versionId);
@@ -130,20 +163,5 @@ public class DependencyManager
     public void setProjectDataTransitiveDependencies(StoreProjectVersionData projectData)
     {
         projectData.setTransitiveDependenciesReport(calculateTransitiveDependencies(projectData.getVersionData().getDependencies()));
-    }
-
-    protected List<String> validateDependencies(List<ProjectVersion> dependencies, String versionId)
-    {
-        List<String> errors = new ArrayList<>();
-        dependencies.stream().forEach(dep ->
-        {
-            if (VersionValidator.isValidReleaseVersion(versionId) && VersionValidator.isSnapshotVersion(dep.getVersionId()))
-            {
-                String illegalDepError = String.format("Snapshot dependency %s-%s-%s not allowed in versions", dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
-                errors.add(illegalDepError);
-                LOGGER.error(illegalDepError);
-            }
-        });
-        return errors;
     }
 }

@@ -16,17 +16,23 @@
 package org.finos.legend.depot.services;
 
 import com.google.inject.PrivateModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.api.serverInfo.InfoService;
 import org.finos.legend.depot.services.api.versionedEntities.VersionedEntitiesService;
+import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.entities.EntityClassifierServiceImpl;
 import org.finos.legend.depot.services.generation.file.FileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.services.versionedEntities.VersionedEntitiesServiceImpl;
+
+import javax.inject.Named;
 
 public class ReadDataServicesModule extends PrivateModule
 {
@@ -47,5 +53,14 @@ public class ReadDataServicesModule extends PrivateModule
         expose(EntityClassifierService.class);
         expose(FileGenerationsService.class);
         expose(InfoService.class);
+        expose(DependencyUtil.class).annotatedWith(Names.named("dependencyUtil"));
+    }
+
+    @Provides
+    @Named("dependencyUtil")
+    @Singleton
+    public DependencyUtil initialiseDependencyCache()
+    {
+        return new DependencyUtil();
     }
 }

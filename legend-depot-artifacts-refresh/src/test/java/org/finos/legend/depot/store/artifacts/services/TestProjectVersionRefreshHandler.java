@@ -22,6 +22,8 @@ import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
+import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
+import org.finos.legend.depot.services.dependencies.ManageDependenciesServiceImpl;
 import org.finos.legend.depot.store.artifacts.configuration.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
@@ -82,9 +84,9 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     protected EntityArtifactsProvider entitiesProvider = new EntityProvider();
     protected RepositoryServices repositoryServices = mock(RepositoryServices.class);
 
-    protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
+    protected ManageDependenciesService manageDependenciesService = new ManageDependenciesServiceImpl(projectsService, repositoryServices);
 
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, artifactsStore, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), dependencyManager, 3);
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, artifactsStore, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), manageDependenciesService, 3);
 
 
     @Before

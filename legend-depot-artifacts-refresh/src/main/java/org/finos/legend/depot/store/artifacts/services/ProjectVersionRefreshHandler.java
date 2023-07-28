@@ -25,6 +25,7 @@ import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.CoordinateValidator;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
+import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
 import org.finos.legend.depot.store.artifacts.configuration.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
@@ -82,12 +83,12 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
     private final List<String> projectPropertiesInScope;
     private final List<String> manifestPropertiesInScope;
     private final Queue workQueue;
-    private final DependencyManager dependencyManager;
+    private final ManageDependenciesService manageDependenciesService;
     private final int maximumSnapshotsAllowed;
 
 
     @Inject
-    public ProjectVersionRefreshHandler(ManageProjectsService projects, RepositoryServices repositoryServices, Queue workQueue, ArtifactsFilesStore artifacts, IncludeProjectPropertiesConfiguration includePropertyConfig, DependencyManager dependencyManager, @Named("maximumSnapshotsAllowed") int maximumSnapshotsAllowed)
+    public ProjectVersionRefreshHandler(ManageProjectsService projects, RepositoryServices repositoryServices, Queue workQueue, ArtifactsFilesStore artifacts, IncludeProjectPropertiesConfiguration includePropertyConfig, ManageDependenciesService manageDependenciesService, @Named("maximumSnapshotsAllowed") int maximumSnapshotsAllowed)
     {
         this.projects = projects;
         this.workQueue = workQueue;
@@ -95,7 +96,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         this.repositoryServices = repositoryServices;
         this.projectPropertiesInScope = includePropertyConfig != null ? includePropertyConfig.getProperties() : Collections.EMPTY_LIST;
         this.manifestPropertiesInScope = includePropertyConfig != null ? includePropertyConfig.getManifestProperties() : Collections.EMPTY_LIST;
-        this.dependencyManager = dependencyManager;
+        this.manageDependenciesService = manageDependenciesService;
         this.maximumSnapshotsAllowed = maximumSnapshotsAllowed;
 
         try
@@ -229,8 +230,8 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             StoreProjectData project = getProject(event.getGroupId(), event.getArtifactId());
             try
             {
-                List<ProjectVersion> newDependencies = this.dependencyManager.calculateDependencies(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                this.dependencyManager.validateDependencies(newDependencies, event.getVersionId()).forEach(error -> response.addError(error));
+                List<ProjectVersion> newDependencies = this.manageDependenciesService.calculateDependencies(event.getGroupId(), event.getArtifactId(), event.getVersionId());
+                this.manageDependenciesService.validateDependencies(newDependencies, event.getVersionId()).forEach(error -> response.addError(error));
                 if (!response.hasErrors())
                 {
                     LOGGER.info("Processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
@@ -281,7 +282,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         StoreProjectVersionData storeProjectVersionData = projectVersionData.isPresent() ? projectVersionData.get() : new StoreProjectVersionData(project.getGroupId(), project.getArtifactId(), versionId);
         ProjectVersionData versionData = storeProjectVersionData.getVersionData();
         versionData.setDependencies(newDependencies);
-        this.dependencyManager.setProjectDataTransitiveDependencies(storeProjectVersionData);
+        this.manageDependenciesService.setProjectDataTransitiveDependencies(storeProjectVersionData);
 
         if (this.projectPropertiesInScope != null && !this.projectPropertiesInScope.isEmpty())
         {

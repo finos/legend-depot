@@ -22,6 +22,8 @@ import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
+import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
+import org.finos.legend.depot.services.dependencies.ManageDependenciesServiceImpl;
 import org.finos.legend.depot.store.artifacts.configuration.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
@@ -97,9 +99,9 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, projectsService);
     protected ArtifactRepository repository = new TestMavenArtifactsRepository();
     protected RepositoryServices repositoryServices = new RepositoryServices(repository);
-    protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
+    protected ManageDependenciesService manageDependenciesService = new ManageDependenciesServiceImpl(projectsService, repositoryServices);
 
-    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, artifacts, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), dependencyManager, 10);
+    protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, artifacts, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), manageDependenciesService, 10);
 
     protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices, queue);
 
