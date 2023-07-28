@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
-import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
 import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
@@ -90,15 +89,5 @@ public class RepositoryResource extends BaseResource
             }
         });
     }
-
-    @GET
-    @Path("/repository/versions/mismatch")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<VersionMismatch> getVersionMissMatches()
-    {
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES, () -> this.repositoryServices.findVersionsMismatches());
-    }
-
 
 }

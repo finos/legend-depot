@@ -96,7 +96,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected FileGenerationsArtifactsProvider fileGenerationsProvider = new FileGenerationsProvider();
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, projectsService);
     protected ArtifactRepository repository = new TestMavenArtifactsRepository();
-    protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
+    protected RepositoryServices repositoryServices = new RepositoryServices(repository);
     protected DependencyManager dependencyManager = new DependencyManager(projectsService, repositoryServices);
 
     protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, artifacts, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), dependencyManager, 10);

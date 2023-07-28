@@ -80,7 +80,7 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
     protected UpdateEntities mongoEntities = mock(UpdateEntities.class);
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(mongoEntities,projectsService);
     protected UpdateFileGenerations mongoGenerations = mock(UpdateFileGenerations.class);
-    protected RepositoryServices repositoryServices = new RepositoryServices(repository,projectsService);
+    protected RepositoryServices repositoryServices = new RepositoryServices(repository);
 
     protected ArtifactsRefreshServiceImpl artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repositoryServices,queue);
 

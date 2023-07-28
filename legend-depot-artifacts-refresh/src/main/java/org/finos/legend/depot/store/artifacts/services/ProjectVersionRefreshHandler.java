@@ -59,8 +59,7 @@ import java.util.function.Supplier;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.artifacts.repository.services.RepositoryServices.REPO_EXCEPTIONS;
-
+import static org.finos.legend.depot.services.VersionsMismatchService.REPO_EXCEPTIONS;
 
 public final class ProjectVersionRefreshHandler implements NotificationEventHandler
 {

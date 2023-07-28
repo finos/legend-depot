@@ -16,122 +16,26 @@
 package org.finos.legend.depot.artifacts.repository.services;
 
 import org.apache.maven.model.Model;
-import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
 import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.artifacts.repository.domain.VersionMismatch;
-import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
-import org.finos.legend.depot.domain.version.VersionValidator;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
-import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 public class RepositoryServices
 {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(RepositoryServices.class);
-
-    public static final String REPO_VERSIONS = "repo_versions";
-    public static final String STORE_VERSIONS = "store_versions";
-    public static final String EXCLUDED_VERSIONS = "excluded_versions";
-    public static final String EVICTED_VERSIONS = "evicted_versions";
-    public static final String MISSING_REPO_VERSIONS = "missing_repo_versions";
-    public static final String MISSING_STORE_VERSIONS = "missing_store_versions";
-    public static final String REPO_EXCEPTIONS = "repo_exceptions";
-    public static final String PROJECTS = "projects";
-
     private final ArtifactRepository repository;
-    private final ProjectsService projects;
 
     @Inject
-    public RepositoryServices(ArtifactRepository repository, ProjectsService projectsService)
+    public RepositoryServices(ArtifactRepository repository)
     {
         this.repository = repository;
-        this.projects = projectsService;
-    }
-
-    public List<VersionMismatch> findVersionsMismatches()
-    {
-        List<VersionMismatch> versionMismatches = new ArrayList<>();
-        AtomicLong repoVersions = new AtomicLong(0);
-        AtomicLong storeVersionsCount = new AtomicLong(0);
-        AtomicLong missingRepoVersions = new AtomicLong(0);
-        AtomicLong missingStoreVersions = new AtomicLong(0);
-        AtomicLong repoExceptions = new AtomicLong(0);
-        AtomicLong evictedVersionsCount = new AtomicLong(0);
-        AtomicLong excludedVersionsCount = new AtomicLong(0);
-        long startTime = System.currentTimeMillis();
-        List<StoreProjectData> allProjects = projects.getAllProjectCoordinates();
-        LOGGER.info("Starting findVersionsMismatches {}",allProjects.size());
-        ParallelIterate.forEach(allProjects,(p ->
-        {
-            try
-            {
-                final List<StoreProjectVersionData> projectVersions = projects.find(p.getGroupId(), p.getArtifactId());
-                List<String> storeVersions = projectVersions.stream().filter(pv -> !VersionValidator.isSnapshotVersion(pv.getVersionId())).map(pv -> pv.getVersionId()).collect(Collectors.toList());
-                storeVersionsCount.addAndGet(storeVersions.size());
-                final List<String> repositoryVersions = repository.findVersions(p.getGroupId(), p.getArtifactId()).stream().map(v -> v.toVersionIdString()).collect(Collectors.toList());
-                repoVersions.addAndGet(repositoryVersions.size());
-
-                //check evicted versions
-                long noOfEvictedVersions = projectVersions.stream().filter(pv -> pv.isEvicted()).count();
-                long noOfExcludedVersions = projectVersions.stream().filter(pv -> pv.getVersionData().isExcluded()).count();
-                evictedVersionsCount.addAndGet(noOfEvictedVersions);
-                excludedVersionsCount.addAndGet(noOfExcludedVersions);
-
-                //check versions not in store
-                List<String> versionsNotInStore = repositoryVersions.stream().filter(repoVersion -> !storeVersions.contains(repoVersion)).collect(Collectors.toList());
-                missingRepoVersions.addAndGet(versionsNotInStore.size());
-                if (!versionsNotInStore.isEmpty())
-                {
-                    LOGGER.info("version-mismatch found for {} {}-{} : notInStore[{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInStore);
-                }
-                //check versions not in repo
-                List<String> versionsNotInRepo = storeVersions.stream().filter(storeVersion -> !repositoryVersions.contains(storeVersion)).collect(Collectors.toList());
-                missingStoreVersions.addAndGet(versionsNotInRepo.size());
-                if (!versionsNotInRepo.isEmpty())
-                {
-                    LOGGER.info("version-mismatch found for {} {}-{} : notInRepository [{}]", p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInRepo);
-                }
-
-                if (!versionsNotInStore.isEmpty() || !versionsNotInRepo.isEmpty())
-                {
-                    versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), versionsNotInStore, versionsNotInRepo));
-                }
-            }
-            catch (Exception e)
-            {
-                String message = String.format("Could not get versions for %s:%s exception: %s ", p.getGroupId(), p.getArtifactId(), e.getMessage());
-                LOGGER.error(message);
-                versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), Collections.emptyList(), Collections.emptyList(), Arrays.asList(message)));
-                repoExceptions.addAndGet(1);
-            }
-        }));
-
-        PrometheusMetricsFactory.getInstance().setGauge(PROJECTS,allProjects.size());
-        PrometheusMetricsFactory.getInstance().setGauge(REPO_VERSIONS,repoVersions.get());
-        PrometheusMetricsFactory.getInstance().setGauge(STORE_VERSIONS,storeVersionsCount.get());
-        PrometheusMetricsFactory.getInstance().setGauge(MISSING_REPO_VERSIONS,missingRepoVersions.get());
-        PrometheusMetricsFactory.getInstance().setGauge(MISSING_STORE_VERSIONS,missingStoreVersions.get());
-        PrometheusMetricsFactory.getInstance().setGauge(REPO_EXCEPTIONS,repoExceptions.get());
-        PrometheusMetricsFactory.getInstance().setGauge(EXCLUDED_VERSIONS,excludedVersionsCount.get());
-        PrometheusMetricsFactory.getInstance().setGauge(EVICTED_VERSIONS, evictedVersionsCount.get());
-        LOGGER.info("Finished findVersionsMismatches {} ({}) ms",versionMismatches.size(),System.currentTimeMillis() - startTime);
-        return versionMismatches;
     }
 
     public List<VersionId> findVersions(String groupId, String artifactId) throws ArtifactRepositoryException
