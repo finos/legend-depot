@@ -30,6 +30,7 @@ import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithP
 import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
@@ -42,9 +43,7 @@ import org.finos.legend.sdlc.domain.model.version.VersionId;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Comparator;
-import java.util.Collections;
 import java.util.List;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
@@ -68,17 +67,20 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private final ProjectsConfiguration configuration;
 
+    private final DependencyUtil dependencyUtil;
+
     private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
     private static final String NOT_FOUND_IN_STORE = "project version not found for %s-%s-%s";
 
     @Inject
-    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration)
+    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyUtil") DependencyUtil dependencyUtil)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
         this.metricsRegistry = metricsRegistry;
         this.queue = queue;
         this.configuration = configuration;
+        this.dependencyUtil = dependencyUtil;
     }
 
     public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration)
@@ -88,6 +90,7 @@ public class ProjectsServiceImpl implements ProjectsService
         this.metricsRegistry = metricsRegistry;
         this.queue = queue;
         this.configuration = configuration;
+        this.dependencyUtil = new DependencyUtil();
     }
 
     @Override
@@ -228,7 +231,7 @@ public class ProjectsServiceImpl implements ProjectsService
             {
                 if (projectData.getTransitiveDependenciesReport().isValid())
                 {
-                    dependencies.addAll(projectData.getTransitiveDependenciesReport().getTransitiveDependencies());
+                    dependencies.addAll(this.dependencyUtil.overrideDependencies(projectVersions, projectData.getTransitiveDependenciesReport().getTransitiveDependencies(), this::getDependencies));
                 }
                 else
                 {
@@ -354,5 +357,4 @@ public class ProjectsServiceImpl implements ProjectsService
         }
         return projectData.get();
     }
-
 }

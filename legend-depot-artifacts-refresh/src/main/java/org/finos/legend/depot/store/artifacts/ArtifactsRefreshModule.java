@@ -24,9 +24,7 @@ import org.finos.legend.depot.store.artifacts.api.ArtifactsRefreshService;
 import org.finos.legend.depot.store.artifacts.api.ParentEvent;
 import org.finos.legend.depot.store.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.store.artifacts.resources.ArtifactsRefreshResource;
-import org.finos.legend.depot.store.artifacts.resources.DependenciesResource;
 import org.finos.legend.depot.store.artifacts.services.ArtifactsRefreshServiceImpl;
-import org.finos.legend.depot.store.artifacts.services.DependencyManager;
 import org.finos.legend.depot.store.artifacts.services.ProjectVersionRefreshHandler;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
@@ -45,17 +43,14 @@ public class ArtifactsRefreshModule extends PrivateModule
     protected void configure()
     {
         bind(ArtifactsRefreshResource.class);
-        bind(DependenciesResource.class);
 
         bind(ArtifactsRefreshService.class).to(ArtifactsRefreshServiceImpl.class);
         bind(NotificationEventHandler.class).to(ProjectVersionRefreshHandler.class);
         bind(ProjectVersionRefreshHandler.class);
-        bind(DependencyManager.class);
 
         expose(ArtifactsRefreshService.class);
         expose(NotificationEventHandler.class);
         expose(ArtifactsRefreshResource.class);
-        expose(DependenciesResource.class);
     }
 
 
