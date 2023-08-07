@@ -78,8 +78,8 @@
 
         <!-- Legend dependency versions -->
         <legend.shared.version>0.23.8</legend.shared.version>
-        <legend.engine.version>4.19.0</legend.engine.version>
-        <legend.sdlc.version>0.137.0</legend.sdlc.version>
+        <legend.engine.version>4.21.1</legend.engine.version>
+        <legend.sdlc.version>0.138.1</legend.sdlc.version>
 
 
         <!-- Dependency versions -->
