@@ -48,6 +48,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -267,7 +268,22 @@ public class ProjectsServiceImpl implements ProjectsService
         ProjectDependencyGraph graph = new ProjectDependencyGraph();
         ProjectDependencyGraphWalkerContext  graphWalkerContext =  new ProjectDependencyGraphWalkerContext();
         buildDependencyGraph(graph, null, projectDependencyVersions, graphWalkerContext);
-        return buildReportFromGraph(graph,graphWalkerContext);
+        ProjectDependencyReport report = buildReportFromGraph(graph, graphWalkerContext);
+        return overrideConflictDependencies(projectDependencyVersions, report);
+    }
+
+    public ProjectDependencyReport overrideConflictDependencies(List<ProjectVersion> projectDependencyVersions, ProjectDependencyReport report)
+    {
+        List<ProjectDependencyReport.ProjectDependencyConflict> conflicts = new ArrayList<>(report.getConflicts());
+        projectDependencyVersions.stream().forEach(dep ->
+        {
+            Optional<ProjectDependencyReport.ProjectDependencyConflict> conflictPresent = conflicts.stream().filter(conflict -> conflict.getGroupId().equals(dep.getGroupId()) && conflict.getArtifactId().equals(dep.getArtifactId())).findFirst();
+            if (conflictPresent.isPresent())
+            {
+                report.removeConflict(conflictPresent.get());
+            }
+        });
+        return report;
     }
 
     public ProjectDependencyReport buildReportFromGraph(ProjectDependencyGraph dependencyGraph, ProjectDependencyGraphWalkerContext graphWalkerContext)
