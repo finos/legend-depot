@@ -78,6 +78,11 @@ public class ProjectDependencyReport
         this.getConflicts().add(new ProjectDependencyConflict(groupId, artifactId, versions));
     }
 
+    public void removeConflict(ProjectDependencyConflict conflict)
+    {
+        conflicts.remove(conflict);
+    }
+
     public List<ProjectDependencyConflict> getConflicts()
     {
         return conflicts;
