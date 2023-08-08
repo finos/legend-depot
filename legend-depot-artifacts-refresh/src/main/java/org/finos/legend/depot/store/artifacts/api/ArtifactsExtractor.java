@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.store.artifacts.api;
 
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
+import org.finos.legend.depot.store.artifacts.repository.domain.ArtifactType;
 
 import java.io.File;
 import java.util.List;

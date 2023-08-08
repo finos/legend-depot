@@ -16,10 +16,10 @@
 package org.finos.legend.depot.store.artifacts.services.entities;
 
 import org.apache.maven.model.Model;
-import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactDependency;
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.artifacts.repository.maven.impl.TestMavenArtifactsRepository;
+import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepository;
+import org.finos.legend.depot.store.artifacts.repository.domain.ArtifactDependency;
+import org.finos.legend.depot.store.artifacts.repository.domain.ArtifactType;
+import org.finos.legend.depot.store.artifacts.repository.maven.impl.TestMavenArtifactsRepository;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;

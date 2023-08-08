@@ -21,7 +21,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import org.finos.legend.depot.store.StorageConfiguration;
+import org.finos.legend.depot.store.api.StorageConfiguration;
 import org.finos.legend.depot.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 

@@ -15,8 +15,8 @@
 
 package org.finos.legend.depot.store.artifacts.services.entities;
 
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.store.artifacts.ArtifactLoadingException;
+import org.finos.legend.depot.store.artifacts.repository.domain.ArtifactType;
+import org.finos.legend.depot.store.artifacts.api.ArtifactLoadingException;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.finos.legend.sdlc.serialization.EntityLoader;

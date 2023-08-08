@@ -16,7 +16,6 @@
 package org.finos.legend.depot.store.artifacts.api;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.project.StoreProjectData;
 
 import java.io.File;
 import java.util.List;
@@ -24,7 +23,7 @@ import java.util.List;
 public interface ProjectArtifactsHandler
 {
 
-    MetadataEventResponse refreshProjectVersionArtifacts(StoreProjectData projectData, String versionId, List<File> files);
+    MetadataEventResponse refreshProjectVersionArtifacts(String groupId,String artifactId, String versionId, List<File> files);
 
     void delete(String groupId, String artifactId, String versionId);
 }

@@ -23,7 +23,7 @@ import com.mongodb.client.model.IndexModel;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.domain.project.ProjectValidator;
 import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.store.StoreException;
+import org.finos.legend.depot.store.api.StoreException;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;

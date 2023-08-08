@@ -17,15 +17,13 @@ package org.finos.legend.depot.services;
 
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.finos.legend.depot.schedules.services.SchedulesFactory;
+import org.finos.legend.depot.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
-import org.finos.legend.depot.services.api.generation.file.ManageFileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.versionedEntities.ManageVersionedEntitiesService;
 import org.finos.legend.depot.services.dependencies.ManageDependenciesServiceImpl;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
-import org.finos.legend.depot.services.generation.file.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.services.versionedEntities.ManageVersionedEntitiesServiceImpl;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
@@ -52,7 +50,7 @@ public class ManageServicesModule extends ReadDataServicesModule
         bind(ManageProjectsService.class).to(ManageProjectsServiceImpl.class);
         bind(ManageEntitiesService.class).to(ManageEntitiesServiceImpl.class);
         bind(ManageVersionedEntitiesService.class).to(ManageVersionedEntitiesServiceImpl.class);
-        bind(ManageFileGenerationsService.class).to(ManageFileGenerationsServiceImpl.class);
+
         bind(ManageDependenciesService.class).to(ManageDependenciesServiceImpl.class);
         bind(VersionsMismatchService.class);
 
@@ -60,7 +58,7 @@ public class ManageServicesModule extends ReadDataServicesModule
         expose(ManageEntitiesService.class);
         expose(ManageDependenciesService.class);
         expose(ManageVersionedEntitiesService.class);
-        expose(ManageFileGenerationsService.class);
+
         expose(VersionsMismatchService.class);
     }
 

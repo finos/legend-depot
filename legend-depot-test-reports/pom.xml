@@ -71,6 +71,26 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-generations-services</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-generations-store-mongo</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-model</artifactId>
             <exclusions>
                 <exclusion>
@@ -172,6 +192,56 @@
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-http</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-pure-model-context</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-artifacts-purge</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-servers-common</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-server</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-server</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>

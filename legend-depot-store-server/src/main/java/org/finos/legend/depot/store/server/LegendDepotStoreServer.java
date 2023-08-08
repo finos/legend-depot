@@ -18,21 +18,24 @@ package org.finos.legend.depot.store.server;
 import com.google.inject.Module;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.setup.Bootstrap;
-import org.finos.legend.depot.artifacts.repository.RepositoryModule;
-import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
+import org.finos.legend.depot.store.artifacts.repository.guice.RepositoryModule;
+import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.core.authorisation.AuthorisationModule;
 import org.finos.legend.depot.core.http.BaseServer;
 import org.finos.legend.depot.core.http.resources.InfoPageModule;
 import org.finos.legend.depot.services.ManageServicesModule;
-import org.finos.legend.depot.schedules.AdminSchedulesModule;
-import org.finos.legend.depot.store.artifacts.ArtifactsHandlersModule;
-import org.finos.legend.depot.store.artifacts.ArtifactsRefreshModule;
-import org.finos.legend.depot.store.artifacts.purge.ArtifactsPurgeModule;
-import org.finos.legend.depot.store.guice.DepotStoreResourcesModule;
-import org.finos.legend.depot.store.guice.DepotStoreServerModule;
+import org.finos.legend.depot.services.schedules.guice.AdminSchedulesModule;
+import org.finos.legend.depot.services.generations.guice.ManageGenerationsServicesModule;
+import org.finos.legend.depot.store.artifacts.guice.ArtifactsHandlersModule;
+import org.finos.legend.depot.store.artifacts.guice.ArtifactsRefreshModule;
+import org.finos.legend.depot.store.artifacts.purge.guice.ArtifactsPurgeModule;
+import org.finos.legend.depot.store.server.guice.DepotStoreResourcesModule;
+import org.finos.legend.depot.store.server.guice.DepotStoreServerModule;
 import org.finos.legend.depot.store.metrics.AdminMetricsModule;
-import org.finos.legend.depot.store.mongo.admin.ManageAdminDataStoreMongoModule;
-import org.finos.legend.depot.store.mongo.ManageDataStoreMongoModule;
+import org.finos.legend.depot.store.mongo.admin.guice.ManageAdminDataStoreMongoModule;
+import org.finos.legend.depot.store.mongo.admin.guice.AdminSchedulesStoreMongoModule;
+import org.finos.legend.depot.store.mongo.guice.ManageDataStoreMongoModule;
+import org.finos.legend.depot.store.mongo.guice.ManageGenerationsStoreMongoModule;
 import org.finos.legend.depot.store.notifications.NotificationsModule;
 import org.finos.legend.depot.store.notifications.queue.NotificationsQueueModule;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
@@ -74,9 +77,12 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new DepotStoreServerModule(),
                 new DepotStoreResourcesModule(),
                 new ManageServicesModule(),
+                new ManageGenerationsServicesModule(),
+                new ManageGenerationsStoreMongoModule(),
                 new ManageDataStoreMongoModule(),
                 new ManageAdminDataStoreMongoModule(),
                 new AdminSchedulesModule(),
+                new AdminSchedulesStoreMongoModule(),
                 new AdminMetricsModule(),
                 new AuthorisationModule(),
                 new ArtifactsHandlersModule(),

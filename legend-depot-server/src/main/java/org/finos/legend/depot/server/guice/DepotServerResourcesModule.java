@@ -21,7 +21,7 @@ import org.finos.legend.depot.server.resources.ProjectsVersionsResource;
 import org.finos.legend.depot.server.resources.dependencies.DependenciesResource;
 import org.finos.legend.depot.server.resources.entities.EntitiesResource;
 import org.finos.legend.depot.server.resources.entities.EntityClassifierResource;
-import org.finos.legend.depot.server.resources.file.FileGenerationsResource;
+
 
 public class DepotServerResourcesModule extends PrivateModule
 {
@@ -33,7 +33,6 @@ public class DepotServerResourcesModule extends PrivateModule
         bind(EntitiesResource.class);
         bind(EntityClassifierResource.class);
         bind(DependenciesResource.class);
-        bind(FileGenerationsResource.class);
 
 
         expose(ProjectsResource.class);
@@ -41,7 +40,6 @@ public class DepotServerResourcesModule extends PrivateModule
         expose(EntityClassifierResource.class);
         expose(EntitiesResource.class);
         expose(DependenciesResource.class);
-        expose(FileGenerationsResource.class);
 
     }
 }

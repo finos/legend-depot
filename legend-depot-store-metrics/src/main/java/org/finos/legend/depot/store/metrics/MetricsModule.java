@@ -20,7 +20,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import org.finos.legend.depot.schedules.services.SchedulesFactory;
+import org.finos.legend.depot.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;

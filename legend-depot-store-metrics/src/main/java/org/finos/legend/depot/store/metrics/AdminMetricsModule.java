@@ -15,8 +15,7 @@
 
 package org.finos.legend.depot.store.metrics;
 
-import org.finos.legend.depot.store.metrics.resources.StoreMetricsManagerResource;
-import org.finos.legend.depot.store.metrics.resources.StoreMetricsResource;
+import org.finos.legend.depot.store.resources.metrics.ManageMetricsResourceResource;
 
 public class AdminMetricsModule extends MetricsModule
 {
@@ -24,11 +23,9 @@ public class AdminMetricsModule extends MetricsModule
     protected void configure()
     {
         super.configure();
-        bind(StoreMetricsResource.class);
-        bind(StoreMetricsManagerResource.class);
+        bind(ManageMetricsResourceResource.class);
 
-        expose(StoreMetricsResource.class);
-        expose(StoreMetricsManagerResource.class);
+        expose(ManageMetricsResourceResource.class);
     }
 
 }

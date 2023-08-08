@@ -18,15 +18,12 @@ package org.finos.legend.depot.store.mongo.projects;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 public class TestQueryProjectVersionApi extends TestStoreMongo

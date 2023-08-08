@@ -16,7 +16,6 @@
 package org.finos.legend.depot.store.artifacts.services.entities;
 
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.store.artifacts.api.entities.EntityArtifactsProvider;
@@ -59,19 +58,19 @@ public abstract class AbstractEntityRefreshHandlerImpl
     }
 
 
-    private String getGAVCoordinates(StoreProjectData projectConfig, String versionId)
+    private String getGAVCoordinates(String groupId,String artifactId, String versionId)
     {
-        return String.format("%s-%s-%s", projectConfig.getGroupId(), projectConfig.getArtifactId(), versionId);
+        return String.format("%s-%s-%s", groupId, artifactId, versionId);
     }
 
 
-    public MetadataEventResponse refreshVersionArtifacts(StoreProjectData projectData, String versionId, List<File> files)
+    public MetadataEventResponse refreshVersionArtifacts(String groupId, String artifactId,String versionId, List<File> files)
     {
 
         MetadataEventResponse response = new MetadataEventResponse();
         try
         {
-            String gavCoordinates = getGAVCoordinates(projectData, versionId);
+            String gavCoordinates = getGAVCoordinates(groupId, artifactId, versionId);
             List<Entity> entityList = getEntities(files);
             if (entityList != null && !entityList.isEmpty())
             {
@@ -82,10 +81,10 @@ public abstract class AbstractEntityRefreshHandlerImpl
                 {
                     message = String.format("removing prior %s artifacts for [%s-%s]",this.entitiesProvider.getType(),gavCoordinates,versionId);
                     response.addMessage(message);
-                    response.addMessage("deleted " + getEntitiesApi().delete(projectData.getGroupId(), projectData.getArtifactId(),versionId));
+                    response.addMessage("deleted " + getEntitiesApi().delete(groupId, artifactId,versionId));
                     LOGGER.info(message);
                 }
-                getEntitiesApi().createOrUpdate(projectData.getGroupId(), projectData.getArtifactId(), versionId, entityList);
+                getEntitiesApi().createOrUpdate(groupId, artifactId, versionId, entityList);
             }
             else
             {
@@ -97,7 +96,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
         }
         catch (Exception e)
         {
-            String errorMessage = String.format("Unexpected exception refreshing %s %s-%s-%s , %s",entitiesProvider.getType(),projectData.getGroupId(),projectData.getArtifactId(),versionId,e.getMessage());
+            String errorMessage = String.format("Unexpected exception refreshing %s %s-%s-%s , %s",entitiesProvider.getType(),groupId,artifactId,versionId,e.getMessage());
             response.addError(errorMessage);
             LOGGER.error(errorMessage);
         }

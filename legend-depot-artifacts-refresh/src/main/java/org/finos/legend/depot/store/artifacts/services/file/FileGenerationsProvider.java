@@ -15,10 +15,10 @@
 
 package org.finos.legend.depot.store.artifacts.services.file;
 
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.domain.generation.file.FileGeneration;
-import org.finos.legend.depot.services.generation.file.FileGenerationLoader;
-import org.finos.legend.depot.store.artifacts.ArtifactLoadingException;
+import org.finos.legend.depot.store.artifacts.repository.domain.ArtifactType;
+import org.finos.legend.depot.domain.generation.DepotGeneration;
+import org.finos.legend.depot.services.generations.loader.FileGenerationLoader;
+import org.finos.legend.depot.store.artifacts.api.ArtifactLoadingException;
 import org.finos.legend.depot.store.artifacts.api.generation.file.FileGenerationsArtifactsProvider;
 
 import javax.inject.Inject;
@@ -39,14 +39,14 @@ public class FileGenerationsProvider implements FileGenerationsArtifactsProvider
     }
 
     @Override
-    public List<FileGeneration> extractArtifactsForType(Stream<File> files)
+    public List<DepotGeneration> extractArtifactsForType(Stream<File> files)
     {
-        List<FileGeneration> generations = new ArrayList<>();
+        List<DepotGeneration> generations = new ArrayList<>();
         files.forEach(f ->
         {
             try (FileGenerationLoader loader = FileGenerationLoader.newFileGenerationsLoader(f))
             {
-                List<FileGeneration> fileGenerations = loader.getAllFileGenerations().collect(Collectors.toList());
+                List<DepotGeneration> fileGenerations = loader.getAllFileGenerations().collect(Collectors.toList());
                 generations.addAll(fileGenerations);
             }
             catch (Exception e)

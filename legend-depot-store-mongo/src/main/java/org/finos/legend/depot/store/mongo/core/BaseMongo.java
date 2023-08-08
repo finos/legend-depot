@@ -30,7 +30,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.finos.legend.depot.domain.HasIdentifier;
-import org.finos.legend.depot.store.StoreException;
+import org.finos.legend.depot.store.api.StoreException;
 import org.slf4j.Logger;
 
 import java.time.LocalDateTime;
@@ -153,6 +153,13 @@ public abstract class BaseMongo<T extends HasIdentifier>
         return convert(result, documentClass);
     }
 
+    public List<T> createOrUpdate(List<T> items)
+    {
+        List<T> newItems = new ArrayList<>();
+        items.forEach(data -> newItems.add(createOrUpdate(data)));
+        return newItems;
+    }
+
     public void insert(T data)
     {
         validateNewData(data);
@@ -208,6 +215,13 @@ public abstract class BaseMongo<T extends HasIdentifier>
         }
     }
 
+    protected List<T> convert(FindIterable iterable)
+    {
+        List<T> result = new ArrayList<>();
+        iterable.forEach((Consumer<Document>)doc -> result.add(convert(doc, documentClass)));
+        return result;
+    }
+
     protected static IndexModel buildIndex(String indexName, String... fieldNames)
     {
         return buildIndex(indexName, false, fieldNames);
@@ -234,24 +248,6 @@ public abstract class BaseMongo<T extends HasIdentifier>
         return convert(getCollection().find(filter));
     }
 
-    protected long count(Bson condition)
-    {
-        return getCollection().countDocuments(condition);
-    }
-
-    protected FindIterable executeFind(Bson filter)
-    {
-        return getCollection().find(filter);
-    }
-
-
-    protected List<T> convert(FindIterable iterable)
-    {
-        List<T> result = new ArrayList<>();
-        iterable.forEach((Consumer<Document>)doc -> result.add(convert(doc, documentClass)));
-        return result;
-    }
-
     protected Optional<T> findOne(Bson filter)
     {
         List<T> result = convert(getCollection().find(filter));
@@ -262,6 +258,15 @@ public abstract class BaseMongo<T extends HasIdentifier>
         return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
     }
 
+    protected FindIterable executeFind(Bson filter)
+    {
+        return getCollection().find(filter);
+    }
+
+    protected long count(Bson condition)
+    {
+        return getCollection().countDocuments(condition);
+    }
 
     protected long delete(Bson key)
     {

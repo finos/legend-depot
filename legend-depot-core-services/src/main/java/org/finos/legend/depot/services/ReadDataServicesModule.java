@@ -21,14 +21,12 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
-import org.finos.legend.depot.services.api.generation.file.FileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.api.serverInfo.InfoService;
 import org.finos.legend.depot.services.api.versionedEntities.VersionedEntitiesService;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.entities.EntityClassifierServiceImpl;
-import org.finos.legend.depot.services.generation.file.FileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.services.versionedEntities.VersionedEntitiesServiceImpl;
 
@@ -44,14 +42,12 @@ public class ReadDataServicesModule extends PrivateModule
         bind(VersionedEntitiesService.class).to(VersionedEntitiesServiceImpl.class);
         bind(EntityClassifierService.class).to(EntityClassifierServiceImpl.class);
         bind(ProjectsService.class).to(ProjectsServiceImpl.class);
-        bind(FileGenerationsService.class).to(FileGenerationsServiceImpl.class);
         bind(InfoService.class);
 
         expose(ProjectsService.class);
         expose(EntitiesService.class);
         expose(VersionedEntitiesService.class);
         expose(EntityClassifierService.class);
-        expose(FileGenerationsService.class);
         expose(InfoService.class);
         expose(DependencyUtil.class).annotatedWith(Names.named("dependencyUtil"));
     }
