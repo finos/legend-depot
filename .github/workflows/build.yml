@@ -67,11 +67,11 @@ jobs:
           theme: dark
 
       - name: Build + Test
-        if: (github.repository != 'finos/legend-depot') || (github.ref != 'refs/heads/master')
+        if: (github.repository != 'finos/legend-depot') || (github.ref != 'refs/heads/master') || (github.ref != 'refs/heads/integration')
         run: mvn install javadoc:javadoc
 
       - name: Build + Test + Sonar + Maven Deploy
-        if: (github.repository == 'finos/legend-depot') && (github.ref == 'refs/heads/master')
+        if: (github.repository == 'finos/legend-depot') && ((github.ref == 'refs/heads/master') || (github.ref == 'refs/heads/integration'))
         env:
           DOCKER_USERNAME: finos
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
