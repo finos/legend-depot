@@ -48,3 +48,5 @@ In order to store such entities and also make the storage  of entities scalable 
 With this change we have also introduced three kinds of entity storage which will further help the cause of scalability.
 ### Steps to follow:
 1. Use the API /migrations/migrateToStoredEntityData, this will update the entities collection to be identified as one form of entity data.
+2. Once done, using the /indexes (create indexes if absent) you can create the index for this collection.
+3. Delete the old indexes of the entities collection.
