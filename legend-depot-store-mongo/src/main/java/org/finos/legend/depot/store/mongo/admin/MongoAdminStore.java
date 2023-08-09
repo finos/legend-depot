@@ -18,22 +18,16 @@ package org.finos.legend.depot.store.mongo.admin;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Singleton;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexModel;
 import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
-import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
+import org.eclipse.collections.api.factory.Maps;
 import org.finos.legend.depot.store.mongo.admin.migrations.ProjectToProjectVersionMigration;
 import org.finos.legend.depot.store.mongo.admin.migrations.DependenciesMigration;
 import org.finos.legend.depot.store.mongo.admin.migrations.EntitiesMigration;
-import org.finos.legend.depot.store.mongo.admin.schedules.ScheduleInstancesMongo;
-import org.finos.legend.depot.store.mongo.admin.schedules.SchedulesMongo;
-import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
-import org.finos.legend.depot.store.mongo.generation.file.FileGenerationsMongo;
-import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
-import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
-import org.finos.legend.depot.store.mongo.versionedEntities.VersionedEntitiesMongo;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,14 +37,17 @@ import java.util.function.Consumer;
 
 import static org.finos.legend.depot.store.mongo.core.BaseMongo.createIndexesIfAbsent;
 
+@Singleton
 public class MongoAdminStore
 {
     private final MongoDatabase mongoDatabase;
+    private final Map<String,List<IndexModel>> collectionIndexes;
 
-    @Inject
-    public MongoAdminStore(@Named("mongoDatabase") MongoDatabase mongoDatabase)
+
+    public MongoAdminStore(MongoDatabase mongoDatabase)
     {
         this.mongoDatabase = mongoDatabase;
+        this.collectionIndexes = Maps.mutable.empty();
     }
 
 
@@ -83,18 +80,15 @@ public class MongoAdminStore
         mongoDatabase.getCollection(collectionId).dropIndex(indexName);
     }
 
+    public void registerIndexes(String collectionName,List<IndexModel> indexes)
+    {
+        collectionIndexes.put(collectionName,indexes);
+    }
 
     public List<String> createIndexes()
     {
         List<String> results = new ArrayList<>();
-        results.addAll(createIndexesIfAbsent(mongoDatabase,ProjectsMongo.COLLECTION,ProjectsMongo.buildIndexes()));
-        results.addAll(createIndexesIfAbsent(mongoDatabase, ProjectsVersionsMongo.COLLECTION, ProjectsVersionsMongo.buildIndexes()));
-        results.addAll(createIndexesIfAbsent(mongoDatabase,EntitiesMongo.COLLECTION,EntitiesMongo.buildIndexes()));
-        results.addAll(createIndexesIfAbsent(mongoDatabase, VersionedEntitiesMongo.COLLECTION,EntitiesMongo.buildIndexes()));
-        results.addAll(createIndexesIfAbsent(mongoDatabase,FileGenerationsMongo.COLLECTION,FileGenerationsMongo.buildIndexes()));
-        results.addAll(createIndexesIfAbsent(mongoDatabase,ArtifactsFilesMongo.COLLECTION,ArtifactsFilesMongo.buildIndexes()));
-        results.addAll(createIndexesIfAbsent(mongoDatabase,SchedulesMongo.COLLECTION,SchedulesMongo.buildIndexes()));
-        results.addAll(createIndexesIfAbsent(mongoDatabase, ScheduleInstancesMongo.COLLECTION,ScheduleInstancesMongo.buildIndexes()));
+        collectionIndexes.keySet().forEach(collection -> results.addAll(createIndexesIfAbsent(mongoDatabase,collection,collectionIndexes.get(collection))));
         return results;
     }
 

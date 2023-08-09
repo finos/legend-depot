@@ -14,8 +14,8 @@
 
 package org.finos.legend.depot.services.dependencies;
 
-import org.finos.legend.depot.artifacts.repository.api.ArtifactRepository;
-import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
+import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepository;
+import org.finos.legend.depot.store.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;

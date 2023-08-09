@@ -17,7 +17,7 @@ package org.finos.legend.depot.store.server.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
+import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.core.http.ServersConfiguration;
 import org.finos.legend.depot.store.artifacts.configuration.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.store.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;

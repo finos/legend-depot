@@ -46,7 +46,10 @@
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-authorisation</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-http</artifactId>
+        </dependency>
         <!-- DEPOT -->
 
         <dependency>
@@ -80,10 +83,6 @@
             <groupId>de.bwaldvogel</groupId>
             <artifactId>mongo-java-server</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-http</artifactId>
         </dependency>
 
     </dependencies>

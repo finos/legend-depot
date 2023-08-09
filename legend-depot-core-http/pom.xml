@@ -24,7 +24,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Legend Depot - Core - HTTP Server</name>
+    <name>Legend Depot - Core - HTTP Components</name>
     <artifactId>legend-depot-core-http</artifactId>
 
     <dependencies>

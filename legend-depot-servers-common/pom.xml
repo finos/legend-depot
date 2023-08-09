@@ -24,7 +24,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Legend Depot - Servers Common</name>
+    <name>Legend Depot - Servers - Common</name>
     <artifactId>legend-depot-servers-common</artifactId>
 
     <dependencies>

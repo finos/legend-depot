@@ -35,7 +35,48 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-artifacts-repository-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-generations-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-notifications</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <!-- SDLC -->
+        <dependency>
+            <groupId>org.finos.legend.sdlc</groupId>
+            <artifactId>legend-sdlc-entity-serialization</artifactId>
+        </dependency>
+        <!-- SDLC -->
+
+
+
+        <!-- testing -->
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-generations-services</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-artifacts-repository-maven-impl</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
@@ -43,10 +84,6 @@
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-services</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
@@ -57,36 +94,13 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-notifications</artifactId>
-        </dependency>
-        <!-- DEPOT -->
-
-        <!-- SDLC -->
-        <dependency>
-            <groupId>org.finos.legend.sdlc</groupId>
-            <artifactId>legend-sdlc-entity-serialization</artifactId>
-        </dependency>
-        <!-- SDLC -->
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
+            <artifactId>legend-depot-generations-store-mongo</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
+            <groupId>de.bwaldvogel</groupId>
+            <artifactId>mongo-java-server</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>${junit.groupId}</groupId>
@@ -98,10 +112,7 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>de.bwaldvogel</groupId>
-            <artifactId>mongo-java-server</artifactId>
-            <scope>test</scope>
-        </dependency>
+
+
     </dependencies>
 </project>

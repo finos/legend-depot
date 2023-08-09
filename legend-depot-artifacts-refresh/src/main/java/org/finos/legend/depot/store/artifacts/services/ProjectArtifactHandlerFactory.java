@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.store.artifacts.services;
 
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
+import org.finos.legend.depot.store.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.store.artifacts.api.ProjectArtifactsHandler;
 
 import javax.inject.Singleton;

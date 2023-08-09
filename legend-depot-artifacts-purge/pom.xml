@@ -31,46 +31,18 @@
         <!-- DEPOT -->
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-artifacts-refresh</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-authorisation</artifactId>
+            <artifactId>legend-depot-model</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-services</artifactId>
         </dependency>
+        <!--TODO: remove this dependency -->
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-metrics</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-schedules</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-mongo</artifactId>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
-            <scope>test</scope>
+            <artifactId>legend-depot-artifacts-refresh</artifactId>
         </dependency>
 
-        <!-- DEPOT -->
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
@@ -80,6 +52,41 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <!-- testing-->
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-generations-services</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-mongo</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-generations-store-mongo</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-generations-store-mongo</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.bwaldvogel</groupId>
+            <artifactId>mongo-java-server</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
               <groupId>${junit.groupId}</groupId>
             <artifactId>${junit.artifactId}</artifactId>
             <scope>test</scope>
@@ -87,11 +94,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>de.bwaldvogel</groupId>
-            <artifactId>mongo-java-server</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -19,9 +19,9 @@ import com.google.inject.name.Named;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.maven.model.Model;
 import org.eclipse.collections.impl.parallel.ParallelIterate;
-import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
-import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
+import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepositoryException;
+import org.finos.legend.depot.store.artifacts.repository.domain.ArtifactType;
+import org.finos.legend.depot.store.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.CoordinateValidator;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
@@ -394,7 +394,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             if (files != null && !files.isEmpty())
             {
                 response.addMessage(String.format("[%s] files found [%s] artifacts to process [%s-%s-%s], processUnChangedFiles: %s",files.size(),artifactType,project.getGroupId(),project.getArtifactId(),versionId,processUnchangedFiles));
-                response.combine(refreshHandler.refreshProjectVersionArtifacts(project, versionId, files));
+                response.combine(refreshHandler.refreshProjectVersionArtifacts(project.getGroupId(),project.getArtifactId(), versionId, files));
             }
             else
             {

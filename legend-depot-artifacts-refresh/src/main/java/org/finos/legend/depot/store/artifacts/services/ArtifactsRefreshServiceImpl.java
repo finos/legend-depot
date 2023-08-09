@@ -16,8 +16,8 @@
 package org.finos.legend.depot.store.artifacts.services;
 
 import org.eclipse.collections.impl.parallel.ParallelIterate;
-import org.finos.legend.depot.artifacts.repository.api.ArtifactRepositoryException;
-import org.finos.legend.depot.artifacts.repository.services.RepositoryServices;
+import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepositoryException;
+import org.finos.legend.depot.store.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.StoreProjectData;

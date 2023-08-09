@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.store.artifacts.purge.services;
 
-import org.finos.legend.depot.artifacts.repository.domain.ArtifactType;
+import org.finos.legend.depot.store.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.project.ProjectVersion;

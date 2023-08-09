@@ -17,7 +17,7 @@ package org.finos.legend.depot.store.mongo.core;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.finos.legend.depot.store.StorageConfiguration;
+import org.finos.legend.depot.store.api.StorageConfiguration;
 
 import javax.validation.constraints.NotNull;
 
