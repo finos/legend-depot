@@ -13,22 +13,17 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.server.pure.model.context;
+package org.finos.legend.depot.services.pure.model.context.guice;
 
 import com.google.inject.PrivateModule;
-import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
-import org.finos.legend.depot.server.pure.model.context.resources.PureModelContextResource;
-import org.finos.legend.depot.server.pure.model.context.services.PureModelContextServiceImpl;
+import org.finos.legend.depot.server.resources.DeprecatedPureModelContextAPIsResource;
 
-public class PureModelContextModule extends PrivateModule
+public class DeprecatedPureModelContextResourcesModule extends PrivateModule
 {
     @Override
     protected void configure()
     {
-        bind(PureModelContextService.class).to(PureModelContextServiceImpl.class);
-        expose(PureModelContextService.class);
-
-        bind(PureModelContextResource.class);
-        expose(PureModelContextResource.class);
+        bind(DeprecatedPureModelContextAPIsResource.class);
+        expose(DeprecatedPureModelContextAPIsResource.class);
     }
 }

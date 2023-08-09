@@ -13,15 +13,14 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.server.pure.model.context;
+package org.finos.legend.depot.services.pure.model.context;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
-import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
-import org.finos.legend.depot.server.pure.model.context.services.PureModelContextServiceImpl;
+import org.finos.legend.depot.services.api.pure.model.context.PureModelContextService;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
