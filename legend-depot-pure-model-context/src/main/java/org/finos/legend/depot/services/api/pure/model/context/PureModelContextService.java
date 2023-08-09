@@ -13,7 +13,7 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.server.pure.model.context.api;
+package org.finos.legend.depot.services.api.pure.model.context;
 
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 

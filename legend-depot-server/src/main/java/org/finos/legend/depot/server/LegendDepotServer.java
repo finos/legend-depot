@@ -22,7 +22,7 @@ import org.finos.legend.depot.core.http.resources.InfoPageModule;
 import org.finos.legend.depot.server.configuration.DepotServerConfiguration;
 import org.finos.legend.depot.server.guice.DepotServerModule;
 import org.finos.legend.depot.server.guice.DepotServerResourcesModule;
-import org.finos.legend.depot.server.pure.model.context.PureModelContextModule;
+import org.finos.legend.depot.services.pure.model.context.guice.PureModelContextModule;
 import org.finos.legend.depot.services.ReadDataServicesModule;
 import org.finos.legend.depot.services.schedules.guice.SchedulesModule;
 import org.finos.legend.depot.services.generations.guice.GenerationsServicesModule;

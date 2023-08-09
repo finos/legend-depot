@@ -104,7 +104,7 @@
     "CORS": 5
   },
   "artifactRepositoryProviderConfiguration": {
-    "org.finos.legend.depot.artifacts.repository.maven.impl.MavenArtifactRepositoryConfiguration": {
+    "org.finos.legend.depot.store.artifacts.repository.maven.impl.MavenArtifactRepositoryConfiguration": {
       "settingsLocation": "legend-depot-store-server/src/test/resources/sample-repository-settings.xml",
       "versionsUpdateIntervalInMillis": 7200000,
       "latestUpdateIntervalInMillis": 3600000

@@ -13,13 +13,13 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.server.pure.model.context.resources;
+package org.finos.legend.depot.server.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
-import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
+import org.finos.legend.depot.services.api.pure.model.context.PureModelContextService;
 import org.finos.legend.depot.tracing.resources.BaseResource;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 

@@ -13,10 +13,10 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.server.pure.model.context.services;
+package org.finos.legend.depot.services.pure.model.context;
 
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
-import org.finos.legend.depot.server.pure.model.context.api.PureModelContextService;
+import org.finos.legend.depot.services.api.pure.model.context.PureModelContextService;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.engine.protocol.pure.PureClientVersions;
@@ -24,7 +24,6 @@ import org.finos.legend.engine.protocol.pure.v1.model.context.AlloySDLC;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.finos.legend.sdlc.protocol.pure.v1.PureModelContextDataBuilder;
-import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -65,7 +64,7 @@ public class PureModelContextServiceImpl implements PureModelContextService
             List<PureModelContextData> allPMCD = new ArrayList<>();
             for (ProjectVersionEntities projectVersionEntities : dependenciesEntities)
             {
-                allPMCD.add(getPureModelContextData(projectVersionEntities.getEntities().stream().map(x -> (Entity) x).collect(Collectors.toList()),
+                allPMCD.add(getPureModelContextData(projectVersionEntities.getEntities().stream().collect(Collectors.toList()),
                         projectVersionEntities.getGroupId(),
                         projectVersionEntities.getArtifactId(),
                         projectVersionEntities.getVersionId(),
