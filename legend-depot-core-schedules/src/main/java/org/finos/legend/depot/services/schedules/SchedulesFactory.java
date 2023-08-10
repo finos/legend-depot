@@ -72,6 +72,11 @@ public final class SchedulesFactory
         }
     }
 
+    public void registerExternalTriggerSchedule(String name, long intervalInMilliseconds, boolean isSingleInstance, Supplier<Object> function)
+    {
+        createScheduleInfo(name, intervalInMilliseconds, isSingleInstance, function);
+    }
+
     public void registerSingleInstance(String name, long delayStartInMilliseconds, long intervalInMilliseconds, Supplier<Object> function)
     {
         register(name, delayStartInMilliseconds, intervalInMilliseconds, true, function);
@@ -84,15 +89,20 @@ public final class SchedulesFactory
 
     private void register(String name, long delayStartInMilliseconds, long intervalInMilliseconds, boolean singleInstance, Supplier<Object> function)
     {
+        createScheduleInfo(name, intervalInMilliseconds, singleInstance, function);
+
+        TimerTask timerTask = createTimerTask(name);
+        tasksRegistry.put(name,timerTask);
+        timer.scheduleAtFixedRate(timerTask, delayStartInMilliseconds, intervalInMilliseconds);
+    }
+
+    private void createScheduleInfo(String name, long intervalInMilliseconds, boolean singleInstance, Supplier<Object> function)
+    {
         ScheduleInfo info = schedulesStore.get(name).orElse(new ScheduleInfo(name));
         info.frequency = intervalInMilliseconds;
         info.singleInstance = singleInstance;
         functions.put(name,function);
         schedulesStore.createOrUpdate(info);
-
-        TimerTask timerTask = createTimerTask(name);
-        tasksRegistry.put(name,timerTask);
-        timer.scheduleAtFixedRate(timerTask, delayStartInMilliseconds, intervalInMilliseconds);
     }
 
     private TimerTask createTimerTask(String name)
@@ -122,7 +132,7 @@ public final class SchedulesFactory
                     LOGGER.info("Skipping {} execution", name);
                     return;
                 }
-                execute(schedule);
+                execute(schedule, true);
             }
         };
     }
@@ -159,10 +169,10 @@ public final class SchedulesFactory
         });
     }
 
-    public void trigger(String scheduleName)
+    public void trigger(String scheduleName, boolean forceRun)
     {
         Optional<ScheduleInfo> scheduleInfo = schedulesStore.get(scheduleName);
-        scheduleInfo.ifPresent(schedule -> execute(schedule));
+        scheduleInfo.ifPresent(schedule -> execute(schedule, forceRun));
     }
 
     void run(String scheduleName)
@@ -184,21 +194,29 @@ public final class SchedulesFactory
         schedulesStore.getAll().forEach(info -> toggleDisable(info.name, toggle));
     }
 
-    private void execute(ScheduleInfo schedule)
+    private void execute(ScheduleInfo schedule, boolean forceRun)
     {
         try
         {
-            if (functions.containsKey(schedule.name))
+            if (forceRun || !schedule.isDisabled())
             {
-                this.instancesStore.insert(new ScheduleInstance(schedule.name,toDate(LocalDateTime.now().plusSeconds(schedule.frequency / 1000L))));
-                LOGGER.info("Starting schedule {} ", schedule.name);
-                Object result = functions.get(schedule.name).get();
-                LOGGER.info("Schedule {} result {}", schedule.name, result);
+                if (functions.containsKey(schedule.name))
+                {
+                    this.instancesStore.insert(new ScheduleInstance(schedule.name,toDate(LocalDateTime.now().plusSeconds(schedule.frequency / 1000L))));
+                    LOGGER.info("Starting schedule {} ", schedule.name);
+                    Object result = functions.get(schedule.name).get();
+                    LOGGER.info("Schedule {} result {}", schedule.name, result);
+                }
+                else
+                {
+                    LOGGER.warn("No function to execute {}", schedule.name);
+                }
             }
             else
             {
-                LOGGER.warn("No function to execute {}", schedule.name);
+                LOGGER.warn("Schedule {} is disabled and force run flag is false", schedule.name);
             }
+
         }
         catch (Exception e)
         {
