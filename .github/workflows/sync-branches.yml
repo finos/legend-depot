@@ -13,16 +13,16 @@
 # limitations under the License.
 
 
-# This action is used to overwrite a target remote branch with a given source branch
+# This action is used to overwrite a target remote branch with a given source branch.
 # This is mainly intended to be used for synchronising the integration and master branches
-# via a third intermediary branch which contains all commits from both
+# via a third intermediary branch which contains all commits from both.
 
 # The recommended workflow is to update the integration and master branches in the
-# contributor's fork to be up-to-date with upstream. Then branch from integration,
-# rebase on top of master and push the resulting branch to the upstream repo.
+# contributor's fork to be in sync with upstream finos repo. Then branch from integration,
+# rebase on top of master and push the resulting branch to the upstream fions repo.
 # Finally, run this action twice, with the source branch being the newly pushed branch
 # and the target branch being master and then integration.
-name: Synch branches
+name: Sync branches
 
 on:
   workflow_dispatch:
@@ -35,7 +35,7 @@ on:
         required: true
 
 jobs:
-  synch:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source branch
