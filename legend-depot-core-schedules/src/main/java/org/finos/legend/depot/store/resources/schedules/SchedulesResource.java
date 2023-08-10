@@ -17,6 +17,7 @@ package org.finos.legend.depot.store.resources.schedules;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.services.schedules.SchedulesFactory;
@@ -97,12 +98,13 @@ public class SchedulesResource extends BaseAuthorisedResource
     @Path("/schedules/{scheduleName}")
     @ApiOperation(ResourceLoggingAndTracing.TRIGGER_SCHEDULE)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response forceScheduler(@PathParam("scheduleName") String scheduleName)
+    public Response forceScheduler(@PathParam("scheduleName") String scheduleName,
+                                   @QueryParam("forceRun") @DefaultValue("false") @ApiParam("Whether to run the schedule if disabled") boolean forceRun)
     {
         return handle(ResourceLoggingAndTracing.TRIGGER_SCHEDULE, () ->
         {
             validateUser();
-            schedulesFactory.trigger(scheduleName);
+            schedulesFactory.trigger(scheduleName, forceRun);
             return Response.noContent().build();
         });
     }
