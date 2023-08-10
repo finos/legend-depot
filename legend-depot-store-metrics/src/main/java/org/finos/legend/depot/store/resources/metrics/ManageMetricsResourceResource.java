@@ -66,17 +66,4 @@ public class ManageMetricsResourceResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.GET_VERSIONS_BY_LAST_USED, () -> this.queryMetrics.getSummaryByProjectVersion());
     }
 
-    @PUT
-    @Path("/metrics/indexes")
-    @ApiOperation("createIndexes if absent")
-    public List<String> createIndexesIfAbsent()
-    {
-        validateUser();
-        return handle("Create indexes", this::createIndexes);
-    }
-
-    private List<String> createIndexes()
-    {
-        return metricsStore.createIndexes();
-    }
 }

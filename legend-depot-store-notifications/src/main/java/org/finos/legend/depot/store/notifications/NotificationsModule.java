@@ -19,6 +19,7 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.finos.legend.depot.services.schedules.SchedulesFactory;
+import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
@@ -99,4 +100,12 @@ public class NotificationsModule extends PrivateModule
         return true;
     }
 
+    @Singleton
+    @Provides
+    @Named("register-indexes")
+    public boolean registerIndexes(MongoAdminStore adminStore)
+    {
+        adminStore.registerIndexes(NotificationsMongo.COLLECTION,NotificationsMongo.buildIndexes());
+        return true;
+    }
 }

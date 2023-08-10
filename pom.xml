@@ -47,6 +47,11 @@
         <module>legend-depot-store-notifications-queue</module>
 
         <module>legend-depot-core-services</module>
+
+        <module>legend-depot-entities-api</module>
+        <module>legend-depot-entities-services</module>
+        <module>legend-depot-entities-store-mongo</module>
+
         <module>legend-depot-generations-api</module>
         <module>legend-depot-generations-services</module>
         <module>legend-depot-generations-store-mongo</module>
@@ -446,6 +451,29 @@
             <dependency>
                 <groupId>org.finos.legend.depot</groupId>
                 <artifactId>legend-depot-pure-model-context</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-entities-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-entities-services</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-entities-store-mongo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-entities-store-mongo</artifactId>
+                <classifier>tests</classifier>
+                <type>test-jar</type>
+                <scope>test</scope>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

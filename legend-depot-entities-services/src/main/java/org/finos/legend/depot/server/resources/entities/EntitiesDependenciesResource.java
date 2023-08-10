@@ -1,0 +1,87 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+package org.finos.legend.depot.server.resources.entities;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
+import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.version.VersionValidator;
+import org.finos.legend.depot.services.api.entities.EntitiesService;
+import org.finos.legend.depot.tracing.resources.BaseResource;
+import org.finos.legend.depot.tracing.resources.EtagBuilder;
+
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import java.util.List;
+
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSIONS_DEPENDENCY_ENTITIES;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_DEPENDENCY_ENTITIES;
+
+@Path("")
+@Api("Dependencies")
+public class EntitiesDependenciesResource extends BaseResource
+{
+    private final EntitiesService entitiesService;
+
+    @Inject
+    public EntitiesDependenciesResource(EntitiesService entitiesService)
+    {
+        this.entitiesService = entitiesService;
+    }
+
+    @GET
+    @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/dependencies")
+    @ApiOperation(GET_VERSION_DEPENDENCY_ENTITIES)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEntitiesFromDependencies(@PathParam("groupId") String groupId,
+                                                @PathParam("artifactId") String artifactId,
+                                                @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                                @QueryParam("transitive") @DefaultValue("false")
+                                                @ApiParam("Whether to return transitive dependencies") boolean transitive,
+                                                @QueryParam("includeOrigin") @DefaultValue("false")
+                                                @ApiParam("Whether to return start of dependency tree") boolean includeOrigin,
+                                                @Context Request request)
+    {
+        return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, transitive, includeOrigin), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
+    }
+
+    @POST
+    @Path("/projects/dependencies")
+    @ApiOperation(GET_VERSIONS_DEPENDENCY_ENTITIES)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<ProjectVersionEntities> getAllEntitiesFromDependencies(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies,
+                                                                       @QueryParam("transitive") @DefaultValue("false")
+                                                                       @ApiParam("Whether to return transitive dependencies") boolean transitive,
+                                                                       @QueryParam("includeOrigin") @DefaultValue("false")
+                                                                       @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
+    {
+        return handle(GET_VERSIONS_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, transitive, includeOrigin));
+    }
+}

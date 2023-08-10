@@ -46,6 +46,7 @@ import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
+import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
@@ -99,7 +100,7 @@ public class TestArtifactsPurgeService extends TestStoreMongo
         setUpProjectsVersionsFromFile(TestArtifactsPurgeService.class.getClassLoader().getResource("data/projectsVersions.json"));
         Assert.assertEquals(3, projectsStore.getAll().size());
 
-        setUpEntitiesDataFromFile(TestArtifactsPurgeService.class.getClassLoader().getResource("data/entities.json"));
+        new EntitiesMongoTestUtils(mongoProvider).loadEntities(TestArtifactsPurgeService.class.getClassLoader().getResource("data/entities.json"));
         TestGenerationsStoreMongo.setUpFileGenerationFromFile(TestArtifactsPurgeService.class.getClassLoader().getResource("data/generations.json"),mongoProvider);
     }
 

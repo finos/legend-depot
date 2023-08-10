@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.mongo.guice;
 
-import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.finos.legend.depot.store.api.generations.FileGenerations;
@@ -25,11 +24,13 @@ import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 
 import javax.inject.Named;
 
-public class ManageGenerationsStoreMongoModule extends PrivateModule
+public class ManageGenerationsStoreMongoModule extends GenerationsStoreMongoModule
 {
     @Override
     protected void configure()
     {
+        super.configure();
+
         bind(FileGenerations.class).to(FileGenerationsMongo.class);
         bind(UpdateFileGenerations.class).to(FileGenerationsMongo.class);
 

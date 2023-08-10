@@ -21,14 +21,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Singleton;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
-import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.eclipse.collections.api.factory.Maps;
-import org.finos.legend.depot.store.mongo.admin.migrations.ProjectToProjectVersionMigration;
-import org.finos.legend.depot.store.mongo.admin.migrations.DependenciesMigration;
-import org.finos.legend.depot.store.mongo.admin.migrations.EntitiesMigration;
 
-import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +35,7 @@ import static org.finos.legend.depot.store.mongo.core.BaseMongo.createIndexesIfA
 @Singleton
 public class MongoAdminStore
 {
-    private final MongoDatabase mongoDatabase;
+    protected final MongoDatabase mongoDatabase;
     private final Map<String,List<IndexModel>> collectionIndexes;
 
 
@@ -118,39 +113,4 @@ public class MongoAdminStore
         return mongoDatabase.getName();
     }
 
-    @Deprecated
-    public void migrationToProjectVersions()
-    {
-        new ProjectToProjectVersionMigration(mongoDatabase).migrationToProjectVersions();
-    }
-
-    @Deprecated
-    public void cleanUpProjectData()
-    {
-        new ProjectToProjectVersionMigration(mongoDatabase).cleanUpProjectData();
-    }
-
-    @Deprecated
-    public void calculateTransitiveDependenciesForAllProjectVersions()
-    {
-        new DependenciesMigration(mongoDatabase).calculateTransitiveDependenciesForAllProjectVersions();
-    }
-
-    @Deprecated
-    public void addTransitiveDependenciesToVersionData()
-    {
-        new DependenciesMigration(mongoDatabase).addTransitiveDependenciesToVersionData();
-    }
-
-    @Deprecated
-    public DeleteResult deleteVersionedEntities()
-    {
-        return new EntitiesMigration(mongoDatabase).versionedEntitiesDeletion();
-    }
-
-    @Deprecated
-    public void migrateEntitiesToStoredEntityData()
-    {
-        new EntitiesMigration(mongoDatabase).entitiesToStoredEntityDataMigration();
-    }
 }
