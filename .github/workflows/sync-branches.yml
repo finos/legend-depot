@@ -19,7 +19,7 @@
 
 # The recommended workflow is to update the integration and master branches in the
 # contributor's fork to be in sync with upstream finos repo. Then branch from integration,
-# rebase on top of master and push the resulting branch to the upstream fions repo.
+# rebase on top of master and push the resulting branch to the upstream finos repo.
 # Finally, run this action twice, with the source branch being the newly pushed branch
 # and the target branch being master and then integration.
 name: Sync branches
