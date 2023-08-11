@@ -29,41 +29,9 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- SDLC -->
         <dependency>
-            <groupId>org.finos.legend.sdlc</groupId>
-            <artifactId>legend-sdlc-model</artifactId>
-        </dependency>
-        <!-- SDLC -->
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.collections</groupId>
-            <artifactId>eclipse-collections</artifactId>
-        </dependency>
-        <dependency>
-              <groupId>${junit.groupId}</groupId>
-            <artifactId>${junit.artifactId}</artifactId>
-            <scope>test</scope>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-api</artifactId>
         </dependency>
     </dependencies>
 

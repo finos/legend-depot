@@ -35,7 +35,11 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-services</artifactId>
+            <artifactId>legend-depot-core-data-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-services</artifactId>
         </dependency>
         <!--TODO: remove this dependency -->
         <dependency>
@@ -59,12 +63,28 @@
         <!-- testing-->
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-generations-services</artifactId>
+            <artifactId>legend-depot-store-mongo</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-mongo</artifactId>
+            <artifactId>legend-depot-core-data-services</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-store-mongo</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-store-mongo</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
@@ -84,6 +104,11 @@
             <artifactId>legend-depot-entities-store-mongo</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-generations-services</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

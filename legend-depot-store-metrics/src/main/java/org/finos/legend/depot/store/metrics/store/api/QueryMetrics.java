@@ -37,5 +37,4 @@ public interface QueryMetrics
 
     List<VersionQueryMetric> findMetricsBefore(Date date);
 
-    List<String> createIndexes();
 }

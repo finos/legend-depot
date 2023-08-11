@@ -18,7 +18,7 @@ package org.finos.legend.depot.store.notifications.services;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
-import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
@@ -46,7 +46,7 @@ public class TestNotificationManager extends TestStoreMongo
     public static final String TEST_PROJECT_ID = "PROD-1";
     public static final String VERSION_ID = "2.3.1";
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
-    protected UpdateEntities entitiesStore = mock(UpdateEntities.class);//new EntitiesMongo(mongoProvider);
+    protected UpdateEntities entitiesStore = mock(UpdateEntities.class);
     private final NotificationsMongo notifications = new NotificationsMongo(mongoProvider);
     private final NotificationsQueueMongo queue = new NotificationsQueueMongo(mongoProvider);
     private final NotificationEventHandler notificationEventHandler = mock(NotificationEventHandler.class);

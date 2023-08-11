@@ -30,8 +30,8 @@ import org.finos.legend.depot.store.artifacts.configuration.IncludeProjectProper
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.Property;
-import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
@@ -60,7 +60,6 @@ import java.util.function.Supplier;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.services.VersionsMismatchService.REPO_EXCEPTIONS;
 
 public final class ProjectVersionRefreshHandler implements NotificationEventHandler
 {
@@ -192,7 +191,6 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             }
             catch (ArtifactRepositoryException e)
             {
-                PrometheusMetricsFactory.getInstance().increaseGauge(REPO_EXCEPTIONS,1);
                 response.addError(e.getMessage());
                 LOGGER.error("error validating gav",e);
             }

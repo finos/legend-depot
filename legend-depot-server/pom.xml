@@ -54,7 +54,11 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-services</artifactId>
+            <artifactId>legend-depot-core-data-services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-store-mongo</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>

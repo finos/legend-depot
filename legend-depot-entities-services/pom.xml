@@ -36,7 +36,11 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-services</artifactId>
+            <artifactId>legend-depot-core-data-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-http</artifactId>
         </dependency>
         <!-- DEPOT -->
 
@@ -56,6 +60,7 @@
             <groupId>org.eclipse.collections</groupId>
             <artifactId>eclipse-collections</artifactId>
         </dependency>
+        <!-- testing-->
         <dependency>
               <groupId>${junit.groupId}</groupId>
             <artifactId>${junit.artifactId}</artifactId>
@@ -80,7 +85,31 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-services</artifactId>
+            <artifactId>legend-depot-core-data-store-mongo</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-store-mongo</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-services</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-services</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-store-mongo</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>

@@ -18,7 +18,7 @@ package org.finos.legend.depot.store.admin.domain.artifacts;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.finos.legend.depot.domain.HasIdentifier;
+import org.finos.legend.depot.store.model.HasIdentifier;
 
 import javax.validation.constraints.NotNull;
 

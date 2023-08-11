@@ -21,8 +21,8 @@ import org.finos.legend.depot.store.artifacts.repository.maven.impl.TestMavenArt
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.generation.DepotGeneration;
 import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
-import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.generations.ManageFileGenerationsService;
 import org.finos.legend.depot.services.generations.impl.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;

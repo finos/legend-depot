@@ -18,7 +18,7 @@ package org.finos.legend.depot.store.model.entities;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.finos.legend.depot.domain.HasIdentifier;
+import org.finos.legend.depot.store.model.HasIdentifier;
 import org.finos.legend.depot.domain.VersionedData;
 
 import java.util.Map;

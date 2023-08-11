@@ -44,13 +44,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-entities-store-mongo</artifactId>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
         <!-- DEPOT -->
 
         <dependency>

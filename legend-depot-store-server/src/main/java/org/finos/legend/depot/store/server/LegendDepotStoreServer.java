@@ -34,6 +34,7 @@ import org.finos.legend.depot.store.metrics.AdminMetricsModule;
 import org.finos.legend.depot.store.mongo.admin.guice.AdminSchedulesStoreMongoModule;
 import org.finos.legend.depot.store.mongo.admin.guice.ManageAdminDataStoreMongoModule;
 import org.finos.legend.depot.store.mongo.core.MongoClientModule;
+import org.finos.legend.depot.store.mongo.guice.CoreDataMigrationsStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.EntitiesMigrationsStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.ManageCoreDataStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.ManageEntitiesStoreMongoModule;
@@ -84,11 +85,13 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new ManageCoreDataResourcesModule(),
                 new ManageCoreDataServicesModule(),
                 new ManageCoreDataStoreMongoModule(),
-                new EntitiesMigrationsStoreMongoModule(),
+                new CoreDataMigrationsStoreMongoModule(),
+
 
                 new ManageEntitiesResourcesModule(),
                 new ManageEntitiesServicesModule(),
                 new ManageEntitiesStoreMongoModule(),
+                new EntitiesMigrationsStoreMongoModule(),
 
                 new ManageGenerationsServicesModule(),
                 new ManageGenerationsStoreMongoModule(),

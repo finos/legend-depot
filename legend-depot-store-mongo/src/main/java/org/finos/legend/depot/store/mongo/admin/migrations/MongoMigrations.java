@@ -21,12 +21,11 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 
-public class MongoMigrations
+public abstract class MongoMigrations
 {
     protected final MongoDatabase mongoDatabase;
 
-    @Inject
-    public MongoMigrations(@Named("mongoDatabase") MongoDatabase mongoDatabase)
+    public MongoMigrations(MongoDatabase mongoDatabase)
     {
         this.mongoDatabase = mongoDatabase;
     }
@@ -34,30 +33,6 @@ public class MongoMigrations
     public String getName()
     {
         return mongoDatabase.getName();
-    }
-
-    @Deprecated
-    public void migrationToProjectVersions()
-    {
-        new ProjectToProjectVersionMigration(mongoDatabase).migrationToProjectVersions();
-    }
-
-    @Deprecated
-    public void cleanUpProjectData()
-    {
-        new ProjectToProjectVersionMigration(mongoDatabase).cleanUpProjectData();
-    }
-
-    @Deprecated
-    public void calculateTransitiveDependenciesForAllProjectVersions()
-    {
-        new DependenciesMigration(mongoDatabase).calculateTransitiveDependenciesForAllProjectVersions();
-    }
-
-    @Deprecated
-    public void addTransitiveDependenciesToVersionData()
-    {
-        new DependenciesMigration(mongoDatabase).addTransitiveDependenciesToVersionData();
     }
 
 }

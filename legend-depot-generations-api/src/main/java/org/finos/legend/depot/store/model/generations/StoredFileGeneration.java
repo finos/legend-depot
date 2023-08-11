@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.VersionedData;
-import org.finos.legend.depot.domain.HasIdentifier;
+import org.finos.legend.depot.store.model.HasIdentifier;
 import org.finos.legend.depot.domain.generation.DepotGeneration;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

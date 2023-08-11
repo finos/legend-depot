@@ -17,8 +17,8 @@ package org.finos.legend.depot.server.resources;
 
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.server.resources.entities.EntitiesResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.EntitiesService;

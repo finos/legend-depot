@@ -30,10 +30,9 @@
 
     <dependencies>
         <!-- DEPOT -->
-
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-model</artifactId>
+            <artifactId>legend-depot-core-data-api</artifactId>
         </dependency>
 
         <dependency>

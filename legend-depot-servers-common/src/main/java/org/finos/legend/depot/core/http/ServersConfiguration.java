@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.api.StorageConfiguration;
+import org.finos.legend.depot.store.StorageConfiguration;
 import org.finos.legend.depot.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
 import org.finos.legend.server.pac4j.LegendPac4jConfiguration;

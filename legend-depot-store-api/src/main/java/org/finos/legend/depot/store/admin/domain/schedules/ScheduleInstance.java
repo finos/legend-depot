@@ -17,7 +17,7 @@ package org.finos.legend.depot.store.admin.domain.schedules;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.finos.legend.depot.domain.HasIdentifier;
+import org.finos.legend.depot.store.model.HasIdentifier;
 
 import java.util.Date;
 

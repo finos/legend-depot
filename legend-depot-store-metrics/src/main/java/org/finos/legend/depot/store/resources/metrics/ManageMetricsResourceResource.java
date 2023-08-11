@@ -21,14 +21,12 @@ import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
-import org.finos.legend.depot.store.metrics.store.api.QueryMetrics;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -39,15 +37,13 @@ import java.util.List;
 @Api("Metrics")
 public class ManageMetricsResourceResource extends BaseAuthorisedResource
 {
-    private final QueryMetrics metricsStore;
     private final QueryMetricsHandler queryMetrics;
 
     @Inject
-    protected ManageMetricsResourceResource(QueryMetrics metricsStore, AuthorisationProvider authorisationProvider,
+    protected ManageMetricsResourceResource(AuthorisationProvider authorisationProvider,
                                             @Named("requestPrincipal") Provider<Principal> principalProvider, QueryMetricsHandler queryMetrics)
     {
         super(authorisationProvider, principalProvider);
-        this.metricsStore = metricsStore;
         this.queryMetrics = queryMetrics;
     }
 

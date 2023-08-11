@@ -16,8 +16,8 @@
 package org.finos.legend.depot.services.generations;
 
 import org.finos.legend.depot.domain.generation.DepotGeneration;
-import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.generations.ManageFileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.generations.impl.ManageFileGenerationsServiceImpl;

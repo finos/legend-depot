@@ -29,8 +29,8 @@ import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
-import org.finos.legend.depot.domain.HasIdentifier;
-import org.finos.legend.depot.store.api.StoreException;
+import org.finos.legend.depot.store.model.HasIdentifier;
+import org.finos.legend.depot.store.StoreException;
 import org.slf4j.Logger;
 
 import java.time.LocalDateTime;

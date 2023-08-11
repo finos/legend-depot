@@ -20,8 +20,8 @@ import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepositoryE
 import org.finos.legend.depot.store.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
-import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;

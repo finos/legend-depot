@@ -15,13 +15,14 @@
 
 package org.finos.legend.depot.store.artifacts.purge.services;
 
+import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepository;
 import org.finos.legend.depot.store.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.domain.version.VersionMismatch;
 import org.finos.legend.depot.domain.DatesHandler;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.services.VersionsMismatchService;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
@@ -43,7 +44,6 @@ import org.finos.legend.depot.store.artifacts.services.file.FileGenerationsProvi
 import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
-import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
@@ -68,7 +68,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
-public class TestArtifactsPurgeService extends TestStoreMongo
+public class TestArtifactsPurgeService extends TestBaseServices
 {
 
     public static final String TEST_GROUP_ID = "examples.metadata";
