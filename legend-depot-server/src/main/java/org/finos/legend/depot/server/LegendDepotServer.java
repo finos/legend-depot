@@ -21,13 +21,20 @@ import org.finos.legend.depot.core.http.BaseServer;
 import org.finos.legend.depot.core.http.resources.InfoPageModule;
 import org.finos.legend.depot.server.configuration.DepotServerConfiguration;
 import org.finos.legend.depot.server.guice.DepotServerModule;
-import org.finos.legend.depot.server.guice.DepotServerResourcesModule;
+import org.finos.legend.depot.server.resources.guice.CoreDataResourcesModule;
+import org.finos.legend.depot.server.resources.guice.EntitiesResourcesModule;
+import org.finos.legend.depot.server.resources.guice.GenerationsResourcesModule;
+import org.finos.legend.depot.server.resources.guice.PureModelContextResourcesModule;
+import org.finos.legend.depot.services.guice.EntitiesServicesModule;
 import org.finos.legend.depot.services.pure.model.context.guice.PureModelContextModule;
-import org.finos.legend.depot.services.ReadDataServicesModule;
+import org.finos.legend.depot.services.guice.CoreDataServicesModule;
 import org.finos.legend.depot.services.schedules.guice.SchedulesModule;
-import org.finos.legend.depot.services.generations.guice.GenerationsServicesModule;
+import org.finos.legend.depot.services.guice.GenerationsServicesModule;
 import org.finos.legend.depot.store.metrics.MetricsModule;
-import org.finos.legend.depot.store.mongo.guice.DataStoreMongoModule;
+import org.finos.legend.depot.store.mongo.admin.guice.SchedulesStoreMongoModule;
+import org.finos.legend.depot.store.mongo.core.MongoClientModule;
+import org.finos.legend.depot.store.mongo.guice.CoreDataStoreMongoModule;
+import org.finos.legend.depot.store.mongo.guice.EntitiesStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.GenerationsStoreMongoModule;
 import org.finos.legend.depot.store.notifications.queue.NotificationsQueueModule;
 import org.finos.legend.depot.tracing.TracingModule;
@@ -49,18 +56,35 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
 
     protected List<Module> getServerModules()
     {
-        return Arrays.asList(new InfoPageModule(),
+        return Arrays.asList(
+                new InfoPageModule(),
                 new DepotServerModule(),
-                new DepotServerResourcesModule(),
-                new ReadDataServicesModule(),
-                new DataStoreMongoModule(),
+
+                new CoreDataResourcesModule(),
+                new CoreDataServicesModule(),
+                new CoreDataStoreMongoModule(),
+
+                new EntitiesResourcesModule(),
+                new EntitiesServicesModule(),
+                new EntitiesStoreMongoModule(),
+
+                new GenerationsResourcesModule(),
                 new GenerationsServicesModule(),
                 new GenerationsStoreMongoModule(),
+
+                new MongoClientModule(),
+
+                new NotificationsQueueModule(),
+
+                new PureModelContextResourcesModule(),
                 new PureModelContextModule(),
+
                 new SchedulesModule(),
+                new SchedulesStoreMongoModule(),
+
                 new MetricsModule(),
-                new TracingModule(),
-                new NotificationsQueueModule());
+                new TracingModule()
+                );
     }
 
     @Override

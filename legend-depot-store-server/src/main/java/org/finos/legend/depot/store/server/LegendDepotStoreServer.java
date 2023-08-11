@@ -18,27 +18,32 @@ package org.finos.legend.depot.store.server;
 import com.google.inject.Module;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.setup.Bootstrap;
-import org.finos.legend.depot.store.artifacts.repository.guice.RepositoryModule;
-import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.core.authorisation.AuthorisationModule;
 import org.finos.legend.depot.core.http.BaseServer;
 import org.finos.legend.depot.core.http.resources.InfoPageModule;
-import org.finos.legend.depot.services.ManageServicesModule;
+import org.finos.legend.depot.services.guice.ManageCoreDataServicesModule;
+import org.finos.legend.depot.services.guice.ManageEntitiesServicesModule;
+import org.finos.legend.depot.services.guice.ManageGenerationsServicesModule;
 import org.finos.legend.depot.services.schedules.guice.AdminSchedulesModule;
-import org.finos.legend.depot.services.generations.guice.ManageGenerationsServicesModule;
 import org.finos.legend.depot.store.artifacts.guice.ArtifactsHandlersModule;
 import org.finos.legend.depot.store.artifacts.guice.ArtifactsRefreshModule;
 import org.finos.legend.depot.store.artifacts.purge.guice.ArtifactsPurgeModule;
-import org.finos.legend.depot.store.server.guice.DepotStoreResourcesModule;
-import org.finos.legend.depot.store.server.guice.DepotStoreServerModule;
+import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
+import org.finos.legend.depot.store.artifacts.repository.guice.RepositoryModule;
 import org.finos.legend.depot.store.metrics.AdminMetricsModule;
-import org.finos.legend.depot.store.mongo.admin.guice.ManageAdminDataStoreMongoModule;
 import org.finos.legend.depot.store.mongo.admin.guice.AdminSchedulesStoreMongoModule;
-import org.finos.legend.depot.store.mongo.guice.ManageDataStoreMongoModule;
+import org.finos.legend.depot.store.mongo.admin.guice.ManageAdminDataStoreMongoModule;
+import org.finos.legend.depot.store.mongo.core.MongoClientModule;
+import org.finos.legend.depot.store.mongo.guice.EntitiesMigrationsStoreMongoModule;
+import org.finos.legend.depot.store.mongo.guice.ManageCoreDataStoreMongoModule;
+import org.finos.legend.depot.store.mongo.guice.ManageEntitiesStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.ManageGenerationsStoreMongoModule;
 import org.finos.legend.depot.store.notifications.NotificationsModule;
-import org.finos.legend.depot.store.notifications.queue.NotificationsQueueModule;
+import org.finos.legend.depot.store.notifications.queue.ManageNotificationsQueueModule;
+import org.finos.legend.depot.store.resources.guice.ManageCoreDataResourcesModule;
+import org.finos.legend.depot.store.resources.guice.ManageEntitiesResourcesModule;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
+import org.finos.legend.depot.store.server.guice.DepotStoreServerModule;
 import org.finos.legend.depot.tracing.TracingModule;
 
 import java.util.Arrays;
@@ -75,23 +80,38 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
         return Arrays.asList(
                 new InfoPageModule(),
                 new DepotStoreServerModule(),
-                new DepotStoreResourcesModule(),
-                new ManageServicesModule(),
+
+                new ManageCoreDataResourcesModule(),
+                new ManageCoreDataServicesModule(),
+                new ManageCoreDataStoreMongoModule(),
+                new EntitiesMigrationsStoreMongoModule(),
+
+                new ManageEntitiesResourcesModule(),
+                new ManageEntitiesServicesModule(),
+                new ManageEntitiesStoreMongoModule(),
+
                 new ManageGenerationsServicesModule(),
                 new ManageGenerationsStoreMongoModule(),
-                new ManageDataStoreMongoModule(),
+
+                new MongoClientModule(),
+
                 new ManageAdminDataStoreMongoModule(),
+
                 new AdminSchedulesModule(),
                 new AdminSchedulesStoreMongoModule(),
+
                 new AdminMetricsModule(),
+
                 new AuthorisationModule(),
+
                 new ArtifactsHandlersModule(),
                 new ArtifactsRefreshModule(),
                 new ArtifactsPurgeModule(),
+
                 new RepositoryModule(),
                 new TracingModule(),
                 new NotificationsModule(),
-                new NotificationsQueueModule());
+                new ManageNotificationsQueueModule());
     }
 
 }

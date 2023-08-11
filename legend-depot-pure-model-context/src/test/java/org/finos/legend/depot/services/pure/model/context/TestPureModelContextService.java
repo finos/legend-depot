@@ -26,13 +26,16 @@ import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
+import org.finos.legend.depot.store.api.entities.UpdateEntities;
+import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.store.api.QueryMetrics;
 import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
-import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
+import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
+import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
+import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.engine.protocol.pure.v1.model.context.AlloySDLC;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
@@ -51,10 +54,10 @@ import static org.mockito.Mockito.mock;
 
 public class TestPureModelContextService extends TestBaseServices
 {
-    protected static final URL projects = TestStoreMongo.class.getClassLoader().getResource("allProjectVersions.json");
-    protected static final URL revisionEntities = TestStoreMongo.class.getClassLoader().getResource("data/revision-entities.json");
-    private static final URL versionedEntities = TestStoreMongo.class.getClassLoader().getResource("data/versioned-entities.json");
-    private static final URL entities_16538 = TestPureModelContextService.class.getClassLoader().getResource("versioned-entities_PROD-16538.json");
+    public static final URL projects = TestPureModelContextService.class.getClassLoader().getResource("allProjectVersions.json");
+    protected static final URL revisionEntities = TestPureModelContextService.class.getClassLoader().getResource("data/revision-entities.json");
+    private static final URL versionedEntities = TestPureModelContextService.class.getClassLoader().getResource("data/versioned-entities.json");
+    public static final URL entities_16538 = TestPureModelContextService.class.getClassLoader().getResource("versioned-entities_PROD-16538.json");
     private static final URL entities_10357 = TestPureModelContextService.class.getClassLoader().getResource("versioned-entities_PROD-10357.json");
     private static final URL entities_10855 = TestPureModelContextService.class.getClassLoader().getResource("versioned-entities_PROD-10855.json");
     public static final String TEST_GROUP_ID = "examples.metadata";
@@ -64,6 +67,8 @@ public class TestPureModelContextService extends TestBaseServices
     private final QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metrics, metricsRegistry);
     private final Queue queue = mock(Queue.class);
     ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metricsRegistry, queue, new ProjectsConfiguration("master"));
+    protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
+    private  EntitiesMongoTestUtils entityUtils = new EntitiesMongoTestUtils(mongoProvider);
     private final PureModelContextService service = new PureModelContextServiceImpl(new EntitiesServiceImpl(entitiesStore, projectsService), projectsService);
 
     private final ObjectMapper objectMapper = ObjectMapperFactory.getNewStandardObjectMapperWithPureProtocolExtensionSupports().setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -97,11 +102,11 @@ public class TestPureModelContextService extends TestBaseServices
         projectsStore.createOrUpdate(new StoreProjectData("PROD-1","test.legend","blank-prod"));
         setUpProjectsVersionsFromFile(projects);
         Assert.assertEquals(4, projectsService.getAllProjectCoordinates().size());
-        setUpEntitiesDataFromFile(versionedEntities);
-        setUpEntitiesDataFromFile(revisionEntities);
-        setUpEntitiesDataFromFile(entities_16538);
-        setUpEntitiesDataFromFile(entities_10357);
-        setUpEntitiesDataFromFile(entities_10855);
+        entityUtils.loadEntities(versionedEntities);
+        entityUtils.loadEntities(revisionEntities);
+        entityUtils.loadEntities(entities_16538);
+        entityUtils.loadEntities(entities_10357);
+        entityUtils.loadEntities(entities_10855);
     }
 
     @Test

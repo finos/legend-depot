@@ -26,11 +26,9 @@ import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 import org.bson.Document;
 import org.finos.legend.depot.domain.HasIdentifier;
-import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.junit.After;
@@ -46,9 +44,15 @@ public abstract class TestStoreMongo
     private MongoClient mongoClient = new MongoClient(new ServerAddress(server.bind()));
     protected MongoDatabase mongoProvider = mongoClient.getDatabase("test-db");
 
-    protected  MongoClient getMongoClient()
+    @After
+    public void tearDownData()
     {
-        return mongoClient;
+        this.mongoProvider.drop();
+    }
+
+    protected MongoDatabase getMongoDatabase()
+    {
+        return mongoProvider;
     }
 
     public static List<StoreProjectData> readProjectConfigsFile(URL fileName)
@@ -96,41 +100,6 @@ public abstract class TestStoreMongo
         return null;
     }
 
-    @After
-    public void tearDownData()
-    {
-        this.mongoProvider.drop();
-    }
-
-    protected MongoDatabase getMongoDatabase()
-    {
-        return mongoProvider;
-    }
-
-    private MongoCollection getMongoEntities()
-    {
-        return getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
-    }
-
-    protected List<StoredEntity> readEntitiesFile(URL fileName)
-    {
-        try
-        {
-            InputStream stream = fileName.openStream();
-            String jsonInput = new java.util.Scanner(stream).useDelimiter("\\A").next();
-
-            List<StoredEntity> entities = new ObjectMapper().readValue(jsonInput, new TypeReference<List<StoredEntity>>()
-            {
-            });
-            Assert.assertNotNull("testing file" + fileName.getFile(), entities);
-            return entities;
-        }
-        catch (Exception e)
-        {
-            Assert.fail("an error has occurred loading test versioned entity metadata" + e.getMessage());
-        }
-        return null;
-    }
 
     protected MongoCollection getMongoProjects()
     {
@@ -183,30 +152,6 @@ public abstract class TestStoreMongo
             Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
         }
     }
-
-    protected void setUpEntitiesDataFromFile(URL versionedEntities)
-    {
-        try
-        {
-            readEntitiesFile(versionedEntities).forEach(entity ->
-            {
-                try
-                {
-                    getMongoEntities().insertOne(Document.parse(new ObjectMapper().writeValueAsString(entity)));
-                }
-                catch (JsonProcessingException e)
-                {
-                    Assert.fail("an error has occurred loading test entity" + e.getMessage());
-                }
-            });
-            Assert.assertNotNull(getMongoEntities());
-        }
-        catch (Exception e)
-        {
-            Assert.fail("an error has occurred loading test entity" + e.getMessage());
-        }
-    }
-
 
     protected MongoCollection getMongoProjectVersions()
     {

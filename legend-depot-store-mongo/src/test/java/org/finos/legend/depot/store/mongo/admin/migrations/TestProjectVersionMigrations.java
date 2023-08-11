@@ -22,7 +22,6 @@ import org.bson.Document;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +35,7 @@ import static org.finos.legend.depot.store.mongo.core.BaseMongo.convert;
 
 public class TestProjectVersionMigrations extends TestStoreMongo
 {
-    MongoAdminStore mongoAdminStore = new MongoAdminStore(mongoProvider);
+    MongoMigrations mongoAdminStore = new MongoMigrations(mongoProvider);
 
     @Before
     public void setupTestData()
@@ -66,6 +65,7 @@ public class TestProjectVersionMigrations extends TestStoreMongo
     {
         try
         {
+            Assert.assertNotNull(getMongoProjects());
             readProjectDataConfigsFile(projectConfigFile).forEach(project ->
             {
                 try
@@ -77,7 +77,6 @@ public class TestProjectVersionMigrations extends TestStoreMongo
                     Assert.fail("an error has occurred loading test project " + e.getMessage());
                 }
             });
-            Assert.assertNotNull(getMongoProjects());
         }
         catch (Exception e)
         {

@@ -24,7 +24,9 @@ import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.metrics.StorageMetricsHandler;
+import org.finos.legend.depot.store.mongo.admin.migrations.MongoMigrations;
 import org.finos.legend.depot.store.mongo.resources.MongoStoreAdministrationResource;
+import org.finos.legend.depot.store.mongo.resources.MongoStoreMigrationsResource;
 
 import javax.inject.Named;
 
@@ -35,10 +37,14 @@ public class ManageAdminDataStoreMongoModule extends PrivateModule
     protected void configure()
     {
         bind(MongoStoreAdministrationResource.class);
+        bind(MongoStoreMigrationsResource.class);
+        bind(MongoMigrations.class);
         bind(ArtifactsFilesStore.class).to(ArtifactsFilesMongo.class);
         bind(StorageMetrics.class).to(StorageMetricsHandler.class);
 
         expose(MongoStoreAdministrationResource.class);
+        expose(MongoStoreMigrationsResource.class);
+        expose(MongoMigrations.class);
         expose(ArtifactsFilesStore.class);
         expose(StorageMetrics.class);
         expose(MongoAdminStore.class);
@@ -54,10 +60,11 @@ public class ManageAdminDataStoreMongoModule extends PrivateModule
 
     @Singleton
     @Provides
-    @Named("register-artifacts-indexes")
+    @Named("register-indexes")
     public boolean registerIndexes(MongoAdminStore adminStore)
     {
         adminStore.registerIndexes(ArtifactsFilesMongo.COLLECTION,ArtifactsFilesMongo.buildIndexes());
         return true;
     }
+
 }

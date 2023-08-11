@@ -22,6 +22,7 @@ import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,13 +50,14 @@ public class TestMetricsServices extends TestStoreMongo
     private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
     private QueryMetricsRegistry metricsRegistry = new InMemoryQueryMetricsRegistry();
     private QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metricsStore, metricsRegistry);
+    private EntitiesMongoTestUtils entityUtils = new EntitiesMongoTestUtils(mongoProvider);
 
     @Before
     public void setup() throws InterruptedException
     {
         setUpProjectsFromFile(TestStoreMongo.class.getClassLoader().getResource("data/projects.json"));
-        setUpEntitiesDataFromFile(TestStoreMongo.class.getClassLoader().getResource("data/versioned-entities.json"));
-        setUpEntitiesDataFromFile(TestStoreMongo.class.getClassLoader().getResource("data/revision-entities.json"));
+        entityUtils.loadEntities(TestStoreMongo.class.getClassLoader().getResource("data/versioned-entities.json"));
+        entityUtils.loadEntities(TestStoreMongo.class.getClassLoader().getResource("data/revision-entities.json"));
 
         metricsStore.getCollection().drop();
         metricsStore.insert(new VersionQueryMetric("group1", "art1", "2.2.0"));

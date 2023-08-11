@@ -22,13 +22,11 @@ import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,7 +46,7 @@ public class TestNotificationManager extends TestStoreMongo
     public static final String TEST_PROJECT_ID = "PROD-1";
     public static final String VERSION_ID = "2.3.1";
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
-    protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
+    protected UpdateEntities entitiesStore = mock(UpdateEntities.class);//new EntitiesMongo(mongoProvider);
     private final NotificationsMongo notifications = new NotificationsMongo(mongoProvider);
     private final NotificationsQueueMongo queue = new NotificationsQueueMongo(mongoProvider);
     private final NotificationEventHandler notificationEventHandler = mock(NotificationEventHandler.class);
@@ -63,19 +61,12 @@ public class TestNotificationManager extends TestStoreMongo
         when(notificationEventHandler.validateEvent(new MetadataNotification(TEST_PROJECT_ID,TEST_GROUP_ID,"test","10.0.0"))).thenReturn(Arrays.asList("bad version"));
     }
 
-    @After
-    public void tearDown()
-    {
-      mongoProvider.drop();
-    }
-
-
     protected MetadataEventResponse loadEntities(String projectId, String versionId)
     {
         String fileName = "data/" + projectId + "/entities-" + versionId + ".json";
         try
         {
-            setUpEntitiesDataFromFile(TestNotificationManager.class.getClassLoader().getResource(fileName));
+          //  setUpEntitiesDataFromFile(TestNotificationManager.class.getClassLoader().getResource(fileName));
         }
         catch (Exception e)
         {
@@ -217,20 +208,5 @@ public class TestNotificationManager extends TestStoreMongo
         Assert.assertEquals(2,notification.getAttempt());
         Assert.assertEquals(2,notification.getResponses().size());
     }
-
-//    List<RefreshStatus> statusesBeforeLunch = refreshStatus.find(aPointInTime.toLocalDate().atStartOfDay(), aPointInTime);
-//        Assert.assertNotNull(statusesBeforeLunch);
-//        Assert.assertEquals(1, statusesBeforeLunch.size());
-//        Assert.assertEquals("test1.org", statusesBeforeLunch.get(0).getGroupId());
-//
-//    List<RefreshStatus> afterLunch = refreshStatus.find(aPointInTime.withHour(12).withMinute(0).withSecond(1), null);
-//        Assert.assertNotNull(afterLunch);
-//        Assert.assertEquals(3, afterLunch.size());
-//
-//    List<RefreshStatus> statusInBetween = refreshStatus.find(aPointInTime.plusHours(1).plusMinutes(1),aPointInTime.plusHours(2));
-//        Assert.assertNotNull(statusInBetween);
-//        Assert.assertEquals(1, statusInBetween.size());
-//        Assert.assertEquals("test3.org", statusInBetween.get(0).getGroupId());
-
 
 }

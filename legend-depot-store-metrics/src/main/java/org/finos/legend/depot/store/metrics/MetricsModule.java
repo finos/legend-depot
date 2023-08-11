@@ -73,4 +73,5 @@ public class MetricsModule extends PrivateModule
     {
         return new InMemoryQueryMetricsRegistry();
     }
+
 }

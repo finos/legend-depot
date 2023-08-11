@@ -16,7 +16,6 @@
 package org.finos.legend.depot.store.mongo.resources;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.mongodb.client.result.DeleteResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.bson.Document;
@@ -157,87 +156,4 @@ public class MongoStoreAdministrationResource extends BaseAuthorisedResource
         return Response.ok().entity(this.manageStoreService.runPipeline(collectionMame,jsonPipeline)).build();
     }
 
-    @PUT
-    @Path("/migrations/migrateToVersionData")
-    @ApiOperation("migrate data from projects to store projects versions data")
-    @Deprecated
-    public Response migrationToProjectVersionData()
-    {
-        return handle("migrate data from projects to store projects versions data", () ->
-        {
-            validateUser();
-            manageStoreService.migrationToProjectVersions();
-            return Response.status(Response.Status.NO_CONTENT).build();
-        });
-    }
-
-    @PUT
-    @Path("/migrations/cleanupProjectData")
-    @ApiOperation("cleanup projects data")
-    @Deprecated
-    public Response cleanupProjectData()
-    {
-        return handle("cleanup projects data", () ->
-        {
-            validateUser();
-            manageStoreService.cleanUpProjectData();
-            return Response.status(Response.Status.NO_CONTENT).build();
-        });
-    }
-
-    @PUT
-    @Path("/migrations/calculateDependenciesForVersions/all")
-    @ApiOperation("calculating transitive dependencies of each version present in the store")
-    @Deprecated
-    public Response storeTransitiveDependenciesForVersions()
-    {
-        return handle("calculating transitive dependencies of each version present in the store", () ->
-        {
-            validateUser();
-            manageStoreService.calculateTransitiveDependenciesForAllProjectVersions();
-            return Response.status(Response.Status.NO_CONTENT).build();
-        });
-    }
-
-    @PUT
-    @Path("/migrations/addTransitiveDependenciesToVersionData")
-    @ApiOperation("Update versions collection with transitive dependencies")
-    @Deprecated
-    public Response addTransitiveDependenciesToVersionData()
-    {
-        return handle("Update versions collection with transitive dependencies", () ->
-        {
-            validateUser();
-            manageStoreService.addTransitiveDependenciesToVersionData();
-            return Response.status(Response.Status.NO_CONTENT).build();
-        });
-    }
-
-    @DELETE
-    @Path("/migrations/deleteVersionedEntities")
-    @ApiOperation("Delete versioned entities from entities collection")
-    @Deprecated
-    public Response deleteVersionedEntities()
-    {
-        return handle("Delete versioned entities from entities collection", () ->
-        {
-            validateUser();
-            DeleteResult deleteResult = manageStoreService.deleteVersionedEntities();
-            return Response.ok().entity(deleteResult).build();
-        });
-    }
-
-    @PUT
-    @Path("/migrations/migrateToStoredEntityData")
-    @ApiOperation("Migrate entities to stored entity data")
-    @Deprecated
-    public Response migrateEntitiesToStoredEntityData()
-    {
-        return handle("Migrate entities to stored entity data", () ->
-        {
-            validateUser();
-             manageStoreService.migrateEntitiesToStoredEntityData();
-            return Response.ok().build();
-        });
-    }
 }

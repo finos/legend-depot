@@ -37,7 +37,7 @@ import static org.finos.legend.depot.store.mongo.core.BaseMongo.convert;
 
 public class TestDependenciesMigration extends TestStoreMongo
 {
-    MongoAdminStore mongoAdminStore = new MongoAdminStore(mongoProvider);
+    MongoMigrations mongoAdminStore = new MongoMigrations(mongoProvider);
     private static final String VERSIONS_COLLECTION = "versionsTemp";
 
     @Before
@@ -79,7 +79,6 @@ public class TestDependenciesMigration extends TestStoreMongo
                     Assert.fail("an error has occurred loading test project " + e.getMessage());
                 }
             });
-            Assert.assertNotNull(getMongoProjects());
         }
         catch (Exception e)
         {

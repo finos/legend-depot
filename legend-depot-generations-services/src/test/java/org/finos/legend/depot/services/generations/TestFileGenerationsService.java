@@ -15,24 +15,23 @@
 
 package org.finos.legend.depot.services.generations;
 
+import org.finos.legend.depot.domain.generation.DepotGeneration;
 import org.finos.legend.depot.domain.project.StoreProjectData;
 import org.finos.legend.depot.domain.project.StoreProjectVersionData;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.api.generations.ManageFileGenerationsService;
-import org.finos.legend.depot.domain.generation.DepotGeneration;
-import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
-import org.finos.legend.depot.services.generations.loader.FileGenerationLoader;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.generations.impl.ManageFileGenerationsServiceImpl;
-import org.finos.legend.depot.store.api.generations.UpdateFileGenerations;
-import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
+import org.finos.legend.depot.services.generations.loader.FileGenerationLoader;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.entities.Entities;
+import org.finos.legend.depot.store.api.generations.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
+import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
+import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.junit.Assert;
 import org.junit.Before;
@@ -55,7 +54,7 @@ public class TestFileGenerationsService extends TestStoreMongo
 
     public static final String AVRO = "avro";
     private static final URL filePath = TestFileGenerationsService.class.getClassLoader().getResource("generations/test-file-generation-master-SNAPSHOT.jar");
-    protected Entities entities = new EntitiesMongo(mongoProvider);
+    protected Entities entities = mock(Entities.class);
     private UpdateFileGenerations generations = new FileGenerationsMongo(mongoProvider);
     UpdateProjectsVersions projectsVersionsStore = mock(UpdateProjectsVersions.class);
     UpdateProjects projectsStore = mock(UpdateProjects.class);
@@ -152,7 +151,6 @@ public class TestFileGenerationsService extends TestStoreMongo
         Assert.assertTrue(service.getFileGenerationsByElementPath("group.test", "test", "1.0.0", "examples::avrogen1").isEmpty());
         Assert.assertEquals(2, service.getFileGenerationsByElementPath("group.test", "test", "1.0.0", "examples::metadata::test::ClientBasic").size());
     }
-
 
     @Test
     public void canQueryFileGenerationEntitiesByFilePath()

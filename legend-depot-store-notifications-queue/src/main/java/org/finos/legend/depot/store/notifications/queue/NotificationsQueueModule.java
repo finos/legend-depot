@@ -26,7 +26,6 @@ public class NotificationsQueueModule extends PrivateModule
     protected void configure()
     {
         bind(Queue.class).to(NotificationsQueueMongo.class);
-
         expose(Queue.class);
     }
 }

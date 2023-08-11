@@ -69,7 +69,6 @@ public class TestProjectsService extends TestBaseServices
         project2.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(pv), true));
         projectsVersionsStore.createOrUpdate(project2);
         Assert.assertEquals(1, projectsVersionsStore.find("examples.metadata", "test-dependencies", "1.0.0").get().getVersionData().getDependencies().size());
-        loadEntities("PROD-A", "2.3.1");
     }
 
     @Test
