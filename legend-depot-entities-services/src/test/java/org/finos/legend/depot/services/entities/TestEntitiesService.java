@@ -22,7 +22,7 @@ import org.finos.legend.depot.store.model.entities.EntityDefinition;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.store.model.entities.StoredEntityData;
 import org.finos.legend.depot.store.model.entities.StoredEntityStringData;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.services.TestBaseServices;

@@ -16,17 +16,8 @@
 package org.finos.legend.depot.store.mongo.guice;
 
 import com.google.inject.PrivateModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import org.finos.legend.depot.store.api.entities.UpdateEntities;
-import org.finos.legend.depot.store.api.versionedEntities.UpdateVersionedEntities;
-import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.admin.migrations.MongoEntitiesMigrations;
-import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
-import org.finos.legend.depot.store.mongo.versionedEntities.VersionedEntitiesMongo;
-import org.finos.legend.depot.store.resources.EntitiesMigrationResource;
-
-import javax.inject.Named;
+import org.finos.legend.depot.store.resources.entities.EntitiesMigrationResource;
 
 public class EntitiesMigrationsStoreMongoModule extends PrivateModule
 {

@@ -34,6 +34,19 @@
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-generations-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-mongo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
@@ -41,12 +54,6 @@
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
-        </dependency>
-        <!-- DEPOT -->
-
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
               <groupId>${junit.groupId}</groupId>

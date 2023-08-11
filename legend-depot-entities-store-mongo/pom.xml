@@ -32,18 +32,15 @@
         <!-- DEPOT -->
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-entities-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-store-mongo</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-mongo</artifactId>
-            <classifier>tests</classifier>
-            <type>test-jar</type>
-            <scope>test</scope>
         </dependency>
         <!-- DEPOT -->
 
@@ -54,6 +51,13 @@
         <dependency>
               <groupId>${junit.groupId}</groupId>
             <artifactId>${junit.artifactId}</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-mongo</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -27,7 +27,6 @@ import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import java.util.List;
 import java.util.function.Supplier;
 
 public class BaseResource

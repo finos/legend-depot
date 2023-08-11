@@ -17,8 +17,8 @@ package org.finos.legend.depot.store.mongo.admin;
 
 import org.bson.Document;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
+import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,14 +35,14 @@ public class TestMongoAdminStore extends TestStoreMongo
     public void canCreateProjectsIndexesIfAbsent()
     {
         List<Document> indexes = new ArrayList<>();
-        this.mongoProvider.getCollection(ProjectsMongo.COLLECTION).listIndexes().forEach((Consumer<Document>) indexes::add);
+        this.mongoProvider.getCollection(ArtifactsFilesMongo.COLLECTION).listIndexes().forEach((Consumer<Document>) indexes::add);
         Assert.assertTrue(indexes.isEmpty());
 
-        List<String> result = BaseMongo.createIndexesIfAbsent(mongoProvider, ProjectsMongo.COLLECTION, ProjectsMongo.buildIndexes());
+        List<String> result = BaseMongo.createIndexesIfAbsent(mongoProvider, ArtifactsFilesMongo.COLLECTION, ArtifactsFilesMongo.buildIndexes());
         Assert.assertFalse(result.isEmpty());
 
         List indexes1 = new ArrayList();
-        this.mongoProvider.getCollection(ProjectsMongo.COLLECTION).listIndexes().forEach((Consumer<Document>) indexes1::add);
+        this.mongoProvider.getCollection(ArtifactsFilesMongo.COLLECTION).listIndexes().forEach((Consumer<Document>) indexes1::add);
         Assert.assertFalse(indexes1.isEmpty());
         Assert.assertEquals(2, indexes1.size());
     }

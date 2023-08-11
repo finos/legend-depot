@@ -33,7 +33,7 @@
 
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-services</artifactId>
+            <artifactId>legend-depot-core-data-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
@@ -43,7 +43,10 @@
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-generations-api</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-http</artifactId>
+        </dependency>
 
         <!-- DEPOT -->
 
@@ -58,6 +61,10 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.collections</groupId>
@@ -80,7 +87,17 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-mongo</artifactId>
+            <artifactId>legend-depot-core-data-services</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-store-mongo</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-data-store-mongo</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
@@ -90,7 +107,13 @@
             <artifactId>legend-depot-generations-store-mongo</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-store-mongo</artifactId>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 

@@ -15,28 +15,14 @@
 
 package org.finos.legend.depot.store.mongo;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
-import org.bson.Document;
-import org.finos.legend.depot.domain.HasIdentifier;
-import org.finos.legend.depot.domain.project.StoreProjectData;
-import org.finos.legend.depot.domain.project.StoreProjectVersionData;
+import org.finos.legend.depot.store.model.HasIdentifier;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
-import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.junit.After;
-import org.junit.Assert;
-
-import java.io.InputStream;
-import java.net.URL;
-import java.util.List;
 
 public abstract class TestStoreMongo
 {
@@ -55,107 +41,8 @@ public abstract class TestStoreMongo
         return mongoProvider;
     }
 
-    public static List<StoreProjectData> readProjectConfigsFile(URL fileName)
-    {
-        try
-        {
-            InputStream stream = fileName.openStream();
-            String jsonInput = new java.util.Scanner(stream).useDelimiter("\\A").next();
-
-            List<StoreProjectData> projects = new ObjectMapper().readValue(jsonInput, new TypeReference<List<StoreProjectData>>()
-            {
-            });
-            Assert.assertNotNull("testing file" + fileName.getFile(), projects);
-            return projects;
-        }
-        catch (Exception e)
-        {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
-        }
-        return null;
-    }
-
-    protected void insertRaw(String collectionName,HasIdentifier rawObject)
+    protected void insertRaw(String collectionName, HasIdentifier rawObject)
     {
         mongoProvider.getCollection(collectionName).insertOne(BaseMongo.buildDocument(rawObject));
     }
-
-    public static List<StoreProjectVersionData> readProjectVersionsConfigsFile(URL fileName)
-    {
-        try
-        {
-            InputStream stream = fileName.openStream();
-            String jsonInput = new java.util.Scanner(stream).useDelimiter("\\A").next();
-
-            List<StoreProjectVersionData> projects = new ObjectMapper().readValue(jsonInput, new TypeReference<List<StoreProjectVersionData>>()
-            {
-            });
-            Assert.assertNotNull("testing file" + fileName.getFile(), projects);
-            return projects;
-        }
-        catch (Exception e)
-        {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
-        }
-        return null;
-    }
-
-
-    protected MongoCollection getMongoProjects()
-    {
-        return getMongoDatabase().getCollection(ProjectsMongo.COLLECTION);
-    }
-
-    protected void setUpProjectsFromFile(URL projectConfigFile)
-    {
-        try
-        {
-            readProjectConfigsFile(projectConfigFile).forEach(project ->
-            {
-                try
-                {
-                    getMongoProjects().insertOne(Document.parse(new ObjectMapper().writeValueAsString(project)));
-                }
-                catch (JsonProcessingException e)
-                {
-                    Assert.fail("an error has occurred loading test project " + e.getMessage());
-                }
-            });
-            Assert.assertNotNull(getMongoProjects());
-        }
-        catch (Exception e)
-        {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
-        }
-    }
-
-
-    protected void setUpProjectsVersionsFromFile(URL projectConfigFile)
-    {
-        try
-        {
-            readProjectVersionsConfigsFile(projectConfigFile).forEach(project ->
-            {
-                try
-                {
-                    getMongoProjectVersions().insertOne(Document.parse(new ObjectMapper().writeValueAsString(project)));
-                }
-                catch (JsonProcessingException e)
-                {
-                    Assert.fail("an error has occurred loading test project " + e.getMessage());
-                }
-            });
-            Assert.assertNotNull(getMongoProjectVersions());
-        }
-        catch (Exception e)
-        {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
-        }
-    }
-
-    protected MongoCollection getMongoProjectVersions()
-    {
-        return getMongoDatabase().getCollection(ProjectsVersionsMongo.COLLECTION);
-    }
-
 }

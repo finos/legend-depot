@@ -145,14 +145,6 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
         //no specific validation
     }
 
-    @Override
-    public List<String> createIndexes()
-    {
-        List<String> results = new ArrayList<>();
-        results.addAll(createIndexesIfAbsent(mongoDatabase,COLLECTION,this.buildIndexes()));
-        return results;
-    }
-
     public static List<IndexModel> buildIndexes()
     {
         return Arrays.asList(buildIndex("group-artifact-version", GROUP_ID,ARTIFACT_ID,VERSION_ID));

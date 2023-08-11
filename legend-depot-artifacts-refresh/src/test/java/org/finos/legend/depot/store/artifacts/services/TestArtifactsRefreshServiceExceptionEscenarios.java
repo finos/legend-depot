@@ -21,7 +21,7 @@ import org.finos.legend.depot.store.artifacts.repository.domain.ArtifactType;
 import org.finos.legend.depot.store.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
-import org.finos.legend.depot.domain.project.StoreProjectData;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;

@@ -17,7 +17,7 @@ package org.finos.legend.depot.core.http.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.finos.legend.depot.services.api.serverInfo.InfoService;
+import org.finos.legend.depot.services.serverInfo.InfoService;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;

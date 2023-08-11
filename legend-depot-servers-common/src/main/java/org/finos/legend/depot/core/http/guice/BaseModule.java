@@ -21,7 +21,7 @@ import com.google.inject.servlet.RequestScoped;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import org.finos.legend.depot.core.http.ServersConfiguration;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.api.StorageConfiguration;
+import org.finos.legend.depot.store.StorageConfiguration;
 import org.finos.legend.depot.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
 

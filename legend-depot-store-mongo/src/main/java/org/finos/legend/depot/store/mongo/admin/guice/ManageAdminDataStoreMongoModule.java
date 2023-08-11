@@ -26,7 +26,6 @@ import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.metrics.StorageMetricsHandler;
 import org.finos.legend.depot.store.mongo.admin.migrations.MongoMigrations;
 import org.finos.legend.depot.store.mongo.resources.MongoStoreAdministrationResource;
-import org.finos.legend.depot.store.mongo.resources.MongoStoreMigrationsResource;
 
 import javax.inject.Named;
 
@@ -37,14 +36,10 @@ public class ManageAdminDataStoreMongoModule extends PrivateModule
     protected void configure()
     {
         bind(MongoStoreAdministrationResource.class);
-        bind(MongoStoreMigrationsResource.class);
-        bind(MongoMigrations.class);
         bind(ArtifactsFilesStore.class).to(ArtifactsFilesMongo.class);
         bind(StorageMetrics.class).to(StorageMetricsHandler.class);
 
         expose(MongoStoreAdministrationResource.class);
-        expose(MongoStoreMigrationsResource.class);
-        expose(MongoMigrations.class);
         expose(ArtifactsFilesStore.class);
         expose(StorageMetrics.class);
         expose(MongoAdminStore.class);
