@@ -1,0 +1,53 @@
+# Copyright 2023 Goldman Sachs
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+# This action is used to overwrite a target remote branch with a given source branch.
+# This is mainly intended to be used for synchronising the integration and master branches
+# via a third intermediary branch which contains all commits from both.
+
+# The recommended workflow is to update the integration and master branches in the
+# contributor's fork to be in sync with upstream finos repo. Then branch from integration,
+# rebase on top of master and push the resulting branch to the upstream finos repo.
+# Finally, run this action twice, with the source branch being the newly pushed branch
+# and the target branch being master and then integration.
+name: Sync branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      sourceBranch:
+        description: "The source branch used as a base"
+        required: true
+      targetBranch:
+        description: "The target branch to be overwritten"
+        required: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.sourceBranch }}
+          token: ${{ secrets.FINOS_GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config --global user.email "37706051+finos-admin@users.noreply.github.com"
+          git config --global user.name "FINOS Administrator"
+
+      - name: Overwrite target branch
+        run: git push origin --force ${{ github.event.inputs.sourceBranch }}:${{ github.event.inputs.targetBranch }}
