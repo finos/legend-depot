@@ -57,6 +57,12 @@ public abstract class BaseModule<T extends ServersConfiguration> extends Dropwiz
         return configuration.getApplicationName();
     }
 
+    @Provides
+    public ServersConfiguration getConfig(T configuration)
+    {
+        return configuration;
+    }
+    
     private StorageConfiguration getStorageConfig()
     {
         return getConfiguration().getStorageConfiguration();
