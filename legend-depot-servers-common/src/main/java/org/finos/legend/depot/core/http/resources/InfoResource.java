@@ -17,6 +17,7 @@ package org.finos.legend.depot.core.http.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.finos.legend.depot.core.http.ServersConfiguration;
 import org.finos.legend.depot.services.serverInfo.InfoService;
 
 import javax.inject.Inject;
@@ -28,12 +29,14 @@ import javax.ws.rs.Produces;
 @Path("")
 public class InfoResource
 {
-    private InfoService infoService;
+    private final InfoService infoService;
+    private final ServersConfiguration configuration;
 
     @Inject
-    public InfoResource(InfoService infoService)
+    public InfoResource(InfoService infoService, ServersConfiguration configuration)
     {
         this.infoService = infoService;
+        this.configuration = configuration;
     }
 
     @GET
@@ -43,5 +46,15 @@ public class InfoResource
     public InfoService.ServerInfo getServerInfo()
     {
         return this.infoService.getServerInfo();
+    }
+
+    
+    @GET
+    @Path("/config")
+    @Produces({"application/json"})
+    @ApiOperation("Provides server config")
+    public ServersConfiguration getServerConfig()
+    {
+        return configuration;
     }
 }
