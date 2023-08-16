@@ -15,6 +15,10 @@
 
 package org.finos.legend.depot.core.http.resources;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.finos.legend.depot.core.http.ServersConfiguration;
@@ -48,13 +52,12 @@ public class InfoResource
         return this.infoService.getServerInfo();
     }
 
-    
+
     @GET
     @Path("/config")
-    @Produces({"application/json"})
     @ApiOperation("Provides server config")
-    public ServersConfiguration getServerConfig()
+    public String getServerConfig() throws JsonProcessingException
     {
-        return configuration;
+        return new ObjectMapper().disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).setSerializationInclusion(JsonInclude.Include.NON_EMPTY).writeValueAsString(configuration);
     }
 }
