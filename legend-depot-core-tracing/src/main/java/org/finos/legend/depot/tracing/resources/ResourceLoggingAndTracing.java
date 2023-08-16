@@ -19,7 +19,6 @@ public class ResourceLoggingAndTracing
 {
     public static final String GET_ALL_PROJECTS = "get all projects";
     public static final String GET_PROJECT_CONFIG_BY_GA = "get project configuration by ga";
-    public static final String GET_PROJECT_VERSIONS_BY_GA = "get project versions by ga";
     public static final String FIND_PROJECT_VERSIONS = "find project versions";
     public static final String GET_PROJECT_VERSION_BY_GAV = "get project version by gav";
     public static final String DELETE_PROJECT = "delete project";
@@ -32,7 +31,6 @@ public class ResourceLoggingAndTracing
     public static final String GET_VERSION_ENTITIES = "get version entities";
     public static final String GET_VERSION_DEPENDENCY_ENTITIES = "get version dependencies entities";
     public static final String GET_VERSIONS_DEPENDENCY_ENTITIES = "get versions dependencies entities";
-    public static final String GET_VERSION_STORE_ENTITIES = "get stored version entities";
     public static final String GET_VERSION_ENTITIES_AS_PMCD = "get version entities as PMCD";
     public static final String GET_VERSION_ENTITY = "get version entity";
     public static final String GET_VERSION_ENTITIES_BY_PACKAGE = "get version entities by package";
@@ -60,8 +58,6 @@ public class ResourceLoggingAndTracing
     public static final String SCHEDULES_STATUS = "get schedule status";
     public static final String SCHEDULES_RUNS = "get schedule runs";
     public static final String TRIGGER_SCHEDULE = "trigger schedule";
-    public static final String GET_CACHE_STATUS = "cache status";
-    public static final String GET_PROJECT_CACHE_STATUS = "project cache status";
     public static final String GET_VERSIONS_BY_LAST_USED = "versions last used";
     public static final String TOGGLE_SCHEDULE = "toggle schedule";
     public static final String TOGGLE_SCHEDULES = "toggle schedules";
