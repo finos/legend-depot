@@ -19,12 +19,12 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.mongodb.client.MongoDatabase;
+import org.finos.legend.depot.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.admin.api.artifacts.ArtifactsFilesStore;
 import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.admin.metrics.StorageMetricsHandler;
-import org.finos.legend.depot.store.mongo.admin.migrations.MongoMigrations;
 import org.finos.legend.depot.store.mongo.resources.MongoStoreAdministrationResource;
 
 import javax.inject.Named;
@@ -59,6 +59,16 @@ public class ManageAdminDataStoreMongoModule extends PrivateModule
     public boolean registerIndexes(MongoAdminStore adminStore)
     {
         adminStore.registerIndexes(ArtifactsFilesMongo.COLLECTION,ArtifactsFilesMongo.buildIndexes());
+        return true;
+    }
+
+    @Provides
+    @Singleton
+    @Named("storage-metrics")
+    boolean scheduleStorageMetrics(SchedulesFactory schedulesFactory, StorageMetrics storageMetrics)
+    {
+        storageMetrics.init();
+        schedulesFactory.register("storage-metrics", 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE,storageMetrics::reportMetrics);
         return true;
     }
 
