@@ -63,14 +63,4 @@ public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfigura
         return (configuration == null) ? ArtifactRepositoryProviderConfiguration.voidConfiguration() : configuration;
     }
 
-    @Provides
-    @Singleton
-    @Named("storage-metrics")
-    boolean scheduleStorageMetrics(SchedulesFactory schedulesFactory, StorageMetrics storageMetrics)
-    {
-        storageMetrics.init();
-        schedulesFactory.register("storage-metrics", 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE,storageMetrics::reportMetrics);
-        return true;
-    }
-
 }
