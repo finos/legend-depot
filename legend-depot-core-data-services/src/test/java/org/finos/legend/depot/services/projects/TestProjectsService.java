@@ -419,4 +419,35 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertEquals(2, versionData.size());
         Assert.assertEquals(Arrays.asList("master-SNAPSHOT", "branch1-SNAPSHOT"), versionData.stream().map(x -> x.getVersionId()).collect(Collectors.toList()));
     }
+
+     @Test
+    public void canOverrideDependencies()
+    {
+        // B -> CV1
+        // CV2 -> D
+        StoreProjectVersionData projectB = new StoreProjectVersionData("examples.metadata", "testb", "1.0.0");
+        StoreProjectVersionData projectCv1 = new StoreProjectVersionData("examples.metadata", "testc", "1.0.0");
+        ProjectVersion dependency1 = new ProjectVersion("examples.metadata", "testc", "1.0.0");
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(dependency1), true));
+        projectB.getVersionData().setDependencies(Arrays.asList(dependency1));
+        StoreProjectVersionData projectCv2 = new StoreProjectVersionData("examples.metadata","testc", "2.0.0");
+        StoreProjectVersionData projectD = new StoreProjectVersionData("examples.metadata","testd","1.0.0");
+        ProjectVersion dependency2 = new ProjectVersion("examples.metadata", "testd", "1.0.0");
+        projectCv2.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(dependency2), true));
+        projectCv2.getVersionData().setDependencies(Arrays.asList(dependency2));
+
+        projectsService.createOrUpdate(projectCv1);
+        projectsService.createOrUpdate(projectB);
+        projectsService.createOrUpdate(projectD);
+        projectsService.createOrUpdate(projectCv2);
+
+        ProjectVersion pv1 = new ProjectVersion("examples.metadata", "testb", "1.0.0");
+        ProjectVersion pv2 = new ProjectVersion("examples.metadata", "testc", "2.0.0");
+
+        // Cv1 will be overridden by CV2 and incoming dependency D will be part of the list
+        List<ProjectVersion> dependencies = projectsService.getDependencies(Arrays.asList(pv1, pv2), true).stream().collect(Collectors.toList());
+        Assert.assertEquals(1, dependencies.size());
+        Assert.assertEquals(dependency2, dependencies.get(0));
+
+    }
 }
