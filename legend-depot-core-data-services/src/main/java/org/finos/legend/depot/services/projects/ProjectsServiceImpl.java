@@ -218,7 +218,7 @@ public class ProjectsServiceImpl implements ProjectsService
         return this.getVersions(groupId, artifactId,false).stream().map(v -> VersionId.parseVersionId(v)).max(VersionId::compareTo);
     }
 
-    @Override
+@Override
     public Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, boolean transitive)
     {
         Set<ProjectVersion> dependencies = new HashSet<>();
@@ -227,6 +227,7 @@ public class ProjectsServiceImpl implements ProjectsService
             String version = this.resolveAliasesAndCheckVersionExists(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
             StoreProjectVersionData projectData = this.getProject(pv.getGroupId(), pv.getArtifactId(), version);
             List<ProjectVersion> projectVersionDependencies = projectData.getVersionData().getDependencies();
+            dependencies.addAll(this.dependencyUtil.overrideDependencies(projectVersions, projectVersionDependencies, this::getDependencies));
             if (transitive && !projectVersionDependencies.isEmpty())
             {
                 if (projectData.getTransitiveDependenciesReport().isValid())
@@ -238,10 +239,6 @@ public class ProjectsServiceImpl implements ProjectsService
                 {
                     throw new IllegalStateException(String.format("Error calculating transitive dependencies for project version - %s-%s-%s", projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId()));
                 }
-            }
-            else
-            {
-                dependencies.addAll(this.dependencyUtil.overrideDependencies(projectVersions, projectVersionDependencies, this::getDependencies));
             }
         });
         return dependencies;
