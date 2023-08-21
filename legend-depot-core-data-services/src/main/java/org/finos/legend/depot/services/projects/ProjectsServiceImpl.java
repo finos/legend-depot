@@ -218,7 +218,7 @@ public class ProjectsServiceImpl implements ProjectsService
         return this.getVersions(groupId, artifactId,false).stream().map(v -> VersionId.parseVersionId(v)).max(VersionId::compareTo);
     }
 
-@Override
+    @Override
     public Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, boolean transitive)
     {
         Set<ProjectVersion> dependencies = new HashSet<>();
