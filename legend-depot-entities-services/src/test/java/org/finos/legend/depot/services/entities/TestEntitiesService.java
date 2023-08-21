@@ -180,7 +180,7 @@ public class TestEntitiesService extends TestBaseServices
         List<ProjectVersion> projectVersions = Arrays.asList(new ProjectVersion("examples.metadata", "test", "latest"), new ProjectVersion("examples.metadata", "test-dependencies", "latest"));
         List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities(projectVersions,  true, true);
         Assert.assertFalse(dependencyList3.isEmpty());
-        Assert.assertEquals(4, dependencyList3.size());
+        Assert.assertEquals(3, dependencyList3.size());
         Assert.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
         Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
         Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
@@ -192,7 +192,7 @@ public class TestEntitiesService extends TestBaseServices
         List<ProjectVersion> projectVersions = Arrays.asList(new ProjectVersion("examples.metadata", "test", "head"), new ProjectVersion("examples.metadata", "test-dependencies", "latest"));
         List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities(projectVersions, true, true);
         Assert.assertFalse(dependencyList3.isEmpty());
-        Assert.assertEquals(4, dependencyList3.size());
+        Assert.assertEquals(3, dependencyList3.size());
         Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
         Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
     }

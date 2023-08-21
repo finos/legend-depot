@@ -227,11 +227,12 @@ public class ProjectsServiceImpl implements ProjectsService
             String version = this.resolveAliasesAndCheckVersionExists(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
             StoreProjectVersionData projectData = this.getProject(pv.getGroupId(), pv.getArtifactId(), version);
             List<ProjectVersion> projectVersionDependencies = projectData.getVersionData().getDependencies();
-            dependencies.addAll(projectVersionDependencies);
+            dependencies.addAll(this.dependencyUtil.overrideDependencies(projectVersions, projectVersionDependencies, this::getDependencies));
             if (transitive && !projectVersionDependencies.isEmpty())
             {
                 if (projectData.getTransitiveDependenciesReport().isValid())
                 {
+                    // Transitive dependencies report contains both direct and transitive dependencies
                     dependencies.addAll(this.dependencyUtil.overrideDependencies(projectVersions, projectData.getTransitiveDependenciesReport().getTransitiveDependencies(), this::getDependencies));
                 }
                 else
