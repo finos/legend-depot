@@ -21,8 +21,8 @@ import io.swagger.annotations.ApiOperation;
 import org.bson.Document;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
-import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
+import org.finos.legend.depot.store.mongo.admin.metrics.StorageMetricsHandler;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -48,12 +48,12 @@ public class MongoStoreAdministrationResource extends BaseAuthorisedResource
 
     public static final String STORE_ADMINISTRATION_RESOURCE = "Store Administration";
     private final MongoAdminStore manageStoreService;
-    private final StorageMetrics storageMetrics;
+    private final StorageMetricsHandler storageMetrics;
 
     @Inject
     protected MongoStoreAdministrationResource(MongoAdminStore manageStoreService,
                                                AuthorisationProvider authorisationProvider,
-                                               @Named("requestPrincipal") Provider<Principal> principalProvider, StorageMetrics storageMetrics)
+                                               @Named("requestPrincipal") Provider<Principal> principalProvider, StorageMetricsHandler storageMetrics)
     {
         super(authorisationProvider, principalProvider);
         this.manageStoreService = manageStoreService;

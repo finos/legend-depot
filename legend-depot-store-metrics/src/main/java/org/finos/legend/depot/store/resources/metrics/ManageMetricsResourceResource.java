@@ -19,7 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
-import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
+import org.finos.legend.depot.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 

@@ -16,7 +16,7 @@
 package org.finos.legend.depot.store.metrics;
 
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
+import org.finos.legend.depot.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
 import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;

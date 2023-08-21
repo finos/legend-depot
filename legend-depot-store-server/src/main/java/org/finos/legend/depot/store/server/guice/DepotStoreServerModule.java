@@ -16,18 +16,12 @@
 package org.finos.legend.depot.store.server.guice;
 
 import com.google.inject.Binder;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.core.http.guice.BaseModule;
-import org.finos.legend.depot.store.artifacts.configuration.IncludeProjectPropertiesConfiguration;
-import org.finos.legend.depot.services.schedules.SchedulesFactory;
-import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
-import org.finos.legend.depot.store.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
+import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
+import org.finos.legend.depot.services.api.artifacts.configuration.IncludeProjectPropertiesConfiguration;
+import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
-
-import javax.inject.Named;
 
 public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfiguration>
 {

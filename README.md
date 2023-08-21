@@ -28,7 +28,7 @@ Add following callback url to config: `http://127.0.0.1:6201/depot-store/callbac
 #### Depot Store Server
 
 - Create a JSON configuration: _check out the [sample config](https://github.com/finos/legend-depot/blob/master/legend-depot-server/src/test/resources/sample-server-config.json)_
-- Configure your Artifacts Repository provider (artifactRepositoryProviderConfiguration)  _Check out the [instructions here](https://github.com/finos/legend-depot/blob/master/legend-depot-artifacts-refresh/README.md)_
+- Configure your Artifacts Repository provider (artifactRepositoryProviderConfiguration)  _Check out the [instructions here](https://github.com/finos/legend-depot/blob/master/legend-depot-artifacts-services/README.md)_
 - Start an instance of `Mongo DB`: this is where your metadata will be stored: Add the `MongoDB URL` and `database name` to the `mongo` section of your config file
 - Start the server:
 

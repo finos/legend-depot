@@ -171,7 +171,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-artifacts-refresh</artifactId>
+            <artifactId>legend-depot-artifacts-services</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>
@@ -192,6 +192,16 @@
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-artifacts-repository-maven-impl</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-schedules-store-mongo</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>
@@ -242,16 +252,6 @@
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-pure-model-context</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-artifacts-purge</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>

@@ -16,7 +16,8 @@
 package org.finos.legend.depot.services;
 
 import org.eclipse.collections.impl.parallel.ParallelIterate;
-import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepository;
+import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
+import org.finos.legend.depot.services.api.projects.ProjectsVersionsReconciliationService;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionMismatch;
@@ -33,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-public class VersionsMismatchService
+public class VersionsMismatchService implements ProjectsVersionsReconciliationService
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(VersionsMismatchService.class);
 
@@ -56,6 +57,7 @@ public class VersionsMismatchService
         this.projects = projectsService;
     }
 
+    @Override
     public List<VersionMismatch> findVersionsMismatches()
     {
         List<VersionMismatch> versionMismatches = new ArrayList<>();

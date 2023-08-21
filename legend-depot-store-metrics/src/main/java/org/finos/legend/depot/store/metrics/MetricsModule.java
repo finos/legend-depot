@@ -20,7 +20,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import org.finos.legend.depot.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
 import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
@@ -38,32 +37,6 @@ public class MetricsModule extends PrivateModule
         expose(QueryMetrics.class);
         expose(QueryMetricsRegistry.class).annotatedWith(Names.named("queryMetricsRegistry"));
         expose(QueryMetricsHandler.class);
-    }
-
-    @Provides
-    @Singleton
-    @Named("consolidate-query-metrics")
-    boolean scheduleMetricsConsolidation(SchedulesFactory schedulesFactory, QueryMetricsHandler queryMetrics)
-    {
-        schedulesFactory.registerSingleInstance("consolidate-query-metrics", SchedulesFactory.MINUTE, 6 * SchedulesFactory.HOUR, () ->
-        {
-            queryMetrics.consolidateMetrics();
-            return true;
-        });
-        return true;
-    }
-
-    @Provides
-    @Singleton
-    @Named("persist-query-metrics")
-    boolean scheduleMetricsPersistence(SchedulesFactory schedulesFactory, QueryMetricsHandler queryMetrics)
-    {
-        schedulesFactory.register("persist-query-metrics", SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE, () ->
-        {
-            queryMetrics.persistMetrics();
-            return true;
-        });
-        return true;
     }
 
     @Provides

@@ -32,7 +32,7 @@
         <!-- DEPOT -->
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-api</artifactId>
+            <artifactId>legend-depot-core-store-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-schedules</artifactId>
+            <artifactId>legend-depot-core-schedules-api</artifactId>
         </dependency>
         <!-- DEPOT -->
 

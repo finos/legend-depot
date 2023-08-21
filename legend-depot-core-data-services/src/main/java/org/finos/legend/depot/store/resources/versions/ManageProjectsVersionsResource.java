@@ -20,10 +20,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
-import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionMismatch;
-import org.finos.legend.depot.services.VersionsMismatchService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.api.projects.ProjectsVersionsReconciliationService;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
@@ -46,10 +46,10 @@ public class ManageProjectsVersionsResource extends BaseAuthorisedResource
 
     public static final String PROJECTS_VERSIONS_RESOURCE = "Versions";
     private final ManageProjectsService projectVersionApi;
-    private final VersionsMismatchService repositoryService;
+    private final ProjectsVersionsReconciliationService repositoryService;
 
     @Inject
-    public ManageProjectsVersionsResource(ManageProjectsService projectVersionApi, VersionsMismatchService repositoryService, AuthorisationProvider authorisationProvider, @Named("requestPrincipal") Provider<Principal> principalProvider)
+    public ManageProjectsVersionsResource(ManageProjectsService projectVersionApi, ProjectsVersionsReconciliationService repositoryService, AuthorisationProvider authorisationProvider, @Named("requestPrincipal") Provider<Principal> principalProvider)
     {
         super(authorisationProvider, principalProvider);
         this.projectVersionApi = projectVersionApi;

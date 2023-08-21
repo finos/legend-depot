@@ -15,24 +15,24 @@
 
 package org.finos.legend.depot.services.dependencies;
 
-import org.finos.legend.depot.store.artifacts.repository.domain.ArtifactDependency;
-import org.finos.legend.depot.store.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
+import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.Optional;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ManageDependenciesServiceImpl implements ManageDependenciesService
@@ -40,18 +40,18 @@ public class ManageDependenciesServiceImpl implements ManageDependenciesService
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ManageDependenciesServiceImpl.class);
 
     private final ManageProjectsService projects;
-    private final RepositoryServices repositoryServices;
+    private final ArtifactRepository repositoryServices;
     private final DependencyUtil dependencyUtil;
 
     @Inject
-    public ManageDependenciesServiceImpl(ManageProjectsService projects, RepositoryServices repositoryServices, @Named("dependencyUtil") DependencyUtil dependencyUtil)
+    public ManageDependenciesServiceImpl(ManageProjectsService projects, ArtifactRepository repositoryServices, @Named("dependencyUtil") DependencyUtil dependencyUtil)
     {
         this.projects = projects;
         this.repositoryServices = repositoryServices;
         this.dependencyUtil = dependencyUtil;
     }
 
-    public ManageDependenciesServiceImpl(ManageProjectsService projects, RepositoryServices repositoryServices)
+    public ManageDependenciesServiceImpl(ManageProjectsService projects, ArtifactRepository repositoryServices)
     {
         this.projects = projects;
         this.repositoryServices = repositoryServices;

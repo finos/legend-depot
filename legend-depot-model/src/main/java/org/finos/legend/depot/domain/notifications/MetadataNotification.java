@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+//todo :move these to a new notifications api module and remove dependency with store-api
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MetadataNotification extends VersionedData implements HasIdentifier
 {

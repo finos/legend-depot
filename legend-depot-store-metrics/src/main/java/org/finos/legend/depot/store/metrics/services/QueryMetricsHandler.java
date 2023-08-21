@@ -18,7 +18,7 @@ package org.finos.legend.depot.store.metrics.services;
 import com.google.inject.name.Named;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.store.metrics.store.api.QueryMetrics;
-import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
+import org.finos.legend.depot.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
 import org.slf4j.Logger;
 

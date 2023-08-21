@@ -101,7 +101,7 @@
   },
   "artifactRepositoryProviderConfiguration": {
 
-    "org.finos.legend.depot.store.artifacts.repository.maven.impl.MavenArtifactRepositoryConfiguration": {
+    "org.finos.legend.depot.services.artifacts.repository.maven.MavenArtifactRepositoryConfiguration": {
       "settingsLocation": "/config/settings.xml",
       "versionsUpdateIntervalInMillis": 3600000,
       "latestUpdateIntervalInMillis": 3600000
