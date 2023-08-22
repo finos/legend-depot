@@ -18,16 +18,14 @@ package org.finos.legend.depot.store.notifications;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.finos.legend.depot.services.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
-import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
-import org.finos.legend.depot.store.resources.notifications.NotificationsManagerResource;
 import org.finos.legend.depot.store.notifications.services.NotificationsQueueManager;
 import org.finos.legend.depot.store.notifications.store.api.NotificationsStore;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsStoreImpl;
+import org.finos.legend.depot.store.resources.notifications.NotificationsManagerResource;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
 
@@ -43,8 +41,6 @@ import static org.finos.legend.depot.store.notifications.services.NotificationsQ
 
 public class NotificationsModule extends PrivateModule
 {
-    private static final String QUEUE_OBSERVER = "queue-observer";
-    private static final String CLEANUP_NOTIFICATIONS_SCHEDULE = "clean-notifications-schedule";
 
     @Override
     protected void configure()
@@ -57,24 +53,9 @@ public class NotificationsModule extends PrivateModule
 
         expose(Notifications.class);
         expose(NotificationsManagerResource.class);
+        expose(NotificationsManager.class);
     }
 
-    @Provides
-    @Singleton
-    @Named("queue-observer")
-    boolean initQueue(SchedulesFactory schedulesFactory, QueueManagerConfiguration config, NotificationsManager notificationsManager)
-    {
-        long numberOfWorkers = config.getNumberOfQueueWorkers();
-        if (numberOfWorkers <= 0)
-        {
-            throw new IllegalArgumentException("Number of queue workers must be a positive number >1 ");
-        }
-        for (long worker = 1;numberOfWorkers >= worker;worker++)
-        {
-            schedulesFactory.register(QUEUE_OBSERVER + "_" + worker, config.getQueueDelay(), config.getQueueInterval(), notificationsManager::handle);
-        }
-        return true;
-    }
 
     @Provides
     @Named("notifications-metrics")
@@ -88,15 +69,6 @@ public class NotificationsModule extends PrivateModule
             metricsHandler.registerGauge(QUEUE_WAITING, QUEUE_WAITING_HELP);
             metricsHandler.registerHistogram(NOTIFICATION_COMPLETE, NOTIFICATION_COMPLETE_HELP, Arrays.asList("eventPriority"));
         }
-        return true;
-    }
-
-    @Provides
-    @Named("clean-old-notifications")
-    @Singleton
-    boolean notificationsCleanUp(SchedulesFactory schedulesFactory, NotificationsManager eventsQueueManager)
-    {
-        schedulesFactory.register(CLEANUP_NOTIFICATIONS_SCHEDULE, SchedulesFactory.MINUTE, 1 * SchedulesFactory.HOUR,  () -> eventsQueueManager.deleteOldNotifications(120));
         return true;
     }
 

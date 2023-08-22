@@ -15,8 +15,8 @@
 
 package org.finos.legend.depot.services.schedules;
 
-import org.finos.legend.depot.store.admin.api.schedules.SchedulesStore;
-import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInfo;
+import org.finos.legend.depot.store.api.admin.schedules.SchedulesStore;
+import org.finos.legend.depot.store.model.admin.schedules.ScheduleInfo;
 
 import java.util.HashMap;
 import java.util.List;

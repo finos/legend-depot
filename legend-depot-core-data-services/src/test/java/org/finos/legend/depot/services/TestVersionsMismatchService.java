@@ -15,8 +15,8 @@
 
 package org.finos.legend.depot.services;
 
-import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepository;
-import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepositoryException;
+import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
+import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryException;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionMismatch;

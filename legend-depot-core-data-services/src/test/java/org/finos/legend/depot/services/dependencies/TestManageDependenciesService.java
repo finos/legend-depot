@@ -14,18 +14,17 @@
 
 package org.finos.legend.depot.services.dependencies;
 
-import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepository;
-import org.finos.legend.depot.store.artifacts.repository.services.RepositoryServices;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.store.model.projects.StoreProjectData;
-import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
+import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.CoreDataMongoStoreTests;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
@@ -49,8 +48,7 @@ public class TestManageDependenciesService extends CoreDataMongoStoreTests
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore,projectsStore,metrics,queue,new ProjectsConfiguration("master"));
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
-    protected RepositoryServices repositoryServices = new RepositoryServices(repository);
-    protected ManageDependenciesService manageDependenciesService = new ManageDependenciesServiceImpl(projectsService, repositoryServices);
+    protected ManageDependenciesService manageDependenciesService = new ManageDependenciesServiceImpl(projectsService, repository);
 
     private static final String GROUPID = "examples.metadata";
 

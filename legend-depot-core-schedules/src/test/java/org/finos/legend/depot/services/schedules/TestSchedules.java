@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.services.schedules;
 
-import org.finos.legend.depot.store.admin.domain.schedules.ScheduleInstance;
+import org.finos.legend.depot.store.model.admin.schedules.ScheduleInstance;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,12 +27,12 @@ import static org.finos.legend.depot.domain.DatesHandler.toDate;
 
 public class TestSchedules
 {
-    private SchedulesFactory schedulesFactory;
+    private SchedulesFactoryImpl schedulesFactory;
 
     @Before
     public void setUp()
     {
-        schedulesFactory = new SchedulesFactory(new MockScheduleStore(), new MockInstancesStore());
+        schedulesFactory = new SchedulesFactoryImpl(new MockScheduleStore(), new MockInstancesStore(),false);
         Assert.assertTrue(schedulesFactory.tasksRegistry.isEmpty());
     }
 

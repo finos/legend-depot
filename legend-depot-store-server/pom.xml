@@ -73,6 +73,10 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-schedules-store-mongo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-store-notifications</artifactId>
         </dependency>
         <dependency>
@@ -81,11 +85,15 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-artifacts-refresh</artifactId>
+            <artifactId>legend-depot-artifacts-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-artifacts-purge</artifactId>
+            <artifactId>legend-depot-artifacts-services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-artifacts-store-mongo</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
@@ -107,7 +115,6 @@
             <artifactId>${junit.artifactId}</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>

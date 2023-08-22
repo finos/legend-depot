@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.store.metrics.api;
 
-import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
+import org.finos.legend.depot.domain.metrics.VersionQueryMetric;
 
 import java.util.Date;
 import java.util.Optional;

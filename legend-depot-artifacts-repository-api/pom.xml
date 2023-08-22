@@ -65,9 +65,5 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-schedules</artifactId>
-        </dependency>
     </dependencies>
 </project>

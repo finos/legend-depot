@@ -21,18 +21,21 @@ import io.dropwizard.setup.Bootstrap;
 import org.finos.legend.depot.core.authorisation.AuthorisationModule;
 import org.finos.legend.depot.core.http.BaseServer;
 import org.finos.legend.depot.core.http.resources.InfoPageModule;
+import org.finos.legend.depot.services.guice.ArtifactsSchedulesModule;
+import org.finos.legend.depot.services.guice.ArtifactsServicesModule;
+import org.finos.legend.depot.services.guice.ManageCoreDataSchedulesModule;
 import org.finos.legend.depot.services.guice.ManageCoreDataServicesModule;
 import org.finos.legend.depot.services.guice.ManageEntitiesServicesModule;
 import org.finos.legend.depot.services.guice.ManageGenerationsServicesModule;
-import org.finos.legend.depot.services.schedules.guice.AdminSchedulesModule;
-import org.finos.legend.depot.store.artifacts.guice.ArtifactsHandlersModule;
-import org.finos.legend.depot.store.artifacts.guice.ArtifactsRefreshModule;
-import org.finos.legend.depot.store.artifacts.purge.guice.ArtifactsPurgeModule;
-import org.finos.legend.depot.store.artifacts.repository.api.ArtifactRepositoryProviderConfiguration;
-import org.finos.legend.depot.store.artifacts.repository.guice.RepositoryModule;
+import org.finos.legend.depot.services.guice.ManageSchedulesModule;
+import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryProviderConfiguration;
+import org.finos.legend.depot.services.guice.RepositoryModule;
 import org.finos.legend.depot.store.metrics.AdminMetricsModule;
-import org.finos.legend.depot.store.mongo.admin.guice.AdminSchedulesStoreMongoModule;
-import org.finos.legend.depot.store.mongo.admin.guice.ManageAdminDataStoreMongoModule;
+import org.finos.legend.depot.store.metrics.MetricsSchedulesModule;
+import org.finos.legend.depot.store.mongo.guice.ManageMongoStoreSchedulesModule;
+import org.finos.legend.depot.store.mongo.admin.guice.ManageSchedulesStoreMongoModule;
+import org.finos.legend.depot.store.mongo.guice.ManageMongoStoreModule;
+import org.finos.legend.depot.store.mongo.admin.guice.ArtifactsStoreMongoModule;
 import org.finos.legend.depot.store.mongo.core.MongoClientModule;
 import org.finos.legend.depot.store.mongo.guice.CoreDataMigrationsStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.EntitiesMigrationsStoreMongoModule;
@@ -40,9 +43,13 @@ import org.finos.legend.depot.store.mongo.guice.ManageCoreDataStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.ManageEntitiesStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.ManageGenerationsStoreMongoModule;
 import org.finos.legend.depot.store.notifications.NotificationsModule;
+import org.finos.legend.depot.store.notifications.NotificationsSchedulesModule;
 import org.finos.legend.depot.store.notifications.queue.ManageNotificationsQueueModule;
+import org.finos.legend.depot.store.resources.guice.ArtifactsResourcesModule;
 import org.finos.legend.depot.store.resources.guice.ManageCoreDataResourcesModule;
 import org.finos.legend.depot.store.resources.guice.ManageEntitiesResourcesModule;
+import org.finos.legend.depot.store.resources.guice.ManageSchedulesResourcesModule;
+import org.finos.legend.depot.store.resources.guice.RepositoryResourcesModule;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
 import org.finos.legend.depot.store.server.guice.DepotStoreServerModule;
 import org.finos.legend.depot.tracing.TracingModule;
@@ -85,8 +92,8 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new ManageCoreDataResourcesModule(),
                 new ManageCoreDataServicesModule(),
                 new ManageCoreDataStoreMongoModule(),
+                new ManageCoreDataSchedulesModule(),
                 new CoreDataMigrationsStoreMongoModule(),
-
 
                 new ManageEntitiesResourcesModule(),
                 new ManageEntitiesServicesModule(),
@@ -96,25 +103,33 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new ManageGenerationsServicesModule(),
                 new ManageGenerationsStoreMongoModule(),
 
-                new MongoClientModule(),
+                new ArtifactsResourcesModule(),
+                new ArtifactsServicesModule(),
+                new ArtifactsSchedulesModule(),
+                new ArtifactsStoreMongoModule(),
 
-                new ManageAdminDataStoreMongoModule(),
+                new RepositoryResourcesModule(),
+                new RepositoryModule(),
 
-                new AdminSchedulesModule(),
-                new AdminSchedulesStoreMongoModule(),
+                new ManageSchedulesResourcesModule(),
+                new ManageSchedulesModule(),
+                new ManageSchedulesStoreMongoModule(),
+
+                new NotificationsModule(),
+                new NotificationsSchedulesModule(),
+                new ManageNotificationsQueueModule(),
 
                 new AdminMetricsModule(),
+                new MetricsSchedulesModule(),
 
                 new AuthorisationModule(),
 
-                new ArtifactsHandlersModule(),
-                new ArtifactsRefreshModule(),
-                new ArtifactsPurgeModule(),
-
-                new RepositoryModule(),
                 new TracingModule(),
-                new NotificationsModule(),
-                new ManageNotificationsQueueModule());
+
+                new MongoClientModule(),
+                new ManageMongoStoreSchedulesModule(),
+                new ManageMongoStoreModule()
+              );
     }
 
 }

@@ -27,7 +27,7 @@ import com.mongodb.client.model.Projections;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.store.admin.domain.metrics.VersionQueryMetric;
+import org.finos.legend.depot.domain.metrics.VersionQueryMetric;
 import org.finos.legend.depot.store.metrics.store.api.QueryMetrics;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import com.mongodb.client.model.IndexModel;

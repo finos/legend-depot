@@ -54,6 +54,10 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-schedules-store-mongo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-data-services</artifactId>
         </dependency>
         <dependency>
@@ -71,10 +75,6 @@
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-store-notifications-queue</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-entities-services</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>

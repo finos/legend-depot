@@ -40,7 +40,7 @@
 
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-schedules</artifactId>
+            <artifactId>legend-depot-core-schedules-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>

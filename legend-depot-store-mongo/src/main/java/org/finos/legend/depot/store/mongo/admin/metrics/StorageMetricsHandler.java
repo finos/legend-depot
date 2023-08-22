@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
-import org.finos.legend.depot.store.admin.api.metrics.StorageMetrics;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class StorageMetricsHandler implements StorageMetrics
+public class StorageMetricsHandler
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(StorageMetricsHandler.class);
     private static final int SCALE = 1024;
@@ -43,7 +42,7 @@ public class StorageMetricsHandler implements StorageMetrics
         this.metricsHandler = metricsHandler;
     }
 
-    @Override
+
     public void init()
     {
 
@@ -59,7 +58,7 @@ public class StorageMetricsHandler implements StorageMetrics
         this.metricsHandler.registerGauge("storage_avgSize","avg size",Arrays.asList("collectionName"));
     }
 
-    @Override
+
     public Object reportMetrics()
     {
         StorageStats stats = new StorageStats();
