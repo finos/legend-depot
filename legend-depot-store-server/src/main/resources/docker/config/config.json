@@ -32,7 +32,12 @@
     }
   },
   "artifactRepositoryProviderConfiguration": {},
-  "includeProjectPropertiesConfiguration": {},
+  "artifactsRefreshPolicyConfiguration": {
+         "versionsUpdateIntervalInMillis": 3600000,
+         "includeProjectPropertiesConfiguration": {
+             "properties": []
+        }
+ },
   "artifactsRetentionPolicyConfiguration": {},
   "projects": {"defaultBranch": "master"},
   "storage": {
@@ -102,13 +107,8 @@
   "artifactRepositoryProviderConfiguration": {
 
     "org.finos.legend.depot.services.artifacts.repository.maven.MavenArtifactRepositoryConfiguration": {
-      "settingsLocation": "/config/settings.xml",
-      "versionsUpdateIntervalInMillis": 3600000,
-      "latestUpdateIntervalInMillis": 3600000
+      "settingsLocation": "/config/settings.xml"
     }
-  },
-  "includeProjectPropertiesConfiguration": {
-    "properties": []
   },
   "artifactsRetentionPolicyConfiguration": {
     "maximumSnapshotsAllowed": 5,

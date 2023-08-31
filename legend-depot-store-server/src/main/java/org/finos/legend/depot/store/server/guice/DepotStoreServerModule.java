@@ -17,6 +17,7 @@ package org.finos.legend.depot.store.server.guice;
 
 import com.google.inject.Binder;
 import org.finos.legend.depot.core.http.guice.BaseModule;
+import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRefreshPolicyConfiguration;
 import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.services.api.artifacts.configuration.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryProviderConfiguration;
@@ -31,6 +32,7 @@ public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfigura
     {
         super.configure(binder);
         binder.bind(ArtifactRepositoryProviderConfiguration.class).toProvider(this::getArtifactRepositoryConfiguration);
+        binder.bind(ArtifactsRefreshPolicyConfiguration.class).toProvider(this::getRefreshPolicyConfiguration);
         binder.bind(IncludeProjectPropertiesConfiguration.class).toProvider(this::getIncludePropertiesConfiguration);
         binder.bind(ArtifactsRetentionPolicyConfiguration.class).toProvider(this::getRetentionPolicyConfiguration);
         binder.bind(QueueManagerConfiguration.class).toProvider(this::getQueueManagerConfiguration);
@@ -43,7 +45,12 @@ public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfigura
 
     private IncludeProjectPropertiesConfiguration getIncludePropertiesConfiguration()
     {
-        return getConfiguration().getIncludeProjectPropertiesConfiguration();
+        return getConfiguration().getArtifactsRefreshPolicyConfiguration().getIncludeProjectPropertiesConfiguration();
+    }
+
+    private ArtifactsRefreshPolicyConfiguration getRefreshPolicyConfiguration()
+    {
+        return getConfiguration().getArtifactsRefreshPolicyConfiguration();
     }
 
     private ArtifactsRetentionPolicyConfiguration getRetentionPolicyConfiguration()
