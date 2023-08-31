@@ -32,7 +32,7 @@
     }
   },
   "artifactRepositoryProviderConfiguration": {},
-  "includeProjectPropertiesConfiguration": {},
+  "artifactsRefreshPolicyConfiguration": {},
   "artifactsRetentionPolicyConfiguration": {},
   "projects": {"defaultBranch": "master"},
   "storage": {
@@ -105,13 +105,8 @@
   },
   "artifactRepositoryProviderConfiguration": {
     "org.finos.legend.depot.store.artifacts.repository.maven.impl.MavenArtifactRepositoryConfiguration": {
-      "settingsLocation": "legend-depot-store-server/src/test/resources/sample-repository-settings.xml",
-      "versionsUpdateIntervalInMillis": 7200000,
-      "latestUpdateIntervalInMillis": 3600000
+      "settingsLocation": "legend-depot-store-server/src/test/resources/sample-repository-settings.xml"
     }
-  },
-  "includeProjectPropertiesConfiguration": {
-    "properties": []
   },
   "queue-interval": 30
 }

@@ -36,13 +36,22 @@ public class ArtifactsRetentionPolicyConfiguration
     private int ttlForSnapshotsInDays = DEFAULT_TTL_FOR_SNAPSHOTS;
 
     @JsonCreator
-    public ArtifactsRetentionPolicyConfiguration(@JsonProperty(value = "maximumSnapshotsAllowed") int maximumSnapshotsAllowed,
-                                                 @JsonProperty(value = "ttlForVersionsInDays") int ttlForVersionsInDays,
-                                                 @JsonProperty(value = "ttlForSnapshotsInDay") int ttlForSnapshotsInDays)
+    public ArtifactsRetentionPolicyConfiguration(@JsonProperty(value = "maximumSnapshotsAllowed") Integer maximumSnapshotsAllowed,
+                                                 @JsonProperty(value = "ttlForVersionsInDays") Integer ttlForVersionsInDays,
+                                                 @JsonProperty(value = "ttlForSnapshotsInDay") Integer ttlForSnapshotsInDays)
     {
-        this.maximumSnapshotsAllowed = maximumSnapshotsAllowed;
-        this.ttlForSnapshotsInDays = ttlForSnapshotsInDays;
-        this.ttlForVersionsInDays = ttlForVersionsInDays;
+        if (maximumSnapshotsAllowed != null)
+        {
+            this.maximumSnapshotsAllowed = maximumSnapshotsAllowed;
+        }
+        if (ttlForSnapshotsInDays != null)
+        {
+            this.ttlForSnapshotsInDays = ttlForSnapshotsInDays;
+        }
+        if (ttlForVersionsInDays != null)
+        {
+            this.ttlForVersionsInDays = ttlForVersionsInDays;
+        }
     }
 
     public int getMaximumSnapshotsAllowed()

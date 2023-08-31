@@ -17,9 +17,9 @@ package org.finos.legend.depot.store.server.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRefreshPolicyConfiguration;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.core.http.ServersConfiguration;
-import org.finos.legend.depot.services.api.artifacts.configuration.IncludeProjectPropertiesConfiguration;
 import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
 
@@ -34,8 +34,8 @@ public class DepotStoreServerConfiguration extends ServersConfiguration
     @JsonProperty("artifactRepositoryProviderConfiguration")
     private ArtifactRepositoryProviderConfiguration artifactRepositoryProviderConfiguration;
 
-    @JsonProperty("includeProjectPropertiesConfiguration")
-    private IncludeProjectPropertiesConfiguration includeProjectPropertiesConfiguration;
+    @JsonProperty("artifactsRefreshPolicyConfiguration")
+    private ArtifactsRefreshPolicyConfiguration artifactsRefreshPolicyConfiguration;
 
     @JsonProperty("artifactsRetentionPolicyConfiguration")
     private ArtifactsRetentionPolicyConfiguration artifactsRetentionPolicyConfiguration;
@@ -60,14 +60,14 @@ public class DepotStoreServerConfiguration extends ServersConfiguration
         this.artifactRepositoryProviderConfiguration = artifactRepositoryProviderConfiguration;
     }
 
-    public IncludeProjectPropertiesConfiguration getIncludeProjectPropertiesConfiguration()
+    public ArtifactsRefreshPolicyConfiguration getArtifactsRefreshPolicyConfiguration()
     {
-        return includeProjectPropertiesConfiguration;
+        return artifactsRefreshPolicyConfiguration;
     }
 
-    public void setIncludeProjectPropertiesConfiguration(IncludeProjectPropertiesConfiguration includeProjectPropertiesConfiguration)
+    public void setArtifactsRefreshPolicyConfiguration(ArtifactsRefreshPolicyConfiguration artifactsRefreshPolicyConfiguration)
     {
-        this.includeProjectPropertiesConfiguration = includeProjectPropertiesConfiguration;
+        this.artifactsRefreshPolicyConfiguration = artifactsRefreshPolicyConfiguration;
     }
 
     public ArtifactsRetentionPolicyConfiguration getRetentionPolicyConfiguration()

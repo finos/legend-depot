@@ -19,9 +19,9 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRefreshPolicyConfiguration;
 import org.finos.legend.depot.services.api.artifacts.purge.ArtifactsPurgeService;
 import org.finos.legend.depot.services.api.artifacts.refresh.ArtifactsRefreshService;
-import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.services.api.schedules.SchedulesFactory;
 import org.finos.legend.depot.services.api.artifacts.refresh.ParentEvent;
 import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
@@ -39,7 +39,7 @@ public class ArtifactsSchedulesModule extends PrivateModule
     @Provides
     @Singleton
     @Named("refresh-all-versions")
-    boolean initVersions(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService, ArtifactRepositoryProviderConfiguration configuration)
+    boolean initVersions(SchedulesFactory schedulesFactory, ArtifactsRefreshService artifactsRefreshService, ArtifactsRefreshPolicyConfiguration configuration)
     {
         schedulesFactory.registerExternalTriggerSchedule(ParentEvent.REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE.name(), configuration.getVersionsUpdateIntervalInMillis(), true, () -> artifactsRefreshService.refreshAllVersionsForAllProjects(false,false,false, ParentEvent.REFRESH_ALL_VERSION_ARTIFACTS_SCHEDULE.name()));
         return true;
