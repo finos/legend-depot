@@ -32,13 +32,13 @@
     }
   },
   "projects": {"defaultBranch": "master"},
-  "storage": {
+  "storages": [{
     "org.finos.legend.depot.store.mongo.core.MongoConfiguration": {
       "url": "mongodb://127.0.0.1:27017",
       "database": "depot-dev",
       "tracing": false
     }
-  },
+  }],
   "openTracing": {
     "openTracingUri": "URL here",
     "serviceName": "legend-depot-server",

@@ -17,6 +17,7 @@ package org.finos.legend.depot.core.http.guice;
 
 import com.google.inject.Binder;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
 import com.google.inject.servlet.RequestScoped;
 import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import org.finos.legend.depot.core.http.ServersConfiguration;
@@ -28,6 +29,7 @@ import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
+import java.util.List;
 
 public abstract class BaseModule<T extends ServersConfiguration> extends DropwizardAwareModule<T>
 {
@@ -36,7 +38,7 @@ public abstract class BaseModule<T extends ServersConfiguration> extends Dropwiz
     public void configure(Binder binder)
     {
         binder.bind(ProjectsConfiguration.class).toProvider(this::getProjectsConfig);
-        binder.bind(StorageConfiguration.class).toProvider(this::getStorageConfig);
+        binder.bind(new TypeLiteral<List<StorageConfiguration>>() {}).toInstance(this.getStorageConfig());
         binder.bind(OpenTracingConfiguration.class).toProvider(this::getTracingConfig);
         binder.bind(PrometheusConfiguration.class).toProvider(this::getPrometheusConfig);
     }
@@ -63,7 +65,7 @@ public abstract class BaseModule<T extends ServersConfiguration> extends Dropwiz
         return configuration;
     }
     
-    private StorageConfiguration getStorageConfig()
+    private List<StorageConfiguration> getStorageConfig()
     {
         return getConfiguration().getStorageConfiguration();
     }

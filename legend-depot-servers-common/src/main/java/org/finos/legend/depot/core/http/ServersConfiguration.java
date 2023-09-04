@@ -26,6 +26,7 @@ import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
 import org.finos.legend.server.pac4j.LegendPac4jConfiguration;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -55,8 +56,8 @@ public class ServersConfiguration extends Configuration
     private String deployment;
 
     @NotNull
-    @JsonProperty("storage")
-    private StorageConfiguration storage;
+    @JsonProperty("storages")
+    private List<StorageConfiguration> storages;
 
     @NotNull
     @JsonProperty("projects")
@@ -76,9 +77,9 @@ public class ServersConfiguration extends Configuration
         return deployment;
     }
 
-    public StorageConfiguration getStorageConfiguration()
+    public List<StorageConfiguration> getStorageConfiguration()
     {
-        return storage;
+        return storages;
     }
 
     public ProjectsConfiguration getProjectsConfiguration()
@@ -86,9 +87,9 @@ public class ServersConfiguration extends Configuration
         return projects;
     }
 
-    public void setStorage(StorageConfiguration storage)
+    public void setStorage(List<StorageConfiguration> storages)
     {
-        this.storage = storage;
+        this.storages = storages;
     }
 
     public OpenTracingConfiguration getOpenTracingConfiguration()

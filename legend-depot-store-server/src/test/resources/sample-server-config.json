@@ -35,13 +35,13 @@
   "artifactsRefreshPolicyConfiguration": {},
   "artifactsRetentionPolicyConfiguration": {},
   "projects": {"defaultBranch": "master"},
-  "storage": {
+  "storages": [{
     "org.finos.legend.depot.store.mongo.core.MongoConfiguration": {
       "url": "mongodb://127.0.0.1:27017",
       "database": "depot-dev",
       "tracing": false
     }
-  },
+  }],
   "openTracing": {
     "openTracingUri": "your URL here",
     "serviceName": "legend-depot-store",
@@ -104,7 +104,7 @@
     "CORS": 5
   },
   "artifactRepositoryProviderConfiguration": {
-    "org.finos.legend.depot.store.artifacts.repository.maven.impl.MavenArtifactRepositoryConfiguration": {
+    "org.finos.legend.depot.services.artifacts.repository.maven.MavenArtifactRepositoryConfiguration": {
       "settingsLocation": "legend-depot-store-server/src/test/resources/sample-repository-settings.xml"
     }
   },
