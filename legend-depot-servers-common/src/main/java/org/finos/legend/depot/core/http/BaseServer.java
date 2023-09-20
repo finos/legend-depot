@@ -37,6 +37,7 @@ import org.eclipse.jetty.util.component.LifeCycle;
 import org.finos.legend.depot.store.StorageConfiguration;
 import org.finos.legend.depot.tracing.configuration.PrometheusMetricsProviderConfiguration;
 import org.finos.legend.depot.tracing.configuration.TracingAuthenticationProviderConfiguration;
+import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.finos.legend.sdlc.server.error.LegendSDLCServerExceptionMapper;
 import org.finos.legend.server.pac4j.LegendPac4jBundle;
 import org.finos.legend.server.shared.bundles.ChainFixingFilterHandler;
@@ -54,6 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class BaseServer<T extends ServersConfiguration> extends Application<T>
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BaseServer.class);
+    public static final String SERVER_STOPPED = "server-stopped";
 
     AtomicBoolean ready = new AtomicBoolean(false);
 
@@ -131,6 +133,7 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
             }
         });
 
+
         initialiseCors(environment);
         initialisePrometheusMetrics(environment);
         initialiseOpenTracing(environment);
@@ -142,6 +145,7 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
     {
         environment.lifecycle().addLifeCycleListener(new LifeCycle.Listener()
         {
+            private long shutDownStartTime = 0L;
             @Override
             public void lifeCycleStarting(LifeCycle event)
             {
@@ -166,12 +170,14 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
             public void lifeCycleStopping(LifeCycle event)
             {
                 LOGGER.info("Stopping {}", configuration.getApplicationName());
+                shutDownStartTime = System.currentTimeMillis();
             }
 
             @Override
             public void lifeCycleStopped(LifeCycle event)
             {
-                LOGGER.info("Stopped {}", configuration.getApplicationName());
+                LOGGER.info("Stopped {} in {} ", configuration.getApplicationName(), System.currentTimeMillis() - shutDownStartTime);
+                PrometheusMetricsFactory.getInstance().incrementCount(SERVER_STOPPED);
             }
         });
     }
