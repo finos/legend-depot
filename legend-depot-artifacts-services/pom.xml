@@ -39,7 +39,7 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-metrics</artifactId>
+            <artifactId>legend-depot-metrics-query-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
@@ -161,6 +161,16 @@
             <artifactId>legend-depot-core-data-store-mongo</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-metrics-query-services</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-metrics-query-store-mongo</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

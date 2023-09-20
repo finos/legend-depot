@@ -17,8 +17,6 @@ package org.finos.legend.depot.services.artifacts.handlers.generations;
 
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
-import org.finos.legend.depot.services.artifacts.handlers.generations.FileGenerationHandlerImpl;
-import org.finos.legend.depot.services.artifacts.handlers.generations.FileGenerationsProvider;
 import org.finos.legend.depot.services.artifacts.repository.maven.TestMavenArtifactsRepository;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.domain.generation.DepotGeneration;
@@ -33,7 +31,7 @@ import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.services.api.artifacts.handlers.generations.FileGenerationsArtifactsProvider;
-import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;

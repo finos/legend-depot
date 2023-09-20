@@ -16,7 +16,8 @@
 package org.finos.legend.depot.services.artifacts.purge;
 
 import org.finos.legend.depot.services.TestBaseServices;
-import org.finos.legend.depot.domain.metrics.VersionQueryMetric;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsService;
+import org.finos.legend.depot.store.model.metrics.query.VersionQueryMetric;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 import org.finos.legend.depot.domain.version.VersionMismatch;
@@ -41,10 +42,10 @@ import org.finos.legend.depot.services.artifacts.handlers.entities.EntitiesHandl
 import org.finos.legend.depot.services.artifacts.handlers.entities.EntityProvider;
 import org.finos.legend.depot.services.artifacts.handlers.generations.FileGenerationHandlerImpl;
 import org.finos.legend.depot.services.artifacts.handlers.generations.FileGenerationsProvider;
-import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
-import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
-import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
+import org.finos.legend.depot.services.metrics.query.InMemoryQueryMetricsRegistry;
+import org.finos.legend.depot.services.metrics.query.QueryMetricsServiceImpl;
+import org.finos.legend.depot.store.mongo.metrics.query.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
@@ -78,7 +79,7 @@ public class TestArtifactsPurgeService extends TestBaseServices
     protected UpdateProjectsVersions projectsVersionsStore = new ProjectsVersionsMongo(mongoProvider);
     private final QueryMetricsMongo metrics = new QueryMetricsMongo(mongoProvider);
     private final QueryMetricsRegistry metricsRegistry = new InMemoryQueryMetricsRegistry();
-    private final QueryMetricsHandler metricHandler = new QueryMetricsHandler(metrics, metricsRegistry);
+    private final QueryMetricsService metricHandler = new QueryMetricsServiceImpl(metrics);
     private final Queue queue = mock(Queue.class);
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metricsRegistry, queue, new ProjectsConfiguration("master"));
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);

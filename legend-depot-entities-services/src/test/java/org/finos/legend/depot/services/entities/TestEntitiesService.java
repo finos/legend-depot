@@ -28,7 +28,7 @@ import org.finos.legend.depot.domain.project.dependencies.VersionDependencyRepor
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
-import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;

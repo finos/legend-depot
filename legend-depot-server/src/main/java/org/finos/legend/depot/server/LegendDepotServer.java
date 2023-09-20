@@ -30,9 +30,10 @@ import org.finos.legend.depot.services.pure.model.context.guice.PureModelContext
 import org.finos.legend.depot.services.guice.CoreDataServicesModule;
 import org.finos.legend.depot.services.guice.SchedulesModule;
 import org.finos.legend.depot.services.guice.GenerationsServicesModule;
-import org.finos.legend.depot.store.metrics.MetricsModule;
-import org.finos.legend.depot.store.metrics.MetricsSchedulesModule;
-import org.finos.legend.depot.store.mongo.admin.guice.SchedulesStoreMongoModule;
+import org.finos.legend.depot.services.guice.QueryMetricsModule;
+import org.finos.legend.depot.services.guice.QueryMetricsSchedulesModule;
+import org.finos.legend.depot.store.mongo.guice.QueryMetricsMongoStoreModule;
+import org.finos.legend.depot.store.mongo.guice.SchedulesStoreMongoModule;
 import org.finos.legend.depot.store.mongo.core.MongoClientModule;
 import org.finos.legend.depot.store.mongo.guice.CoreDataStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.EntitiesStoreMongoModule;
@@ -83,8 +84,9 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
                 new SchedulesModule(),
                 new SchedulesStoreMongoModule(),
 
-                new MetricsModule(),
-                new MetricsSchedulesModule(),
+                new QueryMetricsModule(),
+                new QueryMetricsMongoStoreModule(),
+                new QueryMetricsSchedulesModule(),
                 new TracingModule()
                 );
     }

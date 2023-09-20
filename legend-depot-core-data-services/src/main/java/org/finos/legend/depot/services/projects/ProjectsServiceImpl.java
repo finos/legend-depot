@@ -36,7 +36,7 @@ import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
-import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 
