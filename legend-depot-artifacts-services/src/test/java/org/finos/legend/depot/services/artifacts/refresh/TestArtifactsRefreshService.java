@@ -43,11 +43,11 @@ import org.finos.legend.depot.services.artifacts.handlers.entities.EntitiesHandl
 import org.finos.legend.depot.services.artifacts.handlers.entities.EntityProvider;
 import org.finos.legend.depot.services.artifacts.handlers.generations.FileGenerationHandlerImpl;
 import org.finos.legend.depot.services.artifacts.handlers.generations.FileGenerationsProvider;
-import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.finos.legend.depot.store.mongo.admin.artifacts.ArtifactsFilesMongo;
+import org.finos.legend.depot.store.mongo.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;

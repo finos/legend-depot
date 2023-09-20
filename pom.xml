@@ -46,7 +46,10 @@
         <module>legend-depot-core-schedules</module>
         <module>legend-depot-core-schedules-store-mongo</module>
 
-        <module>legend-depot-store-metrics</module>
+        <module>legend-depot-metrics-query-api</module>
+        <module>legend-depot-metrics-query-services</module>
+        <module>legend-depot-metrics-query-store-mongo</module>
+
         <module>legend-depot-store-notifications</module>
         <module>legend-depot-store-notifications-queue</module>
 
@@ -529,7 +532,17 @@
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.depot</groupId>
-                <artifactId>legend-depot-store-metrics</artifactId>
+                <artifactId>legend-depot-metrics-query-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-metrics-query-services</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-metrics-query-store-mongo</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

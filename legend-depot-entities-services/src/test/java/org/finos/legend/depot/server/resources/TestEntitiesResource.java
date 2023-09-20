@@ -17,6 +17,9 @@ package org.finos.legend.depot.server.resources;
 
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsService;
+import org.finos.legend.depot.services.metrics.query.InMemoryQueryMetricsRegistry;
+import org.finos.legend.depot.services.metrics.query.QueryMetricsServiceImpl;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.server.resources.entities.EntitiesResource;
@@ -28,12 +31,10 @@ import org.finos.legend.depot.services.projects.configuration.ProjectsConfigurat
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
-import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
-import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
-import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
+import org.finos.legend.depot.store.mongo.metrics.query.QueryMetricsMongo;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.After;
@@ -63,7 +64,7 @@ public class TestEntitiesResource extends TestBaseServices
     private final EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projectsVersions, projects, metricsRegistry, queue, new ProjectsConfiguration("master")));
     private EntitiesResource entitiesResource = new EntitiesResource(entitiesService);
     private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
-    private QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metricsStore, metricsRegistry);
+    private QueryMetricsService metricsHandler = new QueryMetricsServiceImpl(metricsStore);
 
     static
     {
@@ -128,7 +129,7 @@ public class TestEntitiesResource extends TestBaseServices
         when(projects.find("examples.metadata","test")).thenReturn(Optional.of(new StoreProjectData("mock","examples.metadata","test")));
         Response responseOne  = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true, null);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), responseOne.getStatus());
-        metricsHandler.persistMetrics();
+        metricsHandler.persist(metricsRegistry);
 
         Assert.assertEquals(1, metricsStore.get("examples.metadata", "test", "2.3.0").size());
         Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
@@ -136,7 +137,7 @@ public class TestEntitiesResource extends TestBaseServices
 
         Response responseTwo = entitiesResource.getEntities("example.services.test", "test", "1.0.1", null);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), responseTwo.getStatus());
-        metricsHandler.persistMetrics();
+        metricsHandler.persist(metricsRegistry);
 
         Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
         Assert.assertEquals(2, metricsStore.getAllStoredEntities().size());
@@ -154,7 +155,7 @@ public class TestEntitiesResource extends TestBaseServices
         when(projectsVersions.find("examples.metadata","test-master", "2.3.0")).thenReturn(Optional.of(versionData));
 
         entitiesService.getDependenciesEntities("examples.metadata", "test-master", "2.3.0", true, false);
-        metricsHandler.persistMetrics();
+        metricsHandler.persist(metricsRegistry);
 
         Assert.assertEquals(2, metricsStore.getAll().size());
         Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());

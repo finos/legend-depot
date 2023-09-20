@@ -18,6 +18,9 @@ package org.finos.legend.depot.services.pure.model.context;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsService;
+import org.finos.legend.depot.services.metrics.query.InMemoryQueryMetricsRegistry;
+import org.finos.legend.depot.services.metrics.query.QueryMetricsServiceImpl;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.pure.model.context.PureModelContextService;
@@ -27,14 +30,13 @@ import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
-import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
-import org.finos.legend.depot.store.metrics.store.api.QueryMetrics;
-import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
-import org.finos.legend.depot.store.metrics.store.mongo.QueryMetricsMongo;
+import org.finos.legend.depot.store.api.metrics.query.QueryMetrics;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
+
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
+import org.finos.legend.depot.store.mongo.metrics.query.QueryMetricsMongo;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.engine.protocol.pure.v1.model.context.AlloySDLC;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
@@ -63,7 +65,7 @@ public class TestPureModelContextService extends TestBaseServices
     public static final String CLIENT_VERSION = "vX_X_X";
     private final QueryMetrics metrics = new QueryMetricsMongo(mongoProvider);
     private final QueryMetricsRegistry metricsRegistry = new InMemoryQueryMetricsRegistry();
-    private final QueryMetricsHandler metricsHandler = new QueryMetricsHandler(metrics, metricsRegistry);
+    private final QueryMetricsService metricsHandler = new QueryMetricsServiceImpl(metrics);
     private final Queue queue = mock(Queue.class);
     ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metricsRegistry, queue, new ProjectsConfiguration("master"));
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
@@ -193,7 +195,7 @@ public class TestPureModelContextService extends TestBaseServices
     public void canGetEntitiesForProjectAsPureModelContextDataWithMetricsStored()
     {
         getPureModelContextDataAsString("examples.metadata", "test", "2.3.1", CLIENT_VERSION,  true);
-        metricsHandler.persistMetrics();
+        metricsHandler.persist(metricsRegistry);
         Assert.assertEquals(metrics.getAll().size(), 5);
         Assert.assertNotNull(metrics.get("examples.metadata", "test-dependencies", "1.0.0").get(0).getLastQueryTime());
         Assert.assertNotNull(metrics.get("examples.metadata", "test", "2.3.1").get(0).getLastQueryTime());

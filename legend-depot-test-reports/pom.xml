@@ -211,7 +211,17 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-metrics</artifactId>
+            <artifactId>legend-depot-metrics-query-services</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-metrics-query-store-mongo</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>

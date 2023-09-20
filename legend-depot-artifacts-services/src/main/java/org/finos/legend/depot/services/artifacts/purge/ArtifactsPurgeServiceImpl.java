@@ -17,16 +17,16 @@ package org.finos.legend.depot.services.artifacts.purge;
 
 import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.services.api.artifacts.purge.ArtifactsPurgeService;
-import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
-import org.finos.legend.depot.services.api.projects.ProjectsVersionsReconciliationService;
-import org.finos.legend.depot.store.metrics.services.QueryMetricsHandler;
-import org.finos.legend.depot.store.model.projects.StoreProjectData;
-import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactHandlerFactory;
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactsHandler;
+import org.finos.legend.depot.services.api.artifacts.purge.ArtifactsPurgeService;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsService;
+import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.api.projects.ProjectsVersionsReconciliationService;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
 import org.slf4j.Logger;
@@ -61,10 +61,10 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
 
     private final ManageProjectsService projects;
     private final ProjectsVersionsReconciliationService versionsMismatchService;
-    private final QueryMetricsHandler metrics;
+    private final QueryMetricsService metrics;
 
     @Inject
-    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, ProjectsVersionsReconciliationService versionsMismatchService, QueryMetricsHandler metrics)
+    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, ProjectsVersionsReconciliationService versionsMismatchService, QueryMetricsService metrics)
     {
         this.projects = projects;
         this.metrics = metrics;
