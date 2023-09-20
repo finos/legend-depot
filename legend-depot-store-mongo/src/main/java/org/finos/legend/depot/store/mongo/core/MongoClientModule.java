@@ -26,6 +26,9 @@ import org.finos.legend.depot.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.tracing.services.TracerFactory;
 
 import javax.inject.Named;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class MongoClientModule extends PrivateModule
 {
@@ -39,11 +42,12 @@ public class MongoClientModule extends PrivateModule
 
     @Provides
     @Singleton
-    MongoConfiguration getMongoConfiguration(StorageConfiguration configuration)
+    MongoConfiguration getMongoConfiguration(List<StorageConfiguration> configurations)
     {
-        if (configuration != null && configuration instanceof MongoConfiguration)
+        Optional<StorageConfiguration> mongoConfiguration = configurations.stream().filter(configuration -> configuration != null && configuration instanceof MongoConfiguration).findFirst();
+        if (mongoConfiguration.isPresent())
         {
-            return (MongoConfiguration) configuration;
+            return (MongoConfiguration) mongoConfiguration.get();
         }
         else
         {

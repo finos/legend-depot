@@ -40,11 +40,11 @@
  },
   "artifactsRetentionPolicyConfiguration": {},
   "projects": {"defaultBranch": "master"},
-  "storage": {
+  "storages": [{
     "org.finos.legend.depot.store.mongo.core.MongoConfiguration": {
       "url": "${MONGODB_URI}",
       "database": "depot"}
-  },
+  }],
   "openTracing": {
     "openTracingUri": "your URL here",
     "serviceName": "legend-depot-store",
