@@ -27,6 +27,7 @@ import org.finos.legend.depot.services.guice.ManageCoreDataSchedulesModule;
 import org.finos.legend.depot.services.guice.ManageCoreDataServicesModule;
 import org.finos.legend.depot.services.guice.ManageEntitiesServicesModule;
 import org.finos.legend.depot.services.guice.ManageGenerationsServicesModule;
+import org.finos.legend.depot.services.guice.ManageQueryMetricsSchedulesModule;
 import org.finos.legend.depot.services.guice.ManageSchedulesModule;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryProviderConfiguration;
 
@@ -121,6 +122,7 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new ManageNotificationsQueueModule(),
 
                 new QueryMetricsModule(),
+                new ManageQueryMetricsSchedulesModule(),
                 new ManageQueryMetricsMongoStoreModule(),
 
                 new AuthorisationModule(),
