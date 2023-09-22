@@ -25,8 +25,8 @@ import org.finos.legend.depot.services.projects.configuration.ProjectsConfigurat
 import org.finos.legend.depot.services.pure.model.context.PureModelContextServiceImpl;
 import org.finos.legend.depot.services.pure.model.context.TestPureModelContextService;
 import org.finos.legend.depot.store.api.entities.Entities;
-import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
-import org.finos.legend.depot.store.metrics.services.InMemoryQueryMetricsRegistry;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
+import org.finos.legend.depot.services.metrics.query.InMemoryQueryMetricsRegistry;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;

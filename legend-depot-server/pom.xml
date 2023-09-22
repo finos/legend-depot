@@ -45,8 +45,11 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-metrics</artifactId>
-            <scope>compile</scope>
+            <artifactId>legend-depot-metrics-query-services</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-metrics-query-store-mongo</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>

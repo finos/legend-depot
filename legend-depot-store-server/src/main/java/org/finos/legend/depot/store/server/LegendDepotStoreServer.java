@@ -29,13 +29,14 @@ import org.finos.legend.depot.services.guice.ManageEntitiesServicesModule;
 import org.finos.legend.depot.services.guice.ManageGenerationsServicesModule;
 import org.finos.legend.depot.services.guice.ManageSchedulesModule;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryProviderConfiguration;
+
+import org.finos.legend.depot.services.guice.QueryMetricsModule;
 import org.finos.legend.depot.services.guice.RepositoryModule;
-import org.finos.legend.depot.store.metrics.AdminMetricsModule;
-import org.finos.legend.depot.store.metrics.MetricsSchedulesModule;
 import org.finos.legend.depot.store.mongo.guice.ManageMongoStoreSchedulesModule;
-import org.finos.legend.depot.store.mongo.admin.guice.ManageSchedulesStoreMongoModule;
+import org.finos.legend.depot.store.mongo.guice.ManageQueryMetricsMongoStoreModule;
+import org.finos.legend.depot.store.mongo.guice.ManageSchedulesStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.ManageMongoStoreModule;
-import org.finos.legend.depot.store.mongo.admin.guice.ArtifactsStoreMongoModule;
+import org.finos.legend.depot.store.mongo.guice.ArtifactsStoreMongoModule;
 import org.finos.legend.depot.store.mongo.core.MongoClientModule;
 import org.finos.legend.depot.store.mongo.guice.CoreDataMigrationsStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.EntitiesMigrationsStoreMongoModule;
@@ -119,8 +120,8 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new NotificationsSchedulesModule(),
                 new ManageNotificationsQueueModule(),
 
-                new AdminMetricsModule(),
-                new MetricsSchedulesModule(),
+                new QueryMetricsModule(),
+                new ManageQueryMetricsMongoStoreModule(),
 
                 new AuthorisationModule(),
 

@@ -18,7 +18,7 @@ package org.finos.legend.depot.server.resources;
 import org.finos.legend.depot.server.resources.projects.ProjectsResource;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
-import org.finos.legend.depot.store.metrics.api.QueryMetricsRegistry;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.junit.Assert;
