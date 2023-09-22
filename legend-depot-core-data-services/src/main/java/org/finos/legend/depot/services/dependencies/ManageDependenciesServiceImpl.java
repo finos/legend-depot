@@ -90,7 +90,7 @@ public class ManageDependenciesServiceImpl implements ManageDependenciesService
                         throw new IllegalStateException(String.format("Cannot calculate dependencies for project version: %s", deps.getGav()));
                     }
                     projectDependencies.addAll(projectData.get().getVersionData().getDependencies());
-                    projectDependencies.addAll(this.dependencyUtil.overrideDependencies(directDependencies, projectData.get().getTransitiveDependenciesReport().getTransitiveDependencies(), this::getCalculatedTransitiveDependencies));
+                    projectDependencies.addAll(projectData.get().getTransitiveDependenciesReport().getTransitiveDependencies());
                 }
                 else
                 {
@@ -116,7 +116,8 @@ public class ManageDependenciesServiceImpl implements ManageDependenciesService
             return new VersionDependencyReport(new ArrayList<>(), false);
         }
         LOGGER.info("Completed finding dependencies");
-        return new VersionDependencyReport(projectDependencies.stream().collect(Collectors.toList()), true);
+        List<ProjectVersion> finalDependencies = this.dependencyUtil.overrideDependencies(directDependencies, projectDependencies.stream().collect(Collectors.toList()), this::getCalculatedTransitiveDependencies);
+        return new VersionDependencyReport(finalDependencies, true);
     }
 
     private Set<ProjectVersion> getCalculatedTransitiveDependencies(List<ProjectVersion> directDependencies, boolean transitive)
