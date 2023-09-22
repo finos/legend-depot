@@ -118,14 +118,14 @@ public class TestManageDependenciesService extends CoreDataMongoStoreTests
     public void canOverrideDependencies1()
     {
         StoreProjectVersionData project1 = new StoreProjectVersionData(GROUPID, "art102", "2.0.0");
-        ProjectVersion dependency = new ProjectVersion(GROUPID, "art103", "1.0.0");
+        ProjectVersion dependency = new ProjectVersion(GROUPID, "test", "1.0.0");
         project1.getVersionData().setDependencies(Collections.singletonList(dependency));
         projectsService.createOrUpdate(project1);
         project1 = manageDependenciesService.updateTransitiveDependencies(GROUPID, "art102", "2.0.0");
         Assert.assertTrue(project1.getTransitiveDependenciesReport().isValid());
         Assert.assertEquals(Collections.singletonList(dependency), project1.getTransitiveDependenciesReport().getTransitiveDependencies());
 
-        //overriding art102:1.0.0 dependency with art102:2.0.0
+        //overriding test:1.0.0 dependency with test:3.0.0
         StoreProjectVersionData project2 = new StoreProjectVersionData(GROUPID, "test-master", "3.0.0");
         ProjectVersion dependency1 = new ProjectVersion(GROUPID, "test", "3.0.0");
         ProjectVersion dependency2 = new ProjectVersion(GROUPID, "art102", "2.0.0");
@@ -134,7 +134,7 @@ public class TestManageDependenciesService extends CoreDataMongoStoreTests
 
         project2 = manageDependenciesService.updateTransitiveDependencies(GROUPID, "test-master", "3.0.0");
         Assert.assertTrue(project2.getTransitiveDependenciesReport().isValid());
-        Assert.assertEquals(Arrays.asList(dependency1, dependency2, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0"), new ProjectVersion(GROUPID, "art101", "1.0.0"), dependency), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
+        Assert.assertEquals(Arrays.asList(dependency1, dependency2, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0"), new ProjectVersion(GROUPID, "art101", "1.0.0")), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
     }
 
     @Test
@@ -162,4 +162,50 @@ public class TestManageDependenciesService extends CoreDataMongoStoreTests
         Assert.assertEquals(Arrays.asList(dependency1, dependency, dependency2, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0"), new ProjectVersion(GROUPID, "art101", "1.0.0")), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
     }
 
+//    Example : A -> B_V1 -> C_V1
+//    B_V2->C_V2
+//    C depends on A and B_V2
+//    Result: C depends on A and B_V2 and C_V2
+    @Test
+    public void canOverrideDependencies3()
+    {
+        projectsService.createOrUpdate(new StoreProjectVersionData(GROUPID, "art104", "1.0.0"));
+
+        StoreProjectVersionData project1 = new StoreProjectVersionData(GROUPID, "art102", "1.0.0");
+        ProjectVersion dependency = new ProjectVersion(GROUPID, "art104", "1.0.0");
+        project1.getVersionData().setDependencies(Collections.singletonList(dependency));
+        projectsService.createOrUpdate(project1);
+        project1 = manageDependenciesService.updateTransitiveDependencies(GROUPID, "art102", "1.0.0");
+        Assert.assertTrue(project1.getTransitiveDependenciesReport().isValid());
+        Assert.assertEquals(Collections.singletonList(dependency), project1.getTransitiveDependenciesReport().getTransitiveDependencies());
+
+        projectsService.createOrUpdate(new StoreProjectVersionData(GROUPID, "art104", "2.0.0"));
+
+        StoreProjectVersionData project2 = new StoreProjectVersionData(GROUPID, "art102", "2.0.0");
+        ProjectVersion dependency1 = new ProjectVersion(GROUPID, "art104", "2.0.0");
+        project2.getVersionData().setDependencies(Collections.singletonList(dependency1));
+        projectsService.createOrUpdate(project2);
+        project2 = manageDependenciesService.updateTransitiveDependencies(GROUPID, "art102", "2.0.0");
+        Assert.assertTrue(project2.getTransitiveDependenciesReport().isValid());
+        Assert.assertEquals(Collections.singletonList(dependency1), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
+
+        StoreProjectVersionData project3 = new StoreProjectVersionData(GROUPID, "test", "5.0.0");
+        ProjectVersion dependency2 = new ProjectVersion(GROUPID, "art102", "1.0.0");
+        project3.getVersionData().setDependencies(Collections.singletonList(dependency2));
+        projectsService.createOrUpdate(project3);
+        project3 = manageDependenciesService.updateTransitiveDependencies(GROUPID, "test", "5.0.0");
+        Assert.assertTrue(project3.getTransitiveDependenciesReport().isValid());
+        Assert.assertEquals(Arrays.asList(dependency, dependency2), project3.getTransitiveDependenciesReport().getTransitiveDependencies());
+
+        //overriding art102:1.0.0 dependency with art102:2.0.0 with a different underlying dependency
+        StoreProjectVersionData project4 = new StoreProjectVersionData(GROUPID, "test-master", "3.0.0");
+        ProjectVersion dependency3 = new ProjectVersion(GROUPID, "test", "5.0.0");
+        ProjectVersion dependency4 = new ProjectVersion(GROUPID, "art102", "2.0.0");
+        project4.getVersionData().setDependencies(Arrays.asList(dependency3, dependency4));
+        projectsService.createOrUpdate(project4);
+
+        project4 = manageDependenciesService.updateTransitiveDependencies(GROUPID, "test-master", "3.0.0");
+        Assert.assertTrue(project4.getTransitiveDependenciesReport().isValid());
+        Assert.assertEquals(Arrays.asList(dependency3, dependency4, dependency1), project4.getTransitiveDependenciesReport().getTransitiveDependencies());
+    }
 }
