@@ -126,7 +126,7 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
             @Override
             protected Result check()
             {
-                return Result.healthy() ;
+                return Result.healthy();
             }
         });
 
