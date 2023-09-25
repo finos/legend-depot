@@ -50,15 +50,12 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class BaseServer<T extends ServersConfiguration> extends Application<T>
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BaseServer.class);
-    public static final String SERVER_STOPPED = "server-stopped";
-
-    AtomicBoolean ready = new AtomicBoolean(false);
-
+    public static final String SERVER_STARTED = "server started";
+    
     protected BaseServer()
     {
     }
@@ -129,7 +126,7 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
             @Override
             protected Result check()
             {
-                return ready.get() ? Result.healthy() : Result.unhealthy("app not ready");
+                return Result.healthy() ;
             }
         });
 
@@ -155,14 +152,13 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
             @Override
             public void lifeCycleStarted(LifeCycle event)
             {
-                ready.getAndSet(true);
-                LOGGER.info("Started {} ready: {}", configuration.getApplicationName(),ready.get());
+                LOGGER.info("Started {} ", configuration.getApplicationName());
+                PrometheusMetricsFactory.getInstance().incrementCount(SERVER_STARTED);
             }
 
             @Override
             public void lifeCycleFailure(LifeCycle event, Throwable cause)
             {
-                ready.getAndSet(false);
                 LOGGER.error("Application {} failure : {}", configuration.getApplicationName(),cause.getMessage());
             }
 
@@ -177,7 +173,6 @@ public abstract class BaseServer<T extends ServersConfiguration> extends Applica
             public void lifeCycleStopped(LifeCycle event)
             {
                 LOGGER.info("Stopped {} in {} ", configuration.getApplicationName(), System.currentTimeMillis() - shutDownStartTime);
-                PrometheusMetricsFactory.getInstance().incrementCount(SERVER_STOPPED);
             }
         });
     }
