@@ -37,7 +37,7 @@ import javax.ws.rs.core.Response;
 import java.util.Set;
 
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_BY_PACKAGE;
+import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_BY_FILTER;
 import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITY;
 
 @Path("")
@@ -80,19 +80,20 @@ public class EntitiesResource extends BaseResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/entities")
-    @ApiOperation(GET_VERSION_ENTITIES_BY_PACKAGE)
+    @ApiOperation(GET_VERSION_ENTITIES_BY_FILTER)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEntities(@PathParam("groupId") String groupId,
                                     @PathParam("artifactId") String artifactId,
                                     @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
-                                    @QueryParam("package") String packageName,
+                                    @QueryParam("package")
+                                    @ApiParam("Restrict ENTITIES to only this package if provided") String packageName,
                                     @QueryParam("classifierPath") @ApiParam("Only include ENTITIES with one of these classifier paths.") Set<String> classifierPaths,
                                     @QueryParam("includeSubPackages")
                                     @DefaultValue("true")
-                                    @ApiParam("Whether to include ENTITIES from subpackages or only directly in one of the given packages") boolean includeSubPackages,
+                                    @ApiParam("Whether to include ENTITIES from subpackages or only directly in one of the given packages. Only used if packageName is provided") boolean includeSubPackages,
                                     @Context Request request
     )
     {
-        return handle(GET_VERSION_ENTITIES_BY_PACKAGE, GET_VERSION_ENTITIES_BY_PACKAGE + packageName, () -> entitiesService.getEntitiesByPackage(groupId, artifactId, versionId, packageName, classifierPaths, includeSubPackages), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
+        return handle(GET_VERSION_ENTITIES_BY_FILTER, GET_VERSION_ENTITIES_BY_FILTER + packageName, () -> entitiesService.getEntitiesByPackage(groupId, artifactId, versionId, packageName, classifierPaths, includeSubPackages), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 }

@@ -30,33 +30,33 @@ import org.bson.conversions.Bson;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
-import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.StringTokenizer;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.StringTokenizer;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.mongodb.client.model.Aggregates.group;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.in;
 import static com.mongodb.client.model.Filters.not;
 import static com.mongodb.client.model.Filters.or;
 import static com.mongodb.client.model.Filters.regex;
 import static com.mongodb.client.model.Updates.combine;
-import static com.mongodb.client.model.Updates.set;
 import static com.mongodb.client.model.Updates.currentDate;
+import static com.mongodb.client.model.Updates.set;
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends BaseMongo<T>
@@ -75,6 +75,8 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
     static final String ENTITY_TYPE_STRING_DATA = "entityStringData";
     protected static final String VERSIONED_ENTITY_TYPE_STRING_DATA = "versionedEntityStringData";
     protected static final ObjectMapper objectMapper = new ObjectMapper().configure(SerializationFeature.WRITE_NULL_MAP_VALUES, true);
+    static final String RE_STRING_START = "^";
+    static final String RE_STAR = "*";
 
     protected AbstractEntitiesMongo(MongoDatabase mongoDatabase, Class documentClass)
     {
@@ -153,20 +155,23 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
     public List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages)
     {
         Bson filter = getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId);
-        if (includeSubPackages)
+        if (packageName != null && !packageName.trim().isEmpty() && includeSubPackages)
         {
-            filter = and(filter, regex(ENTITY_PACKAGE, "^" + packageName + "*"));
+            filter = and(filter, regex(ENTITY_PACKAGE, RE_STRING_START + packageName + RE_STAR));
         }
-        else
+        else if (packageName != null && !packageName.trim().isEmpty())
         {
             filter = and(filter, eq(ENTITY_PACKAGE, packageName));
         }
-        Stream<Entity> entities = find(filter).parallelStream().map(this::resolvedToEntityDefinition);
+
         if (classifierPaths != null && !classifierPaths.isEmpty())
         {
-            entities = entities.filter(entity -> classifierPaths.contains(entity.getClassifierPath()));
+            filter = and(filter, in(ENTITY_CLASSIFIER_PATH, classifierPaths));
         }
-        return entities.collect(Collectors.toList());
+
+        return find(filter).parallelStream()
+                .map(this::resolvedToEntityDefinition)
+                .collect(Collectors.toList());
     }
 
     public FindIterable findReleasedEntitiesByClassifier(String classifier)
