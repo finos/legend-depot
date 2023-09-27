@@ -24,7 +24,7 @@ public interface SchedulesFactory
 
     void register(String name, long delayStartInMilliseconds, long intervalInMilliseconds, Supplier<Object> task);
 
-    void registerExternalTriggerSchedule(String name, long intervalInMilliseconds, boolean isSingleInstance, Supplier<Object> function);
+    void registerExternalTriggerSchedule(String name, long intervalInMilliseconds, Supplier<Object> function);
 
     void registerSingleInstance(String name, long delayStartInMilliseconds, long intervalInMilliseconds, Supplier<Object> function);
 
