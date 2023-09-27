@@ -71,35 +71,36 @@ public final class SchedulesFactoryImpl implements SchedulesFactory
     }
 
 
-    public void registerExternalTriggerSchedule(String name, long intervalInMilliseconds, boolean isSingleInstance, Supplier<Object> function)
+    public void registerExternalTriggerSchedule(String name, long intervalInMilliseconds,  Supplier<Object> function)
     {
-        createScheduleInfo(name, intervalInMilliseconds, isSingleInstance, function);
+        createScheduleInfo(name, intervalInMilliseconds, null,true, function);
     }
 
     public void registerSingleInstance(String name, long delayStartInMilliseconds, long intervalInMilliseconds, Supplier<Object> function)
     {
-        register(name, delayStartInMilliseconds, intervalInMilliseconds, true, function);
+        register(name, delayStartInMilliseconds, intervalInMilliseconds, true,null,function);
     }
 
     public void register(String name, long delayStartInMilliseconds, long intervalInMilliseconds, Supplier<Object> task)
     {
-        this.register(name, delayStartInMilliseconds, intervalInMilliseconds, false, task);
+        this.register(name, delayStartInMilliseconds, intervalInMilliseconds, false,null, task);
     }
 
-    private void register(String name, long delayStartInMilliseconds, long intervalInMilliseconds, boolean singleInstance, Supplier<Object> function)
+    private void register(String name, long delayStartInMilliseconds, long intervalInMilliseconds, Boolean singleInstance, Boolean external, Supplier<Object> function)
     {
-        createScheduleInfo(name, intervalInMilliseconds, singleInstance, function);
+        createScheduleInfo(name, intervalInMilliseconds, singleInstance, external,function);
 
         TimerTask timerTask = createTimerTask(name);
         tasksRegistry.put(name,timerTask);
         timer.scheduleAtFixedRate(timerTask, delayStartInMilliseconds, intervalInMilliseconds);
     }
 
-    private void createScheduleInfo(String name, long intervalInMilliseconds, boolean singleInstance, Supplier<Object> function)
+    private void createScheduleInfo(String name, long intervalInMilliseconds, Boolean singleInstance, Boolean external,Supplier<Object> function)
     {
         ScheduleInfo info = schedulesStore.get(name).orElse(new ScheduleInfo(name));
         info.frequency = intervalInMilliseconds;
         info.singleInstance = singleInstance;
+        info.externalTrigger = external;
         functions.put(name,function);
         schedulesStore.createOrUpdate(info);
     }
