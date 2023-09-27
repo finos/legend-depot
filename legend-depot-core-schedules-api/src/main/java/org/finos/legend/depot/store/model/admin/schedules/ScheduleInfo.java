@@ -32,6 +32,8 @@ public class ScheduleInfo implements HasIdentifier
     @JsonProperty
     public Boolean singleInstance;
     @JsonProperty
+    public Boolean externalTrigger;
+    @JsonProperty
     public Long frequency;
 
     public ScheduleInfo()
@@ -82,6 +84,16 @@ public class ScheduleInfo implements HasIdentifier
     public void setSingleInstance(Boolean singleInstance)
     {
         this.singleInstance = singleInstance;
+    }
+
+    public Boolean getExternalTrigger()
+    {
+        return externalTrigger;
+    }
+
+    public void setExternalTrigger(Boolean externalTrigger)
+    {
+        this.externalTrigger = externalTrigger;
     }
 
     public Long getFrequency()
