@@ -251,7 +251,6 @@ public class ProjectsServiceImpl implements ProjectsService
             if (!graph.hasNode(projectVersion))
             {
                 graph.addNode(projectVersion, parent);
-                context.addVersionToProject(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion);
                 if (!context.getProjectVersionToDependencyMap().containsKey(projectVersion))
                 {
                     StoreProjectVersionData projectData =  context.getProjectDataPutIfAbsent(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId(), () -> getProject(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()));
@@ -269,6 +268,7 @@ public class ProjectsServiceImpl implements ProjectsService
         ProjectDependencyGraph graph = new ProjectDependencyGraph();
         ProjectDependencyGraphWalkerContext  graphWalkerContext =  new ProjectDependencyGraphWalkerContext();
         buildDependencyGraph(graph, null, projectDependencyVersions, graphWalkerContext);
+        buildProjectVersionMap(projectDependencyVersions, graphWalkerContext);
         ProjectDependencyReport report = buildReportFromGraph(graph, graphWalkerContext);
         return overrideConflictDependencies(projectDependencyVersions, report);
     }
@@ -285,6 +285,17 @@ public class ProjectsServiceImpl implements ProjectsService
             }
         });
         return report;
+    }
+
+    private void buildProjectVersionMap(List<ProjectVersion> projectDependencyVersions, ProjectDependencyGraphWalkerContext graphWalkerContext)
+    {
+        projectDependencyVersions.forEach(pv ->
+        {
+            StoreProjectVersionData versionData = graphWalkerContext.getProjectData(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+            versionData.getTransitiveDependenciesReport().getTransitiveDependencies().stream()
+                    .filter(dep -> !projectDependencyVersions.stream().filter(x -> x.getGroupId().equals(dep.getGroupId()) && x.getArtifactId().equals(dep.getArtifactId())).findFirst().isPresent())
+                    .forEach(dep -> graphWalkerContext.addVersionToProject(dep.getGroupId(), dep.getArtifactId(), dep));
+        });
     }
 
     public ProjectDependencyReport buildReportFromGraph(ProjectDependencyGraph dependencyGraph, ProjectDependencyGraphWalkerContext graphWalkerContext)

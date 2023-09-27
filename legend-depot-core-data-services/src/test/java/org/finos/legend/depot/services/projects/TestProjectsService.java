@@ -176,26 +176,46 @@ public class TestProjectsService extends TestBaseServices
     @Test
     public void canGetProjectDependenciesWithConflicts()
     {
-        Set<ProjectVersion> dependencyList = projectsService.getDependencies("examples.metadata", "test", "2.3.1", false);
-        Assert.assertFalse(dependencyList.isEmpty());
-        Assert.assertTrue(dependencyList.contains(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0")));
-
-        Set<ProjectVersion> dependencyList2 = projectsService.getDependencies("examples.metadata", "test", "2.3.1", true);
-        Assert.assertFalse(dependencyList2.isEmpty());
-        Assert.assertTrue(dependencyList2.contains(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0")));
-        Assert.assertTrue(dependencyList2.contains(new ProjectVersion("example.services.test", "test", "1.0.0")));
-        Assert.assertFalse(projectsService.getDependencies("examples.metadata", "test", "2.3.1", false).contains(new ProjectVersion("example.services.test", "test", "2.0.1")));
-        StoreProjectVersionData projectA = projectsService.find("example.services.test", "test", "1.0.0").get();
-        StoreProjectVersionData projectB = new StoreProjectVersionData("examples.metadata", "test-dependencies", "2.0.0");
-        projectA.getVersionData().addDependency(new ProjectVersion("examples.metadata", "test-dependencies", "2.0.0"));
-        projectsService.createOrUpdate(projectB);
+        StoreProjectVersionData projectA = projectsService.find("examples.metadata", "test-dependencies", "1.0.0").get();
+        ProjectVersion dependencyA = new ProjectVersion("example.services.test", "test", "1.0.0");
+        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(dependencyA), true));
         projectsService.createOrUpdate(projectA);
 
+        StoreProjectVersionData projectB = new StoreProjectVersionData("example.services.test", "test-dependencies", "1.0.0");
+        projectsService.createOrUpdate(new StoreProjectData("PROD-72", "example.services.test", "test-dependencies"));
+        ProjectVersion dependencyB = new ProjectVersion("example.services.test", "test", "2.0.0");
+        projectB.getVersionData().addDependency(dependencyB);
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(dependencyB), true));
+        projectsService.createOrUpdate(projectB);
+        projectsService.createOrUpdate(new StoreProjectVersionData("example.services.test", "test", "2.0.0"));
+
         // Dependency Tree
-        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReport("examples.metadata", "test", "2.3.1");
+        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReport(Arrays.asList(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), new ProjectVersion("example.services.test", "test-dependencies", "1.0.0")));
 
         Assert.assertEquals(1, dependencyReport.getConflicts().size());
-        Assert.assertEquals(dependencyReport.getConflicts().get(0).getVersions(), Sets.mutable.of("examples.metadata:test-dependencies:1.0.0","examples.metadata:test-dependencies:2.0.0"));
+        Assert.assertEquals(dependencyReport.getConflicts().get(0).getVersions(), Sets.mutable.of("example.services.test:test:1.0.0","example.services.test:test:2.0.0"));
+    }
+
+    @Test
+    public void canGetProjectDependenciesReportWithOverrides()
+    {
+        StoreProjectVersionData projectA = projectsService.find("examples.metadata", "test-dependencies", "1.0.0").get();
+        ProjectVersion dependencyA = new ProjectVersion("example.services.test", "test", "1.0.0");
+        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(dependencyA), true));
+        projectsService.createOrUpdate(projectA);
+
+        StoreProjectVersionData projectB = new StoreProjectVersionData("example.services.test", "test-dependencies", "1.0.0");
+        projectsService.createOrUpdate(new StoreProjectData("PROD-72", "example.services.test", "test-dependencies"));
+        ProjectVersion dependencyB = new ProjectVersion("example.services.test", "test", "2.0.0");
+        projectB.getVersionData().addDependency(dependencyB);
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(dependencyB), true));
+        projectsService.createOrUpdate(projectB);
+        projectsService.createOrUpdate(new StoreProjectVersionData("example.services.test", "test", "2.0.0"));
+
+        // Dependency Tree
+        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReport(Arrays.asList(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), new ProjectVersion("example.services.test", "test-dependencies", "1.0.0"), dependencyB));
+
+        Assert.assertEquals(0, dependencyReport.getConflicts().size());
     }
 
     @Test
