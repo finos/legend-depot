@@ -33,7 +33,7 @@ public class ResourceLoggingAndTracing
     public static final String GET_VERSIONS_DEPENDENCY_ENTITIES = "get versions dependencies entities";
     public static final String GET_VERSION_ENTITIES_AS_PMCD = "get version entities as PMCD";
     public static final String GET_VERSION_ENTITY = "get version entity";
-    public static final String GET_VERSION_ENTITIES_BY_PACKAGE = "get version entities by package";
+    public static final String GET_VERSION_ENTITIES_BY_FILTER = "get version entities by filter";
     public static final String GET_VERSIONS = "get versions";
     public static final String UPDATE_ALL_VERSIONS = "refresh all versions";
     public static final String UPDATE_VERSION = "refresh version";

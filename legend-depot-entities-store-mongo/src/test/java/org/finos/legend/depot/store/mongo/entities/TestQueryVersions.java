@@ -70,6 +70,18 @@ public class TestQueryVersions extends TestStoreMongo
     }
 
     @Test
+    public void canQueryEntityMetadataByProjectVersionPackageAll()
+    {
+        List<Entity> entities = versionsMongo.getEntitiesByPackage("examples.metadata", "test", "2.2.0", null,  null, false);
+        Assert.assertNotNull(entities);
+        Assert.assertEquals(3, entities.size());
+        for (Entity entity : entities)
+        {
+            Assert.assertTrue(entity.getContent().get("package").toString().startsWith("examples::metadata::test"));
+        }
+    }
+
+    @Test
     public void canQueryEntityMetadataByProjectVersionPackage()
     {
         List<Entity> entities = versionsMongo.getEntitiesByPackage("examples.metadata", "test", "2.2.0", "examples::metadata::test",  null, false);
