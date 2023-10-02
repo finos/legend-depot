@@ -19,6 +19,7 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
+import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
@@ -37,13 +38,13 @@ public class CoreDataServicesModule extends PrivateModule
 
         expose(ProjectsService.class);
         expose(InfoService.class);
-        expose(DependencyUtil.class).annotatedWith(Names.named("dependencyUtil"));
+        expose(DependencyOverride.class).annotatedWith(Names.named("dependencyOverride"));
     }
 
     @Provides
-    @Named("dependencyUtil")
+    @Named("dependencyOverride")
     @Singleton
-    public DependencyUtil initialiseDependencyCache()
+    public DependencyOverride initialiseDependencyCache()
     {
         return new DependencyUtil();
     }

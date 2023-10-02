@@ -20,9 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
-import org.finos.legend.depot.domain.version.VersionMismatch;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.api.projects.ProjectsVersionsReconciliationService;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
@@ -46,15 +44,13 @@ public class ManageProjectsVersionsResource extends BaseAuthorisedResource
 
     public static final String PROJECTS_VERSIONS_RESOURCE = "Versions";
     private final ManageProjectsService projectVersionApi;
-    private final ProjectsVersionsReconciliationService repositoryService;
+
 
     @Inject
-    public ManageProjectsVersionsResource(ManageProjectsService projectVersionApi, ProjectsVersionsReconciliationService repositoryService, AuthorisationProvider authorisationProvider, @Named("requestPrincipal") Provider<Principal> principalProvider)
+    public ManageProjectsVersionsResource(ManageProjectsService projectVersionApi,  AuthorisationProvider authorisationProvider, @Named("requestPrincipal") Provider<Principal> principalProvider)
     {
         super(authorisationProvider, principalProvider);
         this.projectVersionApi = projectVersionApi;
-        this.repositoryService = repositoryService;
-
     }
 
     @Override
@@ -84,13 +80,6 @@ public class ManageProjectsVersionsResource extends BaseAuthorisedResource
         );
     }
 
-    @GET
-    @Path("/versions/mismatch")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES)
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<VersionMismatch> getVersionMissMatches()
-    {
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES, () -> this.repositoryService.findVersionsMismatches());
-    }
+
 
 }

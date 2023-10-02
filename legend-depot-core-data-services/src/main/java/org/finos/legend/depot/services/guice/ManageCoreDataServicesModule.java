@@ -15,11 +15,7 @@
 
 package org.finos.legend.depot.services.guice;
 
-import org.finos.legend.depot.services.VersionsMismatchService;
-import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.api.projects.ProjectsVersionsReconciliationService;
-import org.finos.legend.depot.services.dependencies.ManageDependenciesServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 
 public class ManageCoreDataServicesModule extends CoreDataServicesModule
@@ -31,12 +27,7 @@ public class ManageCoreDataServicesModule extends CoreDataServicesModule
         super.configure();
 
         bind(ManageProjectsService.class).to(ManageProjectsServiceImpl.class);
-        bind(ManageDependenciesService.class).to(ManageDependenciesServiceImpl.class);
-        bind(ProjectsVersionsReconciliationService.class).to(VersionsMismatchService.class);
-
         expose(ManageProjectsService.class);
-        expose(ManageDependenciesService.class);
-        expose(ProjectsVersionsReconciliationService.class);
     }
 
 }

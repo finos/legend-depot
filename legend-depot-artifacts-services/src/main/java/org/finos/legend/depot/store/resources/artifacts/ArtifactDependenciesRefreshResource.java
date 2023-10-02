@@ -13,14 +13,14 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.resources.dependencies;
+package org.finos.legend.depot.store.resources.artifacts;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
 import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
-import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
+import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependenciesService;
 import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
@@ -35,23 +35,23 @@ import java.security.Principal;
 
 
 @Path("")
-@Api("Dependencies")
-public class ManageDependenciesResource extends BaseAuthorisedResource
+@Api("Artifacts Refresh")
+public class ArtifactDependenciesRefreshResource extends BaseAuthorisedResource
 {
-    public static final String DEPENDENCIES_RESOURCE = "Dependencies";
-    private final ManageDependenciesService manageDependenciesService;
+    public static final String ARTIFACTS_RESOURCE = "ArtifactsRefresh";
+    private final RefreshDependenciesService refreshDependenciesService;
 
     @Inject
-    public ManageDependenciesResource(ManageDependenciesService manageDependenciesService,
-                                      AuthorisationProvider authorisationProvider,
-                                      @Named("requestPrincipal") Provider<Principal> principalProvider)
+    public ArtifactDependenciesRefreshResource(RefreshDependenciesService refreshDependenciesService,
+                                               AuthorisationProvider authorisationProvider,
+                                               @Named("requestPrincipal") Provider<Principal> principalProvider)
     {
         super(authorisationProvider, principalProvider);
-        this.manageDependenciesService = manageDependenciesService;
+        this.refreshDependenciesService = refreshDependenciesService;
     }
 
     @PUT
-    @Path("/dependencies/{groupId}/{artifactId}/{versionId}")
+    @Path("/artifactsRefresh/dependencies/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES)
     @Produces(MediaType.APPLICATION_JSON)
     public StoreProjectVersionData updateTransitiveDependencies(@PathParam("groupId") String groupId,
@@ -61,13 +61,13 @@ public class ManageDependenciesResource extends BaseAuthorisedResource
         return handle(ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES, ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES + groupId + artifactId + versionId, () ->
                 {
                     validateUser();
-                    return manageDependenciesService.updateTransitiveDependencies(groupId, artifactId, versionId);
+                    return refreshDependenciesService.updateTransitiveDependencies(groupId, artifactId, versionId);
                 });
     }
 
     @Override
     protected String getResourceName()
     {
-        return DEPENDENCIES_RESOURCE;
+        return ARTIFACTS_RESOURCE;
     }
 }

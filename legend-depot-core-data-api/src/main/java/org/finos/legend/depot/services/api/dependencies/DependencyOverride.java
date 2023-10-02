@@ -15,21 +15,13 @@
 
 package org.finos.legend.depot.services.api.dependencies;
 
+import org.eclipse.collections.api.block.function.Function2;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
-import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 
 import java.util.List;
+import java.util.Set;
 
-public interface ManageDependenciesService
+public interface DependencyOverride
 {
-    List<ProjectVersion> calculateDependencies(String groupId, String artifactId, String versionId);
-
-    VersionDependencyReport calculateTransitiveDependencies(List<ProjectVersion> directDependencies);
-
-    List<String> validateDependencies(List<ProjectVersion> dependencies, String versionId);
-
-    StoreProjectVersionData updateTransitiveDependencies(String groupId, String artifactId, String versionId);
-
-    void setProjectDataTransitiveDependencies(StoreProjectVersionData projectData);
+    List<ProjectVersion> overrideWith(List<ProjectVersion> dependencies, List<ProjectVersion> overridingDependencies, Function2<List<ProjectVersion>, Boolean, Set<ProjectVersion>> executableFunction);
 }

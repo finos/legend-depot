@@ -18,6 +18,7 @@ package org.finos.legend.depot.store.resources.guice;
 import com.google.inject.PrivateModule;
 import org.finos.legend.depot.store.resources.artifacts.ArtifactsPurgeResource;
 import org.finos.legend.depot.store.resources.artifacts.ArtifactsRefreshResource;
+import org.finos.legend.depot.store.resources.artifacts.VersionsReconciliationResource;
 
 public class ArtifactsResourcesModule extends PrivateModule
 {
@@ -27,9 +28,11 @@ public class ArtifactsResourcesModule extends PrivateModule
     {
         bind(ArtifactsPurgeResource.class);
         bind(ArtifactsRefreshResource.class);
+        bind(VersionsReconciliationResource.class);
 
         expose(ArtifactsPurgeResource.class);
         expose(ArtifactsRefreshResource.class);
+        expose(VersionsReconciliationResource.class);
     }
 
 }

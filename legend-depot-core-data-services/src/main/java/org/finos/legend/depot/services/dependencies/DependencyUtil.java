@@ -17,6 +17,7 @@ package org.finos.legend.depot.services.dependencies;
 
 import org.eclipse.collections.api.block.function.Function2;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
 
 import java.util.Set;
 import java.util.Collections;
@@ -25,16 +26,16 @@ import java.util.Map;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public class DependencyUtil
+public class DependencyUtil implements DependencyOverride
 {
-    public List<ProjectVersion> overrideDependencies(List<ProjectVersion> directDependencies, List<ProjectVersion> projectDependencies, Function2<List<ProjectVersion>, Boolean, Set<ProjectVersion>> executableFunction)
+    public List<ProjectVersion> overrideWith(List<ProjectVersion> dependencies, List<ProjectVersion> overridingDependencies, Function2<List<ProjectVersion>, Boolean, Set<ProjectVersion>> executableFunction)
     {
-        Map<String, List<ProjectVersion>> dependenciesLocator = projectDependencies.stream().collect(Collectors.groupingBy(dep -> dep.getGroupId() + dep.getArtifactId()));
-        Set<ProjectVersion> overriddenDependencies = directDependencies.stream().map(dep -> dependenciesLocator.getOrDefault(dep.getGroupId() + dep.getArtifactId(), Collections.emptyList())).flatMap(Collection::stream).collect(Collectors.toSet());
-        overriddenDependencies.removeAll(directDependencies);
+        Map<String, List<ProjectVersion>> dependenciesLocator = dependencies.stream().collect(Collectors.groupingBy(dep -> dep.getGroupId() + dep.getArtifactId()));
+        Set<ProjectVersion> overriddenDependencies = overridingDependencies.stream().map(dep -> dependenciesLocator.getOrDefault(dep.getGroupId() + dep.getArtifactId(), Collections.emptyList())).flatMap(Collection::stream).collect(Collectors.toSet());
+        overriddenDependencies.removeAll(overridingDependencies);
         Set<ProjectVersion> deleteDependencies = overriddenDependencies.parallelStream().map(dep -> executableFunction.apply(Collections.singletonList(dep), true)).flatMap(Collection::stream).collect(Collectors.toSet());
-        projectDependencies.removeAll(deleteDependencies);
-        projectDependencies.removeAll(overriddenDependencies);
-        return projectDependencies;
+        dependencies.removeAll(deleteDependencies);
+        dependencies.removeAll(overriddenDependencies);
+        return dependencies;
     }
 }

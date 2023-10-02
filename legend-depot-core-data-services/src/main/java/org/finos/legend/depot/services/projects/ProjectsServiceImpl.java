@@ -19,6 +19,7 @@ import org.eclipse.collections.api.factory.Sets;
 import org.finos.legend.depot.domain.notifications.EventPriority;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
+import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
@@ -68,20 +69,20 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private final ProjectsConfiguration configuration;
 
-    private final DependencyUtil dependencyUtil;
+    private final DependencyOverride dependencyOverride;
 
     private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
     private static final String NOT_FOUND_IN_STORE = "project version not found for %s-%s-%s";
 
     @Inject
-    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyUtil") DependencyUtil dependencyUtil)
+    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyOverride") DependencyOverride dependencyOverride)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
         this.metricsRegistry = metricsRegistry;
         this.queue = queue;
         this.configuration = configuration;
-        this.dependencyUtil = dependencyUtil;
+        this.dependencyOverride = dependencyOverride;
     }
 
     public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration)
@@ -91,7 +92,7 @@ public class ProjectsServiceImpl implements ProjectsService
         this.metricsRegistry = metricsRegistry;
         this.queue = queue;
         this.configuration = configuration;
-        this.dependencyUtil = new DependencyUtil();
+        this.dependencyOverride = new DependencyUtil();
     }
 
     @Override
@@ -227,13 +228,13 @@ public class ProjectsServiceImpl implements ProjectsService
             String version = this.resolveAliasesAndCheckVersionExists(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
             StoreProjectVersionData projectData = this.getProject(pv.getGroupId(), pv.getArtifactId(), version);
             List<ProjectVersion> projectVersionDependencies = projectData.getVersionData().getDependencies();
-            dependencies.addAll(this.dependencyUtil.overrideDependencies(projectVersions, projectVersionDependencies, this::getDependencies));
+            dependencies.addAll(this.dependencyOverride.overrideWith(projectVersionDependencies, projectVersions, this::getDependencies));
             if (transitive && !projectVersionDependencies.isEmpty())
             {
                 if (projectData.getTransitiveDependenciesReport().isValid())
                 {
                     // Transitive dependencies report contains both direct and transitive dependencies
-                    dependencies.addAll(this.dependencyUtil.overrideDependencies(projectVersions, projectData.getTransitiveDependenciesReport().getTransitiveDependencies(), this::getDependencies));
+                    dependencies.addAll(this.dependencyOverride.overrideWith(projectData.getTransitiveDependenciesReport().getTransitiveDependencies(), projectVersions, this::getDependencies));
                 }
                 else
                 {

@@ -18,23 +18,22 @@ package org.finos.legend.depot.services.guice;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.finos.legend.depot.services.api.projects.ProjectsVersionsReconciliationService;
+import com.google.inject.name.Named;
+import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
 import org.finos.legend.depot.services.api.schedules.SchedulesFactory;
 import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
 import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
 
-import javax.inject.Named;
+import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.MISSING_REPO_VERSIONS;
+import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.MISSING_STORE_VERSIONS;
+import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.PROJECTS;
+import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.REPO_EXCEPTIONS;
+import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.REPO_VERSIONS;
+import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.STORE_VERSIONS;
 
-import static org.finos.legend.depot.services.VersionsMismatchService.MISSING_REPO_VERSIONS;
-import static org.finos.legend.depot.services.VersionsMismatchService.MISSING_STORE_VERSIONS;
-import static org.finos.legend.depot.services.VersionsMismatchService.PROJECTS;
-import static org.finos.legend.depot.services.VersionsMismatchService.REPO_EXCEPTIONS;
-import static org.finos.legend.depot.services.VersionsMismatchService.REPO_VERSIONS;
-import static org.finos.legend.depot.services.VersionsMismatchService.STORE_VERSIONS;
-
-public class ManageCoreDataSchedulesModule extends PrivateModule
+public class VersionReconciliationSchedulesModule extends PrivateModule
 {
-    private static final String REPOSITORY_METRICS_SCHEDULE = "repository-metrics-schedule";
+    public static final String REPOSITORY_METRICS_SCHEDULE = "repository-metrics-schedule";
 
     @Override
     protected void configure()
@@ -44,7 +43,7 @@ public class ManageCoreDataSchedulesModule extends PrivateModule
     @Provides
     @Named("repository-metrics")
     @Singleton
-    boolean registerMetrics(PrometheusConfiguration prometheusConfiguration, SchedulesFactory schedulesFactory, ProjectsVersionsReconciliationService versionsMismatchService)
+    boolean registerMetrics(PrometheusConfiguration prometheusConfiguration, SchedulesFactory schedulesFactory, VersionsReconciliationService versionsReconciliationService)
     {
         if (prometheusConfiguration.isEnabled())
         {
@@ -55,8 +54,9 @@ public class ManageCoreDataSchedulesModule extends PrivateModule
             metricsHandler.registerGauge(MISSING_REPO_VERSIONS, MISSING_REPO_VERSIONS);
             metricsHandler.registerGauge(MISSING_STORE_VERSIONS, MISSING_STORE_VERSIONS);
             metricsHandler.registerGauge(REPO_EXCEPTIONS, REPO_EXCEPTIONS);
-            schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE, versionsMismatchService::findVersionsMismatches);
+            schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE, versionsReconciliationService::findVersionsMismatches);
         }
         return true;
     }
+
 }

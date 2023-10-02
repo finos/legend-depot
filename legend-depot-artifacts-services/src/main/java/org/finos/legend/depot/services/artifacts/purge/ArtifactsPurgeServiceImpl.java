@@ -24,7 +24,7 @@ import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactsHa
 import org.finos.legend.depot.services.api.artifacts.purge.ArtifactsPurgeService;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.api.projects.ProjectsVersionsReconciliationService;
+import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.tracing.services.TracerFactory;
@@ -60,11 +60,11 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     private static final String EVICT_OLDEST = "evict_old";
 
     private final ManageProjectsService projects;
-    private final ProjectsVersionsReconciliationService versionsMismatchService;
+    private final VersionsReconciliationService versionsMismatchService;
     private final QueryMetricsService metrics;
 
     @Inject
-    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, ProjectsVersionsReconciliationService versionsMismatchService, QueryMetricsService metrics)
+    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, VersionsReconciliationService versionsMismatchService, QueryMetricsService metrics)
     {
         this.projects = projects;
         this.metrics = metrics;
