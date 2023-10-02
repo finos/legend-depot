@@ -13,8 +13,9 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.services;
+package org.finos.legend.depot.services.artifacts.reconciliation;
 
+import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryException;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
@@ -38,7 +39,7 @@ public class TestVersionsMismatchService
 {
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
     protected ProjectsService projects = mock(ProjectsService.class);
-    protected VersionsMismatchService repositoryServices = new VersionsMismatchService(repository, projects);
+    protected VersionsReconciliationService repositoryServices = new VersionsReconciliationServiceImpl(repository, projects);
 
     @Before
     public void setup() throws ArtifactRepositoryException

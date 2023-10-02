@@ -13,11 +13,11 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.services;
+package org.finos.legend.depot.services.artifacts.reconciliation;
 
 import org.eclipse.collections.impl.parallel.ParallelIterate;
+import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
-import org.finos.legend.depot.services.api.projects.ProjectsVersionsReconciliationService;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionMismatch;
@@ -34,9 +34,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-public class VersionsMismatchService implements ProjectsVersionsReconciliationService
+public class VersionsReconciliationServiceImpl implements VersionsReconciliationService
 {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(VersionsMismatchService.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(VersionsReconciliationServiceImpl.class);
 
     public static final String REPO_VERSIONS = "repo_versions";
     public static final String STORE_VERSIONS = "store_versions";
@@ -51,7 +51,7 @@ public class VersionsMismatchService implements ProjectsVersionsReconciliationSe
     private final ProjectsService projects;
 
     @Inject
-    public VersionsMismatchService(ArtifactRepository repository, ProjectsService projectsService)
+    public VersionsReconciliationServiceImpl(ArtifactRepository repository, ProjectsService projectsService)
     {
         this.repository = repository;
         this.projects = projectsService;

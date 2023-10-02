@@ -16,7 +16,6 @@
 package org.finos.legend.depot.store.resources.guice;
 
 import com.google.inject.PrivateModule;
-import org.finos.legend.depot.store.resources.dependencies.ManageDependenciesResource;
 import org.finos.legend.depot.store.resources.projects.ManageProjectsResource;
 import org.finos.legend.depot.store.resources.versions.ManageProjectsVersionsResource;
 
@@ -27,11 +26,9 @@ public class ManageCoreDataResourcesModule extends PrivateModule
     protected void configure()
     {
         bind(ManageProjectsResource.class);
-        bind(ManageDependenciesResource.class);
         bind(ManageProjectsVersionsResource.class);
 
         expose(ManageProjectsResource.class);
-        expose(ManageDependenciesResource.class);
         expose(ManageProjectsVersionsResource.class);
     }
 

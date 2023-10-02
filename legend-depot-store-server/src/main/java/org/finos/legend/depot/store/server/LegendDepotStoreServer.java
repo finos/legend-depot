@@ -23,7 +23,7 @@ import org.finos.legend.depot.core.http.BaseServer;
 import org.finos.legend.depot.core.http.resources.InfoPageModule;
 import org.finos.legend.depot.services.guice.ArtifactsSchedulesModule;
 import org.finos.legend.depot.services.guice.ArtifactsServicesModule;
-import org.finos.legend.depot.services.guice.ManageCoreDataSchedulesModule;
+import org.finos.legend.depot.services.guice.VersionReconciliationSchedulesModule;
 import org.finos.legend.depot.services.guice.ManageCoreDataServicesModule;
 import org.finos.legend.depot.services.guice.ManageEntitiesServicesModule;
 import org.finos.legend.depot.services.guice.ManageGenerationsServicesModule;
@@ -94,7 +94,7 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new ManageCoreDataResourcesModule(),
                 new ManageCoreDataServicesModule(),
                 new ManageCoreDataStoreMongoModule(),
-                new ManageCoreDataSchedulesModule(),
+                new VersionReconciliationSchedulesModule(),
                 new CoreDataMigrationsStoreMongoModule(),
 
                 new ManageEntitiesResourcesModule(),

@@ -13,13 +13,14 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.services.dependencies;
+package org.finos.legend.depot.services.artifacts.refresh;
 
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.domain.version.VersionValidator;
-import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
+import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependenciesService;
+import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
@@ -35,31 +36,24 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ManageDependenciesServiceImpl implements ManageDependenciesService
+public class RefreshDependenciesServiceImpl implements RefreshDependenciesService
 {
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ManageDependenciesServiceImpl.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(RefreshDependenciesServiceImpl.class);
 
     private final ManageProjectsService projects;
     private final ArtifactRepository repositoryServices;
-    private final DependencyUtil dependencyUtil;
+    private final DependencyOverride dependencyOverride;
 
     @Inject
-    public ManageDependenciesServiceImpl(ManageProjectsService projects, ArtifactRepository repositoryServices, @Named("dependencyUtil") DependencyUtil dependencyUtil)
+    public RefreshDependenciesServiceImpl(ManageProjectsService projects, ArtifactRepository repositoryServices,@Named("dependencyOverride") DependencyOverride dependencyOverride)
     {
         this.projects = projects;
         this.repositoryServices = repositoryServices;
-        this.dependencyUtil = dependencyUtil;
-    }
-
-    public ManageDependenciesServiceImpl(ManageProjectsService projects, ArtifactRepository repositoryServices)
-    {
-        this.projects = projects;
-        this.repositoryServices = repositoryServices;
-        this.dependencyUtil = new DependencyUtil();
+        this.dependencyOverride = dependencyOverride;
     }
 
     @Override
-    public List<ProjectVersion> calculateDependencies(String groupId, String artifactId, String versionId)
+    public List<ProjectVersion> retrieveDependenciesFromRepository(String groupId, String artifactId, String versionId)
     {
         List<ProjectVersion> versionDependencies = new ArrayList<>();
         LOGGER.info("Finding dependencies for [{}-{}-{}]", groupId, artifactId, versionId);
@@ -69,13 +63,13 @@ public class ManageDependenciesServiceImpl implements ManageDependenciesService
         return versionDependencies;
     }
 
-    @Override
-    public VersionDependencyReport calculateTransitiveDependencies(List<ProjectVersion> directDependencies)
+
+    private VersionDependencyReport calculateTransitiveDependencies(List<ProjectVersion> projectVersions)
     {
         Set<ProjectVersion> projectDependencies = new HashSet<>();
         try
         {
-            directDependencies.forEach(deps ->
+            projectVersions.forEach(deps ->
             {
                 LOGGER.info(String.format("Finding dependencies for %s-%s-%s", deps.getGroupId(), deps.getArtifactId(), deps.getVersionId()));
                 Optional<StoreProjectVersionData> projectData = this.projects.find(deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
@@ -95,7 +89,7 @@ public class ManageDependenciesServiceImpl implements ManageDependenciesService
                 else
                 {
                     LOGGER.info(String.format("Finding dependencies for %s-%s-%s as no data is present in the store", deps.getGroupId(), deps.getArtifactId(), deps.getVersionId()));
-                    List<ProjectVersion> dependencies = this.calculateDependencies(deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
+                    List<ProjectVersion> dependencies = this.retrieveDependenciesFromRepository(deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
                     projectDependencies.addAll(dependencies);
                     VersionDependencyReport report = calculateTransitiveDependencies(dependencies);
                     if (!report.isValid())
@@ -116,7 +110,7 @@ public class ManageDependenciesServiceImpl implements ManageDependenciesService
             return new VersionDependencyReport(new ArrayList<>(), false);
         }
         LOGGER.info("Completed finding dependencies");
-        List<ProjectVersion> finalDependencies = this.dependencyUtil.overrideDependencies(directDependencies, projectDependencies.stream().collect(Collectors.toList()), this::getCalculatedTransitiveDependencies);
+        List<ProjectVersion> finalDependencies = this.dependencyOverride.overrideWith(projectDependencies.stream().collect(Collectors.toList()), projectVersions, this::getCalculatedTransitiveDependencies);
         return new VersionDependencyReport(finalDependencies, true);
     }
 

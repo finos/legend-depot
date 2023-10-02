@@ -26,7 +26,7 @@ import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.Property;
 import org.finos.legend.depot.domain.version.VersionValidator;
-import org.finos.legend.depot.services.api.dependencies.ManageDependenciesService;
+import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependenciesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.artifacts.handlers.ManifestLoader;
 import org.finos.legend.depot.store.api.admin.artifacts.ArtifactsFilesStore;
@@ -84,12 +84,12 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
     private final List<String> projectPropertiesInScope;
     private final List<String> manifestPropertiesInScope;
     private final Queue workQueue;
-    private final ManageDependenciesService manageDependenciesService;
+    private final RefreshDependenciesService refreshDependenciesService;
     private final int maximumSnapshotsAllowed;
 
 
     @Inject
-    public ProjectVersionRefreshHandler(ManageProjectsService projects, ArtifactRepository repositoryServices, Queue workQueue, ArtifactsFilesStore artifacts, IncludeProjectPropertiesConfiguration includePropertyConfig, ManageDependenciesService manageDependenciesService, @Named("maximumSnapshotsAllowed") int maximumSnapshotsAllowed)
+    public ProjectVersionRefreshHandler(ManageProjectsService projects, ArtifactRepository repositoryServices, Queue workQueue, ArtifactsFilesStore artifacts, IncludeProjectPropertiesConfiguration includePropertyConfig, RefreshDependenciesService refreshDependenciesService, @Named("maximumSnapshotsAllowed") int maximumSnapshotsAllowed)
     {
         this.projects = projects;
         this.workQueue = workQueue;
@@ -97,7 +97,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         this.repositoryServices = repositoryServices;
         this.projectPropertiesInScope = includePropertyConfig != null ? includePropertyConfig.getProperties() : Collections.EMPTY_LIST;
         this.manifestPropertiesInScope = includePropertyConfig != null ? includePropertyConfig.getManifestProperties() : Collections.EMPTY_LIST;
-        this.manageDependenciesService = manageDependenciesService;
+        this.refreshDependenciesService = refreshDependenciesService;
         this.maximumSnapshotsAllowed = maximumSnapshotsAllowed;
 
         try
@@ -230,8 +230,8 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
             StoreProjectData project = getProject(event.getGroupId(), event.getArtifactId());
             try
             {
-                List<ProjectVersion> newDependencies = this.manageDependenciesService.calculateDependencies(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                this.manageDependenciesService.validateDependencies(newDependencies, event.getVersionId()).forEach(error -> response.addError(error));
+                List<ProjectVersion> newDependencies = this.refreshDependenciesService.retrieveDependenciesFromRepository(event.getGroupId(), event.getArtifactId(), event.getVersionId());
+                this.refreshDependenciesService.validateDependencies(newDependencies, event.getVersionId()).forEach(error -> response.addError(error));
                 if (!response.hasErrors())
                 {
                     LOGGER.info("Processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
@@ -282,7 +282,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         StoreProjectVersionData storeProjectVersionData = projectVersionData.isPresent() ? projectVersionData.get() : new StoreProjectVersionData(project.getGroupId(), project.getArtifactId(), versionId);
         ProjectVersionData versionData = storeProjectVersionData.getVersionData();
         versionData.setDependencies(newDependencies);
-        this.manageDependenciesService.setProjectDataTransitiveDependencies(storeProjectVersionData);
+        this.refreshDependenciesService.setProjectDataTransitiveDependencies(storeProjectVersionData);
 
         if (this.projectPropertiesInScope != null && !this.projectPropertiesInScope.isEmpty())
         {

@@ -17,6 +17,7 @@ package org.finos.legend.depot.services.artifacts.purge;
 
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsService;
+import org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl;
 import org.finos.legend.depot.store.model.metrics.query.VersionQueryMetric;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
@@ -25,7 +26,6 @@ import org.finos.legend.depot.domain.DatesHandler;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
-import org.finos.legend.depot.services.VersionsMismatchService;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
@@ -85,7 +85,7 @@ public class TestArtifactsPurgeService extends TestBaseServices
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     protected UpdateFileGenerations fileGenerationsStore = new FileGenerationsMongo(mongoProvider);
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
-    protected VersionsMismatchService versionsMismatchService = new VersionsMismatchService(repository, projectsService);
+    protected VersionsReconciliationServiceImpl versionsMismatchService = new VersionsReconciliationServiceImpl(repository, projectsService);
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, projectsService);
     protected ArtifactsPurgeService purgeService = new ArtifactsPurgeServiceImpl(projectsService, versionsMismatchService, metricHandler);
 

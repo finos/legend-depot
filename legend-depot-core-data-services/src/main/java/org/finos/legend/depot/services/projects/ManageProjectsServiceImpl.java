@@ -16,10 +16,10 @@
 package org.finos.legend.depot.services.projects;
 
 import org.finos.legend.depot.domain.project.ProjectSummary;
+import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
@@ -39,7 +39,7 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
     private final UpdateProjects projects;
 
     @Inject
-    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyUtil")DependencyUtil dependencyUtil)
+    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyOverride") DependencyOverride dependencyUtil)
     {
         super(projectsVersions,projects, metricsRegistry, queue, configuration, dependencyUtil);
         this.projects = projects;

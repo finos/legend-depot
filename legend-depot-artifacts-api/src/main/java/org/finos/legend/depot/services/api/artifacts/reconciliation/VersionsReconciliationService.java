@@ -13,13 +13,13 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.services.api.projects;
+package org.finos.legend.depot.services.api.artifacts.reconciliation;
 
 import org.finos.legend.depot.domain.version.VersionMismatch;
 
 import java.util.List;
 
-public interface ProjectsVersionsReconciliationService
+public interface VersionsReconciliationService
 {
      List<VersionMismatch> findVersionsMismatches();
 }
