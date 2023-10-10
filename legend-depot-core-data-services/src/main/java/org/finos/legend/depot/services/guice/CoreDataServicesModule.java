@@ -32,9 +32,7 @@ public class CoreDataServicesModule extends PrivateModule
     @Override
     protected void configure()
     {
-
         bind(ProjectsService.class).to(ProjectsServiceImpl.class);
-        bind(InfoService.class);
 
         expose(ProjectsService.class);
         expose(InfoService.class);
@@ -47,5 +45,12 @@ public class CoreDataServicesModule extends PrivateModule
     public DependencyOverride initialiseDependencyCache()
     {
         return new DependencyUtil();
+    }
+
+    @Provides
+    @Singleton
+    public InfoService initInfo()
+    {
+        return new InfoService();
     }
 }
