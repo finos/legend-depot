@@ -33,19 +33,18 @@ public class InfoService
     private static final Logger LOGGER = LoggerFactory.getLogger(InfoService.class);
     private static final String PLATFORM_VERSION_FILE = "version.json";
     private static final ObjectMapper JSON = new ObjectMapper();
-    private static final long MEGABYTE = 1024L * 1024L;
     
-    private ServerInfo serverInfo;
+    private final ServerInfo serverInfo;
 
-    @Inject
+
     public InfoService()
     {
-        String hostName = tryGetValue(InfoService::getLocalHostName);
-        InfoService.PlatformVersionInfo platformVersionInfo = tryGetValue(InfoService::getPlatformVersionInfo);
+        String hostName = tryGetValue(() -> getLocalHostName());
+        InfoService.PlatformVersionInfo platformVersionInfo = tryGetValue(() -> getPlatformVersionInfo());
         this.serverInfo = new InfoService.ServerInfo(hostName, platformVersionInfo);
     }
 
-    private static <T> T tryGetValue(InfoService.SupplierWithException<T> supplier)
+    private <T> T tryGetValue(InfoService.SupplierWithException<T> supplier)
     {
         try
         {
@@ -58,12 +57,12 @@ public class InfoService
         }
     }
 
-    private static String getLocalHostName() throws UnknownHostException
+    private  String getLocalHostName() throws UnknownHostException
     {
         return InetAddress.getLocalHost().getHostName();
     }
 
-    private static InfoService.PlatformVersionInfo getPlatformVersionInfo() throws IOException
+    private  InfoService.PlatformVersionInfo getPlatformVersionInfo() throws IOException
     {
         URL url = InfoService.class.getClassLoader().getResource(PLATFORM_VERSION_FILE);
         return url == null ? null : JSON.readValue(url, PlatformVersionInfo.class);
@@ -124,12 +123,9 @@ public class InfoService
         }
     }
 
-    public class ServerInfo
+    public static class ServerInfo
     {
         private final String hostName;
-        private final long totalMemory;
-        private final long maxMemory;
-        private final long usedMemory;
         private final String serverTimeZone;
         private final InfoService.ServerPlatformInfo platform;
 
@@ -137,30 +133,12 @@ public class InfoService
         {
             this.hostName = hostName;
             this.platform = platformVersionInfo == null ? new InfoService.ServerPlatformInfo() : new InfoService.ServerPlatformInfo(platformVersionInfo.version, platformVersionInfo.buildTime, platformVersionInfo.gitRevision);
-            this.totalMemory = Runtime.getRuntime().totalMemory() / MEGABYTE;
-            this.maxMemory = Runtime.getRuntime().maxMemory() / MEGABYTE;
-            this.usedMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / MEGABYTE;
             this.serverTimeZone = DatesHandler.ZONE_ID.getId();
         }
 
         public String getHostName()
         {
             return this.hostName;
-        }
-
-        public long getMaxMemory()
-        {
-            return maxMemory;
-        }
-
-        public long getUsedMemory()
-        {
-            return usedMemory;
-        }
-
-        public long getTotalMemory()
-        {
-            return totalMemory;
         }
 
         public InfoService.ServerPlatformInfo getPlatform()
