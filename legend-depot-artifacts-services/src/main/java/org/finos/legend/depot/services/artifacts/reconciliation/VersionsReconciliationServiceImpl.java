@@ -23,7 +23,7 @@ import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionMismatch;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
+import org.finos.legend.depot.core.services.metrics.PrometheusMetricsFactory;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

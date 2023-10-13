@@ -35,7 +35,15 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-http</artifactId>
+            <artifactId>legend-depot-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-tracing</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-authorisation</artifactId>
         </dependency>
         <dependency>
               <groupId>${junit.groupId}</groupId>
@@ -51,6 +59,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+
         <!-- DEPOT -->
     </dependencies>
 </project>

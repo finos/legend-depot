@@ -20,8 +20,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.pure.model.context.PureModelContextService;
-import org.finos.legend.depot.tracing.resources.BaseResource;
-import org.finos.legend.depot.tracing.resources.EtagBuilder;
+import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
+import org.finos.legend.depot.services.api.EtagBuilder;
 
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -35,11 +35,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_AS_PMCD;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_AS_PMCD;
 
 @Path("")
 @Api("Pure Model Context Data")
-public class PureModelContextResource extends BaseResource
+public class PureModelContextResource extends TracingResource
 {
     private final PureModelContextService service;
 

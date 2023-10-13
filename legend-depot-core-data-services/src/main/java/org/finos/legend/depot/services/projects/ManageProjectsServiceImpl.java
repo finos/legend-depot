@@ -20,7 +20,7 @@ import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
+import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;

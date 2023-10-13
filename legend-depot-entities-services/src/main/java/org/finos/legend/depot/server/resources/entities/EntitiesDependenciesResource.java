@@ -22,8 +22,8 @@ import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
-import org.finos.legend.depot.tracing.resources.BaseResource;
-import org.finos.legend.depot.tracing.resources.EtagBuilder;
+import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
+import org.finos.legend.depot.services.api.EtagBuilder;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -40,12 +40,12 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSIONS_DEPENDENCY_ENTITIES;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_DEPENDENCY_ENTITIES;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSIONS_DEPENDENCY_ENTITIES;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_DEPENDENCY_ENTITIES;
 
 @Path("")
 @Api("Dependencies")
-public class EntitiesDependenciesResource extends BaseResource
+public class EntitiesDependenciesResource extends TracingResource
 {
     private final EntitiesService entitiesService;
 

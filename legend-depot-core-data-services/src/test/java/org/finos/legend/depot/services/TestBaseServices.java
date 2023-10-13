@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.services;
 
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
@@ -29,10 +28,6 @@ public class TestBaseServices extends CoreDataMongoStoreTests
     protected UpdateProjectsVersions projectsVersionsStore = new ProjectsVersionsMongo(mongoProvider);
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
 
-    static
-    {
-        JerseyGuiceUtils.install((s, serviceLocator) -> null);
-    }
 
     @Before
     public void setUpData()

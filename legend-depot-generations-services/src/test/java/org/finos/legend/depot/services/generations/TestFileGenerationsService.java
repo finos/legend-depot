@@ -23,7 +23,7 @@ import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.generations.impl.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.generations.loader.FileGenerationLoader;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
-import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
+import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.generations.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;

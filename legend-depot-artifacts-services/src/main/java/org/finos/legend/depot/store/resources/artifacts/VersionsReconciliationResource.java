@@ -17,11 +17,11 @@ package org.finos.legend.depot.store.resources.artifacts;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
-import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
+import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.domain.version.VersionMismatch;
 import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
+import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,7 +35,7 @@ import java.util.List;
 
 @Path("")
 @Api("Repository")
-public class VersionsReconciliationResource extends BaseAuthorisedResource
+public class VersionsReconciliationResource extends AuthorisedResource
 {
     private static final String REPOSITORY = "Repository";
     private final VersionsReconciliationService reconciliationService;

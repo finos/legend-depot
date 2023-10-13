@@ -17,10 +17,9 @@ package org.finos.legend.depot.store.mongo.resources;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
-import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
+import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.store.mongo.admin.CoreDataMigrations;
-import org.finos.legend.depot.store.mongo.admin.migrations.MongoMigrations;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -32,7 +31,7 @@ import java.security.Principal;
 
 @Path("")
 @Api("Mongo Store Administration")
-public class CoreDataStoreMigrationsResource extends BaseAuthorisedResource
+public class CoreDataStoreMigrationsResource extends AuthorisedResource
 {
 
     public static final String STORE_ADMINISTRATION_RESOURCE = "Store Administration";

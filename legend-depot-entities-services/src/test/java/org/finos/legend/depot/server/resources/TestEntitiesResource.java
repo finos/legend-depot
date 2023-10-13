@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.server.resources;
 
-import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsService;
 import org.finos.legend.depot.services.metrics.query.InMemoryQueryMetricsRegistry;
@@ -27,7 +26,7 @@ import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
-import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
+import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
@@ -66,10 +65,6 @@ public class TestEntitiesResource extends TestBaseServices
     private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
     private QueryMetricsService metricsHandler = new QueryMetricsServiceImpl(metricsStore);
 
-    static
-    {
-        JerseyGuiceUtils.install((s, serviceLocator) -> null);
-    }
 
     @Before
     public void setupMetadata()

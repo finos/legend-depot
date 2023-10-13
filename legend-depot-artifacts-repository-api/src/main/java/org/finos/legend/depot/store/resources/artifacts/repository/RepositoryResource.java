@@ -20,8 +20,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryException;
-import org.finos.legend.depot.tracing.resources.BaseResource;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
+import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
+import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 @Path("")
 @Api("Repository")
-public class RepositoryResource extends BaseResource
+public class RepositoryResource extends TracingResource
 {
 
     private final ArtifactRepository artifactRepository;

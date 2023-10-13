@@ -41,10 +41,6 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-http</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-metrics-query-services</artifactId>
         </dependency>
         <dependency>

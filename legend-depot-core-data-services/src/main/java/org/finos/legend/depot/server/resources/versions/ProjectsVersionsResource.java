@@ -27,8 +27,8 @@ import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.tracing.resources.BaseResource;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
+import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
+import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -43,7 +43,7 @@ import java.util.Optional;
 
 @Path("")
 @Api("Versions")
-public class ProjectsVersionsResource extends BaseResource
+public class ProjectsVersionsResource extends TracingResource
 {
 
     private final ProjectsService projectVersionApi;

@@ -18,12 +18,12 @@ package org.finos.legend.depot.store.resources.artifacts;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
-import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
+import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.domain.api.MetadataEventResponse;
 import org.finos.legend.depot.services.api.artifacts.refresh.ArtifactsRefreshService;
 import org.finos.legend.depot.services.api.artifacts.refresh.ParentEvent;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
+import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -40,7 +40,7 @@ import java.security.Principal;
 
 @Path("")
 @Api("Artifacts Refresh")
-public class ArtifactsRefreshResource extends BaseAuthorisedResource
+public class ArtifactsRefreshResource extends AuthorisedResource
 {
 
     public static final String ARTIFACTS_RESOURCE = "ArtifactsRefresh";

@@ -35,6 +35,10 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-artifacts-repository-api</artifactId>
         </dependency>
 
@@ -67,6 +71,7 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
     <build>
         <plugins>

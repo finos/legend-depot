@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
-import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
+import org.finos.legend.depot.core.services.api.metrics.PrometheusMetricsHandler;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;

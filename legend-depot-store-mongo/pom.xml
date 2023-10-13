@@ -32,26 +32,30 @@
         <!-- DEPOT -->
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-store-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-tracing</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-authorisation</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-http</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-core-schedules-api</artifactId>
         </dependency>
         <!-- DEPOT -->
-
+        <dependency>
+            <groupId>io.opentracing.contrib</groupId>
+            <artifactId>opentracing-mongo-driver</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -84,6 +88,7 @@
             <artifactId>mongo-java-server</artifactId>
             <scope>test</scope>
         </dependency>
+
 
     </dependencies>
 

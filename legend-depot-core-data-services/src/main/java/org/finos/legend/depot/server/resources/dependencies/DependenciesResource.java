@@ -30,8 +30,8 @@ import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithP
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.resources.projects.ProjectsResource;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.tracing.resources.BaseResource;
-import org.finos.legend.depot.tracing.resources.EtagBuilder;
+import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
+import org.finos.legend.depot.services.api.EtagBuilder;
 
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -48,14 +48,14 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_DEPENDANT_PROJECTS;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCIES;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCY_TREE;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_DEPENDANT_PROJECTS;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCIES;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCY_TREE;
 
 
 @Path("")
 @Api("Dependencies")
-public class DependenciesResource extends BaseResource
+public class DependenciesResource extends TracingResource
 {
     private final ProjectsService projectApi;
 

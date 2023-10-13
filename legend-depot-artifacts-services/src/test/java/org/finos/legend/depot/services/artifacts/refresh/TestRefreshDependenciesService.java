@@ -19,7 +19,7 @@ import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependencies
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
-import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
+import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;

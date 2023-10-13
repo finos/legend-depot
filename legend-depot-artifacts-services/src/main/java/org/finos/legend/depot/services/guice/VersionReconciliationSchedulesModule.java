@@ -21,8 +21,8 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
 import org.finos.legend.depot.services.api.schedules.SchedulesFactory;
-import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
-import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
+import org.finos.legend.depot.core.services.api.metrics.PrometheusMetricsHandler;
+import org.finos.legend.depot.core.services.api.metrics.configuration.PrometheusConfiguration;
 
 import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.MISSING_REPO_VERSIONS;
 import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.MISSING_STORE_VERSIONS;

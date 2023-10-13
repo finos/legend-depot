@@ -18,14 +18,14 @@ package org.finos.legend.depot.store.resources.schedules;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
-import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
+import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.services.api.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.api.admin.schedules.ScheduleInstancesStore;
 import org.finos.legend.depot.store.api.admin.schedules.SchedulesStore;
 import org.finos.legend.depot.store.model.admin.schedules.ScheduleInfo;
 import org.finos.legend.depot.store.model.admin.schedules.ScheduleInstance;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
+import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 
 @Path("")
 @Api("Schedules")
-public class ManageSchedulesResource extends BaseAuthorisedResource
+public class ManageSchedulesResource extends AuthorisedResource
 {
 
     public static final String SCHEDULES_RESOURCE = "Schedules";

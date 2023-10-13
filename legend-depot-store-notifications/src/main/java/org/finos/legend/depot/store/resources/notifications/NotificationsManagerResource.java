@@ -18,13 +18,13 @@ package org.finos.legend.depot.store.resources.notifications;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
-import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
+import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.domain.DatesHandler;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.store.api.NotificationsStore;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
+import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -44,7 +44,7 @@ import java.util.Optional;
 
 @Path("")
 @Api("Notifications")
-public class NotificationsManagerResource extends BaseAuthorisedResource
+public class NotificationsManagerResource extends AuthorisedResource
 {
 
     private final NotificationsManager notificationsManager;

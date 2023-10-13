@@ -16,7 +16,7 @@
 package org.finos.legend.depot.store.server.guice;
 
 import com.google.inject.Binder;
-import org.finos.legend.depot.core.http.guice.BaseModule;
+import org.finos.legend.depot.core.server.guice.BaseServerModule;
 import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRefreshPolicyConfiguration;
 import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.services.api.artifacts.configuration.IncludeProjectPropertiesConfiguration;
@@ -24,7 +24,7 @@ import org.finos.legend.depot.services.api.artifacts.repository.ArtifactReposito
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
 
-public class DepotStoreServerModule extends BaseModule<DepotStoreServerConfiguration>
+public class DepotStoreServerModule extends BaseServerModule<DepotStoreServerConfiguration>
 {
 
     @Override

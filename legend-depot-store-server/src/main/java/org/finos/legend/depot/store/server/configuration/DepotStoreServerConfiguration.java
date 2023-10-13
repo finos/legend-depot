@@ -19,13 +19,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRefreshPolicyConfiguration;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryProviderConfiguration;
-import org.finos.legend.depot.core.http.ServersConfiguration;
+import org.finos.legend.depot.core.server.ServerConfiguration;
 import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DepotStoreServerConfiguration extends ServersConfiguration
+public class DepotStoreServerConfiguration extends ServerConfiguration
 {
 
     @JsonProperty("queueManager")

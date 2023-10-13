@@ -21,7 +21,7 @@ import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
-import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
+import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.services.pure.model.context.PureModelContextServiceImpl;
 import org.finos.legend.depot.services.pure.model.context.TestPureModelContextService;
 import org.finos.legend.depot.store.api.entities.Entities;

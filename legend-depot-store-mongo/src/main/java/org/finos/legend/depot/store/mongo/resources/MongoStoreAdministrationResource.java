@@ -19,8 +19,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.bson.Document;
-import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
-import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
+import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.admin.metrics.StorageMetricsHandler;
 
@@ -43,7 +43,7 @@ import java.util.Map;
 
 @Path("")
 @Api("Mongo Store Administration")
-public class MongoStoreAdministrationResource extends BaseAuthorisedResource
+public class MongoStoreAdministrationResource extends AuthorisedResource
 {
 
     public static final String STORE_ADMINISTRATION_RESOURCE = "Store Administration";

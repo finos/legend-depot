@@ -18,10 +18,10 @@ package org.finos.legend.depot.store.resources.entities;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.eclipse.collections.api.tuple.Pair;
-import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
-import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
+import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
+import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,7 +35,7 @@ import java.util.List;
 
 @Path("")
 @Api("Entities")
-public class ManageEntitiesResource extends BaseAuthorisedResource
+public class ManageEntitiesResource extends AuthorisedResource
 {
 
     private final ManageEntitiesService entitiesService;

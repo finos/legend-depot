@@ -40,7 +40,11 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-http</artifactId>
+            <artifactId>legend-depot-core-tracing</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-authorisation</artifactId>
         </dependency>
         <!-- DEPOT -->
 
