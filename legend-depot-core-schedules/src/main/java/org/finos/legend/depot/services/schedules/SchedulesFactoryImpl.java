@@ -205,7 +205,7 @@ public final class SchedulesFactoryImpl implements SchedulesFactory
                     this.instancesStore.insert(new ScheduleInstance(schedule.name,toDate(LocalDateTime.now().plusSeconds(schedule.frequency / 1000L))));
                     LOGGER.info("Starting schedule {} ", schedule.name);
                     Object result = functions.get(schedule.name).get();
-                    LOGGER.info("Schedule {} result {}", schedule.name, result);
+                    LOGGER.info("Schedule {} completed", schedule.name);
                 }
                 else
                 {
