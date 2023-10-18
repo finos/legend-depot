@@ -18,8 +18,8 @@ package org.finos.legend.depot.store.resources.entities;
 import com.mongodb.client.result.DeleteResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
-import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
+import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.store.mongo.admin.migrations.MongoEntitiesMigrations;
 
 import javax.inject.Inject;
@@ -34,7 +34,7 @@ import java.security.Principal;
 @Deprecated
 @Path("")
 @Api("Mongo Store Administration")
-public class EntitiesMigrationResource extends BaseAuthorisedResource
+public class EntitiesMigrationResource extends AuthorisedResource
 {
 
     public static final String STORE_ADMINISTRATION_RESOURCE = "Store Administration";

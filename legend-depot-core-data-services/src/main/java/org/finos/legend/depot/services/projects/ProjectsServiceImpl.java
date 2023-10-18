@@ -32,7 +32,7 @@ import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
-import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
+import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;

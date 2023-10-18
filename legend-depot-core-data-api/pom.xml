@@ -30,12 +30,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.finos.legend.sdlc</groupId>
-            <artifactId>legend-sdlc-model</artifactId>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-core-store-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-core-store-api</artifactId>
+            <artifactId>legend-depot-model</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

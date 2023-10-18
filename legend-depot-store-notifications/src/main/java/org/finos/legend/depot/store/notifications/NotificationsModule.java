@@ -26,8 +26,8 @@ import org.finos.legend.depot.store.notifications.store.api.NotificationsStore;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsMongo;
 import org.finos.legend.depot.store.notifications.store.mongo.NotificationsStoreImpl;
 import org.finos.legend.depot.store.resources.notifications.NotificationsManagerResource;
-import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
-import org.finos.legend.depot.tracing.configuration.PrometheusConfiguration;
+import org.finos.legend.depot.core.services.api.metrics.PrometheusMetricsHandler;
+import org.finos.legend.depot.core.services.api.metrics.configuration.PrometheusConfiguration;
 
 import javax.inject.Named;
 import java.util.Arrays;

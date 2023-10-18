@@ -65,7 +65,6 @@
         <module>legend-depot-generations-services</module>
         <module>legend-depot-generations-store-mongo</module>
 
-        <module>legend-depot-core-http</module>
         <module>legend-depot-core-tracing</module>
         <module>legend-depot-core-authorisation</module>
 
@@ -558,11 +557,6 @@
             <dependency>
                 <groupId>org.finos.legend.depot</groupId>
                 <artifactId>legend-depot-servers-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.depot</groupId>
-                <artifactId>legend-depot-core-http</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

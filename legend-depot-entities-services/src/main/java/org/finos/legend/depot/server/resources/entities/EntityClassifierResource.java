@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.entity.DepotEntity;
 import org.finos.legend.depot.domain.version.Scope;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
-import org.finos.legend.depot.tracing.resources.BaseResource;
+import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -33,11 +33,11 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_ENTITIES_BY_CLASSIFIER_PATH;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_ENTITIES_BY_CLASSIFIER_PATH;
 
 @Path("")
 @Api("Classifiers")
-public class EntityClassifierResource extends BaseResource
+public class EntityClassifierResource extends TracingResource
 {
     private final EntityClassifierService graphService;
 

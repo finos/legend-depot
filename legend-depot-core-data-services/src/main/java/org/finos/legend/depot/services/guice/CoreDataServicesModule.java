@@ -23,7 +23,6 @@ import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
-import org.finos.legend.depot.services.serverInfo.InfoService;
 
 import javax.inject.Named;
 
@@ -35,7 +34,6 @@ public class CoreDataServicesModule extends PrivateModule
         bind(ProjectsService.class).to(ProjectsServiceImpl.class);
 
         expose(ProjectsService.class);
-        expose(InfoService.class);
         expose(DependencyOverride.class).annotatedWith(Names.named("dependencyOverride"));
     }
 
@@ -47,10 +45,4 @@ public class CoreDataServicesModule extends PrivateModule
         return new DependencyUtil();
     }
 
-    @Provides
-    @Singleton
-    public InfoService initInfo()
-    {
-        return new InfoService();
-    }
 }

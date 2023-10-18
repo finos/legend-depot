@@ -29,7 +29,7 @@ import org.finos.legend.depot.services.api.artifacts.repository.ArtifactReposito
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 import org.finos.legend.depot.domain.version.VersionValidator;
-import org.finos.legend.depot.tracing.services.TracerFactory;
+import org.finos.legend.depot.core.services.tracing.TracerFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.jboss.shrinkwrap.resolver.api.NoResolvedResultException;
 import org.jboss.shrinkwrap.resolver.api.ResolutionException;

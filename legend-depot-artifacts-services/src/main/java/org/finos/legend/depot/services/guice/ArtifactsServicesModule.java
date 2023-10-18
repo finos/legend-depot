@@ -44,7 +44,7 @@ import org.finos.legend.depot.services.api.artifacts.handlers.entties.VersionedE
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.VersionedEntityArtifactsProvider;
 import org.finos.legend.depot.services.api.artifacts.handlers.generations.FileGenerationsArtifactsHandler;
 import org.finos.legend.depot.services.api.artifacts.handlers.generations.FileGenerationsArtifactsProvider;
-import org.finos.legend.depot.tracing.api.PrometheusMetricsHandler;
+import org.finos.legend.depot.core.services.api.metrics.PrometheusMetricsHandler;
 
 import static org.finos.legend.depot.services.artifacts.refresh.ProjectVersionRefreshHandler.TOTAL_NUMBER_OF_VERSIONS_REFRESH;
 import static org.finos.legend.depot.services.artifacts.refresh.ProjectVersionRefreshHandler.VERSION_REFRESH_COUNTER;

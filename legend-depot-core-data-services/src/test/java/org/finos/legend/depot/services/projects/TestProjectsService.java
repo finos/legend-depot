@@ -29,7 +29,7 @@ import org.finos.legend.depot.domain.project.dependencies.VersionDependencyRepor
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
-import org.finos.legend.depot.services.projects.configuration.ProjectsConfiguration;
+import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
 import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
 import org.junit.Assert;

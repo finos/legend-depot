@@ -20,9 +20,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.generations.FileGenerationsService;
-import org.finos.legend.depot.tracing.resources.BaseResource;
-import org.finos.legend.depot.tracing.resources.EtagBuilder;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
+import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
+import org.finos.legend.depot.services.api.EtagBuilder;
+import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -34,15 +34,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_FILEPATH;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_CONTENT;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_ENTITIES;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_FILEPATH;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_CONTENT;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_ENTITIES;
 
 @Path("")
 @Api("Generations")
-public class FileGenerationsResource extends BaseResource
+public class FileGenerationsResource extends TracingResource
 {
 
     private final FileGenerationsService generationsService;

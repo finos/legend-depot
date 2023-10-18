@@ -32,4 +32,4 @@
 #
 #
 
-org.finos.legend.depot.core.http.filters.HealthcheckFilterFactory
+org.finos.legend.depot.core.server.filters.HealthcheckFilterFactory

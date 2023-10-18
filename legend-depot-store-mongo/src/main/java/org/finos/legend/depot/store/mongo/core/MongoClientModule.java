@@ -22,13 +22,12 @@ import com.google.inject.name.Names;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.finos.legend.depot.store.StorageConfiguration;
-import org.finos.legend.depot.tracing.configuration.OpenTracingConfiguration;
-import org.finos.legend.depot.tracing.services.TracerFactory;
+import org.finos.legend.depot.core.services.api.tracing.configuration.OpenTracingConfiguration;
+import org.finos.legend.depot.core.services.tracing.TracerFactory;
 
 import javax.inject.Named;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class MongoClientModule extends PrivateModule
 {

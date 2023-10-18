@@ -24,8 +24,8 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.tracing.resources.BaseResource;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
+import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
+import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -40,7 +40,7 @@ import java.util.Optional;
 
 @Path("")
 @Api("Projects")
-public class ProjectsResource extends BaseResource
+public class ProjectsResource extends TracingResource
 {
 
     private final ProjectsService projectApi;

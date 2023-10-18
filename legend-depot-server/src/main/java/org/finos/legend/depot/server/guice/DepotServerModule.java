@@ -15,9 +15,9 @@
 
 package org.finos.legend.depot.server.guice;
 
-import org.finos.legend.depot.core.http.guice.BaseModule;
+import org.finos.legend.depot.core.server.guice.BaseServerModule;
 import org.finos.legend.depot.server.configuration.DepotServerConfiguration;
 
-public class DepotServerModule extends BaseModule<DepotServerConfiguration>
+public class DepotServerModule extends BaseServerModule<DepotServerConfiguration>
 {
 }

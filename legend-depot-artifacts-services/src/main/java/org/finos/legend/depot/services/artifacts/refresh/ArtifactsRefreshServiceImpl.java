@@ -28,7 +28,7 @@ import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.api.artifacts.refresh.ArtifactsRefreshService;
 import org.finos.legend.depot.services.api.artifacts.refresh.ParentEvent;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
-import org.finos.legend.depot.tracing.services.TracerFactory;
+import org.finos.legend.depot.core.services.tracing.TracerFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 

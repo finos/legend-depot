@@ -24,7 +24,7 @@ import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.entities.Entities;
-import org.finos.legend.depot.tracing.services.TracerFactory;
+import org.finos.legend.depot.core.services.tracing.TracerFactory;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.slf4j.Logger;
 

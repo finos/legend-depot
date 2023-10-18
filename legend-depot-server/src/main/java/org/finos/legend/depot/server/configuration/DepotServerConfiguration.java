@@ -16,9 +16,9 @@
 package org.finos.legend.depot.server.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.finos.legend.depot.core.http.ServersConfiguration;
+import org.finos.legend.depot.core.server.ServerConfiguration;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DepotServerConfiguration extends ServersConfiguration
+public class DepotServerConfiguration extends ServerConfiguration
 {
 }

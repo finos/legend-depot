@@ -17,11 +17,11 @@ package org.finos.legend.depot.store.resources.artifacts;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.finos.legend.depot.core.authorisation.api.AuthorisationProvider;
-import org.finos.legend.depot.core.authorisation.resources.BaseAuthorisedResource;
+import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
+import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependenciesService;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
+import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -36,7 +36,7 @@ import java.security.Principal;
 
 @Path("")
 @Api("Artifacts Refresh")
-public class ArtifactDependenciesRefreshResource extends BaseAuthorisedResource
+public class ArtifactDependenciesRefreshResource extends AuthorisedResource
 {
     public static final String ARTIFACTS_RESOURCE = "ArtifactsRefresh";
     private final RefreshDependenciesService refreshDependenciesService;

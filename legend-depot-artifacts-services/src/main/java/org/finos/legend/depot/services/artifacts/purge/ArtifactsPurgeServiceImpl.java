@@ -27,8 +27,8 @@ import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
-import org.finos.legend.depot.tracing.services.TracerFactory;
-import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
+import org.finos.legend.depot.core.services.tracing.TracerFactory;
+import org.finos.legend.depot.core.services.metrics.PrometheusMetricsFactory;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -42,9 +42,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.DatesHandler.toDate;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.DELETE_VERSION;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.DEPRECATE_VERSION;
-import static org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing.EVICT_VERSION;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.DELETE_VERSION;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.DEPRECATE_VERSION;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.EVICT_VERSION;
 
 
 public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService

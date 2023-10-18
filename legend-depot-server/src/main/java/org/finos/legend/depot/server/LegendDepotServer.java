@@ -17,8 +17,8 @@ package org.finos.legend.depot.server;
 
 import com.google.inject.Module;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
-import org.finos.legend.depot.core.http.BaseServer;
-import org.finos.legend.depot.core.http.resources.InfoPageModule;
+import org.finos.legend.depot.core.server.BaseServer;
+import org.finos.legend.depot.core.server.guice.ServerInfoModule;
 import org.finos.legend.depot.server.configuration.DepotServerConfiguration;
 import org.finos.legend.depot.server.guice.DepotServerModule;
 import org.finos.legend.depot.server.resources.guice.CoreDataResourcesModule;
@@ -39,7 +39,7 @@ import org.finos.legend.depot.store.mongo.guice.CoreDataStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.EntitiesStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.GenerationsStoreMongoModule;
 import org.finos.legend.depot.store.notifications.queue.NotificationsQueueModule;
-import org.finos.legend.depot.tracing.TracingModule;
+import org.finos.legend.depot.core.services.guice.MonitoringModule;
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,7 +59,7 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
     protected List<Module> getServerModules()
     {
         return Arrays.asList(
-                new InfoPageModule(),
+                new ServerInfoModule(),
                 new DepotServerModule(),
 
                 new CoreDataResourcesModule(),
@@ -87,7 +87,7 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
                 new QueryMetricsModule(),
                 new QueryMetricsMongoStoreModule(),
                 new QueryMetricsSchedulesModule(),
-                new TracingModule()
+                new MonitoringModule()
                 );
     }
 

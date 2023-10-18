@@ -22,9 +22,9 @@ import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.store.notifications.api.Notifications;
 import org.finos.legend.depot.store.notifications.api.NotificationsManager;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
-import org.finos.legend.depot.tracing.resources.ResourceLoggingAndTracing;
-import org.finos.legend.depot.tracing.services.TracerFactory;
-import org.finos.legend.depot.tracing.services.prometheus.PrometheusMetricsFactory;
+import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
+import org.finos.legend.depot.core.services.tracing.TracerFactory;
+import org.finos.legend.depot.core.services.metrics.PrometheusMetricsFactory;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
