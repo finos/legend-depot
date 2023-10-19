@@ -18,6 +18,7 @@ package org.finos.legend.depot.core.services.tracing;
 public class ResourceLoggingAndTracing
 {
     public static final String GET_ALL_PROJECTS = "get all projects";
+    public static final String GET_VERSIONS_BY_CREATION_DATE = "get versions by creation date";
     public static final String GET_PROJECT_CONFIG_BY_GA = "get project configuration by ga";
     public static final String FIND_PROJECT_VERSIONS = "find project versions";
     public static final String GET_PROJECT_VERSION_BY_GAV = "get project version by gav";

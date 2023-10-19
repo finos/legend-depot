@@ -37,11 +37,15 @@ import java.util.Optional;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lt;
 
 public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> implements ProjectsVersions, UpdateProjectsVersions
 {
     public static final String COLLECTION = "versions";
     private static final String VERSION_DATA_EXCLUDED = "versionData.excluded";
+    // Creation date field on store project versions used for time base querying
+    private static final String CREATION_DATE = "creationDate";
 
     @Inject
     public ProjectsVersionsMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -58,6 +62,21 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
     public List<StoreProjectVersionData> getAll()
     {
         return getAllStoredEntities();
+    }
+
+    /** Return the list of all stored entities which have been created from the given
+     *  timestamp or beyond.
+     *  Records with Created time matching the given input will also be returned.
+     *
+     * @param createdFrom - the created from timestamp in milliseconds (UTC) (inclusive)
+     * @param createdTo - the created to timestamp in milliseconds (UTC) (exclusive)
+     * @return - list of all stored entities which have been created from and beyond the given created from time till
+     *  the given created to time
+     */
+    @Override
+    public List<StoreProjectVersionData> findByCreationDate(long createdFrom, long createdTo)
+    {
+        return find(and(gte(CREATION_DATE, createdFrom),(lt(CREATION_DATE, createdTo))));
     }
 
     @Override

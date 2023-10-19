@@ -22,8 +22,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static org.finos.legend.depot.domain.DatesHandler.toTime;
 
 
 public class TestQueryProjectVersionApi extends CoreDataMongoStoreTests
@@ -42,6 +45,23 @@ public class TestQueryProjectVersionApi extends CoreDataMongoStoreTests
         List<StoreProjectVersionData> allConfigs = projectsVersionsAPI.getAll();
         Assert.assertNotNull(allConfigs);
         Assert.assertEquals(6, allConfigs.size());
+    }
+
+    @Test
+    public void canCollectAllProjectConfigCreatedFrom()
+    {
+        List<StoreProjectVersionData> allConfigs = projectsVersionsAPI.findByCreationDate(1687227600000L,
+                toTime(LocalDateTime.now()));
+        Assert.assertNotNull(allConfigs);
+        Assert.assertEquals(3, allConfigs.size());
+    }
+
+    @Test
+    public void canCollectAllProjectConfigCreatedFromTo()
+    {
+        List<StoreProjectVersionData> allConfigs = projectsVersionsAPI.findByCreationDate(1687219200000L, 1687219210000L);
+        Assert.assertNotNull(allConfigs);
+        Assert.assertEquals(1, allConfigs.size());
     }
 
     @Test
