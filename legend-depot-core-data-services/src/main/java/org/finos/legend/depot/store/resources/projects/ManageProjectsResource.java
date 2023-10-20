@@ -62,7 +62,7 @@ public class ManageProjectsResource extends AuthorisedResource
     @Path("/projects/{projectId}/{groupId}/{artifactId}")
     @ApiOperation(ResourceLoggingAndTracing.CREATE_UPDATE_PROJECT)
     @Produces(MediaType.APPLICATION_JSON)
-    public StoreProjectData updateProject(@PathParam("projectId") String projectId, @PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @QueryParam("defaultBranch") @ApiParam String defaultBranch)
+    public StoreProjectData updateProject(@PathParam("projectId") String projectId, @PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @QueryParam("defaultBranch") @ApiParam String defaultBranch, @QueryParam("latestVersion") @ApiParam String latestVersion)
     {
         return handle(
                 ResourceLoggingAndTracing.CREATE_UPDATE_PROJECT,
@@ -70,7 +70,7 @@ public class ManageProjectsResource extends AuthorisedResource
                 () ->
                 {
                     validateUser();
-                    return projectApi.createOrUpdate(new StoreProjectData(projectId, groupId, artifactId, defaultBranch));
+                    return projectApi.createOrUpdate(new StoreProjectData(projectId, groupId, artifactId, defaultBranch, latestVersion));
                 });
     }
 

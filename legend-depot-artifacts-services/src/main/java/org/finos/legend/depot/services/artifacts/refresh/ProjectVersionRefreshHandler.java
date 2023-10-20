@@ -43,6 +43,7 @@ import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactHan
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactsHandler;
 import org.finos.legend.depot.core.services.tracing.TracerFactory;
 import org.finos.legend.depot.core.services.metrics.PrometheusMetricsFactory;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -242,6 +243,7 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
                     {
 
                         updateProjectVersionData(project, event.getVersionId(), newDependencies);
+                        updateProjectData(project, event.getVersionId());
                         //we let the version load but will check dependencies exists and report missing dependencies as errors
                         if (!event.isTransitive())
                         {
@@ -302,6 +304,27 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
         storeProjectVersionData.getVersionData().setExclusionReason(null);
         projects.createOrUpdate(storeProjectVersionData);
         LOGGER.info("Finished updating project data [{}-{}-{}]", project.getGroupId(), project.getArtifactId(), versionId);
+    }
+
+    private void updateProjectData(StoreProjectData projectData, String versionId)
+    {
+        if (!VersionValidator.isSnapshotVersion(versionId))
+        {
+            if (projectData.getLatestVersion() == null)
+            {
+                projectData.setLatestVersion(versionId);
+                projects.createOrUpdate(projectData);
+            }
+            else
+            {
+                //finding if the new version is the latest version
+                if (VersionId.parseVersionId(versionId).compareTo(VersionId.parseVersionId(projectData.getLatestVersion())) > 1)
+                {
+                    projectData.setLatestVersion(versionId);
+                    projects.createOrUpdate(projectData);
+                }
+            }
+        }
     }
 
     private String queueWorkToRefreshProjectVersion(StoreProjectData projectData, String versionId, boolean fullUpdate, boolean transitive, String parentEvent)

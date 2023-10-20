@@ -15,20 +15,19 @@
 
 package org.finos.legend.depot.services.entities;
 
-import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.depot.domain.entity.DepotEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.version.Scope;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.entities.Entities;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class EntityClassifierServiceImpl implements EntityClassifierService
@@ -44,13 +43,22 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
         this.entities = versions;
     }
 
-    private List<ProjectVersion> getProjectsInfo(int page, int pageSize)
+    private List<ProjectVersion> getLatestProjectVersionByPage(int page, int pageSize, List<StoreProjectData> allProjects)
     {
-        return ListIterate.collect(projects.getProjects(page, pageSize), projectData ->
+        int beginIndex = page * pageSize - pageSize;
+        int lastIndex = page * pageSize - 1;
+        if (beginIndex >= allProjects.size() || beginIndex < 0)
         {
-            Optional<VersionId> latestVersion = projects.getLatestVersion(projectData.getGroupId(), projectData.getArtifactId());
-            return new ProjectVersion(projectData.getGroupId(), projectData.getArtifactId(), latestVersion.isPresent() ? latestVersion.get().toVersionIdString() : null);
-        }).select(info -> info.getVersionId() != null);
+            return Collections.emptyList();
+        }
+        else if (lastIndex >= allProjects.size())
+        {
+            lastIndex = allProjects.size() - 1;
+        }
+        return allProjects.subList(beginIndex, lastIndex).stream()
+                .filter(project -> project.getLatestVersion() != null)
+                .map(project -> new ProjectVersion(project.getGroupId(), project.getArtifactId(), project.getLatestVersion()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -63,7 +71,8 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
         List<DepotEntity> result = new ArrayList<>();
         int PAGE_SIZE = 100;
         int currentPage = 1;
-        List<ProjectVersion> projectVersions = this.getProjectsInfo(currentPage, PAGE_SIZE);
+        List<StoreProjectData> allProjects = projects.getAllProjectCoordinates();
+        List<ProjectVersion> projectVersions = this.getLatestProjectVersionByPage(currentPage, PAGE_SIZE, allProjects);
         while (!projectVersions.isEmpty())
         {
             List<DepotEntity> entities = this.findReleasedEntitiesByClassifier(classifierPath, search, projectVersions, limit, summary);
@@ -73,7 +82,7 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
                 break;
             }
             currentPage++;
-            projectVersions = this.getProjectsInfo(currentPage, PAGE_SIZE);
+            projectVersions = this.getLatestProjectVersionByPage(currentPage, PAGE_SIZE, allProjects);
         }
         if (limit != null)
         {

@@ -24,11 +24,6 @@ public interface Projects
 {
     List<StoreProjectData> getAll();
 
-    /**
-     * NOTE: page starting from 1
-     */
-    List<StoreProjectData> getProjects(int page, int pageSize);
-
     Optional<StoreProjectData> find(String groupId, String artifactId);
 
     @Deprecated

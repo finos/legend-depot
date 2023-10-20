@@ -93,7 +93,7 @@ public class TestFileGenerationsService extends TestStoreMongo
             Assert.assertEquals(54, generations.getAll().size());
         }
 
-        when(projectsStore.find("group.test","test")).thenReturn(Optional.of(new StoreProjectData("prod-1","group.test","test")));
+        when(projectsStore.find("group.test","test")).thenReturn(Optional.of(new StoreProjectData("prod-1","group.test","test",null,"1.0.0")));
         when(projectsStore.find("group.test.otherproject", "test")).thenReturn(Optional.of(new StoreProjectData("prod-2","group.test.otherproject", "test")));
         when(projectsVersionsStore.find("group.test","test",BRANCH_SNAPSHOT("master"))).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test",BRANCH_SNAPSHOT("master"))));
         when(projectsVersionsStore.find("group.test","test","1.0.0")).thenReturn(Optional.of(new StoreProjectVersionData("group-test","test","1.0.0")));

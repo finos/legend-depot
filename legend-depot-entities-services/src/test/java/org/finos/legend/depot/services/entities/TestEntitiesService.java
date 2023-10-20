@@ -17,17 +17,19 @@ package org.finos.legend.depot.services.entities;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.model.entities.EntityDefinition;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.store.model.entities.StoredEntityData;
 import org.finos.legend.depot.store.model.entities.StoredEntityStringData;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
-import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
@@ -43,18 +45,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static org.mockito.Mockito.mock;
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
+import static org.mockito.Mockito.when;
 
 public class TestEntitiesService extends TestBaseServices
 {
     private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
     private final Queue queue = mock(Queue.class);
     private  EntitiesMongoTestUtils entityUtils = new EntitiesMongoTestUtils(mongoProvider);
+    private ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
-    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master")));
+    protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, projectsService);
 
     @Before
     public void setUpData()
@@ -164,13 +169,16 @@ public class TestEntitiesService extends TestBaseServices
     @Test
     public void canQueryEntitiesWithLatestVersionAlias()
     {
+        //validation on project id , can't bypass PROD-D
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-1","examples.metadata","test1",null, "1.0.0"));
         projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata","test1","1.0.0"));
+        // latest is derived from project data
         entityUtils.loadEntities("PROD-D", "1.0.0");
 
         String pkgName = "examples::metadata::test::dependency::v1_2_3";
 
         Assert.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","latest").size());
-        Assert.assertEquals(2, entitiesService.getEntitiesByPackage("examples.metadata","test1","latest",pkgName, Collections.EMPTY_SET,true).size());
+        Assert.assertEquals(2, entitiesService.getEntitiesByPackage("examples.metadata","test1","latest", pkgName, Collections.EMPTY_SET,true).size());
 
     }
 

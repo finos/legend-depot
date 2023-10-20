@@ -111,4 +111,18 @@ public class CoreDataStoreMigrationsResource extends AuthorisedResource
         });
     }
 
+    @PUT
+    @Path("/migrations/addLatestVersionToProjectData")
+    @ApiOperation("Update project configurations with latest version")
+    @Deprecated
+    public Response addLatestVersionToProjectData()
+    {
+        return handle("Update project configurations with latest version", () ->
+        {
+            validateUser();
+            mongoMigrations.addLatestVersionToProjectData();
+            return Response.status(Response.Status.NO_CONTENT).build();
+        });
+    }
+
 }

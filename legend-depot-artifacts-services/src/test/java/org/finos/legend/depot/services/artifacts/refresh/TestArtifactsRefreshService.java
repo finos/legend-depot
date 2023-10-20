@@ -116,7 +116,6 @@ public class TestArtifactsRefreshService extends TestStoreMongo
 
         projectsVersionsStore.createOrUpdate(new StoreProjectVersionData(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "2.0.0"));
         projectsVersionsStore.createOrUpdate(new StoreProjectVersionData(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, BRANCH_SNAPSHOT("master")));
-        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID,"2.3.3"));
         projectsVersionsStore.createOrUpdate(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0"));
         projectsVersionsStore.createOrUpdate(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master")));
 
@@ -202,8 +201,6 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     @Test
     public void canRefreshProjectVersion()
     {
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3").size());
-
         Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
 
         MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0",true,PARENT_EVENT_ID);
@@ -344,15 +341,15 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         notificationsQueueManager.handleAll();
 
         List<String> versions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID);
-        Assert.assertEquals(3, versions.size());
-        Assert.assertEquals("2.3.3",projectsService.getLatestVersion(TEST_GROUP_ID, TEST_ARTIFACT_ID).get().toVersionIdString());
+        Assert.assertEquals(2, versions.size());
+        Assert.assertEquals("2.0.0",projectsService.findCoordinates(TEST_GROUP_ID, TEST_ARTIFACT_ID).get().getLatestVersion());
 
 
         projectsService.delete(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0");
-        Assert.assertEquals("2.3.3",projectsService.getLatestVersion(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().toVersionIdString());
+        Assert.assertEquals("2.0.0",projectsService.findCoordinates(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().getLatestVersion());
 
         artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, false, false, false,PARENT_EVENT_ID);
-        Assert.assertEquals("2.3.3",projectsService.getLatestVersion(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().toVersionIdString());
+        Assert.assertEquals("2.0.0",projectsService.findCoordinates(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().getLatestVersion());
         Assert.assertEquals(2,notificationsQueueManager.getAllInQueue().size());
         Assert.assertEquals("1.0.0",notificationsQueueManager.getAllInQueue().get(1).getVersionId());
         notificationsQueueManager.handleAll();
@@ -502,7 +499,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         notificationsQueueManager.handleAll();
         Assert.assertEquals(docsBefore,entitiesStore.getAllStoredEntities().size());
         Assert.assertTrue(projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,versionId).isPresent());
-        Assert.assertEquals(3,projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).stream().filter(x -> !x.getVersionId().equals(BRANCH_SNAPSHOT("master"))).collect(Collectors.toList()).size());
+        Assert.assertEquals(2,projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).stream().filter(x -> !x.getVersionId().equals(BRANCH_SNAPSHOT("master"))).collect(Collectors.toList()).size());
         Assert.assertEquals(0,notificationsQueueManager.getAllInQueue().size());
     }
 

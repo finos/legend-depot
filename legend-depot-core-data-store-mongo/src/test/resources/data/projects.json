@@ -2,12 +2,14 @@
   {
     "projectId": "PROD-A",
     "groupId": "examples.metadata",
-    "artifactId": "test"
+    "artifactId": "test",
+    "latestVersion": "2.3.1"
   },
   {
     "projectId": "PROD-B",
     "groupId": "examples.metadata",
-    "artifactId": "test-dependencies"
+    "artifactId": "test-dependencies",
+    "latestVersion": "1.0.0"
   },
   {
     "projectId": "PROD-C",

@@ -115,7 +115,7 @@ public class TestArtifactsPurgeService extends TestBaseServices
         List<String> projectVersions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID);
         Assert.assertEquals(3, projectVersions.size());
         Assert.assertEquals("2.0.0", projectVersions.get(0));
-        Assert.assertEquals("2.3.0", projectsService.getLatestVersion(TEST_GROUP_ID, TEST_ARTIFACT_ID).get().toVersionIdString());
+        Assert.assertEquals("2.3.0", project.getLatestVersion());
 
         Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
         purgeService.evictOldestProjectVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID,1);
