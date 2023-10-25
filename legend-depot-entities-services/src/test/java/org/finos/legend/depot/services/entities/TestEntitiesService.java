@@ -17,6 +17,9 @@ package org.finos.legend.depot.services.entities;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.finos.legend.depot.domain.entity.DepotEntity;
+import org.finos.legend.depot.domain.version.Scope;
+import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
@@ -60,6 +63,7 @@ public class TestEntitiesService extends TestBaseServices
     private ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, projectsService);
+    protected EntityClassifierService classifierService = new EntityClassifierServiceImpl(projectsService, entitiesStore);
 
     @Before
     public void setUpData()
@@ -230,7 +234,6 @@ public class TestEntitiesService extends TestBaseServices
 
     }
 
-
     @Test
     public void canSerializeEntityDefinitionWithNulls()
     {
@@ -245,5 +248,12 @@ public class TestEntitiesService extends TestBaseServices
         // check entities serialization and deserialization
         Entity entity = (Entity) entitiesService.getEntities("examples.metadata", "test", "5.0.0").get(0);
         Assert.assertEquals(content, entity.getContent());
+    }
+
+    @Test
+    public void canGetClassifiers()
+    {
+        List<DepotEntity> entities = classifierService.getEntitiesByClassifierPath("meta::pure::metamodel::type::Class", null, null, Scope.RELEASES, true);
+        Assert.assertEquals(entities.size(), 3);
     }
 }

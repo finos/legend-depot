@@ -310,21 +310,26 @@ public final class ProjectVersionRefreshHandler implements NotificationEventHand
     {
         if (!VersionValidator.isSnapshotVersion(versionId))
         {
-            if (projectData.getLatestVersion() == null)
+            String latestVersion = calculateLatestVersion(projectData.getLatestVersion(), versionId);
+            if (!latestVersion.equals(projectData.getLatestVersion()))
             {
-                projectData.setLatestVersion(versionId);
+                projectData.setLatestVersion(latestVersion);
                 projects.createOrUpdate(projectData);
             }
-            else
-            {
-                //finding if the new version is the latest version
-                if (VersionId.parseVersionId(versionId).compareTo(VersionId.parseVersionId(projectData.getLatestVersion())) > 1)
-                {
-                    projectData.setLatestVersion(versionId);
-                    projects.createOrUpdate(projectData);
-                }
-            }
         }
+    }
+
+    private String calculateLatestVersion(String projectLatestVersion, String versionId)
+    {
+        if (projectLatestVersion == null)
+        {
+            return versionId;
+        }
+        else if (VersionId.parseVersionId(versionId).compareTo(VersionId.parseVersionId(projectLatestVersion)) > 1)
+        {
+            return versionId;
+        }
+        return projectLatestVersion;
     }
 
     private String queueWorkToRefreshProjectVersion(StoreProjectData projectData, String versionId, boolean fullUpdate, boolean transitive, String parentEvent)

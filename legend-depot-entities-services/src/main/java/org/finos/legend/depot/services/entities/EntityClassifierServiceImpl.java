@@ -35,6 +35,7 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(EntityClassifierServiceImpl.class);
     private final Entities entities;
     private final ProjectsService projects;
+    private static final int PAGE_SIZE = 100;
 
     @Inject
     public EntityClassifierServiceImpl(ProjectsService projects, Entities versions)
@@ -69,7 +70,6 @@ public class EntityClassifierServiceImpl implements EntityClassifierService
             return this.findLatestEntitiesByClassifier(classifierPath, search, limit, summary);
         }
         List<DepotEntity> result = new ArrayList<>();
-        int PAGE_SIZE = 100;
         int currentPage = 1;
         List<StoreProjectData> allProjects = projects.getAllProjectCoordinates();
         List<ProjectVersion> projectVersions = this.getLatestProjectVersionByPage(currentPage, PAGE_SIZE, allProjects);
