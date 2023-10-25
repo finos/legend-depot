@@ -61,14 +61,14 @@ public class ProjectsVersionsResource extends TracingResource
 
 
     @GET
-    @Path("/projects/versions/{createdFrom}")
-    @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS_BY_CREATION_DATE)
+    @Path("/projects/versions/{updatedFrom}")
+    @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<StoreProjectVersionData> findByCreationDate(@PathParam("createdFrom") @ApiParam(value = "Created From Date value in milliseconds (UTC) ") long createdFrom,
-                                                            @QueryParam("createdTo") @ApiParam(value = "Created To Date value in milliseconds (UTC) ")  Long createdTo)
+    public List<StoreProjectVersionData> findByUpdatedDate(@PathParam("updatedFrom") @ApiParam(value = "Updated From Date value in milliseconds (UTC) ") long updatedFrom,
+                                                            @QueryParam("updatedTo") @ApiParam(value = "Updated To Date value in milliseconds (UTC) ")  Long updatedTo)
     {
-        return handle(ResourceLoggingAndTracing.GET_VERSIONS_BY_CREATION_DATE,
-                () -> projectVersionApi.findByCreationDate(createdFrom, createdTo == null ? toTime(LocalDateTime.now()) : createdTo));
+        return handle(ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE,
+                () -> projectVersionApi.findByUpdatedDate(updatedFrom, updatedTo == null ? toTime(LocalDateTime.now()) : updatedTo));
     }
 
     @GET

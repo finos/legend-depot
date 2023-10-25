@@ -48,18 +48,18 @@ public class TestQueryProjectVersionApi extends CoreDataMongoStoreTests
     }
 
     @Test
-    public void canCollectAllProjectConfigCreatedFrom()
+    public void canCollectAllProjectConfigUpdatedFrom()
     {
-        List<StoreProjectVersionData> allConfigs = projectsVersionsAPI.findByCreationDate(1687227600000L,
+        List<StoreProjectVersionData> allConfigs = projectsVersionsAPI.findByUpdatedDate(1687227600000L,
                 toTime(LocalDateTime.now()));
         Assert.assertNotNull(allConfigs);
         Assert.assertEquals(3, allConfigs.size());
     }
 
     @Test
-    public void canCollectAllProjectConfigCreatedFromTo()
+    public void canCollectAllProjectConfigUpdatedFromTo()
     {
-        List<StoreProjectVersionData> allConfigs = projectsVersionsAPI.findByCreationDate(1687219200000L, 1687219210000L);
+        List<StoreProjectVersionData> allConfigs = projectsVersionsAPI.findByUpdatedDate(1687219200000L, 1687219210000L);
         Assert.assertNotNull(allConfigs);
         Assert.assertEquals(1, allConfigs.size());
     }

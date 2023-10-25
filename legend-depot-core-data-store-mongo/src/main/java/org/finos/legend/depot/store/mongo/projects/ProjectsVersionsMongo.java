@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 import static com.mongodb.client.model.Filters.lt;
 
@@ -44,8 +43,6 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
 {
     public static final String COLLECTION = "versions";
     private static final String VERSION_DATA_EXCLUDED = "versionData.excluded";
-    // Creation date field on store project versions used for time base querying
-    private static final String CREATION_DATE = "creationDate";
 
     @Inject
     public ProjectsVersionsMongo(@Named("mongoDatabase") MongoDatabase databaseProvider)
@@ -64,19 +61,19 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
         return getAllStoredEntities();
     }
 
-    /** Return the list of all stored entities which have been created from the given
+    /** Return the list of all stored entities which have been updated from the given
      *  timestamp or beyond.
-     *  Records with Created time matching the given input will also be returned.
+     *  Records with updated time matching the given input will also be returned.
      *
-     * @param createdFrom - the created from timestamp in milliseconds (UTC) (inclusive)
-     * @param createdTo - the created to timestamp in milliseconds (UTC) (exclusive)
-     * @return - list of all stored entities which have been created from and beyond the given created from time till
-     *  the given created to time
+     * @param updatedFrom - the updated from timestamp in milliseconds (UTC) (inclusive)
+     * @param updatedTo - the updated to timestamp in milliseconds (UTC) (exclusive)
+     * @return - list of all stored entities which have been updated from and beyond the given updated from time till
+     *  the given updated to time
      */
     @Override
-    public List<StoreProjectVersionData> findByCreationDate(long createdFrom, long createdTo)
+    public List<StoreProjectVersionData> findByUpdatedDate(long updatedFrom, long updatedTo)
     {
-        return find(and(gte(CREATION_DATE, createdFrom),(lt(CREATION_DATE, createdTo))));
+        return find(and(gte(UPDATED, updatedFrom),(lt(UPDATED, updatedTo))));
     }
 
     @Override

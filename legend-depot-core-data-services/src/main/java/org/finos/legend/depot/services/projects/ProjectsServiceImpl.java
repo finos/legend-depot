@@ -120,9 +120,9 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
-    public List<StoreProjectVersionData> findByCreationDate(long createdFrom, long createdTo)
+    public List<StoreProjectVersionData> findByUpdatedDate(long updatedFrom, long updatedTo)
     {
-        return projectsVersions.findByCreationDate(createdFrom, createdTo);
+        return projectsVersions.findByUpdatedDate(updatedFrom, updatedTo);
     }
 
     @Override
