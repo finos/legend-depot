@@ -24,8 +24,6 @@ public interface FileGenerations
 {
     List<StoredFileGeneration> getAll();
 
-    Optional<StoredFileGeneration> get(String groupId, String artifactId, String versionId, String generationFilePath);
-
     List<StoredFileGeneration> find(String groupId, String artifactId, String versionId);
 
     List<StoredFileGeneration> findByType(String groupId, String artifactId,String versionId, String type);

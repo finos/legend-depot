@@ -81,10 +81,10 @@ public class TestFileGenerationsStore extends TestGenerationsStoreMongo
     @Test
     public void canQueryByGenerationFilePath()
     {
-        Assert.assertTrue(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "/examples/metadata/test/ClientBasic.avro").isPresent());
-        Assert.assertTrue(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "/examples/generated/test/other/MyOutput.json").isPresent());
-        Assert.assertFalse(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, "0.01.1", "/examples/metadata/test/ClientBasic.avro").isPresent());
-        Assert.assertFalse(generations.get(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"), "com/finos/sdgashdf").isPresent());
+        Assert.assertTrue(generations.findByFilePath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assert.assertTrue(generations.findByFilePath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.3", "/examples/generated/test/other/MyOutput.json").isPresent());
+        Assert.assertFalse(generations.findByFilePath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "0.01.1", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assert.assertFalse(generations.findByFilePath(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"), "com/finos/sdgashdf").isPresent());
     }
 
 }
