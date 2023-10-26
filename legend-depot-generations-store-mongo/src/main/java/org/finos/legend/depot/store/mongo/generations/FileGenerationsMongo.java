@@ -105,12 +105,6 @@ public class FileGenerationsMongo extends BaseMongo<StoredFileGeneration> implem
     }
 
     @Override
-    public Optional<StoredFileGeneration> get(String groupId, String artifactId, String versionId, String generationFilePath)
-    {
-        return findOne(and(getArtifactAndVersionFilter(groupId, artifactId, versionId), eq(FILE_PATH, generationFilePath)));
-    }
-
-    @Override
     public long delete(String groupId, String artifactId, String versionId)
     {
         return delete(getArtifactAndVersionFilter(groupId, artifactId, versionId));
