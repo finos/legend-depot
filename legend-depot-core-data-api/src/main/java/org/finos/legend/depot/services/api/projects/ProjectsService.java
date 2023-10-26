@@ -31,6 +31,8 @@ public interface ProjectsService
 {
     List<StoreProjectData> getAllProjectCoordinates();
 
+    List<StoreProjectVersionData> findByUpdatedDate(long updatedFrom, long updatedTo);
+
     /**
      * NOTE: page starting from 1
      */

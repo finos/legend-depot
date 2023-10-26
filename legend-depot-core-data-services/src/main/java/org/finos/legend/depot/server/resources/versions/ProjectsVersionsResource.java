@@ -35,11 +35,16 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+
+import static org.finos.legend.depot.domain.DatesHandler.toTime;
 
 @Path("")
 @Api("Versions")
@@ -52,6 +57,18 @@ public class ProjectsVersionsResource extends TracingResource
     public ProjectsVersionsResource(ProjectsService projectVersionApi)
     {
         this.projectVersionApi = projectVersionApi;
+    }
+
+
+    @GET
+    @Path("/projects/versions/{updatedFrom}")
+    @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<StoreProjectVersionData> findByUpdatedDate(@PathParam("updatedFrom") @ApiParam(value = "Updated From Date value in milliseconds (UTC) ") long updatedFrom,
+                                                            @QueryParam("updatedTo") @ApiParam(value = "Updated To Date value in milliseconds (UTC) ")  Long updatedTo)
+    {
+        return handle(ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE,
+                () -> projectVersionApi.findByUpdatedDate(updatedFrom, updatedTo == null ? toTime(LocalDateTime.now()) : updatedTo));
     }
 
     @GET

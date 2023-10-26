@@ -120,6 +120,12 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
+    public List<StoreProjectVersionData> findByUpdatedDate(long updatedFrom, long updatedTo)
+    {
+        return projectsVersions.findByUpdatedDate(updatedFrom, updatedTo);
+    }
+
+    @Override
     public List<StoreProjectVersionData> find(String groupId, String artifactId)
     {
         return projectsVersions.find(groupId, artifactId);

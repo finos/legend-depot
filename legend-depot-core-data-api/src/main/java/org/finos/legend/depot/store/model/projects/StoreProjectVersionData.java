@@ -34,9 +34,8 @@ public class StoreProjectVersionData extends VersionedData implements HasIdentif
     private boolean evicted = false;
     @JsonProperty
     private Date creationDate;
-    //TODO: understand how to populate last updated
     @JsonProperty
-    private Date lastUpdated;
+    private Date updated;
     @JsonProperty
     private ProjectVersionData versionData = new ProjectVersionData();
     @JsonProperty
@@ -71,16 +70,6 @@ public class StoreProjectVersionData extends VersionedData implements HasIdentif
         this.creationDate = creationDate;
     }
 
-    public Date getLastUpdated()
-    {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated(Date lastUpdated)
-    {
-        this.lastUpdated = lastUpdated;
-    }
-
     public boolean isEvicted()
     {
         return evicted;
@@ -109,6 +98,11 @@ public class StoreProjectVersionData extends VersionedData implements HasIdentif
     public void setTransitiveDependenciesReport(VersionDependencyReport transitiveDependenciesReport)
     {
         this.transitiveDependenciesReport = transitiveDependenciesReport;
+    }
+
+    public Date getUpdated()
+    {
+        return updated;
     }
 
     @Override
