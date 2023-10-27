@@ -56,7 +56,7 @@ public class NotificationsSchedulesModule extends PrivateModule
     @Singleton
     boolean notificationsCleanUp(SchedulesFactory schedulesFactory, NotificationsManager eventsQueueManager)
     {
-        schedulesFactory.register(CLEANUP_NOTIFICATIONS_SCHEDULE, SchedulesFactory.MINUTE, 1 * SchedulesFactory.HOUR,  () -> eventsQueueManager.deleteOldNotifications(120));
+        schedulesFactory.register(CLEANUP_NOTIFICATIONS_SCHEDULE, SchedulesFactory.MINUTE, 1 * SchedulesFactory.HOUR,  () -> eventsQueueManager.deleteOldNotifications(30));
         return true;
     }
 }
