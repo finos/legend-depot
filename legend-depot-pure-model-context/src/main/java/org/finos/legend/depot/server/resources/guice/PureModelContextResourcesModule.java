@@ -18,8 +18,7 @@ package org.finos.legend.depot.server.resources.guice;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
+import org.finos.legend.depot.core.services.api.metrics.PrometheusMetricsHandler;
 import org.finos.legend.depot.server.resources.pure.model.context.PureModelContextResource;
 
 public class PureModelContextResourcesModule extends PrivateModule
@@ -29,5 +28,13 @@ public class PureModelContextResourcesModule extends PrivateModule
     {
         bind(PureModelContextResource.class);
         expose(PureModelContextResource.class);
+    }
+
+    @Singleton
+    @Provides
+    boolean registerResourceMetrics(PrometheusMetricsHandler metricsHandler)
+    {
+        metricsHandler.registerResourceSummaries(PureModelContextResource.class);
+        return true;
     }
 }

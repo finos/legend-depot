@@ -18,8 +18,7 @@ package org.finos.legend.depot.server.resources.guice;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
-import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
+import org.finos.legend.depot.core.services.api.metrics.PrometheusMetricsHandler;
 import org.finos.legend.depot.server.resources.generations.FileGenerationsResource;
 
 
@@ -30,5 +29,13 @@ public class GenerationsResourcesModule extends PrivateModule
     {
         bind(FileGenerationsResource.class);
         expose(FileGenerationsResource.class);
+    }
+
+    @Singleton
+    @Provides
+    boolean registerResourceMetrics(PrometheusMetricsHandler metricsHandler)
+    {
+        metricsHandler.registerResourceSummaries(FileGenerationsResource.class);
+        return true;
     }
 }

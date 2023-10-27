@@ -48,7 +48,7 @@ public class VoidPrometheusMetricsHandler implements PrometheusMetricsHandler
     }
 
     @Override
-    public void registerResourceSummaries(TracingResource baseResource)
+    public void registerResourceSummaries(Class<? extends TracingResource> baseResource)
     {
     }
 

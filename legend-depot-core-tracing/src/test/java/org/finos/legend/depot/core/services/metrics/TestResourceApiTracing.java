@@ -26,9 +26,8 @@ public class TestResourceApiTracing
     @Test
     public void testMetricRegistrationForResource()
     {
-        new TestTracingResource();
+        prometheusMetrics.registerResourceSummaries(TestTracingResource.class);
         Assert.assertEquals(1,prometheusMetrics.allSummaries.keySet().size());
-        new TestTracingResource();
-        Assert.assertEquals(1,prometheusMetrics.allSummaries.keySet().size());
+
     }
 }
