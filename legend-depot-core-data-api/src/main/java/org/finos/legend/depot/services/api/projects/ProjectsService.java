@@ -31,6 +31,8 @@ public interface ProjectsService
 {
     List<StoreProjectData> getAllProjectCoordinates();
 
+    List<StoreProjectVersionData> findByUpdatedDate(long updatedFrom, long updatedTo);
+
     default List<String> getVersions(String groupId, String artifactId)
     {
         return getVersions(groupId, artifactId,false);

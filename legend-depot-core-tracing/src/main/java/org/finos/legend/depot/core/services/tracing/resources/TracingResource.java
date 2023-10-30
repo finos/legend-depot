@@ -38,7 +38,6 @@ public class TracingResource
 
     public TracingResource()
     {
-        PrometheusMetricsFactory.getInstance().registerResourceSummaries(this);
     }
 
     private Logger getLogger()

@@ -49,5 +49,5 @@ public interface PrometheusMetricsHandler
 
     void increaseGauge(String name, int value);
 
-    void registerResourceSummaries(TracingResource baseResource);
+    void registerResourceSummaries(Class<? extends TracingResource> baseResource);
 }

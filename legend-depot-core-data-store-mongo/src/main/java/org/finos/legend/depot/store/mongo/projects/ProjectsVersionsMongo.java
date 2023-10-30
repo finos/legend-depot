@@ -36,7 +36,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
+import static com.mongodb.client.model.Filters.lt;
 
 public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> implements ProjectsVersions, UpdateProjectsVersions
 {
@@ -58,6 +59,21 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
     public List<StoreProjectVersionData> getAll()
     {
         return getAllStoredEntities();
+    }
+
+    /** Return the list of all stored entities which have been updated from the given
+     *  timestamp or beyond.
+     *  Records with updated time matching the given input will also be returned.
+     *
+     * @param updatedFrom - the updated from timestamp in milliseconds (UTC) (inclusive)
+     * @param updatedTo - the updated to timestamp in milliseconds (UTC) (exclusive)
+     * @return - list of all stored entities which have been updated from and beyond the given updated from time till
+     *  the given updated to time
+     */
+    @Override
+    public List<StoreProjectVersionData> findByUpdatedDate(long updatedFrom, long updatedTo)
+    {
+        return find(and(gte(UPDATED, updatedFrom),(lt(UPDATED, updatedTo))));
     }
 
     @Override

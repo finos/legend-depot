@@ -16,7 +16,6 @@
 package org.finos.legend.depot.core.services.metrics;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.istack.NotNull;
 import io.prometheus.client.Counter;
@@ -25,10 +24,7 @@ import io.prometheus.client.Histogram;
 import io.prometheus.client.Summary;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.collections.api.factory.Maps;
-import org.eclipse.collections.api.map.ConcurrentMutableMap;
 import org.eclipse.collections.impl.map.mutable.ConcurrentHashMap;
-import org.eclipse.collections.impl.map.mutable.SynchronizedMutableMap;
 import org.finos.legend.depot.core.services.api.metrics.PrometheusMetricsHandler;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 
@@ -44,20 +40,13 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
     private static final String DURATION = " duration";
     private static final String GAUGE = " gauge";
     private static final String HISTOGRAM = " histogram";
-    private static final String WHITE_SPACE = " ";
-    private static final String BLANK = "";
-    private static final String SLASH = "/";
-    private static final String HYPHEN = "-";
-    private static final String OPEN_CURLY = "{";
-    private static final String CLOSE_CURLY = "}";
-    private static final String DOT = ".";
+    private static final String WHITE_SPACE = "\\s";
 
-    final SynchronizedMutableMap<String, Counter> allCounters = new SynchronizedMutableMap(Maps.mutable.empty());
-    final SynchronizedMutableMap<String, Counter> allErrorCounters = new SynchronizedMutableMap(Maps.mutable.empty());
-    final SynchronizedMutableMap<String, Summary> allSummaries = new SynchronizedMutableMap(Maps.mutable.empty());
-    final SynchronizedMutableMap<String, Gauge> allGauges = new SynchronizedMutableMap(Maps.mutable.empty());
-    final SynchronizedMutableMap<String, Histogram> allHistograms = new SynchronizedMutableMap(Maps.mutable.empty());
-    final SynchronizedMutableMap<String,String> resourceMetricsRegistration = new SynchronizedMutableMap(Maps.mutable.empty());
+    final ConcurrentHashMap<String, Counter> allCounters = new ConcurrentHashMap<>();
+    final ConcurrentHashMap<String, Counter> allErrorCounters = new ConcurrentHashMap();
+    final ConcurrentHashMap<String, Summary> allSummaries = new ConcurrentHashMap();
+    final ConcurrentHashMap<String, Gauge> allGauges = new ConcurrentHashMap();
+    final ConcurrentHashMap<String, Histogram> allHistograms = new ConcurrentHashMap();
 
     @JsonProperty
     @NotNull
@@ -71,7 +60,7 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
 
     private String getKeyName(String name)
     {
-        return sanitise(this.prefix + METRIC_SEPARATOR + StringUtils.lowerCase(name));
+        return sanitise(new StringBuffer().append(this.prefix).append(METRIC_SEPARATOR).append(StringUtils.lowerCase(name)).toString());
     }
 
     private String getHelpMessage(String metricName, String helpMessage)
@@ -81,11 +70,7 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
 
     private String sanitise(String name)
     {
-        return name.replace(SLASH, METRIC_SEPARATOR)
-                .replace(HYPHEN, METRIC_SEPARATOR)
-                .replace(DOT, METRIC_SEPARATOR)
-                .replace(OPEN_CURLY, BLANK).replace(CLOSE_CURLY, BLANK)
-                .replaceAll(WHITE_SPACE, METRIC_SEPARATOR);
+        return name.replaceAll(WHITE_SPACE, METRIC_SEPARATOR);
     }
 
     private String buildErrorCounterName(String counterName)
@@ -222,11 +207,9 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
     }
 
     @Override
-    public void registerResourceSummaries(TracingResource baseResource)
+    public void registerResourceSummaries(Class<? extends TracingResource> baseResource)
     {
-        resourceMetricsRegistration.getIfAbsentPutWithKey(baseResource.getClass().getCanonicalName(), resourceName ->
-        {
-            Arrays.stream(baseResource.getClass().getMethods()).forEach(m ->
+            Arrays.stream(baseResource.getMethods()).forEach(m ->
             {
                 if (m.isAnnotationPresent(ApiOperation.class))
                 {
@@ -235,7 +218,5 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
                     PrometheusMetricsFactory.getInstance().registerSummary(metricName, metricName);
                 }
             });
-            return resourceName;
-        });
     }
 }

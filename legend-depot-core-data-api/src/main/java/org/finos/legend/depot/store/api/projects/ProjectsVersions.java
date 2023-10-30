@@ -24,6 +24,8 @@ public interface ProjectsVersions
 {
     List<StoreProjectVersionData> getAll();
 
+    List<StoreProjectVersionData> findByUpdatedDate(long updatedFrom, long updatedTo);
+
     List<StoreProjectVersionData> find(String groupId, String artifactId);
 
     Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId);

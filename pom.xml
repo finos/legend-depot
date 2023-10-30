@@ -27,7 +27,7 @@
     <name>Legend Depot</name>
     <groupId>org.finos.legend.depot</groupId>
     <artifactId>legend-depot</artifactId>
-    <version>2.10.1-SNAPSHOT</version>
+    <version>2.11.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -97,8 +97,8 @@
 
         <!-- Legend dependency versions -->
         <legend.shared.version>0.24.1</legend.shared.version>
-        <legend.engine.version>4.31.2</legend.engine.version>
-        <legend.sdlc.version>0.147.0</legend.sdlc.version>
+        <legend.engine.version>4.29.0</legend.engine.version>
+        <legend.sdlc.version>0.145.0</legend.sdlc.version>
 
 
         <!-- Dependency versions -->
