@@ -55,5 +55,11 @@ public final class CoreDataMigrations extends MongoMigrations
     {
         new DependenciesMigration(mongoDatabase).addTransitiveDependenciesToVersionData();
     }
+
+    @Deprecated
+    public void addLatestVersionToProjectData()
+    {
+        new ProjectToProjectVersionMigration(mongoDatabase).addLatestVersionToProjectData();
+    }
 }
 

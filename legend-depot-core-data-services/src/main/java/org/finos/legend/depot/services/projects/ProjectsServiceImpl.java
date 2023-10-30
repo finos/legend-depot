@@ -39,7 +39,6 @@ import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.store.notifications.queue.api.Queue;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -102,12 +101,6 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
-    public List<StoreProjectData> getProjects(int page, int pageSize)
-    {
-        return projects.getProjects(page, pageSize);
-    }
-
-    @Override
     public List<String> getVersions(String groupId, String artifactId,boolean includeSnapshots)
     {
         return this.find(groupId, artifactId).stream().filter(pv -> (includeSnapshots || !VersionValidator.isSnapshotVersion(pv.getVersionId())) && !pv.getVersionData().isExcluded()).map(pv -> pv.getVersionId()).collect(Collectors.toList());
@@ -160,7 +153,12 @@ public class ProjectsServiceImpl implements ProjectsService
     {
         if (VersionAlias.LATEST.getName().equals(versionId))
         {
-            return projectsVersions.find(groupId, artifactId).stream().filter(v -> !VersionValidator.isSnapshotVersion(v.getVersionId()) && !v.getVersionData().isExcluded()).max(Comparator.comparing(o -> VersionId.parseVersionId(o.getVersionId())));
+            Optional<StoreProjectData> projectData = this.findCoordinates(groupId, artifactId);
+            if (projectData.isPresent())
+            {
+                return projectsVersions.find(groupId, artifactId, projectData.get().getLatestVersion());
+            }
+            return Optional.empty();
         }
         else if (VersionAlias.HEAD.getName().equals(versionId))
         {
@@ -217,12 +215,6 @@ public class ProjectsServiceImpl implements ProjectsService
         {
             throw new IllegalArgumentException(String.format("No project found for %s-%s",groupId,artifactId));
         }
-    }
-
-    @Override
-    public Optional<VersionId> getLatestVersion(String groupId, String artifactId)
-    {
-        return this.getVersions(groupId, artifactId,false).stream().map(v -> VersionId.parseVersionId(v)).max(VersionId::compareTo);
     }
 
     @Override

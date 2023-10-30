@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.store.mongo.admin.migrations;
 
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
@@ -27,12 +28,17 @@ import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
@@ -42,6 +48,7 @@ public final class ProjectToProjectVersionMigration
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ProjectToProjectVersionMigration.class);
     private final MongoDatabase mongoDatabase;
+    private static final String EXCLUDED = "versionData.excluded";
 
     public ProjectToProjectVersionMigration(MongoDatabase mongoDatabase)
     {
@@ -127,5 +134,44 @@ public final class ProjectToProjectVersionMigration
             }
         });
         LOGGER.info(String.format("versions updated [%s]", i.get()));
+    }
+
+    @Deprecated
+    public void addLatestVersionToProjectData()
+    {
+        MongoCollection<Document> projectCollection = mongoDatabase.getCollection(ProjectsMongo.COLLECTION);
+        MongoCollection<Document> versionCollection = mongoDatabase.getCollection(ProjectsVersionsMongo.COLLECTION);
+        projectCollection.find().forEach((Consumer<Document>) document ->
+        {
+            AtomicInteger i = new AtomicInteger();
+            String groupId = document.getString(BaseMongo.GROUP_ID);
+            String artifactId = document.getString(BaseMongo.ARTIFACT_ID);
+            try
+            {
+                FindIterable<Document> versionDocument = versionCollection.find(Filters.and(
+                        Filters.eq(BaseMongo.GROUP_ID, groupId), Filters.eq(BaseMongo.ARTIFACT_ID, artifactId),
+                        Filters.not(Filters.regex(BaseMongo.VERSION_ID, BRANCH_SNAPSHOT(""))), Filters.eq(EXCLUDED, false)));
+                List<VersionId> parsedVersions  = new ArrayList<>();
+                versionDocument.forEach((Consumer<Document>) doc ->
+                {
+                    parsedVersions.add(VersionId.parseVersionId(doc.getString(BaseMongo.VERSION_ID)));
+                });
+                Optional<VersionId> latestVersion = parsedVersions.stream().max(Comparator.comparing(Function.identity()));
+                if (latestVersion.isPresent())
+                {
+                    LOGGER.info(String.format("%s-%s updated with latest version", groupId, artifactId));
+                    projectCollection.updateOne(Filters.and(Filters.eq(BaseMongo.GROUP_ID, groupId),
+                            Filters.eq(BaseMongo.ARTIFACT_ID, artifactId)), Updates.set("latestVersion", latestVersion.get().toVersionIdString()));
+                    LOGGER.info(String.format("%s-%s update completed",groupId,artifactId));
+                }
+                LOGGER.info(String.format("projects updated [%s]",i.incrementAndGet()));
+            }
+            catch (Exception e)
+            {
+                LOGGER.info("Error while updating data:" + e.getMessage());
+                LOGGER.info(String.format("projects updated [%s] before error",i.get()));
+                LOGGER.info(String.format("%s-%s update could not be completed",groupId, artifactId));
+            }
+        });
     }
 }

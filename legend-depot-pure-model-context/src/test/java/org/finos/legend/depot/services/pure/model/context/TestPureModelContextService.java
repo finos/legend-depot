@@ -100,7 +100,7 @@ public class TestPureModelContextService extends TestBaseServices
     @Before
     public void setupMetadata()
     {
-        projectsStore.createOrUpdate(new StoreProjectData("PROD-1","test.legend","blank-prod"));
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-1","test.legend","blank-prod",null, "2.0.0"));
         setUpProjectsVersionsFromFile(projects);
         Assert.assertEquals(4, projectsService.getAllProjectCoordinates().size());
         entityUtils.loadEntities(versionedEntities);

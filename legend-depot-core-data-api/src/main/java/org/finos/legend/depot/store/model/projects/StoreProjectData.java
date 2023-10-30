@@ -32,15 +32,19 @@ public class StoreProjectData extends CoordinateData implements HasIdentifier
     @JsonProperty
     private String projectId;
 
+    @JsonProperty
+    private String latestVersion;
+
     public StoreProjectData()
     {
         super();
     }
 
-    public StoreProjectData(String projectId, String groupId, String artifactId, String defaultBranch)
+    public StoreProjectData(String projectId, String groupId, String artifactId, String defaultBranch, String latestVersion)
     {
         this(projectId, groupId, artifactId);
         this.defaultBranch = defaultBranch;
+        this.latestVersion = latestVersion;
     }
 
     public StoreProjectData(String projectId,String groupId,String artifactId)
@@ -62,6 +66,16 @@ public class StoreProjectData extends CoordinateData implements HasIdentifier
     public String getProjectId()
     {
         return projectId;
+    }
+
+    public String getLatestVersion()
+    {
+        return latestVersion;
+    }
+
+    public void setLatestVersion(String latestVersion)
+    {
+        this.latestVersion = latestVersion;
     }
 
     @Override

@@ -281,7 +281,7 @@ public class TestProjectsService extends TestBaseServices
     {
         Optional<StoreProjectData> storeProjectData = projectsService.findCoordinates("examples.metadata", "test");
         Assert.assertTrue(storeProjectData.isPresent());
-        Assert.assertEquals(storeProjectData.get(), new StoreProjectData("PROD-A", "examples.metadata", "test"));
+        Assert.assertEquals(storeProjectData.get(), new StoreProjectData("PROD-A", "examples.metadata", "test", null, "2.3.1"));
 
         Optional<StoreProjectData> storeProjectData1 = projectsService.findCoordinates("dummy.dep", "test");
         Assert.assertFalse(storeProjectData1.isPresent());
@@ -352,11 +352,11 @@ public class TestProjectsService extends TestBaseServices
         Assert.assertNotNull(fullVersions);
         Assert.assertEquals(2, fullVersions.size());
 
-        Assert.assertTrue(projectsService.getLatestVersion("examples.metadata", "test").isPresent());
-        Assert.assertEquals("2.3.1", projectsService.getLatestVersion("examples.metadata", "test").get().toVersionIdString());
+        Assert.assertTrue(projectsService.findCoordinates("examples.metadata", "test").isPresent());
+        Assert.assertEquals("2.3.1", projectsService.findCoordinates("examples.metadata", "test").get().getLatestVersion());
 
         Assert.assertTrue(projectsService.find("examples.metadata", "test","latest").isPresent());
-        Assert.assertEquals("2.3.1", projectsService.getLatestVersion("examples.metadata", "test").get().toVersionIdString());
+        Assert.assertEquals("2.3.1", projectsService.findCoordinates("examples.metadata", "test").get().getLatestVersion());
 
         Assert.assertFalse(projectsService.find("dont","exist","latest").isPresent());
 

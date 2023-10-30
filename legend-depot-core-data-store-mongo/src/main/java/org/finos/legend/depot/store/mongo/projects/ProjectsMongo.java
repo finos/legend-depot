@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-
 public class ProjectsMongo extends BaseMongo<StoreProjectData> implements Projects, UpdateProjects
 {
 
@@ -85,12 +84,6 @@ public class ProjectsMongo extends BaseMongo<StoreProjectData> implements Projec
     public List<StoreProjectData> getAll()
     {
         return getAllStoredEntities();
-    }
-
-    @Override
-    public List<StoreProjectData> getProjects(int page, int pageSize)
-    {
-        return getStoredEntitiesByPage(page, pageSize);
     }
 
     @Override

@@ -33,19 +33,12 @@ public interface ProjectsService
 
     List<StoreProjectVersionData> findByUpdatedDate(long updatedFrom, long updatedTo);
 
-    /**
-     * NOTE: page starting from 1
-     */
-    List<StoreProjectData> getProjects(int page, int pageSize);
-
     default List<String> getVersions(String groupId, String artifactId)
     {
         return getVersions(groupId, artifactId,false);
     }
 
     List<String> getVersions(String groupId, String artifactId,boolean includeSnapshots);
-
-    Optional<VersionId> getLatestVersion(String groupId, String artifactId);
 
     @Deprecated
     List<StoreProjectData> findByProjectId(String projectId);
