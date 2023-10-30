@@ -49,7 +49,7 @@ With this change we have also introduced three kinds of entity storage which wil
 ### Steps to follow:
 1. Use the API /migrations/migrateToStoredEntityData, this will update the entities collection to be identified as one form of entity data.
 
-## 4. Storing entity's content as string (for version 2.11.0 and up)
+## 4. Storing entity's content as string (for version 2.12.0 and up)
 ### Why is the storage of latest versions required in project data?
 Currently, we compute latest version whenever it is required. It is computed by fetching all versions for the project coordinates and then find the maximum of all the versions. We wanted to make the APIs using latest version have a better performance.
 The result is storing latest version to the data itself. We save the computation of this version. We use the refresh handler to keep the latest versions in sync. 
