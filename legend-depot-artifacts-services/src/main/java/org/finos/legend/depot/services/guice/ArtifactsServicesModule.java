@@ -84,6 +84,7 @@ public class ArtifactsServicesModule extends PrivateModule
 
         expose(ArtifactsRefreshService.class);
         expose(NotificationEventHandler.class);
+        expose(RefreshDependenciesService.class);
     }
 
 
