@@ -288,6 +288,17 @@ public class TestProjectsService extends TestBaseServices
     }
 
     @Test
+    public void canGetProjectVersionWithLatestVersionNull()
+    {
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-123", "dummy.project", "test"));
+        Optional<StoreProjectData> storeProjectData = projectsService.findCoordinates("dummy.project", "test");
+        Assert.assertTrue(storeProjectData.isPresent());
+
+        Optional<StoreProjectVersionData> projectVersionData = projectsService.find("dummy.project", "test", "latest");
+        Assert.assertFalse(projectVersionData.isPresent());
+    }
+
+    @Test
     public void canRestoreEvictedProjectVersion()
     {
         StoreProjectVersionData versionData = new StoreProjectVersionData("examples.metadata", "test", "1.0.0");
