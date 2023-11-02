@@ -154,7 +154,7 @@ public class ProjectsServiceImpl implements ProjectsService
         if (VersionAlias.LATEST.getName().equals(versionId))
         {
             Optional<StoreProjectData> projectData = this.findCoordinates(groupId, artifactId);
-            if (projectData.isPresent())
+            if (projectData.isPresent() && projectData.get().getLatestVersion() != null)
             {
                 return projectsVersions.find(groupId, artifactId, projectData.get().getLatestVersion());
             }
