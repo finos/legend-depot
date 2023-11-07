@@ -48,7 +48,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -268,33 +267,25 @@ public class ProjectsServiceImpl implements ProjectsService
         ProjectDependencyGraphWalkerContext  graphWalkerContext =  new ProjectDependencyGraphWalkerContext();
         buildDependencyGraph(graph, null, projectDependencyVersions, graphWalkerContext);
         buildProjectVersionMap(projectDependencyVersions, graphWalkerContext);
-        ProjectDependencyReport report = buildReportFromGraph(graph, graphWalkerContext);
-        return overrideConflictDependencies(projectDependencyVersions, report);
-    }
-
-    public ProjectDependencyReport overrideConflictDependencies(List<ProjectVersion> projectDependencyVersions, ProjectDependencyReport report)
-    {
-        List<ProjectDependencyReport.ProjectDependencyConflict> conflicts = new ArrayList<>(report.getConflicts());
-        projectDependencyVersions.stream().forEach(dep ->
-        {
-            Optional<ProjectDependencyReport.ProjectDependencyConflict> conflictPresent = conflicts.stream().filter(conflict -> conflict.getGroupId().equals(dep.getGroupId()) && conflict.getArtifactId().equals(dep.getArtifactId())).findFirst();
-            if (conflictPresent.isPresent())
-            {
-                report.removeConflict(conflictPresent.get());
-            }
-        });
-        return report;
+        return buildReportFromGraph(graph, graphWalkerContext);
     }
 
     private void buildProjectVersionMap(List<ProjectVersion> projectDependencyVersions, ProjectDependencyGraphWalkerContext graphWalkerContext)
     {
+        Set<ProjectVersion> dependencies = new HashSet<>();
         projectDependencyVersions.forEach(pv ->
         {
             StoreProjectVersionData versionData = graphWalkerContext.getProjectData(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
-            versionData.getTransitiveDependenciesReport().getTransitiveDependencies().stream()
-                    .filter(dep -> !projectDependencyVersions.stream().filter(x -> x.getGroupId().equals(dep.getGroupId()) && x.getArtifactId().equals(dep.getArtifactId())).findFirst().isPresent())
-                    .forEach(dep -> graphWalkerContext.addVersionToProject(dep.getGroupId(), dep.getArtifactId(), dep));
+                if (versionData.getTransitiveDependenciesReport().isValid())
+                {
+                    dependencies.addAll(this.dependencyOverride.overrideWith(versionData.getTransitiveDependenciesReport().getTransitiveDependencies(), projectDependencyVersions, graphWalkerContext::getProjectDataDependencies));
+                }
+                else
+                {
+                    throw new IllegalStateException(String.format("Error calculating transitive dependencies for project version - %s-%s-%s", versionData.getGroupId(), versionData.getArtifactId(), versionData.getVersionId()));
+                }
         });
+        dependencies.parallelStream().forEach(dep -> graphWalkerContext.addVersionToProject(dep.getGroupId(), dep.getArtifactId(), dep));
     }
 
     public ProjectDependencyReport buildReportFromGraph(ProjectDependencyGraph dependencyGraph, ProjectDependencyGraphWalkerContext graphWalkerContext)

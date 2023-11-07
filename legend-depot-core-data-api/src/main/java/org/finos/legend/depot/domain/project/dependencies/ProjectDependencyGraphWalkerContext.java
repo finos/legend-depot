@@ -25,9 +25,11 @@ import org.finos.legend.depot.domain.CoordinateData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ProjectDependencyGraphWalkerContext
 {
@@ -73,4 +75,9 @@ public class ProjectDependencyGraphWalkerContext
         return this.projectDataMap.get(new ProjectVersion(groupId, artifactId, versionId));
     }
 
+    public Set<ProjectVersion> getProjectDataDependencies(List<ProjectVersion> pv, boolean transitive)
+    {
+        return transitive == true ? pv.stream().map(p -> this.projectDataMap.get(p).getTransitiveDependenciesReport().getTransitiveDependencies()).flatMap(Collection::stream).collect(Collectors.toSet())
+                : pv.stream().map(p -> this.projectDataMap.get(p).getVersionData().getDependencies()).flatMap(Collection::stream).collect(Collectors.toSet());
+    }
 }
