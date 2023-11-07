@@ -29,7 +29,7 @@ import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.metrics.query.InMemoryQueryMetricsRegistry;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
-import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.junit.Assert;
 import org.junit.Before;

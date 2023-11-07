@@ -50,8 +50,10 @@
         <module>legend-depot-metrics-query-services</module>
         <module>legend-depot-metrics-query-store-mongo</module>
 
-        <module>legend-depot-store-notifications</module>
-        <module>legend-depot-store-notifications-queue</module>
+        <module>legend-depot-notifications-api</module>
+        <module>legend-depot-notifications-services</module>
+        <module>legend-depot-notifications-store-mongo</module>
+        <module>legend-depot-notifications-queue-mongo</module>
 
         <module>legend-depot-core-data-api</module>
         <module>legend-depot-core-data-services</module>
@@ -546,12 +548,23 @@
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.depot</groupId>
-                <artifactId>legend-depot-store-notifications</artifactId>
+                <artifactId>legend-depot-notifications-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.depot</groupId>
-                <artifactId>legend-depot-store-notifications-queue</artifactId>
+                <artifactId>legend-depot-notifications-services</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-notifications-store-mongo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.finos.legend.depot</groupId>
+                <artifactId>legend-depot-notifications-queue-mongo</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

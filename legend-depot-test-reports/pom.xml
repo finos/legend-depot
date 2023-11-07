@@ -151,7 +151,17 @@
         </dependency>
         <dependency>
             <groupId>org.finos.legend.depot</groupId>
-            <artifactId>legend-depot-store-notifications</artifactId>
+            <artifactId>legend-depot-notifications-store-mongo</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.finos.legend.depot</groupId>
+            <artifactId>legend-depot-notifications-services</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>

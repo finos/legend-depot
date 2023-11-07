@@ -24,7 +24,7 @@ import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfig
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
-import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
 
 import javax.inject.Inject;
 import javax.inject.Named;

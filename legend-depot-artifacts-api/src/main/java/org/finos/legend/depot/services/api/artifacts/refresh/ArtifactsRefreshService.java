@@ -15,22 +15,22 @@
 
 package org.finos.legend.depot.services.api.artifacts.refresh;
 
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 
 
 public interface ArtifactsRefreshService
 {
-    default MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId,boolean transitive, String parentEventId)
+    default MetadataNotificationResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean transitive, String parentEventId)
     {
         return refreshVersionForProject(groupId, artifactId, versionId,false, transitive, parentEventId);
     }
 
-    MetadataEventResponse refreshVersionForProject(String groupId, String artifactId, String versionId,boolean fullUpdate, boolean transitive, String parentEventId);
+    MetadataNotificationResponse refreshVersionForProject(String groupId, String artifactId, String versionId, boolean fullUpdate, boolean transitive, String parentEventId);
 
-    MetadataEventResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate,boolean allVersions,boolean transitive, String parentEventId);
+    MetadataNotificationResponse refreshAllVersionsForProject(String groupId, String artifactId, boolean fullUpdate, boolean allVersions, boolean transitive, String parentEventId);
 
-    MetadataEventResponse refreshAllVersionsForAllProjects(boolean fullUpdate,boolean allVersions,boolean transitive, String parentEventId);
+    MetadataNotificationResponse refreshAllVersionsForAllProjects(boolean fullUpdate, boolean allVersions, boolean transitive, String parentEventId);
 
-    MetadataEventResponse refreshDefaultSnapshotsForAllProjects(boolean fullUpdate, boolean transitive, String parentEventId);
+    MetadataNotificationResponse refreshDefaultSnapshotsForAllProjects(boolean fullUpdate, boolean transitive, String parentEventId);
 
 }

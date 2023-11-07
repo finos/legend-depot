@@ -34,7 +34,7 @@ import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.depot.store.mongo.metrics.query.QueryMetricsMongo;
-import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.After;
 import org.junit.Assert;

@@ -16,7 +16,7 @@
 package org.finos.legend.depot.services.artifacts.purge;
 
 import org.finos.legend.depot.domain.VersionedData;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactHandlerFactory;
@@ -138,11 +138,11 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     }
 
     @Override
-    public MetadataEventResponse deprecate(String groupId, String artifactId, String versionId)
+    public MetadataNotificationResponse deprecate(String groupId, String artifactId, String versionId)
     {
         return TracerFactory.get().executeWithTrace(DEPRECATE_VERSION, () ->
         {
-            MetadataEventResponse response = new MetadataEventResponse();
+            MetadataNotificationResponse response = new MetadataNotificationResponse();
             StoreProjectVersionData projectData = getProjectVersion(groupId, artifactId, versionId);
             projectData.getVersionData().setDeprecated(true);
             response.addMessage(String.format("%s-%s-%s deprecated", groupId, artifactId, versionId));
@@ -152,9 +152,9 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     }
 
     @Override
-    public MetadataEventResponse deprecateVersionsNotInRepository()
+    public MetadataNotificationResponse deprecateVersionsNotInRepository()
     {
-        MetadataEventResponse response = new MetadataEventResponse();
+        MetadataNotificationResponse response = new MetadataNotificationResponse();
         versionsMismatchService.findVersionsMismatches().parallelStream().forEach(versionMismatch ->
         {
             if (!versionMismatch.versionsNotInRepository.isEmpty())
@@ -171,12 +171,12 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     }
 
     @Override
-    public MetadataEventResponse evictOldestProjectVersions(String groupId, String artifactId, int versionsToKeep)
+    public MetadataNotificationResponse evictOldestProjectVersions(String groupId, String artifactId, int versionsToKeep)
     {
         projects.checkExists(groupId, artifactId);
         return TracerFactory.get().executeWithTrace(EVICT_OLDEST, () ->
         {
-            MetadataEventResponse response = new MetadataEventResponse();
+            MetadataNotificationResponse response = new MetadataNotificationResponse();
             List<String> versionIds = projects.getVersions(groupId, artifactId);
             int numberOfVersions = versionIds.size();
             try
@@ -202,11 +202,11 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     }
 
     @Override
-    public MetadataEventResponse evictLeastRecentlyUsed(int ttlForVersionsInDays, int ttlForSnapshotsInDays)
+    public MetadataNotificationResponse evictLeastRecentlyUsed(int ttlForVersionsInDays, int ttlForSnapshotsInDays)
     {
         Set<ProjectVersion> evictProjectVersions = new HashSet<>();
         LocalDateTime currentDateTime = LocalDateTime.now();
-        MetadataEventResponse response = new MetadataEventResponse();
+        MetadataNotificationResponse response = new MetadataNotificationResponse();
         try
         {
             LOGGER.info("Started finding eviction candidates for snapshot versions");
@@ -230,10 +230,10 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     }
 
     @Override
-    public MetadataEventResponse evictVersionsNotUsed()
+    public MetadataNotificationResponse evictVersionsNotUsed()
     {
         Set<ProjectVersion> evictProjectVersions = new HashSet<>();
-        MetadataEventResponse response = new MetadataEventResponse();
+        MetadataNotificationResponse response = new MetadataNotificationResponse();
         try
         {
             LOGGER.info("Started finding versions not being used for eviction");

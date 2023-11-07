@@ -15,22 +15,22 @@
 
 package org.finos.legend.depot.services.api.artifacts.purge;
 
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 
 public interface ArtifactsPurgeService
 {
-    MetadataEventResponse evictLeastRecentlyUsed(int ttlForVersionsInDays, int ttlForSnapshotsInDays);
+    MetadataNotificationResponse evictLeastRecentlyUsed(int ttlForVersionsInDays, int ttlForSnapshotsInDays);
 
-    MetadataEventResponse evictVersionsNotUsed();
+    MetadataNotificationResponse evictVersionsNotUsed();
 
-    MetadataEventResponse evictOldestProjectVersions(String groupId, String artifactId, int versionsToKeep);
+    MetadataNotificationResponse evictOldestProjectVersions(String groupId, String artifactId, int versionsToKeep);
 
     void evict(String groupId, String artifactId, String versionId);
 
     void delete(String groupId, String artifactId, String versionId);
 
-    MetadataEventResponse deprecate(String groupId, String artifactId, String version);
+    MetadataNotificationResponse deprecate(String groupId, String artifactId, String version);
 
-    MetadataEventResponse deprecateVersionsNotInRepository();
+    MetadataNotificationResponse deprecateVersionsNotInRepository();
 
   }
