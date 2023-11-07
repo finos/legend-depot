@@ -23,7 +23,7 @@ import org.finos.legend.depot.services.api.artifacts.repository.ArtifactReposito
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 import org.finos.legend.depot.domain.version.VersionMismatch;
 import org.finos.legend.depot.domain.DatesHandler;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
@@ -51,7 +51,7 @@ import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
-import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.store.mongo.generations.TestGenerationsStoreMongo;
 import org.junit.Assert;
 import org.junit.Before;
@@ -138,7 +138,7 @@ public class TestArtifactsPurgeService extends TestBaseServices
         Assert.assertNotNull(project);
         List<String> projectVersions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID);
         Assert.assertEquals(3, projectVersions.size());
-        MetadataEventResponse response = purgeService.evictOldestProjectVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID,5);
+        MetadataNotificationResponse response = purgeService.evictOldestProjectVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID,5);
         Assert.assertNotNull(response);
 
         List<String> afterVersionsOrdered = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID);
@@ -161,7 +161,7 @@ public class TestArtifactsPurgeService extends TestBaseServices
         Assert.assertEquals(0, projectVersions.size());
         Assert.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, "test1", BRANCH_SNAPSHOT("master")).size());
 
-        MetadataEventResponse response = purgeService.evictOldestProjectVersions(TEST_GROUP_ID,"test1",1);
+        MetadataNotificationResponse response = purgeService.evictOldestProjectVersions(TEST_GROUP_ID,"test1",1);
         Assert.assertNotNull(response);
 
         List<String> afterVersionsOrdered = projectsService.getVersions(TEST_GROUP_ID, "test1");

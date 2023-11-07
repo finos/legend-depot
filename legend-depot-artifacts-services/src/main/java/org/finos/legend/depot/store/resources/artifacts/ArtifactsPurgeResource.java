@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.services.api.artifacts.purge.ArtifactsPurgeService;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
@@ -56,16 +56,16 @@ public class ArtifactsPurgeResource extends AuthorisedResource
     @Path("/artifactEviction/{groupId}/{artifactId}/versions/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.EVICT_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse evictVersion(@PathParam("groupId") String groupId,
-                                              @PathParam("artifactId") String artifactId,
-                                              @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
+    public MetadataNotificationResponse evictVersion(@PathParam("groupId") String groupId,
+                                                     @PathParam("artifactId") String artifactId,
+                                                     @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
 
         return handle(ResourceLoggingAndTracing.EVICT_VERSION, () ->
         {
             validateUser();
             artifactsPurgeService.evict(groupId, artifactId, versionId);
-            return new MetadataEventResponse();
+            return new MetadataNotificationResponse();
         });
     }
 
@@ -73,16 +73,16 @@ public class ArtifactsPurgeResource extends AuthorisedResource
     @Path("/artifactDelete/{groupId}/{artifactId}/versions/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.DELETE_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse deleteVersion(@PathParam("groupId") String groupId,
-                                              @PathParam("artifactId") String artifactId,
-                                              @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
+    public MetadataNotificationResponse deleteVersion(@PathParam("groupId") String groupId,
+                                                      @PathParam("artifactId") String artifactId,
+                                                      @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
 
         return handle(ResourceLoggingAndTracing.DELETE_VERSION, () ->
         {
             validateUser();
             artifactsPurgeService.delete(groupId, artifactId, versionId);
-            return new MetadataEventResponse();
+            return new MetadataNotificationResponse();
         });
     }
 
@@ -91,9 +91,9 @@ public class ArtifactsPurgeResource extends AuthorisedResource
     @Path("/artifactEviction/{groupId}/{artifactId}/old/{keepVersions}")
     @ApiOperation(ResourceLoggingAndTracing.EVICT_OLD_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse evictOldVersions(@PathParam("groupId") String groupId,
-                                                  @PathParam("artifactId") String artifactId,
-                                                  @PathParam("keepVersions") int versionsToKeep)
+    public MetadataNotificationResponse evictOldVersions(@PathParam("groupId") String groupId,
+                                                         @PathParam("artifactId") String artifactId,
+                                                         @PathParam("keepVersions") int versionsToKeep)
     {
 
         return handle(ResourceLoggingAndTracing.EVICT_OLD_VERSIONS, () ->
@@ -107,9 +107,9 @@ public class ArtifactsPurgeResource extends AuthorisedResource
     @Path("/artifactDeprecate/{groupId}/{artifactId}/versions/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.DEPRECATE_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse deprecateVersion(@PathParam("groupId") String groupId,
-                                                  @PathParam("artifactId") String artifactId,
-                                                  @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
+    public MetadataNotificationResponse deprecateVersion(@PathParam("groupId") String groupId,
+                                                         @PathParam("artifactId") String artifactId,
+                                                         @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
 
         return handle(ResourceLoggingAndTracing.DEPRECATE_VERSION, () ->
@@ -123,7 +123,7 @@ public class ArtifactsPurgeResource extends AuthorisedResource
     @Path("/artifactEviction/versions/notUsed")
     @ApiOperation(ResourceLoggingAndTracing.EVICT_VERSIONS_NOT_USED)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataEventResponse evictVersionsNotUsed()
+    public MetadataNotificationResponse evictVersionsNotUsed()
     {
 
         return handle(ResourceLoggingAndTracing.EVICT_VERSIONS_NOT_USED, () ->

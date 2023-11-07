@@ -15,9 +15,9 @@
 
 package org.finos.legend.depot.services.artifacts.refresh;
 
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationStatus;
 import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependenciesService;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
@@ -42,9 +42,9 @@ import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
+import org.finos.legend.depot.store.mongo.notifications.queue.NotificationsQueueMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
-import org.finos.legend.depot.store.notifications.queue.api.Queue;
-import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactHandlerFactory;
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntityArtifactsProvider;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
@@ -110,7 +110,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     public void cantRefreshANonExistingVersion()
     {
         String versionId = "4.0.0";
-        MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("prod-1",TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false,false,PARENT_EVENT_ID));
+        MetadataNotificationResponse response = versionHandler.handleNotification(new MetadataNotification("prod-1",TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false,false,PARENT_EVENT_ID));
         Assert.assertNotNull(response);
         Assert.assertTrue(response.hasErrors());
     }
@@ -123,16 +123,16 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         List<VersionId> versionsInRepo = repositoryServices.findVersions(TEST_GROUP_ID, "art1011");
         Assert.assertNotNull(versionsInRepo);
         Assert.assertTrue(versionsInRepo.isEmpty());
-        MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("prod-1",TEST_GROUP_ID, "art1011", versionId,true,false,PARENT_EVENT_ID));
+        MetadataNotificationResponse response = versionHandler.handleNotification(new MetadataNotification("prod-1",TEST_GROUP_ID, "art1011", versionId,true,false,PARENT_EVENT_ID));
         Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
+        Assert.assertEquals(MetadataNotificationStatus.FAILED,response.getStatus());
     }
 
     @Test
     public void cantRefreshNonExistingVersionInRepo()
     {
         String versionId = "2.111.0";
-        MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("prod-1",TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false,false,PARENT_EVENT_ID));
+        MetadataNotificationResponse response = versionHandler.handleNotification(new MetadataNotification("prod-1",TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false,false,PARENT_EVENT_ID));
         Assert.assertNotNull(response);
         Assert.assertTrue(response.hasErrors());
     }
@@ -145,7 +145,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         StoreProjectVersionData storeProjectVersionData = projectsService.excludeProjectVersion(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId, EXCLUSION_REASON);
         Assert.assertTrue(storeProjectVersionData.getVersionData().isExcluded());
 
-        MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("prod-1",TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false,false,PARENT_EVENT_ID));
+        MetadataNotificationResponse response = versionHandler.handleNotification(new MetadataNotification("prod-1",TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,false,false,PARENT_EVENT_ID));
         Assert.assertNotNull(response);
         Assert.assertTrue(response.hasErrors());
 
@@ -165,27 +165,27 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         when(repositoryServices.findVersion(TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0")).thenReturn(Optional.of("1.0.0"));
         when(repositoryServices.findVersion(TEST_GROUP_ID,TEST_ARTIFACT_ID,BRANCH_SNAPSHOT("master"))).thenReturn(Optional.of(BRANCH_SNAPSHOT("master")));
         projectsService.createOrUpdate(new StoreProjectVersionData(TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0"));
-        MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("prod-1",TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0",true,false,PARENT_EVENT_ID));
+        MetadataNotificationResponse response = versionHandler.handleNotification(new MetadataNotification("prod-1",TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0",true,false,PARENT_EVENT_ID));
         Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
+        Assert.assertEquals(MetadataNotificationStatus.FAILED,response.getStatus());
         Assert.assertTrue(response.getErrors().contains("Dependency examples.metadata-c-1.0.0 not found in store"));
     }
 
     @Test
     public void cannotUpdateUnknownProjectVersion()
     {
-        MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("prod-1",TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0",true,false,PARENT_EVENT_ID));
+        MetadataNotificationResponse response = versionHandler.handleNotification(new MetadataNotification("prod-1",TEST_GROUP_ID,TEST_ARTIFACT_ID,"1.0.0",true,false,PARENT_EVENT_ID));
         Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
+        Assert.assertEquals(MetadataNotificationStatus.FAILED,response.getStatus());
         Assert.assertEquals("Version 1.0.0 does not exist for examples.metadata-test in repository", response.getErrors().get(0));
     }
 
     @Test
     public void cannotUpdateUnknownProject()
     {
-        MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("prod-1","i.am.not.in",TEST_ARTIFACT_ID,"1.0.0",true,false,PARENT_EVENT_ID));
+        MetadataNotificationResponse response = versionHandler.handleNotification(new MetadataNotification("prod-1","i.am.not.in",TEST_ARTIFACT_ID,"1.0.0",true,false,PARENT_EVENT_ID));
         Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
+        Assert.assertEquals(MetadataNotificationStatus.FAILED,response.getStatus());
         Assert.assertEquals("No Project with coordinates i.am.not.in-test found", response.getErrors().get(0));
     }
 
@@ -193,11 +193,11 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     public void cannotUpdateProjectWithDuplicateCoordinates() throws ArtifactRepositoryException
     {
         when(repositoryServices.findVersion(TEST_GROUP_ID,TEST_ARTIFACT_ID,BRANCH_SNAPSHOT("master"))).thenReturn(Optional.of(BRANCH_SNAPSHOT("master")));
-        List<String> response = versionHandler.validateEvent(new MetadataNotification("prod-d",TEST_GROUP_ID,TEST_ARTIFACT_ID,BRANCH_SNAPSHOT("master"),true,false,PARENT_EVENT_ID));
+        List<String> response = versionHandler.validate(new MetadataNotification("prod-d",TEST_GROUP_ID,TEST_ARTIFACT_ID,BRANCH_SNAPSHOT("master"),true,false,PARENT_EVENT_ID));
         Assert.assertNotNull(response);
         Assert.assertEquals("Invalid projectId [prod-d]. Existing project [PROD-1] has same [examples.metadata-test] coordinates", response.get(0));
-        Assert.assertEquals("Invalid projectId [null]. Existing project [PROD-1] has same [examples.metadata-test] coordinates",  versionHandler.validateEvent(new MetadataNotification(null,TEST_GROUP_ID,TEST_ARTIFACT_ID,BRANCH_SNAPSHOT("master"),true,false,PARENT_EVENT_ID)).get(0));
-        Assert.assertEquals("Invalid projectId []. Existing project [PROD-1] has same [examples.metadata-test] coordinates",  versionHandler.validateEvent(new MetadataNotification("",TEST_GROUP_ID,TEST_ARTIFACT_ID,BRANCH_SNAPSHOT("master"),true,false,PARENT_EVENT_ID)).get(0));
+        Assert.assertEquals("Invalid projectId [null]. Existing project [PROD-1] has same [examples.metadata-test] coordinates",  versionHandler.validate(new MetadataNotification(null,TEST_GROUP_ID,TEST_ARTIFACT_ID,BRANCH_SNAPSHOT("master"),true,false,PARENT_EVENT_ID)).get(0));
+        Assert.assertEquals("Invalid projectId []. Existing project [PROD-1] has same [examples.metadata-test] coordinates",  versionHandler.validate(new MetadataNotification("",TEST_GROUP_ID,TEST_ARTIFACT_ID,BRANCH_SNAPSHOT("master"),true,false,PARENT_EVENT_ID)).get(0));
     }
 
     @Test
@@ -207,9 +207,9 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         when(repositoryServices.findVersion(TEST_GROUP_ID,TEST_ARTIFACT_ID,BRANCH_SNAPSHOT("master"))).thenReturn(Optional.of(BRANCH_SNAPSHOT("master")));
         when(repositoryServices.findVersion(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID,BRANCH_SNAPSHOT("master"))).thenReturn(Optional.of(BRANCH_SNAPSHOT("master")));
         when(repositoryServices.findDependencies(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"))).thenReturn(artifactDependency);
-        MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("",TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"), false, false, PARENT_EVENT_ID));
+        MetadataNotificationResponse response = versionHandler.handleNotification(new MetadataNotification("",TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"), false, false, PARENT_EVENT_ID));
         Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.FAILED, response.getStatus());
+        Assert.assertEquals(MetadataNotificationStatus.FAILED, response.getStatus());
         Assert.assertTrue(response.getErrors().contains("Dependency examples.metadata-test-dependencies-master-SNAPSHOT not found in store"));
         Assert.assertFalse(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).get().getVersionData().getDependencies().isEmpty());
     }
@@ -219,9 +219,9 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     {
         Set<ArtifactDependency> artifactDependency = Collections.singleton(new ArtifactDependency(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, BRANCH_SNAPSHOT("master")));
         when(repositoryServices.findDependencies(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0")).thenReturn(artifactDependency);
-        MetadataEventResponse response = versionHandler.handleEvent(new MetadataNotification("",TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0", true,false, PARENT_EVENT_ID));
+        MetadataNotificationResponse response = versionHandler.handleNotification(new MetadataNotification("",TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0", true,false, PARENT_EVENT_ID));
         Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.FAILED, response.getStatus());
+        Assert.assertEquals(MetadataNotificationStatus.FAILED, response.getStatus());
     }
 
     @Test
@@ -231,7 +231,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch2-SNAPSHOT"));
         projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch3-SNAPSHOT"));
 
-        List<String> errors = versionHandler.validateEvent(new MetadataNotification("PROD-1", "examples.metadata", "test", "branch4-SNAPSHOT"));
+        List<String> errors = versionHandler.validate(new MetadataNotification("PROD-1", "examples.metadata", "test", "branch4-SNAPSHOT"));
 
         Assert.assertEquals(1, errors.size());
     }
@@ -243,7 +243,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch2-SNAPSHOT"));
         projectsService.createOrUpdate(new StoreProjectVersionData("examples.metadata","test","branch3-SNAPSHOT"));
 
-        List<String> errors = versionHandler.validateEvent(new MetadataNotification("PROD-1", "examples.metadata", "test", "branch3-SNAPSHOT"));
+        List<String> errors = versionHandler.validate(new MetadataNotification("PROD-1", "examples.metadata", "test", "branch3-SNAPSHOT"));
 
         Assert.assertEquals(0, errors.size());
     }

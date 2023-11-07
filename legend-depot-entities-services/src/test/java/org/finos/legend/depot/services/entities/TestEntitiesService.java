@@ -37,7 +37,7 @@ import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
-import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;
 import org.junit.Before;
@@ -48,12 +48,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import static org.mockito.Mockito.mock;
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
-import static org.mockito.Mockito.when;
 
 public class TestEntitiesService extends TestBaseServices
 {

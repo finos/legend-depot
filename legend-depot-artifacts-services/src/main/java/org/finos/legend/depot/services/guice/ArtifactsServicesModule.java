@@ -24,6 +24,7 @@ import org.finos.legend.depot.services.api.artifacts.purge.ArtifactsPurgeService
 import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
 import org.finos.legend.depot.services.api.artifacts.refresh.ArtifactsRefreshService;
 import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependenciesService;
+import org.finos.legend.depot.services.api.notifications.NotificationHandler;
 import org.finos.legend.depot.services.artifacts.handlers.entities.EntitiesHandlerImpl;
 import org.finos.legend.depot.services.artifacts.handlers.entities.EntityProvider;
 import org.finos.legend.depot.services.artifacts.handlers.entities.VersionedEntitiesHandlerImpl;
@@ -35,7 +36,6 @@ import org.finos.legend.depot.services.artifacts.refresh.ArtifactsRefreshService
 import org.finos.legend.depot.services.artifacts.refresh.ProjectVersionRefreshHandler;
 import org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl;
 import org.finos.legend.depot.services.artifacts.refresh.RefreshDependenciesServiceImpl;
-import org.finos.legend.depot.store.notifications.api.NotificationEventHandler;
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactHandlerFactory;
 import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntitiesArtifactsHandler;
@@ -78,12 +78,12 @@ public class ArtifactsServicesModule extends PrivateModule
     protected void configureRefresh()
     {
         bind(ArtifactsRefreshService.class).to(ArtifactsRefreshServiceImpl.class);
-        bind(NotificationEventHandler.class).to(ProjectVersionRefreshHandler.class);
+        bind(NotificationHandler.class).to(ProjectVersionRefreshHandler.class);
         bind(RefreshDependenciesService.class).to(RefreshDependenciesServiceImpl.class);
         bind(ProjectVersionRefreshHandler.class);
 
         expose(ArtifactsRefreshService.class);
-        expose(NotificationEventHandler.class);
+        expose(NotificationHandler.class);
         expose(RefreshDependenciesService.class);
     }
 

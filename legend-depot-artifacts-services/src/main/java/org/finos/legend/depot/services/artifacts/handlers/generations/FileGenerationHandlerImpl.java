@@ -18,7 +18,7 @@ package org.finos.legend.depot.services.artifacts.handlers.generations;
 import org.apache.commons.io.FilenameUtils;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.generation.DepotGeneration;
 import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
 import org.finos.legend.depot.domain.version.VersionValidator;
@@ -71,9 +71,9 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
 
 
 
-    public MetadataEventResponse refreshProjectVersionArtifacts(String groupId,String artifactId, String versionId, List<File> files)
+    public MetadataNotificationResponse refreshProjectVersionArtifacts(String groupId, String artifactId, String versionId, List<File> files)
     {
-        MetadataEventResponse response = new MetadataEventResponse();
+        MetadataNotificationResponse response = new MetadataNotificationResponse();
         try
         {
             List<StoredFileGeneration> newGenerations = new ArrayList<>();

@@ -23,6 +23,7 @@ import org.finos.legend.depot.core.server.BaseServer;
 import org.finos.legend.depot.core.server.guice.ServerInfoModule;
 import org.finos.legend.depot.services.guice.ArtifactsSchedulesModule;
 import org.finos.legend.depot.services.guice.ArtifactsServicesModule;
+import org.finos.legend.depot.services.guice.NotificationsQueueSchedulesModule;
 import org.finos.legend.depot.services.guice.VersionReconciliationSchedulesModule;
 import org.finos.legend.depot.services.guice.ManageCoreDataServicesModule;
 import org.finos.legend.depot.services.guice.ManageEntitiesServicesModule;
@@ -33,6 +34,7 @@ import org.finos.legend.depot.services.api.artifacts.repository.ArtifactReposito
 
 import org.finos.legend.depot.services.guice.QueryMetricsModule;
 import org.finos.legend.depot.services.guice.RepositoryModule;
+import org.finos.legend.depot.store.mongo.guice.ManageNotificationsQueueMongoModule;
 import org.finos.legend.depot.store.mongo.guice.ManageMongoStoreSchedulesModule;
 import org.finos.legend.depot.store.mongo.guice.ManageQueryMetricsMongoStoreModule;
 import org.finos.legend.depot.store.mongo.guice.ManageSchedulesStoreMongoModule;
@@ -44,13 +46,14 @@ import org.finos.legend.depot.store.mongo.guice.EntitiesMigrationsStoreMongoModu
 import org.finos.legend.depot.store.mongo.guice.ManageCoreDataStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.ManageEntitiesStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.ManageGenerationsStoreMongoModule;
-import org.finos.legend.depot.store.notifications.NotificationsModule;
-import org.finos.legend.depot.store.notifications.NotificationsSchedulesModule;
-import org.finos.legend.depot.store.notifications.queue.ManageNotificationsQueueModule;
+import org.finos.legend.depot.services.guice.NotificationsModule;
+import org.finos.legend.depot.services.guice.NotificationsSchedulesModule;
+import org.finos.legend.depot.store.mongo.guice.NotificationsStoreMongoModule;
 import org.finos.legend.depot.store.resources.guice.ArtifactsResourcesModule;
 import org.finos.legend.depot.store.resources.guice.ManageCoreDataResourcesModule;
 import org.finos.legend.depot.store.resources.guice.ManageEntitiesResourcesModule;
 import org.finos.legend.depot.store.resources.guice.ManageSchedulesResourcesModule;
+import org.finos.legend.depot.store.resources.guice.NotificationsResourcesModule;
 import org.finos.legend.depot.store.resources.guice.RepositoryResourcesModule;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
 import org.finos.legend.depot.store.server.guice.DepotStoreServerModule;
@@ -117,9 +120,13 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
                 new ManageSchedulesModule(),
                 new ManageSchedulesStoreMongoModule(),
 
+                new NotificationsResourcesModule(),
                 new NotificationsModule(),
+                new NotificationsStoreMongoModule(),
                 new NotificationsSchedulesModule(),
-                new ManageNotificationsQueueModule(),
+
+                new ManageNotificationsQueueMongoModule(),
+                new NotificationsQueueSchedulesModule(),
 
                 new QueryMetricsModule(),
                 new ManageQueryMetricsSchedulesModule(),

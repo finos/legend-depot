@@ -21,7 +21,7 @@ import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRefr
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryProviderConfiguration;
 import org.finos.legend.depot.core.server.ServerConfiguration;
 import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
-import org.finos.legend.depot.store.notifications.domain.QueueManagerConfiguration;
+import org.finos.legend.depot.services.api.notifications.queue.QueueManagerConfiguration;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)

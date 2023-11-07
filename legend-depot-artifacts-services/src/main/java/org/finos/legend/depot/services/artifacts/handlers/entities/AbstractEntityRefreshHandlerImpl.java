@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.services.artifacts.handlers.entities;
 
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntityArtifactsProvider;
@@ -64,10 +64,10 @@ public abstract class AbstractEntityRefreshHandlerImpl
     }
 
 
-    public MetadataEventResponse refreshVersionArtifacts(String groupId, String artifactId,String versionId, List<File> files)
+    public MetadataNotificationResponse refreshVersionArtifacts(String groupId, String artifactId, String versionId, List<File> files)
     {
 
-        MetadataEventResponse response = new MetadataEventResponse();
+        MetadataNotificationResponse response = new MetadataNotificationResponse();
         try
         {
             String gavCoordinates = getGAVCoordinates(groupId, artifactId, versionId);

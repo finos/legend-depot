@@ -16,15 +16,15 @@
 package org.finos.legend.depot.services.projects;
 
 import org.eclipse.collections.api.factory.Sets;
-import org.finos.legend.depot.domain.notifications.EventPriority;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.Priority;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraph;
-import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraphWalkerContext;
+import org.finos.legend.depot.services.dependencies.ProjectDependencyGraphWalkerContext;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
@@ -38,7 +38,7 @@ import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
-import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -177,7 +177,7 @@ public class ProjectsServiceImpl implements ProjectsService
     private void restoreEvictedProjectVersion(String groupId, String artifactId, String versionId)
     {
         StoreProjectData projectData = this.findCoordinates(groupId, artifactId).get();
-        this.queue.push(new MetadataNotification(projectData.getProjectId(), groupId, artifactId, versionId,true, false, null, EventPriority.HIGH));
+        this.queue.push(new MetadataNotification(projectData.getProjectId(), groupId, artifactId, versionId,true, false, null, Priority.HIGH));
     }
 
     @Override

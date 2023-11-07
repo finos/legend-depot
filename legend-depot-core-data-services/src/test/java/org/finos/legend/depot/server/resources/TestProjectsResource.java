@@ -20,7 +20,7 @@ import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -15,8 +15,8 @@
 
 package org.finos.legend.depot.services.artifacts.refresh;
 
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
-import org.finos.legend.depot.domain.api.status.MetadataEventStatus;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationStatus;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
@@ -40,11 +40,11 @@ import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.artifacts.ArtifactsFilesMongo;
-import org.finos.legend.depot.store.notifications.queue.api.Queue;
-import org.finos.legend.depot.store.notifications.queue.store.mongo.NotificationsQueueMongo;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactHandlerFactory;
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntityArtifactsProvider;
 import org.finos.legend.depot.services.api.artifacts.handlers.generations.FileGenerationsArtifactsProvider;
+import org.finos.legend.depot.store.mongo.notifications.queue.NotificationsQueueMongo;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.After;
 import org.junit.Assert;
@@ -124,9 +124,9 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     {
         when(mongoProjects.find(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID)).thenReturn(Optional.of(new StoreProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID)));
 
-        MetadataEventResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID,"1.0.0",true,PARENT_EVENT_ID);
+        MetadataNotificationResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID,"1.0.0",true,PARENT_EVENT_ID);
         Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataEventStatus.FAILED,response.getStatus());
+        Assert.assertEquals(MetadataNotificationStatus.FAILED,response.getStatus());
         Assert.assertEquals("Could not find dependent project: [examples.metadata-test-dependencies-1.0.0]", response.getErrors().get(0));
     }
 

@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.services.artifacts.handlers.entities;
 
-import org.finos.legend.depot.domain.api.MetadataEventResponse;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntitiesArtifactsHandler;
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntityArtifactsProvider;
@@ -33,7 +33,7 @@ public class EntitiesHandlerImpl extends AbstractEntityRefreshHandlerImpl implem
     }
 
     @Override
-    public MetadataEventResponse refreshProjectVersionArtifacts(String groupId, String artifactId, String versionId, List<File> files)
+    public MetadataNotificationResponse refreshProjectVersionArtifacts(String groupId, String artifactId, String versionId, List<File> files)
     {
         return super.refreshVersionArtifacts(groupId, artifactId, versionId, files);
     }

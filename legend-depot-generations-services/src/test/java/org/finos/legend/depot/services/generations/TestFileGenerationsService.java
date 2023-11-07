@@ -32,7 +32,7 @@ import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
-import org.finos.legend.depot.store.notifications.queue.api.Queue;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
