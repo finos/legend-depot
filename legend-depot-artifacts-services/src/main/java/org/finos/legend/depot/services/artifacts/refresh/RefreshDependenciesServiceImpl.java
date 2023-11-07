@@ -83,8 +83,9 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
                     {
                         throw new IllegalStateException(String.format("Cannot calculate dependencies for project version: %s", deps.getGav()));
                     }
-                    projectDependencies.addAll(projectData.get().getVersionData().getDependencies());
-                    projectDependencies.addAll(projectData.get().getTransitiveDependenciesReport().getTransitiveDependencies());
+                    List<ProjectVersion> allDependencies = new ArrayList<>(projectData.get().getVersionData().getDependencies());
+                    allDependencies.addAll(projectData.get().getTransitiveDependenciesReport().getTransitiveDependencies());
+                    projectDependencies.addAll(this.dependencyOverride.overrideWith(allDependencies, projectVersions, this::getCalculatedTransitiveDependencies));
                 }
                 else
                 {
@@ -98,7 +99,7 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
                     }
                     else
                     {
-                        projectDependencies.addAll(report.getTransitiveDependencies());
+                        projectDependencies.addAll(this.dependencyOverride.overrideWith(report.getTransitiveDependencies(), projectVersions, this::getCalculatedTransitiveDependencies));
                     }
                 }
                 projectDependencies.add(deps);
@@ -110,8 +111,7 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
             return new VersionDependencyReport(new ArrayList<>(), false);
         }
         LOGGER.info("Completed finding dependencies");
-        List<ProjectVersion> finalDependencies = this.dependencyOverride.overrideWith(projectDependencies.stream().collect(Collectors.toList()), projectVersions, this::getCalculatedTransitiveDependencies);
-        return new VersionDependencyReport(finalDependencies, true);
+        return new VersionDependencyReport(projectDependencies.stream().collect(Collectors.toList()), true);
     }
 
     private Set<ProjectVersion> getCalculatedTransitiveDependencies(List<ProjectVersion> directDependencies, boolean transitive)
