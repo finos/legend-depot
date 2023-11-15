@@ -23,6 +23,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.store.model.HasIdentifier;
 import org.finos.legend.depot.domain.CoordinateData;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
+import org.finos.legend.depot.domain.version.VersionValidator;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoreProjectData extends CoordinateData implements HasIdentifier
