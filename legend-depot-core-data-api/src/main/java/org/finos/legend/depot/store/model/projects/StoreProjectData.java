@@ -22,6 +22,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.store.model.HasIdentifier;
 import org.finos.legend.depot.domain.CoordinateData;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoreProjectData extends CoordinateData implements HasIdentifier
@@ -76,6 +77,11 @@ public class StoreProjectData extends CoordinateData implements HasIdentifier
     public void setLatestVersion(String latestVersion)
     {
         this.latestVersion = latestVersion;
+    }
+
+    public boolean canSupersedeLatestVersion(String candidateVersion)
+    {
+        return VersionId.parseVersionId(candidateVersion).compareTo(VersionId.parseVersionId(this.getLatestVersion())) == 1;
     }
 
     @Override

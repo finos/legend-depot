@@ -16,10 +16,11 @@
 package org.finos.legend.depot.domain.project;
 
 import org.finos.legend.depot.domain.CoordinateValidator;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestProjectValidator
+public class TestProjectUtilities
 {
 
     @Test
@@ -40,5 +41,15 @@ public class TestProjectValidator
         Assert.assertTrue(CoordinateValidator.isValidArtifactId("test-other"));
         Assert.assertFalse(CoordinateValidator.isValidArtifactId(""));
         Assert.assertFalse(CoordinateValidator.isValidArtifactId("singleWordNoDots"));
+    }
+
+    @Test
+    public void testCanSupersedeLatestVersion()
+    {
+        StoreProjectData projectData = new StoreProjectData("PROD-1", "examples.test", "metadata", null, "2.1.0");
+
+        Assert.assertTrue(projectData.canSupersedeLatestVersion("2.1.1"));
+        Assert.assertFalse(projectData.canSupersedeLatestVersion("2.1.0"));
+        Assert.assertFalse(projectData.canSupersedeLatestVersion("2.0.1"));
     }
 }
