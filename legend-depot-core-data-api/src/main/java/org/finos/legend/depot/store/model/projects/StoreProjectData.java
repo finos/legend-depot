@@ -81,7 +81,8 @@ public class StoreProjectData extends CoordinateData implements HasIdentifier
 
     public boolean evaluateLatestVersionAndUpdate(String candidateVersion)
     {
-        if (this.getLatestVersion() == null || VersionId.parseVersionId(candidateVersion).compareTo(VersionId.parseVersionId(this.getLatestVersion())) == 1)
+        if (!VersionValidator.isSnapshotVersion(candidateVersion) &&
+            (this.getLatestVersion() == null || VersionId.parseVersionId(candidateVersion).compareTo(VersionId.parseVersionId(this.getLatestVersion())) == 1))
         {
             this.setLatestVersion(candidateVersion);
             return true;
