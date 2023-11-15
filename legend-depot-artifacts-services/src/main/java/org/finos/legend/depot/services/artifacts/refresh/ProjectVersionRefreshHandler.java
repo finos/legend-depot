@@ -43,7 +43,6 @@ import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactHan
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactsHandler;
 import org.finos.legend.depot.core.services.tracing.TracerFactory;
 import org.finos.legend.depot.core.services.metrics.PrometheusMetricsFactory;
-import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
@@ -308,28 +307,10 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
 
     private void updateProjectData(StoreProjectData projectData, String versionId)
     {
-        if (!VersionValidator.isSnapshotVersion(versionId))
+        if (projectData.evaluateLatestVersionAndUpdate(versionId))
         {
-            String latestVersion = calculateLatestVersion(projectData.getLatestVersion(), versionId);
-            if (!latestVersion.equals(projectData.getLatestVersion()))
-            {
-                projectData.setLatestVersion(latestVersion);
-                projects.createOrUpdate(projectData);
-            }
+            projects.createOrUpdate(projectData);
         }
-    }
-
-    private String calculateLatestVersion(String projectLatestVersion, String versionId)
-    {
-        if (projectLatestVersion == null)
-        {
-            return versionId;
-        }
-        else if (VersionId.parseVersionId(versionId).compareTo(VersionId.parseVersionId(projectLatestVersion)) > 1)
-        {
-            return versionId;
-        }
-        return projectLatestVersion;
     }
 
     private String queueWorkToRefreshProjectVersion(StoreProjectData projectData, String versionId, boolean fullUpdate, boolean transitive, String parentEvent)

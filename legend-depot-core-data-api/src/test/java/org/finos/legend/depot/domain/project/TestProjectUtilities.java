@@ -16,10 +16,11 @@
 package org.finos.legend.depot.domain.project;
 
 import org.finos.legend.depot.domain.CoordinateValidator;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestProjectValidator
+public class TestProjectUtilities
 {
 
     @Test
@@ -40,5 +41,24 @@ public class TestProjectValidator
         Assert.assertTrue(CoordinateValidator.isValidArtifactId("test-other"));
         Assert.assertFalse(CoordinateValidator.isValidArtifactId(""));
         Assert.assertFalse(CoordinateValidator.isValidArtifactId("singleWordNoDots"));
+    }
+
+    @Test
+    public void testEvaluateLatestVersionAndUpdate()
+    {
+        StoreProjectData projectData = new StoreProjectData("PROD-1", "examples.test", "metadata", null, "2.1.0");
+
+        Assert.assertTrue(projectData.evaluateLatestVersionAndUpdate("3.0.0"));
+        Assert.assertEquals(projectData.getLatestVersion(), "3.0.0");
+
+        projectData.setLatestVersion("2.1.0");
+        Assert.assertFalse(projectData.evaluateLatestVersionAndUpdate("2.1.0"));
+        Assert.assertFalse(projectData.evaluateLatestVersionAndUpdate("2.0.1"));
+
+        projectData = new StoreProjectData("PROD-1", "examples.test", "metadata", null, null);
+        Assert.assertTrue(projectData.evaluateLatestVersionAndUpdate("3.0.0"));
+        Assert.assertEquals(projectData.getLatestVersion(), "3.0.0");
+
+        Assert.assertFalse(projectData.evaluateLatestVersionAndUpdate("master-SNAPSHOT"));
     }
 }
