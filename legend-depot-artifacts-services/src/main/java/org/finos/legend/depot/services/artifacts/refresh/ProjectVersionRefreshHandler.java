@@ -307,7 +307,7 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
 
     private void updateProjectData(StoreProjectData projectData, String versionId)
     {
-        if (!VersionValidator.isSnapshotVersion(versionId) && projectData.evaluateLatestVersionAndUpdate(versionId))
+        if (projectData.evaluateLatestVersionAndUpdate(versionId))
         {
             projects.createOrUpdate(projectData);
         }
