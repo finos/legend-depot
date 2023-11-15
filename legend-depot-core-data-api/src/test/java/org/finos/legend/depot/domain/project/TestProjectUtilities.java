@@ -58,5 +58,7 @@ public class TestProjectUtilities
         projectData = new StoreProjectData("PROD-1", "examples.test", "metadata", null, null);
         Assert.assertTrue(projectData.evaluateLatestVersionAndUpdate("3.0.0"));
         Assert.assertEquals(projectData.getLatestVersion(), "3.0.0");
+
+        Assert.assertFalse(projectData.evaluateLatestVersionAndUpdate("master-SNAPSHOT"));
     }
 }
