@@ -29,6 +29,9 @@ public class DepotEntityOverview extends DepotEntity
     @JsonProperty
     private String classifierPath;
 
+    public DepotEntityOverview()
+    {
+    }
 
     public DepotEntityOverview(String groupId, String artifactId, String versionId, String path, String classifierPath)
     {

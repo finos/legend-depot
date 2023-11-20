@@ -203,7 +203,7 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
     }
 
     @Override
-    protected Entity resolvedToEntityDefinition(T storedEntity)
+    protected EntityDefinition resolvedToEntityDefinition(T storedEntity)
     {
         if (storedEntity instanceof StoredEntityData)
         {

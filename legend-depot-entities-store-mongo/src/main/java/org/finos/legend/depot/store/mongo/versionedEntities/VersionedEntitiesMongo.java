@@ -74,7 +74,7 @@ public class VersionedEntitiesMongo extends EntitiesMongo<StoredVersionedEntity>
     }
 
     @Override
-    protected Entity resolvedToEntityDefinition(StoredVersionedEntity storedEntity)
+    protected EntityDefinition resolvedToEntityDefinition(StoredVersionedEntity storedEntity)
     {
         if (storedEntity instanceof StoredVersionedEntityData)
         {

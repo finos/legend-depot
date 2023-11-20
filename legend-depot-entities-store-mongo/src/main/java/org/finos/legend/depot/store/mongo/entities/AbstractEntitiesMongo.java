@@ -31,6 +31,7 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.store.model.entities.EntityDefinition;
 import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -102,7 +103,7 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
 
     protected abstract void validateNewData(T data);
 
-    protected abstract Entity resolvedToEntityDefinition(T storedEntity);
+    protected abstract EntityDefinition resolvedToEntityDefinition(T storedEntity);
 
     public FindIterable findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions)
     {
@@ -111,6 +112,10 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
         if (projectVersions != null && !projectVersions.isEmpty())
         {
             filters.add(or(ListIterate.collect(projectVersions, projectVersion -> getArtifactAndVersionFilter(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()))));
+        }
+        else
+        {
+            filters.add(Filters.not(Filters.regex(BaseMongo.VERSION_ID, BRANCH_SNAPSHOT(""))));
         }
         if (search != null)
         {

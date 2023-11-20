@@ -49,10 +49,10 @@ public class TestQueryClassifierPath extends TestStoreMongo
     public void canQueryVersionEntitiesByClassifier()
     {
         String CPATH = "meta::pure::metamodel::extension::Profile";
-        Assert.assertEquals(9, mongo.findReleasedEntitiesByClassifier(CPATH, null, null, null, false).size());
+        Assert.assertEquals(6, mongo.findReleasedEntitiesByClassifier(CPATH, null, null, null, false).size());
         Assert.assertEquals(2, mongo.findReleasedEntitiesByClassifier(CPATH, null, null, 2, false).size());
-        Assert.assertEquals(4, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfileTwo", null, null, false).size());
-        Assert.assertEquals(9, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfile", null, null, false).size());
+        Assert.assertEquals(3, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfileTwo", null, null, false).size());
+        Assert.assertEquals(6, mongo.findReleasedEntitiesByClassifier(CPATH, "TestProfile", null, null, false).size());
         Assert.assertEquals(0, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "1.0.0")), null, false).size());
         Assert.assertEquals(3, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.2.0")), null, false).size());
         Assert.assertEquals(1, mongo.findReleasedEntitiesByClassifier(CPATH, null, Lists.fixedSize.of(new ProjectVersion("examples.metadata", "test", "2.3.0")), null, false).size());

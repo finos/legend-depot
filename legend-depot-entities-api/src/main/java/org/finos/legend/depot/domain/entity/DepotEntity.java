@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.VersionedData;
+import org.finos.legend.depot.store.model.entities.EntityDefinition;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -30,7 +31,7 @@ public class DepotEntity extends VersionedData
     private boolean versionedEntity;
 
     @JsonProperty
-    private Entity entity;
+    private EntityDefinition entity;
 
     public DepotEntity()
     {
@@ -42,7 +43,7 @@ public class DepotEntity extends VersionedData
         super(groupId, artifactId, versionId);
     }
 
-    public DepotEntity(String groupId, String artifactId, String versionId, Entity entity)
+    public DepotEntity(String groupId, String artifactId, String versionId, EntityDefinition entity)
     {
         super(groupId, artifactId, versionId);
         this.entity = entity;
