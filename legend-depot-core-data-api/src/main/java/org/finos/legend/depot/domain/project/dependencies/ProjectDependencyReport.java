@@ -17,13 +17,13 @@ package org.finos.legend.depot.domain.project.dependencies;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.eclipse.collections.api.factory.Lists;
-import org.eclipse.collections.api.factory.Maps;
 import org.eclipse.collections.api.factory.Sets;
-import org.eclipse.collections.api.map.MutableMap;
 import org.finos.legend.depot.domain.CoordinateData;
 
 import java.util.List;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProjectDependencyReport
@@ -34,10 +34,10 @@ public class ProjectDependencyReport
 
     public static class SerializedGraph
     {
-        private final MutableMap<String, ProjectDependencyVersionNode> nodes = Maps.mutable.empty();
+        private final Map<String, ProjectDependencyVersionNode> nodes = new HashMap<>();
         private final Set<String> rootNodes = Sets.mutable.empty();
 
-        public MutableMap<String, ProjectDependencyVersionNode> getNodes()
+        public Map<String, ProjectDependencyVersionNode> getNodes()
         {
             return nodes;
         }
