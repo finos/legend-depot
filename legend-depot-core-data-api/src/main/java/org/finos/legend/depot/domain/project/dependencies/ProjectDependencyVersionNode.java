@@ -31,6 +31,10 @@ public class ProjectDependencyVersionNode extends VersionedData implements HasId
 
     private Set<String> backEdges;
 
+    public ProjectDependencyVersionNode()
+    {
+    }
+
     public ProjectDependencyVersionNode(String groupId, String artifactId, String versionId)
     {
         super(groupId, artifactId, versionId);
