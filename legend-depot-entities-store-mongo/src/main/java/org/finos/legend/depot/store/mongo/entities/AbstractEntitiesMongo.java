@@ -112,6 +112,10 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
         {
             filters.add(or(ListIterate.collect(projectVersions, projectVersion -> getArtifactAndVersionFilter(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()))));
         }
+        else
+        {
+            filters.add(Filters.not(Filters.regex(BaseMongo.VERSION_ID, BRANCH_SNAPSHOT(""))));
+        }
         if (search != null)
         {
             filters.add(Filters.regex(ENTITY_PATH, Pattern.quote(search), "i"));
