@@ -16,7 +16,6 @@
 package org.finos.legend.depot.services.projects;
 
 import org.eclipse.collections.api.factory.Sets;
-import org.eclipse.collections.api.map.MutableMap;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
@@ -41,6 +40,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Collections;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
@@ -106,7 +106,7 @@ public class TestProjectsService extends TestBaseServices
         // Dependency Tree
         ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReport("examples.metadata", "test", "2.3.1");
         ProjectDependencyReport.SerializedGraph graph = dependencyReport.getGraph();
-        MutableMap<String, ProjectDependencyVersionNode> nodes = graph.getNodes();
+        Map<String, ProjectDependencyVersionNode> nodes = graph.getNodes();
         Assert.assertEquals(nodes.size(), 3);
         Assert.assertEquals(graph.getRootNodes().size(), 1);
         String rootId = graph.getRootNodes().iterator().next();
