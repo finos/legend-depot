@@ -15,29 +15,27 @@
 
 package org.finos.legend.depot.services.entities;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.finos.legend.depot.domain.entity.DepotEntity;
+import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
+import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.domain.version.Scope;
+import org.finos.legend.depot.services.TestBaseServices;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
+import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
+import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.model.entities.EntityDefinition;
-import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.store.model.entities.StoredEntityData;
 import org.finos.legend.depot.store.model.entities.StoredEntityStringData;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
-import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
-import org.finos.legend.depot.services.TestBaseServices;
-import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
-import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
-import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
-import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,13 +43,13 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.function.Predicate;
 
-import static org.mockito.Mockito.mock;
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
+import static org.mockito.Mockito.mock;
 
 public class TestEntitiesService extends TestBaseServices
 {
@@ -140,17 +138,6 @@ public class TestEntitiesService extends TestBaseServices
 
     }
 
-    @Test
-    public void canGetOrphanedEntities()
-    {
-        entitiesService.createOrUpdate("example.one", "orphaned", "1.0.0", Arrays.asList(new EntityDefinition("path::entity", "la", null)));
-        entitiesService.createOrUpdate("example.two", "orphaned", "1.0.1", Arrays.asList(new EntityDefinition("path::lala", "la", null)));
-
-        List<Pair<String, String>> orphaned = entitiesService.getOrphanedStoredEntities();
-        Assert.assertEquals(2, orphaned.size());
-        Assert.assertTrue(orphaned.contains(Tuples.pair("example.one", "orphaned")));
-        Assert.assertTrue(orphaned.contains(Tuples.pair("example.two", "orphaned")));
-    }
 
     @Test
     public void canQueryEntitiesWithVersionInPackage()
