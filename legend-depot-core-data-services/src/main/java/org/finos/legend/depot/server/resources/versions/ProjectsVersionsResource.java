@@ -41,7 +41,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.finos.legend.depot.domain.DatesHandler.toTime;
@@ -64,11 +63,11 @@ public class ProjectsVersionsResource extends TracingResource
     @Path("/projects/versions/{updatedFrom}")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<StoreProjectVersionData> findByUpdatedDate(@PathParam("updatedFrom") @ApiParam(value = "Updated From Date value in milliseconds (UTC) ") long updatedFrom,
+    public Response findByUpdatedDate(@PathParam("updatedFrom") @ApiParam(value = "Updated From Date value in milliseconds (UTC) ") long updatedFrom,
                                                             @QueryParam("updatedTo") @ApiParam(value = "Updated To Date value in milliseconds (UTC) ")  Long updatedTo)
     {
         return handle(ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE,
-                () -> projectVersionApi.findByUpdatedDate(updatedFrom, updatedTo == null ? toTime(LocalDateTime.now()) : updatedTo));
+                () -> projectVersionApi.findByUpdatedDate(updatedFrom, updatedTo == null ? toTime(LocalDateTime.now()) : updatedTo), null, () -> null);
     }
 
     @GET

@@ -18,7 +18,6 @@ package org.finos.legend.depot.server.resources.entities;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.finos.legend.depot.domain.entity.DepotEntity;
 import org.finos.legend.depot.domain.version.Scope;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
@@ -31,7 +30,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
+import javax.ws.rs.core.Response;
 
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_ENTITIES_BY_CLASSIFIER_PATH;
 
@@ -54,12 +53,12 @@ public class EntityClassifierResource extends TracingResource
     // graph built in depot server.
     @ApiOperation(value = GET_ENTITIES_BY_CLASSIFIER_PATH, hidden = true)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DepotEntity> getEntities(@PathParam("classifierPath") @ApiParam("The classifier path of the entities") String classifierPath,
-                                         @QueryParam("search") @ApiParam("The search string that the entity path contains") String search,
-                                         @QueryParam("scope") @ApiParam("Whether to return entities for the latest released version or snapshot") @DefaultValue("RELEASES") Scope scope,
-                                         @QueryParam("limit") @ApiParam("Limit the number of entities returned") Integer limit,
-                                         @QueryParam("summary") @DefaultValue("false") @ApiParam("Whether to return the summary view of the ENTITIES or the full entity") boolean summary)
+    public Response getEntities(@PathParam("classifierPath") @ApiParam("The classifier path of the entities") String classifierPath,
+                                @QueryParam("search") @ApiParam("The search string that the entity path contains") String search,
+                                @QueryParam("scope") @ApiParam("Whether to return entities for the latest released version or snapshot") @DefaultValue("RELEASES") Scope scope,
+                                @QueryParam("limit") @ApiParam("Limit the number of entities returned") Integer limit,
+                                @QueryParam("summary") @DefaultValue("false") @ApiParam("Whether to return the summary view of the ENTITIES or the full entity") boolean summary)
     {
-        return handle(GET_ENTITIES_BY_CLASSIFIER_PATH, () -> this.graphService.getEntitiesByClassifierPath(classifierPath, search, limit, scope, summary));
+        return handle(GET_ENTITIES_BY_CLASSIFIER_PATH, () -> this.graphService.getEntitiesByClassifierPath(classifierPath, search, limit, scope, summary), null, () -> null);
     }
 }
