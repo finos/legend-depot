@@ -15,24 +15,18 @@
 
 package org.finos.legend.depot.services.guice;
 
-import com.google.inject.PrivateModule;
-import org.finos.legend.depot.services.api.entities.EntitiesService;
-import org.finos.legend.depot.services.api.entities.EntityClassifierService;
-import org.finos.legend.depot.services.entities.EntitiesServiceImpl;
-import org.finos.legend.depot.services.entities.EntityClassifierServiceImpl;
+import org.finos.legend.depot.services.api.versionedEntities.ManageVersionedEntitiesService;
+import org.finos.legend.depot.services.versionedEntities.ManageVersionedEntitiesServiceImpl;
 
-
-public class EntitiesServicesModule extends PrivateModule
+public class ManageVersionedEntitiesServicesModule extends VersionedEntitiesServicesModule
 {
+
     @Override
     protected void configure()
     {
-
-        bind(EntitiesService.class).to(EntitiesServiceImpl.class);
-        bind(EntityClassifierService.class).to(EntityClassifierServiceImpl.class);
-
-        expose(EntitiesService.class);
-        expose(EntityClassifierService.class);
+        super.configure();
+        bind(ManageVersionedEntitiesService.class).to(ManageVersionedEntitiesServiceImpl.class);
+        expose(ManageVersionedEntitiesService.class);
     }
 
 }

@@ -16,9 +16,7 @@
 package org.finos.legend.depot.services.guice;
 
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
-import org.finos.legend.depot.services.api.versionedEntities.ManageVersionedEntitiesService;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
-import org.finos.legend.depot.services.versionedEntities.ManageVersionedEntitiesServiceImpl;
 
 public class ManageEntitiesServicesModule extends EntitiesServicesModule
 {
@@ -27,12 +25,8 @@ public class ManageEntitiesServicesModule extends EntitiesServicesModule
     protected void configure()
     {
         super.configure();
-
         bind(ManageEntitiesService.class).to(ManageEntitiesServiceImpl.class);
-        bind(ManageVersionedEntitiesService.class).to(ManageVersionedEntitiesServiceImpl.class);
-
         expose(ManageEntitiesService.class);
-        expose(ManageVersionedEntitiesService.class);
     }
 
 }

@@ -13,17 +13,23 @@
 //  limitations under the License.
 //
 
-package org.finos.legend.depot.store.resources.guice;
+package org.finos.legend.depot.services.guice;
 
 import com.google.inject.PrivateModule;
-import org.finos.legend.depot.store.resources.entities.ManageEntitiesResource;
+import org.finos.legend.depot.services.api.versionedEntities.VersionedEntitiesService;
+import org.finos.legend.depot.services.versionedEntities.VersionedEntitiesServiceImpl;
 
-public class ManageEntitiesResourcesModule extends PrivateModule
+
+public class VersionedEntitiesServicesModule extends PrivateModule
 {
     @Override
     protected void configure()
     {
-        bind(ManageEntitiesResource.class);
-        expose(ManageEntitiesResource.class);
+
+        bind(VersionedEntitiesService.class).to(VersionedEntitiesServiceImpl.class);
+
+        expose(VersionedEntitiesService.class);
+
     }
+
 }

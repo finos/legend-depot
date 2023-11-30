@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.services.api.entities;
 
-import org.eclipse.collections.api.tuple.Pair;
 import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
@@ -32,5 +31,4 @@ public interface ManageEntitiesService<T extends StoredEntity> extends EntitiesS
 
     void createOrUpdate(String groupId, String artifactId, String versionId, List<Entity> entities);
 
-    List<Pair<String, String>> getOrphanedStoredEntities();
 }

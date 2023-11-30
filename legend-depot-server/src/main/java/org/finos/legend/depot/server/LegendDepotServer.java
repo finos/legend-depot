@@ -26,6 +26,7 @@ import org.finos.legend.depot.server.resources.guice.EntitiesResourcesModule;
 import org.finos.legend.depot.server.resources.guice.GenerationsResourcesModule;
 import org.finos.legend.depot.server.resources.guice.PureModelContextResourcesModule;
 import org.finos.legend.depot.services.guice.EntitiesServicesModule;
+import org.finos.legend.depot.services.guice.VersionedEntitiesServicesModule;
 import org.finos.legend.depot.services.pure.model.context.guice.PureModelContextModule;
 import org.finos.legend.depot.services.guice.CoreDataServicesModule;
 import org.finos.legend.depot.services.guice.SchedulesModule;
@@ -68,6 +69,7 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
 
                 new EntitiesResourcesModule(),
                 new EntitiesServicesModule(),
+                new VersionedEntitiesServicesModule(),
                 new EntitiesStoreMongoModule(),
 
                 new GenerationsResourcesModule(),

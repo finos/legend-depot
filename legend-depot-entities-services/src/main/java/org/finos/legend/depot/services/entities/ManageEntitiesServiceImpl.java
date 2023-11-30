@@ -15,16 +15,14 @@
 
 package org.finos.legend.depot.services.entities;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ManageEntitiesServiceImpl<T extends StoredEntity> extends EntitiesServiceImpl<T> implements ManageEntitiesService<T>
 {
@@ -65,10 +63,4 @@ public class ManageEntitiesServiceImpl<T extends StoredEntity> extends EntitiesS
         entities.createOrUpdate(groupId, artifactId, versionId, entityList);
     }
 
-    @Override
-    public List<Pair<String, String>> getOrphanedStoredEntities()
-    {
-        List<Pair<String, String>> allArtifacts = entities.getStoredEntitiesCoordinates();
-        return allArtifacts.stream().filter(art -> !projects.findCoordinates(art.getOne(), art.getTwo()).isPresent()).collect(Collectors.toList());
-    }
 }
