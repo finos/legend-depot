@@ -25,7 +25,6 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.Property;
-import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.server.resources.projects.ProjectsResource;
@@ -83,23 +82,23 @@ public class DependenciesResource extends TracingResource
     @Path("/projects/analyzeDependencyTree")
     @ApiOperation(GET_PROJECT_DEPENDENCY_TREE)
     @Produces(MediaType.APPLICATION_JSON)
-    public ProjectDependencyReport analyzeDependencyTree(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies)
+    public Response analyzeDependencyTree(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies)
     {
-        return handle(GET_PROJECT_DEPENDENCY_TREE, GET_PROJECT_DEPENDENCY_TREE, () -> this.projectApi.getProjectDependencyReport(projectDependencies));
+        return handleResponse(GET_PROJECT_DEPENDENCY_TREE, () -> this.projectApi.getProjectDependencyReport(projectDependencies));
     }
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/dependantProjects")
     @ApiOperation(GET_DEPENDANT_PROJECTS)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<ProjectVersionPlatformDependency> getDependantProjects(@PathParam("groupId") String groupId,
-                                                                       @PathParam("artifactId") String artifactId,
-                                                                       @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
-                                                                       @QueryParam("latestOnly") @DefaultValue("false")
+    public Response getDependantProjects(@PathParam("groupId") String groupId,
+                                         @PathParam("artifactId") String artifactId,
+                                         @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                         @QueryParam("latestOnly") @DefaultValue("false")
                                                                        @ApiParam("Whether to only return the latest version of dependant projects") boolean latestOnly
     )
     {
-        return handle(GET_DEPENDANT_PROJECTS, GET_DEPENDANT_PROJECTS + groupId + artifactId, () -> transform(this.projectApi.getDependantProjects(groupId, artifactId, versionId, latestOnly)));
+        return handleResponse(GET_DEPENDANT_PROJECTS, GET_DEPENDANT_PROJECTS + groupId + artifactId, () -> transform(this.projectApi.getDependantProjects(groupId, artifactId, versionId, latestOnly)));
     }
 
 

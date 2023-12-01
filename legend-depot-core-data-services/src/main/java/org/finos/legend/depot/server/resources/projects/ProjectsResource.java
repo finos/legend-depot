@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
@@ -35,8 +34,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
-import java.util.Optional;
+import javax.ws.rs.core.Response;
 
 @Path("")
 @Api("Projects")
@@ -56,28 +54,28 @@ public class ProjectsResource extends TracingResource
     @Path("/project-configurations")
     @ApiOperation(ResourceLoggingAndTracing.GET_ALL_PROJECTS)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<StoreProjectData> getProjectsWithCoordinates()
+    public Response getProjectsWithCoordinates()
     {
-        return handle(ResourceLoggingAndTracing.GET_ALL_PROJECTS, () -> projectApi.getAllProjectCoordinates());
+        return handleResponse(ResourceLoggingAndTracing.GET_ALL_PROJECTS, () -> projectApi.getAllProjectCoordinates());
     }
 
     @GET
     @Path("/project-configurations/{groupId}/{artifactId}")
     @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CONFIG_BY_GA)
     @Produces(MediaType.APPLICATION_JSON)
-    public Optional<StoreProjectData> getProjectCoordinates(@PathParam("groupId")String groupId, @PathParam("artifactId") String artifactId)
+    public Response getProjectCoordinates(@PathParam("groupId")String groupId, @PathParam("artifactId") String artifactId)
     {
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_CONFIG_BY_GA, () -> projectApi.findCoordinates(groupId, artifactId));
+        return handleResponse(ResourceLoggingAndTracing.GET_PROJECT_CONFIG_BY_GA, () -> projectApi.findCoordinates(groupId, artifactId));
     }
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<String> getVersions(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId,
-                                    @QueryParam("snapshots") @ApiParam("wether to return snapshot versions too") @DefaultValue("false") boolean includeSnapshots)
+    public Response getVersions(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId,
+                                @QueryParam("snapshots") @ApiParam("wether to return snapshot versions too") @DefaultValue("false") boolean includeSnapshots)
     {
-        return handle(ResourceLoggingAndTracing.GET_VERSIONS, () -> projectApi.getVersions(groupId, artifactId,includeSnapshots));
+        return handleResponse(ResourceLoggingAndTracing.GET_VERSIONS, () -> projectApi.getVersions(groupId, artifactId,includeSnapshots));
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

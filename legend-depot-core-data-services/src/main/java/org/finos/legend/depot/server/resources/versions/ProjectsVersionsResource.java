@@ -36,12 +36,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.finos.legend.depot.domain.DatesHandler.toTime;
@@ -64,10 +61,10 @@ public class ProjectsVersionsResource extends TracingResource
     @Path("/projects/versions/{updatedFrom}")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<StoreProjectVersionData> findByUpdatedDate(@PathParam("updatedFrom") @ApiParam(value = "Updated From Date value in milliseconds (UTC) ") long updatedFrom,
-                                                            @QueryParam("updatedTo") @ApiParam(value = "Updated To Date value in milliseconds (UTC) ")  Long updatedTo)
+    public Response findByUpdatedDate(@PathParam("updatedFrom") @ApiParam(value = "Updated From Date value in milliseconds (UTC) ") long updatedFrom,
+                                      @QueryParam("updatedTo") @ApiParam(value = "Updated To Date value in milliseconds (UTC) ")  Long updatedTo)
     {
-        return handle(ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE,
+        return handleResponse(ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE,
                 () -> projectVersionApi.findByUpdatedDate(updatedFrom, updatedTo == null ? toTime(LocalDateTime.now()) : updatedTo));
     }
 
@@ -77,10 +74,9 @@ public class ProjectsVersionsResource extends TracingResource
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProjectVersion(@PathParam("groupId") String groupId,
                                       @PathParam("artifactId") String artifactId,
-                                      @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
-                                      @Context Request request)
+                                      @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
     {
-        return handle(ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV, ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV + groupId + artifactId + versionId, () ->
+        return handleResponse(ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV, ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV + groupId + artifactId + versionId, () ->
         {
             Optional<StoreProjectVersionData> projectVersion = projectVersionApi.find(groupId, artifactId, versionId);
             if (projectVersion.isPresent())
@@ -89,7 +85,7 @@ public class ProjectsVersionsResource extends TracingResource
                 return Optional.of(new ProjectVersionDTO(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), pv.getVersionData()));
             }
             return Optional.empty();
-        }, request, () -> null);
+        });
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

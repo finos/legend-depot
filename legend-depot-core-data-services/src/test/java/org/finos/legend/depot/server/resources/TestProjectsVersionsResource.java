@@ -43,7 +43,7 @@ public class TestProjectsVersionsResource extends TestBaseServices
     @Test
     public void canQueryLatestProjectVersionData()
     {
-        Response responseOne = projectsVersionsResource.getProjectVersion("examples.metadata", "test","latest", null);
+        Response responseOne = projectsVersionsResource.getProjectVersion("examples.metadata", "test","latest");
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseOne.getEntity();
         Assert.assertTrue(versionData.isPresent());
         Assert.assertEquals(versionData.get().getGroupId(), "examples.metadata");
@@ -56,7 +56,7 @@ public class TestProjectsVersionsResource extends TestBaseServices
         Assert.assertEquals(manifestProperties.get("commit-author"), "test-author");
         Assert.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
 
-        Response responseTwo = projectsVersionsResource.getProjectVersion("somethig.random", "test","latest", null);
+        Response responseTwo = projectsVersionsResource.getProjectVersion("somethig.random", "test","latest");
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseTwo.getEntity();
         Assert.assertFalse(versionData1.isPresent());
     }
@@ -64,14 +64,14 @@ public class TestProjectsVersionsResource extends TestBaseServices
     @Test
     public void canQueryHeadProjectVersionData()
     {
-        Response responseOne = projectsVersionsResource.getProjectVersion("examples.metadata", "test","head", null);
+        Response responseOne = projectsVersionsResource.getProjectVersion("examples.metadata", "test","head");
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseOne.getEntity();
         Assert.assertTrue(versionData.isPresent());
         Assert.assertEquals(versionData.get().getGroupId(), "examples.metadata");
         Assert.assertEquals(versionData.get().getArtifactId(), "test");
         Assert.assertEquals(versionData.get().getVersionId(), BRANCH_SNAPSHOT("master"));
 
-        Response responseTwo = projectsVersionsResource.getProjectVersion("somethig.random", "test","head", null);
+        Response responseTwo = projectsVersionsResource.getProjectVersion("somethig.random", "test","head");
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseTwo.getEntity();
         Assert.assertFalse(versionData1.isPresent());
     }
