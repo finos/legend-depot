@@ -124,6 +124,16 @@ public class TracingResource
         return responseBuilder.build();
     }
 
+    protected <T> Response handleResponse(String label, Supplier<T> supplier)
+    {
+        return handleResponse(label, label, supplier);
+    }
+
+    protected <T> Response handleResponse(String resourceAPIMetricName,String label, Supplier<T> supplier)
+    {
+        return handle(resourceAPIMetricName, label, supplier, null, () -> null);
+    }
+
     protected <T> T handle(String label, Supplier<T> supplier)
     {
         return handle(label, label, supplier);

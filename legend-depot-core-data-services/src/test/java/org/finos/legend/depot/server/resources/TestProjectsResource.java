@@ -37,7 +37,7 @@ public class TestProjectsResource extends TestBaseServices
     @Test
     public void canQueryVersionsForProjectGA()
     {
-        List<String> versionSet = projectsVersionsResource.getVersions("examples.metadata", "test", false);
+        List<String> versionSet = (List<String>) projectsVersionsResource.getVersions("examples.metadata", "test", false).getEntity();
         Assert.assertNotNull(versionSet);
         Assert.assertEquals(2, versionSet.size());
     }
@@ -45,7 +45,7 @@ public class TestProjectsResource extends TestBaseServices
     @Test
     public void canQueryVersionsForProject()
     {
-        List<String> versionSet = projectsVersionsResource.getVersions("examples.metadata", "test",false);
+        List<String> versionSet = (List<String>) projectsVersionsResource.getVersions("examples.metadata", "test",false).getEntity();
         Assert.assertNotNull(versionSet);
         Assert.assertEquals(2, versionSet.size());
     }
