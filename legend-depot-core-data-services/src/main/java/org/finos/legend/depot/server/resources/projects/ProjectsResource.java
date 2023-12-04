@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
@@ -72,6 +74,7 @@ public class ProjectsResource extends TracingResource
     @Path("/projects/{groupId}/{artifactId}/versions")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponses(@ApiResponse(response = String.class, code = 200, message = "successful operation", responseContainer = "List"))
     public Response getVersions(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId,
                                 @QueryParam("snapshots") @ApiParam("wether to return snapshot versions too") @DefaultValue("false") boolean includeSnapshots)
     {
