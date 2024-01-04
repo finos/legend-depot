@@ -358,7 +358,7 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
             });
         }
 
-        return manifestProperties;
+        return manifestProperties.isEmpty() ? null : manifestProperties;
     }
 
     private MetadataNotificationResponse handleDependencies(StoreProjectData projectData, String versionId, List<ProjectVersion> dependencies, boolean fullUpdate, boolean transitive, String parentEventId)
