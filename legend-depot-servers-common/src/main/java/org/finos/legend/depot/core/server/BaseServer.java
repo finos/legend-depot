@@ -35,6 +35,7 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.finos.legend.depot.core.services.api.metrics.configuration.PrometheusMetricsProviderConfiguration;
+import org.finos.legend.depot.core.services.api.tracing.configuration.TracerProviderConfiguration;
 import org.finos.legend.depot.core.services.api.tracing.configuration.TracingAuthenticationProviderConfiguration;
 import org.finos.legend.depot.core.services.metrics.PrometheusMetricsFactory;
 import org.finos.legend.depot.store.StorageConfiguration;
@@ -90,6 +91,7 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
     {
         StorageConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
         TracingAuthenticationProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
+        TracerProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
         PrometheusMetricsProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
     }
 

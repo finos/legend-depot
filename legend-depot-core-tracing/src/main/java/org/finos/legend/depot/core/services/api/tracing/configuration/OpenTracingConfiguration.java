@@ -33,6 +33,9 @@ public class OpenTracingConfiguration
     @JsonProperty
     private AuthenticationProvider authenticationProvider;
 
+    @JsonProperty
+    private TracerProvider tracerProvider;
+
     public String getOpenTracingUri()
     {
         return openTracingUri;
@@ -71,5 +74,15 @@ public class OpenTracingConfiguration
     public void setAuthenticationProvider(AuthenticationProvider authenticationProvider)
     {
         this.authenticationProvider = authenticationProvider;
+    }
+
+    public TracerProvider getTracerProvider()
+    {
+        return tracerProvider;
+    }
+
+    public void setTracerProvider(TracerProvider tracerProvider)
+    {
+        this.tracerProvider = tracerProvider;
     }
 }
