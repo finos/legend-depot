@@ -26,6 +26,7 @@ import io.prometheus.client.CollectorRegistry;
 import org.finos.legend.depot.core.services.api.tracing.TracingException;
 import org.finos.legend.depot.core.services.api.tracing.VoidAuthenticationProvider;
 import org.finos.legend.depot.core.services.api.tracing.configuration.OpenTracingConfiguration;
+import org.finos.legend.depot.core.services.api.tracing.configuration.TracerProvider;
 import org.finos.legend.engine.shared.core.operational.prometheus.TracingExports;
 import org.finos.legend.opentracing.AuthenticationProvider;
 import org.finos.legend.opentracing.JerseyClientSender;
@@ -82,9 +83,8 @@ public final class TracerFactory
                     openTracingConfiguration.getServiceName() : DEFAULT_SERVICE_NAME;
             try (JerseyClientSender sender = new JerseyClientSender(new URI(openTracingConfiguration.getOpenTracingUri()), authenticationProvider);)
             {
-
-                Tracer tracer = OpenTracing.create(sender, serviceName, null, getMemoryMetricsReporter());
-                LogManager.getLogManager().getLogger("").setLevel(Level.FINE);
+                TracerProvider tracerProvider =  openTracingConfiguration.getTracerProvider() != null ? openTracingConfiguration.getTracerProvider() : new DefaultTracerProvider();
+                Tracer tracer = tracerProvider.create(sender,serviceName);
                 GlobalTracer.registerIfAbsent(tracer);
                 INSTANCE = new TracerFactory(tracer);
             }
@@ -101,13 +101,7 @@ public final class TracerFactory
         return INSTANCE;
     }
 
-    private static InMemoryReporterMetrics getMemoryMetricsReporter()
-    {
-        CollectorRegistry collectorRegistry = CollectorRegistry.defaultRegistry;
-        InMemoryReporterMetrics tracingMetrics = new InMemoryReporterMetrics();
-        collectorRegistry.register(new TracingExports(tracingMetrics));
-        return tracingMetrics;
-    }
+
 
     private Span startSpan(String trace)
     {
