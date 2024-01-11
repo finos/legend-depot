@@ -64,7 +64,7 @@ public class PureModelContextServiceImpl implements PureModelContextService
             List<PureModelContextData> allPMCD = new ArrayList<>();
             for (ProjectVersionEntities projectVersionEntities : dependenciesEntities)
             {
-                allPMCD.add(getPureModelContextData(projectVersionEntities.getEntities().stream().collect(Collectors.toList()),
+                allPMCD.add(getPureModelContextData(projectVersionEntities.getEntities(),
                         projectVersionEntities.getGroupId(),
                         projectVersionEntities.getArtifactId(),
                         projectVersionEntities.getVersionId(),
