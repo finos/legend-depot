@@ -30,7 +30,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 
-public final class NotificationsQueueManager
+public class NotificationsQueueManager
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(NotificationsQueueManager.class);
     public static final String NOTIFICATIONS_COUNTER = "notifications";
