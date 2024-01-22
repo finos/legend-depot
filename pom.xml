@@ -96,6 +96,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
         <maven.compiler>1.8</maven.compiler>
+        <java.version.range>[11,12),[17,18)</java.version.range>
 
         <!-- Legend dependency versions -->
         <legend.shared.version>0.24.1</legend.shared.version>
@@ -279,7 +280,7 @@
                             <configuration>
                                 <rules>
                                     <requireJavaVersion>
-                                        <version>[11,12)</version>
+                                        <version>${java.version.range}</version>
                                     </requireJavaVersion>
                                     <dependencyConvergence />
                                     <bannedDependencies>
