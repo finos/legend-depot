@@ -80,7 +80,7 @@ public class PureModelContextServiceImpl implements PureModelContextService
                 .newBuilder()
                 .withProtocol(PURE, clientVersion == null ? PureClientVersions.production : clientVersion)
                 .withSDLC(getAlloySDLC(groupId, artifactId, versionId))
-                .withEntities(entities)
+                .withEntitiesIfPossible(entities)
                 .build();
     }
 
