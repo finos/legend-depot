@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.services.artifacts.purge;
 
+import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
@@ -155,7 +156,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     public MetadataNotificationResponse deprecateVersionsNotInRepository()
     {
         MetadataNotificationResponse response = new MetadataNotificationResponse();
-        versionsMismatchService.findVersionsMismatches().parallelStream().forEach(versionMismatch ->
+        ParallelIterate.forEach(versionsMismatchService.findVersionsMismatches(),versionMismatch ->
         {
             if (!versionMismatch.versionsNotInRepository.isEmpty())
             {
@@ -166,7 +167,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
                     response.addMessage(String.format("Deprecated project version: %s-%s-%s", versionMismatch.groupId, versionMismatch.artifactId, versionId));
                 });
             }
-        });
+        },10);
         return response;
     }
 

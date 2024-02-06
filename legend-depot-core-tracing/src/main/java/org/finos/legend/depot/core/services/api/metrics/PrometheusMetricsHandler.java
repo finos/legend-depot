@@ -33,6 +33,8 @@ public interface PrometheusMetricsHandler
 
     void observeHistogram(String name, long start, long end);
 
+    void observeHistogram(String name, double amount);
+
     void registerCounter(String counter, String helpMessage);
 
     void incrementCount(String counter);

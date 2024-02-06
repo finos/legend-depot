@@ -18,7 +18,6 @@ package org.finos.legend.depot.services.artifacts.refresh;
 import com.google.inject.name.Named;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.maven.model.Model;
-import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.domain.CoordinateValidator;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
@@ -236,7 +235,7 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
                 {
                     LOGGER.info("Processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
 
-                    ParallelIterate.forEach(ProjectArtifactHandlerFactory.getSupportedTypes(), artifactType -> response.combine(handleArtifacts(artifactType, project, event.getVersionId(), event.isFullUpdate())));
+                    ProjectArtifactHandlerFactory.getSupportedTypes().forEach(artifactType -> response.combine(handleArtifacts(artifactType, project, event.getVersionId(), event.isFullUpdate())));
                     LOGGER.info("Finished processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
                     if (!response.hasErrors())
                     {

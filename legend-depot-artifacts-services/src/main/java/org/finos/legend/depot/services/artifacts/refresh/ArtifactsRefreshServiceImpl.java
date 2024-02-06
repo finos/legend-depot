@@ -55,6 +55,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
     private static final String GROUP_ID = "groupId";
     private static final String ARTIFACT_ID = "artifactId";
     private static final String VERSION_ID = "versionId";
+    private static final int PARALLEL_ITERATE_BATCH_SIZE = 100;
 
 
     private final ProjectsService projects;
@@ -81,7 +82,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                     String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/allVersions/transitive :[%s/%s/%s]",ALL,ALL,ALL,parentEvent,fullUpdate,allVersions,transitive);
                     result.addMessage(message);
                     LOGGER.info(message);
-                    ParallelIterate.forEach(projects.getAllProjectCoordinates(),project -> result.combine(refreshAllVersionsForProject(project.getGroupId(),project.getArtifactId(),fullUpdate,allVersions,transitive,parentEvent)));
+                    ParallelIterate.forEach(projects.getAllProjectCoordinates(),project -> result.combine(refreshAllVersionsForProject(project.getGroupId(),project.getArtifactId(),fullUpdate,allVersions,transitive,parentEvent)), PARALLEL_ITERATE_BATCH_SIZE);
                     return result;
                 }
         );
@@ -108,7 +109,7 @@ public class ArtifactsRefreshServiceImpl implements ArtifactsRefreshService
                     String message = String.format("Executing: [%s-%s-%s], parentEventId :[%s], full/transitive :[%s/%s]",ALL,ALL,ALL_SNAPSHOT,parentEvent,fullUpdate,transitive);
                     result.addMessage(message);
                     LOGGER.info(message);
-                    ParallelIterate.forEach(projects.getAllProjectCoordinates(),project -> result.combine(refreshAllDefaultSNAPSHOTVersionsForProject(project,fullUpdate,transitive,parentEvent)));
+                    ParallelIterate.forEach(projects.getAllProjectCoordinates(),project -> result.combine(refreshAllDefaultSNAPSHOTVersionsForProject(project,fullUpdate,transitive,parentEvent)), PARALLEL_ITERATE_BATCH_SIZE);
                     return result;
                 }
         );

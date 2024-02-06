@@ -34,12 +34,13 @@ import io.prometheus.client.exporter.MetricsServlet;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.eclipse.jetty.util.component.LifeCycle;
+import org.finos.legend.depot.core.server.error.CatchAllExceptionMapper;
+import org.finos.legend.depot.core.server.error.DepotServerExceptionMapper;
 import org.finos.legend.depot.core.services.api.metrics.configuration.PrometheusMetricsProviderConfiguration;
 import org.finos.legend.depot.core.services.api.tracing.configuration.TracerProviderConfiguration;
 import org.finos.legend.depot.core.services.api.tracing.configuration.TracingAuthenticationProviderConfiguration;
 import org.finos.legend.depot.core.services.metrics.PrometheusMetricsFactory;
 import org.finos.legend.depot.store.StorageConfiguration;
-import org.finos.legend.sdlc.server.error.LegendSDLCServerExceptionMapper;
 import org.finos.legend.server.pac4j.LegendPac4jBundle;
 import org.finos.legend.server.shared.bundles.ChainFixingFilterHandler;
 import org.finos.legend.server.shared.bundles.HostnameHeaderBundle;
@@ -56,7 +57,8 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BaseServer.class);
     public static final String SERVER_STARTED = "server started";
-    
+    public static final boolean INCLUDE_STACK_TRACE = true;
+
     protected BaseServer()
     {
     }
@@ -119,8 +121,9 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
             environment.jersey().setUrlPattern(configuration.getUrlPattern());
         }
         environment.jersey().register(MultiPartFeature.class);
-        environment.jersey().register(new LegendSDLCServerExceptionMapper());
+        environment.jersey().register(new DepotServerExceptionMapper(isExceptionsIncludeStackTrace()));
         environment.jersey().register(new JsonProcessingExceptionMapper(true));
+        environment.jersey().register(new CatchAllExceptionMapper(isExceptionsIncludeStackTrace()));
         registerJacksonJsonProvider(environment.jersey());
 
         environment.healthChecks().register("HealthCheck", new HealthCheck()
@@ -136,6 +139,11 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
         initialiseCors(environment);
         initialisePrometheusMetrics(environment);
         initialiseOpenTracing(environment);
+    }
+
+    protected boolean isExceptionsIncludeStackTrace()
+    {
+        return INCLUDE_STACK_TRACE;
     }
 
     protected abstract void registerJacksonJsonProvider(JerseyEnvironment jerseyEnvironment);
