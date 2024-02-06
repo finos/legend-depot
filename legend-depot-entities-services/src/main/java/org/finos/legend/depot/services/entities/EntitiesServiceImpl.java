@@ -18,6 +18,7 @@ package org.finos.legend.depot.services.entities;
 import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.parallel.ParallelIterate;
+import org.finos.legend.depot.core.services.metrics.PrometheusMetricsFactory;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
@@ -39,8 +40,9 @@ import java.util.stream.Collectors;
 public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesService<T>
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(EntitiesServiceImpl.class);
-    public static final String CALCULATE_PROJECT_DEPENDENCIES = "calculateProjectDependencies";
-    public static final String RETRIEVE_DEPENDENCY_ENTITIES = "retrieveDependencyEntities";
+    private static final String CALCULATE_PROJECT_DEPENDENCIES = "calculateProjectDependencies";
+    private static final String RETRIEVE_DEPENDENCY_ENTITIES = "retrieveDependencyEntities";
+    private static final String DEPENDENCIES_SIZE = "dependencies";
     private final Entities entities;
     protected final ProjectsService projects;
 
@@ -86,7 +88,9 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
             return deps;
         });
         TracerFactory.get().log(String.format("dependencies: [%s] ",dependencies.size()));
+        PrometheusMetricsFactory.getInstance().observeHistogram(DEPENDENCIES_SIZE,dependencies.size());
         LOGGER.info("finished calculating [{}] dependencies",dependencies.size());
+
         return  (List<ProjectVersionEntities>) executeWithTrace(RETRIEVE_DEPENDENCY_ENTITIES, () ->
         {
             MutableList<ProjectVersionEntities> depEntities = FastList.newList();

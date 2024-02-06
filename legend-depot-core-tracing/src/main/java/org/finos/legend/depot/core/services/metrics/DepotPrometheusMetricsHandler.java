@@ -207,6 +207,12 @@ public class DepotPrometheusMetricsHandler implements  PrometheusMetricsHandler
     }
 
     @Override
+    public void observeHistogram(String name, double amount)
+    {
+        this.allHistograms.getIfAbsentPutWithKey(getKeyName(name),(key) -> buildHistogram(name,name + HISTOGRAM,Collections.emptyList())).observe(amount);
+    }
+
+    @Override
     public void registerResourceSummaries(Class<? extends TracingResource> baseResource)
     {
             Arrays.stream(baseResource.getMethods()).forEach(m ->

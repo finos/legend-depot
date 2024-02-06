@@ -98,4 +98,10 @@ public class VoidPrometheusMetricsHandler implements PrometheusMetricsHandler
     {
 
     }
+
+    @Override
+    public void observeHistogram(String name, double amount)
+    {
+
+    }
 }
