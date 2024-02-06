@@ -196,7 +196,7 @@ public class TestPureModelContextService extends TestBaseServices
     {
         getPureModelContextDataAsString("examples.metadata", "test", "2.3.1", CLIENT_VERSION,  true);
         metricsHandler.persist(metricsRegistry);
-        Assert.assertEquals(metrics.getAll().size(), 5);
+        Assert.assertEquals(metrics.getAll().size(), 4);
         Assert.assertNotNull(metrics.get("examples.metadata", "test-dependencies", "1.0.0").get(0).getLastQueryTime());
         Assert.assertNotNull(metrics.get("examples.metadata", "test", "2.3.1").get(0).getLastQueryTime());
     }

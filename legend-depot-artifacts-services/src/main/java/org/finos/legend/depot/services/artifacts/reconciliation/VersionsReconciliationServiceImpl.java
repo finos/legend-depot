@@ -114,7 +114,7 @@ public class VersionsReconciliationServiceImpl implements VersionsReconciliation
                 versionMismatches.add(new VersionMismatch(p.getProjectId(), p.getGroupId(), p.getArtifactId(), Collections.emptyList(), Collections.emptyList(), Arrays.asList(message)));
                 repoExceptions.addAndGet(1);
             }
-        }));
+        }),10);
 
         PrometheusMetricsFactory.getInstance().setGauge(PROJECTS,allProjects.size());
         PrometheusMetricsFactory.getInstance().setGauge(REPO_VERSIONS,repoVersions.get());

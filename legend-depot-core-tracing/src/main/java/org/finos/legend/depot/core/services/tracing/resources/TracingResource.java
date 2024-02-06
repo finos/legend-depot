@@ -143,9 +143,4 @@ public class TracingResource
     {
         return handle(label, label, supplier, request, entityTagSupplier);
     }
-
-    void registerResourceApisMetrics(TracingResource baseResource)
-    {
-
-    }
 }

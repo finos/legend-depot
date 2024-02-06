@@ -22,17 +22,12 @@ import io.opentracing.noop.NoopTracerFactory;
 import io.opentracing.tag.StringTag;
 import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
-import io.prometheus.client.CollectorRegistry;
-import org.finos.legend.depot.core.services.api.tracing.TracingException;
 import org.finos.legend.depot.core.services.api.tracing.VoidAuthenticationProvider;
 import org.finos.legend.depot.core.services.api.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.core.services.api.tracing.configuration.TracerProvider;
-import org.finos.legend.engine.shared.core.operational.prometheus.TracingExports;
 import org.finos.legend.opentracing.AuthenticationProvider;
 import org.finos.legend.opentracing.JerseyClientSender;
-import org.finos.legend.opentracing.OpenTracing;
 import org.slf4j.Logger;
-import zipkin2.reporter.InMemoryReporterMetrics;
 
 import javax.inject.Singleton;
 import java.net.URI;
@@ -40,14 +35,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
 
 @Singleton
 public final class TracerFactory
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TracerFactory.class);
     private static final String DEFAULT_SERVICE_NAME = "legend-depot";
+    private static final String ERROR_TAG = "error";
     private static TracerFactory INSTANCE;
     private final Tracer tracer;
 
@@ -65,7 +59,7 @@ public final class TracerFactory
         return INSTANCE;
     }
 
-    public static synchronized Tracer getTracer()
+    public static Tracer getTracer()
     {
         return get().tracer;
     }
@@ -76,7 +70,7 @@ public final class TracerFactory
         {
             if (openTracingConfiguration.getOpenTracingUri() == null || openTracingConfiguration.getOpenTracingUri().isEmpty())
             {
-                throw new TracingException("Invalid uri, openTracingUri cannot be empty");
+                throw new IllegalArgumentException("Invalid uri, openTracingUri cannot be empty");
             }
             AuthenticationProvider authenticationProvider = openTracingConfiguration.getAuthenticationProvider() != null ? openTracingConfiguration.getAuthenticationProvider() : new VoidAuthenticationProvider();
             String serviceName = openTracingConfiguration.getServiceName() != null && !openTracingConfiguration.getServiceName().isEmpty() ?
@@ -91,7 +85,7 @@ public final class TracerFactory
             catch (Exception e)
             {
                 LOGGER.error("tracing configuration failed",e);
-                throw new TracingException("Invalid openTracingUri provided", e);
+                throw new IllegalArgumentException("Invalid openTracingUri provided", e);
             }
         }
         else
@@ -126,11 +120,16 @@ public final class TracerFactory
         }
     }
 
-    public void addTags(Map<String, String> tags,Span span)
+    public void addTags(Map<String, ?> tags)
+    {
+        addTags(tags, GlobalTracer.get().activeSpan());
+    }
+
+    public void addTags(Map<String, ?> tags,Span span)
     {
         if (tags != null & !tags.keySet().isEmpty() && span != null)
         {
-            tags.keySet().forEach(key -> new StringTag(key).set(span,tags.get(key)));
+            tags.keySet().forEach(key -> new StringTag(key).set(span,String.valueOf(tags.get(key))));
         }
     }
 
@@ -168,21 +167,19 @@ public final class TracerFactory
             {
                 Tags.ERROR.set(currentSpan, true);
                 Map<String, String> map = new HashMap<>();
-                map.put(Fields.EVENT, "error");
+                map.put(Fields.EVENT, ERROR_TAG);
                 map.put(Fields.ERROR_OBJECT, e.toString());
                 map.put(Fields.MESSAGE, e.getMessage());
                 currentSpan.log(map);
                 String traceId = currentSpan.context().toTraceId();
-                message = String.format("[%s] failed with error:[%s] (TraceId: [%s])", label, e.getMessage(), traceId);
-                LOGGER.error(message);
+                message = String.format("[%s] - TraceId [%s]: %s", label, traceId,e.getMessage());
             }
             else
             {
-                message = String.format("[%s] failed with error:[%s])", label, e.getMessage());
-                LOGGER.error(message);
-                LOGGER.error("{} ( TraceId: current span not found)",message);
+                message = String.format("[%s]: %s", label,e.getMessage());
             }
-            throw new TracingException(message, e);
+            LOGGER.error(message);
+            throw new RuntimeException(message,e);
         }
         finally
         {
