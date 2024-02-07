@@ -33,6 +33,8 @@ public interface EntitiesService<T extends StoredEntity>
 
     Optional<Entity> getEntity(String groupId, String artifactId, String versionId, String entityPath);
 
+    List<Entity> getEntityFromDependencies(String groupId, String artifactId, String versionId, List<String> entityPaths, boolean includeOrigin);
+
     List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages);
 
     List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin);
