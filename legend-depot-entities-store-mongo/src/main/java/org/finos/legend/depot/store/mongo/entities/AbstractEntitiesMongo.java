@@ -141,6 +141,28 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
         return findOne(filterByKey).map(this::resolvedToEntityDefinition);
     }
 
+    private List<Entity> getEntities(String groupId, String artifactId, String versionId, List<String> entityPaths)
+    {
+        List<Bson> filters = new ArrayList<>();
+        filters.add(or(ListIterate.collect(entityPaths, path -> getEntityPathFilter(groupId, artifactId, versionId, path))));
+        return find(and(filters)).stream().map(this::resolvedToEntityDefinition).collect(Collectors.toList());
+    }
+
+    public List<Entity> getEntityFromDependencies(Set<ProjectVersion> dependencies, List<String> entityPaths)
+    {
+        List<Entity> entity = new ArrayList<>();
+        for (ProjectVersion dep : dependencies)
+        {
+            List<Entity> depEntity = this.getEntities(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(), entityPaths);
+            entity.addAll(depEntity);
+            if (depEntity.size() == entityPaths.size())
+            {
+                break;
+            }
+        }
+        return entity;
+    }
+
     public List<T> getStoredEntities(String groupId, String artifactId)
     {
         return find(getArtifactVersionedFilter(groupId, artifactId));

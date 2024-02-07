@@ -30,6 +30,8 @@ public interface Entities<T extends StoredEntity>
 
     Optional<Entity> getEntity(String groupId, String artifactId, String versionId, String path);
 
+    List<Entity> getEntityFromDependencies(Set<ProjectVersion> dependencies, List<String> entityPaths);
+
     List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages);
 
     List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary);

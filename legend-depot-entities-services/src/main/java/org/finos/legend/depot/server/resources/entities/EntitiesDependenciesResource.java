@@ -18,6 +18,7 @@ package org.finos.legend.depot.server.resources.entities;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang.StringUtils;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
@@ -41,6 +42,7 @@ import java.util.List;
 
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSIONS_DEPENDENCY_ENTITIES;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_DEPENDENCY_ENTITIES;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_ENTITY_FROM_DEPENDENCIES;
 
 @Path("")
 @Api("Dependencies")
@@ -69,6 +71,22 @@ public class EntitiesDependenciesResource extends TracingResource
                                                 @Context Request request)
     {
         return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, transitive, includeOrigin), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
+    }
+
+    @POST
+    @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/dependencies/paths")
+    @ApiOperation(value = GET_VERSION_ENTITY_FROM_DEPENDENCIES, hidden = true)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEntityFromDependencies(@PathParam("groupId") String groupId,
+                                              @PathParam("artifactId") String artifactId,
+                                              @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                              @ApiParam("entityPaths") List<String> entityPaths,
+                                              @QueryParam("includeOrigin")
+                                              @DefaultValue("false")
+                                              @ApiParam("Whether to find entity in the GAV provided") boolean includeOrigin,
+                                              @Context Request request)
+    {
+        return handle(GET_VERSION_ENTITY_FROM_DEPENDENCIES, GET_VERSION_ENTITY_FROM_DEPENDENCIES + StringUtils.join(entityPaths, ","), () -> this.entitiesService.getEntityFromDependencies(groupId, artifactId, versionId, entityPaths, includeOrigin), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
     @POST

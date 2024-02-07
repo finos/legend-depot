@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.services.entities;
 
+import org.eclipse.collections.api.factory.Lists;
 import org.finos.legend.depot.domain.entity.DepotEntity;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.domain.project.ProjectVersion;
@@ -46,6 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
@@ -240,5 +242,23 @@ public class TestEntitiesService extends TestBaseServices
     {
         List<DepotEntity> entities = classifierService.getEntitiesByClassifierPath("meta::pure::metamodel::type::Class", null, null, Scope.RELEASES, true);
         Assert.assertEquals(entities.size(), 3);
+    }
+
+    @Test
+    public void canGetEntityFromDependencies()
+    {
+        List<Entity> entity = entitiesService.getEntityFromDependencies("examples.metadata", "test", "2.3.1", Lists.fixedSize.of("domain::covid::JHUCovid19","examples::metadata::test::dependency::Dependency"), false);
+        Assert.assertEquals(entity.size(), 2);
+
+        entity = entitiesService.getEntityFromDependencies("examples.metadata", "test", "2.3.1", Lists.fixedSize.of("examples::metadata::test::dependency::Dependency","com::MyGenerationSpecification"), true);
+        Assert.assertEquals(entity.size(), 2);
+
+        entity = entitiesService.getEntityFromDependencies("examples.metadata", "test", "2.3.1", Lists.fixedSize.of("examples::metadata::test::dependency::Dependency","covid::JHUCovid19"), false);
+        Assert.assertEquals(entity.size(), 1);
+
+        entity = entitiesService.getEntityFromDependencies("examples.metadata", "test", "2.3.1", Lists.fixedSize.of("com::MyGenerationSpecification","covid::JHUCovid19"), false);
+        Assert.assertEquals(entity.size(), 0);
+
+        Assert.assertThrows("project version not found for examples.metadata-test-3.0.1", IllegalArgumentException.class, () -> entitiesService.getEntityFromDependencies("examples.metadata", "test", "3.0.1", Lists.fixedSize.of("covid::JHUCovid19"), false));
     }
 }

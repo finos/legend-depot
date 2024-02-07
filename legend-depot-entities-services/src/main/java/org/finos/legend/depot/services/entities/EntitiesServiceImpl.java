@@ -67,6 +67,18 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
     }
 
     @Override
+    public List<Entity> getEntityFromDependencies(String groupId, String artifactId, String versionId, List<String> entityPaths, boolean includeOrigin)
+    {
+        String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+        Set<ProjectVersion> projectVersions = projects.getDependencies(groupId, artifactId, version, true);
+        if (includeOrigin)
+        {
+            projectVersions.add(new ProjectVersion(groupId, artifactId, version));
+        }
+        return entities.getEntityFromDependencies(projectVersions, entityPaths);
+    }
+
+    @Override
     public List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages)
     {
         String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
