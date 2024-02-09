@@ -20,5 +20,5 @@ import zipkin2.reporter.Sender;
 
 public interface TracerProvider
 {
-    Tracer create(Sender sender, String serviceName);
+    Tracer create(OpenTracingConfiguration configuration);
 }

@@ -38,7 +38,6 @@ import org.finos.legend.depot.core.server.error.CatchAllExceptionMapper;
 import org.finos.legend.depot.core.server.error.DepotServerExceptionMapper;
 import org.finos.legend.depot.core.services.api.metrics.configuration.PrometheusMetricsProviderConfiguration;
 import org.finos.legend.depot.core.services.api.tracing.configuration.TracerProviderConfiguration;
-import org.finos.legend.depot.core.services.api.tracing.configuration.TracingAuthenticationProviderConfiguration;
 import org.finos.legend.depot.core.services.metrics.PrometheusMetricsFactory;
 import org.finos.legend.depot.store.StorageConfiguration;
 import org.finos.legend.server.pac4j.LegendPac4jBundle;
@@ -92,7 +91,6 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
     protected void configureObjectMapper(Bootstrap<T> bootstrap)
     {
         StorageConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
-        TracingAuthenticationProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
         TracerProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
         PrometheusMetricsProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
     }

@@ -16,7 +16,7 @@
 package org.finos.legend.depot.core.services.api.tracing.configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.finos.legend.opentracing.AuthenticationProvider;
+
 
 public class OpenTracingConfiguration
 {
@@ -30,8 +30,6 @@ public class OpenTracingConfiguration
     @JsonProperty
     private String serviceName;
 
-    @JsonProperty
-    private AuthenticationProvider authenticationProvider;
 
     @JsonProperty
     private TracerProvider tracerProvider;
@@ -64,16 +62,6 @@ public class OpenTracingConfiguration
     public void setEnabled(boolean enabled)
     {
         this.enabled = enabled;
-    }
-
-    public AuthenticationProvider getAuthenticationProvider()
-    {
-        return authenticationProvider;
-    }
-
-    public void setAuthenticationProvider(AuthenticationProvider authenticationProvider)
-    {
-        this.authenticationProvider = authenticationProvider;
     }
 
     public TracerProvider getTracerProvider()
