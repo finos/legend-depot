@@ -22,15 +22,10 @@ import io.opentracing.noop.NoopTracerFactory;
 import io.opentracing.tag.StringTag;
 import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
-import org.finos.legend.depot.core.services.api.tracing.VoidAuthenticationProvider;
 import org.finos.legend.depot.core.services.api.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.core.services.api.tracing.configuration.TracerProvider;
-import org.finos.legend.opentracing.AuthenticationProvider;
-import org.finos.legend.opentracing.JerseyClientSender;
 import org.slf4j.Logger;
-
 import javax.inject.Singleton;
-import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,10 +35,12 @@ import java.util.function.Supplier;
 public final class TracerFactory
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TracerFactory.class);
-    private static final String DEFAULT_SERVICE_NAME = "legend-depot";
+    static final String DEFAULT_SERVICE_NAME = "legend-depot";
     private static final String ERROR_TAG = "error";
     private static TracerFactory INSTANCE;
     private final Tracer tracer;
+
+
 
     private TracerFactory(Tracer tracer)
     {
@@ -68,25 +65,10 @@ public final class TracerFactory
     {
         if (openTracingConfiguration != null && openTracingConfiguration.isEnabled())
         {
-            if (openTracingConfiguration.getOpenTracingUri() == null || openTracingConfiguration.getOpenTracingUri().isEmpty())
-            {
-                throw new IllegalArgumentException("Invalid uri, openTracingUri cannot be empty");
-            }
-            AuthenticationProvider authenticationProvider = openTracingConfiguration.getAuthenticationProvider() != null ? openTracingConfiguration.getAuthenticationProvider() : new VoidAuthenticationProvider();
-            String serviceName = openTracingConfiguration.getServiceName() != null && !openTracingConfiguration.getServiceName().isEmpty() ?
-                    openTracingConfiguration.getServiceName() : DEFAULT_SERVICE_NAME;
-            try (JerseyClientSender sender = new JerseyClientSender(new URI(openTracingConfiguration.getOpenTracingUri()), authenticationProvider);)
-            {
-                TracerProvider tracerProvider =  openTracingConfiguration.getTracerProvider() != null ? openTracingConfiguration.getTracerProvider() : new DefaultTracerProvider();
-                Tracer tracer = tracerProvider.create(sender,serviceName);
-                GlobalTracer.registerIfAbsent(tracer);
-                INSTANCE = new TracerFactory(tracer);
-            }
-            catch (Exception e)
-            {
-                LOGGER.error("tracing configuration failed",e);
-                throw new IllegalArgumentException("Invalid openTracingUri provided", e);
-            }
+            TracerProvider tracerProvider = openTracingConfiguration.getTracerProvider() != null ? openTracingConfiguration.getTracerProvider() : new DefaultTracerProvider();
+            Tracer tracer = tracerProvider.create(openTracingConfiguration);
+            GlobalTracer.registerIfAbsent(tracer);
+            INSTANCE = new TracerFactory(tracer);
         }
         else
         {

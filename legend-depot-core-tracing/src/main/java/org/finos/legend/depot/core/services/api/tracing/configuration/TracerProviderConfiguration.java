@@ -17,7 +17,6 @@ package org.finos.legend.depot.core.services.api.tracing.configuration;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.finos.legend.opentracing.AuthenticationProvider;
 
 public abstract class TracerProviderConfiguration
 {
