@@ -104,37 +104,6 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
 
     protected abstract Entity resolvedToEntityDefinition(T storedEntity);
 
-    public FindIterable findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions)
-    {
-        List<Bson> filters = new ArrayList<>();
-        filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
-        if (projectVersions != null && !projectVersions.isEmpty())
-        {
-            filters.add(or(ListIterate.collect(projectVersions, projectVersion -> getArtifactAndVersionFilter(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()))));
-        }
-        else
-        {
-            filters.add(Filters.not(Filters.regex(BaseMongo.VERSION_ID, BRANCH_SNAPSHOT(""))));
-        }
-        if (search != null)
-        {
-            filters.add(Filters.regex(ENTITY_PATH, Pattern.quote(search), "i"));
-        }
-        return executeFind(and(filters));
-    }
-
-    public FindIterable findLatestEntitiesByClassifier(String classifier, String search)
-    {
-        List<Bson> filters = new ArrayList<>();
-        filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
-        filters.add(Filters.regex(BaseMongo.VERSION_ID, BRANCH_SNAPSHOT("")));
-        if (search != null)
-        {
-            filters.add(Filters.regex(ENTITY_PATH, Pattern.quote(search), "i"));
-        }
-        return executeFind(and(filters));
-    }
-
     public Optional<Entity> getEntity(String groupId, String artifactId, String versionId, String path)
     {
         Bson filterByKey = getEntityPathFilter(groupId, artifactId, versionId, path);
@@ -210,9 +179,58 @@ public abstract class AbstractEntitiesMongo<T extends StoredEntity> extends Base
         return executeFind(and(eq(ENTITY_CLASSIFIER_PATH, classifier), Filters.regex(BaseMongo.VERSION_ID, BRANCH_SNAPSHOT(""))));
     }
 
-    public List<Entity> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier)
+    public FindIterable findEntitiesByClassifierAndVersions(String classifier, List<ProjectVersion> projectVersions)
     {
-        return find(and(getArtifactAndVersionVersionedFilter(groupId, artifactId, versionId), eq(ENTITY_CLASSIFIER_PATH, classifier))).parallelStream().map(this::resolvedToEntityDefinition).collect(Collectors.toList());
+        List<Bson> filters = new ArrayList<>();
+        filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
+        if (projectVersions != null && !projectVersions.isEmpty())
+        {
+            filters.add(or(ListIterate.collect(projectVersions, projectVersion -> getArtifactAndVersionFilter(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()))));
+        }
+        return executeFind(and(filters));
+    }
+
+    public FindIterable findReleasedEntitiesByClassifier(String classifier, String search)
+    {
+        List<Bson> filters = new ArrayList<>();
+        filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
+        filters.add(Filters.not(Filters.regex(BaseMongo.VERSION_ID, BRANCH_SNAPSHOT(""))));
+        if (search != null)
+        {
+            filters.add(Filters.regex(ENTITY_PATH, Pattern.quote(search), "i"));
+        }
+        return executeFind(and(filters));
+    }
+
+    public FindIterable findLatestEntitiesByClassifier(String classifier, String search)
+    {
+        List<Bson> filters = new ArrayList<>();
+        filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
+        filters.add(Filters.regex(BaseMongo.VERSION_ID, BRANCH_SNAPSHOT("")));
+        if (search != null)
+        {
+            filters.add(Filters.regex(ENTITY_PATH, Pattern.quote(search), "i"));
+        }
+        return executeFind(and(filters));
+    }
+
+    public FindIterable findEntitiesByClassifierAndVersions(String classifier, String search, List<ProjectVersion> projectVersions)
+    {
+        List<Bson> filters = new ArrayList<>();
+        filters.add(eq(ENTITY_CLASSIFIER_PATH, classifier));
+        if (projectVersions != null && !projectVersions.isEmpty())
+        {
+            filters.add(or(ListIterate.collect(projectVersions, projectVersion -> getArtifactAndVersionFilter(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()))));
+        }
+        else
+        {
+            filters.add(Filters.not(Filters.regex(BaseMongo.VERSION_ID, BRANCH_SNAPSHOT(""))));
+        }
+        if (search != null)
+        {
+            filters.add(Filters.regex(ENTITY_PATH, Pattern.quote(search), "i"));
+        }
+        return executeFind(and(filters));
     }
 
     public long delete(String groupId, String artifactId, String versionId)

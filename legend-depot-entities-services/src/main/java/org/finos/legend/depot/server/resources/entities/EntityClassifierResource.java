@@ -56,9 +56,8 @@ public class EntityClassifierResource extends TracingResource
     public Response getEntities(@PathParam("classifierPath") @ApiParam("The classifier path of the entities") String classifierPath,
                                 @QueryParam("search") @ApiParam("The search string that the entity path contains") String search,
                                 @QueryParam("scope") @ApiParam("Whether to return entities for the latest released version or snapshot") @DefaultValue("RELEASES") Scope scope,
-                                @QueryParam("limit") @ApiParam("Limit the number of entities returned") Integer limit,
-                                @QueryParam("summary") @DefaultValue("false") @ApiParam("Whether to return the summary view of the ENTITIES or the full entity") boolean summary)
+                                @QueryParam("limit") @ApiParam("Limit the number of entities returned") Integer limit)
     {
-        return handleResponse(GET_ENTITIES_BY_CLASSIFIER_PATH, () -> this.graphService.getEntitiesByClassifierPath(classifierPath, search, limit, scope, summary));
+        return handleResponse(GET_ENTITIES_BY_CLASSIFIER_PATH, () -> this.graphService.getEntitiesByClassifierPath(classifierPath, search, limit, scope, true));
     }
 }
