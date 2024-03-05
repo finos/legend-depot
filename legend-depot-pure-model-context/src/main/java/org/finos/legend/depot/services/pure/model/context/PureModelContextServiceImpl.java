@@ -17,6 +17,7 @@ package org.finos.legend.depot.services.pure.model.context;
 
 import org.finos.legend.depot.core.services.tracing.TracerFactory;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.api.pure.model.context.PureModelContextService;
@@ -71,6 +72,14 @@ public class PureModelContextServiceImpl implements PureModelContextService
         });
     }
 
+    @Override
+    public PureModelContextData getDependenciesPureModelContextData(List<ProjectVersion> projectDependencies, String clientVersion, boolean transitive, boolean includeOrigin)
+    {
+        String resolvedClientVersion = resolveAndValidateClientVersion(clientVersion);
+        List<ProjectVersionEntities> dependenciesEntities = (List<ProjectVersionEntities>) entitiesService.getDependenciesEntities(projectDependencies, transitive, includeOrigin);
+        return getPureModelContextData(dependenciesEntities.stream().flatMap(dep -> dep.getEntities().stream()), new AlloySDLC(), resolvedClientVersion);
+    }
+
     protected String resolveAndValidateClientVersion(String clientVersion)
     {
         if (clientVersion != null && !PureClientVersions.versions.contains(clientVersion))
@@ -82,10 +91,15 @@ public class PureModelContextServiceImpl implements PureModelContextService
 
     protected PureModelContextData getPureModelContextData(Stream<Entity> entities, String groupId, String artifactId, String versionId, String clientVersion)
     {
+        return getPureModelContextData(entities, buildAlloySDLC(groupId, artifactId, versionId), clientVersion);
+    }
+
+    protected PureModelContextData getPureModelContextData(Stream<Entity> entities, AlloySDLC alloySDLC, String clientVersion)
+    {
         return PureModelContextDataBuilder
                 .newBuilder()
                 .withProtocol(PURE, clientVersion)
-                .withSDLC(buildAlloySDLC(groupId, artifactId, versionId))
+                .withSDLC(alloySDLC)
                 .withEntitiesIfPossible(entities)
                 .build();
     }
