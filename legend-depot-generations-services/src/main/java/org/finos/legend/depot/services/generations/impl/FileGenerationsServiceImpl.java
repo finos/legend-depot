@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.services.generations.impl;
 
+import org.finos.legend.depot.domain.entity.DepotEntity;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.api.generations.FileGenerationsService;
 import org.finos.legend.depot.domain.generation.DepotGeneration;
@@ -52,7 +53,8 @@ public class FileGenerationsServiceImpl implements FileGenerationsService
     public List<Entity> getGenerations(String groupId, String artifactId, String versionId)
     {
         String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
-        return entities.findEntitiesByClassifier(groupId, artifactId, version, GENERATION_CONFIGURATION);
+        return ((List<DepotEntity>)entities.findEntitiesByClassifier(groupId, artifactId, version, GENERATION_CONFIGURATION)).stream()
+                .map(depotEntity -> depotEntity.getEntity()).collect(Collectors.toList());
     }
 
     @Override

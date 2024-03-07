@@ -101,7 +101,7 @@ public class TestQueryRevisions extends TestStoreMongo
     @Test
     public void canQueryByClassifier()
     {
-        List<DepotEntity> entities = revisionsMongo.findLatestEntitiesByClassifier("meta::pure::metamodel::type::Class", null, null, true);
+        List<DepotEntity> entities = revisionsMongo.findLatestClassifierSummaries("meta::pure::metamodel::type::Class");
         Assert.assertNotNull(entities);
         Assert.assertEquals(2, entities.size());
         for (DepotEntity entity : entities)

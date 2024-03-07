@@ -136,56 +136,81 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
     }
 
     @Override
-    public List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary)
+    public List<DepotEntity> findLatestClassifierEntities(String classifier)
     {
-        FindIterable findIterable = super.findReleasedEntitiesByClassifier(classifier, search, projectVersions);
-        if (limit != null)
-        {
-            return transform(summary, findIterable.limit(limit));
-        }
-        return transform(summary, findIterable);
+        return curateDepotEntity(super.findLatestEntitiesByClassifier(classifier));
     }
 
     @Override
-    public List<DepotEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary)
+    public List<DepotEntity> findReleasedClassifierEntities(String classifier)
+    {
+        return curateDepotEntity(super.findReleasedEntitiesByClassifier(classifier));
+    }
+
+
+    @Override
+    public List<DepotEntity> findClassifierEntitiesByVersions(String classifier, List<ProjectVersion> projectVersions)
+    {
+        return curateDepotEntity(super.findEntitiesByClassifierAndVersions(classifier, projectVersions));
+    }
+
+    @Override
+    public List<DepotEntityOverview> findLatestClassifierSummaries(String classifier)
+    {
+        return curateDepotEntityOverview(super.findLatestEntitiesByClassifier(classifier));
+    }
+
+    @Override
+    public List<DepotEntityOverview> findReleasedClassifierSummaries(String classifier)
+    {
+        return curateDepotEntityOverview(super.findReleasedEntitiesByClassifier(classifier));
+    }
+
+    @Override
+    public List<DepotEntityOverview> findClassifierSummariesByVersions(String classifier, List<ProjectVersion> projectVersions)
+    {
+        return curateDepotEntityOverview(super.findEntitiesByClassifierAndVersions(classifier, projectVersions));
+    }
+
+    @Override
+    public List<DepotEntity> findReleasedClassifierEntities(String classifier, String search, Integer limit)
+    {
+        FindIterable findIterable = super.findReleasedEntitiesByClassifier(classifier, search);
+
+        if (limit != null)
+        {
+            return curateDepotEntity(findIterable.limit(limit));
+        }
+        return curateDepotEntity(findIterable);
+    }
+
+    @Override
+    public List<DepotEntity> findLatestClassifierEntities(String classifier, String search, Integer limit)
     {
         FindIterable findIterable = super.findLatestEntitiesByClassifier(classifier, search);
+
         if (limit != null)
         {
-            return transform(summary, findIterable.limit(limit));
+            return curateDepotEntity(findIterable.limit(limit));
         }
-        return transform(summary, findIterable);
+        return curateDepotEntity(findIterable);
     }
 
     @Override
-    public List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary)
+    public List<DepotEntity> findClassifierEntitiesByVersions(String classifier, List<ProjectVersion> projectVersions, String search, Integer limit)
     {
-        return transform(summary, super.findReleasedEntitiesByClassifier(classifier));
-    }
+        FindIterable findIterable = super.findEntitiesByClassifierAndVersions(classifier, search, projectVersions);
 
-    @Override
-    public List<DepotEntity> findLatestEntitiesByClassifier(String classifier, boolean summary)
-    {
-        return transform(summary, super.findLatestEntitiesByClassifier(classifier));
-    }
-
-    @Override
-    public List<Entity> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier)
-    {
-        return super.findEntitiesByClassifier(groupId, artifactId, versionId, classifier);
-    }
-
-    protected List<DepotEntity> transform(boolean summary, FindIterable query)
-    {
-        if (!summary)
+        if (limit != null)
         {
-            List<T> storedEntities = convert(query);
-            if (!storedEntities.isEmpty())
-            {
-                return storedEntities.stream().map(storedEntity -> new DepotEntity(storedEntity.getGroupId(), storedEntity.getArtifactId(), storedEntity.getVersionId(), resolvedToEntityDefinition(storedEntity))).collect(Collectors.toList());
-            }
+            return curateDepotEntity(findIterable.limit(limit));
         }
-        List<DepotEntity> result = new ArrayList<>();
+        return curateDepotEntity(findIterable);
+    }
+
+    protected List<DepotEntityOverview> curateDepotEntityOverview(FindIterable query)
+    {
+        List<DepotEntityOverview> result = new ArrayList<>();
         query.forEach((Consumer<Document>) doc ->
         {
             Map<String, ?> entity = null;
@@ -200,6 +225,16 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
             result.add(new DepotEntityOverview(doc.getString(BaseMongo.GROUP_ID), doc.getString(BaseMongo.ARTIFACT_ID), doc.getString(BaseMongo.VERSION_ID), (String) entity.get(PATH), (String) entity.get(CLASSIFIER_PATH)));
         });
         return result;
+    }
+
+    protected List<DepotEntity> curateDepotEntity(FindIterable query)
+    {
+        List<T> storedEntities = convert(query);
+        if (!storedEntities.isEmpty())
+        {
+            return storedEntities.stream().map(storedEntity -> new DepotEntity(storedEntity.getGroupId(), storedEntity.getArtifactId(), storedEntity.getVersionId(), resolvedToEntityDefinition(storedEntity))).collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     @Override

@@ -16,6 +16,7 @@
 package org.finos.legend.depot.services.api.entities;
 
 import org.finos.legend.depot.domain.entity.DepotEntity;
+import org.finos.legend.depot.domain.entity.DepotEntityOverview;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.version.Scope;
 
@@ -23,13 +24,17 @@ import java.util.List;
 
 public interface EntityClassifierService
 {
-    List<DepotEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit, Scope scope, boolean summary);
+    List<DepotEntity> getEntitiesByClassifierPath(String classifierPath, String search, Integer limit, Scope scope, boolean latestVersion);
 
-    List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary);
+    List<DepotEntity> findClassifierEntities(String classifier, Scope scope);
 
-    List<DepotEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary);
+    List<DepotEntity> findClassifierEntitiesByVersions(String classifier, List<ProjectVersion> projectVersions);
 
-    List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary);
+    List<DepotEntityOverview> findClassifierSummaries(String classifier, Scope scope);
 
-    List<DepotEntity> findLatestEntitiesByClassifier(String classifier, boolean summary);
+    List<DepotEntityOverview> findClassifierSummariesByVersions(String classifier, List<ProjectVersion> projectVersions);
+
+    List<DepotEntity> findClassifierEntities(String classifier, Scope scope, String search, Integer limit);
+
+    List<DepotEntity> findClassifierEntitiesByVersions(String classifier, List<ProjectVersion> projectVersions, String search, Integer limit);
 }

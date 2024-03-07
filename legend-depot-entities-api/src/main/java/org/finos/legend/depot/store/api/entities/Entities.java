@@ -16,10 +16,12 @@
 package org.finos.legend.depot.store.api.entities;
 
 import org.finos.legend.depot.domain.entity.DepotEntity;
+import org.finos.legend.depot.domain.entity.DepotEntityOverview;
 import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,15 +36,28 @@ public interface Entities<T extends StoredEntity>
 
     List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages);
 
-    List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, String search, List<ProjectVersion> projectVersions, Integer limit, boolean summary);
+    default List<DepotEntity> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier)
+    {
+        return findClassifierEntitiesByVersions(classifier, Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)));
+    }
 
-    List<DepotEntity> findLatestEntitiesByClassifier(String classifier, String search, Integer limit, boolean summary);
+    List<DepotEntity> findReleasedClassifierEntities(String classifier);
 
-    List<DepotEntity> findReleasedEntitiesByClassifier(String classifier, boolean summary);
+    List<DepotEntity> findLatestClassifierEntities(String classifier);
 
-    List<DepotEntity> findLatestEntitiesByClassifier(String classifier, boolean summary);
+    List<DepotEntity> findClassifierEntitiesByVersions(String classifier, List<ProjectVersion> projectVersions);
 
-    List<Entity> findEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier);
+    List<DepotEntityOverview> findReleasedClassifierSummaries(String classifier);
+
+    List<DepotEntityOverview> findLatestClassifierSummaries(String classifier);
+
+    List<DepotEntityOverview> findClassifierSummariesByVersions(String classifier, List<ProjectVersion> projectVersions);
+
+    List<DepotEntity> findReleasedClassifierEntities(String classifier, String search, Integer limit);
+
+    List<DepotEntity> findLatestClassifierEntities(String classifier, String search, Integer limit);
+
+    List<DepotEntity> findClassifierEntitiesByVersions(String classifier, List<ProjectVersion> projectVersions, String search, Integer limit);
 
     List<T> getStoredEntities(String groupId, String artifactId, String versionId);
 
