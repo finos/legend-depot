@@ -15,9 +15,14 @@
 
 package org.finos.legend.depot.services.api.pure.model.context;
 
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
+
+import java.util.List;
 
 public interface PureModelContextService
 {
     PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean transitive);
+
+    PureModelContextData getPureModelContextData(List<ProjectVersion> projectDependencies, String clientVersion, boolean transitive);
 }

@@ -10,5 +10,50 @@
         "versionId": "3.0.0"
       }]
     }
+  },
+  {
+    "groupId": "org.finos.legend",
+    "artifactId": "first-project",
+    "versionId": "1.0.0",
+    "versionData": {
+      "dependencies": [],
+      "properties": [],
+      "manifestProperties": null,
+      "deprecated": false,
+      "excluded": false,
+      "exclusionReason": null
+    }
+  },
+  {
+    "groupId": "org.finos.legend",
+    "artifactId": "first-project",
+    "versionId": "1.0.2",
+    "versionData": {
+      "dependencies": [],
+      "properties": [],
+      "manifestProperties": null,
+      "deprecated": false,
+      "excluded": false,
+      "exclusionReason": null
+    }
+  },
+  {
+    "groupId": "org.finos.legend",
+    "artifactId": "second-project",
+    "versionId": "1.0.1",
+    "versionData": {
+      "dependencies": [
+        {
+          "groupId": "org.finos.legend",
+          "artifactId": "first-project",
+          "versionId": "1.0.0"
+        }
+      ],
+      "properties": [],
+      "manifestProperties": null,
+      "deprecated": false,
+      "excluded": false,
+      "exclusionReason": null
+    }
   }
 ]

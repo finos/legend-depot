@@ -18,6 +18,7 @@ package org.finos.legend.depot.server.resources.pure.model.context;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.pure.model.context.PureModelContextService;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
@@ -26,6 +27,7 @@ import org.finos.legend.depot.services.api.EtagBuilder;
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -35,6 +37,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 
+import java.util.List;
+
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSIONS_DEPENDENCY_ENTITIES_AS_PMCD;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_AS_PMCD;
 
 @Path("")
@@ -66,5 +71,16 @@ public class PureModelContextResource extends TracingResource
         return handle(GET_VERSION_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(groupId, artifactId, versionId, clientVersion, transitive), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).withProtocolVersion(clientVersion).build());
     }
 
-
+    @POST
+    @Path("projects/dependencies/pureModelContextData")
+    @ApiOperation(GET_VERSIONS_DEPENDENCY_ENTITIES_AS_PMCD)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPureModelContextData(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies,
+                                            @QueryParam("clientVersion") String clientVersion,
+                                            @QueryParam("transitive") @DefaultValue("true")
+                                            @ApiParam("Whether to return transitive dependencies") boolean transitive,
+                                            @Context Request request)
+    {
+        return handleResponse(GET_VERSIONS_DEPENDENCY_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(projectDependencies, clientVersion, transitive));
+    }
 }

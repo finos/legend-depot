@@ -1,0 +1,121 @@
+[
+  {
+    "artifactId": "first-project",
+    "entityAttributes": {
+      "path": "demo::model::Firm",
+      "package": "demo::model",
+      "classifierPath": "meta::pure::metamodel::type::Class"
+    },
+    "groupId": "org.finos.legend",
+    "versionId": "1.0.0",
+    "_type": "entityStringData",
+    "data": "{\"classifierPath\":\"meta::pure::metamodel::type::Class\",\"path\":\"demo::model::Firm\",\"content\":{\"_type\":\"class\",\"constraints\":[],\"name\":\"Firm\",\"originalMilestonedProperties\":[],\"package\":\"demo::model\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"legalName\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]}}",
+    "updated": {
+      "$date": "2024-02-13T09:00:34.673Z"
+    }
+  },
+  {
+    "artifactId": "first-project",
+    "entityAttributes": {
+      "path": "demo::model::Person",
+      "package": "demo::model",
+      "classifierPath": "meta::pure::metamodel::type::Class"
+    },
+    "groupId": "org.finos.legend",
+    "versionId": "1.0.0",
+    "_type": "entityStringData",
+    "data": "{\"classifierPath\":\"meta::pure::metamodel::type::Class\",\"path\":\"demo::model::Person\",\"content\":{\"_type\":\"class\",\"constraints\":[],\"name\":\"Person\",\"originalMilestonedProperties\":[],\"package\":\"demo::model\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"firstName\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]}}",
+    "updated": {
+      "$date": "2024-02-13T09:00:34.678Z"
+    }
+  },
+  {
+    "artifactId": "second-project",
+    "entityAttributes": {
+      "path": "demo::db",
+      "package": "demo",
+      "classifierPath": "meta::relational::metamodel::Database"
+    },
+    "groupId": "org.finos.legend",
+    "versionId": "1.0.1",
+    "_type": "entityStringData",
+    "data": "{\"classifierPath\":\"meta::relational::metamodel::Database\",\"path\":\"demo::db\",\"content\":{\"_type\":\"relational\",\"filters\":[],\"includedStores\":[],\"joins\":[{\"name\":\"person_firm\",\"operation\":{\"_type\":\"dynaFunc\",\"funcName\":\"equal\",\"parameters\":[{\"_type\":\"column\",\"column\":\"id\",\"table\":{\"_type\":\"Table\",\"database\":\"demo::db\",\"mainTableDb\":\"demo::db\",\"schema\":\"default\",\"table\":\"Firm\"},\"tableAlias\":\"Firm\"},{\"_type\":\"column\",\"column\":\"firm_id\",\"table\":{\"_type\":\"Table\",\"database\":\"demo::db\",\"mainTableDb\":\"demo::db\",\"schema\":\"default\",\"table\":\"Person\"},\"tableAlias\":\"Person\"}]}}],\"name\":\"db\",\"package\":\"demo\",\"schemas\":[{\"name\":\"default\",\"tables\":[{\"columns\":[{\"name\":\"id\",\"nullable\":false,\"type\":{\"_type\":\"Integer\"}},{\"name\":\"legal_name\",\"nullable\":true,\"type\":{\"_type\":\"Varchar\",\"size\":200}}],\"milestoning\":[],\"name\":\"Firm\",\"primaryKey\":[\"id\"]},{\"columns\":[{\"name\":\"id\",\"nullable\":false,\"type\":{\"_type\":\"Integer\"}},{\"name\":\"first_name\",\"nullable\":true,\"type\":{\"_type\":\"Varchar\",\"size\":200}},{\"name\":\"firm_id\",\"nullable\":false,\"type\":{\"_type\":\"Integer\"}}],\"milestoning\":[],\"name\":\"Person\",\"primaryKey\":[\"id\",\"firm_id\"]}],\"views\":[]}]}}",
+    "updated": {
+      "$date": "2024-02-13T12:37:54.885Z"
+    }
+  },
+  {
+    "artifactId": "second-project",
+    "entityAttributes": {
+      "path": "demo::mapping",
+      "package": "demo",
+      "classifierPath": "meta::pure::mapping::Mapping"
+    },
+    "groupId": "org.finos.legend",
+    "versionId": "1.0.1",
+    "_type": "entityStringData",
+    "data": "{\"classifierPath\":\"meta::pure::mapping::Mapping\",\"path\":\"demo::mapping\",\"content\":{\"_type\":\"mapping\",\"associationMappings\":[],\"classMappings\":[{\"_type\":\"relational\",\"class\":\"demo::model::Firm\",\"distinct\":false,\"groupBy\":[],\"mainTable\":{\"_type\":\"Table\",\"database\":\"demo::db\",\"mainTableDb\":\"demo::db\",\"schema\":\"default\",\"table\":\"Firm\"},\"primaryKey\":[{\"_type\":\"column\",\"column\":\"id\",\"table\":{\"_type\":\"Table\",\"database\":\"demo::db\",\"mainTableDb\":\"demo::db\",\"schema\":\"default\",\"table\":\"Firm\"},\"tableAlias\":\"Firm\"}],\"propertyMappings\":[{\"_type\":\"relationalPropertyMapping\",\"property\":{\"class\":\"demo::model::Firm\",\"property\":\"legalName\"},\"relationalOperation\":{\"_type\":\"column\",\"column\":\"legal_name\",\"table\":{\"_type\":\"Table\",\"database\":\"demo::db\",\"mainTableDb\":\"demo::db\",\"schema\":\"default\",\"table\":\"Firm\"},\"tableAlias\":\"Firm\"}},{\"_type\":\"relationalPropertyMapping\",\"property\":{\"class\":\"demo::model::Firm\",\"property\":\"employees\"},\"relationalOperation\":{\"_type\":\"elemtWithJoins\",\"joins\":[{\"db\":\"demo::db\",\"name\":\"person_firm\"}]},\"target\":\"demo_model_Person\"}],\"root\":true},{\"_type\":\"relational\",\"class\":\"demo::model::Person\",\"distinct\":false,\"groupBy\":[],\"mainTable\":{\"_type\":\"Table\",\"database\":\"demo::db\",\"mainTableDb\":\"demo::db\",\"schema\":\"default\",\"table\":\"Person\"},\"primaryKey\":[{\"_type\":\"column\",\"column\":\"id\",\"table\":{\"_type\":\"Table\",\"database\":\"demo::db\",\"mainTableDb\":\"demo::db\",\"schema\":\"default\",\"table\":\"Person\"},\"tableAlias\":\"Person\"},{\"_type\":\"column\",\"column\":\"firm_id\",\"table\":{\"_type\":\"Table\",\"database\":\"demo::db\",\"mainTableDb\":\"demo::db\",\"schema\":\"default\",\"table\":\"Person\"},\"tableAlias\":\"Person\"}],\"propertyMappings\":[{\"_type\":\"relationalPropertyMapping\",\"property\":{\"class\":\"demo::model::Person\",\"property\":\"firstName\"},\"relationalOperation\":{\"_type\":\"column\",\"column\":\"first_name\",\"table\":{\"_type\":\"Table\",\"database\":\"demo::db\",\"mainTableDb\":\"demo::db\",\"schema\":\"default\",\"table\":\"Person\"},\"tableAlias\":\"Person\"}},{\"_type\":\"relationalPropertyMapping\",\"property\":{\"class\":\"demo::model::Person\",\"property\":\"firm\"},\"relationalOperation\":{\"_type\":\"elemtWithJoins\",\"joins\":[{\"db\":\"demo::db\",\"name\":\"person_firm\"}]},\"target\":\"demo_model_Firm\"}],\"root\":true}],\"enumerationMappings\":[],\"includedMappings\":[],\"name\":\"mapping\",\"package\":\"demo\",\"tests\":[]}}",
+    "updated": {
+      "$date": "2024-02-13T12:37:54.890Z"
+    }
+  },
+  {
+    "artifactId": "second-project",
+    "entityAttributes": {
+      "path": "demo::Firm_Person",
+      "package": "demo",
+      "classifierPath": "meta::pure::metamodel::relationship::Association"
+    },
+    "groupId": "org.finos.legend",
+    "versionId": "1.0.1",
+    "_type": "entityStringData",
+    "data": "{\"classifierPath\":\"meta::pure::metamodel::relationship::Association\",\"path\":\"demo::Firm_Person\",\"content\":{\"_type\":\"association\",\"name\":\"Firm_Person\",\"originalMilestonedProperties\":[],\"package\":\"demo\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"firm\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"demo::model::Firm\"},{\"multiplicity\":{\"lowerBound\":0},\"name\":\"employees\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"demo::model::Person\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"taggedValues\":[]}}",
+    "updated": {
+      "$date": "2024-02-13T12:37:54.909Z"
+    }
+  },
+  {
+    "artifactId": "first-project",
+    "entityAttributes": {
+      "path": "demo::model::Firm",
+      "package": "demo::model",
+      "classifierPath": "meta::pure::metamodel::type::Class"
+    },
+    "groupId": "org.finos.legend",
+    "versionId": "1.0.2",
+    "_type": "entityStringData",
+    "data": "{\"path\":\"demo::model::Firm\",\"content\":{\"_type\":\"class\",\"constraints\":[],\"name\":\"Firm\",\"originalMilestonedProperties\":[],\"package\":\"demo::model\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"legalName\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},\"classifierPath\":\"meta::pure::metamodel::type::Class\"}",
+    "updated": {
+      "$date": "2024-02-15T07:59:05.486Z"
+    }
+  },
+  {
+    "artifactId": "first-project",
+    "entityAttributes": {
+      "path": "demo::model::Person",
+      "package": "demo::model",
+      "classifierPath": "meta::pure::metamodel::type::Class"
+    },
+    "groupId": "org.finos.legend",
+    "versionId": "1.0.2",
+    "_type": "entityStringData",
+    "data": "{\"path\":\"demo::model::Person\",\"content\":{\"_type\":\"class\",\"constraints\":[],\"name\":\"Person\",\"originalMilestonedProperties\":[],\"package\":\"demo::model\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"firstName\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"},{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"lastName\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},\"classifierPath\":\"meta::pure::metamodel::type::Class\"}",
+    "updated": {
+      "$date": "2024-02-15T07:59:05.486Z"
+    }
+  },
+  {
+    "artifactId": "first-project",
+    "entityAttributes": {
+      "path": "demo::model::Address",
+      "package": "demo::model",
+      "classifierPath": "meta::pure::metamodel::type::Class"
+    },
+    "groupId": "org.finos.legend",
+    "versionId": "1.0.2",
+    "_type": "entityStringData",
+    "data": "{\"path\":\"demo::model::Address\",\"content\":{\"_type\":\"class\",\"constraints\":[],\"name\":\"Address\",\"originalMilestonedProperties\":[],\"package\":\"demo::model\",\"properties\":[{\"multiplicity\":{\"lowerBound\":1,\"upperBound\":1},\"name\":\"street\",\"stereotypes\":[],\"taggedValues\":[],\"type\":\"String\"}],\"qualifiedProperties\":[],\"stereotypes\":[],\"superTypes\":[],\"taggedValues\":[]},\"classifierPath\":\"meta::pure::metamodel::type::Class\"}",
+    "updated": {
+      "$date": "2024-02-15T07:59:05.500Z"
+    }
+  }]
