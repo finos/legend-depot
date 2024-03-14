@@ -24,5 +24,5 @@ public interface PureModelContextService
 {
     PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean transitive);
 
-    PureModelContextData getDependenciesPureModelContextData(List<ProjectVersion> projectDependencies, String clientVersion, boolean transitive, boolean includeOrigin);
+    PureModelContextData getPureModelContextData(List<ProjectVersion> projectDependencies, String clientVersion, boolean transitive);
 }

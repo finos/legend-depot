@@ -58,7 +58,7 @@ public class PureModelContextServiceImpl implements PureModelContextService
 
         List<Entity> entities = this.entitiesService.getEntities(groupId, artifactId, version);
 
-        PureModelContextData pureModelContextData = getPureModelContextData(entities.stream(), groupId, artifactId, version, resolvedClientVersion);
+        PureModelContextData pureModelContextData = buildPureModelContextData(entities.stream(), groupId, artifactId, version, resolvedClientVersion);
         if (!transitive)
         {
             return pureModelContextData;
@@ -67,17 +67,17 @@ public class PureModelContextServiceImpl implements PureModelContextService
         List<ProjectVersionEntities> dependenciesEntities = this.entitiesService.getDependenciesEntities(groupId, artifactId, version, true, false);
         return tracer.executeWithTrace(CALCULATE_COMBINED_PMCD, () ->
         {
-            PureModelContextData dependenciesPMCD = getPureModelContextData(dependenciesEntities.stream().flatMap(dep -> dep.getEntities().stream()),groupId,artifactId,version,resolvedClientVersion);
+            PureModelContextData dependenciesPMCD = buildPureModelContextData(dependenciesEntities.stream().flatMap(dep -> dep.getEntities().stream()),groupId,artifactId,version,resolvedClientVersion);
             return combinePureModelContextData(pureModelContextData,dependenciesPMCD);
         });
     }
 
     @Override
-    public PureModelContextData getDependenciesPureModelContextData(List<ProjectVersion> projectDependencies, String clientVersion, boolean transitive, boolean includeOrigin)
+    public PureModelContextData getPureModelContextData(List<ProjectVersion> projectDependencies, String clientVersion, boolean transitive)
     {
         String resolvedClientVersion = resolveAndValidateClientVersion(clientVersion);
-        List<ProjectVersionEntities> dependenciesEntities = (List<ProjectVersionEntities>) entitiesService.getDependenciesEntities(projectDependencies, transitive, includeOrigin);
-        return getPureModelContextData(dependenciesEntities.stream().flatMap(dep -> dep.getEntities().stream()), new AlloySDLC(), resolvedClientVersion);
+        List<ProjectVersionEntities> dependenciesEntities = (List<ProjectVersionEntities>) entitiesService.getDependenciesEntities(projectDependencies, transitive, true);
+        return buildPureModelContextData(dependenciesEntities.stream().flatMap(dep -> dep.getEntities().stream()), new AlloySDLC(), resolvedClientVersion);
     }
 
     protected String resolveAndValidateClientVersion(String clientVersion)
@@ -89,12 +89,12 @@ public class PureModelContextServiceImpl implements PureModelContextService
         return clientVersion == null ? PureClientVersions.production : clientVersion;
     }
 
-    protected PureModelContextData getPureModelContextData(Stream<Entity> entities, String groupId, String artifactId, String versionId, String clientVersion)
+    protected PureModelContextData buildPureModelContextData(Stream<Entity> entities, String groupId, String artifactId, String versionId, String clientVersion)
     {
-        return getPureModelContextData(entities, buildAlloySDLC(groupId, artifactId, versionId), clientVersion);
+        return buildPureModelContextData(entities, buildAlloySDLC(groupId, artifactId, versionId), clientVersion);
     }
 
-    protected PureModelContextData getPureModelContextData(Stream<Entity> entities, AlloySDLC alloySDLC, String clientVersion)
+    protected PureModelContextData buildPureModelContextData(Stream<Entity> entities, AlloySDLC alloySDLC, String clientVersion)
     {
         return PureModelContextDataBuilder
                 .newBuilder()

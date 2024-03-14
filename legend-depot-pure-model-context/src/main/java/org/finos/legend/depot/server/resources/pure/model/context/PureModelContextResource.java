@@ -79,17 +79,8 @@ public class PureModelContextResource extends TracingResource
                                             @QueryParam("clientVersion") String clientVersion,
                                             @QueryParam("transitive") @DefaultValue("true")
                                             @ApiParam("Whether to return transitive dependencies") boolean transitive,
-                                            @QueryParam("includeOrigin") @DefaultValue("true")
-                                                @ApiParam("Whether to return start of dependency tree") boolean includeOrigin,
                                             @Context Request request)
     {
-        return handle(GET_VERSIONS_DEPENDENCY_ENTITIES_AS_PMCD, () -> service.getDependenciesPureModelContextData(projectDependencies, clientVersion, transitive, includeOrigin), request, () ->
-        {
-            EtagBuilder etagBuilder = EtagBuilder.create().withProtocolVersion(clientVersion);
-            projectDependencies.forEach(projectVersion -> etagBuilder.withGAV(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()));
-            return etagBuilder.build();
-        });
+        return handleResponse(GET_VERSIONS_DEPENDENCY_ENTITIES_AS_PMCD, () -> service.getPureModelContextData(projectDependencies, clientVersion, transitive));
     }
-
-
 }
