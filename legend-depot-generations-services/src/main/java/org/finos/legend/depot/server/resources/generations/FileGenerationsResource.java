@@ -53,20 +53,6 @@ public class FileGenerationsResource extends TracingResource
         this.generationsService = generationsService;
     }
 
-
-    @GET
-    @Path("/projects/{groupId}/{artifactId}/{versionId}/generations")
-    @ApiOperation(GET_VERSION_FILE_GENERATION_ENTITIES)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getVersionGenerationsEntities(@PathParam("groupId") String groupId,
-                                                  @PathParam("artifactId") String artifactId,
-                                                  @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
-                                                  @Context Request request)
-    {
-        return handle(GET_VERSION_FILE_GENERATION_ENTITIES, () -> this.generationsService.getGenerations(groupId, artifactId, versionId), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
-    }
-
-
     @GET
     @Path("/generations/{groupId}/{artifactId}/versions/{versionId}")
     @ApiOperation(GET_VERSION_FILE_GENERATION)

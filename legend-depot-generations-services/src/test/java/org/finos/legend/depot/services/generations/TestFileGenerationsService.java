@@ -24,7 +24,6 @@ import org.finos.legend.depot.services.generations.impl.ManageFileGenerationsSer
 import org.finos.legend.depot.services.generations.loader.FileGenerationLoader;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.generations.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
@@ -54,14 +53,13 @@ public class TestFileGenerationsService extends TestStoreMongo
 
     public static final String AVRO = "avro";
     private static final URL filePath = TestFileGenerationsService.class.getClassLoader().getResource("generations/test-file-generation-master-SNAPSHOT.jar");
-    protected Entities entities = mock(Entities.class);
     private UpdateFileGenerations generations = new FileGenerationsMongo(mongoProvider);
     UpdateProjectsVersions projectsVersionsStore = mock(UpdateProjectsVersions.class);
     UpdateProjects projectsStore = mock(UpdateProjects.class);
     private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
     private final Queue queue = mock(Queue.class);
     private ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
-    private ManageFileGenerationsService service = new ManageFileGenerationsServiceImpl(generations, entities, projectsService);
+    private ManageFileGenerationsService service = new ManageFileGenerationsServiceImpl(generations, projectsService);
 
     @Before
     public void loadData() throws Exception
