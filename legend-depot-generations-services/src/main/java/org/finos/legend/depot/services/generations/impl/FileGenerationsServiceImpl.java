@@ -15,46 +15,29 @@
 
 package org.finos.legend.depot.services.generations.impl;
 
-import org.finos.legend.depot.domain.entity.DepotEntity;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.api.generations.FileGenerationsService;
 import org.finos.legend.depot.domain.generation.DepotGeneration;
 import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
 import org.finos.legend.depot.store.api.generations.FileGenerations;
-import org.finos.legend.depot.store.api.entities.Entities;
-import org.finos.legend.sdlc.domain.model.entity.Entity;
 
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.finos.legend.depot.domain.generation.DepotGeneration.GENERATION_CONFIGURATION;
-
-
 public class FileGenerationsServiceImpl implements FileGenerationsService
 {
 
     private final FileGenerations fileGenerations;
-    private final Entities entities;
     protected final ProjectsService projects;
 
 
     @Inject
-    public FileGenerationsServiceImpl(FileGenerations fileGenerations, Entities entities, ProjectsService projectsService)
+    public FileGenerationsServiceImpl(FileGenerations fileGenerations, ProjectsService projectsService)
     {
         this.fileGenerations = fileGenerations;
-        this.entities = entities;
         this.projects = projectsService;
-    }
-
-
-    @Override
-    public List<Entity> getGenerations(String groupId, String artifactId, String versionId)
-    {
-        String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
-        return ((List<DepotEntity>)entities.findEntitiesByClassifier(groupId, artifactId, version, GENERATION_CONFIGURATION)).stream()
-                .map(depotEntity -> depotEntity.getEntity()).collect(Collectors.toList());
     }
 
     @Override

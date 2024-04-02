@@ -63,7 +63,7 @@ public class TestGenerationsProvider extends TestStoreMongo
     private final UpdateEntities entities = mock(UpdateEntities.class);
     private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
     private final Queue queue = mock(Queue.class);
-    private final ManageFileGenerationsService generations = new ManageFileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), entities, new ProjectsServiceImpl(projectsVersions,projects,metrics,queue,new ProjectsConfiguration("master")));
+    private final ManageFileGenerationsService generations = new ManageFileGenerationsServiceImpl(new FileGenerationsMongo(mongoProvider), new ProjectsServiceImpl(projectsVersions,projects,metrics,queue,new ProjectsConfiguration("master")));
 
     @Before
     public void setup()

@@ -19,7 +19,6 @@ import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.api.generations.ManageFileGenerationsService;
 import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
 import org.finos.legend.depot.store.api.generations.UpdateFileGenerations;
-import org.finos.legend.depot.store.api.entities.Entities;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -31,9 +30,9 @@ public class ManageFileGenerationsServiceImpl extends  FileGenerationsServiceImp
 
 
     @Inject
-    public ManageFileGenerationsServiceImpl(UpdateFileGenerations fileGenerations, Entities entities, ProjectsService projectsService)
+    public ManageFileGenerationsServiceImpl(UpdateFileGenerations fileGenerations, ProjectsService projectsService)
     {
-        super(fileGenerations, entities, projectsService);
+        super(fileGenerations, projectsService);
         this.fileGenerations = fileGenerations;
     }
 

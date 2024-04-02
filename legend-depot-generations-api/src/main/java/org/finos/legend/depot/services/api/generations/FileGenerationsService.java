@@ -25,9 +25,6 @@ import java.util.Optional;
 
 public interface FileGenerationsService
 {
-
-    List<Entity> getGenerations(String groupId, String artifactId, String versionId);
-
     List<DepotGeneration> getFileGenerations(String groupId, String artifactId, String versionId);
 
     List<DepotGeneration> getFileGenerationsByElementPath(String groupId, String artifactId, String versionId, String elementPath);
