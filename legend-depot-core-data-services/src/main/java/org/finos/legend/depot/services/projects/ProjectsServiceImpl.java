@@ -285,7 +285,7 @@ public class ProjectsServiceImpl implements ProjectsService
                     throw new IllegalStateException(String.format("Error calculating transitive dependencies for project version - %s-%s-%s", versionData.getGroupId(), versionData.getArtifactId(), versionData.getVersionId()));
                 }
         });
-        dependencies.parallelStream().forEach(dep -> graphWalkerContext.addVersionToProject(dep.getGroupId(), dep.getArtifactId(), dep));
+        dependencies.forEach(dep -> graphWalkerContext.addVersionToProject(dep.getGroupId(), dep.getArtifactId(), dep));
     }
 
     public ProjectDependencyReport buildReportFromGraph(ProjectDependencyGraph dependencyGraph, ProjectDependencyGraphWalkerContext graphWalkerContext)
