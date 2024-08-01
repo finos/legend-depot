@@ -27,6 +27,7 @@ import org.finos.legend.depot.core.services.api.metrics.configuration.Prometheus
 import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.MISSING_REPO_VERSIONS;
 import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.MISSING_STORE_VERSIONS;
 import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.PROJECTS;
+import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.PROJECT_UPDATE_EXCEPTIONS;
 import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.REPO_EXCEPTIONS;
 import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.REPO_VERSIONS;
 import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsReconciliationServiceImpl.STORE_VERSIONS;
@@ -34,6 +35,7 @@ import static org.finos.legend.depot.services.artifacts.reconciliation.VersionsR
 public class VersionReconciliationSchedulesModule extends PrivateModule
 {
     public static final String REPOSITORY_METRICS_SCHEDULE = "repository-metrics-schedule";
+    public static final String SYNC_PROJECT_LATEST_VERSIONS_SCHEDULE = "sync-project-latest-versions-schedule";
 
     @Override
     protected void configure()
@@ -54,7 +56,9 @@ public class VersionReconciliationSchedulesModule extends PrivateModule
             metricsHandler.registerGauge(MISSING_REPO_VERSIONS, MISSING_REPO_VERSIONS);
             metricsHandler.registerGauge(MISSING_STORE_VERSIONS, MISSING_STORE_VERSIONS);
             metricsHandler.registerGauge(REPO_EXCEPTIONS, REPO_EXCEPTIONS);
+            metricsHandler.registerGauge(PROJECT_UPDATE_EXCEPTIONS, PROJECT_UPDATE_EXCEPTIONS);
             schedulesFactory.register(REPOSITORY_METRICS_SCHEDULE, 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE, versionsReconciliationService::findVersionsMismatches);
+            schedulesFactory.register(SYNC_PROJECT_LATEST_VERSIONS_SCHEDULE, 5 * SchedulesFactory.MINUTE, 5 * SchedulesFactory.MINUTE, versionsReconciliationService::syncLatestProjectVersions);
         }
         return true;
     }

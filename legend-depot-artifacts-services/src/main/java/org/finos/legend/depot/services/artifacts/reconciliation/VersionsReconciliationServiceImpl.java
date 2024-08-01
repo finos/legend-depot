@@ -18,11 +18,11 @@ package org.finos.legend.depot.services.artifacts.reconciliation;
 import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
+import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionMismatch;
 import org.finos.legend.depot.domain.version.VersionValidator;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.core.services.metrics.PrometheusMetricsFactory;
 import org.slf4j.Logger;
 
@@ -33,6 +33,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.max;
+import static java.util.Collections.synchronizedList;
 
 public class VersionsReconciliationServiceImpl implements VersionsReconciliationService
 {
@@ -45,13 +48,14 @@ public class VersionsReconciliationServiceImpl implements VersionsReconciliation
     public static final String MISSING_REPO_VERSIONS = "missing_repo_versions";
     public static final String MISSING_STORE_VERSIONS = "missing_store_versions";
     public static final String REPO_EXCEPTIONS = "repo_exceptions";
+    public static final String PROJECT_UPDATE_EXCEPTIONS = "project_update_exceptions";
     public static final String PROJECTS = "projects";
 
     private final ArtifactRepository repository;
-    private final ProjectsService projects;
+    private final ManageProjectsService projects;
 
     @Inject
-    public VersionsReconciliationServiceImpl(ArtifactRepository repository, ProjectsService projectsService)
+    public VersionsReconciliationServiceImpl(ArtifactRepository repository, ManageProjectsService projectsService)
     {
         this.repository = repository;
         this.projects = projectsService;
@@ -126,5 +130,42 @@ public class VersionsReconciliationServiceImpl implements VersionsReconciliation
         PrometheusMetricsFactory.getInstance().setGauge(EVICTED_VERSIONS, evictedVersionsCount.get());
         LOGGER.info("Finished findVersionsMismatches {} ({}) ms",versionMismatches.size(),System.currentTimeMillis() - startTime);
         return versionMismatches;
+    }
+
+    @Override
+    public List<StoreProjectData> syncLatestProjectVersions()
+    {
+        AtomicLong projectUpdateExceptions = new AtomicLong(0);
+        List<StoreProjectData> projectsWithUpdatedLatestVersion = synchronizedList(new ArrayList<>());
+        long startTime = System.currentTimeMillis();
+        List<StoreProjectData> allProjects = projects.getAllProjectCoordinates();
+        LOGGER.info("Syncing projects' latest versions to latest non-evicted and non-excluded store version if mismatch exists {}", allProjects.size());
+        ParallelIterate.forEach(allProjects, (p ->
+        {
+            try
+            {
+                final List<StoreProjectVersionData> activeProjectVersions = projects.find(p.getGroupId(), p.getArtifactId()).stream()
+                        .filter(pv -> !pv.getVersionData().isExcluded() && !pv.isEvicted() && !pv.getVersionData().isDeprecated()).collect(Collectors.toList());
+
+                List<String> activeStoreVersions = activeProjectVersions.stream().filter(pv -> !VersionValidator.isSnapshotVersion(pv.getVersionId())).map(pv -> pv.getVersionId()).collect(Collectors.toList());
+                if (!activeStoreVersions.isEmpty() && p.evaluateLatestVersionAndUpdate(max(activeStoreVersions)))
+                {
+                    LOGGER.info("Updating latest version for {} {}-{} to {}", p.getProjectId(), p.getGroupId(), p.getArtifactId(), max(activeStoreVersions));
+                    projects.createOrUpdate(p);
+                    projectsWithUpdatedLatestVersion.add(p);
+                }
+            }
+            catch (Exception e)
+            {
+                String message = String.format("Could not update project %s:%s exception: %s ", p.getGroupId(), p.getArtifactId(), e.getMessage());
+                LOGGER.error(message);
+                projectUpdateExceptions.addAndGet(1);
+            }
+        }), 10);
+
+        PrometheusMetricsFactory.getInstance().setGauge(PROJECTS, allProjects.size());
+        PrometheusMetricsFactory.getInstance().setGauge(PROJECT_UPDATE_EXCEPTIONS, projectUpdateExceptions.get());
+        LOGGER.info("Finished syncLatestProjectVersions {} ({}) ms", projectsWithUpdatedLatestVersion.size(), System.currentTimeMillis() - startTime);
+        return projectsWithUpdatedLatestVersion;
     }
 }
