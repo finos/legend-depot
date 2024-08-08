@@ -16,10 +16,13 @@
 package org.finos.legend.depot.services.api.artifacts.reconciliation;
 
 import org.finos.legend.depot.domain.version.VersionMismatch;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
 
 import java.util.List;
 
 public interface VersionsReconciliationService
 {
      List<VersionMismatch> findVersionsMismatches();
+
+     List<StoreProjectData> syncLatestProjectVersions();
 }

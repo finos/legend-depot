@@ -18,10 +18,10 @@ package org.finos.legend.depot.services.artifacts.reconciliation;
 import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryException;
+import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionMismatch;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,16 +38,16 @@ import static org.mockito.Mockito.when;
 public class TestVersionsMismatchService
 {
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
-    protected ProjectsService projects = mock(ProjectsService.class);
+    protected ManageProjectsService projects = mock(ManageProjectsService.class);
     protected VersionsReconciliationService repositoryServices = new VersionsReconciliationServiceImpl(repository, projects);
 
     @Before
     public void setup() throws ArtifactRepositoryException
     {
         List<StoreProjectData> coordinates = new ArrayList<>();
-        coordinates.add(new StoreProjectData("PROD-A","examples.metadata", "test1"));
-        coordinates.add(new StoreProjectData("PROD-B","examples.metadata", "test2"));
-        coordinates.add(new StoreProjectData("PROD-C","examples.metadata", "test3"));
+        coordinates.add(new StoreProjectData("PROD-A","examples.metadata", "test1", null, "2.1.0"));
+        coordinates.add(new StoreProjectData("PROD-B","examples.metadata", "test2", null, "1.0.0"));
+        coordinates.add(new StoreProjectData("PROD-C","examples.metadata", "test3", null, "2.0.2"));
         coordinates.add(new StoreProjectData("PROD-D","examples.metadata", "test4"));
         when(projects.getAllProjectCoordinates()).thenReturn(coordinates);
         StoreProjectVersionData p1v1 = new StoreProjectVersionData("examples.metadata", "test1", "2.2.0");
@@ -121,5 +121,46 @@ public class TestVersionsMismatchService
         Assert.assertEquals(3, counts.size());
         Assert.assertEquals(0, counts.stream().filter(p -> p.artifactId.equals("test5")).count());
 
+    }
+
+    @Test
+    public void getProjectsWithUpdatedLatestVersions()
+    {
+        List<StoreProjectData> projectsWithUpdatedLatestVersions = repositoryServices.syncLatestProjectVersions();
+        Assert.assertEquals(2, projectsWithUpdatedLatestVersions.size());
+        Assert.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-A")).count());
+        Assert.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-D")).count());
+        StoreProjectData prodA = projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-A")).findFirst().get();
+        StoreProjectData prodD = projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-D")).findFirst().get();
+        Assert.assertEquals("2.3.0", prodA.getLatestVersion());
+        Assert.assertEquals("0.0.1", prodD.getLatestVersion());
+    }
+
+    @Test
+    public void getProjectsWithUpdatedLatestVersionsIfExcludedAndEvictedVersionsPresent()
+    {
+        List<StoreProjectData> coordinates = new ArrayList<>();
+        coordinates.add(new StoreProjectData("PROD-A","examples.metadata", "test1", null, "2.1.0"));
+        coordinates.add(new StoreProjectData("PROD-B","examples.metadata", "test2", null, "1.0.0"));
+        coordinates.add(new StoreProjectData("PROD-C","examples.metadata", "test3", null, "2.0.2"));
+        when(projects.getAllProjectCoordinates()).thenReturn(coordinates);
+        StoreProjectVersionData p1v1 = new StoreProjectVersionData("examples.metadata", "test1", "2.2.0");
+        StoreProjectVersionData p1v2 = new StoreProjectVersionData("examples.metadata", "test1", "2.3.0");
+        p1v2.getVersionData().setExcluded(true);
+        p1v2.getVersionData().setExclusionReason("unknown error");
+        StoreProjectVersionData p2v1 = new StoreProjectVersionData("examples.metadata", "test2", "1.0.1");
+        p2v1.setEvicted(true);
+        StoreProjectVersionData p3v1 = new StoreProjectVersionData("examples.metadata", "test3", "2.0.3");
+        when(projects.find("examples.metadata", "test1")).thenReturn(Arrays.asList(p1v1, p1v2));
+        when(projects.find("examples.metadata", "test2")).thenReturn(Arrays.asList(p2v1));
+        when(projects.find("examples.metadata", "test3")).thenReturn(Arrays.asList(p3v1));
+
+        List<StoreProjectData> projectsWithUpdatedLatestVersions = repositoryServices.syncLatestProjectVersions();
+        Assert.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-A")).count());
+        Assert.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-C")).count());
+        StoreProjectData prodA = projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-A")).findFirst().get();
+        StoreProjectData prodC = projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-C")).findFirst().get();
+        Assert.assertEquals("2.2.0", prodA.getLatestVersion());
+        Assert.assertEquals("2.0.3", prodC.getLatestVersion());
     }
 }
