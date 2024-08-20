@@ -97,7 +97,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
                 String elementPath = PATH_SEPARATOR + (generationPath != null ? generationPath : entity.getPath().replace(PURE_PACKAGE_SEPARATOR, UNDERSCORE));
                 String codeSchemaGenerationType = (String) entity.getContent().get(TYPE);
 
-                generatedFiles.stream().filter(gen -> gen.getPath().startsWith(elementPath)).forEach(gen ->
+                generatedFiles.stream().filter(gen -> gen.getPath().startsWith(elementPath + PATH_SEPARATOR)).forEach(gen ->
                 {
                     DepotGeneration generation = new DepotGeneration(gen.getPath().replace(elementPath, BLANK), gen.getContent());
                     newGenerations.add(new StoredFileGeneration(groupId, artifactId, versionId, entity.getPath(), codeSchemaGenerationType, generation));
@@ -112,7 +112,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
             {
                 if (!processedGeneratedFiles.contains(generatedFile))
                 {
-                    Optional<String> entityPath = entityPaths.stream().filter(s -> generatedFile.getPath().startsWith(PATH_SEPARATOR + s)).findFirst();
+                    Optional<String> entityPath = entityPaths.stream().filter(s -> generatedFile.getPath().startsWith(PATH_SEPARATOR + s + PATH_SEPARATOR)).findFirst();
                     if (!entityPath.isPresent())
                     {
                         String unableToHandle = String.format("Can't find element path for generated file with path %s",generatedFile.getPath());
@@ -159,7 +159,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
     }
 
 
-    private List<Entity> getAllNonVersionedEntities(String groupId, String artifactId, String versionId)
+    public List<Entity> getAllNonVersionedEntities(String groupId, String artifactId, String versionId)
     {
         List<File> files = repository.findFiles(ArtifactType.ENTITIES, groupId, artifactId, versionId);
         return files.stream().findFirst().map(file -> EntityLoader.newEntityLoader(file).getAllEntities().collect(Collectors.toList())).orElse(Collections.emptyList());
