@@ -74,6 +74,10 @@ public class EntitiesResource extends TracingResource
                                 @PathParam("classifier") String classifier,
                                 @Context Request request)
     {
+        if (classifier == null)
+        {
+            Response.status(Response.Status.BAD_REQUEST).entity("Classifier is not valid").build();
+        }
         return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntitiesByClassifier(groupId, artifactId, versionId, classifier), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).withClassifier(classifier).build());
     }
     
