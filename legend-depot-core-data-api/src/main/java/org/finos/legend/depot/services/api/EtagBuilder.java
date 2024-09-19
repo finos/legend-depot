@@ -64,6 +64,19 @@ public final class EtagBuilder
         return this;
     }
 
+    public EtagBuilder withClassifier(String classifier)
+    {
+        if (classifier == null)
+        {
+            this.constantParams = false;
+        }
+        else
+        {
+            params.add(classifier);
+        }
+        return this;
+    }
+
     public String build()
     {
         if (this.constantParams)

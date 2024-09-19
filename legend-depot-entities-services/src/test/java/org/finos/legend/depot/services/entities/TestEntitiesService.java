@@ -47,7 +47,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
@@ -242,6 +241,35 @@ public class TestEntitiesService extends TestBaseServices
     {
         List<DepotEntity> entities = classifierService.getEntitiesByClassifierPath("meta::pure::metamodel::type::Class", null, null, Scope.RELEASES, true);
         Assert.assertEquals(entities.size(), 3);
+    }
+
+    @Test
+    public void canGetEntitiesForProjectAndVersionByClassifier()
+    {
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("example.services.test","test","2.0.2"));
+        entityUtils.loadEntities("PROD-C", "2.0.2");
+        List<Entity> entity = entitiesService.getEntitiesByClassifier("example.services.test", "test", "2.0.2", "meta::pure::metamodel::function::ConcreteFunctionDefinition");
+        Assert.assertNotNull(entity);
+        Assert.assertEquals(1, entity.size());
+    }
+
+    @Test
+    public void canGetDependencyEntitiesForProjectAndVersionByClassifier()
+    {
+        StoreProjectVersionData project = new StoreProjectVersionData("examples.metadata", "test-dependencies", "1.0.1");
+        ProjectVersion pv = new ProjectVersion("example.services.test", "test", "2.0.2");
+        project.getVersionData().addDependency(pv);
+        projectsVersionsStore.createOrUpdate(project);
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("example.services.test","test","2.0.2"));
+        entityUtils.loadEntities("PROD-B", "1.0.1");
+        entityUtils.loadEntities("PROD-C", "2.0.2");
+        List<Entity> entity = entitiesService.getDependenciesEntitiesByClassifier("examples.metadata", "test-dependencies", "1.0.1", "meta::pure::metamodel::function::ConcreteFunctionDefinition", true, true);
+        Assert.assertNotNull(entity);
+        Assert.assertEquals(2, entity.size());
+
+        List<Entity> entity1 = entitiesService.getDependenciesEntitiesByClassifier("examples.metadata", "test-dependencies", "1.0.1", "meta::pure::metamodel::function::ConcreteFunctionDefinition", true, false);
+        Assert.assertNotNull(entity1);
+        Assert.assertEquals(1, entity1.size());
     }
 
     @Test

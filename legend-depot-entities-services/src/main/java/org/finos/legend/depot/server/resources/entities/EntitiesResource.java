@@ -64,7 +64,19 @@ public class EntitiesResource extends TracingResource
         return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntities(groupId, artifactId, versionId), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
-
+    @GET
+    @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/classifier/{classifier}")
+    @ApiOperation(value = GET_VERSION_ENTITIES, hidden = true)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEntitiesByClassifier(@PathParam("groupId") String groupId,
+                                @PathParam("artifactId") String artifactId,
+                                @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                @PathParam("classifier") String classifier,
+                                @Context Request request)
+    {
+        return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntitiesByClassifier(groupId, artifactId, versionId, classifier), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).withClassifier(classifier).build());
+    }
+    
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/entities/{path}")
     @ApiOperation(GET_VERSION_ENTITY)

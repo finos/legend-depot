@@ -1,0 +1,38 @@
+[
+  {
+    "_type": "entityData",
+    "versionId": "1.0.1",
+    "groupId": "examples.metadata",
+    "artifactId": "test-dependencies",
+    "versionedEntity": false,
+    "entityAttributes": {
+      "path": "test::testFunction__String_1_",
+      "classifierPath": "meta::pure::metamodel::function::ConcreteFunctionDefinition",
+      "package": "test"
+    },
+    "entity": {
+      "classifierPath": "meta::pure::metamodel::function::ConcreteFunctionDefinition",
+      "path": "test::testFunction__String_1_",
+      "content":  {
+        "_type": "function",
+        "body": [
+          {
+            "_type": "string",
+            "value": ""
+          }
+        ],
+        "name": "testFunction__String_1_",
+        "package": "test",
+        "parameters": [],
+        "postConstraints": [],
+        "preConstraints": [],
+        "returnMultiplicity": {
+          "lowerBound": 1,
+          "upperBound": 1
+        },
+        "returnType": "String"
+      }
+    },
+    "id": ""
+  }
+]

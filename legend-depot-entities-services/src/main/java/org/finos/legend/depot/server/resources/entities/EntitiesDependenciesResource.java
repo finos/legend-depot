@@ -73,6 +73,24 @@ public class EntitiesDependenciesResource extends TracingResource
         return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, transitive, includeOrigin), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
+    @GET
+    @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/classifier/{classifier}/dependencies")
+    @ApiOperation(value = GET_VERSION_DEPENDENCY_ENTITIES, hidden = true)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEntitiesFromDependenciesByClassifier(@PathParam("groupId") String groupId,
+                                                            @PathParam("artifactId") String artifactId,
+                                                            @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                                            @PathParam("classifier") String classifier,
+                                                            @QueryParam("transitive") @DefaultValue("false")
+                                                            @ApiParam("Whether to return transitive dependencies") boolean transitive,
+                                                            @QueryParam("includeOrigin") @DefaultValue("false")
+                                                            @ApiParam("Whether to return start of dependency tree") boolean includeOrigin,
+                                                            @Context Request request)
+    {
+        return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntitiesByClassifier(groupId, artifactId, versionId, classifier, transitive, includeOrigin), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).withClassifier(classifier).build());
+    }
+
     @POST
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/dependencies/paths")
     @ApiOperation(value = GET_VERSION_ENTITY_FROM_DEPENDENCIES, hidden = true)

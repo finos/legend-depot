@@ -31,6 +31,8 @@ public interface EntitiesService<T extends StoredEntity>
 
     List<Entity> getEntities(String groupId, String artifactId, String versionId);
 
+    List<Entity> getEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier);
+
     Optional<Entity> getEntity(String groupId, String artifactId, String versionId, String entityPath);
 
     List<Entity> getEntityFromDependencies(String groupId, String artifactId, String versionId, List<String> entityPaths, boolean includeOrigin);
@@ -39,8 +41,15 @@ public interface EntitiesService<T extends StoredEntity>
 
     List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin);
 
+    List<ProjectVersionEntities> getDependenciesEntitiesByClassifier(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin);
+
     default List<ProjectVersionEntities> getDependenciesEntities(String groupId, String artifactId, String versionId, boolean transitive, boolean includeOrigin)
     {
         return getDependenciesEntities(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)), transitive, includeOrigin);
+    }
+
+    default List<ProjectVersionEntities> getDependenciesEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier, boolean transitive, boolean includeOrigin)
+    {
+        return getDependenciesEntitiesByClassifier(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)), classifier, transitive, includeOrigin);
     }
 }
