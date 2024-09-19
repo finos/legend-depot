@@ -94,14 +94,7 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
         return entities.getEntitiesByPackage(groupId, artifactId, version, packageName, classifierPaths, includeSubPackages);
     }
 
-    @Override
-    public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin)
-    {
-        return getDependenciesEntitiesByClassifier(projectDependencies, null, transitive, includeOrigin);
-    }
-
-    @Override
-    public List<ProjectVersionEntities> getDependenciesEntitiesByClassifier(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin)
+    public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin)
     {
         Set<ProjectVersion> dependencies = (Set<ProjectVersion>) executeWithTrace(CALCULATE_PROJECT_DEPENDENCIES, () ->
         {
@@ -139,6 +132,18 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
             TracerFactory.get().log(String.format("Total [%s]: [%s] entities",depEntities.size(),totalEntities));
             return depEntities;
         });
+    }
+
+    @Override
+    public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin)
+    {
+        return getDependenciesEntities(projectDependencies, null, transitive, includeOrigin);
+    }
+
+    @Override
+    public List<ProjectVersionEntities> getDependenciesEntitiesByClassifier(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin)
+    {
+        return getDependenciesEntities(projectDependencies, classifier, transitive, includeOrigin);
     }
 
     private Object executeWithTrace(String label, Supplier<Object> functionToExecute)
