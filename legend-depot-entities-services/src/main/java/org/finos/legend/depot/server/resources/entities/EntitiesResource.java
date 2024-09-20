@@ -78,7 +78,7 @@ public class EntitiesResource extends TracingResource
         {
             Response.status(Response.Status.BAD_REQUEST).entity("Classifier is not valid").build();
         }
-        return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntitiesByClassifier(groupId, artifactId, versionId, classifier), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).withClassifier(classifier).build());
+        return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntitiesByClassifier(groupId, artifactId, versionId, classifier), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
     
     @GET
