@@ -62,6 +62,13 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
     }
 
     @Override
+    public List<Entity> getEntitiesByClassifier(String groupId, String artifactId, String versionId, String classifier)
+    {
+        String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+        return entities.findEntitiesByClassifier(groupId, artifactId, version, classifier);
+    }
+
+    @Override
     public Optional<Entity> getEntity(String groupId, String artifactId, String versionId, String entityPath)
     {
         String version = this.projects.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
@@ -87,8 +94,7 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
         return entities.getEntitiesByPackage(groupId, artifactId, version, packageName, classifierPaths, includeSubPackages);
     }
 
-    @Override
-    public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin)
+    public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin)
     {
         Set<ProjectVersion> dependencies = (Set<ProjectVersion>) executeWithTrace(CALCULATE_PROJECT_DEPENDENCIES, () ->
         {
@@ -110,7 +116,15 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
             ParallelIterate.forEach(dependencies, dep ->
             {
                 String version = this.projects.resolveAliasesAndCheckVersionExists(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
-                List<Entity> deps = (List<Entity>) entities.getAllEntities(dep.getGroupId(), dep.getArtifactId(), version).stream().collect(Collectors.toList());
+                List<Entity> deps;
+                if (classifier != null)
+                {
+                    deps = (List<Entity>) entities.findEntitiesByClassifier(dep.getGroupId(), dep.getArtifactId(), version, classifier).stream().collect(Collectors.toList());
+                }
+                else
+                {
+                    deps = (List<Entity>) entities.getAllEntities(dep.getGroupId(), dep.getArtifactId(), version).stream().collect(Collectors.toList());
+                }
                 depEntities.add(new ProjectVersionEntities(dep.getGroupId(), dep.getArtifactId(), version, deps));
                 totalEntities.addAndGet(deps.size());
                 TracerFactory.get().log(String.format("Total [%s-%s-%s]: [%s] entities",dep.getGroupId(), dep.getArtifactId(), dep.getVersionId(),deps.size()));
@@ -118,6 +132,18 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
             TracerFactory.get().log(String.format("Total [%s]: [%s] entities",depEntities.size(),totalEntities));
             return depEntities;
         });
+    }
+
+    @Override
+    public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin)
+    {
+        return getDependenciesEntities(projectDependencies, null, transitive, includeOrigin);
+    }
+
+    @Override
+    public List<ProjectVersionEntities> getDependenciesEntitiesByClassifier(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin)
+    {
+        return getDependenciesEntities(projectDependencies, classifier, transitive, includeOrigin);
     }
 
     private Object executeWithTrace(String label, Supplier<Object> functionToExecute)
