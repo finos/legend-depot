@@ -74,7 +74,7 @@ public class EntitiesDependenciesResource extends TracingResource
     }
 
     @GET
-    @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/classifier/{classifier}/dependencies")
+    @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/classifiers/{classifier}/dependencies")
     @ApiOperation(value = GET_VERSION_DEPENDENCY_ENTITIES, hidden = true)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
