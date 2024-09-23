@@ -65,7 +65,7 @@ public class EntitiesResource extends TracingResource
     }
 
     @GET
-    @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/classifier/{classifier}")
+    @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/classifiers/{classifier}")
     @ApiOperation(value = GET_VERSION_ENTITIES, hidden = true)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEntitiesByClassifier(@PathParam("groupId") String groupId,
