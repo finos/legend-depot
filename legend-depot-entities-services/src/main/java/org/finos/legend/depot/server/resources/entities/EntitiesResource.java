@@ -22,6 +22,7 @@ import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 import org.finos.legend.depot.services.api.EtagBuilder;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 
 import javax.inject.Inject;
 import javax.ws.rs.DefaultValue;
@@ -45,11 +46,13 @@ import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTra
 public class EntitiesResource extends TracingResource
 {
     private final EntitiesService entitiesService;
+    private final ProjectsService projectsService;
 
     @Inject
-    public EntitiesResource(EntitiesService entitiesService)
+    public EntitiesResource(EntitiesService entitiesService, ProjectsService projectsService)
     {
         this.entitiesService = entitiesService;
+        this.projectsService = projectsService;
     }
 
     @GET
@@ -61,7 +64,8 @@ public class EntitiesResource extends TracingResource
                                 @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                 @Context Request request)
     {
-        return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntities(groupId, artifactId, versionId), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
+        String resolvedVersionId = this.projectsService.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
+        return handle(GET_VERSION_ENTITIES, () -> this.entitiesService.getEntities(groupId, artifactId, resolvedVersionId), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, resolvedVersionId).build());
     }
 
     @GET

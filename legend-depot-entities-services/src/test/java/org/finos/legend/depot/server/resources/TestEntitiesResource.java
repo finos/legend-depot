@@ -17,6 +17,7 @@ package org.finos.legend.depot.server.resources;
 
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsService;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.metrics.query.InMemoryQueryMetricsRegistry;
 import org.finos.legend.depot.services.metrics.query.QueryMetricsServiceImpl;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
@@ -60,8 +61,9 @@ public class TestEntitiesResource extends TestBaseServices
     private final Queue queue = mock(Queue.class);
     private UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     private  EntitiesMongoTestUtils entityUtils = new EntitiesMongoTestUtils(mongoProvider);
-    private final EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore,new ProjectsServiceImpl(projectsVersions, projects, metricsRegistry, queue, new ProjectsConfiguration("master")));
-    private EntitiesResource entitiesResource = new EntitiesResource(entitiesService);
+    private ProjectsService projectsService = new ProjectsServiceImpl(projectsVersions, projects, metricsRegistry, queue, new ProjectsConfiguration("master"));
+    private final EntitiesService entitiesService = new EntitiesServiceImpl(entitiesStore,projectsService);
+    private EntitiesResource entitiesResource = new EntitiesResource(entitiesService, projectsService);
     private QueryMetricsMongo metricsStore = new QueryMetricsMongo(mongoProvider);
     private QueryMetricsService metricsHandler = new QueryMetricsServiceImpl(metricsStore);
 
@@ -135,7 +137,7 @@ public class TestEntitiesResource extends TestBaseServices
         metricsHandler.persist(metricsRegistry);
 
         Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
-        Assert.assertEquals(2, metricsStore.getAllStoredEntities().size());
+        Assert.assertEquals(3, metricsStore.getAllStoredEntities().size());
     }
 
     @Test
