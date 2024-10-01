@@ -118,9 +118,9 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
             environment.jersey().setUrlPattern(configuration.getUrlPattern());
         }
         environment.jersey().register(MultiPartFeature.class);
-        environment.jersey().register(new DepotServerExceptionMapper(configuration.getExceptionMapperConfiguration().includeStackTrace()));
+        environment.jersey().register(new DepotServerExceptionMapper(isExceptionsIncludeStackTrace()));
         environment.jersey().register(new JsonProcessingExceptionMapper(true));
-        environment.jersey().register(new CatchAllExceptionMapper(configuration.getExceptionMapperConfiguration().includeStackTrace()));
+        environment.jersey().register(new CatchAllExceptionMapper(isExceptionsIncludeStackTrace()));
         registerJacksonJsonProvider(environment.jersey());
 
         environment.healthChecks().register("HealthCheck", new HealthCheck()
