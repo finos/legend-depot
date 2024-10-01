@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
+import org.finos.legend.depot.core.server.error.configuration.ExceptionMapperConfiguration;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.core.services.api.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.core.services.api.metrics.configuration.PrometheusConfiguration;
@@ -73,6 +74,9 @@ public class ServerConfiguration extends Configuration
     @JsonProperty("urlPattern")
     private String urlPattern;
 
+    @JsonProperty("exceptionMapper")
+    private ExceptionMapperConfiguration exceptionMapperConfiguration;
+
     public String getDeployment()
     {
         return deployment;
@@ -101,6 +105,16 @@ public class ServerConfiguration extends Configuration
     public void setOpenTracingConfiguration(OpenTracingConfiguration openTracingConfiguration)
     {
         this.openTracingConfiguration = openTracingConfiguration;
+    }
+
+    public ExceptionMapperConfiguration getExceptionMapperConfiguration()
+    {
+        return exceptionMapperConfiguration != null ? exceptionMapperConfiguration : new ExceptionMapperConfiguration();
+    }
+
+    public void setExceptionMapperConfiguration(ExceptionMapperConfiguration exceptionMapperConfiguration)
+    {
+        this.exceptionMapperConfiguration = exceptionMapperConfiguration;
     }
 
     public String getSessionCookie()

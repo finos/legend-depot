@@ -44,6 +44,9 @@
     "serviceName": "legend-depot-server",
     "enabled": false
   },
+  "exceptionMapper": {
+    "includeStackTrace": true
+  }
   "logging": {
     "level": "INFO",
     "loggers": {
