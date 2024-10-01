@@ -28,6 +28,6 @@ public interface ScheduleInstancesStore
 
     void insert(ScheduleInstance instance);
 
-    void delete(String instanceId);
+    long delete(long l);
 
 }

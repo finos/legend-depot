@@ -21,7 +21,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
 import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
 import org.finos.legend.depot.store.api.admin.schedules.ScheduleInstancesStore;
 import org.finos.legend.depot.store.model.admin.schedules.ScheduleInstance;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
@@ -32,11 +31,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.lt;
 
 public class ScheduleInstancesMongo extends BaseMongo<ScheduleInstance> implements ScheduleInstancesStore
 {
     public static final String COLLECTION = "schedule-instances";
     public static final String SCHEDULE = "schedule";
+    private static final String EXPIRES = "expires";
 
 
     @Inject
@@ -75,9 +76,9 @@ public class ScheduleInstancesMongo extends BaseMongo<ScheduleInstance> implemen
     }
 
     @Override
-    public void delete(String instanceId)
+    public long delete(long expiry)
     {
-        super.delete(eq(ID_FIELD, new ObjectId(instanceId)));
+        return super.delete(lt(EXPIRES, expiry));
     }
 
     @Override

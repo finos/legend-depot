@@ -34,6 +34,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.DatesHandler.toDate;
+import static org.finos.legend.depot.domain.DatesHandler.toTime;
 
 
 @Singleton
@@ -144,10 +145,9 @@ public final class SchedulesFactoryImpl implements SchedulesFactory
 
     long deleteExpired()
     {
-        List<ScheduleInstance> expired = instancesStore.getAll().stream().filter(instance -> instance.isExpired()).collect(Collectors.toList());
-        expired.forEach(instance -> this.instancesStore.delete(instance.getId()));
-        LOGGER.info("Deleted {} expired schedule runs", expired.size());
-        return expired.size();
+        long deletedInstancesCount = this.instancesStore.delete(toTime(LocalDateTime.now()));
+        LOGGER.info("Deleted {} expired schedule runs", deletedInstancesCount);
+        return deletedInstancesCount;
     }
 
     public void deRegister(String name)

@@ -21,6 +21,7 @@ import org.finos.legend.depot.store.model.admin.schedules.ScheduleInstance;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class MockInstancesStore implements ScheduleInstancesStore
 {
@@ -36,9 +37,11 @@ class MockInstancesStore implements ScheduleInstancesStore
     }
 
     @Override
-    public void delete(String instanceId)
+    public long delete(long l)
     {
-        instances.removeIf(i -> instanceId.equals(i.getId()));
+        List<ScheduleInstance> toDeletedInstances = instances.stream().filter(i -> i.isExpired()).collect(Collectors.toList());
+        instances.removeAll(toDeletedInstances);
+        return toDeletedInstances.size();
     }
 
     @Override
