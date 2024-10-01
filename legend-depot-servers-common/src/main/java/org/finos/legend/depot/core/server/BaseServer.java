@@ -56,6 +56,7 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BaseServer.class);
     public static final String SERVER_STARTED = "server started";
+    public static final boolean INCLUDE_STACK_TRACE = true;
 
     protected BaseServer()
     {
@@ -138,6 +139,11 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
         initialiseOpenTracing(environment);
     }
 
+    protected boolean isExceptionsIncludeStackTrace()
+    {
+        return INCLUDE_STACK_TRACE;
+    }
+    
     protected abstract void registerJacksonJsonProvider(JerseyEnvironment jerseyEnvironment);
 
     private void registerLifeCycleListener(T configuration, Environment environment)
