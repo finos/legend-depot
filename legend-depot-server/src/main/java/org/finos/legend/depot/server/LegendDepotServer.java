@@ -17,6 +17,8 @@ package org.finos.legend.depot.server;
 
 import com.google.inject.Module;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
+import io.dropwizard.setup.Environment;
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.finos.legend.depot.core.server.BaseServer;
 import org.finos.legend.depot.core.server.guice.ServerInfoModule;
 import org.finos.legend.depot.server.configuration.DepotServerConfiguration;
@@ -42,7 +44,10 @@ import org.finos.legend.depot.store.mongo.guice.EntitiesStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.GenerationsStoreMongoModule;
 import org.finos.legend.depot.core.services.guice.MonitoringModule;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 
 public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
@@ -97,5 +102,17 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
     public void registerJacksonJsonProvider(JerseyEnvironment jerseyEnvironment)
     {
         jerseyEnvironment.register(new LegendDepotServerJacksonJsonProvider());
+    }
+
+    @Override
+    protected void initialiseCors(Environment environment)
+    {
+        FilterRegistration.Dynamic corsFilter = environment.servlets().addFilter("CORS", CrossOriginFilter.class);
+        corsFilter.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,PUT,POST,DELETE,OPTIONS");
+        corsFilter.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
+        corsFilter.setInitParameter(CrossOriginFilter.ALLOWED_TIMING_ORIGINS_PARAM, "*");
+        corsFilter.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin,Access-Control-Allow-Credentials,x-b3-parentspanid,x-b3-sampled,x-b3-spanid,x-b3-traceid");
+        corsFilter.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, "false");
+        corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "*");
     }
 }
