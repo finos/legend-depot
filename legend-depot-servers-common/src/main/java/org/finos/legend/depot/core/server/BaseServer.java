@@ -56,7 +56,6 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
 {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BaseServer.class);
     public static final String SERVER_STARTED = "server started";
-    public static final boolean INCLUDE_STACK_TRACE = true;
 
     protected BaseServer()
     {
@@ -119,9 +118,9 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
             environment.jersey().setUrlPattern(configuration.getUrlPattern());
         }
         environment.jersey().register(MultiPartFeature.class);
-        environment.jersey().register(new DepotServerExceptionMapper(isExceptionsIncludeStackTrace()));
+        environment.jersey().register(new DepotServerExceptionMapper(configuration.getExceptionMapperConfiguration().includeStackTrace()));
         environment.jersey().register(new JsonProcessingExceptionMapper(true));
-        environment.jersey().register(new CatchAllExceptionMapper(isExceptionsIncludeStackTrace()));
+        environment.jersey().register(new CatchAllExceptionMapper(configuration.getExceptionMapperConfiguration().includeStackTrace()));
         registerJacksonJsonProvider(environment.jersey());
 
         environment.healthChecks().register("HealthCheck", new HealthCheck()
@@ -137,11 +136,6 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
         initialiseCors(environment);
         initialisePrometheusMetrics(environment);
         initialiseOpenTracing(environment);
-    }
-
-    protected boolean isExceptionsIncludeStackTrace()
-    {
-        return INCLUDE_STACK_TRACE;
     }
 
     protected abstract void registerJacksonJsonProvider(JerseyEnvironment jerseyEnvironment);
@@ -198,14 +192,5 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
         environment.admin().addServlet("prometheus", new MetricsServlet(collectorRegistry)).addMapping("/prometheus");
     }
 
-    private void initialiseCors(Environment environment)
-    {
-        FilterRegistration.Dynamic corsFilter = environment.servlets().addFilter("CORS", CrossOriginFilter.class);
-        corsFilter.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,PUT,POST,DELETE,OPTIONS");
-        corsFilter.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
-        corsFilter.setInitParameter(CrossOriginFilter.ALLOWED_TIMING_ORIGINS_PARAM, "*");
-        corsFilter.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin,Access-Control-Allow-Credentials,x-b3-parentspanid,x-b3-sampled,x-b3-spanid,x-b3-traceid");
-        corsFilter.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, "false");
-        corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "*");
-    }
+    protected abstract void initialiseCors(Environment environment);
 }
