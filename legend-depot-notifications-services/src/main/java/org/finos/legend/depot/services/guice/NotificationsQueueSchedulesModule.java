@@ -36,7 +36,8 @@ public class NotificationsQueueSchedulesModule extends PrivateModule
 
     @Provides
     @Singleton
-    @Named("queue-observer")
+    @Named("" +
+            "queue-observer")
     boolean initQueue(SchedulesFactory schedulesFactory, QueueManagerConfiguration config, NotificationsQueueManager notificationsManager)
     {
         long numberOfWorkers = config.getNumberOfQueueWorkers();

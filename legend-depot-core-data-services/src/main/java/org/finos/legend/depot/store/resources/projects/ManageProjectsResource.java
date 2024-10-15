@@ -34,6 +34,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.security.Principal;
 
 @Path("")
@@ -62,9 +63,9 @@ public class ManageProjectsResource extends AuthorisedResource
     @Path("/projects/{projectId}/{groupId}/{artifactId}")
     @ApiOperation(ResourceLoggingAndTracing.CREATE_UPDATE_PROJECT)
     @Produces(MediaType.APPLICATION_JSON)
-    public StoreProjectData updateProject(@PathParam("projectId") String projectId, @PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @QueryParam("defaultBranch") @ApiParam String defaultBranch, @QueryParam("latestVersion") @ApiParam String latestVersion)
+    public Response updateProject(@PathParam("projectId") String projectId, @PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @QueryParam("defaultBranch") @ApiParam String defaultBranch, @QueryParam("latestVersion") @ApiParam String latestVersion)
     {
-        return handle(
+        return handleResponse(
                 ResourceLoggingAndTracing.CREATE_UPDATE_PROJECT,
                 ResourceLoggingAndTracing.CREATE_UPDATE_PROJECT + projectId,
                 () ->
@@ -78,10 +79,10 @@ public class ManageProjectsResource extends AuthorisedResource
     @Path("/projects/{groupId}/{artifactId}")
     @ApiOperation(ResourceLoggingAndTracing.DELETE_PROJECT)
     @Produces(MediaType.APPLICATION_JSON)
-    public long deleteProject(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
+    public Response deleteProject(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
     {
 
-        return handle(
+        return handleResponse(
                 ResourceLoggingAndTracing.DELETE_PROJECT,
                 ResourceLoggingAndTracing.DELETE_PROJECT + groupId + artifactId,
                 () ->

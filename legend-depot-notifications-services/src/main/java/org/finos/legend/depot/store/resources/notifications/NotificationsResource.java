@@ -34,6 +34,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -72,7 +73,7 @@ public class NotificationsResource extends AuthorisedResource
     @Path("/notifications")
     @ApiOperation(ResourceLoggingAndTracing.FIND_PAST_EVENTS)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<MetadataNotification> getPastEventNotifications(
+    public Response getPastEventNotifications(
                                                    @QueryParam("groupId") String group,
                                                    @QueryParam("artifactId") String artifact,
                                                    @QueryParam("versionId") String version,
@@ -84,7 +85,7 @@ public class NotificationsResource extends AuthorisedResource
                                                    @QueryParam("to")
                                                    @ApiParam("to date: yyyy-MM-dd HH:mm:ss/unix epoc millis (default is now)") String to)
     {
-        return handle(ResourceLoggingAndTracing.FIND_PAST_EVENTS, () -> notificationsService.findProcessedEvents(group,artifact,version,eventId,parentId,success,
+        return handleResponse(ResourceLoggingAndTracing.FIND_PAST_EVENTS, () -> notificationsService.findProcessedEvents(group,artifact,version,eventId,parentId,success,
                 from == null ?  LocalDateTime.now().minusMinutes(120) : DatesHandler.parseDate(from),
                 to == null ? LocalDateTime.now() : DatesHandler.parseDate(to)));
     }
@@ -94,8 +95,8 @@ public class NotificationsResource extends AuthorisedResource
     @Path("/notifications/{eventId}")
     @ApiOperation(ResourceLoggingAndTracing.FIND_EVENT_BY_ID)
     @Produces(MediaType.APPLICATION_JSON)
-    public Optional<MetadataNotification> getNotificationById(@PathParam("eventId") String eventId)
+    public Response getNotificationById(@PathParam("eventId") String eventId)
     {
-        return handle(ResourceLoggingAndTracing.FIND_EVENT_BY_ID, () -> notificationsService.getProcessedEvent(eventId));
+        return handleResponse(ResourceLoggingAndTracing.FIND_EVENT_BY_ID, () -> notificationsService.getProcessedEvent(eventId));
     }
 }

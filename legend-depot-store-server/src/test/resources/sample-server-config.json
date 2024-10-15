@@ -9,7 +9,7 @@
     "adminContextPath": "/admin",
     "connector": {
       "type": "http",
-      "port": 6201,
+      "port": 7082,
       "maxRequestHeaderSize": "32KiB"
     },
     "gzip": {
@@ -37,8 +37,8 @@
   "projects": {"defaultBranch": "master"},
   "storages": [{
     "org.finos.legend.depot.store.mongo.core.MongoConfiguration": {
-      "url": "mongodb://127.0.0.1:27017",
-      "database": "depot-dev",
+      "url": "mongodb://shahgu%40GS.COM@d185242-082.dc.gs.com:24947/?authMechanism=GSSAPI&authSource=%24external&authMechanismProperties=CANONICALIZE_HOST_NAME%3Aforward%2CSERVICE_NAME%3Amongodb%2CSERVICE_REALM%3AGS.COM&directConnection=true&serverSelectionTimeoutMS=60000",
+      "database": "alloy-metadata-dev",
       "tracing": false
     }
   }],
@@ -78,12 +78,7 @@
     ],
     "clients": [
       {
-        "org.finos.legend.server.pac4j.gitlab.GitlabClient": {
-          "name": "depot",
-          "clientId": "...",
-          "secret": "...",
-          "discoveryUri": "https://gitlab.com/.well-known/openid-configuration",
-          "scope": "openid profile api"
+        "org.finos.legend.server.pac4j.kerberos.LocalKerberosClient": {
         }
       }
     ],

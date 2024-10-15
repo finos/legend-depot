@@ -23,7 +23,6 @@ import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedRe
 import org.finos.legend.depot.services.api.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.api.admin.schedules.ScheduleInstancesStore;
 import org.finos.legend.depot.store.api.admin.schedules.SchedulesStore;
-import org.finos.legend.depot.store.model.admin.schedules.ScheduleInfo;
 import org.finos.legend.depot.store.model.admin.schedules.ScheduleInstance;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
@@ -74,10 +73,10 @@ public class ManageSchedulesResource extends AuthorisedResource
     @Path("/schedules")
     @ApiOperation(value = ResourceLoggingAndTracing.SCHEDULES_STATUS, notes = "Toggle to true for checking disabled schedules or toggle to false for checking enabled schedules")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<ScheduleInfo> getSchedulerStatus(@QueryParam("disabled") @DefaultValue("false") Boolean disabled)
+    public Response getSchedulerStatus(@QueryParam("disabled") @DefaultValue("false") Boolean disabled)
     {
 
-        return handle(ResourceLoggingAndTracing.SCHEDULES_STATUS,() ->
+        return handleResponse(ResourceLoggingAndTracing.SCHEDULES_STATUS,() ->
         {
             validateUser();
             return this.schedulesStore.getAll().stream().filter(s -> disabled == null || s.disabled == disabled.booleanValue()).collect(Collectors.toList());
@@ -89,10 +88,10 @@ public class ManageSchedulesResource extends AuthorisedResource
     @Path("/scheduleInstances")
     @ApiOperation(ResourceLoggingAndTracing.SCHEDULES_RUNS)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<ScheduleInstance> getSchedulerInstances()
+    public Response getSchedulerInstances()
     {
         validateUser();
-        return handle(ResourceLoggingAndTracing.SCHEDULES_RUNS,() -> this.scheduleInstancesStore.getAll());
+        return handleResponse(ResourceLoggingAndTracing.SCHEDULES_RUNS,() -> this.scheduleInstancesStore.getAll());
     }
 
     @PUT

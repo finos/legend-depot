@@ -31,6 +31,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.security.Principal;
 
 
@@ -54,11 +55,11 @@ public class ArtifactDependenciesRefreshResource extends AuthorisedResource
     @Path("/artifactsRefresh/dependencies/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES)
     @Produces(MediaType.APPLICATION_JSON)
-    public StoreProjectVersionData updateTransitiveDependencies(@PathParam("groupId") String groupId,
-                                                                          @PathParam("artifactId") String artifactId,
-                                                                          @PathParam("versionId") String versionId)
+    public Response updateTransitiveDependencies(@PathParam("groupId") String groupId,
+                                                 @PathParam("artifactId") String artifactId,
+                                                 @PathParam("versionId") String versionId)
     {
-        return handle(ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES, ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES + groupId + artifactId + versionId, () ->
+        return handleResponse(ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES, ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES + groupId + artifactId + versionId, () ->
                 {
                     validateUser();
                     return refreshDependenciesService.updateTransitiveDependencies(groupId, artifactId, versionId);

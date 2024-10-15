@@ -34,6 +34,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -69,28 +70,28 @@ public class NotificationsQueueManagerResource extends AuthorisedResource
     @Path("/notifications-queue")
     @ApiOperation(ResourceLoggingAndTracing.GET_ALL_EVENTS_IN_QUEUE)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<MetadataNotification> getAllEventsInQueue()
+    public Response getAllEventsInQueue()
     {
         validateUser();
-        return handle(ResourceLoggingAndTracing.GET_ALL_EVENTS_IN_QUEUE, queue::getAll);
+        return handleResponse(ResourceLoggingAndTracing.GET_ALL_EVENTS_IN_QUEUE, queue::getAll);
     }
 
     @GET
     @Path("/notifications-queue/count")
     @ApiOperation(ResourceLoggingAndTracing.GET_QUEUE_COUNT)
     @Produces(MediaType.APPLICATION_JSON)
-    public long getAllEventsInQueueCount()
+    public Response getAllEventsInQueueCount()
     {
-        return handle(ResourceLoggingAndTracing.GET_QUEUE_COUNT, () -> this.queue.size());
+        return handleResponse(ResourceLoggingAndTracing.GET_QUEUE_COUNT, () -> this.queue.size());
     }
 
     @GET
     @Path("/notifications-queue/{eventId}")
     @ApiOperation(ResourceLoggingAndTracing.GET_EVENT_IN_QUEUE)
     @Produces(MediaType.APPLICATION_JSON)
-    public Optional<MetadataNotification> geEventsInQueue(@PathParam("eventId") String eventId)
+    public Response geEventsInQueue(@PathParam("eventId") String eventId)
     {
-        return handle(ResourceLoggingAndTracing.GET_EVENT_IN_QUEUE, () -> this.queue.get(eventId));
+        return handleResponse(ResourceLoggingAndTracing.GET_EVENT_IN_QUEUE, () -> this.queue.get(eventId));
     }
 
 
@@ -98,20 +99,20 @@ public class NotificationsQueueManagerResource extends AuthorisedResource
     @Path("/queue/{projectId}/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.ENQUEUE_EVENT)
     @Produces(MediaType.TEXT_PLAIN)
-    public String queueEvent(@PathParam("projectId") String projectId,
+    public Response queueEvent(@PathParam("projectId") String projectId,
                              @PathParam("groupId") String groupId,
                              @PathParam("artifactId") String artifactId,
                              @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
-        return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId));
+        return handleResponse(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId));
     }
 
     @DELETE
     @Path("/notifications-queue")
     @ApiOperation("purge queue")
-    public long purgeQueue()
+    public Response purgeQueue()
     {
         validateUser();
-        return handle("purge queue", () -> this.queue.deleteAll());
+        return handleResponse("purge queue", () -> this.queue.deleteAll());
     }
 }

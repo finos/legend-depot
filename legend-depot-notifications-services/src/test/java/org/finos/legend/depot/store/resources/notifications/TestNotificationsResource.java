@@ -15,11 +15,14 @@
 
 package org.finos.legend.depot.store.resources.notifications;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.services.api.notifications.NotificationsService;
 import org.finos.legend.depot.services.notifications.NotificationsServiceImpl;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.notifications.NotificationsMongo;
+import org.finos.legend.engine.shared.core.ObjectMapperFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,6 +40,7 @@ public class TestNotificationsResource extends TestStoreMongo
 
     private final NotificationsService notificationsService = new NotificationsServiceImpl(notificationsMongo);
     private final NotificationsResource resource = new NotificationsResource(notificationsService);
+    private final ObjectMapper objectMapper = ObjectMapperFactory.getNewStandardObjectMapper();
 
     @Test
     public void canRetrieveEventsByDate()
@@ -54,12 +58,12 @@ public class TestNotificationsResource extends TestStoreMongo
         insertRaw(notificationsMongo.COLLECTION,event4.setUpdated(toDate(aPointInTime.plusHours(2).plusMinutes(35))));
 
 
-        List<MetadataNotification> allEvents = resource.getPastEventNotifications(null,null,null,null,null,null,aPointInTime.minusDays(100).format(DateTimeFormatter.ISO_DATE_TIME), null);
+        List<MetadataNotification> allEvents = objectMapper.convertValue(resource.getPastEventNotifications(null,null,null,null,null,null,aPointInTime.minusDays(100).format(DateTimeFormatter.ISO_DATE_TIME), null).getEntity(), new TypeReference<List<MetadataNotification>>(){});
         Assert.assertNotNull(allEvents);
         Assert.assertEquals(4, allEvents.size());
 
         LocalDateTime lunchTime = LocalDateTime.parse("2019-01-01T12:00:00", DateTimeFormatter.ISO_DATE_TIME);
-        List<MetadataNotification> afterLunch = resource.getPastEventNotifications(null,null,null,null,null,null,lunchTime.format(DateTimeFormatter.ISO_DATE_TIME), null);
+        List<MetadataNotification> afterLunch = objectMapper.convertValue(resource.getPastEventNotifications(null,null,null,null,null,null,lunchTime.format(DateTimeFormatter.ISO_DATE_TIME), null).getEntity(), new TypeReference<List<MetadataNotification>>(){});
         Assert.assertNotNull(afterLunch);
         Assert.assertEquals(2, afterLunch.size());
 
@@ -77,7 +81,7 @@ public class TestNotificationsResource extends TestStoreMongo
         Assert.assertEquals(2, notificationsMongo.getAll().size());
 
 
-        List<MetadataNotification> found = resource.getPastEventNotifications(null,null,null,null,null,null,null, String.valueOf(System.currentTimeMillis()));
+        List<MetadataNotification> found = objectMapper.convertValue(resource.getPastEventNotifications(null,null,null,null,null,null,null, String.valueOf(System.currentTimeMillis())).getEntity(), new TypeReference<List<MetadataNotification>>(){});
         Assert.assertNotNull(found);
         Assert.assertEquals(1, found.size());
         Assert.assertTrue(found.stream().anyMatch(e -> e.getProjectId().equals("1")));

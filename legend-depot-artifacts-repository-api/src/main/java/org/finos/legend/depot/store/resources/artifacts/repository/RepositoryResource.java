@@ -29,6 +29,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -50,10 +51,10 @@ public class RepositoryResource extends TracingResource
     @Path("/repository/versions/{groupId}/{artifactId}")
     @ApiOperation(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<String> getRepositoryVersions(@PathParam("groupId") String groupId,
+    public Response getRepositoryVersions(@PathParam("groupId") String groupId,
                                                  @PathParam("artifactId") String artifactId)
     {
-        return handle(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId,
+        return handleResponse(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId,
                 () ->
                 {
                     try
@@ -71,11 +72,11 @@ public class RepositoryResource extends TracingResource
     @Path("/repository/versions/{groupId}/{artifactId}/{versionId}")
     @ApiOperation(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)
     @Produces(MediaType.TEXT_PLAIN)
-    public Optional<String> getRepositoryVersion(@PathParam("groupId") String groupId,
-                                                 @PathParam("artifactId") String artifactId,
-                                                 @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
+    public Response getRepositoryVersion(@PathParam("groupId") String groupId,
+                                         @PathParam("artifactId") String artifactId,
+                                         @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
-        return handle(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId + versionId, () ->
+        return handleResponse(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId + versionId, () ->
         {
             try
             {

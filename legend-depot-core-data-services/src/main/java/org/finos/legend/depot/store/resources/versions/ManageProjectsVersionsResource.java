@@ -34,8 +34,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.security.Principal;
-import java.util.List;
 
 @Path("")
 @Api("Versions")
@@ -63,19 +63,19 @@ public class ManageProjectsVersionsResource extends AuthorisedResource
     @Path("/versions")
     @ApiOperation(ResourceLoggingAndTracing.FIND_PROJECT_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<StoreProjectVersionData> findProjectVersion(@QueryParam("excluded") Boolean excluded)
+    public Response findProjectVersion(@QueryParam("excluded") Boolean excluded)
     {
         validateUser();
-        return handle(ResourceLoggingAndTracing.FIND_PROJECT_VERSIONS, ResourceLoggingAndTracing.FIND_PROJECT_VERSIONS + excluded, () -> projectVersionApi.findVersion(excluded));
+        return handleResponse(ResourceLoggingAndTracing.FIND_PROJECT_VERSIONS, ResourceLoggingAndTracing.FIND_PROJECT_VERSIONS + excluded, () -> projectVersionApi.findVersion(excluded));
     }
 
     @PUT
     @Path("/versions/{groupId}/{artifactId}/{versionId}/{exclusionReason}")
     @ApiOperation(ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
-    public StoreProjectVersionData excludeProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("exclusionReason") String exclusionReason)
+    public Response excludeProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("exclusionReason") String exclusionReason)
     {
-        return handle(ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION, ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION + groupId + artifactId + versionId + exclusionReason, () ->
+        return handleResponse(ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION, ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION + groupId + artifactId + versionId + exclusionReason, () ->
             projectVersionApi.excludeProjectVersion(groupId, artifactId, versionId, exclusionReason)
         );
     }
