@@ -99,9 +99,9 @@
         <java.version.range>[11,12),[17,18)</java.version.range>
 
         <!-- Legend dependency versions -->
-        <legend.shared.version>0.25.6</legend.shared.version>
-        <legend.engine.version>4.62.1</legend.engine.version>
-        <legend.sdlc.version>0.176.1</legend.sdlc.version>
+        <legend.shared.version>0.25.7</legend.shared.version>
+        <legend.engine.version>4.63.1</legend.engine.version>
+        <legend.sdlc.version>0.177.0</legend.sdlc.version>
 
 
         <!-- Dependency versions -->
