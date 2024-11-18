@@ -100,8 +100,8 @@
 
         <!-- Legend dependency versions -->
         <legend.shared.version>0.25.7</legend.shared.version>
-        <legend.engine.version>4.63.2</legend.engine.version>
-        <legend.sdlc.version>0.177.3</legend.sdlc.version>
+        <legend.engine.version>4.65.3</legend.engine.version>
+        <legend.sdlc.version>0.177.4</legend.sdlc.version>
 
 
         <!-- Dependency versions -->
