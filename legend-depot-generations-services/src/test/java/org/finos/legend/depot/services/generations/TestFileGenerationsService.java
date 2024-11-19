@@ -151,6 +151,15 @@ public class TestFileGenerationsService extends TestStoreMongo
     }
 
     @Test
+    public void canGetByType()
+    {
+        List<StoredFileGeneration> fileGenerations = service.findByType("group.test", "test", "1.0.0", AVRO);
+        Assert.assertEquals(12, fileGenerations.size());
+        Assert.assertEquals(0, service.findByTypeAndElementPath("group.test", "test", "1.0.0", AVRO, "element::NotFound").size());
+        Assert.assertEquals(12, service.findByTypeAndElementPath("group.test", "test", "1.0.0", AVRO, "examples::avrogen").size());
+    }
+
+    @Test
     public void canQueryFileGenerationEntitiesByFilePath()
     {
         Assert.assertTrue(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());

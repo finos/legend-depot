@@ -161,6 +161,14 @@ public class TestGenerationsProvider extends TestStoreMongo
         StoredFileGeneration storedFileGeneration2 = fileGenerations.stream().filter(f -> f.getPath().equals("examples::metadata::snowFlakeApp2")).findFirst().get();
         Assert.assertEquals(generatedFiles.get(0).getPath(), storedFileGeneration.getFile().getPath());
         Assert.assertEquals(generatedFiles.get(1).getPath(), storedFileGeneration2.getFile().getPath());
+
+        List<StoredFileGeneration> searchDocuments = generations.findByType(TEST_GROUP_ID,TEST_ARTIFACT_ID, "2.0.0", "searchDocuments");
+        Assert.assertEquals(2, searchDocuments.size());
+        List<StoredFileGeneration> snowFlakeAppSearchDocuments = generations.findByTypeAndElementPath(TEST_GROUP_ID,TEST_ARTIFACT_ID, "2.0.0", "searchDocuments", "examples::metadata::snowFlakeApp");
+        Assert.assertEquals(1, snowFlakeAppSearchDocuments.size());
+        StoredFileGeneration storedFileGeneration1 = snowFlakeAppSearchDocuments.get(0);
+        Assert.assertEquals(storedFileGeneration1.getPath(),"examples::metadata::snowFlakeApp");
+        Assert.assertEquals(storedFileGeneration1.getType(),"searchDocuments");
     }
 
     @Test

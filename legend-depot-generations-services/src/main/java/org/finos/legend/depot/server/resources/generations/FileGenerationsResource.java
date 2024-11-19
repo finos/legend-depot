@@ -29,6 +29,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -38,7 +39,6 @@ import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTra
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_ELEMENT_PATH;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_FILEPATH;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_CONTENT;
-import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_ENTITIES;
 
 @Path("")
 @Api("Generations")
@@ -104,9 +104,9 @@ public class FileGenerationsResource extends TracingResource
     @Path("/generations/{groupId}/{artifactId}/{versionId}/types/{type}")
     @ApiOperation(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getFileGenerations(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("type") String type, @Context Request request)
+    public Response getFileGenerations(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("type") String type, @QueryParam("elementPath")@ApiParam("Element path that generated artifacts") String elementPath, @Context Request request)
     {
-        return handle(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE, () -> this.generationsService.findByType(groupId, artifactId, versionId, type), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
+        return handle(ResourceLoggingAndTracing.GET_VERSION_FILE_GENERATION_BY_TYPE, () -> this.generationsService.findByTypeAndElementPath(groupId, artifactId, versionId, type, elementPath), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
     }
 
 }
