@@ -68,7 +68,7 @@ public class TestPureModelContextDataResource extends TestBaseServices
     @Test
     public void loadPMCD()
     {
-        Response data = resource.getPureModelContextData("test.legend", "blank-prod", "2.0.0", null, false,null);
+        Response data = resource.getPureModelContextData("test.legend", "blank-prod", "2.0.0", null, false,true, null);
         Assert.assertFalse(((PureModelContextData)data.getEntity()).getElements().isEmpty());
         Assert.assertEquals(((PureModelContextData)data.getEntity()).getElements().size(), 2);
 
@@ -77,7 +77,7 @@ public class TestPureModelContextDataResource extends TestBaseServices
     @Test
     public void loadDependenciesPMCD()
     {
-        Response data = resource.getPureModelContextData(List.of(new ProjectVersion("org.finos.legend","second-project","1.0.1"), new ProjectVersion("org.finos.legend","first-project","1.0.2")), null, true, null);
+        Response data = resource.getPureModelContextData(List.of(new ProjectVersion("org.finos.legend","second-project","1.0.1"), new ProjectVersion("org.finos.legend","first-project","1.0.2")), null, true, true, null);
         Assert.assertFalse(((PureModelContextData)data.getEntity()).getElements().isEmpty());
         Assert.assertEquals(6, ((PureModelContextData)data.getEntity()).getElements().size());
         Optional<Class> optionalPersonClass = ((PureModelContextData)data.getEntity())
