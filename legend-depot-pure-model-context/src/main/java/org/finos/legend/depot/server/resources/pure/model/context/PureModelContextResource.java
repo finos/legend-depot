@@ -69,7 +69,7 @@ public class PureModelContextResource extends TracingResource
                                             @ApiParam("Whether to include entities from dependencies")
                                             boolean transitive,
                                             @QueryParam("convertToNewProtocol")
-                                            @DefaultValue("false")
+                                            @DefaultValue("true")
                                             @ApiParam("Whether to convert the protocol to latest or return the protocol as initially published")
                                             boolean convertToNewProtocol,
                                             @Context Request request)
@@ -89,7 +89,7 @@ public class PureModelContextResource extends TracingResource
                                             @ApiParam("Whether to return transitive dependencies")
                                             boolean transitive,
                                             @QueryParam("convertToNewProtocol")
-                                            @DefaultValue("false")
+                                            @DefaultValue("true")
                                             @ApiParam("Whether to convert the protocol to latest or return the protocol as initially published")
                                             boolean convertToNewProtocol,
                                             @Context Request request)
