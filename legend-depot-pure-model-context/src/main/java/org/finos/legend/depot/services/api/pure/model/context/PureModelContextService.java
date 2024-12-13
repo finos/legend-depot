@@ -22,7 +22,7 @@ import java.util.List;
 
 public interface PureModelContextService
 {
-    PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean transitive);
+    PureModelContextData getPureModelContextData(String groupId, String artifactId, String versionId, String clientVersion, boolean transitive, boolean convertToNewProtocol);
 
-    PureModelContextData getPureModelContextData(List<ProjectVersion> projectDependencies, String clientVersion, boolean transitive);
+    PureModelContextData getPureModelContextData(List<ProjectVersion> projectDependencies, String clientVersion, boolean transitive, boolean convertToNewProtocol);
 }
