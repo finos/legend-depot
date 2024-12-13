@@ -15,10 +15,12 @@
 
 package org.finos.legend.depot.services.pure.model.context;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.util.StdConverter;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializable;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -73,8 +75,8 @@ public class PureModelContextServiceImpl implements PureModelContextService
         List<ProjectVersionEntities> dependenciesEntities = this.entitiesService.getDependenciesEntities(groupId, artifactId, version, true, false);
         return tracer.executeWithTrace(CALCULATE_COMBINED_PMCD, () ->
         {
-            PureModelContextData dependenciesPMCD = buildPureModelContextData(dependenciesEntities.stream().flatMap(dep -> dep.getEntities().stream()),groupId,artifactId,version,resolvedClientVersion, convertToNewProtocol);
-            return combinePureModelContextData(pureModelContextData,dependenciesPMCD);
+            PureModelContextData dependenciesPMCD = buildPureModelContextData(dependenciesEntities.stream().flatMap(dep -> dep.getEntities().stream()), groupId, artifactId, version, resolvedClientVersion, convertToNewProtocol);
+            return combinePureModelContextData(pureModelContextData, dependenciesPMCD);
         });
     }
 
@@ -123,7 +125,7 @@ public class PureModelContextServiceImpl implements PureModelContextService
     protected AlloySDLC buildAlloySDLC(String groupId, String artifactId, String versionId)
     {
         AlloySDLC sdlc = new AlloySDLC();
-        sdlc.project = String.join(GA_SEPARATOR,groupId,artifactId);
+        sdlc.project = String.join(GA_SEPARATOR, groupId, artifactId);
         sdlc.baseVersion = versionId;
         return sdlc;
     }
@@ -142,8 +144,7 @@ public class PureModelContextServiceImpl implements PureModelContextService
             return Optional.of(this.fromEntity(entity));
         }
 
-        @JsonSerialize(converter = EntityPackageableElementConverter.class)
-        private static class EntityPackageableElement extends PackageableElement
+        private static class EntityPackageableElement extends PackageableElement implements JsonSerializable
         {
             private final Entity entity;
 
@@ -151,15 +152,18 @@ public class PureModelContextServiceImpl implements PureModelContextService
             {
                 this.entity = entity;
             }
-        }
-    }
 
-    private static final class EntityPackageableElementConverter extends StdConverter<EntityToRawPureConverter.EntityPackageableElement, Map<String, ?>>
-    {
-        @Override
-        public Map<String, ?> convert(EntityToRawPureConverter.EntityPackageableElement value)
-        {
-            return value.entity.getContent();
+            @Override
+            public void serialize(JsonGenerator gen, SerializerProvider serializers) throws IOException
+            {
+                gen.writeObject(this.entity.getContent());
+            }
+
+            @Override
+            public void serializeWithType(JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException
+            {
+                gen.writeObject(this.entity.getContent());
+            }
         }
     }
 }
