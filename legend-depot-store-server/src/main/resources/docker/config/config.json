@@ -31,14 +31,22 @@
       ]
     }
   },
-  "artifactRepositoryProviderConfiguration": {},
+    "artifactRepositoryProviderConfiguration": {
+    "org.finos.legend.depot.services.artifacts.repository.maven.MavenArtifactRepositoryConfiguration": {
+    "settingsLocation": "/config/settings.xml"
+}
+},
+    "artifactsRetentionPolicyConfiguration": {
+      "maximumSnapshotsAllowed": 5,
+      "ttlForVersionsInDays": 365,
+      "ttlForSnapshotsInDays": 30
+  },
   "artifactsRefreshPolicyConfiguration": {
          "versionsUpdateIntervalInMillis": 3600000,
          "includeProjectPropertiesConfiguration": {
              "properties": []
         }
  },
-  "artifactsRetentionPolicyConfiguration": {},
   "projects": {"defaultBranch": "master"},
   "storages": [{
     "org.finos.legend.depot.store.mongo.core.MongoConfiguration": {
@@ -104,16 +112,5 @@
     "org.pac4j.j2e.filter.CallbackFilter": 4,
     "CORS": 5
   },
-  "artifactRepositoryProviderConfiguration": {
-
-    "org.finos.legend.depot.services.artifacts.repository.maven.MavenArtifactRepositoryConfiguration": {
-      "settingsLocation": "/config/settings.xml"
-    }
-  },
-  "artifactsRetentionPolicyConfiguration": {
-    "maximumSnapshotsAllowed": 5,
-    "ttlForVersionsInDays": 365,
-    "ttlForSnapshotsInDays": 30
-  }
   "queue-interval": 30
 }
