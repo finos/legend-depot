@@ -31,17 +31,33 @@
       ]
     }
   },
-  "artifactRepositoryProviderConfiguration": {},
-  "artifactsRefreshPolicyConfiguration": {},
-  "artifactsRetentionPolicyConfiguration": {},
-  "projects": {"defaultBranch": "master"},
-  "storages": [{
-    "org.finos.legend.depot.store.mongo.core.MongoConfiguration": {
-      "url": "mongodb://127.0.0.1:27017",
-      "database": "depot-dev",
-      "tracing": false
+  "artifactRepositoryProviderConfiguration": {
+    "org.finos.legend.depot.services.artifacts.repository.maven.MavenArtifactRepositoryConfiguration": {
+      "settingsLocation": "legend-depot-store-server/src/test/resources/sample-repository-settings.xml"
     }
-  }],
+  },
+  "artifactsRetentionPolicyConfiguration": {
+    "maximumSnapshotsAllowed": 5,
+    "ttlForVersionsInDays": 365,
+    "ttlForSnapshotsInDays": 30
+  },
+  "artifactsRefreshPolicyConfiguration": {
+    "versionsUpdateIntervalInMillis": 3600000,
+    "includeProjectPropertiesConfiguration": {
+      "properties": []
+    }
+  },
+  "projects": {
+    "defaultBranch": "master"
+  },
+  "storages": [
+    {
+      "org.finos.legend.depot.store.mongo.core.MongoConfiguration": {
+        "url": "mongodb://127.0.0.1:27017",
+        "database": "depot-dev"
+      }
+    }
+  ],
   "openTracing": {
     "openTracingUri": "your URL here",
     "serviceName": "legend-depot-store",
@@ -102,11 +118,6 @@
     "org.pac4j.j2e.filter.SecurityFilter": 3,
     "org.pac4j.j2e.filter.CallbackFilter": 4,
     "CORS": 5
-  },
-  "artifactRepositoryProviderConfiguration": {
-    "org.finos.legend.depot.services.artifacts.repository.maven.MavenArtifactRepositoryConfiguration": {
-      "settingsLocation": "legend-depot-store-server/src/test/resources/sample-repository-settings.xml"
-    }
   },
   "queue-interval": 30
 }
