@@ -46,7 +46,7 @@
   },
   "exceptionMapper": {
     "includeStackTrace": true
-  }
+  },
   "logging": {
     "level": "INFO",
     "loggers": {
