@@ -22,7 +22,7 @@ import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 import org.finos.legend.depot.store.model.HasIdentifier;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 
 public abstract class TestStoreMongo
 {
@@ -30,7 +30,7 @@ public abstract class TestStoreMongo
     private MongoClient mongoClient = new MongoClient(new ServerAddress(server.bind()));
     protected MongoDatabase mongoProvider = mongoClient.getDatabase("test-db");
 
-    @After
+    @AfterEach
     public void tearDownData()
     {
         this.mongoProvider.drop();

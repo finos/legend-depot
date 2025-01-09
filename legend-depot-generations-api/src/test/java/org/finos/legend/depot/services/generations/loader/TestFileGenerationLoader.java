@@ -16,8 +16,8 @@
 package org.finos.legend.depot.services.generations.loader;
 
 import org.finos.legend.depot.domain.generation.DepotGeneration;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -34,10 +34,10 @@ public class TestFileGenerationLoader
     public void canReadFileGenerationArtifacts() throws URISyntaxException
     {
         List<DepotGeneration> generations = FileGenerationLoader.newFileGenerationsLoader(new File(filePath.toURI())).getAllFileGenerations().collect(Collectors.toList());
-        Assert.assertNotNull(generations);
-        Assert.assertEquals(14, generations.size());
+        Assertions.assertNotNull(generations);
+        Assertions.assertEquals(14, generations.size());
         DepotGeneration generation = generations.get(0);
-        Assert.assertFalse(generation.getContent().isEmpty());
+        Assertions.assertFalse(generation.getContent().isEmpty());
     }
 
 }

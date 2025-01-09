@@ -21,7 +21,7 @@ import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.CoreDataMongoStoreTests;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 public class TestBaseServices extends CoreDataMongoStoreTests
 {
@@ -29,7 +29,7 @@ public class TestBaseServices extends CoreDataMongoStoreTests
     protected UpdateProjects projectsStore = new ProjectsMongo(mongoProvider);
 
 
-    @Before
+    @BeforeEach
     public void setUpData()
     {
         setUpProjectsVersionsFromFile(TestStoreMongo.class.getClassLoader().getResource("data/projectsVersions.json"));

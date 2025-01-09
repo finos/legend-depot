@@ -17,8 +17,8 @@ package org.finos.legend.depot.domain.project;
 
 import org.finos.legend.depot.domain.CoordinateValidator;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestProjectUtilities
 {
@@ -26,21 +26,21 @@ public class TestProjectUtilities
     @Test
     public void validGroupId()
     {
-        Assert.assertTrue(CoordinateValidator.isValidGroupId("example.good.group"));
-        Assert.assertTrue(CoordinateValidator.isValidGroupId("org.finos"));
-        Assert.assertFalse(CoordinateValidator.isValidGroupId(""));
-        Assert.assertFalse(CoordinateValidator.isValidGroupId("this is not a good one"));
-        Assert.assertFalse(CoordinateValidator.isValidGroupId("this.is.starting.well but not ending well"));
-        Assert.assertTrue(CoordinateValidator.isValidGroupId("singleWordNoDots"));
+        Assertions.assertTrue(CoordinateValidator.isValidGroupId("example.good.group"));
+        Assertions.assertTrue(CoordinateValidator.isValidGroupId("org.finos"));
+        Assertions.assertFalse(CoordinateValidator.isValidGroupId(""));
+        Assertions.assertFalse(CoordinateValidator.isValidGroupId("this is not a good one"));
+        Assertions.assertFalse(CoordinateValidator.isValidGroupId("this.is.starting.well but not ending well"));
+        Assertions.assertTrue(CoordinateValidator.isValidGroupId("singleWordNoDots"));
     }
 
     @Test
     public void validArtifactId()
     {
-        Assert.assertTrue(CoordinateValidator.isValidArtifactId("test"));
-        Assert.assertTrue(CoordinateValidator.isValidArtifactId("test-other"));
-        Assert.assertFalse(CoordinateValidator.isValidArtifactId(""));
-        Assert.assertFalse(CoordinateValidator.isValidArtifactId("singleWordNoDots"));
+        Assertions.assertTrue(CoordinateValidator.isValidArtifactId("test"));
+        Assertions.assertTrue(CoordinateValidator.isValidArtifactId("test-other"));
+        Assertions.assertFalse(CoordinateValidator.isValidArtifactId(""));
+        Assertions.assertFalse(CoordinateValidator.isValidArtifactId("singleWordNoDots"));
     }
 
     @Test
@@ -48,17 +48,17 @@ public class TestProjectUtilities
     {
         StoreProjectData projectData = new StoreProjectData("PROD-1", "examples.test", "metadata", null, "2.1.0");
 
-        Assert.assertTrue(projectData.evaluateLatestVersionAndUpdate("3.0.0"));
-        Assert.assertEquals(projectData.getLatestVersion(), "3.0.0");
+        Assertions.assertTrue(projectData.evaluateLatestVersionAndUpdate("3.0.0"));
+        Assertions.assertEquals(projectData.getLatestVersion(), "3.0.0");
 
         projectData.setLatestVersion("2.1.0");
-        Assert.assertFalse(projectData.evaluateLatestVersionAndUpdate("2.1.0"));
-        Assert.assertFalse(projectData.evaluateLatestVersionAndUpdate("2.0.1"));
+        Assertions.assertFalse(projectData.evaluateLatestVersionAndUpdate("2.1.0"));
+        Assertions.assertFalse(projectData.evaluateLatestVersionAndUpdate("2.0.1"));
 
         projectData = new StoreProjectData("PROD-1", "examples.test", "metadata", null, null);
-        Assert.assertTrue(projectData.evaluateLatestVersionAndUpdate("3.0.0"));
-        Assert.assertEquals(projectData.getLatestVersion(), "3.0.0");
+        Assertions.assertTrue(projectData.evaluateLatestVersionAndUpdate("3.0.0"));
+        Assertions.assertEquals(projectData.getLatestVersion(), "3.0.0");
 
-        Assert.assertFalse(projectData.evaluateLatestVersionAndUpdate("master-SNAPSHOT"));
+        Assertions.assertFalse(projectData.evaluateLatestVersionAndUpdate("master-SNAPSHOT"));
     }
 }

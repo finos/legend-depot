@@ -33,9 +33,9 @@ import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
 import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.domain.Class;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.Response;
 
@@ -56,7 +56,7 @@ public class TestPureModelContextDataResource extends TestBaseServices
 
     private final PureModelContextResource resource = new PureModelContextResource(new PureModelContextServiceImpl(entitiesService,projectsService));
 
-    @Before
+    @BeforeEach
     public void setUpData()
     {
         super.setUpData();
@@ -69,8 +69,8 @@ public class TestPureModelContextDataResource extends TestBaseServices
     public void loadPMCD()
     {
         Response data = resource.getPureModelContextData("test.legend", "blank-prod", "2.0.0", null, false,true, null);
-        Assert.assertFalse(((PureModelContextData)data.getEntity()).getElements().isEmpty());
-        Assert.assertEquals(((PureModelContextData)data.getEntity()).getElements().size(), 2);
+        Assertions.assertFalse(((PureModelContextData)data.getEntity()).getElements().isEmpty());
+        Assertions.assertEquals(((PureModelContextData)data.getEntity()).getElements().size(), 2);
 
     }
 
@@ -78,15 +78,15 @@ public class TestPureModelContextDataResource extends TestBaseServices
     public void loadDependenciesPMCD()
     {
         Response data = resource.getPureModelContextData(List.of(new ProjectVersion("org.finos.legend","second-project","1.0.1"), new ProjectVersion("org.finos.legend","first-project","1.0.2")), null, true, true, null);
-        Assert.assertFalse(((PureModelContextData)data.getEntity()).getElements().isEmpty());
-        Assert.assertEquals(6, ((PureModelContextData)data.getEntity()).getElements().size());
+        Assertions.assertFalse(((PureModelContextData)data.getEntity()).getElements().isEmpty());
+        Assertions.assertEquals(6, ((PureModelContextData)data.getEntity()).getElements().size());
         Optional<Class> optionalPersonClass = ((PureModelContextData)data.getEntity())
                 .getElements()
                 .stream()
                 .filter(packageableElement -> Objects.equals(packageableElement._package, "demo::model") && packageableElement.name.equals("Person"))
                 .map(packageableElement -> (Class) packageableElement)
                 .findFirst();
-        Assert.assertTrue(optionalPersonClass.isPresent());
-        Assert.assertTrue(optionalPersonClass.get().properties.stream().anyMatch(property -> property.name.equals("lastName")));
+        Assertions.assertTrue(optionalPersonClass.isPresent());
+        Assertions.assertTrue(optionalPersonClass.get().properties.stream().anyMatch(property -> property.name.equals("lastName")));
     }
 }

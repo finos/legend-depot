@@ -19,9 +19,9 @@ import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,7 +35,7 @@ public class TestQueryVersions extends TestStoreMongo
     private EntitiesMongo versionsMongo = new EntitiesMongo(mongoProvider);
     private EntitiesMongoTestUtils entityUtils = new EntitiesMongoTestUtils(mongoProvider);
 
-    @Before
+    @BeforeEach
     public void setupMetadata()
     {
 
@@ -48,13 +48,13 @@ public class TestQueryVersions extends TestStoreMongo
     public void canQueryEntityMetadataByProjectVersion()
     {
         List<Entity> entityList = versionsMongo.getAllEntities("examples.metadata", "test", "2.2.0");
-        Assert.assertNotNull(entityList);
-        Assert.assertEquals(3, entityList.size());
+        Assertions.assertNotNull(entityList);
+        Assertions.assertEquals(3, entityList.size());
         List<String> paths = new ArrayList<>();
         entityList.forEach(entity -> paths.add(entity.getPath()));
-        Assert.assertEquals(3, paths.size());
-        Assert.assertTrue(paths.contains("examples::metadata::test::TestProfile"));
-        Assert.assertTrue(paths.contains("examples::metadata::test::ClientBasic"));
+        Assertions.assertEquals(3, paths.size());
+        Assertions.assertTrue(paths.contains("examples::metadata::test::TestProfile"));
+        Assertions.assertTrue(paths.contains("examples::metadata::test::ClientBasic"));
 
     }
 
@@ -62,10 +62,10 @@ public class TestQueryVersions extends TestStoreMongo
     public void canQueryEntityMetadataByProjectVersionPath()
     {
         Entity entity = (Entity) versionsMongo.getEntity("examples.metadata", "test", "2.2.0", "examples::metadata::test::TestProfile").get();
-        Assert.assertNotNull(entity);
-        Assert.assertEquals("examples::metadata::test::TestProfile", entity.getPath());
-        Assert.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
-        Assert.assertEquals("examples::metadata::test", entity.getContent().get("package"));
+        Assertions.assertNotNull(entity);
+        Assertions.assertEquals("examples::metadata::test::TestProfile", entity.getPath());
+        Assertions.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
+        Assertions.assertEquals("examples::metadata::test", entity.getContent().get("package"));
 
     }
 
@@ -73,11 +73,11 @@ public class TestQueryVersions extends TestStoreMongo
     public void canQueryEntityMetadataByProjectVersionPackageAll()
     {
         List<Entity> entities = versionsMongo.getEntitiesByPackage("examples.metadata", "test", "2.2.0", null,  null, false);
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(3, entities.size());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(3, entities.size());
         for (Entity entity : entities)
         {
-            Assert.assertTrue(entity.getContent().get("package").toString().startsWith("examples::metadata::test"));
+            Assertions.assertTrue(entity.getContent().get("package").toString().startsWith("examples::metadata::test"));
         }
     }
 
@@ -85,11 +85,11 @@ public class TestQueryVersions extends TestStoreMongo
     public void canQueryEntityMetadataByProjectVersionPackage()
     {
         List<Entity> entities = versionsMongo.getEntitiesByPackage("examples.metadata", "test", "2.2.0", "examples::metadata::test",  null, false);
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(2, entities.size());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(2, entities.size());
         for (Entity entity : entities)
         {
-            Assert.assertEquals("examples::metadata::test", entity.getContent().get("package"));
+            Assertions.assertEquals("examples::metadata::test", entity.getContent().get("package"));
         }
     }
 
@@ -97,11 +97,11 @@ public class TestQueryVersions extends TestStoreMongo
     public void canQueryEntityMetadataByProjectVersionAndSubPackage()
     {
         List<Entity> entities = versionsMongo.getEntitiesByPackage("examples.metadata", "test", "2.2.0", "examples::metadata::test",  null, true);
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(3, entities.size());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(3, entities.size());
         for (Entity entity : entities)
         {
-            Assert.assertTrue(entity.getContent().get("package").toString().startsWith("examples::metadata::test"));
+            Assertions.assertTrue(entity.getContent().get("package").toString().startsWith("examples::metadata::test"));
         }
     }
 
@@ -115,11 +115,11 @@ public class TestQueryVersions extends TestStoreMongo
                 "2.2.0",
                 "examples::metadata::test",
                 classifiers, true);
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(2, entities.size());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(2, entities.size());
         for (Entity entity : entities)
         {
-            Assert.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
+            Assertions.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
         }
     }
 
@@ -127,13 +127,13 @@ public class TestQueryVersions extends TestStoreMongo
     public void getMasterVersionWithoutVersionInPath()
     {
         List<StoredEntity> entities = versionsMongo.getStoredEntities("examples.metadata", "test");
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(7, entities.size());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(7, entities.size());
 
         List<Entity> withoutVersions = versionsMongo.getAllEntities("examples.metadata", "test", "2.2.0");
-        Assert.assertNotNull(withoutVersions);
+        Assertions.assertNotNull(withoutVersions);
         Set<String> allPaths = withoutVersions.stream().map(Entity::getPath).collect(Collectors.toSet());
-        Assert.assertTrue(allPaths.stream().noneMatch(ent -> ent.contains("v2_2_0")));
+        Assertions.assertTrue(allPaths.stream().noneMatch(ent -> ent.contains("v2_2_0")));
     }
 
 

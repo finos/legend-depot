@@ -62,10 +62,10 @@ import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactHan
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntityArtifactsProvider;
 import org.finos.legend.depot.services.api.artifacts.handlers.generations.FileGenerationsArtifactsProvider;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.Arrays;
@@ -110,7 +110,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected NotificationsQueueManager notificationsQueueManager = new NotificationsQueueManager(notifications,queue, versionHandler);
 
 
-    @Before
+    @BeforeEach
     public void setUpData()
     {
         ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
@@ -124,34 +124,34 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         projectsStore.createOrUpdate(new StoreProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID));
         projectsStore.createOrUpdate(new StoreProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID));
         projectsStore.createOrUpdate(new StoreProjectData("PROD-101", TEST_GROUP_ID, "art101"));
-        Assert.assertEquals(3, projectsStore.getAll().size());
+        Assertions.assertEquals(3, projectsStore.getAll().size());
     }
 
-    @After
+    @AfterEach
     public void afterTest()
     {
-        Assert.assertTrue("should not have events in queue",queue.getAll().isEmpty());
+        Assertions.assertTrue(queue.getAll().isEmpty(), "should not have events in queue");
     }
 
     @Test
     public void canUpdateCreateVersion()
     {
 
-        Assert.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, "art101", BRANCH_SNAPSHOT("master")).isEmpty());
-        Assert.assertEquals(0, projectsVersionsStore.find(TEST_GROUP_ID, "art101").size());
+        Assertions.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, "art101", BRANCH_SNAPSHOT("master")).isEmpty());
+        Assertions.assertEquals(0, projectsVersionsStore.find(TEST_GROUP_ID, "art101").size());
         StoreProjectData projectData = projectsStore.find(TEST_GROUP_ID, "art101").get();
         List<File> files = repository.findFiles(ArtifactType.ENTITIES, projectData.getGroupId(), projectData.getArtifactId(), BRANCH_SNAPSHOT("master"));
-        Assert.assertNotNull(files);
-        Assert.assertEquals(1,files.size());
+        Assertions.assertNotNull(files);
+        Assertions.assertEquals(1,files.size());
         MetadataNotificationResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, "art101",BRANCH_SNAPSHOT("master"),true,true,PARENT_EVENT_ID);
-        Assert.assertNotNull(response);
+        Assertions.assertNotNull(response);
         notificationsQueueManager.handleAll();
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
-        Assert.assertEquals(0, projectsVersionsStore.find(TEST_GROUP_ID, "art101").stream().filter(x -> !x.getVersionId().equals(BRANCH_SNAPSHOT("master"))).collect(Collectors.toList()).size());
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(0, projectsVersionsStore.find(TEST_GROUP_ID, "art101").stream().filter(x -> !x.getVersionId().equals(BRANCH_SNAPSHOT("master"))).collect(Collectors.toList()).size());
         List<Entity> entities = entitiesStore.getAllEntities(TEST_GROUP_ID, "art101", BRANCH_SNAPSHOT("master"));
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(9, entities.size());
-        Assert.assertEquals(0,queue.size());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(9, entities.size());
+        Assertions.assertEquals(0,queue.size());
     }
 
     @Test
@@ -161,8 +161,8 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         repository.findFiles(ArtifactType.ENTITIES, projectData.getGroupId(), projectData.getArtifactId(), BRANCH_SNAPSHOT("master"));
         MetadataNotificationResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, "art101",BRANCH_SNAPSHOT("master"),false,true,PARENT_EVENT_ID);
         notificationsQueueManager.handleAll();
-        Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
     }
 
     @Test
@@ -172,16 +172,16 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         repository.findFiles(ArtifactType.ENTITIES, projectData.getGroupId(), projectData.getArtifactId(), BRANCH_SNAPSHOT("master"));
         MetadataNotificationResponse response = artifactsRefreshService.refreshVersionForProject(projectData.getGroupId(), projectData.getArtifactId(), BRANCH_SNAPSHOT("master"),false,true,PARENT_EVENT_ID);
         notificationsQueueManager.handleAll();
-        Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
         Optional<StoreProjectVersionData> updatedProjectData = projectsVersionsStore.find(TEST_GROUP_ID, "art101", BRANCH_SNAPSHOT("master"));
-        Assert.assertTrue(updatedProjectData.isPresent());
-        Assert.assertEquals("0.0.0", updatedProjectData.get().getVersionData().getProperties().get(0).getValue());
+        Assertions.assertTrue(updatedProjectData.isPresent());
+        Assertions.assertEquals("0.0.0", updatedProjectData.get().getVersionData().getProperties().get(0).getValue());
 
         Map<String, String> manifestProperties = updatedProjectData.get().getVersionData().getManifestProperties();
-        Assert.assertNotNull(manifestProperties);
-        Assert.assertEquals(manifestProperties.get("commit-author"), "test-author");
-        Assert.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
+        Assertions.assertNotNull(manifestProperties);
+        Assertions.assertEquals(manifestProperties.get("commit-author"), "test-author");
+        Assertions.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
     }
 
     @Test
@@ -189,59 +189,59 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     {
         StoreProjectData projectData = projectsStore.find(TEST_GROUP_ID, "art101").get();
         List<File> files = repository.findFiles(ArtifactType.ENTITIES, projectData.getGroupId(), projectData.getArtifactId(), BRANCH_SNAPSHOT("master"));
-        Assert.assertNotNull(files);
+        Assertions.assertNotNull(files);
         MetadataNotificationResponse response = artifactsRefreshService.refreshVersionForProject(projectData.getGroupId(), projectData.getArtifactId(), BRANCH_SNAPSHOT("master"),true,true,PARENT_EVENT_ID);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
-        Assert.assertEquals(1,queue.size());
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(1,queue.size());
         notificationsQueueManager.handleAll();
-        Assert.assertTrue(queue.getAll().isEmpty());
-        Assert.assertEquals(2,notifications.find(null,null,null,null,PARENT_EVENT_ID,null,null,null).size());
+        Assertions.assertTrue(queue.getAll().isEmpty());
+        Assertions.assertEquals(2,notifications.find(null,null,null,null,PARENT_EVENT_ID,null,null,null).size());
     }
 
 
     @Test
     public void canRefreshProjectVersion()
     {
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
 
         MetadataNotificationResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0",true,PARENT_EVENT_ID);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
-        Assert.assertEquals(1,queue.size());
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(1,queue.size());
         notificationsQueueManager.handleAll();
 
-        Assert.assertEquals(9, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
+        Assertions.assertEquals(9, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
 
-        Assert.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
+        Assertions.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
 
-        Assert.assertEquals(12, fileGenerationsStore.getAll().size());
-        Assert.assertEquals(3, fileGenerationsStore.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "examples::avrogen").size());
-        Assert.assertEquals(2, fileGenerationsStore.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "examples::metadata::test::ClientBasic").size());
-        Assert.assertTrue(fileGenerationsStore.findByFilePath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
-        Assert.assertEquals("My Output1",  fileGenerationsStore.findByFilePath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").get().getFile().getContent());
+        Assertions.assertEquals(12, fileGenerationsStore.getAll().size());
+        Assertions.assertEquals(3, fileGenerationsStore.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "examples::avrogen").size());
+        Assertions.assertEquals(2, fileGenerationsStore.findByElementPath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "examples::metadata::test::ClientBasic").size());
+        Assertions.assertTrue(fileGenerationsStore.findByFilePath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
+        Assertions.assertEquals("My Output1",  fileGenerationsStore.findByFilePath(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").get().getFile().getContent());
     }
 
     @Test
     public void canRefreshExcludedProjectVersionIfLoadable()
     {
         StoreProjectVersionData storeProjectVersionData = projectsService.excludeProjectVersion(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", "unknown error");
-        Assert.assertTrue(storeProjectVersionData.getVersionData().isExcluded());
-        Assert.assertEquals(storeProjectVersionData.getVersionData().getDependencies().size(), 0);
+        Assertions.assertTrue(storeProjectVersionData.getVersionData().isExcluded());
+        Assertions.assertEquals(storeProjectVersionData.getVersionData().getDependencies().size(), 0);
 
         MetadataNotificationResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0",false,PARENT_EVENT_ID);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
-        Assert.assertEquals(1,queue.size());
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(1,queue.size());
         notificationsQueueManager.handleAll();
 
         storeProjectVersionData = projectsVersionsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get();
-        Assert.assertFalse(storeProjectVersionData.getVersionData().isExcluded());
-        Assert.assertNull(storeProjectVersionData.getVersionData().getExclusionReason());
-        Assert.assertEquals(storeProjectVersionData.getVersionData().getDependencies().size(), 1);
+        Assertions.assertFalse(storeProjectVersionData.getVersionData().isExcluded());
+        Assertions.assertNull(storeProjectVersionData.getVersionData().getExclusionReason());
+        Assertions.assertEquals(storeProjectVersionData.getVersionData().getDependencies().size(), 1);
 
         Map<String, String> manifestProperties = storeProjectVersionData.getVersionData().getManifestProperties();
-        Assert.assertNotNull(manifestProperties);
-        Assert.assertEquals(manifestProperties.get("commit-author"), "test-author");
-        Assert.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
+        Assertions.assertNotNull(manifestProperties);
+        Assertions.assertEquals(manifestProperties.get("commit-author"), "test-author");
+        Assertions.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
     }
 
     @Test
@@ -250,34 +250,34 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         StoreProjectVersionData storeProjectVersionData = new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0");
         storeProjectVersionData.setEvicted(true);
         projectsService.createOrUpdate(storeProjectVersionData);
-        Assert.assertTrue(storeProjectVersionData.isEvicted());
+        Assertions.assertTrue(storeProjectVersionData.isEvicted());
 
-        Assert.assertThrows("Project version: examples.metadata-test-2.0.0 is being restored, please retry in 5 minutes", IllegalStateException.class, () -> projectsService.resolveAliasesAndCheckVersionExists(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0"));
-        Assert.assertEquals(1, queue.size());
+        Assertions.assertThrows(IllegalStateException.class, () -> projectsService.resolveAliasesAndCheckVersionExists(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0"), "Project version: examples.metadata-test-2.0.0 is being restored, please retry in 5 minutes");
+        Assertions.assertEquals(1, queue.size());
         notificationsQueueManager.handleAll();
 
         storeProjectVersionData = projectsVersionsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get();
-        Assert.assertFalse(storeProjectVersionData.isEvicted());
+        Assertions.assertFalse(storeProjectVersionData.isEvicted());
 
     }
 
     @Test
     public void canRefreshAllVersionForProject()
     {
-        Assert.assertTrue(entitiesStore.getAllStoredEntities().isEmpty());
-        Assert.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").isEmpty());
-        Assert.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").isEmpty());
+        Assertions.assertTrue(entitiesStore.getAllStoredEntities().isEmpty());
+        Assertions.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").isEmpty());
+        Assertions.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").isEmpty());
         MetadataNotificationResponse response = artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, true, true,true,PARENT_EVENT_ID);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
 
-        Assert.assertEquals(3,queue.size());
+        Assertions.assertEquals(3,queue.size());
         notificationsQueueManager.handleAll();
 
-        Assert.assertEquals(3,projectsStore.getAll().size());
-        Assert.assertEquals(9, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").size());
-        Assert.assertEquals(9, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
+        Assertions.assertEquals(3,projectsStore.getAll().size());
+        Assertions.assertEquals(9, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").size());
+        Assertions.assertEquals(9, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
 
-        Assert.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
+        Assertions.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
 
     }
 
@@ -285,15 +285,15 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void canRefreshOnlyDefaultSnapshotVersions()
     {
         MetadataNotificationResponse response = artifactsRefreshService.refreshDefaultSnapshotsForAllProjects(false, false, PARENT_EVENT_ID);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
-        Assert.assertEquals(2,queue.size());
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(2,queue.size());
         notificationsQueueManager.handleAll();
 
         projectsService.createOrUpdate(new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "branch1-SNAPSHOT"));
 
         response = artifactsRefreshService.refreshDefaultSnapshotsForAllProjects(false, false, PARENT_EVENT_ID);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
-        Assert.assertEquals(2,queue.size());
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(2,queue.size());
         notificationsQueueManager.handleAll();
     }
 
@@ -301,9 +301,9 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void canRefreshAllVersionExceptForEvictedSnapshot()
     {
         MetadataNotificationResponse response = artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, true, true,true,PARENT_EVENT_ID);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
 
-        Assert.assertEquals(3,queue.size());
+        Assertions.assertEquals(3,queue.size());
         notificationsQueueManager.handleAll();
 
         StoreProjectVersionData pv = new StoreProjectVersionData(TEST_GROUP_ID, TEST_ARTIFACT_ID, "dummy-SNAPSHOT");
@@ -311,26 +311,26 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         projectsService.createOrUpdate(pv);
 
         response = artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, true, true,true,PARENT_EVENT_ID);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
 
-        Assert.assertEquals(3,queue.size());
+        Assertions.assertEquals(3,queue.size());
         notificationsQueueManager.handleAll();
     }
 
     @Test
     public void canRefreshAllVersionForProjectWithExcludedVersion()
     {
-        Assert.assertTrue(entitiesStore.getAllStoredEntities().isEmpty());
-        Assert.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").isEmpty());
-        Assert.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").isEmpty());
+        Assertions.assertTrue(entitiesStore.getAllStoredEntities().isEmpty());
+        Assertions.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").isEmpty());
+        Assertions.assertTrue(entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").isEmpty());
 
         projectsService.excludeProjectVersion(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0","test");
         MetadataNotificationResponse response = artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, false, false,true,PARENT_EVENT_ID);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
 
-        Assert.assertEquals(1,queue.size());
+        Assertions.assertEquals(1,queue.size());
 
-        Assert.assertEquals(BRANCH_SNAPSHOT("master"), queue.getAll().get(0).getVersionId());
+        Assertions.assertEquals(BRANCH_SNAPSHOT("master"), queue.getAll().get(0).getVersionId());
         notificationsQueueManager.handleAll();
 
     }
@@ -339,27 +339,27 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void partialRefreshAllVersionForProjectOnlyRefreshLatest()
     {
         artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, true, true, true,PARENT_EVENT_ID);
-        Assert.assertEquals(3,queue.size());
+        Assertions.assertEquals(3,queue.size());
         notificationsQueueManager.handleAll();
 
         List<String> versions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID);
-        Assert.assertEquals(2, versions.size());
-        Assert.assertEquals("2.0.0",projectsService.findCoordinates(TEST_GROUP_ID, TEST_ARTIFACT_ID).get().getLatestVersion());
+        Assertions.assertEquals(2, versions.size());
+        Assertions.assertEquals("2.0.0",projectsService.findCoordinates(TEST_GROUP_ID, TEST_ARTIFACT_ID).get().getLatestVersion());
 
 
         projectsService.delete(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0");
-        Assert.assertEquals("2.0.0",projectsService.findCoordinates(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().getLatestVersion());
+        Assertions.assertEquals("2.0.0",projectsService.findCoordinates(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().getLatestVersion());
 
         artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, false, false, false,PARENT_EVENT_ID);
-        Assert.assertEquals("2.0.0",projectsService.findCoordinates(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().getLatestVersion());
-        Assert.assertEquals(2,queue.size());
-        Assert.assertEquals("1.0.0",queue.getAll().get(1).getVersionId());
+        Assertions.assertEquals("2.0.0",projectsService.findCoordinates(TEST_GROUP_ID,TEST_ARTIFACT_ID).get().getLatestVersion());
+        Assertions.assertEquals(2,queue.size());
+        Assertions.assertEquals("1.0.0",queue.getAll().get(1).getVersionId());
         notificationsQueueManager.handleAll();
 
         projectsService.delete(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0");
         artifactsRefreshService.refreshAllVersionsForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, false, false, false,PARENT_EVENT_ID);
-        Assert.assertEquals(2,queue.size());
-        Assert.assertEquals("2.0.0",queue.getAll().get(1).getVersionId());
+        Assertions.assertEquals(2,queue.size());
+        Assertions.assertEquals("2.0.0",queue.getAll().get(1).getVersionId());
         notificationsQueueManager.handleAll();
 
     }
@@ -367,20 +367,20 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     @Test
     public void canRefreshAllVersionsAllProjects()
     {
-        Assert.assertEquals(3,projectsService.getAllProjectCoordinates().size());
+        Assertions.assertEquals(3,projectsService.getAllProjectCoordinates().size());
         MetadataNotificationResponse response = artifactsRefreshService.refreshAllVersionsForAllProjects(true,true,true,PARENT_EVENT_ID);
-        Assert.assertEquals(5,queue.size());
+        Assertions.assertEquals(5,queue.size());
         notificationsQueueManager.handleAll();
 
-        Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
 
         List<Entity> entityList2 = entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0");
-        Assert.assertNotNull(entityList2);
-        Assert.assertEquals(9, entityList2.size());
+        Assertions.assertNotNull(entityList2);
+        Assertions.assertEquals(9, entityList2.size());
 
         MetadataNotificationResponse partialUpdate = artifactsRefreshService.refreshAllVersionsForAllProjects(false,false,true,PARENT_EVENT_ID);
-        Assert.assertEquals(3,queue.size());
+        Assertions.assertEquals(3,queue.size());
         queue.getAll().stream().allMatch(notification -> BRANCH_SNAPSHOT("master").equals(notification.getVersionId()));
         notificationsQueueManager.handleAll();
     }
@@ -389,27 +389,27 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void canRefreshProjectMasterVersion()
     {
 
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
 
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
 
         MetadataNotificationResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"),true,PARENT_EVENT_ID);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
-        Assert.assertEquals(1,queue.size());
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(1,queue.size());
         notificationsQueueManager.handleAll();
 
-        Assert.assertEquals(9, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
+        Assertions.assertEquals(9, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
 
-        Assert.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
+        Assertions.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
 
         ProjectVersionData projectVersionData = projectsVersionsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).get().getVersionData();
         List<ProjectVersion> dependencies = projectVersionData.getDependencies();
-        Assert.assertEquals(2, dependencies.size());
+        Assertions.assertEquals(2, dependencies.size());
 
         Map<String, String> manifestProperties = projectVersionData.getManifestProperties();
-        Assert.assertNotNull(manifestProperties);
-        Assert.assertEquals(manifestProperties.get("commit-author"), "test-author");
-        Assert.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
+        Assertions.assertNotNull(manifestProperties);
+        Assertions.assertEquals(manifestProperties.get("commit-author"), "test-author");
+        Assertions.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
 
     }
 
@@ -418,37 +418,37 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void canRefreshProjectMasterVersionWithAllDependenciesTransitively()
     {
 
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, "art101", "2.0.0").size());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, "art101", "2.0.0").size());
 
         MetadataNotificationResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master"),true,PARENT_EVENT_ID);
-        Assert.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
-        Assert.assertEquals(1,queue.size());
+        Assertions.assertEquals(MetadataNotificationStatus.SUCCESS, response.getStatus());
+        Assertions.assertEquals(1,queue.size());
         notificationsQueueManager.handle();
         List<ProjectVersion> dependencies = projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).get().getVersionData().getDependencies();
-        Assert.assertEquals(2, dependencies.size());
+        Assertions.assertEquals(2, dependencies.size());
 
-        Assert.assertEquals(2,queue.size());
+        Assertions.assertEquals(2,queue.size());
         notificationsQueueManager.handleAll();
-        Assert.assertEquals(0,queue.size());
+        Assertions.assertEquals(0,queue.size());
 
     }
 
     @Test
     public void dependenciesAreLoadedCorrectly()
     {
-        Assert.assertEquals(1, repository.findDependenciesByArtifactType(ArtifactType.ENTITIES, TEST_GROUP_ID, "test", "2.0.0").size());
-        Assert.assertEquals(0, entitiesStore.getStoredEntities(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID).size());
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "2.0.0").size());
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").size());
+        Assertions.assertEquals(1, repository.findDependenciesByArtifactType(ArtifactType.ENTITIES, TEST_GROUP_ID, "test", "2.0.0").size());
+        Assertions.assertEquals(0, entitiesStore.getStoredEntities(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID).size());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "2.0.0").size());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "1.0.0").size());
 
         artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0", true,PARENT_EVENT_ID);
         notificationsQueueManager.handleAll();
-        Assert.assertEquals(1,projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,"2.0.0").get().getVersionData().getDependencies().size());
-        Assert.assertEquals(0,queue.size());
-        Assert.assertEquals(9, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
-        Assert.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
+        Assertions.assertEquals(1,projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,"2.0.0").get().getVersionData().getDependencies().size());
+        Assertions.assertEquals(0,queue.size());
+        Assertions.assertEquals(9, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
+        Assertions.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, "1.0.0").size());
     }
 
 
@@ -456,14 +456,14 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     public void canLoadEntitiesWithVersionInPackageName()
     {
         MetadataNotificationResponse partialUpdate = versionHandler.handleNotification(new MetadataNotification("prod-1",TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID,BRANCH_SNAPSHOT("master"),false,false,PARENT_EVENT_ID));
-        Assert.assertNotNull(partialUpdate);
-        Assert.assertEquals(2, entitiesStore.getStoredEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
+        Assertions.assertNotNull(partialUpdate);
+        Assertions.assertEquals(2, entitiesStore.getStoredEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
 
         MetadataNotificationResponse fullUpdate = versionHandler.handleNotification(new MetadataNotification("prod-1",TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID,BRANCH_SNAPSHOT("master"),true,false,PARENT_EVENT_ID));
-        Assert.assertNotNull(fullUpdate);
+        Assertions.assertNotNull(fullUpdate);
 
-        Assert.assertEquals(2, entitiesStore.getStoredEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
+        Assertions.assertEquals(2, entitiesStore.getStoredEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
+        Assertions.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID, BRANCH_SNAPSHOT("master")).size());
 
     }
 
@@ -475,34 +475,34 @@ public class TestArtifactsRefreshService extends TestStoreMongo
         String versionId = "2.0.0";
         MetadataNotificationResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true,PARENT_EVENT_ID);
         notificationsQueueManager.handleAll();
-        Assert.assertNotNull(response);
-        Assert.assertFalse(response.hasErrors());
+        Assertions.assertNotNull(response);
+        Assertions.assertFalse(response.hasErrors());
     }
 
 
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void cantRefreshNonExistingProjectInRepo()
     {
         String versionId = "2.111.0";
-        artifactsRefreshService.refreshVersionForProject("i.dont.exist", "in-repo", versionId,false,PARENT_EVENT_ID);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> artifactsRefreshService.refreshVersionForProject("i.dont.exist", "in-repo", versionId,false,PARENT_EVENT_ID));
     }
 
     @Test
     public void cantRefreshSameVersionTwice()
     {
         String versionId = "2.0.0";
-        Assert.assertFalse(projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,versionId).isPresent());
-        Assert.assertFalse(artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true,PARENT_EVENT_ID).hasErrors());
+        Assertions.assertFalse(projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,versionId).isPresent());
+        Assertions.assertFalse(artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true,PARENT_EVENT_ID).hasErrors());
         notificationsQueueManager.handleAll();
-        Assert.assertTrue(projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,versionId).isPresent());
+        Assertions.assertTrue(projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,versionId).isPresent());
         int docsBefore = this.entitiesStore.getAllStoredEntities().size();
-        Assert.assertFalse(artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true,PARENT_EVENT_ID).hasErrors());
+        Assertions.assertFalse(artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId,true,PARENT_EVENT_ID).hasErrors());
         notificationsQueueManager.handleAll();
-        Assert.assertEquals(docsBefore,entitiesStore.getAllStoredEntities().size());
-        Assert.assertTrue(projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,versionId).isPresent());
-        Assert.assertEquals(2,projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).stream().filter(x -> !x.getVersionId().equals(BRANCH_SNAPSHOT("master"))).collect(Collectors.toList()).size());
-        Assert.assertEquals(0,queue.size());
+        Assertions.assertEquals(docsBefore,entitiesStore.getAllStoredEntities().size());
+        Assertions.assertTrue(projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID,versionId).isPresent());
+        Assertions.assertEquals(2,projectsVersionsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).stream().filter(x -> !x.getVersionId().equals(BRANCH_SNAPSHOT("master"))).collect(Collectors.toList()).size());
+        Assertions.assertEquals(0,queue.size());
     }
 
 

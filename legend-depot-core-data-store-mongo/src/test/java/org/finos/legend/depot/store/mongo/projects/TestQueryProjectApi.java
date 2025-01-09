@@ -18,9 +18,9 @@ package org.finos.legend.depot.store.mongo.projects;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.mongo.CoreDataMongoStoreTests;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public class TestQueryProjectApi extends CoreDataMongoStoreTests
 {
     private Projects projectsAPI = new ProjectsMongo(mongoProvider);
 
-    @Before
+    @BeforeEach
     public void setUpProjectData()
     {
         setUpProjectsFromFile(this.getClass().getClassLoader().getResource("data/projects.json"));
@@ -40,15 +40,15 @@ public class TestQueryProjectApi extends CoreDataMongoStoreTests
     public void canCollectAllProjectConfig()
     {
         List<StoreProjectData> allConfigs = projectsAPI.getAll();
-        Assert.assertNotNull(allConfigs);
-        Assert.assertEquals(3, allConfigs.size());
+        Assertions.assertNotNull(allConfigs);
+        Assertions.assertEquals(3, allConfigs.size());
     }
 
     @Test
     public void canFindByMavenCoordinates()
     {
         Optional<StoreProjectData> projectConfig = projectsAPI.find("examples.metadata", "test");
-        Assert.assertTrue(projectConfig.isPresent());
+        Assertions.assertTrue(projectConfig.isPresent());
 
     }
 
@@ -56,10 +56,10 @@ public class TestQueryProjectApi extends CoreDataMongoStoreTests
     public void canFindByProjectId()
     {
         List<StoreProjectData> projectConfig = projectsAPI.findByProjectId("PROD-A");
-        Assert.assertTrue(!projectConfig.isEmpty());
-        Assert.assertEquals(projectConfig.size(), 1);
-        Assert.assertEquals(projectConfig.get(0).getGroupId(), "examples.metadata");
-        Assert.assertEquals(projectConfig.get(0).getArtifactId(), "test");
+        Assertions.assertTrue(!projectConfig.isEmpty());
+        Assertions.assertEquals(projectConfig.size(), 1);
+        Assertions.assertEquals(projectConfig.get(0).getGroupId(), "examples.metadata");
+        Assertions.assertEquals(projectConfig.get(0).getArtifactId(), "test");
 
     }
 
@@ -67,7 +67,7 @@ public class TestQueryProjectApi extends CoreDataMongoStoreTests
     public void cannotFindProject()
     {
         Optional<StoreProjectData> project = projectsAPI.find("PROD-9691231123", "lalal");
-        Assert.assertFalse(project.isPresent());
+        Assertions.assertFalse(project.isPresent());
 
     }
 

@@ -23,7 +23,7 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -41,12 +41,12 @@ public abstract class TestGenerationsStoreMongo extends TestStoreMongo
             List<StoredFileGeneration> generations = new ObjectMapper().readValue(jsonInput, new TypeReference<List<StoredFileGeneration>>()
             {
             });
-            Assert.assertNotNull("testing file" + fileName.getFile(), generations);
+            Assertions.assertNotNull(generations, "testing file" + fileName.getFile());
             return generations;
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test metadata" + e.getMessage());
+            Assertions.fail("an error has occurred loading test metadata" + e.getMessage());
         }
         return null;
     }
@@ -55,7 +55,7 @@ public abstract class TestGenerationsStoreMongo extends TestStoreMongo
     {
         try
         {
-            Assert.assertNotNull(getMongoFileGenerations(database));
+            Assertions.assertNotNull(getMongoFileGenerations(database));
             readGenerationsFile(generationsData).forEach(project ->
             {
                 try
@@ -64,14 +64,14 @@ public abstract class TestGenerationsStoreMongo extends TestStoreMongo
                 }
                 catch (JsonProcessingException e)
                 {
-                    Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+                    Assertions.fail("an error has occurred loading test project metadata" + e.getMessage());
                 }
             });
 
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+            Assertions.fail("an error has occurred loading test project metadata" + e.getMessage());
         }
     }
 

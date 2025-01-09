@@ -19,8 +19,8 @@ import org.finos.legend.depot.store.api.admin.artifacts.ArtifactsFilesStore;
 import org.finos.legend.depot.store.model.admin.artifacts.ArtifactFile;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.artifacts.ArtifactsFilesMongo;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
@@ -37,11 +37,11 @@ public class TestArtifactMongo extends TestStoreMongo
 
         ArtifactsFilesStore artifacts = new ArtifactsFilesMongo(this.mongoProvider);
         ArtifactFile result = artifacts.createOrUpdate(detail);
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
         Optional<ArtifactFile> artifact = artifacts.find(FILE_PATH);
-        Assert.assertTrue(artifact.isPresent());
-        Assert.assertEquals(FILE_PATH, artifact.get().getPath());
+        Assertions.assertTrue(artifact.isPresent());
+        Assertions.assertEquals(FILE_PATH, artifact.get().getPath());
 
     }
 
@@ -52,18 +52,18 @@ public class TestArtifactMongo extends TestStoreMongo
 
         ArtifactsFilesStore artifacts = new ArtifactsFilesMongo(this.mongoProvider);
         ArtifactFile result = artifacts.createOrUpdate(detail);
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
         Optional<ArtifactFile> artifact = artifacts.find(FILE_PATH);
-        Assert.assertNotNull(artifact);
-        Assert.assertEquals(FILE_PATH, artifact.get().getPath());
-        Assert.assertNull(artifact.get().getCheckSum());
+        Assertions.assertNotNull(artifact);
+        Assertions.assertEquals(FILE_PATH, artifact.get().getPath());
+        Assertions.assertNull(artifact.get().getCheckSum());
 
         ArtifactFile result1 = artifacts.createOrUpdate(detail.setCheckSum("laalalala"));
-        Assert.assertNotNull(result1);
+        Assertions.assertNotNull(result1);
         Optional<ArtifactFile> artifact1 = artifacts.find(FILE_PATH);
-        Assert.assertNotNull(artifact);
-        Assert.assertEquals(FILE_PATH, artifact1.get().getPath());
-        Assert.assertEquals("laalalala", artifact1.get().getCheckSum());
+        Assertions.assertNotNull(artifact);
+        Assertions.assertEquals(FILE_PATH, artifact1.get().getPath());
+        Assertions.assertEquals("laalalala", artifact1.get().getCheckSum());
 
     }
 

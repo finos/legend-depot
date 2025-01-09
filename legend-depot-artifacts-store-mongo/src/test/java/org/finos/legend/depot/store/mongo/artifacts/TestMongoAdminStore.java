@@ -20,8 +20,8 @@ import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,15 +37,15 @@ public class TestMongoAdminStore extends TestStoreMongo
     {
         List<Document> indexes = new ArrayList<>();
         this.mongoProvider.getCollection(ArtifactsFilesMongo.COLLECTION).listIndexes().forEach((Consumer<Document>) indexes::add);
-        Assert.assertTrue(indexes.isEmpty());
+        Assertions.assertTrue(indexes.isEmpty());
 
         List<String> result = BaseMongo.createIndexesIfAbsent(mongoProvider, ArtifactsFilesMongo.COLLECTION, ArtifactsFilesMongo.buildIndexes());
-        Assert.assertFalse(result.isEmpty());
+        Assertions.assertFalse(result.isEmpty());
 
         List indexes1 = new ArrayList();
         this.mongoProvider.getCollection(ArtifactsFilesMongo.COLLECTION).listIndexes().forEach((Consumer<Document>) indexes1::add);
-        Assert.assertFalse(indexes1.isEmpty());
-        Assert.assertEquals(2, indexes1.size());
+        Assertions.assertFalse(indexes1.isEmpty());
+        Assertions.assertEquals(2, indexes1.size());
     }
 
 }

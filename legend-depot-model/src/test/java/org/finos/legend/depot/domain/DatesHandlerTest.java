@@ -15,8 +15,8 @@
 
 package org.finos.legend.depot.domain;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -29,7 +29,7 @@ public class DatesHandlerTest
 
         LocalDateTime date = DatesHandler.parseDate("1679411706436");
         LocalDateTime lunchTime = LocalDateTime.parse("2023-03-21T14:02:49", DateTimeFormatter.ISO_DATE_TIME);
-        Assert.assertNotNull(date);
+        Assertions.assertNotNull(date);
 
     }
 }

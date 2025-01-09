@@ -16,8 +16,8 @@
 package org.finos.legend.depot.services.artifacts.refresh;
 
 import org.finos.legend.depot.services.artifacts.handlers.ManifestLoader;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.jar.Manifest;
@@ -30,7 +30,7 @@ public class TestManifestLoader
         String jarFilePath = TestManifestLoader.class.getClassLoader().getResource("repository/examples/metadata/test-entities/1.0.0/test-entities-1.0.0.jar").getFile();
         File jarFile = new File(jarFilePath);
         Manifest manifest = ManifestLoader.readManifest(jarFile);
-        Assert.assertNotNull(manifest);
+        Assertions.assertNotNull(manifest);
     }
 
     @Test
@@ -39,13 +39,13 @@ public class TestManifestLoader
         String pomFilePath = TestManifestLoader.class.getClassLoader().getResource("repository/examples/metadata/test-entities/1.0.0/test-entities-1.0.0.pom").getFile();
         File pomFile = new File(pomFilePath);
         Manifest manifest = ManifestLoader.readManifest(pomFile);
-        Assert.assertNull(manifest);
+        Assertions.assertNull(manifest);
     }
 
     @Test
     public void canHandleNullFile()
     {
         Manifest manifest = ManifestLoader.readManifest(null);
-        Assert.assertNull(manifest);
+        Assertions.assertNull(manifest);
     }
 }

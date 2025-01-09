@@ -136,8 +136,9 @@
         <json-smart.version>2.4.2</json-smart.version>
 
         <junit.version>4.13.1</junit.version>
-        <junit.groupId>junit</junit.groupId>
-        <junit.artifactId>junit</junit.artifactId>
+        <junit.groupId>org.junit.jupiter</junit.groupId>
+        <junit.artifactId>junit-jupiter-engine</junit.artifactId>
+        <junit5-version>5.9.3</junit5-version>
 
         <mockito.version>3.9.0</mockito.version>
         <pac4j.version>3.8.3</pac4j.version>
@@ -1229,6 +1230,12 @@
             <dependency>
                   <groupId>${junit.groupId}</groupId>
                 <artifactId>${junit.artifactId}</artifactId>
+                <version>${junit5-version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>

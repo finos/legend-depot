@@ -22,8 +22,8 @@ import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -45,20 +45,20 @@ public class TestProjectsVersionsResource extends TestBaseServices
     {
         Response responseOne = projectsVersionsResource.getProjectVersion("examples.metadata", "test","latest");
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseOne.getEntity();
-        Assert.assertTrue(versionData.isPresent());
-        Assert.assertEquals(versionData.get().getGroupId(), "examples.metadata");
-        Assert.assertEquals(versionData.get().getArtifactId(), "test");
-        Assert.assertEquals(versionData.get().getVersionId(), "2.3.1");
-        Assert.assertEquals(versionData.get().getVersionData().getDependencies().get(0), new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"));
+        Assertions.assertTrue(versionData.isPresent());
+        Assertions.assertEquals(versionData.get().getGroupId(), "examples.metadata");
+        Assertions.assertEquals(versionData.get().getArtifactId(), "test");
+        Assertions.assertEquals(versionData.get().getVersionId(), "2.3.1");
+        Assertions.assertEquals(versionData.get().getVersionData().getDependencies().get(0), new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"));
 
         Map<String, String> manifestProperties = versionData.get().getVersionData().getManifestProperties();
-        Assert.assertNotNull(manifestProperties);
-        Assert.assertEquals(manifestProperties.get("commit-author"), "test-author");
-        Assert.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
+        Assertions.assertNotNull(manifestProperties);
+        Assertions.assertEquals(manifestProperties.get("commit-author"), "test-author");
+        Assertions.assertEquals(manifestProperties.get("commit-timestamp"), "2023-04-11T14:48:27+00:00");
 
         Response responseTwo = projectsVersionsResource.getProjectVersion("somethig.random", "test","latest");
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseTwo.getEntity();
-        Assert.assertFalse(versionData1.isPresent());
+        Assertions.assertFalse(versionData1.isPresent());
     }
 
     @Test
@@ -66,13 +66,13 @@ public class TestProjectsVersionsResource extends TestBaseServices
     {
         Response responseOne = projectsVersionsResource.getProjectVersion("examples.metadata", "test","head");
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseOne.getEntity();
-        Assert.assertTrue(versionData.isPresent());
-        Assert.assertEquals(versionData.get().getGroupId(), "examples.metadata");
-        Assert.assertEquals(versionData.get().getArtifactId(), "test");
-        Assert.assertEquals(versionData.get().getVersionId(), BRANCH_SNAPSHOT("master"));
+        Assertions.assertTrue(versionData.isPresent());
+        Assertions.assertEquals(versionData.get().getGroupId(), "examples.metadata");
+        Assertions.assertEquals(versionData.get().getArtifactId(), "test");
+        Assertions.assertEquals(versionData.get().getVersionId(), BRANCH_SNAPSHOT("master"));
 
         Response responseTwo = projectsVersionsResource.getProjectVersion("somethig.random", "test","head");
         Optional<ProjectsVersionsResource.ProjectVersionDTO> versionData1 = (Optional<ProjectsVersionsResource.ProjectVersionDTO>) responseTwo.getEntity();
-        Assert.assertFalse(versionData1.isPresent());
+        Assertions.assertFalse(versionData1.isPresent());
     }
 }

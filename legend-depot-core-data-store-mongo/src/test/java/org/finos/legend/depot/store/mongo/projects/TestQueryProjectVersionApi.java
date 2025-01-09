@@ -18,9 +18,9 @@ package org.finos.legend.depot.store.mongo.projects;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.mongo.CoreDataMongoStoreTests;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,7 +33,7 @@ public class TestQueryProjectVersionApi extends CoreDataMongoStoreTests
 {
     private ProjectsVersions projectsVersionsAPI = new ProjectsVersionsMongo(mongoProvider);
 
-    @Before
+    @BeforeEach
     public void setUpProjectData()
     {
         setUpProjectsVersionsFromFile(this.getClass().getClassLoader().getResource("data/projectsVersions.json"));
@@ -43,8 +43,8 @@ public class TestQueryProjectVersionApi extends CoreDataMongoStoreTests
     public void canCollectAllProjectConfig()
     {
         List<StoreProjectVersionData> allConfigs = projectsVersionsAPI.getAll();
-        Assert.assertNotNull(allConfigs);
-        Assert.assertEquals(6, allConfigs.size());
+        Assertions.assertNotNull(allConfigs);
+        Assertions.assertEquals(6, allConfigs.size());
     }
 
     @Test
@@ -52,51 +52,51 @@ public class TestQueryProjectVersionApi extends CoreDataMongoStoreTests
     {
         List<StoreProjectVersionData> allConfigs = projectsVersionsAPI.findByUpdatedDate(1687227600000L,
                 toTime(LocalDateTime.now()));
-        Assert.assertNotNull(allConfigs);
-        Assert.assertEquals(3, allConfigs.size());
+        Assertions.assertNotNull(allConfigs);
+        Assertions.assertEquals(3, allConfigs.size());
     }
 
     @Test
     public void canCollectAllProjectConfigUpdatedFromTo()
     {
         List<StoreProjectVersionData> allConfigs = projectsVersionsAPI.findByUpdatedDate(1687219200000L, 1687219210000L);
-        Assert.assertNotNull(allConfigs);
-        Assert.assertEquals(1, allConfigs.size());
+        Assertions.assertNotNull(allConfigs);
+        Assertions.assertEquals(1, allConfigs.size());
     }
 
     @Test
     public void testFindingByProjectVersionCoordinates()
     {
         Optional<StoreProjectVersionData> projectConfig = projectsVersionsAPI.find("examples.metadata", "test", "2.2.0");
-        Assert.assertTrue(projectConfig.isPresent());
+        Assertions.assertTrue(projectConfig.isPresent());
         projectConfig = projectsVersionsAPI.find("examples.metadata", "test", "1.0.0");
-        Assert.assertFalse(projectConfig.isPresent());
+        Assertions.assertFalse(projectConfig.isPresent());
     }
 
     @Test
     public void canFindProjectByMavenCoordinates()
     {
         List<StoreProjectVersionData> project = projectsVersionsAPI.find("examples.metadata", "test");
-        Assert.assertFalse(project.isEmpty());
-        Assert.assertEquals(4, project.size());
+        Assertions.assertFalse(project.isEmpty());
+        Assertions.assertEquals(4, project.size());
     }
 
     @Test
     public void cannotFindProject()
     {
         List<StoreProjectVersionData> project = projectsVersionsAPI.find("PROD-9691231123", "lalal");
-        Assert.assertTrue(project.isEmpty());
+        Assertions.assertTrue(project.isEmpty());
     }
 
     @Test
     public void canGetProjectVersionIfExcluded()
     {
         List<StoreProjectVersionData> storeProjectVersionData = projectsVersionsAPI.findVersion(true);
-        Assert.assertFalse(storeProjectVersionData.isEmpty());
-        Assert.assertEquals(1, storeProjectVersionData.size());
-        Assert.assertEquals("examples.metadata", storeProjectVersionData.get(0).getGroupId());
-        Assert.assertEquals("test", storeProjectVersionData.get(0).getArtifactId());
-        Assert.assertEquals("3.0.0", storeProjectVersionData.get(0).getVersionId());
+        Assertions.assertFalse(storeProjectVersionData.isEmpty());
+        Assertions.assertEquals(1, storeProjectVersionData.size());
+        Assertions.assertEquals("examples.metadata", storeProjectVersionData.get(0).getGroupId());
+        Assertions.assertEquals("test", storeProjectVersionData.get(0).getArtifactId());
+        Assertions.assertEquals("3.0.0", storeProjectVersionData.get(0).getVersionId());
     }
 
 }

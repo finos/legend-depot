@@ -20,9 +20,9 @@ import org.finos.legend.depot.domain.entity.DepotEntityOverview;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class TestQueryRevisions extends TestStoreMongo
     private EntitiesMongo revisionsMongo = new EntitiesMongo(mongoProvider);
     private EntitiesMongoTestUtils entityUtils = new EntitiesMongoTestUtils(mongoProvider);
 
-    @Before
+    @BeforeEach
     public void setupMetadata()
     {
         entityUtils.loadEntities(this.getClass().getClassLoader().getResource("data/revision-entities.json"));
@@ -45,31 +45,31 @@ public class TestQueryRevisions extends TestStoreMongo
     public void canQueryAllEntityMetadataByProjectVersion()
     {
         List<Entity> entityList = revisionsMongo.getAllEntities("examples.metadata", "test",BRANCH_SNAPSHOT("master"));
-        Assert.assertNotNull(entityList);
-        Assert.assertEquals(4, entityList.size());
+        Assertions.assertNotNull(entityList);
+        Assertions.assertEquals(4, entityList.size());
         List<String> paths = new ArrayList<>();
         entityList.forEach(entity -> paths.add(entity.getPath()));
-        Assert.assertEquals(4, paths.size());
-        Assert.assertTrue(paths.contains("examples::metadata::test::TestProfile"));
-        Assert.assertTrue(paths.contains("examples::metadata::test::ClientBasic"));
+        Assertions.assertEquals(4, paths.size());
+        Assertions.assertTrue(paths.contains("examples::metadata::test::TestProfile"));
+        Assertions.assertTrue(paths.contains("examples::metadata::test::ClientBasic"));
     }
 
     @Test
     public void canQueryEntityMetadataByProjectVersion()
     {
         List<Entity> entityList = revisionsMongo.getAllEntities("examples.metadata", "test", BRANCH_SNAPSHOT("master"));
-        Assert.assertNotNull(entityList);
-        Assert.assertEquals(4, entityList.size());
+        Assertions.assertNotNull(entityList);
+        Assertions.assertEquals(4, entityList.size());
     }
 
     @Test
     public void canQueryEntityMetadataByProjectVersionPath()
     {
         Entity entity = (Entity) revisionsMongo.getEntity("examples.metadata", "test", BRANCH_SNAPSHOT("master"),"examples::metadata::test::TestProfile").get();
-        Assert.assertNotNull(entity);
-        Assert.assertEquals("examples::metadata::test::TestProfile", entity.getPath());
-        Assert.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
-        Assert.assertEquals("examples::metadata::test", entity.getContent().get("package"));
+        Assertions.assertNotNull(entity);
+        Assertions.assertEquals("examples::metadata::test::TestProfile", entity.getPath());
+        Assertions.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
+        Assertions.assertEquals("examples::metadata::test", entity.getContent().get("package"));
 
     }
 
@@ -77,11 +77,11 @@ public class TestQueryRevisions extends TestStoreMongo
     public void canQueryEntityMetadataByProjectVersionPackage()
     {
         List<Entity> entities = revisionsMongo.getEntitiesByPackage("examples.metadata", "test", BRANCH_SNAPSHOT("master"),"examples::metadata::test", null, false);
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(3, entities.size());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(3, entities.size());
         for (Entity entity : entities)
         {
-            Assert.assertEquals("examples::metadata::test", entity.getContent().get("package"));
+            Assertions.assertEquals("examples::metadata::test", entity.getContent().get("package"));
         }
     }
 
@@ -90,11 +90,11 @@ public class TestQueryRevisions extends TestStoreMongo
     public void canQueryEntityMetadataByProjectSubPackage()
     {
         List<Entity> entities = revisionsMongo.getEntitiesByPackage("examples.metadata", "test", BRANCH_SNAPSHOT("master"),"examples::metadata::test", null, true);
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(4, entities.size());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(4, entities.size());
         for (Entity entity : entities)
         {
-            Assert.assertTrue(entity.getContent().get("package").toString().startsWith("examples::metadata::test"));
+            Assertions.assertTrue(entity.getContent().get("package").toString().startsWith("examples::metadata::test"));
         }
     }
 
@@ -102,11 +102,11 @@ public class TestQueryRevisions extends TestStoreMongo
     public void canQueryByClassifier()
     {
         List<DepotEntity> entities = revisionsMongo.findLatestClassifierSummaries("meta::pure::metamodel::type::Class");
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(2, entities.size());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(2, entities.size());
         for (DepotEntity entity : entities)
         {
-            Assert.assertEquals("meta::pure::metamodel::type::Class", ((DepotEntityOverview)entity).getClassifierPath());
+            Assertions.assertEquals("meta::pure::metamodel::type::Class", ((DepotEntityOverview)entity).getClassifierPath());
         }
     }
 }

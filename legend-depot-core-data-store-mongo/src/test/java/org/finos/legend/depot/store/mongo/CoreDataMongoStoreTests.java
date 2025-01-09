@@ -24,7 +24,7 @@ import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -43,12 +43,12 @@ public abstract class CoreDataMongoStoreTests extends  TestStoreMongo
             List<StoreProjectData> projects = new ObjectMapper().readValue(jsonInput, new TypeReference<List<StoreProjectData>>()
             {
             });
-            Assert.assertNotNull("testing file" + fileName.getFile(), projects);
+            Assertions.assertNotNull(projects, "testing file" + fileName.getFile());
             return projects;
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+            Assertions.fail("an error has occurred loading test project metadata" + e.getMessage());
         }
         return null;
     }
@@ -63,12 +63,12 @@ public abstract class CoreDataMongoStoreTests extends  TestStoreMongo
             List<StoreProjectVersionData> projects = new ObjectMapper().readValue(jsonInput, new TypeReference<List<StoreProjectVersionData>>()
             {
             });
-            Assert.assertNotNull("testing file" + fileName.getFile(), projects);
+            Assertions.assertNotNull(projects, "testing file" + fileName.getFile());
             return projects;
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+            Assertions.fail("an error has occurred loading test project metadata" + e.getMessage());
         }
         return null;
     }
@@ -90,14 +90,14 @@ public abstract class CoreDataMongoStoreTests extends  TestStoreMongo
                 }
                 catch (JsonProcessingException e)
                 {
-                    Assert.fail("an error has occurred loading test project " + e.getMessage());
+                    Assertions.fail("an error has occurred loading test project " + e.getMessage());
                 }
             });
-            Assert.assertNotNull(getMongoProjects());
+            Assertions.assertNotNull(getMongoProjects());
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+            Assertions.fail("an error has occurred loading test project metadata" + e.getMessage());
         }
     }
 
@@ -113,14 +113,14 @@ public abstract class CoreDataMongoStoreTests extends  TestStoreMongo
                 }
                 catch (JsonProcessingException e)
                 {
-                    Assert.fail("an error has occurred loading test project " + e.getMessage());
+                    Assertions.fail("an error has occurred loading test project " + e.getMessage());
                 }
             });
-            Assert.assertNotNull(getMongoProjectVersions());
+            Assertions.assertNotNull(getMongoProjectVersions());
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+            Assertions.fail("an error has occurred loading test project metadata" + e.getMessage());
         }
     }
 

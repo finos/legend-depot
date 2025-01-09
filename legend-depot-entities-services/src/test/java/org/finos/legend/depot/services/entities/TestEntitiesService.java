@@ -38,9 +38,9 @@ import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,7 +62,7 @@ public class TestEntitiesService extends TestBaseServices
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, projectsService);
     protected EntityClassifierService classifierService = new EntityClassifierServiceImpl(projectsService, entitiesStore);
 
-    @Before
+    @BeforeEach
     public void setUpData()
     {
         super.setUpData();
@@ -85,44 +85,44 @@ public class TestEntitiesService extends TestBaseServices
     {
 
         List<Entity> entityList = entitiesService.getEntities("examples.metadata", "test", "2.3.1");
-        Assert.assertFalse(entityList.isEmpty());
-        Assert.assertEquals(7, entityList.size());
+        Assertions.assertFalse(entityList.isEmpty());
+        Assertions.assertEquals(7, entityList.size());
 
 
         List<Entity> entityList2 = entitiesService.getEntities("examples.metadata", "test-dependencies", "1.0.0");
-        Assert.assertFalse(entityList2.isEmpty());
-        Assert.assertEquals(1, entityList2.size());
+        Assertions.assertFalse(entityList2.isEmpty());
+        Assertions.assertEquals(1, entityList2.size());
 
         List<Entity> entityList3 = entitiesService.getEntities("example.services.test", "test", "2.0.1");
-        Assert.assertFalse(entityList3.isEmpty());
-        Assert.assertEquals(18, entityList3.size());
+        Assertions.assertFalse(entityList3.isEmpty());
+        Assertions.assertEquals(18, entityList3.size());
 
         List<ProjectVersionEntities> dependencyList = entitiesService.getDependenciesEntities("examples.metadata", "test", "2.3.1",false, false);
-        Assert.assertFalse(dependencyList.isEmpty());
-        Assert.assertEquals(1, dependencyList.size());
-        Assert.assertFalse(dependencyList.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().isPresent());
-        Assert.assertEquals(1, dependencyList.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
-        Assert.assertFalse(dependencyList.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().isPresent());
+        Assertions.assertFalse(dependencyList.isEmpty());
+        Assertions.assertEquals(1, dependencyList.size());
+        Assertions.assertFalse(dependencyList.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().isPresent());
+        Assertions.assertEquals(1, dependencyList.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assertions.assertFalse(dependencyList.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().isPresent());
 
         List<ProjectVersionEntities> dependencyList2 = entitiesService.getDependenciesEntities("examples.metadata", "test", "2.3.1", true, false);
-        Assert.assertFalse(dependencyList2.isEmpty());
-        Assert.assertEquals(2, dependencyList2.size());
-        Assert.assertFalse(dependencyList2.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().isPresent());
-        Assert.assertEquals(1, dependencyList2.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
-        Assert.assertEquals(18, dependencyList2.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+        Assertions.assertFalse(dependencyList2.isEmpty());
+        Assertions.assertEquals(2, dependencyList2.size());
+        Assertions.assertFalse(dependencyList2.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().isPresent());
+        Assertions.assertEquals(1, dependencyList2.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assertions.assertEquals(18, dependencyList2.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
 
         List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities("examples.metadata", "test", "2.3.1", true, true);
-        Assert.assertFalse(dependencyList3.isEmpty());
-        Assert.assertEquals(3, dependencyList3.size());
-        Assert.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
-        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
-        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+        Assertions.assertFalse(dependencyList3.isEmpty());
+        Assertions.assertEquals(3, dependencyList3.size());
+        Assertions.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
+        Assertions.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assertions.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
     }
 
     private Predicate<ProjectVersionEntities> projectToArtifactFilter(String groupId,String artifactId)
     {
         List<StoreProjectVersionData> p = projectsVersionsStore.find(groupId, artifactId);
-        Assert.assertTrue(!p.isEmpty());
+        Assertions.assertTrue(!p.isEmpty());
         return dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId);
     }
 
@@ -131,11 +131,11 @@ public class TestEntitiesService extends TestBaseServices
     {
         List<ProjectVersion> projectVersions = Arrays.asList(new ProjectVersion("examples.metadata", "test", "2.3.1"), new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"));
         List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities(projectVersions, true, true);
-        Assert.assertFalse(dependencyList3.isEmpty());
-        Assert.assertEquals(3, dependencyList3.size());
-        Assert.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
-        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
-        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+        Assertions.assertFalse(dependencyList3.isEmpty());
+        Assertions.assertEquals(3, dependencyList3.size());
+        Assertions.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
+        Assertions.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assertions.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
 
     }
 
@@ -147,12 +147,12 @@ public class TestEntitiesService extends TestBaseServices
         entityUtils.loadEntities("PROD-D", "1.0.0");
 
         String pkgName = "examples::metadata::test::dependency::v1_2_3";
-        Assert.assertEquals(2, entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").size());
+        Assertions.assertEquals(2, entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").size());
         entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").stream().allMatch(e -> ((StoredEntityData)e).getEntity().getPath().startsWith(pkgName));
         entitiesService.getStoredEntities("examples.metadata","test1","1.0.0").stream().allMatch(e -> ((String)(((StoredEntityData)e).getEntity().getContent().get("package"))).startsWith(pkgName));;
 
-        Assert.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","1.0.0").size());
-        Assert.assertEquals(2, entitiesService.getEntitiesByPackage("examples.metadata","test1","1.0.0",pkgName, Collections.EMPTY_SET,true).size());
+        Assertions.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","1.0.0").size());
+        Assertions.assertEquals(2, entitiesService.getEntitiesByPackage("examples.metadata","test1","1.0.0",pkgName, Collections.EMPTY_SET,true).size());
 
     }
 
@@ -167,8 +167,8 @@ public class TestEntitiesService extends TestBaseServices
 
         String pkgName = "examples::metadata::test::dependency::v1_2_3";
 
-        Assert.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","latest").size());
-        Assert.assertEquals(2, entitiesService.getEntitiesByPackage("examples.metadata","test1","latest", pkgName, Collections.EMPTY_SET,true).size());
+        Assertions.assertEquals(2, entitiesService.getEntities("examples.metadata","test1","latest").size());
+        Assertions.assertEquals(2, entitiesService.getEntitiesByPackage("examples.metadata","test1","latest", pkgName, Collections.EMPTY_SET,true).size());
 
     }
 
@@ -177,11 +177,11 @@ public class TestEntitiesService extends TestBaseServices
     {
         List<ProjectVersion> projectVersions = Arrays.asList(new ProjectVersion("examples.metadata", "test", "latest"), new ProjectVersion("examples.metadata", "test-dependencies", "latest"));
         List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities(projectVersions,  true, true);
-        Assert.assertFalse(dependencyList3.isEmpty());
-        Assert.assertEquals(3, dependencyList3.size());
-        Assert.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
-        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
-        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+        Assertions.assertFalse(dependencyList3.isEmpty());
+        Assertions.assertEquals(3, dependencyList3.size());
+        Assertions.assertEquals(7, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
+        Assertions.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assertions.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
     }
 
     @Test
@@ -189,10 +189,10 @@ public class TestEntitiesService extends TestBaseServices
     {
         List<ProjectVersion> projectVersions = Arrays.asList(new ProjectVersion("examples.metadata", "test", "head"), new ProjectVersion("examples.metadata", "test-dependencies", "latest"));
         List<ProjectVersionEntities> dependencyList3 = entitiesService.getDependenciesEntities(projectVersions, true, true);
-        Assert.assertFalse(dependencyList3.isEmpty());
-        Assert.assertEquals(3, dependencyList3.size());
-        Assert.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
-        Assert.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+        Assertions.assertFalse(dependencyList3.isEmpty());
+        Assertions.assertEquals(3, dependencyList3.size());
+        Assertions.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assertions.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
     }
 
     @Test
@@ -203,8 +203,8 @@ public class TestEntitiesService extends TestBaseServices
 
         String pkgName = "examples::metadata::test::v2_3_1::examples::metadata::test";
 
-        Assert.assertEquals(7, entitiesService.getEntities("examples.metadata","test","head").size());
-        Assert.assertEquals(0, entitiesService.getEntitiesByPackage("examples.metadata","test","head",pkgName, Collections.EMPTY_SET,true).size());
+        Assertions.assertEquals(7, entitiesService.getEntities("examples.metadata","test","head").size());
+        Assertions.assertEquals(0, entitiesService.getEntitiesByPackage("examples.metadata","test","head",pkgName, Collections.EMPTY_SET,true).size());
 
     }
 
@@ -215,8 +215,8 @@ public class TestEntitiesService extends TestBaseServices
         entitiesService.createOrUpdate("examples.metadata", "test", "3.0.0", Arrays.asList(entity));
 
         List storedEntities = entitiesService.getStoredEntities("examples.metadata", "test", "3.0.0");
-        Assert.assertEquals(1, storedEntities.size());
-        Assert.assertTrue(storedEntities.get(0) instanceof StoredEntityStringData);
+        Assertions.assertEquals(1, storedEntities.size());
+        Assertions.assertTrue(storedEntities.get(0) instanceof StoredEntityStringData);
 
     }
 
@@ -233,14 +233,14 @@ public class TestEntitiesService extends TestBaseServices
 
         // check entities serialization and deserialization
         Entity entity = (Entity) entitiesService.getEntities("examples.metadata", "test", "5.0.0").get(0);
-        Assert.assertEquals(content, entity.getContent());
+        Assertions.assertEquals(content, entity.getContent());
     }
 
     @Test
     public void canGetClassifiers()
     {
         List<DepotEntity> entities = classifierService.getEntitiesByClassifierPath("meta::pure::metamodel::type::Class", null, null, Scope.RELEASES, true);
-        Assert.assertEquals(entities.size(), 3);
+        Assertions.assertEquals(entities.size(), 3);
     }
 
     @Test
@@ -249,8 +249,8 @@ public class TestEntitiesService extends TestBaseServices
         projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("example.services.test","test","2.0.2"));
         entityUtils.loadEntities("PROD-C", "2.0.2");
         List<Entity> entity = entitiesService.getEntitiesByClassifier("example.services.test", "test", "2.0.2", "meta::pure::metamodel::function::ConcreteFunctionDefinition");
-        Assert.assertNotNull(entity);
-        Assert.assertEquals(1, entity.size());
+        Assertions.assertNotNull(entity);
+        Assertions.assertEquals(1, entity.size());
     }
 
     @Test
@@ -264,29 +264,29 @@ public class TestEntitiesService extends TestBaseServices
         entityUtils.loadEntities("PROD-B", "1.0.1");
         entityUtils.loadEntities("PROD-C", "2.0.2");
         List<Entity> entity = entitiesService.getDependenciesEntitiesByClassifier("examples.metadata", "test-dependencies", "1.0.1", "meta::pure::metamodel::function::ConcreteFunctionDefinition", true, true);
-        Assert.assertNotNull(entity);
-        Assert.assertEquals(2, entity.size());
+        Assertions.assertNotNull(entity);
+        Assertions.assertEquals(2, entity.size());
 
         List<Entity> entity1 = entitiesService.getDependenciesEntitiesByClassifier("examples.metadata", "test-dependencies", "1.0.1", "meta::pure::metamodel::function::ConcreteFunctionDefinition", true, false);
-        Assert.assertNotNull(entity1);
-        Assert.assertEquals(1, entity1.size());
+        Assertions.assertNotNull(entity1);
+        Assertions.assertEquals(1, entity1.size());
     }
 
     @Test
     public void canGetEntityFromDependencies()
     {
         List<Entity> entity = entitiesService.getEntityFromDependencies("examples.metadata", "test", "2.3.1", Lists.fixedSize.of("domain::covid::JHUCovid19","examples::metadata::test::dependency::Dependency"), false);
-        Assert.assertEquals(entity.size(), 2);
+        Assertions.assertEquals(entity.size(), 2);
 
         entity = entitiesService.getEntityFromDependencies("examples.metadata", "test", "2.3.1", Lists.fixedSize.of("examples::metadata::test::dependency::Dependency","com::MyGenerationSpecification"), true);
-        Assert.assertEquals(entity.size(), 2);
+        Assertions.assertEquals(entity.size(), 2);
 
         entity = entitiesService.getEntityFromDependencies("examples.metadata", "test", "2.3.1", Lists.fixedSize.of("examples::metadata::test::dependency::Dependency","covid::JHUCovid19"), false);
-        Assert.assertEquals(entity.size(), 1);
+        Assertions.assertEquals(entity.size(), 1);
 
         entity = entitiesService.getEntityFromDependencies("examples.metadata", "test", "2.3.1", Lists.fixedSize.of("com::MyGenerationSpecification","covid::JHUCovid19"), false);
-        Assert.assertEquals(entity.size(), 0);
+        Assertions.assertEquals(entity.size(), 0);
 
-        Assert.assertThrows("project version not found for examples.metadata-test-3.0.1", IllegalArgumentException.class, () -> entitiesService.getEntityFromDependencies("examples.metadata", "test", "3.0.1", Lists.fixedSize.of("covid::JHUCovid19"), false));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> entitiesService.getEntityFromDependencies("examples.metadata", "test", "3.0.1", Lists.fixedSize.of("covid::JHUCovid19"), false), "project version not found for examples.metadata-test-3.0.1");
     }
 }

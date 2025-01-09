@@ -23,9 +23,9 @@ import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.version.VersionMismatch;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +41,7 @@ public class TestVersionsMismatchService
     protected ManageProjectsService projects = mock(ManageProjectsService.class);
     protected VersionsReconciliationService repositoryServices = new VersionsReconciliationServiceImpl(repository, projects);
 
-    @Before
+    @BeforeEach
     public void setup() throws ArtifactRepositoryException
     {
         List<StoreProjectData> coordinates = new ArrayList<>();
@@ -70,20 +70,20 @@ public class TestVersionsMismatchService
     {
 
         List<VersionMismatch> counts = repositoryServices.findVersionsMismatches();
-        Assert.assertNotNull(counts);
-        Assert.assertEquals(3, counts.size());
-        Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-A")).count());
-        Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-B")).count());
-        Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-C")).count());
+        Assertions.assertNotNull(counts);
+        Assertions.assertEquals(3, counts.size());
+        Assertions.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-A")).count());
+        Assertions.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-B")).count());
+        Assertions.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-C")).count());
 
         VersionMismatch prodA = counts.stream().filter(p -> p.projectId.equals("PROD-A")).findFirst().get();
-        Assert.assertEquals(1, prodA.versionsNotInStore.size());
-        Assert.assertEquals("2.3.1", prodA.versionsNotInStore.get(0));
+        Assertions.assertEquals(1, prodA.versionsNotInStore.size());
+        Assertions.assertEquals("2.3.1", prodA.versionsNotInStore.get(0));
         VersionMismatch prodB = counts.stream().filter(p -> p.projectId.equals("PROD-B")).findFirst().get();
-        Assert.assertEquals("1.0.1", prodB.versionsNotInStore.get(0));
-        Assert.assertEquals("1.0.0", prodB.versionsNotInRepository.get(0));
+        Assertions.assertEquals("1.0.1", prodB.versionsNotInStore.get(0));
+        Assertions.assertEquals("1.0.0", prodB.versionsNotInRepository.get(0));
         VersionMismatch prodC = counts.stream().filter(p -> p.projectId.equals("PROD-C")).findFirst().get();
-        Assert.assertEquals("2.0.1", prodC.versionsNotInRepository.get(0));
+        Assertions.assertEquals("2.0.1", prodC.versionsNotInRepository.get(0));
 
 
     }
@@ -94,15 +94,15 @@ public class TestVersionsMismatchService
         when(repository.findVersions("examples.metadata", "test4")).thenThrow(new ArtifactRepositoryException("not found"));
 
         List<VersionMismatch> counts = repositoryServices.findVersionsMismatches();
-        Assert.assertNotNull(counts);
-        Assert.assertEquals(4, counts.size());
-        Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-A")).count());
-        Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-B")).count());
-        Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-C")).count());
-        Assert.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-D")).count());
+        Assertions.assertNotNull(counts);
+        Assertions.assertEquals(4, counts.size());
+        Assertions.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-A")).count());
+        Assertions.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-B")).count());
+        Assertions.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-C")).count());
+        Assertions.assertEquals(1, counts.stream().filter(p -> p.projectId.equals("PROD-D")).count());
 
         VersionMismatch prodD = counts.stream().filter(p -> p.projectId.equals("PROD-D")).findFirst().get();
-        Assert.assertFalse(prodD.errors.isEmpty());
+        Assertions.assertFalse(prodD.errors.isEmpty());
 
 
 
@@ -117,9 +117,9 @@ public class TestVersionsMismatchService
         when(projects.find("examples.metadata", "test5")).thenReturn(Arrays.asList(p1v1));
         when(repository.findVersions("examples.metadata", "test5")).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
         List<VersionMismatch> counts = repositoryServices.findVersionsMismatches();
-        Assert.assertNotNull(counts);
-        Assert.assertEquals(3, counts.size());
-        Assert.assertEquals(0, counts.stream().filter(p -> p.artifactId.equals("test5")).count());
+        Assertions.assertNotNull(counts);
+        Assertions.assertEquals(3, counts.size());
+        Assertions.assertEquals(0, counts.stream().filter(p -> p.artifactId.equals("test5")).count());
 
     }
 
@@ -127,13 +127,13 @@ public class TestVersionsMismatchService
     public void getProjectsWithUpdatedLatestVersions()
     {
         List<StoreProjectData> projectsWithUpdatedLatestVersions = repositoryServices.syncLatestProjectVersions();
-        Assert.assertEquals(2, projectsWithUpdatedLatestVersions.size());
-        Assert.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-A")).count());
-        Assert.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-D")).count());
+        Assertions.assertEquals(2, projectsWithUpdatedLatestVersions.size());
+        Assertions.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-A")).count());
+        Assertions.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-D")).count());
         StoreProjectData prodA = projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-A")).findFirst().get();
         StoreProjectData prodD = projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-D")).findFirst().get();
-        Assert.assertEquals("2.3.0", prodA.getLatestVersion());
-        Assert.assertEquals("0.0.1", prodD.getLatestVersion());
+        Assertions.assertEquals("2.3.0", prodA.getLatestVersion());
+        Assertions.assertEquals("0.0.1", prodD.getLatestVersion());
     }
 
     @Test
@@ -156,11 +156,11 @@ public class TestVersionsMismatchService
         when(projects.find("examples.metadata", "test3")).thenReturn(Arrays.asList(p3v1));
 
         List<StoreProjectData> projectsWithUpdatedLatestVersions = repositoryServices.syncLatestProjectVersions();
-        Assert.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-A")).count());
-        Assert.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-C")).count());
+        Assertions.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-A")).count());
+        Assertions.assertEquals(1, projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-C")).count());
         StoreProjectData prodA = projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-A")).findFirst().get();
         StoreProjectData prodC = projectsWithUpdatedLatestVersions.stream().filter(p -> p.getProjectId().equals("PROD-C")).findFirst().get();
-        Assert.assertEquals("2.2.0", prodA.getLatestVersion());
-        Assert.assertEquals("2.0.3", prodC.getLatestVersion());
+        Assertions.assertEquals("2.2.0", prodA.getLatestVersion());
+        Assertions.assertEquals("2.0.3", prodC.getLatestVersion());
     }
 }

@@ -21,8 +21,8 @@ import org.finos.legend.depot.domain.notifications.Priority;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.List;
@@ -53,8 +53,8 @@ public class TestQueueMongo extends TestStoreMongo
         queue.push(event3);
 
         List<MetadataNotification> inQueue = queue.getAll();
-        Assert.assertNotNull(inQueue);
-        Assert.assertEquals(4, inQueue.size());
+        Assertions.assertNotNull(inQueue);
+        Assertions.assertEquals(4, inQueue.size());
     }
 
     @Test
@@ -64,13 +64,13 @@ public class TestQueueMongo extends TestStoreMongo
         queue.push(event);
 
         List<MetadataNotification> eventList = queue.getAll();
-        Assert.assertNotNull(eventList);
-        Assert.assertEquals(1, eventList.size());
-        Assert.assertNotNull(eventList.get(0).getEventId());
+        Assertions.assertNotNull(eventList);
+        Assertions.assertEquals(1, eventList.size());
+        Assertions.assertNotNull(eventList.get(0).getEventId());
 
         MetadataNotification foundEvent = queue.get(eventList.get(0).getEventId()).get();
-        Assert.assertNotNull(foundEvent);
-        Assert.assertEquals(eventList.get(0).getEventId(), foundEvent.getEventId());
+        Assertions.assertNotNull(foundEvent);
+        Assertions.assertEquals(eventList.get(0).getEventId(), foundEvent.getEventId());
     }
 
     @Test
@@ -80,15 +80,15 @@ public class TestQueueMongo extends TestStoreMongo
         queue.push(event.addError("this is an error"));
 
         List<MetadataNotification> eventList = queue.getAll();
-        Assert.assertNotNull(eventList);
-        Assert.assertEquals(1, eventList.size());
-        Assert.assertNotNull(eventList.get(0).getEventId());
+        Assertions.assertNotNull(eventList);
+        Assertions.assertEquals(1, eventList.size());
+        Assertions.assertNotNull(eventList.get(0).getEventId());
 
         MetadataNotification foundEvent = queue.get(eventList.get(0).getEventId()).get();
-        Assert.assertNotNull(foundEvent);
-        Assert.assertEquals(eventList.get(0).getEventId(), foundEvent.getEventId());
-        Assert.assertNotNull(eventList.get(0).getCurrentResponse().getErrors());
-        Assert.assertEquals(1, eventList.get(0).getCurrentResponse().getErrors().size());
+        Assertions.assertNotNull(foundEvent);
+        Assertions.assertEquals(eventList.get(0).getEventId(), foundEvent.getEventId());
+        Assertions.assertNotNull(eventList.get(0).getCurrentResponse().getErrors());
+        Assertions.assertEquals(1, eventList.get(0).getCurrentResponse().getErrors().size());
     }
 
 
@@ -98,10 +98,10 @@ public class TestQueueMongo extends TestStoreMongo
     {
         MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST,VERSION);
         String id = queue.push(event);
-        Assert.assertNotNull(id);
+        Assertions.assertNotNull(id);
         String id2 = queue.push(event);
-        Assert.assertNotNull(id2);
-        Assert.assertEquals(id, id2);
+        Assertions.assertNotNull(id2);
+        Assertions.assertEquals(id, id2);
     }
 
     @Test
@@ -112,9 +112,9 @@ public class TestQueueMongo extends TestStoreMongo
         queue.push(event);
         queue.push(event1);
 
-        Assert.assertTrue(queue.getFirstInQueue().isPresent());
-        Assert.assertTrue(queue.getFirstInQueue().isPresent());
-        Assert.assertFalse(queue.getFirstInQueue().isPresent());
+        Assertions.assertTrue(queue.getFirstInQueue().isPresent());
+        Assertions.assertTrue(queue.getFirstInQueue().isPresent());
+        Assertions.assertFalse(queue.getFirstInQueue().isPresent());
 
 
     }
@@ -130,9 +130,9 @@ public class TestQueueMongo extends TestStoreMongo
         Optional<MetadataNotification> first = queue.getFirstInQueue();
         Optional<MetadataNotification> second = queue.getFirstInQueue();
 
-        Assert.assertEquals(VERSION,first.get().getVersionId());
-        Assert.assertEquals("1.0.1",second.get().getVersionId());
-        Assert.assertTrue(first.get().getCreated().before(second.get().getCreated()));
+        Assertions.assertEquals(VERSION,first.get().getVersionId());
+        Assertions.assertEquals("1.0.1",second.get().getVersionId());
+        Assertions.assertTrue(first.get().getCreated().before(second.get().getCreated()));
     }
 
     @Test
@@ -146,8 +146,8 @@ public class TestQueueMongo extends TestStoreMongo
         Optional<MetadataNotification> first = queue.getFirstInQueue();
         Optional<MetadataNotification> second = queue.getFirstInQueue();
 
-        Assert.assertEquals("1.0.1", first.get().getVersionId());
-        Assert.assertEquals(VERSION, second.get().getVersionId());
+        Assertions.assertEquals("1.0.1", first.get().getVersionId());
+        Assertions.assertEquals(VERSION, second.get().getVersionId());
     }
 
     @Test
@@ -161,8 +161,8 @@ public class TestQueueMongo extends TestStoreMongo
         Optional<MetadataNotification> first = queue.getFirstInQueue();
         Optional<MetadataNotification> second = queue.getFirstInQueue();
 
-        Assert.assertEquals(VERSION, first.get().getVersionId());
-        Assert.assertEquals("1.0.1", second.get().getVersionId());
+        Assertions.assertEquals(VERSION, first.get().getVersionId());
+        Assertions.assertEquals("1.0.1", second.get().getVersionId());
     }
 
     @Test
@@ -177,8 +177,8 @@ public class TestQueueMongo extends TestStoreMongo
         Optional<MetadataNotification> first = queue.getFirstInQueue();
         Optional<MetadataNotification> second = queue.getFirstInQueue();
 
-        Assert.assertEquals(VERSION, first.get().getVersionId());
-        Assert.assertEquals("1.0.1", second.get().getVersionId());
+        Assertions.assertEquals(VERSION, first.get().getVersionId());
+        Assertions.assertEquals("1.0.1", second.get().getVersionId());
     }
 
     @Test
@@ -188,10 +188,10 @@ public class TestQueueMongo extends TestStoreMongo
         MetadataNotification event1 = new MetadataNotification(TESTPROJECT, TEST, TEST,"1.0.1");
         queue.push(event);
         queue.push(event1);
-        Assert.assertEquals(2, queue.size());
+        Assertions.assertEquals(2, queue.size());
         long deleted = queue.deleteAll();
-        Assert.assertEquals(2, deleted);
-        Assert.assertEquals(0, queue.size());
+        Assertions.assertEquals(2, deleted);
+        Assertions.assertEquals(0, queue.size());
 
     }
 

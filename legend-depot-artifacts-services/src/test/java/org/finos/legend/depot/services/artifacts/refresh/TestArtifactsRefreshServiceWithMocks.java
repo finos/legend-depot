@@ -44,10 +44,10 @@ import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntityArti
 import org.finos.legend.depot.services.api.artifacts.handlers.generations.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.store.mongo.notifications.queue.NotificationsQueueMongo;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -84,7 +84,7 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
     protected ArtifactsRefreshServiceImpl artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repository,queue);
 
 
-    @Before
+    @BeforeEach
     public void setUpData() throws ArtifactRepositoryException
     {
         ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
@@ -103,10 +103,10 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
         when(repository.findVersions(TEST_GROUP_ID,"c")).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
     }
 
-    @After
+    @AfterEach
     public void afterTest()
     {
-        Assert.assertTrue("should not have events in queue",queue.getAll().isEmpty());
+        Assertions.assertTrue(queue.getAll().isEmpty(), "should not have events in queue");
     }
 
     
@@ -116,6 +116,6 @@ public class TestArtifactsRefreshServiceWithMocks extends TestStoreMongo
         List<VersionId> repoVersions = Arrays.asList(VersionId.parseVersionId("1.0.0"),VersionId.parseVersionId("2.0.0"));
         List<String> versions = Arrays.asList("1.0.0");
         List<VersionId> candidates = artifactsRefreshService.calculateCandidateVersions(repoVersions,versions);
-        Assert.assertEquals("2.0.0",candidates.get(0).toVersionIdString());
+        Assertions.assertEquals("2.0.0",candidates.get(0).toVersionIdString());
     }
 }

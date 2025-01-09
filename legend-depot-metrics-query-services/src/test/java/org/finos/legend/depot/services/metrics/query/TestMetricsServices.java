@@ -21,10 +21,10 @@ import org.finos.legend.depot.services.api.metrics.query.QueryMetricsService;
 import org.finos.legend.depot.store.model.metrics.query.VersionQueryMetric;
 import org.finos.legend.depot.store.mongo.metrics.query.QueryMetricsMongo;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -50,7 +50,7 @@ public class TestMetricsServices extends TestStoreMongo
     private QueryMetricsService metricsHandler = new QueryMetricsServiceImpl(metricsStore);
 
 
-    @Before
+    @BeforeEach
     public void setup() throws InterruptedException
     {
 
@@ -62,7 +62,7 @@ public class TestMetricsServices extends TestStoreMongo
         metricsStore.insert(new VersionQueryMetric("group1", "art1", "1.0.0"));
     }
 
-    @After
+    @AfterEach
     public void tearDown()
     {
         metricsStore.getCollection().drop();
@@ -73,41 +73,41 @@ public class TestMetricsServices extends TestStoreMongo
     public void canGetMetricsSummary()
     {
         Optional<VersionQueryMetric> metrics = metricsHandler.getSummary("group1", "art1", "2.2.0");
-        Assert.assertTrue(metrics.isPresent());
-        Assert.assertEquals("2.2.0", metrics.get().getVersionId());
+        Assertions.assertTrue(metrics.isPresent());
+        Assertions.assertEquals("2.2.0", metrics.get().getVersionId());
     }
 
     @Test
     public void canFindMetricsUsingProjectCoordinates()
     {
         List<VersionQueryMetric> metrics = metricsHandler.findMetricsForProjectCoordinates("group1", "art1");
-        Assert.assertEquals(4, metrics.size());
+        Assertions.assertEquals(4, metrics.size());
 
         Set<String> versionsUsed = metrics.stream().map(metric -> metric.getVersionId()).collect(Collectors.toSet());
 
-        Assert.assertEquals(2, versionsUsed.size());
+        Assertions.assertEquals(2, versionsUsed.size());
 
-        Assert.assertTrue(versionsUsed.contains("1.0.0"));
-        Assert.assertTrue(versionsUsed.contains("2.2.0"));
-        Assert.assertFalse(versionsUsed.contains("master-SNAPSHOT"));
+        Assertions.assertTrue(versionsUsed.contains("1.0.0"));
+        Assertions.assertTrue(versionsUsed.contains("2.2.0"));
+        Assertions.assertFalse(versionsUsed.contains("master-SNAPSHOT"));
     }
 
     @Test
     public void canGetAllStoredCoordinates()
     {
         List<ProjectVersion> projectVersions = metricsStore.getAllStoredEntitiesCoordinates();
-        Assert.assertEquals(2, projectVersions.size());
-        Assert.assertEquals(Arrays.asList(new ProjectVersion("group1", "art1", "1.0.0"),new ProjectVersion("group1", "art1", "2.2.0")), projectVersions);
+        Assertions.assertEquals(2, projectVersions.size());
+        Assertions.assertEquals(Arrays.asList(new ProjectVersion("group1", "art1", "1.0.0"),new ProjectVersion("group1", "art1", "2.2.0")), projectVersions);
     }
 
     @Test
     public void canGetMostRecentlyQueriedMetrics()
     {
-        Assert.assertEquals(4, metricsStore.getAllStoredEntities().size());
+        Assertions.assertEquals(4, metricsStore.getAllStoredEntities().size());
         List<VersionQueryMetric> metrics = metricsHandler.getSummaryByProjectVersion();
-        Assert.assertEquals(2, metrics.size());
-        Assert.assertEquals("1.0.0", metrics.get(0).getVersionId());
-        Assert.assertEquals("2.2.0", metrics.get(1).getVersionId());
+        Assertions.assertEquals(2, metrics.size());
+        Assertions.assertEquals("1.0.0", metrics.get(0).getVersionId());
+        Assertions.assertEquals("2.2.0", metrics.get(1).getVersionId());
     }
 
     @Test
@@ -117,20 +117,20 @@ public class TestMetricsServices extends TestStoreMongo
         Thread.sleep(10);
         metricsRegistry.record("group1", "art1", "3.0.0");
         metricsHandler.persist(metricsRegistry);
-        Assert.assertEquals(6, metricsStore.getAllStoredEntities().size());
+        Assertions.assertEquals(6, metricsStore.getAllStoredEntities().size());
         List<VersionQueryMetric> summary = metricsHandler.getSummaryByProjectVersion();
         metricsHandler.consolidateMetrics();
         List<VersionQueryMetric> metrics = metricsStore.getAllStoredEntities();
-        Assert.assertEquals(3, metrics.size());
-        Assert.assertEquals("2.2.0", metrics.get(0).getVersionId());
-        Assert.assertEquals("2.2.0", summary.get(1).getVersionId());
-        Assert.assertEquals(summary.get(1).getLastQueryTime(), metrics.get(0).getLastQueryTime());
-        Assert.assertEquals("1.0.0", metrics.get(1).getVersionId());
-        Assert.assertEquals("1.0.0", summary.get(0).getVersionId());
-        Assert.assertEquals(summary.get(0).getLastQueryTime(), metrics.get(1).getLastQueryTime());
-        Assert.assertEquals("3.0.0", metrics.get(2).getVersionId());
-        Assert.assertEquals("3.0.0", summary.get(2).getVersionId());
-        Assert.assertEquals(summary.get(2).getLastQueryTime(), metrics.get(2).getLastQueryTime());
+        Assertions.assertEquals(3, metrics.size());
+        Assertions.assertEquals("2.2.0", metrics.get(0).getVersionId());
+        Assertions.assertEquals("2.2.0", summary.get(1).getVersionId());
+        Assertions.assertEquals(summary.get(1).getLastQueryTime(), metrics.get(0).getLastQueryTime());
+        Assertions.assertEquals("1.0.0", metrics.get(1).getVersionId());
+        Assertions.assertEquals("1.0.0", summary.get(0).getVersionId());
+        Assertions.assertEquals(summary.get(0).getLastQueryTime(), metrics.get(1).getLastQueryTime());
+        Assertions.assertEquals("3.0.0", metrics.get(2).getVersionId());
+        Assertions.assertEquals("3.0.0", summary.get(2).getVersionId());
+        Assertions.assertEquals(summary.get(2).getLastQueryTime(), metrics.get(2).getLastQueryTime());
     }
 
     @Test
@@ -139,24 +139,24 @@ public class TestMetricsServices extends TestStoreMongo
         metricsStore.insert(new VersionQueryMetric("group1", "art1", "3.0.0", toDate(LocalDateTime.parse("2023-03-22T14:02:49", DateTimeFormatter.ISO_DATE_TIME))));
         metricsStore.insert(new VersionQueryMetric("group1", "art1", "3.0.0", toDate(LocalDateTime.parse("2023-03-21T14:02:49", DateTimeFormatter.ISO_DATE_TIME))));
 
-        Assert.assertEquals(6, metricsStore.getAllStoredEntities().size());
+        Assertions.assertEquals(6, metricsStore.getAllStoredEntities().size());
         metricsHandler.consolidateMetrics();
         List<VersionQueryMetric> metrics = metricsStore.getAllStoredEntities();
-        Assert.assertEquals(3, metrics.size());
-        Assert.assertEquals("3.0.0", metrics.get(2).getVersionId());
-        Assert.assertEquals(toDate(LocalDateTime.parse("2023-03-22T14:02:49", DateTimeFormatter.ISO_DATE_TIME)), metrics.get(2).getLastQueryTime());
+        Assertions.assertEquals(3, metrics.size());
+        Assertions.assertEquals("3.0.0", metrics.get(2).getVersionId());
+        Assertions.assertEquals(toDate(LocalDateTime.parse("2023-03-22T14:02:49", DateTimeFormatter.ISO_DATE_TIME)), metrics.get(2).getLastQueryTime());
     }
 
     @Test
     public void canPersistMetrics() throws InterruptedException
     {
-        Assert.assertEquals(4, metricsStore.getAllStoredEntities().size());
+        Assertions.assertEquals(4, metricsStore.getAllStoredEntities().size());
         metricsRegistry.record("group1", "art1", "3.0.0");
         Thread.sleep(10);
         metricsRegistry.record("group1", "art1", "3.0.0");
         metricsRegistry.record("group1", "art1", "2.0.0");
         metricsHandler.persist(metricsRegistry);
-        Assert.assertEquals(7, metricsStore.getAllStoredEntities().size());
+        Assertions.assertEquals(7, metricsStore.getAllStoredEntities().size());
     }
 
     @Test
@@ -183,8 +183,8 @@ public class TestMetricsServices extends TestStoreMongo
         executorService.submit(recordTask3);
         Future<VersionQueryMetric> returnedElement = executorService.submit(pollTask);
         Thread.sleep(10);
-        Assert.assertEquals(returnedElement.get().getGroupId(), "examples.metadata");
-        Assert.assertEquals(returnedElement.get().getArtifactId(), "test");
-        Assert.assertEquals(returnedElement.get().getVersionId(), "2.0.0");
+        Assertions.assertEquals(returnedElement.get().getGroupId(), "examples.metadata");
+        Assertions.assertEquals(returnedElement.get().getArtifactId(), "test");
+        Assertions.assertEquals(returnedElement.get().getVersionId(), "2.0.0");
     }
 }

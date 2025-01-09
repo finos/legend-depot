@@ -24,9 +24,9 @@ import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.CoreDataMongoStoreTests;
 import org.finos.legend.depot.store.mongo.admin.CoreDataMigrations;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -42,11 +42,11 @@ public class TestProjectVersionMigrations extends CoreDataMongoStoreTests
 {
     CoreDataMigrations mongoAdminStore = new CoreDataMigrations(mongoProvider);
 
-    @Before
+    @BeforeEach
     public void setupTestData()
     {
         setUpProjectDataFromFile(this.getClass().getClassLoader().getResource("data/projectVersionMigration/projectsData.json"));
-        Assert.assertEquals(3,mongoProvider.getCollection("project-configurations").countDocuments());
+        Assertions.assertEquals(3,mongoProvider.getCollection("project-configurations").countDocuments());
     }
 
     protected static List<Document> readProjectDataConfigsFile(URL fileName)
@@ -56,12 +56,12 @@ public class TestProjectVersionMigrations extends CoreDataMongoStoreTests
             InputStream stream = fileName.openStream();
             String jsonInput = new java.util.Scanner(stream).useDelimiter("\\A").next();
             List<Document> projects = new ObjectMapper().readValue(jsonInput, new TypeReference<List<Document>>() {});
-            Assert.assertNotNull("testing file" + fileName.getFile(), projects);
+            Assertions.assertNotNull(projects, "testing file" + fileName.getFile());
             return projects;
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+            Assertions.fail("an error has occurred loading test project metadata" + e.getMessage());
         }
         return null;
     }
@@ -70,7 +70,7 @@ public class TestProjectVersionMigrations extends CoreDataMongoStoreTests
     {
         try
         {
-            Assert.assertNotNull(getMongoProjects());
+            Assertions.assertNotNull(getMongoProjects());
             readProjectDataConfigsFile(projectConfigFile).forEach(project ->
             {
                 try
@@ -79,13 +79,13 @@ public class TestProjectVersionMigrations extends CoreDataMongoStoreTests
                 }
                 catch (JsonProcessingException e)
                 {
-                    Assert.fail("an error has occurred loading test project " + e.getMessage());
+                    Assertions.fail("an error has occurred loading test project " + e.getMessage());
                 }
             });
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test project metadata" + e.getMessage());
+            Assertions.fail("an error has occurred loading test project metadata" + e.getMessage());
         }
     }
 
@@ -93,13 +93,13 @@ public class TestProjectVersionMigrations extends CoreDataMongoStoreTests
     public void testProjectToProjectVersionMigration()
     {
 
-        Assert.assertEquals(0,mongoProvider.getCollection("versions").countDocuments());
+        Assertions.assertEquals(0,mongoProvider.getCollection("versions").countDocuments());
         mongoAdminStore.migrationToProjectVersions();
-        Assert.assertEquals(7,mongoProvider.getCollection("versions").countDocuments());
+        Assertions.assertEquals(7,mongoProvider.getCollection("versions").countDocuments());
         StoreProjectVersionData result = convert(new ObjectMapper(),mongoProvider.getCollection("versions").find().first(), StoreProjectVersionData.class);
-        Assert.assertEquals(result.getGroupId(), "examples.metadata");
-        Assert.assertEquals(result.getArtifactId(), "test");
-        Assert.assertEquals(result.getVersionId(), BRANCH_SNAPSHOT("master"));
+        Assertions.assertEquals(result.getGroupId(), "examples.metadata");
+        Assertions.assertEquals(result.getArtifactId(), "test");
+        Assertions.assertEquals(result.getVersionId(), BRANCH_SNAPSHOT("master"));
     }
 
     @Test
@@ -107,29 +107,29 @@ public class TestProjectVersionMigrations extends CoreDataMongoStoreTests
     {
 
         mongoAdminStore.cleanUpProjectData();
-        Assert.assertEquals(3,mongoProvider.getCollection("project-configurations").countDocuments());
+        Assertions.assertEquals(3,mongoProvider.getCollection("project-configurations").countDocuments());
         StoreProjectData result = convert(new ObjectMapper(),mongoProvider.getCollection("project-configurations").find().first(), StoreProjectData.class);
-        Assert.assertEquals(1,1);
-        Assert.assertEquals(result.getProjectId(), "PROD-A");
-        Assert.assertEquals(result.getGroupId(), "examples.metadata");
-        Assert.assertEquals(result.getArtifactId(), "test");
+        Assertions.assertEquals(1,1);
+        Assertions.assertEquals(result.getProjectId(), "PROD-A");
+        Assertions.assertEquals(result.getGroupId(), "examples.metadata");
+        Assertions.assertEquals(result.getArtifactId(), "test");
     }
 
     @Test
     public void testProjectUpdatesWithLatestVersion()
     {
-        Assert.assertEquals(0,mongoProvider.getCollection("versions").countDocuments());
+        Assertions.assertEquals(0,mongoProvider.getCollection("versions").countDocuments());
         mongoAdminStore.migrationToProjectVersions();
-        Assert.assertEquals(7,mongoProvider.getCollection("versions").countDocuments());
+        Assertions.assertEquals(7,mongoProvider.getCollection("versions").countDocuments());
         mongoAdminStore.cleanUpProjectData();
-        Assert.assertEquals(3,mongoProvider.getCollection("project-configurations").countDocuments());
+        Assertions.assertEquals(3,mongoProvider.getCollection("project-configurations").countDocuments());
         mongoAdminStore.addLatestVersionToProjectData();
-        Assert.assertEquals(3,mongoProvider.getCollection("project-configurations").countDocuments());
+        Assertions.assertEquals(3,mongoProvider.getCollection("project-configurations").countDocuments());
         List<StoreProjectData> result = new ArrayList<>();
         mongoProvider.getCollection("project-configurations").find().forEach((Consumer<Document>) doc -> result.add(convert(new ObjectMapper(), doc, StoreProjectData.class)));
-        Assert.assertEquals(result.get(0).getLatestVersion(), "2.3.1");
-        Assert.assertEquals(result.get(1).getLatestVersion(), "1.0.0");
-        Assert.assertEquals(result.get(2).getLatestVersion(), "2.0.1");
+        Assertions.assertEquals(result.get(0).getLatestVersion(), "2.3.1");
+        Assertions.assertEquals(result.get(1).getLatestVersion(), "1.0.0");
+        Assertions.assertEquals(result.get(2).getLatestVersion(), "2.0.1");
     }
 
     @Test
@@ -142,6 +142,6 @@ public class TestProjectVersionMigrations extends CoreDataMongoStoreTests
         mongoAdminStore.addLatestVersionToProjectData();
         StoreProjectData result = convert(new ObjectMapper(),mongoProvider.getCollection("project-configurations").find().first(), StoreProjectData.class);
 
-        Assert.assertNull(result.getLatestVersion());
+        Assertions.assertNull(result.getLatestVersion());
     }
 }
