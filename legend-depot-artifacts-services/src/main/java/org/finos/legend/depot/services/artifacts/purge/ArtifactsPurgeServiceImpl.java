@@ -72,6 +72,10 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
         this.versionsMismatchService = versionsMismatchService;
     }
 
+    protected QueryMetricsService getQueryMetricsService()
+    {
+        return metrics;
+    }
 
     private Set<ArtifactType> getSupportedArtifactTypes()
     {
@@ -134,6 +138,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
             projectData.setEvicted(true);
             LOGGER.info(String.format("%s-%s-%s evicted", groupId, artifactId, versionId));
             PrometheusMetricsFactory.getInstance().incrementCount(VERSION_PURGE_COUNTER);
+            metrics.delete(groupId, artifactId, versionId);
             return projects.createOrUpdate(projectData);
         },decorateSpanWithVersionInfo(groupId, artifactId, versionId));
     }

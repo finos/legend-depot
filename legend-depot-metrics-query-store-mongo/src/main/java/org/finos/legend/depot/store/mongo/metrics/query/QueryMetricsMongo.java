@@ -126,6 +126,13 @@ public class QueryMetricsMongo extends BaseMongo<VersionQueryMetric> implements 
     }
 
     @Override
+    public long delete(String groupId, String artifactId, String versionId)
+    {
+        delete(getKeyFilter(groupId, artifactId, versionId));
+        return 1;
+    }
+
+    @Override
     protected Bson getKeyFilter(VersionQueryMetric data)
     {
         return getKeyFilter(data.getGroupId(), data.getArtifactId(), data.getVersionId());

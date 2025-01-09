@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.services.metrics.query;
 
-import com.google.inject.name.Named;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsService;
@@ -24,6 +23,7 @@ import org.finos.legend.depot.store.model.metrics.query.VersionQueryMetric;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -91,6 +91,26 @@ public class QueryMetricsServiceImpl implements QueryMetricsService
             versionQueryMetric = registry.findFirst();
         }
 
+    }
+
+    public void delete(String groupId, String artifactId, String versionId)
+    {
+        metricsStore.delete(groupId, artifactId, versionId);
+    }
+
+    private boolean checkDateBeforeNumDays(Date date, int numDays)
+    {
+        return date.before(new Date(System.currentTimeMillis() - Duration.ofDays(numDays).toMillis()));
+    }
+
+    public List<VersionQueryMetric> getStaleMetrics(int ttlForVersionsInDays, int ttlForSnapshotsInDays)
+    {
+        return metricsStore.getAll().stream()
+                .filter(metric ->
+                        (VersionValidator.isSnapshotVersion(metric.getVersionId()) && checkDateBeforeNumDays(metric.getLastQueryTime(), ttlForSnapshotsInDays))
+                                || checkDateBeforeNumDays(metric.getLastQueryTime(), ttlForVersionsInDays)
+                )
+                .collect(Collectors.toList());
     }
 
     public void consolidateMetrics()
