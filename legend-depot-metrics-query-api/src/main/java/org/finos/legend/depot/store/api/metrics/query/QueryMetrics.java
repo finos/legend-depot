@@ -37,4 +37,6 @@ public interface QueryMetrics
 
     List<VersionQueryMetric> findMetricsBefore(Date date);
 
+    long delete(String groupId, String artifactId, String versionId);
+
 }

@@ -33,8 +33,11 @@ public interface QueryMetricsService
 
     List<VersionQueryMetric> findSnapshotVersionMetricsBefore(Date date);
 
+    List<VersionQueryMetric> getStaleMetrics(int ttlForVersionsInDays, int ttlForSnapshotsInDays);
+
     void consolidateMetrics();
 
     void persist(QueryMetricsRegistry registry);
 
+    void delete(String groupId, String artifactId, String versionId);
 }

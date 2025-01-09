@@ -46,13 +46,13 @@ public class PureModelContextServiceImpl implements PureModelContextService
     private static final String CALCULATE_COMBINED_PMCD = "calculate combined PMCD";
     private static final String GA_SEPARATOR = ":";
     private static final TracerFactory tracer = TracerFactory.get();
-    private final EntitiesService<?> entitiesService;
+    private final EntitiesService entitiesService;
     private final ProjectsService projectsService;
     private final EntityToPureConverter entityToPureConverter = new EntityToPureConverter();
     private final EntityToRawPureConverter entityToRawPureConverter = new EntityToRawPureConverter();
 
     @Inject
-    public PureModelContextServiceImpl(EntitiesService<?> entitiesService, ProjectsService projectsService)
+    public PureModelContextServiceImpl(EntitiesService entitiesService, ProjectsService projectsService)
     {
         this.entitiesService = entitiesService;
         this.projectsService = projectsService;
@@ -76,6 +76,7 @@ public class PureModelContextServiceImpl implements PureModelContextService
         return tracer.executeWithTrace(CALCULATE_COMBINED_PMCD, () ->
         {
             PureModelContextData dependenciesPMCD = buildPureModelContextData(dependenciesEntities.stream().flatMap(dep -> dep.getEntities().stream()), groupId, artifactId, version, resolvedClientVersion, convertToNewProtocol);
+            //TODO: fix combining of pure model context data for not converting new tds protocol
             return combinePureModelContextData(pureModelContextData, dependenciesPMCD);
         });
     }
