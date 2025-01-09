@@ -23,8 +23,8 @@ import org.finos.legend.depot.services.artifacts.handlers.entities.EntityProvide
 import org.finos.legend.depot.services.artifacts.repository.maven.TestMavenArtifactsRepository;
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntityArtifactsProvider;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.List;
@@ -47,8 +47,8 @@ public class TestEntityProvider
     public void canResolvePOM()
     {
         Model pom = repository.getPOM(TEST_GROUP_ID, "test-dependencies-entities", "1.0.0");
-        Assert.assertNotNull(pom);
-        Assert.assertNotNull(pom.getParent());
+        Assertions.assertNotNull(pom);
+        Assertions.assertNotNull(pom.getParent());
 
     }
 
@@ -57,8 +57,8 @@ public class TestEntityProvider
     {
 
         List<Entity> entities = artifactProvider.extractArtifacts(getFiles(TEST_GROUP_ID, "test", "2.0.0"));
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(9, entities.size());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(9, entities.size());
 
     }
 
@@ -67,16 +67,16 @@ public class TestEntityProvider
     public void canResolveDependencies()
     {
         Set<ArtifactDependency> dependencies = repository.findDependenciesByArtifactType(ArtifactType.ENTITIES, TEST_GROUP_ID, "test", "2.0.0");
-        Assert.assertEquals(1, dependencies.size());
+        Assertions.assertEquals(1, dependencies.size());
         List<File> files = repository.findDependenciesFiles(ArtifactType.ENTITIES, TEST_GROUP_ID, "test", "2.0.0");
-        Assert.assertNotNull(files);
-        Assert.assertEquals(1, files.size());
+        Assertions.assertNotNull(files);
+        Assertions.assertEquals(1, files.size());
 
         Set<ArtifactDependency> dependenciesForVersionedEntities = repository.findDependenciesByArtifactType(ArtifactType.VERSIONED_ENTITIES, TEST_GROUP_ID, "test", "2.0.0");
-        Assert.assertEquals(1, dependenciesForVersionedEntities.size());
+        Assertions.assertEquals(1, dependenciesForVersionedEntities.size());
         List<File> versionedEntitiesFiles = repository.findDependenciesFiles(ArtifactType.ENTITIES, TEST_GROUP_ID, "test", "2.0.0");
-        Assert.assertNotNull(versionedEntitiesFiles);
-        Assert.assertEquals(1, versionedEntitiesFiles.size());
+        Assertions.assertNotNull(versionedEntitiesFiles);
+        Assertions.assertEquals(1, versionedEntitiesFiles.size());
 
 
     }
@@ -85,13 +85,13 @@ public class TestEntityProvider
     public void canResolveJar()
     {
         File jarFile = repository.getJarFile(TEST_GROUP_ID, "test-dependencies-entities", "1.0.0");
-        Assert.assertNotNull(jarFile);
+        Assertions.assertNotNull(jarFile);
     }
 
     @Test
     public void canHandleJarNotPresent()
     {
         File jarFile = repository.getJarFile(TEST_GROUP_ID, "test-non-existing-entities", "1.0.0");
-        Assert.assertNull(jarFile);
+        Assertions.assertNull(jarFile);
     }
 }

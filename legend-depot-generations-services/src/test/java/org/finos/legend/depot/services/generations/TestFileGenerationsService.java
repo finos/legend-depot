@@ -32,9 +32,9 @@ import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.URL;
@@ -61,14 +61,14 @@ public class TestFileGenerationsService extends TestStoreMongo
     private ProjectsService projectsService = new ProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
     private ManageFileGenerationsService service = new ManageFileGenerationsServiceImpl(generations, projectsService);
 
-    @Before
+    @BeforeEach
     public void loadData() throws Exception
     {
 
         try (FileGenerationLoader file = FileGenerationLoader.newFileGenerationsLoader(new File(filePath.toURI())))
         {
             Stream<DepotGeneration> data = file.getAllFileGenerations();
-            Assert.assertNotNull(data);
+            Assertions.assertNotNull(data);
             data.forEach(gen ->
             {
                 if (gen.getPath().startsWith("/examples/metadata"))
@@ -88,7 +88,7 @@ public class TestFileGenerationsService extends TestStoreMongo
                 }
             });
 
-            Assert.assertEquals(54, generations.getAll().size());
+            Assertions.assertEquals(54, generations.getAll().size());
         }
 
         when(projectsStore.find("group.test","test")).thenReturn(Optional.of(new StoreProjectData("prod-1","group.test","test",null,"1.0.0")));
@@ -105,19 +105,19 @@ public class TestFileGenerationsService extends TestStoreMongo
     {
 
         service.delete("group.test", "test",BRANCH_SNAPSHOT("master"));
-        Assert.assertEquals(40, generations.getAll().size());
+        Assertions.assertEquals(40, generations.getAll().size());
         service.delete("group.test.otherproject", "test", "1.0.0");
-        Assert.assertEquals(26, generations.getAll().size());
+        Assertions.assertEquals(26, generations.getAll().size());
         try
         {
             service.delete("group.test", "test111", "1.1.0");
-            Assert.fail("exception expected");
+            Assertions.fail("exception expected");
         }
         catch (IllegalArgumentException e)
         {
-            Assert.assertTrue(true);
+            Assertions.assertTrue(true);
         }
-        Assert.assertEquals(26, generations.getAll().size());
+        Assertions.assertEquals(26, generations.getAll().size());
 
     }
 
@@ -126,70 +126,70 @@ public class TestFileGenerationsService extends TestStoreMongo
     {
 
         List<DepotGeneration> generations = service.getFileGenerations("group.test", "test",BRANCH_SNAPSHOT("master"));
-        Assert.assertEquals(14, generations.size());
+        Assertions.assertEquals(14, generations.size());
 
         List<DepotGeneration> gens1 = service.getFileGenerations("group.test", "test", "1.0.0");
-        Assert.assertEquals(14, gens1.size());
+        Assertions.assertEquals(14, gens1.size());
 
         try
         {
             List<DepotGeneration> gens2 = service.getFileGenerations("group.test.other", "test", "1.0.0");
-            Assert.fail("Exception expected");
+            Assertions.fail("Exception expected");
         }
         catch (IllegalArgumentException e)
         {
-            Assert.assertTrue(true);
+            Assertions.assertTrue(true);
         }
     }
 
     @Test
     public void canQueryFileGenerationEntitiesByElementPath()
     {
-        Assert.assertEquals(12, service.getFileGenerationsByElementPath("group.test", "test", "1.0.0", "examples::avrogen").size());
-        Assert.assertTrue(service.getFileGenerationsByElementPath("group.test", "test", "1.0.0", "examples::avrogen1").isEmpty());
-        Assert.assertEquals(2, service.getFileGenerationsByElementPath("group.test", "test", "1.0.0", "examples::metadata::test::ClientBasic").size());
+        Assertions.assertEquals(12, service.getFileGenerationsByElementPath("group.test", "test", "1.0.0", "examples::avrogen").size());
+        Assertions.assertTrue(service.getFileGenerationsByElementPath("group.test", "test", "1.0.0", "examples::avrogen1").isEmpty());
+        Assertions.assertEquals(2, service.getFileGenerationsByElementPath("group.test", "test", "1.0.0", "examples::metadata::test::ClientBasic").size());
     }
 
     @Test
     public void canGetByType()
     {
         List<StoredFileGeneration> fileGenerations = service.findByType("group.test", "test", "1.0.0", AVRO);
-        Assert.assertEquals(12, fileGenerations.size());
-        Assert.assertEquals(0, service.findByTypeAndElementPath("group.test", "test", "1.0.0", AVRO, "element::NotFound").size());
-        Assert.assertEquals(12, service.findByTypeAndElementPath("group.test", "test", "1.0.0", AVRO, "examples::avrogen").size());
+        Assertions.assertEquals(12, fileGenerations.size());
+        Assertions.assertEquals(0, service.findByTypeAndElementPath("group.test", "test", "1.0.0", AVRO, "element::NotFound").size());
+        Assertions.assertEquals(12, service.findByTypeAndElementPath("group.test", "test", "1.0.0", AVRO, "examples::avrogen").size());
     }
 
     @Test
     public void canQueryFileGenerationEntitiesByFilePath()
     {
-        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
-        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
-        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
-        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test.otherproject", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assertions.assertTrue(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assertions.assertTrue(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
+        Assertions.assertTrue(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
+        Assertions.assertTrue(service.getFileGenerationsByFilePath("group.test.otherproject", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
 
-        Assert.assertFalse(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "bad").isPresent());
-        Assert.assertFalse(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/DND.txt").isPresent());
+        Assertions.assertFalse(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "bad").isPresent());
+        Assertions.assertFalse(service.getFileGenerationsByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/DND.txt").isPresent());
     }
 
     @Test
     public void canQueryFileGenerationEntitiesByFileContent()
     {
-        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
-        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
-        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
-        Assert.assertTrue(service.getFileGenerationsByFilePath("group.test", "test",BRANCH_SNAPSHOT("master"),  "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assertions.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assertions.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
+        Assertions.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "1.0.0", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
+        Assertions.assertTrue(service.getFileGenerationsByFilePath("group.test", "test",BRANCH_SNAPSHOT("master"),  "/examples/metadata/test/ClientBasic.avro").isPresent());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void cantGetGenerationsForNonExistentProject()
     {
-        service.getFileGenerations("i.dont","exist","version");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> service.getFileGenerations("i.dont","exist","version"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void cantGetGenerationsForNonExistentVersion()
     {
-        service.getFileGenerations("group.test","test","10.0.0");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> service.getFileGenerations("group.test","test","10.0.0"));
     }
 
     @Test
@@ -197,12 +197,12 @@ public class TestFileGenerationsService extends TestStoreMongo
     {
 
         List<DepotGeneration> gens1 = service.getFileGenerations("group.test", "test", "latest");
-        Assert.assertEquals(14, gens1.size());
-        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "latest", "/examples/metadata/test/ClientBasic.avro").isPresent());
-        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "latest", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
-        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "latest", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
-        Assert.assertEquals(2, service.getFileGenerationsByElementPath("group.test", "test", "latest", "examples::metadata::test::ClientBasic").size());
-        Assert.assertEquals(12, service.getFileGenerationsByElementPath("group.test", "test", "latest", "examples::avrogen").size());
+        Assertions.assertEquals(14, gens1.size());
+        Assertions.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "latest", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assertions.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "latest", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
+        Assertions.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "latest", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
+        Assertions.assertEquals(2, service.getFileGenerationsByElementPath("group.test", "test", "latest", "examples::metadata::test::ClientBasic").size());
+        Assertions.assertEquals(12, service.getFileGenerationsByElementPath("group.test", "test", "latest", "examples::avrogen").size());
     }
 
     @Test
@@ -210,9 +210,9 @@ public class TestFileGenerationsService extends TestStoreMongo
     {
 
         List<DepotGeneration> gens1 = service.getFileGenerations("group.test", "test", "head");
-        Assert.assertEquals(14, gens1.size());
-        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "head", "/examples/metadata/test/ClientBasic.avro").isPresent());
-        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "head", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
-        Assert.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "head", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
+        Assertions.assertEquals(14, gens1.size());
+        Assertions.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "head", "/examples/metadata/test/ClientBasic.avro").isPresent());
+        Assertions.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "head", "/examples/metadata/test/ClientBasic/my-ext/Output1.txt").isPresent());
+        Assertions.assertTrue(service.getFileGenerationContentByFilePath("group.test", "test", "head", "/examples/metadata/test/ClientBasic/my-ext/Output2.txt").isPresent());
     }
 }

@@ -46,11 +46,11 @@ import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntityArti
 import org.finos.legend.depot.services.api.artifacts.handlers.generations.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.store.mongo.notifications.queue.NotificationsQueueMongo;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -87,7 +87,7 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
     protected ArtifactsRefreshService artifactsRefreshService = new ArtifactsRefreshServiceImpl(projectsService, repository, queue);
 
 
-    @Before
+    @BeforeEach
     public void setUpData() throws ArtifactRepositoryException
     {
         ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
@@ -104,30 +104,30 @@ public class TestArtifactsRefreshServiceExceptionEscenarios extends TestStoreMon
         when(repository.findVersions(TEST_GROUP_ID,"c")).thenReturn(Arrays.asList(VersionId.parseVersionId("1.0.0")));
     }
 
-    @After
+    @AfterEach
     public void afterTest()
     {
-        Assert.assertTrue("should not have events in queue",queue.getAll().isEmpty());
+        Assertions.assertTrue(queue.getAll().isEmpty(), "should not have events in queue");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void cannotFindProject()
     {
-      artifactsRefreshService.refreshVersionForProject("test.test","missing.project","1.0.0",true, PARENT_EVENT_ID);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> artifactsRefreshService.refreshVersionForProject("test.test","missing.project","1.0.0",true, PARENT_EVENT_ID));
     }
 
 
 
     @Test
-    @Ignore
+    @Disabled
     public void projectFailsToPersistEntities()
     {
         when(mongoProjects.find(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID)).thenReturn(Optional.of(new StoreProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID)));
 
         MetadataNotificationResponse response = artifactsRefreshService.refreshVersionForProject(TEST_GROUP_ID,TEST_DEPENDENCIES_ARTIFACT_ID,"1.0.0",true,PARENT_EVENT_ID);
-        Assert.assertNotNull(response);
-        Assert.assertEquals(MetadataNotificationStatus.FAILED,response.getStatus());
-        Assert.assertEquals("Could not find dependent project: [examples.metadata-test-dependencies-1.0.0]", response.getErrors().get(0));
+        Assertions.assertNotNull(response);
+        Assertions.assertEquals(MetadataNotificationStatus.FAILED,response.getStatus());
+        Assertions.assertEquals("Could not find dependent project: [examples.metadata-test-dependencies-1.0.0]", response.getErrors().get(0));
     }
 
 }

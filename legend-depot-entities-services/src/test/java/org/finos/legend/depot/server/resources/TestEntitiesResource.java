@@ -37,10 +37,10 @@ import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.depot.store.mongo.metrics.query.QueryMetricsMongo;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -68,7 +68,7 @@ public class TestEntitiesResource extends TestBaseServices
     private QueryMetricsService metricsHandler = new QueryMetricsServiceImpl(metricsStore);
 
 
-    @Before
+    @BeforeEach
     public void setupMetadata()
     {
         super.setUpData();
@@ -81,7 +81,7 @@ public class TestEntitiesResource extends TestBaseServices
         when(projectsVersions.find("example.services.test", "test", "1.0.1")).thenReturn(Optional.of(new StoreProjectVersionData("example.services.test", "test", "1.0.1")));
     }
 
-    @After
+    @AfterEach
     public void tearDown()
     {
         metricsStore.getCollection().drop();
@@ -92,8 +92,8 @@ public class TestEntitiesResource extends TestBaseServices
     {
         Response response = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", null);
         List<Entity> entityList = (List<Entity>) response.getEntity();
-        Assert.assertNotNull(entityList);
-        Assert.assertEquals(7, entityList.size());
+        Assertions.assertNotNull(entityList);
+        Assertions.assertEquals(7, entityList.size());
     }
 
     @Test
@@ -101,8 +101,8 @@ public class TestEntitiesResource extends TestBaseServices
     {
         Response response = entitiesResource.getEntity("examples.metadata", "test", "2.3.0", "examples::metadata::test::TestProfile", null);
         Entity entity = ((Optional<Entity>) response.getEntity()).get();
-        Assert.assertNotNull(entity);
-        Assert.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
+        Assertions.assertNotNull(entity);
+        Assertions.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
 
     }
 
@@ -111,8 +111,8 @@ public class TestEntitiesResource extends TestBaseServices
     {
         Response response = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true, null);
         List<Entity> entityList = (List<Entity>) response.getEntity();
-        Assert.assertNotNull(entityList);
-        Assert.assertEquals(4, entityList.size());
+        Assertions.assertNotNull(entityList);
+        Assertions.assertEquals(4, entityList.size());
 
     }
 
@@ -120,31 +120,31 @@ public class TestEntitiesResource extends TestBaseServices
     @Test
     public void canGetMetrics() throws InterruptedException
     {
-        Assert.assertTrue(metricsStore.getAllStoredEntities().isEmpty());
-        Assert.assertEquals(0, metricsStore.get("examples.metadata", "test", "2.3.0").size());
+        Assertions.assertTrue(metricsStore.getAllStoredEntities().isEmpty());
+        Assertions.assertEquals(0, metricsStore.get("examples.metadata", "test", "2.3.0").size());
 
         when(projects.find("examples.metadata","test")).thenReturn(Optional.of(new StoreProjectData("mock","examples.metadata","test")));
         Response responseOne  = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true, null);
-        Assert.assertEquals(Response.Status.OK.getStatusCode(), responseOne.getStatus());
+        Assertions.assertEquals(Response.Status.OK.getStatusCode(), responseOne.getStatus());
         metricsHandler.persist(metricsRegistry);
 
-        Assert.assertEquals(1, metricsStore.get("examples.metadata", "test", "2.3.0").size());
-        Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
+        Assertions.assertEquals(1, metricsStore.get("examples.metadata", "test", "2.3.0").size());
+        Assertions.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
         TimeUnit.SECONDS.sleep(30);
 
         Response responseTwo = entitiesResource.getEntities("example.services.test", "test", "1.0.1", null);
-        Assert.assertEquals(Response.Status.OK.getStatusCode(), responseTwo.getStatus());
+        Assertions.assertEquals(Response.Status.OK.getStatusCode(), responseTwo.getStatus());
         metricsHandler.persist(metricsRegistry);
 
-        Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
-        Assert.assertEquals(3, metricsStore.getAllStoredEntities().size());
+        Assertions.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
+        Assertions.assertEquals(3, metricsStore.getAllStoredEntities().size());
     }
 
     @Test
     public void canGetMetricsForTransitiveDependencies() throws InterruptedException
     {
-        Assert.assertTrue(metricsStore.getAllStoredEntities().isEmpty());
-        Assert.assertEquals(0, metricsStore.get("examples.metadata", "test", "2.3.0").size());
+        Assertions.assertTrue(metricsStore.getAllStoredEntities().isEmpty());
+        Assertions.assertEquals(0, metricsStore.get("examples.metadata", "test", "2.3.0").size());
 
         StoreProjectVersionData versionData = new StoreProjectVersionData("examples.metadata", "test-master", "2.3.0");
         versionData.getVersionData().setDependencies(Collections.singletonList(new ProjectVersion("examples.metadata","test", "2.3.0")));
@@ -154,9 +154,9 @@ public class TestEntitiesResource extends TestBaseServices
         entitiesService.getDependenciesEntities("examples.metadata", "test-master", "2.3.0", true, false);
         metricsHandler.persist(metricsRegistry);
 
-        Assert.assertEquals(2, metricsStore.getAll().size());
-        Assert.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
-        Assert.assertNotNull(metricsStore.get("examples.metadata", "test-master", "2.3.0").get(0).getLastQueryTime());
+        Assertions.assertEquals(2, metricsStore.getAll().size());
+        Assertions.assertNotNull(metricsStore.get("examples.metadata", "test", "2.3.0").get(0).getLastQueryTime());
+        Assertions.assertNotNull(metricsStore.get("examples.metadata", "test-master", "2.3.0").get(0).getLastQueryTime());
     }
 
 
@@ -165,8 +165,8 @@ public class TestEntitiesResource extends TestBaseServices
     {
         Response response = entitiesResource.getEntity("examples.metadata", "test", "2.3.0", "examples::metadata::test::TestProfile", null);
         Entity entity = ((Optional<Entity>) response.getEntity()).get();
-        Assert.assertNotNull(entity);
-        Assert.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
+        Assertions.assertNotNull(entity);
+        Assertions.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
     }
 
     @Test
@@ -174,8 +174,8 @@ public class TestEntitiesResource extends TestBaseServices
     {
         Response response = entitiesResource.getEntity("examples.metadata", "test", "2.3.0", "examples::metadata::test::TestProfile", null);
         Entity entity = ((Optional<Entity>) response.getEntity()).get();
-        Assert.assertNotNull(entity);
-        Assert.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
+        Assertions.assertNotNull(entity);
+        Assertions.assertEquals("meta::pure::metamodel::extension::Profile", entity.getClassifierPath());
     }
 
     @Test
@@ -183,8 +183,8 @@ public class TestEntitiesResource extends TestBaseServices
     {
         Response response = entitiesResource.getEntities("examples.metadata", "test", "2.3.0", "examples::metadata::test", null, true, null);
         List<Entity> entityList = (List<Entity>) response.getEntity();
-        Assert.assertNotNull(entityList);
-        Assert.assertEquals(4, entityList.size());
+        Assertions.assertNotNull(entityList);
+        Assertions.assertEquals(4, entityList.size());
 
     }
 }

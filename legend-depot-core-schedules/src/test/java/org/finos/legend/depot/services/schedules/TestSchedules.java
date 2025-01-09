@@ -16,10 +16,10 @@
 package org.finos.legend.depot.services.schedules;
 
 import org.finos.legend.depot.store.model.admin.schedules.ScheduleInstance;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
@@ -29,14 +29,14 @@ public class TestSchedules
 {
     private SchedulesFactoryImpl schedulesFactory;
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
         schedulesFactory = new SchedulesFactoryImpl(new MockScheduleStore(), new MockInstancesStore(),false);
-        Assert.assertTrue(schedulesFactory.tasksRegistry.isEmpty());
+        Assertions.assertTrue(schedulesFactory.tasksRegistry.isEmpty());
     }
 
-    @After
+    @AfterEach
     public void tearDown()
     {
         schedulesFactory.deRegisterAll();
@@ -49,12 +49,12 @@ public class TestSchedules
         schedulesFactory.register("job3", 600000, 100000, () -> "hello toggles");
         schedulesFactory.register("job4", 600000, 100000, () -> "hello toggles again");
         schedulesFactory.toggleDisableAll(false);
-        Assert.assertTrue(schedulesFactory.schedulesStore.getAll().stream().allMatch(j -> !j.disabled));
+        Assertions.assertTrue(schedulesFactory.schedulesStore.getAll().stream().allMatch(j -> !j.disabled));
         schedulesFactory.toggleDisableAll(true);
-        Assert.assertTrue(schedulesFactory.schedulesStore.getAll().stream().allMatch(j -> j.disabled));
+        Assertions.assertTrue(schedulesFactory.schedulesStore.getAll().stream().allMatch(j -> j.disabled));
 
         schedulesFactory.run("job3");
-        Assert.assertTrue(schedulesFactory.instancesStore.getAll().isEmpty());
+        Assertions.assertTrue(schedulesFactory.instancesStore.getAll().isEmpty());
     }
 
     @Test
@@ -62,10 +62,10 @@ public class TestSchedules
     {
         schedulesFactory.register("job33", 600000, 100000, () -> "hello toggles");
         schedulesFactory.register("job34", 600000, 100000, () -> "hello toggles again");
-        Assert.assertEquals(2,schedulesFactory.schedulesStore.getAll().size());
+        Assertions.assertEquals(2,schedulesFactory.schedulesStore.getAll().size());
         schedulesFactory.deRegister("job33");
-        Assert.assertEquals(1,schedulesFactory.schedulesStore.getAll().size());
-        Assert.assertFalse(schedulesFactory.tasksRegistry.contains("job33"));
+        Assertions.assertEquals(1,schedulesFactory.schedulesStore.getAll().size());
+        Assertions.assertFalse(schedulesFactory.tasksRegistry.contains("job33"));
 
     }
 
@@ -80,7 +80,7 @@ public class TestSchedules
 
         schedulesFactory.deleteExpired();
 
-        Assert.assertTrue(schedulesFactory.instancesStore.getAll().stream().noneMatch(i -> i.getSchedule().equals("expired")));
+        Assertions.assertTrue(schedulesFactory.instancesStore.getAll().stream().noneMatch(i -> i.getSchedule().equals("expired")));
     }
 
     @Test
@@ -88,25 +88,25 @@ public class TestSchedules
     {
          schedulesFactory.register("multiInstance",10000000L,100000000L, () -> "happy run");
          schedulesFactory.registerSingleInstance("singleInstance",10000000L,100000000L, () -> "single run");
-         Assert.assertEquals(2, schedulesFactory.schedulesStore.getAll().size());
+         Assertions.assertEquals(2, schedulesFactory.schedulesStore.getAll().size());
 
          schedulesFactory.run("multiInstance");
          schedulesFactory.run("multiInstance");
          schedulesFactory.run("multiInstance");
 
-         Assert.assertEquals(3,schedulesFactory.instancesStore.getAll().size());
+         Assertions.assertEquals(3,schedulesFactory.instancesStore.getAll().size());
 
          schedulesFactory.run("singleInstance");
          schedulesFactory.run("singleInstance");
 
-        Assert.assertEquals(4,schedulesFactory.instancesStore.getAll().size());
+        Assertions.assertEquals(4,schedulesFactory.instancesStore.getAll().size());
 
-        Assert.assertEquals(1,schedulesFactory.instancesStore.find("singleInstance").size());
+        Assertions.assertEquals(1,schedulesFactory.instancesStore.find("singleInstance").size());
 
         schedulesFactory.instancesStore.find("singleInstance").get(0).setExpires(toDate(LocalDateTime.now().minusMinutes(10)));
         schedulesFactory.run("singleInstance");
 
-        Assert.assertEquals(5,schedulesFactory.instancesStore.getAll().size());
+        Assertions.assertEquals(5,schedulesFactory.instancesStore.getAll().size());
     }
 
 }

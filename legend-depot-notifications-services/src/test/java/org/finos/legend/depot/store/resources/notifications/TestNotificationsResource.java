@@ -20,8 +20,8 @@ import org.finos.legend.depot.services.api.notifications.NotificationsService;
 import org.finos.legend.depot.services.notifications.NotificationsServiceImpl;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.notifications.NotificationsMongo;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -55,13 +55,13 @@ public class TestNotificationsResource extends TestStoreMongo
 
 
         List<MetadataNotification> allEvents = resource.getPastEventNotifications(null,null,null,null,null,null,aPointInTime.minusDays(100).format(DateTimeFormatter.ISO_DATE_TIME), null);
-        Assert.assertNotNull(allEvents);
-        Assert.assertEquals(4, allEvents.size());
+        Assertions.assertNotNull(allEvents);
+        Assertions.assertEquals(4, allEvents.size());
 
         LocalDateTime lunchTime = LocalDateTime.parse("2019-01-01T12:00:00", DateTimeFormatter.ISO_DATE_TIME);
         List<MetadataNotification> afterLunch = resource.getPastEventNotifications(null,null,null,null,null,null,lunchTime.format(DateTimeFormatter.ISO_DATE_TIME), null);
-        Assert.assertNotNull(afterLunch);
-        Assert.assertEquals(2, afterLunch.size());
+        Assertions.assertNotNull(afterLunch);
+        Assertions.assertEquals(2, afterLunch.size());
 
     }
 
@@ -74,13 +74,13 @@ public class TestNotificationsResource extends TestStoreMongo
 
         notificationsMongo.insert(event1);
         insertRaw(notificationsMongo.COLLECTION,event2.setUpdated(toDate(LocalDateTime.now().plusDays(1))));
-        Assert.assertEquals(2, notificationsMongo.getAll().size());
+        Assertions.assertEquals(2, notificationsMongo.getAll().size());
 
 
         List<MetadataNotification> found = resource.getPastEventNotifications(null,null,null,null,null,null,null, String.valueOf(System.currentTimeMillis()));
-        Assert.assertNotNull(found);
-        Assert.assertEquals(1, found.size());
-        Assert.assertTrue(found.stream().anyMatch(e -> e.getProjectId().equals("1")));
+        Assertions.assertNotNull(found);
+        Assertions.assertEquals(1, found.size());
+        Assertions.assertTrue(found.stream().anyMatch(e -> e.getProjectId().equals("1")));
 
     }
 
@@ -91,14 +91,14 @@ public class TestNotificationsResource extends TestStoreMongo
         MetadataNotification ev1 = new MetadataNotification("prod-123","test","artifacts","1.0.0");
         ev1.setUpdated(toDate(LocalDateTime.now().minusDays(12)));
         insertRaw(NotificationsMongo.COLLECTION,ev1);
-        Assert.assertEquals(1, notificationsMongo.getAll().size());
+        Assertions.assertEquals(1, notificationsMongo.getAll().size());
         MetadataNotification ev2 = new MetadataNotification("prod-123","test","artifacts","2.0.0");
         notificationsMongo.createOrUpdate(ev2);
 
-        Assert.assertEquals(2, notificationsMongo.getAll().size());
+        Assertions.assertEquals(2, notificationsMongo.getAll().size());
 
         long deleted = notificationsService.deleteOldNotifications(10);
-        Assert.assertEquals(1,deleted);
-        Assert.assertEquals(1, notificationsMongo.getAll().size());
+        Assertions.assertEquals(1,deleted);
+        Assertions.assertEquals(1, notificationsMongo.getAll().size());
     }
 }

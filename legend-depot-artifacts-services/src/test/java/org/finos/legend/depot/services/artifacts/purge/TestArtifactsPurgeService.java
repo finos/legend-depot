@@ -53,9 +53,9 @@ import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.store.mongo.generations.TestGenerationsStoreMongo;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -91,7 +91,7 @@ public class TestArtifactsPurgeService extends TestBaseServices
 
 
 
-    @Before
+    @BeforeEach
     public void setUpData()
     {
         ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, mock(EntityProvider.class)));
@@ -99,7 +99,7 @@ public class TestArtifactsPurgeService extends TestBaseServices
 
         setUpProjectsFromFile(TestArtifactsPurgeService.class.getClassLoader().getResource("data/projects.json"));
         setUpProjectsVersionsFromFile(TestArtifactsPurgeService.class.getClassLoader().getResource("data/projectsVersions.json"));
-        Assert.assertEquals(3, projectsStore.getAll().size());
+        Assertions.assertEquals(3, projectsStore.getAll().size());
 
         new EntitiesMongoTestUtils(mongoProvider).loadEntities(TestArtifactsPurgeService.class.getClassLoader().getResource("data/entities.json"));
         TestGenerationsStoreMongo.setUpFileGenerationFromFile(TestArtifactsPurgeService.class.getClassLoader().getResource("data/generations.json"),mongoProvider);
@@ -111,23 +111,23 @@ public class TestArtifactsPurgeService extends TestBaseServices
     {
 
         StoreProjectData project = projectsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).get();
-        Assert.assertNotNull(project);
+        Assertions.assertNotNull(project);
         List<String> projectVersions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID);
-        Assert.assertEquals(3, projectVersions.size());
-        Assert.assertEquals("2.0.0", projectVersions.get(0));
-        Assert.assertEquals("2.3.0", project.getLatestVersion());
+        Assertions.assertEquals(3, projectVersions.size());
+        Assertions.assertEquals("2.0.0", projectVersions.get(0));
+        Assertions.assertEquals("2.3.0", project.getLatestVersion());
 
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
+        Assertions.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
         purgeService.evictOldestProjectVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID,1);
 
         List<String> afterVersionsOrdered = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID);
-        Assert.assertEquals(3, afterVersionsOrdered.size());
-        Assert.assertTrue(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get().isEvicted());
-        Assert.assertTrue(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.2.0").get().isEvicted());
-        Assert.assertTrue(afterVersionsOrdered.contains("2.3.0"));
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.2.0").size());
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.0").size());
+        Assertions.assertEquals(3, afterVersionsOrdered.size());
+        Assertions.assertTrue(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get().isEvicted());
+        Assertions.assertTrue(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.2.0").get().isEvicted());
+        Assertions.assertTrue(afterVersionsOrdered.contains("2.3.0"));
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.2.0").size());
+        Assertions.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.0").size());
     }
 
     @Test
@@ -135,20 +135,20 @@ public class TestArtifactsPurgeService extends TestBaseServices
     {
 
         StoreProjectData project = projectsStore.find(TEST_GROUP_ID,TEST_ARTIFACT_ID).get();
-        Assert.assertNotNull(project);
+        Assertions.assertNotNull(project);
         List<String> projectVersions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID);
-        Assert.assertEquals(3, projectVersions.size());
+        Assertions.assertEquals(3, projectVersions.size());
         MetadataNotificationResponse response = purgeService.evictOldestProjectVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID,5);
-        Assert.assertNotNull(response);
+        Assertions.assertNotNull(response);
 
         List<String> afterVersionsOrdered = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID);
-        Assert.assertEquals(3, afterVersionsOrdered.size());
-        Assert.assertTrue(!projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get().isEvicted());
-        Assert.assertTrue(!projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.2.0").get().isEvicted());
-        Assert.assertTrue(!projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.0").get().isEvicted());
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.2.0").size());
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.0").size());
+        Assertions.assertEquals(3, afterVersionsOrdered.size());
+        Assertions.assertTrue(!projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get().isEvicted());
+        Assertions.assertTrue(!projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.2.0").get().isEvicted());
+        Assertions.assertTrue(!projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.0").get().isEvicted());
+        Assertions.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").size());
+        Assertions.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.2.0").size());
+        Assertions.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.3.0").size());
     }
 
     @Test
@@ -156,18 +156,18 @@ public class TestArtifactsPurgeService extends TestBaseServices
     {
 
         StoreProjectData project = projectsStore.find(TEST_GROUP_ID,"test1").get();
-        Assert.assertNotNull(project);
+        Assertions.assertNotNull(project);
         List<String> projectVersions = projectsService.getVersions(TEST_GROUP_ID, "test1");
-        Assert.assertEquals(0, projectVersions.size());
-        Assert.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, "test1", BRANCH_SNAPSHOT("master")).size());
+        Assertions.assertEquals(0, projectVersions.size());
+        Assertions.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, "test1", BRANCH_SNAPSHOT("master")).size());
 
         MetadataNotificationResponse response = purgeService.evictOldestProjectVersions(TEST_GROUP_ID,"test1",1);
-        Assert.assertNotNull(response);
+        Assertions.assertNotNull(response);
 
         List<String> afterVersionsOrdered = projectsService.getVersions(TEST_GROUP_ID, "test1");
-        Assert.assertEquals(0, afterVersionsOrdered.size());
+        Assertions.assertEquals(0, afterVersionsOrdered.size());
 
-        Assert.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, "test1", BRANCH_SNAPSHOT("master")).size());
+        Assertions.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, "test1", BRANCH_SNAPSHOT("master")).size());
     }
 
     @Test
@@ -175,15 +175,15 @@ public class TestArtifactsPurgeService extends TestBaseServices
     {
         String versionId = "2.0.0";
 
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-        Assert.assertEquals(3, fileGenerationsStore.getAll().size());
+        Assertions.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assertions.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assertions.assertEquals(3, fileGenerationsStore.getAll().size());
 
         purgeService.evict(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-        Assert.assertEquals(0, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-        Assert.assertTrue(projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID).contains(versionId));
-        Assert.assertTrue(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).get().isEvicted());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assertions.assertEquals(0, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assertions.assertTrue(projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID).contains(versionId));
+        Assertions.assertTrue(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).get().isEvicted());
     }
 
     @Test
@@ -191,15 +191,15 @@ public class TestArtifactsPurgeService extends TestBaseServices
     {
         String versionId = "2.0.0";
 
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-        Assert.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-        Assert.assertEquals(3, fileGenerationsStore.getAll().size());
+        Assertions.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assertions.assertEquals(2, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assertions.assertEquals(3, fileGenerationsStore.getAll().size());
 
         purgeService.delete(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
-        Assert.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-        Assert.assertEquals(0, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
-        Assert.assertFalse(projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID).contains(versionId));
-        Assert.assertFalse(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).isPresent());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assertions.assertEquals(0, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assertions.assertFalse(projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID).contains(versionId));
+        Assertions.assertFalse(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).isPresent());
     }
 
     @Test
@@ -207,17 +207,17 @@ public class TestArtifactsPurgeService extends TestBaseServices
     {
         String versionId = "2.0.0";
         List<String> versions = projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID);
-        Assert.assertEquals(versions.size(), 3);
-        Assert.assertEquals(1, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assertions.assertEquals(versions.size(), 3);
+        Assertions.assertEquals(1, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
         //deprecating version
         purgeService.deprecate(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
         versions = projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID);
         //no versions deleted
-        Assert.assertEquals(versions, Arrays.asList("2.0.0", "2.2.0", "2.3.0"));
+        Assertions.assertEquals(versions, Arrays.asList("2.0.0", "2.2.0", "2.3.0"));
         //no artifacts deleted
-        Assert.assertEquals(1, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
+        Assertions.assertEquals(1, fileGenerationsStore.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).size());
         Optional<StoreProjectVersionData> storeProjectData = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId);
-        Assert.assertTrue(storeProjectData.get().getVersionData().isDeprecated());
+        Assertions.assertTrue(storeProjectData.get().getVersionData().isDeprecated());
     }
 
     @Test
@@ -226,16 +226,16 @@ public class TestArtifactsPurgeService extends TestBaseServices
         String versionId = "2.0.0";
         VersionMismatch versionMismatch = new VersionMismatch("PROD-A", TEST_GROUP_ID, TEST_ARTIFACT_ID, Collections.EMPTY_LIST, Collections.singletonList(versionId), Collections.EMPTY_LIST);
         List<String> versions = projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID);
-        Assert.assertEquals(versions.size(), 3);
-        Assert.assertEquals(3, fileGenerationsStore.getAll().size());
+        Assertions.assertEquals(versions.size(), 3);
+        Assertions.assertEquals(3, fileGenerationsStore.getAll().size());
         when(versionsMismatchService.findVersionsMismatches()).thenReturn(Collections.singletonList(versionMismatch));
         //deleting the version not present in the repository
         purgeService.deprecateVersionsNotInRepository();
         versions = projectsService.getVersions(TEST_GROUP_ID,TEST_ARTIFACT_ID);
-        Assert.assertEquals(versions.size(), 3);
+        Assertions.assertEquals(versions.size(), 3);
         //checking if version data shows deprecation
         StoreProjectVersionData projectVersionData = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, versionId).get();
-        Assert.assertTrue(projectVersionData.getVersionData().isDeprecated());
+        Assertions.assertTrue(projectVersionData.getVersionData().isDeprecated());
     }
 
     @Test
@@ -248,11 +248,11 @@ public class TestArtifactsPurgeService extends TestBaseServices
         purgeService.evictLeastRecentlyUsed(365, 30);
 
         StoreProjectVersionData version1 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get();
-        Assert.assertTrue(version1.isEvicted());
+        Assertions.assertTrue(version1.isEvicted());
         StoreProjectVersionData version2 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "branch1-SNAPSHOT").get();
-        Assert.assertTrue(version2.isEvicted());
+        Assertions.assertTrue(version2.isEvicted());
         StoreProjectVersionData version3 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT").get();
-        Assert.assertFalse(version3.isEvicted());
+        Assertions.assertFalse(version3.isEvicted());
     }
 
     @Test
@@ -263,11 +263,11 @@ public class TestArtifactsPurgeService extends TestBaseServices
         purgeService.evictVersionsNotUsed();
 
         StoreProjectVersionData version1 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "2.0.0").get();
-        Assert.assertTrue(version1.isEvicted());
+        Assertions.assertTrue(version1.isEvicted());
         StoreProjectVersionData version2 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "branch1-SNAPSHOT").get();
-        Assert.assertTrue(version2.isEvicted());
+        Assertions.assertTrue(version2.isEvicted());
         StoreProjectVersionData version3 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT").get();
-        Assert.assertFalse(version3.isEvicted());
+        Assertions.assertFalse(version3.isEvicted());
     }
 
 }

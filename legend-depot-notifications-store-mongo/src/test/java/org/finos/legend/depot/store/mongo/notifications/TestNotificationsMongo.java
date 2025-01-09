@@ -19,8 +19,8 @@ import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.notifications.queue.NotificationsQueueMongo;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,16 +54,16 @@ public class TestNotificationsMongo extends TestStoreMongo
 
 
         List<MetadataNotification> eventList = queue.pullAll();
-        Assert.assertNotNull(eventList);
-        Assert.assertEquals(4, eventList.size());
+        Assertions.assertNotNull(eventList);
+        Assertions.assertEquals(4, eventList.size());
         for (MetadataNotification ev : eventList)
         {
             eventsMongo.createOrUpdate(ev);
         }
 
         List<MetadataNotification> eventList2 = eventsMongo.getAll();
-        Assert.assertNotNull(eventList2);
-        Assert.assertEquals(4, eventList2.size());
+        Assertions.assertNotNull(eventList2);
+        Assertions.assertEquals(4, eventList2.size());
 
     }
 
@@ -74,16 +74,16 @@ public class TestNotificationsMongo extends TestStoreMongo
         MetadataNotification event = new MetadataNotification(TESTPROJECT, TEST, TEST,VERSION);
         queue.push(event);
         List<MetadataNotification> pulled = queue.pullAll();
-        Assert.assertNotNull(pulled);
-        Assert.assertEquals(1, pulled.size());
-        Assert.assertNotNull(pulled.get(0).getEventId());
+        Assertions.assertNotNull(pulled);
+        Assertions.assertEquals(1, pulled.size());
+        Assertions.assertNotNull(pulled.get(0).getEventId());
 
         eventsMongo.createOrUpdate(pulled.get(0));
         List<MetadataNotification> eventList2 = eventsMongo.getAll();
-        Assert.assertNotNull(eventList2);
-        Assert.assertEquals(1, eventList2.size());
-        Assert.assertNotNull(eventList2.get(0).getEventId());
-        Assert.assertEquals(pulled.get(0).getEventId(), eventList2.get(0).getEventId());
+        Assertions.assertNotNull(eventList2);
+        Assertions.assertEquals(1, eventList2.size());
+        Assertions.assertNotNull(eventList2.get(0).getEventId());
+        Assertions.assertEquals(pulled.get(0).getEventId(), eventList2.get(0).getEventId());
     }
 
     @Test
@@ -95,15 +95,15 @@ public class TestNotificationsMongo extends TestStoreMongo
         eventsMongo.createOrUpdate(events.get(0));
 
         List<MetadataNotification> eventList = eventsMongo.getAll();
-        Assert.assertNotNull(eventList);
-        Assert.assertEquals(1, eventList.size());
-        Assert.assertNotNull(eventList.get(0).getEventId());
+        Assertions.assertNotNull(eventList);
+        Assertions.assertEquals(1, eventList.size());
+        Assertions.assertNotNull(eventList.get(0).getEventId());
 
         Optional<MetadataNotification> foundEvent = eventsMongo.get(eventList.get(0).getEventId());
-        Assert.assertEquals(eventId, eventList.get(0).getEventId());
-        Assert.assertNotNull(foundEvent);
-        Assert.assertTrue(foundEvent.isPresent());
-        Assert.assertEquals(eventList.get(0).getEventId(), foundEvent.get().getEventId());
+        Assertions.assertEquals(eventId, eventList.get(0).getEventId());
+        Assertions.assertNotNull(foundEvent);
+        Assertions.assertTrue(foundEvent.isPresent());
+        Assertions.assertEquals(eventList.get(0).getEventId(), foundEvent.get().getEventId());
     }
 
 
@@ -123,14 +123,14 @@ public class TestNotificationsMongo extends TestStoreMongo
         insertRaw(eventsMongo.COLLECTION,event4.setUpdated(toDate(aPointInTime.plusHours(2).plusMinutes(35))));
 
         List<MetadataNotification> allEvents = eventsMongo.getAll();
-        Assert.assertNotNull(allEvents);
-        Assert.assertEquals(4, allEvents.size());
+        Assertions.assertNotNull(allEvents);
+        Assertions.assertEquals(4, allEvents.size());
         List<MetadataNotification> eventsBeforeLunch = eventsMongo.find(null,null,null,null,null,null,aPointInTime.toLocalDate().atStartOfDay(), aPointInTime);
-        Assert.assertNotNull(eventsBeforeLunch);
-        Assert.assertEquals(1, eventsBeforeLunch.size());
+        Assertions.assertNotNull(eventsBeforeLunch);
+        Assertions.assertEquals(1, eventsBeforeLunch.size());
 
         List<MetadataNotification> afterLunch = eventsMongo.find(null,null,null,null,null,null,aPointInTime.withHour(12).withMinute(0).withSecond(1), null);
-        Assert.assertNotNull(afterLunch);
-        Assert.assertEquals(3, afterLunch.size());
+        Assertions.assertNotNull(afterLunch);
+        Assertions.assertEquals(3, afterLunch.size());
     }
 }

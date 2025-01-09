@@ -16,8 +16,8 @@
 package org.finos.legend.depot.core.services.metrics;
 
 import org.finos.legend.depot.core.services.api.metrics.configuration.PrometheusConfiguration;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestResourceApiTracing
 {
@@ -27,7 +27,7 @@ public class TestResourceApiTracing
     public void testMetricRegistrationForResource()
     {
         prometheusMetrics.registerResourceSummaries(TestTracingResource.class);
-        Assert.assertEquals(1,prometheusMetrics.allSummaries.keySet().size());
+        Assertions.assertEquals(1,prometheusMetrics.allSummaries.keySet().size());
 
     }
 }

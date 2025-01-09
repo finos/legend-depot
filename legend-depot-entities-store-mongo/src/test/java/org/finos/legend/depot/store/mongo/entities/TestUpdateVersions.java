@@ -22,9 +22,9 @@ import org.finos.legend.depot.store.model.entities.StoredEntityData;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -42,7 +42,7 @@ public class TestUpdateVersions extends TestStoreMongo
     private EntitiesMongo entitiesMongo = new EntitiesMongo(mongoProvider);
     private final EntitiesMongoTestUtils entityUtils = new EntitiesMongoTestUtils(mongoProvider);
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
 
@@ -53,19 +53,19 @@ public class TestUpdateVersions extends TestStoreMongo
     {
 
         List<StoredEntity> entitiesList = entityUtils.readEntitiesFile(ENTITIES_FILE);
-        Assert.assertNotNull(entitiesList);
+        Assertions.assertNotNull(entitiesList);
         StoredEntityData entity = (StoredEntityData) entitiesList.get(0);
         List result = entitiesMongo.createOrUpdate(Arrays.asList(entity));
-        Assert.assertNotNull(result);
-        Assert.assertEquals(1, result.size());
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(1, result.size());
 
         MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(1, entities.countDocuments());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(1, entities.countDocuments());
         Document doc = (Document)entities.find().iterator().next();
-        Assert.assertEquals(entity.getVersionId(), doc.getString(EntitiesMongo.VERSION_ID));
-        Assert.assertEquals(entity.getEntity().getPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(PATH));
-        Assert.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(CLASSIFIER_PATH));
+        Assertions.assertEquals(entity.getVersionId(), doc.getString(EntitiesMongo.VERSION_ID));
+        Assertions.assertEquals(entity.getEntity().getPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(PATH));
+        Assertions.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(CLASSIFIER_PATH));
 
     }
 
@@ -73,14 +73,14 @@ public class TestUpdateVersions extends TestStoreMongo
     public void canStoreEntitiesWithDotCharacterAsFieldContent()
     {
         List<StoredEntity> entitiesList = entityUtils.readEntitiesFile(TestUpdateVersions.class.getClassLoader().getResource("data/versioned-entity-dot-character.json"));
-        Assert.assertNotNull(entitiesList);
+        Assertions.assertNotNull(entitiesList);
         List result = entitiesMongo.createOrUpdate(entitiesList);
-        Assert.assertNotNull(result);
-        Assert.assertEquals(1, result.size());
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(1, result.size());
 
         MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(1, entities.countDocuments());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(1, entities.countDocuments());
     }
 
     @Test
@@ -88,32 +88,32 @@ public class TestUpdateVersions extends TestStoreMongo
     {
 
         List<StoredEntity> entitiesList = entityUtils.readEntitiesFile(ENTITIES_FILE);
-        Assert.assertNotNull(entitiesList);
+        Assertions.assertNotNull(entitiesList);
         StoredEntityData entity = (StoredEntityData) entitiesList.get(0);
         List result = entitiesMongo.createOrUpdate(Arrays.asList(entity));
-        Assert.assertNotNull(result);
-        Assert.assertEquals(1, result.size());
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(1, result.size());
 
         MongoCollection entities = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(1, entities.countDocuments());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(1, entities.countDocuments());
         Document doc = (Document)entities.find().iterator().next();
-        Assert.assertEquals(entity.getVersionId(), doc.getString(EntitiesMongo.VERSION_ID));
-        Assert.assertEquals(entity.getEntity().getPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(PATH));
-        Assert.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(CLASSIFIER_PATH));
+        Assertions.assertEquals(entity.getVersionId(), doc.getString(EntitiesMongo.VERSION_ID));
+        Assertions.assertEquals(entity.getEntity().getPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(PATH));
+        Assertions.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(CLASSIFIER_PATH));
 
         List result2 = entitiesMongo.createOrUpdate(Arrays.asList(entity));
-        Assert.assertNotNull(result2);
-        Assert.assertEquals(1, result2.size());
-        Assert.assertEquals(1, entities.countDocuments());
+        Assertions.assertNotNull(result2);
+        Assertions.assertEquals(1, result2.size());
+        Assertions.assertEquals(1, entities.countDocuments());
 
         MongoCollection entities1 = getMongoDatabase().getCollection(EntitiesMongo.COLLECTION);
-        Assert.assertNotNull(entities1);
-        Assert.assertEquals(1, entities1.countDocuments());
+        Assertions.assertNotNull(entities1);
+        Assertions.assertEquals(1, entities1.countDocuments());
         Document doc1 = (Document)entities.find().iterator().next();
-        Assert.assertEquals(entity.getVersionId(), doc1.getString(EntitiesMongo.VERSION_ID));
-        Assert.assertEquals(entity.getEntity().getPath(), ((Map)doc1.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(PATH));
-        Assert.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc1.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(CLASSIFIER_PATH));
+        Assertions.assertEquals(entity.getVersionId(), doc1.getString(EntitiesMongo.VERSION_ID));
+        Assertions.assertEquals(entity.getEntity().getPath(), ((Map)doc1.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(PATH));
+        Assertions.assertEquals(entity.getEntity().getClassifierPath(), ((Map)doc1.get(EntitiesMongo.ENTITY_ATTRIBUTES)).get(CLASSIFIER_PATH));
 
     }
 
@@ -121,14 +121,14 @@ public class TestUpdateVersions extends TestStoreMongo
     public void updatingSameEntityDoesNotCreateAnewONe()
     {
         List<StoredEntity> entitiesList = entityUtils.readEntitiesFile(ENTITIES_FILE);
-        Assert.assertNotNull(entitiesList);
+        Assertions.assertNotNull(entitiesList);
         StoredEntity entity = entitiesList.get(0);
         entitiesMongo.createOrUpdate(Arrays.asList(entity));
         entitiesMongo.createOrUpdate(Arrays.asList(entity));
 
         List<Entity> entities = entitiesMongo.getAllEntities("examples.metadata", "test", entity.getVersionId());
-        Assert.assertNotNull(entities);
-        Assert.assertEquals(1, entities.size());
+        Assertions.assertNotNull(entities);
+        Assertions.assertEquals(1, entities.size());
 
     }
 
@@ -137,9 +137,9 @@ public class TestUpdateVersions extends TestStoreMongo
     {
         entityUtils.loadEntities(ENTITIES_FILE);
         long count = entitiesMongo.getAllEntities("examples.metadata", "test", "2.2.0").size();
-        Assert.assertEquals(3, count);
+        Assertions.assertEquals(3, count);
         entitiesMongo.delete("examples.metadata", "test", "2.2.0");
-        Assert.assertEquals(0, entitiesMongo.getAllEntities("examples.metadata", "test", "2.2.0").size());
+        Assertions.assertEquals(0, entitiesMongo.getAllEntities("examples.metadata", "test", "2.2.0").size());
     }
 
 
@@ -148,16 +148,16 @@ public class TestUpdateVersions extends TestStoreMongo
     {
         entityUtils.loadEntities(ENTITIES_FILE);
         long count = entitiesMongo.getStoredEntities("examples.metadata", "test").stream().count();
-        Assert.assertEquals(3, count);
+        Assertions.assertEquals(3, count);
         entitiesMongo.delete("examples.metadata", "test");
-        Assert.assertEquals(0, entitiesMongo.getStoredEntities("examples.metadata", "test").size());
+        Assertions.assertEquals(0, entitiesMongo.getStoredEntities("examples.metadata", "test").size());
     }
 
     @Test
     public void canCreateUpdateStoreEntities()
     {
         List<StoredEntity> entities = entityUtils.readEntitiesFile(ENTITIES_FILE);
-        Assert.assertEquals(3, entities.size());
+        Assertions.assertEquals(3, entities.size());
 
         //lets do a change
         StoredEntityData first = (StoredEntityData) entities.get(0);
@@ -166,9 +166,9 @@ public class TestUpdateVersions extends TestStoreMongo
         entitiesMongo.createOrUpdate(entities);
 
        Optional<Entity> found = entitiesMongo.getEntity(first.getGroupId(),first.getArtifactId(),first.getVersionId(),first.getEntity().getPath());
-       Assert.assertTrue(found.isPresent());
-       Assert.assertTrue(found.get().getContent().containsKey("new"));
-       Assert.assertEquals("stuff",found.get().getContent().get("new"));
+       Assertions.assertTrue(found.isPresent());
+       Assertions.assertTrue(found.get().getContent().containsKey("new"));
+       Assertions.assertEquals("stuff",found.get().getContent().get("new"));
     }
 
 }

@@ -15,8 +15,8 @@
 
 package org.finos.legend.depot.domain.version;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
@@ -25,10 +25,10 @@ public class TestVersionValidator
     @Test
     public void testVersionsAreCorrect()
     {
-        Assert.assertTrue(VersionValidator.isValid("1.1.1"));
-        Assert.assertTrue(VersionValidator.isValid(BRANCH_SNAPSHOT("master")));
-        Assert.assertFalse(VersionValidator.isValid("jkwhfkjasf-jhdfjks"));
-        Assert.assertTrue(VersionValidator.isValid("my-SNAPSHOT"));
+        Assertions.assertTrue(VersionValidator.isValid("1.1.1"));
+        Assertions.assertTrue(VersionValidator.isValid(BRANCH_SNAPSHOT("master")));
+        Assertions.assertFalse(VersionValidator.isValid("jkwhfkjasf-jhdfjks"));
+        Assertions.assertTrue(VersionValidator.isValid("my-SNAPSHOT"));
     }
 
 }

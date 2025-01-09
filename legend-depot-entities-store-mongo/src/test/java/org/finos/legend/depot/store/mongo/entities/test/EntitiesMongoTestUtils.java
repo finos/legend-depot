@@ -23,7 +23,7 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -54,12 +54,12 @@ public final class EntitiesMongoTestUtils
             List<StoredEntity> entities = new ObjectMapper().readValue(jsonInput, new TypeReference<List<StoredEntity>>()
             {
             });
-            Assert.assertNotNull("testing file" + fileName.getFile(), entities);
+            Assertions.assertNotNull(entities, "testing file" + fileName.getFile());
             return entities;
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test versioned entity metadata" + e.getMessage());
+            Assertions.fail("an error has occurred loading test versioned entity metadata" + e.getMessage());
         }
         return null;
     }
@@ -68,7 +68,7 @@ public final class EntitiesMongoTestUtils
     {
         try
         {
-            Assert.assertNotNull(getMongoEntities());
+            Assertions.assertNotNull(getMongoEntities());
             readEntitiesFile(entitiesFile).forEach(entity ->
             {
                 try
@@ -77,13 +77,13 @@ public final class EntitiesMongoTestUtils
                 }
                 catch (JsonProcessingException e)
                 {
-                    Assert.fail("an error has occurred loading test entity" + e.getMessage());
+                    Assertions.fail("an error has occurred loading test entity" + e.getMessage());
                 }
             });
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test entity" + e.getMessage());
+            Assertions.fail("an error has occurred loading test entity" + e.getMessage());
         }
     }
 

@@ -21,8 +21,8 @@ import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -38,15 +38,15 @@ public class TestProjectsResource extends TestBaseServices
     public void canQueryVersionsForProjectGA()
     {
         List<String> versionSet = (List<String>) projectsVersionsResource.getVersions("examples.metadata", "test", false).getEntity();
-        Assert.assertNotNull(versionSet);
-        Assert.assertEquals(2, versionSet.size());
+        Assertions.assertNotNull(versionSet);
+        Assertions.assertEquals(2, versionSet.size());
     }
 
     @Test
     public void canQueryVersionsForProject()
     {
         List<String> versionSet = (List<String>) projectsVersionsResource.getVersions("examples.metadata", "test",false).getEntity();
-        Assert.assertNotNull(versionSet);
-        Assert.assertEquals(2, versionSet.size());
+        Assertions.assertNotNull(versionSet);
+        Assertions.assertEquals(2, versionSet.size());
     }
 }

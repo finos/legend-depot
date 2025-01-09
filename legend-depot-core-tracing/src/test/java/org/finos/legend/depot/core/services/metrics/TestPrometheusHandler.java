@@ -18,15 +18,15 @@ package org.finos.legend.depot.core.services.metrics;
 
 import io.prometheus.client.CollectorRegistry;
 import org.finos.legend.depot.core.services.api.metrics.configuration.PrometheusConfiguration;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class TestPrometheusHandler
 {
     DepotPrometheusMetricsHandler prometheusMetrics = (DepotPrometheusMetricsHandler) PrometheusMetricsFactory.configure(new PrometheusConfiguration(true,new DepotPrometheusMetricsHandler("test")));
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
         CollectorRegistry.defaultRegistry.clear();
@@ -35,26 +35,26 @@ public class TestPrometheusHandler
     @Test
     public void canConfigureHandler()
     {
-       Assert.assertNotNull(PrometheusMetricsFactory.getInstance());
+       Assertions.assertNotNull(PrometheusMetricsFactory.getInstance());
     }
 
     @Test
     public void canCreateCounterAndIncrement()
     {
         prometheusMetrics.registerCounter("test1","help");
-        Assert.assertEquals(1, prometheusMetrics.allCounters.size());
-        Assert.assertEquals(1, prometheusMetrics.allErrorCounters.size());
+        Assertions.assertEquals(1, prometheusMetrics.allCounters.size());
+        Assertions.assertEquals(1, prometheusMetrics.allErrorCounters.size());
 
-        Assert.assertEquals(0.0D, prometheusMetrics.allCounters.get("test_test1").get(),0.0D);
-        Assert.assertEquals(0.0D, prometheusMetrics.allErrorCounters.get("test_test1_errors").get(),0.0);
+        Assertions.assertEquals(0.0D, prometheusMetrics.allCounters.get("test_test1").get(),0.0D);
+        Assertions.assertEquals(0.0D, prometheusMetrics.allErrorCounters.get("test_test1_errors").get(),0.0);
 
         prometheusMetrics.incrementCount("test1");
-        Assert.assertEquals(1.0D, prometheusMetrics.allCounters.get("test_test1").get(),0.0);
-        Assert.assertEquals(0.0D, prometheusMetrics.allErrorCounters.get("test_test1_errors").get(),0.0);
+        Assertions.assertEquals(1.0D, prometheusMetrics.allCounters.get("test_test1").get(),0.0);
+        Assertions.assertEquals(0.0D, prometheusMetrics.allErrorCounters.get("test_test1_errors").get(),0.0);
 
         prometheusMetrics.incrementErrorCount("test1");
-        Assert.assertEquals(1.0D, prometheusMetrics.allCounters.get("test_test1").get(),0.0);
-        Assert.assertEquals(1.0D, prometheusMetrics.allErrorCounters.get("test_test1_errors").get(),0.0);
+        Assertions.assertEquals(1.0D, prometheusMetrics.allCounters.get("test_test1").get(),0.0);
+        Assertions.assertEquals(1.0D, prometheusMetrics.allErrorCounters.get("test_test1_errors").get(),0.0);
     }
 
     @Test
@@ -62,14 +62,14 @@ public class TestPrometheusHandler
     {
         prometheusMetrics.registerCounter("test2","help");
         prometheusMetrics.incrementCount("test2");
-        Assert.assertEquals(1, prometheusMetrics.allCounters.size());
-        Assert.assertEquals(1, prometheusMetrics.allErrorCounters.size());
+        Assertions.assertEquals(1, prometheusMetrics.allCounters.size());
+        Assertions.assertEquals(1, prometheusMetrics.allErrorCounters.size());
         prometheusMetrics.registerCounter("test2","help");
-        Assert.assertEquals(1, prometheusMetrics.allCounters.size());
-        Assert.assertEquals(1, prometheusMetrics.allErrorCounters.size());
+        Assertions.assertEquals(1, prometheusMetrics.allCounters.size());
+        Assertions.assertEquals(1, prometheusMetrics.allErrorCounters.size());
         prometheusMetrics.incrementCount("test2");
-        Assert.assertEquals(2.0D, prometheusMetrics.allCounters.get("test_test2").get(),0.0);
-        Assert.assertEquals(0.0D, prometheusMetrics.allErrorCounters.get("test_test2_errors").get(),0.0);
+        Assertions.assertEquals(2.0D, prometheusMetrics.allCounters.get("test_test2").get(),0.0);
+        Assertions.assertEquals(0.0D, prometheusMetrics.allErrorCounters.get("test_test2_errors").get(),0.0);
 
     }
 
@@ -77,15 +77,15 @@ public class TestPrometheusHandler
     public void incrementUnknownMetric()
     {
         prometheusMetrics.incrementCount("test2");
-        Assert.assertEquals(1, prometheusMetrics.allCounters.size());
-        Assert.assertEquals(0, prometheusMetrics.allErrorCounters.size());
+        Assertions.assertEquals(1, prometheusMetrics.allCounters.size());
+        Assertions.assertEquals(0, prometheusMetrics.allErrorCounters.size());
 
         prometheusMetrics.incrementCount("test2");
-        Assert.assertEquals(2.0D, prometheusMetrics.allCounters.get("test_test2").get(),0.0);
-        Assert.assertNull(prometheusMetrics.allErrorCounters.get("test_test2_errors"));
+        Assertions.assertEquals(2.0D, prometheusMetrics.allCounters.get("test_test2").get(),0.0);
+        Assertions.assertNull(prometheusMetrics.allErrorCounters.get("test_test2_errors"));
 
         prometheusMetrics.incrementErrorCount("test2");
-        Assert.assertEquals(1.0D, prometheusMetrics.allErrorCounters.get("test_test2_errors").get(),0.0);
+        Assertions.assertEquals(1.0D, prometheusMetrics.allErrorCounters.get("test_test2_errors").get(),0.0);
     }
 
 
@@ -94,9 +94,9 @@ public class TestPrometheusHandler
     public void testSummaryRegistration()
     {
         prometheusMetrics.registerSummary("test","test");
-        Assert.assertEquals(1,prometheusMetrics.allSummaries.keySet().size());
+        Assertions.assertEquals(1,prometheusMetrics.allSummaries.keySet().size());
 
         prometheusMetrics.registerSummary("test","test");
-        Assert.assertEquals(1,prometheusMetrics.allSummaries.keySet().size());
+        Assertions.assertEquals(1,prometheusMetrics.allSummaries.keySet().size());
     }
 }

@@ -34,9 +34,9 @@ import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -52,11 +52,11 @@ public class TestEntitiesMigration extends TestStoreMongo
 {
     MongoEntitiesMigrations mongoAdminStore = new MongoEntitiesMigrations(mongoProvider);
 
-    @Before
+    @BeforeEach
     public void setupTestData()
     {
         new EntitiesMongoTestUtils(mongoProvider).loadEntities(this.getClass().getClassLoader().getResource("data/versioned-entities-deletion.json"));
-        Assert.assertEquals(3,mongoProvider.getCollection("entities").countDocuments());
+        Assertions.assertEquals(3,mongoProvider.getCollection("entities").countDocuments());
     }
 
     private Bson getArtifactAndVersionFilter(String groupId, String artifactId, String versionId)
@@ -72,7 +72,7 @@ public class TestEntitiesMigration extends TestStoreMongo
         mongoProvider.getCollection("entities").updateOne(and(Filters.eq("entity.path", "examples::metadata::test::TestProfile"), getArtifactAndVersionFilter("examples.metadata", "test", "2.2.0")),
                 Updates.combine(Updates.set("versionedEntity", true)));
         DeleteResult result = mongoAdminStore.deleteVersionedEntities();
-        Assert.assertEquals(2, mongoProvider.getCollection("entities").countDocuments());
+        Assertions.assertEquals(2, mongoProvider.getCollection("entities").countDocuments());
     }
 
     @Test
@@ -81,7 +81,7 @@ public class TestEntitiesMigration extends TestStoreMongo
         mongoProvider.getCollection("entities").updateMany(getArtifactAndVersionFilter("examples.metadata", "test", "2.2.0"),
                 Updates.combine(Updates.set("versionedEntity", true)));
         DeleteResult result = mongoAdminStore.deleteVersionedEntities();
-        Assert.assertEquals(0, mongoProvider.getCollection("entities").countDocuments());
+        Assertions.assertEquals(0, mongoProvider.getCollection("entities").countDocuments());
     }
 
     @Test
@@ -91,15 +91,15 @@ public class TestEntitiesMigration extends TestStoreMongo
         setUpLegacyEntitiesDataFromFile(this.getClass().getClassLoader().getResource("data/migration/legacy-entities.json"));
         mongoAdminStore.migrateEntitiesToStoredEntityData();
 
-        Assert.assertEquals(3, mongoProvider.getCollection("entities").countDocuments());
-        Assert.assertNotNull(mongoProvider.getCollection("entities").find().first().getString("_type"));
-        Assert.assertEquals("entityData", mongoProvider.getCollection("entities").find().first().getString("_type"));
+        Assertions.assertEquals(3, mongoProvider.getCollection("entities").countDocuments());
+        Assertions.assertNotNull(mongoProvider.getCollection("entities").find().first().getString("_type"));
+        Assertions.assertEquals("entityData", mongoProvider.getCollection("entities").find().first().getString("_type"));
 
         EntitiesMongo entitiesMongo = new EntitiesMongo(mongoProvider);
         List<StoredEntity> storedEntities = entitiesMongo.getAllStoredEntities();
-        Assert.assertTrue(storedEntities.get(0) instanceof StoredEntityData);
-        Assert.assertTrue(storedEntities.get(1) instanceof StoredEntityData);
-        Assert.assertTrue(storedEntities.get(2) instanceof StoredEntityData);
+        Assertions.assertTrue(storedEntities.get(0) instanceof StoredEntityData);
+        Assertions.assertTrue(storedEntities.get(1) instanceof StoredEntityData);
+        Assertions.assertTrue(storedEntities.get(2) instanceof StoredEntityData);
     }
 
     protected void setUpLegacyEntitiesDataFromFile(URL entitiesFile)
@@ -114,14 +114,14 @@ public class TestEntitiesMigration extends TestStoreMongo
                 }
                 catch (JsonProcessingException e)
                 {
-                    Assert.fail("an error has occurred loading test entity" + e.getMessage());
+                    Assertions.fail("an error has occurred loading test entity" + e.getMessage());
                 }
             });
-            Assert.assertNotNull(getMongoDatabase().getCollection("entities"));
+            Assertions.assertNotNull(getMongoDatabase().getCollection("entities"));
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test entity" + e.getMessage());
+            Assertions.fail("an error has occurred loading test entity" + e.getMessage());
         }
     }
 
@@ -135,12 +135,12 @@ public class TestEntitiesMigration extends TestStoreMongo
             List<LegacyStoredEntities> entities = new ObjectMapper().readValue(jsonInput, new TypeReference<List<LegacyStoredEntities>>()
             {
             });
-            Assert.assertNotNull("testing file" + fileName.getFile(), entities);
+            Assertions.assertNotNull(entities, "testing file" + fileName.getFile());
             return entities;
         }
         catch (Exception e)
         {
-            Assert.fail("an error has occurred loading test versioned entity metadata" + e.getMessage());
+            Assertions.fail("an error has occurred loading test versioned entity metadata" + e.getMessage());
         }
         return null;
     }
