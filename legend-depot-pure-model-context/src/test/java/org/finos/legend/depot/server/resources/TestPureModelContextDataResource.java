@@ -32,7 +32,7 @@ import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.entities.test.EntitiesMongoTestUtils;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.engine.protocol.pure.v1.model.context.PureModelContextData;
-import org.finos.legend.engine.protocol.pure.v1.model.packageableElement.domain.Class;
+import org.finos.legend.engine.protocol.pure.v1.model.domain.Class;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
