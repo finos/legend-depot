@@ -28,11 +28,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.security.Principal;
+import java.util.Arrays;
 
 
 @Path("")
@@ -86,6 +88,16 @@ public class ArtifactsPurgeResource extends AuthorisedResource
         });
     }
 
+    @GET
+    @Path("/artifactDelete/{groupId}/{artifactId}/snapshotVersions/{versions}")
+    @ApiOperation("delete snapshot version")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String deleteSnapShotVersion(@PathParam("groupId") String groupId,
+                                          @PathParam("artifactId") String artifactId,
+                                          @PathParam("versions") @ApiParam("a list of valid snapshot versions separated by ,") String versions)
+    {
+        return handle(ResourceLoggingAndTracing.DELETE_SNAPSHOT_VERSIONS, () -> artifactsPurgeService.deleteSnapshotVersions(groupId, artifactId, Arrays.asList(versions.split(","))));
+    }
 
     @DELETE
     @Path("/artifactEviction/{groupId}/{artifactId}/old/{keepVersions}")
