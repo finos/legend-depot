@@ -20,6 +20,7 @@ import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactHandlerFactory;
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactsHandler;
 import org.finos.legend.depot.services.api.artifacts.purge.ArtifactsPurgeService;
@@ -42,6 +43,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.DELETE_SNAPSHOT_VERSIONS;
 import static org.finos.legend.depot.domain.DatesHandler.toDate;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.DELETE_VERSION;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.DEPRECATE_VERSION;
@@ -118,6 +120,31 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
             LOGGER.info(String.format("%s-%s-%s artifacts deleted", groupId, artifactId, versionId));
             return projects.delete(groupId, artifactId, versionId);
         },decorateSpanWithVersionInfo(groupId, artifactId, versionId));
+    }
+
+    @Override
+    public String deleteSnapshotVersions(String groupId, String artifactId, List<String> versions)
+    {
+        projects.checkExists(groupId, artifactId);
+        TracerFactory.get().executeWithTrace(DELETE_SNAPSHOT_VERSIONS,  () ->
+        {
+            StoreProjectData project = projects.findCoordinates(groupId, artifactId).get();
+            String defaultBranch = project.getDefaultBranch() != null ? project.getDefaultBranch() : VersionValidator.BRANCH_SNAPSHOT("master");
+            versions.forEach(versionId ->
+                    {
+                        if (!VersionValidator.isSnapshotVersion(versionId))
+                        {
+                            throw new IllegalArgumentException(String.format("Version %s is not a snapshot version", versionId));
+                        }
+                    });
+            if (versions.contains(defaultBranch))
+            {
+                throw new IllegalArgumentException(String.format("Can't delete project's default branch %s", defaultBranch));
+            }
+            versions.forEach(versionId -> delete(groupId, artifactId, versionId));
+            return null;
+        });
+        return "Deleted snapshot versions";
     }
 
     @Override
