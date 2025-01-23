@@ -20,12 +20,14 @@ import org.finos.legend.depot.domain.VersionedData;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactHandlerFactory;
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactsHandler;
 import org.finos.legend.depot.services.api.artifacts.purge.ArtifactsPurgeService;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
+import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.core.services.tracing.TracerFactory;
@@ -34,6 +36,7 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.DELETE_SNAPSHOT_VERSIONS;
 import static org.finos.legend.depot.domain.DatesHandler.toDate;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.DELETE_VERSION;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.DEPRECATE_VERSION;
@@ -61,15 +65,18 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     private static final String EVICT_OLDEST = "evict_old";
 
     private final ManageProjectsService projects;
+
+    private final ProjectsConfiguration projectsConfiguration;
     private final VersionsReconciliationService versionsMismatchService;
     private final QueryMetricsService metrics;
 
     @Inject
-    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, VersionsReconciliationService versionsMismatchService, QueryMetricsService metrics)
+    public ArtifactsPurgeServiceImpl(ManageProjectsService projects, VersionsReconciliationService versionsMismatchService, QueryMetricsService metrics, ProjectsConfiguration projectsConfiguration)
     {
         this.projects = projects;
         this.metrics = metrics;
         this.versionsMismatchService = versionsMismatchService;
+        this.projectsConfiguration = projectsConfiguration;
     }
 
     protected QueryMetricsService getQueryMetricsService()
@@ -118,6 +125,49 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
             LOGGER.info(String.format("%s-%s-%s artifacts deleted", groupId, artifactId, versionId));
             return projects.delete(groupId, artifactId, versionId);
         },decorateSpanWithVersionInfo(groupId, artifactId, versionId));
+    }
+
+    @Override
+    public String deleteSnapshotVersions(String groupId, String artifactId, List<String> versions)
+    {
+        TracerFactory.get().executeWithTrace(DELETE_SNAPSHOT_VERSIONS,  () ->
+        {
+            Optional<StoreProjectData> storeProjectData = this.projects.findCoordinates(groupId, artifactId);
+            StoreProjectData project;
+            if (storeProjectData.isEmpty())
+            {
+                throw new IllegalArgumentException(String.format("No project found for %s-%s", groupId, artifactId));
+            }
+            else
+            {
+                project = storeProjectData.get();
+            }
+            String defaultBranch = VersionValidator.BRANCH_SNAPSHOT(project.getDefaultBranch() != null ? project.getDefaultBranch() : projectsConfiguration.getDefaultBranch());
+            List<String> nonSnapShotVersions = new ArrayList<>();
+            String[] defaultBranchMessage = {""};
+            versions.forEach(versionId ->
+                    {
+                        if (!VersionValidator.isSnapshotVersion(versionId))
+                        {
+                            nonSnapShotVersions.add(versionId);
+                        }
+                        else if (defaultBranch.equals(versionId))
+                        {
+                            defaultBranchMessage[0] = String.format(" The version %s was not deleted as it is the project's default branch", defaultBranch);
+                        }
+                        else
+                        {
+                            delete(groupId, artifactId, versionId);
+                        }
+                    });
+            String nonSnapShotVersionsMessage = nonSnapShotVersions.isEmpty() ? "" : "The versions " + nonSnapShotVersions + " could not be deleted as they are not snapshot versions.";
+            if (!(nonSnapShotVersionsMessage + defaultBranchMessage[0]).isEmpty())
+            {
+                throw new IllegalArgumentException(nonSnapShotVersionsMessage + defaultBranchMessage[0]);
+            }
+            return null;
+        });
+        return "Deleted snapshot versions";
     }
 
     @Override

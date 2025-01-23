@@ -81,13 +81,14 @@ public class TestArtifactsPurgeService extends TestBaseServices
     private final QueryMetricsRegistry metricsRegistry = new InMemoryQueryMetricsRegistry();
     private final QueryMetricsService metricHandler = new QueryMetricsServiceImpl(metrics);
     private final Queue queue = mock(Queue.class);
-    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metricsRegistry, queue, new ProjectsConfiguration("master"));
+    private final ProjectsConfiguration projectsConfiguration = new ProjectsConfiguration("master");
+    protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metricsRegistry, queue, projectsConfiguration);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
     protected UpdateFileGenerations fileGenerationsStore = new FileGenerationsMongo(mongoProvider);
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
     protected VersionsReconciliationServiceImpl versionsMismatchService = new VersionsReconciliationServiceImpl(repository, projectsService);
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, projectsService);
-    protected ArtifactsPurgeService purgeService = new ArtifactsPurgeServiceImpl(projectsService, versionsMismatchService, metricHandler);
+    protected ArtifactsPurgeService purgeService = new ArtifactsPurgeServiceImpl(projectsService, versionsMismatchService, metricHandler, projectsConfiguration);
 
 
 
@@ -268,6 +269,96 @@ public class TestArtifactsPurgeService extends TestBaseServices
         Assertions.assertTrue(version2.isEvicted());
         StoreProjectVersionData version3 = projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, "master-SNAPSHOT").get();
         Assertions.assertFalse(version3.isEvicted());
+    }
+
+    @Test
+    public void canDeleteSnapshotVersions()
+    {
+        String snapshot = "test-SNAPSHOT";
+        String snapshot2 = "test2-SNAPSHOT";
+        List<String> allVersions;
+        allVersions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID, true);
+        Assertions.assertEquals(6, allVersions.size());
+        Assertions.assertTrue(allVersions.contains(snapshot));
+        Assertions.assertTrue(allVersions.contains(snapshot2));
+        Assertions.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, snapshot).size());
+        Assertions.assertEquals(1, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, snapshot2).size());
+
+        purgeService.deleteSnapshotVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID, Arrays.asList(snapshot, snapshot2));
+        allVersions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID, true);
+        Assertions.assertEquals(4, allVersions.size());
+        Assertions.assertFalse(allVersions.contains(snapshot));
+        Assertions.assertFalse(allVersions.contains(snapshot2));
+        Assertions.assertFalse(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, snapshot).isPresent());
+        Assertions.assertFalse(projectsService.find(TEST_GROUP_ID, TEST_ARTIFACT_ID, snapshot2).isPresent());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, snapshot).size());
+        Assertions.assertEquals(0, entitiesStore.getAllEntities(TEST_GROUP_ID, TEST_ARTIFACT_ID, snapshot2).size());
+    }
+
+    @Test
+    public void canDeleteSnapshotVersionsButExceptionOnNonSnapShotVersions()
+    {
+        String snapshot = "test-SNAPSHOT";
+        String snapshot2 = "test2-SNAPSHOT";
+        String versionId = "2.0.0";
+        String versionId2 = "2.2.0";
+        String message = "The versions [2.0.0, 2.2.0] could not be deleted as they are not snapshot versions.";
+        List<String> allVersions;
+        allVersions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID, true);
+        Assertions.assertTrue(allVersions.contains(versionId));
+        Assertions.assertTrue(allVersions.contains(versionId2));
+
+        // RuntimeException because the IllegalArgumentException exception is caught in the executeWithTrace method
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> purgeService.deleteSnapshotVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID, Arrays.asList(snapshot, snapshot2, versionId, versionId2)));
+        Assertions.assertTrue(exception.getMessage().contains(message));
+        allVersions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID, true);
+        Assertions.assertEquals(4, allVersions.size());
+        Assertions.assertFalse(allVersions.contains(snapshot));
+        Assertions.assertFalse(allVersions.contains(snapshot2));
+        Assertions.assertTrue(allVersions.contains(versionId));
+        Assertions.assertTrue(allVersions.contains(versionId2));
+    }
+
+    @Test
+    public void canDeleteSnapshotVersionsButExceptionOnDefaultBranch()
+    {
+        String snapshot = "test-SNAPSHOT";
+        String snapshot2 = "test2-SNAPSHOT";
+        String defaultSnapShot = "master-SNAPSHOT";
+        String message = " The version master-SNAPSHOT was not deleted as it is the project's default branch";
+        List<String> allVersions;
+        allVersions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID, true);
+        Assertions.assertTrue(allVersions.contains(defaultSnapShot));
+
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> purgeService.deleteSnapshotVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID, Arrays.asList(defaultSnapShot, snapshot, snapshot2)));
+        Assertions.assertTrue(exception.getMessage().contains(message));
+        allVersions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID, true);
+        Assertions.assertEquals(4, allVersions.size());
+        Assertions.assertFalse(allVersions.contains(snapshot));
+        Assertions.assertFalse(allVersions.contains(snapshot2));
+        Assertions.assertTrue(allVersions.contains(defaultSnapShot));
+    }
+
+    @Test
+    public void canDeleteSnapshotVersionsButExceptionOnNonSnapShotVersionAndDefaultBranch()
+    {
+        String snapshot = "test-SNAPSHOT";
+        String snapshot2 = "test2-SNAPSHOT";
+        String defaultSnapShot = "master-SNAPSHOT";
+        String versionId = "2.0.0";
+        String versionId2 = "2.2.0";
+        String message = "The versions [2.0.0, 2.2.0] could not be deleted as they are not snapshot versions. The version master-SNAPSHOT was not deleted as it is the project's default branch";
+
+
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> purgeService.deleteSnapshotVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID, Arrays.asList(defaultSnapShot, snapshot, snapshot2, versionId, versionId2)));
+        Assertions.assertTrue(exception.getMessage().contains(message));
+        List<String> allVersions = projectsService.getVersions(TEST_GROUP_ID, TEST_ARTIFACT_ID, true);
+        Assertions.assertEquals(4, allVersions.size());
+        Assertions.assertFalse(allVersions.contains(snapshot));
+        Assertions.assertFalse(allVersions.contains(snapshot2));
+        Assertions.assertTrue(allVersions.contains(defaultSnapShot));
+        Assertions.assertTrue(allVersions.contains(versionId));
+        Assertions.assertTrue(allVersions.contains(versionId2));
     }
 
 }
