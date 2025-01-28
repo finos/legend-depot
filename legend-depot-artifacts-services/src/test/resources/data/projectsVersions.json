@@ -37,5 +37,15 @@
     "groupId": "examples.metadata",
     "artifactId": "test1",
     "versionId": "master-SNAPSHOT"
+  },
+  {
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "test-SNAPSHOT"
+  },
+  {
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionId": "test2-SNAPSHOT"
   }
 ]
