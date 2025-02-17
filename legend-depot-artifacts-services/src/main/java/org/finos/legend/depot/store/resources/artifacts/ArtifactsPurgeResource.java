@@ -91,7 +91,7 @@ public class ArtifactsPurgeResource extends AuthorisedResource
     @Path("/artifactDelete/{groupId}/{artifactId}/snapshotVersions")
     @ApiOperation(ResourceLoggingAndTracing.DELETE_SNAPSHOT_VERSIONS)
     @Produces(MediaType.TEXT_PLAIN)
-    public String deleteSnapShotVersion(@PathParam("groupId") String groupId,
+    public String deleteSnapshotVersion(@PathParam("groupId") String groupId,
                                         @PathParam("artifactId") String artifactId,
                                         @ApiParam("snapshotVersions") List<String> snapshotVersions)
     {
