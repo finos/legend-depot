@@ -464,5 +464,49 @@
       }
     },
     "id": ""
+  },
+  {
+    "_type": "entityData",
+    "versionId": "test-SNAPSHOT",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test"
+    },
+    "entity": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "content": {
+        "_type": "profile",
+        "name": "TestProfile",
+        "package": "examples::metadata::test"
+      }
+    },
+    "id": ""
+  },
+  {
+    "_type": "entityData",
+    "versionId": "test2-SNAPSHOT",
+    "groupId": "examples.metadata",
+    "artifactId": "test",
+    "versionedEntity": false,
+    "entityAttributes": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "package": "examples::metadata::test"
+    },
+    "entity": {
+      "path": "examples::metadata::test::TestProfile",
+      "classifierPath": "meta::pure::metamodel::extension::Profile",
+      "content": {
+        "_type": "profile",
+        "name": "TestProfile",
+        "package": "examples::metadata::test"
+      }
+    },
+    "id": ""
   }
 ]

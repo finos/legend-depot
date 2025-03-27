@@ -44,6 +44,7 @@ public class ResourceLoggingAndTracing
     public static final String UPDATE_ALL_PROJECT_VERSIONS = "refresh all project versions";
     public static final String EVICT_OLD_VERSIONS = "evict old versions";
     public static final String DELETE_VERSION = "delete version";
+    public static final String DELETE_SNAPSHOT_VERSIONS = "delete snapshot versions";
     public static final String DEPRECATE_VERSION = "deprecate version";
     public static final String EVICT_VERSION = "evict version";
     public static final String EVICT_VERSIONS_NOT_USED = "evict versions not used";
