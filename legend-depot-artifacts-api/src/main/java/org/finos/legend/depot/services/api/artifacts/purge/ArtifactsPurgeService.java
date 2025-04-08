@@ -17,6 +17,8 @@ package org.finos.legend.depot.services.api.artifacts.purge;
 
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 
+import java.util.List;
+
 public interface ArtifactsPurgeService
 {
     MetadataNotificationResponse evictLeastRecentlyUsed(int ttlForVersionsInDays, int ttlForSnapshotsInDays);
@@ -28,6 +30,8 @@ public interface ArtifactsPurgeService
     void evict(String groupId, String artifactId, String versionId);
 
     void delete(String groupId, String artifactId, String versionId);
+
+    String deleteSnapshotVersions(String groupId, String artifactId, List<String> versions);
 
     MetadataNotificationResponse deprecate(String groupId, String artifactId, String version);
 
