@@ -71,9 +71,9 @@ jobs:
         if: (github.repository != 'finos/legend-depot') || (github.ref != 'refs/heads/master') || (github.ref != 'refs/heads/integration')
         run: mvn install javadoc:javadoc
 
-      - name: Build + Test + Sonar + Maven Deploy
+      - name: Build + Test + Sonar 
         if: (github.repository == 'finos/legend-depot') && ((github.ref == 'refs/heads/master') || (github.ref == 'refs/heads/integration'))
         env:
           DOCKER_USERNAME: finos
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: mvn javadoc:javadoc deploy -P sonar,docker-snapshot
+        run: mvn javadoc:javadoc install -P sonar,docker-snapshot

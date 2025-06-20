@@ -98,7 +98,7 @@
         <maven.compiler>11</maven.compiler>
         <java.version.range>[11,12),[17,18)</java.version.range>
         <publish.server.id>central</publish.server.id>
-        
+
         <!-- Legend dependency versions -->
         <legend.shared.version>0.27.0</legend.shared.version>
         <legend.engine.version>4.89.0</legend.engine.version>
@@ -173,7 +173,6 @@
         <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
         <maven.enforcer.plugin.version>3.0.0-M1</maven.enforcer.plugin.version>
         <maven.jar.plugin.version>3.1.2</maven.jar.plugin.version>
-        <nexus.staging.maven.plugin.version>1.6.13</nexus.staging.maven.plugin.version>
 
         <git.commit.plugin.version>2.2.6</git.commit.plugin.version>
         <versions.maven.plugin.version>2.7</versions.maven.plugin.version>
@@ -215,11 +214,6 @@
                             </fileset>
                         </filesets>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>${nexus.staging.maven.plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -415,10 +409,17 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
+<<<<<<< HEAD
                 <configuration>
                     <publishingServerId>central</publishingServerId>
                      <autoPublish>true</autoPublish>
                     <waitUntil>published</waitUntil>
+=======
+		<configuration>
+	         <publishingServerId>central</publishingServerId>
+	         <autoPublish>true</autoPublish>
+	         <waitUntil>published</waitUntil>
+>>>>>>> ce506d05 (Updates for new release to Sonatype central)
                 </configuration>
             </plugin>
             <plugin>
@@ -1371,7 +1372,10 @@
         </dependencies>
     </dependencyManagement>
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> ce506d05 (Updates for new release to Sonatype central)
     <profiles>
         <profile>
             <id>docker</id>
