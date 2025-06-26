@@ -409,17 +409,10 @@
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
-<<<<<<< HEAD
                 <configuration>
                     <publishingServerId>central</publishingServerId>
                      <autoPublish>true</autoPublish>
                     <waitUntil>published</waitUntil>
-=======
-		<configuration>
-	         <publishingServerId>central</publishingServerId>
-	         <autoPublish>true</autoPublish>
-	         <waitUntil>published</waitUntil>
->>>>>>> ce506d05 (Updates for new release to Sonatype central)
                 </configuration>
             </plugin>
             <plugin>
@@ -1372,10 +1365,6 @@
         </dependencies>
     </dependencyManagement>
 
-<<<<<<< HEAD
-
-=======
->>>>>>> ce506d05 (Updates for new release to Sonatype central)
     <profiles>
         <profile>
             <id>docker</id>
