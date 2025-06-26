@@ -128,7 +128,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
     }
 
     @Override
-    public String deleteSnapshotVersions(String groupId, String artifactId, List<String> versions)
+    public String deleteSnapshotVersions(String groupId, String artifactId, List<String> snapshotVersions)
     {
         List<String> nonCompliantVersionErrors = new ArrayList<>();
         TracerFactory.get().executeWithTrace(DELETE_SNAPSHOT_VERSIONS,  () ->
@@ -144,7 +144,7 @@ public class ArtifactsPurgeServiceImpl implements ArtifactsPurgeService
                 project = storeProjectData.get();
             }
             String defaultBranch = VersionValidator.BRANCH_SNAPSHOT(project.getDefaultBranch() != null ? project.getDefaultBranch() : projectsConfiguration.getDefaultBranch());
-            versions.forEach(versionId ->
+            snapshotVersions.forEach(versionId ->
                     {
                         if (!VersionValidator.isSnapshotVersion(versionId))
                         {
