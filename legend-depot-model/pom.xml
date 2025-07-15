@@ -46,10 +46,6 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
             <groupId>${junit.groupId}</groupId>
             <artifactId>${junit.artifactId}</artifactId>
             <scope>test</scope>
