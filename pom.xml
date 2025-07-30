@@ -21,13 +21,13 @@
     <parent>
         <groupId>org.finos</groupId>
         <artifactId>finos</artifactId>
-        <version>4</version>
+        <version>7</version>
     </parent>
 
     <name>Legend Depot</name>
     <groupId>org.finos.legend.depot</groupId>
     <artifactId>legend-depot</artifactId>
-    <version>2.62.1-SNAPSHOT</version>
+    <version>2.71.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -97,11 +97,12 @@
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
         <maven.compiler>11</maven.compiler>
         <java.version.range>[11,12),[17,18)</java.version.range>
+        <publish.server.id>central</publish.server.id>
 
         <!-- Legend dependency versions -->
-        <legend.shared.version>0.26.0</legend.shared.version>
-        <legend.engine.version>4.84.0</legend.engine.version>
-        <legend.sdlc.version>0.191.0</legend.sdlc.version>
+        <legend.shared.version>0.27.0</legend.shared.version>
+        <legend.engine.version>4.93.0</legend.engine.version>
+        <legend.sdlc.version>0.200.0</legend.sdlc.version>
 
 
         <!-- Dependency versions -->
@@ -172,7 +173,6 @@
         <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
         <maven.enforcer.plugin.version>3.0.0-M1</maven.enforcer.plugin.version>
         <maven.jar.plugin.version>3.1.2</maven.jar.plugin.version>
-        <nexus.staging.maven.plugin.version>1.6.13</nexus.staging.maven.plugin.version>
 
         <git.commit.plugin.version>2.2.6</git.commit.plugin.version>
         <versions.maven.plugin.version>2.7</versions.maven.plugin.version>
@@ -216,14 +216,23 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>${nexus.staging.maven.plugin.version}</version>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven.surefire.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.2.1</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>install</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -412,14 +421,13 @@
 
         <plugins>
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <extensions>true</extensions>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
                 <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                    <stagingProgressTimeoutMinutes>10</stagingProgressTimeoutMinutes>
+                    <publishingServerId>central</publishingServerId>
+                     <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
+                    <waitMaxTime>3600</waitMaxTime>
                 </configuration>
             </plugin>
             <plugin>
@@ -1371,22 +1379,6 @@
             <!-- PROMETHEUS -->
         </dependencies>
     </dependencyManagement>
-
-    <repositories>
-        <repository>
-            <id>ossrh</id>
-            <name>OSSRH Public Group</name>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>ossrh-releases</id>
-            <name>OSSRH Public Releases Group</name>
-            <url>https://s01.oss.sonatype.org/content/repositories/releases/</url>
-        </repository>
-    </repositories>
 
     <profiles>
         <profile>
