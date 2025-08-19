@@ -77,7 +77,7 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
         Assertions.assertTrue(versionData.getTransitiveDependenciesReport().isValid());
         List<ProjectVersion> transitiveDependencies = versionData.getTransitiveDependenciesReport().getTransitiveDependencies();
         Assertions.assertEquals(5, transitiveDependencies.size());
-        List<ProjectVersion> dependencies = Arrays.asList(dependency, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0"), new ProjectVersion(GROUPID, "art103", "1.0.0"), new ProjectVersion(GROUPID, "art102", "1.0.0"),new ProjectVersion(GROUPID, "art101", "1.0.0"));
+        List<ProjectVersion> dependencies = Arrays.asList(dependency, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0"), new ProjectVersion(GROUPID, "art103", "1.0.0"), new ProjectVersion(GROUPID, "art102", "1.0.0"), new ProjectVersion(GROUPID, "art101", "1.0.0"));
         Assertions.assertEquals(dependencies,transitiveDependencies);
     }
 
@@ -161,7 +161,7 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
 
         project2 = refreshDependenciesService.updateTransitiveDependencies(GROUPID, "test-master", "3.0.0");
         Assertions.assertTrue(project2.getTransitiveDependenciesReport().isValid());
-        Assertions.assertEquals(Arrays.asList(dependency1, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0") ,dependency2,dependency, new ProjectVersion(GROUPID, "art101", "1.0.0")), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
+        Assertions.assertEquals(Arrays.asList(dependency1, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0"), dependency2,dependency, new ProjectVersion(GROUPID, "art101", "1.0.0")), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
     }
 
 //    Example : A -> B_V1 -> C_V1
@@ -251,6 +251,6 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
         project = refreshDependenciesService.updateTransitiveDependencies("examples.metadata", "testa", "1.0.0");
 
         Assertions.assertEquals(4, project.getTransitiveDependenciesReport().getTransitiveDependencies().size());
-        Assertions.assertEquals(Arrays.asList(dependency3,dependency2, pv2, pv1), project.getTransitiveDependenciesReport().getTransitiveDependencies());
+        Assertions.assertEquals(Arrays.asList(dependency3, dependency2, pv2, pv1), project.getTransitiveDependenciesReport().getTransitiveDependencies());
     }
 }
