@@ -77,8 +77,8 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
         Assertions.assertTrue(versionData.getTransitiveDependenciesReport().isValid());
         List<ProjectVersion> transitiveDependencies = versionData.getTransitiveDependenciesReport().getTransitiveDependencies();
         Assertions.assertEquals(5, transitiveDependencies.size());
-        List<ProjectVersion> dependencies = Arrays.asList(dependency, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0"), new ProjectVersion(GROUPID, "art101", "1.0.0"),new ProjectVersion(GROUPID, "art102", "1.0.0"), new ProjectVersion(GROUPID, "art103", "1.0.0"));
-        Assertions.assertEquals(transitiveDependencies, dependencies);
+        List<ProjectVersion> dependencies = Arrays.asList(dependency, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0"), new ProjectVersion(GROUPID, "art103", "1.0.0"), new ProjectVersion(GROUPID, "art102", "1.0.0"),new ProjectVersion(GROUPID, "art101", "1.0.0"));
+        Assertions.assertEquals(dependencies,transitiveDependencies);
     }
 
     @Test
@@ -109,11 +109,11 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
         //chain update of snapshot dependants
         project2 = projectsService.find(GROUPID, "art105", "branch1-SNAPSHOT").get();
         Assertions.assertTrue(project2.getTransitiveDependenciesReport().isValid());
-        Assertions.assertEquals(Arrays.asList(dependency1, dependency2), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
+        Assertions.assertEquals(Arrays.asList(dependency2, dependency1), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
 
         project3 = projectsService.find(GROUPID, "art106", "branch1-SNAPSHOT").get();
         Assertions.assertTrue(project3.getTransitiveDependenciesReport().isValid());
-        Assertions.assertEquals(Arrays.asList(dependency1, dependency3, dependency2), project3.getTransitiveDependenciesReport().getTransitiveDependencies());
+        Assertions.assertEquals(Arrays.asList(dependency2, dependency1, dependency3), project3.getTransitiveDependenciesReport().getTransitiveDependencies());
     }
 
     @Test
@@ -136,7 +136,7 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
 
         project2 = refreshDependenciesService.updateTransitiveDependencies(GROUPID, "test-master", "3.0.0");
         Assertions.assertTrue(project2.getTransitiveDependenciesReport().isValid());
-        Assertions.assertEquals(Arrays.asList(dependency1, dependency2, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0"), new ProjectVersion(GROUPID, "art101", "1.0.0")), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
+        Assertions.assertEquals(Arrays.asList(dependency1, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0"),dependency2,  new ProjectVersion(GROUPID, "art101", "1.0.0")), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
     }
 
     @Test
@@ -161,7 +161,7 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
 
         project2 = refreshDependenciesService.updateTransitiveDependencies(GROUPID, "test-master", "3.0.0");
         Assertions.assertTrue(project2.getTransitiveDependenciesReport().isValid());
-        Assertions.assertEquals(Arrays.asList(dependency1, dependency, dependency2, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0"), new ProjectVersion(GROUPID, "art101", "1.0.0")), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
+        Assertions.assertEquals(Arrays.asList(dependency1, new ProjectVersion(GROUPID, "test-dependencies", "2.0.0") ,dependency2,dependency, new ProjectVersion(GROUPID, "art101", "1.0.0")), project2.getTransitiveDependenciesReport().getTransitiveDependencies());
     }
 
 //    Example : A -> B_V1 -> C_V1
@@ -197,7 +197,7 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
         projectsService.createOrUpdate(project3);
         project3 = refreshDependenciesService.updateTransitiveDependencies(GROUPID, "test", "5.0.0");
         Assertions.assertTrue(project3.getTransitiveDependenciesReport().isValid());
-        Assertions.assertEquals(Arrays.asList(dependency, dependency2), project3.getTransitiveDependenciesReport().getTransitiveDependencies());
+        Assertions.assertEquals(Arrays.asList(dependency2, dependency), project3.getTransitiveDependenciesReport().getTransitiveDependencies());
 
         //overriding art102:1.0.0 dependency with art102:2.0.0 with a different underlying dependency
         StoreProjectVersionData project4 = new StoreProjectVersionData(GROUPID, "test-master", "3.0.0");
@@ -208,7 +208,7 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
 
         project4 = refreshDependenciesService.updateTransitiveDependencies(GROUPID, "test-master", "3.0.0");
         Assertions.assertTrue(project4.getTransitiveDependenciesReport().isValid());
-        Assertions.assertEquals(Arrays.asList(dependency3, dependency4, dependency1), project4.getTransitiveDependenciesReport().getTransitiveDependencies());
+        Assertions.assertEquals(Arrays.asList(dependency1, dependency4, dependency3), project4.getTransitiveDependenciesReport().getTransitiveDependencies());
     }
 
     @Test
@@ -251,6 +251,6 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
         project = refreshDependenciesService.updateTransitiveDependencies("examples.metadata", "testa", "1.0.0");
 
         Assertions.assertEquals(4, project.getTransitiveDependenciesReport().getTransitiveDependencies().size());
-        Assertions.assertEquals(Arrays.asList(dependency2, pv2, dependency3, pv1), project.getTransitiveDependenciesReport().getTransitiveDependencies());
+        Assertions.assertEquals(Arrays.asList(dependency3,dependency2, pv2, pv1), project.getTransitiveDependenciesReport().getTransitiveDependencies());
     }
 }
