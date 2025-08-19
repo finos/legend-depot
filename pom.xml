@@ -27,7 +27,7 @@
     <name>Legend Depot</name>
     <groupId>org.finos.legend.depot</groupId>
     <artifactId>legend-depot</artifactId>
-    <version>2.71.1-SNAPSHOT</version>
+    <version>2.73.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -100,9 +100,9 @@
         <publish.server.id>central</publish.server.id>
 
         <!-- Legend dependency versions -->
-        <legend.shared.version>0.27.0</legend.shared.version>
-        <legend.engine.version>4.93.0</legend.engine.version>
-        <legend.sdlc.version>0.200.0</legend.sdlc.version>
+        <legend.shared.version>0.28.0</legend.shared.version>
+        <legend.engine.version>4.96.4</legend.engine.version>
+        <legend.sdlc.version>0.201.1</legend.sdlc.version>
 
 
         <!-- Dependency versions -->
@@ -111,8 +111,7 @@
         <commons-codec.version>1.15</commons-codec.version>
         <commons-compress.version>1.21</commons-compress.version>
         <commons-io.version>2.7</commons-io.version>
-        <commons-lang.version>2.6</commons-lang.version>
-        <commons-lang3.version>3.7</commons-lang3.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
         <dropwizard.version>1.3.29</dropwizard.version>
         <dropwizard.metrics.version>4.1.16</dropwizard.metrics.version>
         <dropwizard-guicier.version>1.3.5.2</dropwizard-guicier.version>
@@ -142,7 +141,6 @@
         <junit5-version>5.9.3</junit5-version>
 
         <mockito.version>3.9.0</mockito.version>
-        <pac4j.version>3.8.3</pac4j.version>
         <slf4j.version>1.7.36</slf4j.version>
 
         <apache.maven.version>3.6.2</apache.maven.version>
@@ -879,11 +877,6 @@
                 <groupId>org.eclipse.collections</groupId>
                 <artifactId>eclipse-collections</artifactId>
                 <version>${eclipse.collections.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons-lang.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>

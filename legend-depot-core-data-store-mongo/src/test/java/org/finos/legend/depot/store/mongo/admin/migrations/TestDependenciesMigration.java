@@ -98,7 +98,7 @@ public class TestDependenciesMigration extends CoreDataMongoStoreTests
         ProjectVersion pv2 = new ProjectVersion("examples.metadata", "art101", "1.0.0");
         ProjectVersion pv3 = new ProjectVersion("examples.metadata", "art102", "1.0.0");
         ProjectVersion pv4 = new ProjectVersion("examples.metadata", "art103", "1.0.0");
-        Assertions.assertEquals(result.getTransitiveDependenciesReport().getTransitiveDependencies(), Arrays.asList(pv1, pv2, pv3, pv4));
+        Assertions.assertEquals(result.getTransitiveDependenciesReport().getTransitiveDependencies(), Arrays.asList(pv1, pv4, pv3, pv2));
 
         //check for the excluded Dependency
         StoreProjectVersionData result1 = convert(new ObjectMapper(), mongoProvider.getCollection(VERSIONS_COLLECTION).find(Filters.and(Filters.eq("groupId", "examples.metadata"), Filters.eq("artifactId", "art104"))).first(), StoreProjectVersionData.class);
@@ -107,7 +107,7 @@ public class TestDependenciesMigration extends CoreDataMongoStoreTests
         //check for other dependencies
         StoreProjectVersionData result2 = convert(new ObjectMapper(), mongoProvider.getCollection(VERSIONS_COLLECTION).find(Filters.and(Filters.eq("groupId", "examples.metadata"), Filters.eq("artifactId", "test-dependencies"))).first(), StoreProjectVersionData.class);
         Assertions.assertTrue(result2.getTransitiveDependenciesReport().isValid());
-        Assertions.assertEquals(result2.getTransitiveDependenciesReport().getTransitiveDependencies(), Arrays.asList(pv2, pv3, pv4));
+        Assertions.assertEquals(result2.getTransitiveDependenciesReport().getTransitiveDependencies(), Arrays.asList(pv4, pv3, pv2));
 
         //check for dependency not present in store
         StoreProjectVersionData result3 = convert(new ObjectMapper(), mongoProvider.getCollection(VERSIONS_COLLECTION).find(Filters.and(Filters.eq("groupId", "examples.metadata"), Filters.eq("artifactId", "art108"))).first(), StoreProjectVersionData.class);
@@ -126,7 +126,7 @@ public class TestDependenciesMigration extends CoreDataMongoStoreTests
         ProjectVersion pv2 = new ProjectVersion("examples.metadata", "art101", "1.0.0");
         ProjectVersion pv3 = new ProjectVersion("examples.metadata", "art102", "1.0.0");
         ProjectVersion pv4 = new ProjectVersion("examples.metadata", "art103", "1.0.0");
-        Assertions.assertEquals(result.getTransitiveDependenciesReport().getTransitiveDependencies(), Arrays.asList(pv1, pv2, pv3, pv4));
+        Assertions.assertEquals(result.getTransitiveDependenciesReport().getTransitiveDependencies(), Arrays.asList(pv1, pv4, pv3, pv2));
 
         //check for the excluded Dependency
         StoreProjectVersionData result1 = convert(new ObjectMapper(), mongoProvider.getCollection(ProjectsVersionsMongo.COLLECTION).find(Filters.and(Filters.eq("groupId", "examples.metadata"), Filters.eq("artifactId", "art104"))).first(), StoreProjectVersionData.class);
@@ -135,7 +135,7 @@ public class TestDependenciesMigration extends CoreDataMongoStoreTests
         //check for other dependencies
         StoreProjectVersionData result2 = convert(new ObjectMapper(), mongoProvider.getCollection(ProjectsVersionsMongo.COLLECTION).find(Filters.and(Filters.eq("groupId", "examples.metadata"), Filters.eq("artifactId", "test-dependencies"))).first(), StoreProjectVersionData.class);
         Assertions.assertTrue(result2.getTransitiveDependenciesReport().isValid());
-        Assertions.assertEquals(result2.getTransitiveDependenciesReport().getTransitiveDependencies(), Arrays.asList(pv2, pv3, pv4));
+        Assertions.assertEquals(result2.getTransitiveDependenciesReport().getTransitiveDependencies(), Arrays.asList(pv4, pv3, pv2));
 
         //check for dependency not present in store
         StoreProjectVersionData result3 = convert(new ObjectMapper(), mongoProvider.getCollection(ProjectsVersionsMongo.COLLECTION).find(Filters.and(Filters.eq("groupId", "examples.metadata"), Filters.eq("artifactId", "art108"))).first(), StoreProjectVersionData.class);
