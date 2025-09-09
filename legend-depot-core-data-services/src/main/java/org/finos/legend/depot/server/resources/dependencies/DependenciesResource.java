@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_DEPENDANT_PROJECTS;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCIES;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCY_TREE;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.RESOLVE_COMPATIBLE_PROJECT_DEPENDENCY_VERSIONS;
 
 
 @Path("")
@@ -99,6 +100,16 @@ public class DependenciesResource extends TracingResource
     )
     {
         return handleResponse(GET_DEPENDANT_PROJECTS, GET_DEPENDANT_PROJECTS + groupId + artifactId, () -> transform(this.projectApi.getDependantProjects(groupId, artifactId, versionId, latestOnly)));
+    }
+
+    @POST
+    @Path("/projects/resolveCompatibleDependencies")
+    @ApiOperation(RESOLVE_COMPATIBLE_PROJECT_DEPENDENCY_VERSIONS)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response resolveCompatibleProjectDependencyVersions(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies,
+                                                                 @QueryParam("Number of versions to backtrack to find compatible versions") @DefaultValue("0") int backtrackVersions)
+    {
+        return handleResponse(RESOLVE_COMPATIBLE_PROJECT_DEPENDENCY_VERSIONS, () -> this.projectApi.resolveCompatibleVersions(projectDependencies, backtrackVersions));
     }
 
 
