@@ -34,13 +34,13 @@ import java.util.stream.Collectors;
 
 public class DependencySATConverter
 {
-    private final FormulaFactory f;
+    private final FormulaFactory formulaFactory;
     private final Map<String, Variable> variableMap = new HashMap<>();
     private final Map<Variable, ProjectVersion> reverseVariableMap = new HashMap<>();
 
-    public DependencySATConverter(FormulaFactory f)
+    public DependencySATConverter(FormulaFactory formulaFactory)
     {
-        this.f = f;
+        this.formulaFactory = formulaFactory;
     }
 
     public LogicNGSATResult convertToLogicNGFormulas(List<ProjectVersion> requiredProjects, Map<ProjectVersion, List<ProjectVersion>> alternativeVersions, ProjectsService projectsService)
@@ -54,7 +54,7 @@ public class DependencySATConverter
 
         Map<ProjectVersion, List<ProjectVersion>> resolvedAlternatives = applyOverridesToAlternatives(alternativeVersions, detectedOverrides);
         createVariables(actualRequiredProjects, resolvedAlternatives, projectsService);
-        calculateVersionWeights(weights);
+        assignVersionWeights(weights);
 
         // Add dependency constraints with override handling
         addDependencyConstraintsWithOverrides(clauses, actualRequiredProjects, resolvedAlternatives, detectedOverrides, projectsService, new HashSet<>());
@@ -68,7 +68,7 @@ public class DependencySATConverter
         // Add override constraints (force specific versions)
         addOverrideConstraints(clauses, detectedOverrides);
 
-        return new LogicNGSATResult(clauses, variableMap, reverseVariableMap, f, weights);
+        return new LogicNGSATResult(clauses, variableMap, reverseVariableMap, formulaFactory, weights);
     }
 
     private int calculateVersionWeight(ProjectVersion projectVersion)
@@ -92,7 +92,7 @@ public class DependencySATConverter
         return weight;
     }
 
-    private void calculateVersionWeights(Map<Variable, Integer> weights)
+    private void assignVersionWeights(Map<Variable, Integer> weights)
     {
         // Group variables by project (groupId:artifactId)
         Map<String, List<Variable>> projectGroups = new HashMap<>();
@@ -232,7 +232,7 @@ public class DependencySATConverter
             if (!variableMap.containsKey(gavKey))
             {
                 String varName = gavKey.replaceAll("[^a-zA-Z0-9_]", "_");
-                Variable var = f.variable(varName);
+                Variable var = formulaFactory.variable(varName);
                 variableMap.put(gavKey, var);
                 reverseVariableMap.put(var, pv);
             }
@@ -277,7 +277,7 @@ public class DependencySATConverter
             if (depVar != null)
             {
                 // ¬parent ? dependency (using effective dependency)
-                clauses.add(f.or(parentVar.negate(), depVar));
+                clauses.add(formulaFactory.or(parentVar.negate(), depVar));
                 processDependencyConstraintsWithOverrides(clauses, effectiveDep, overrides, projectsService, processed);
             }
         });
@@ -304,7 +304,7 @@ public class DependencySATConverter
                     for (int j = i + 1; j < versions.size(); j++)
                     {
                         // ¬version1 ? ¬version2 (at most one version per project)
-                        clauses.add(f.or(versions.get(i).negate(), versions.get(j).negate()));
+                        clauses.add(formulaFactory.or(versions.get(i).negate(), versions.get(j).negate()));
                     }
                 }
             }
@@ -336,7 +336,7 @@ public class DependencySATConverter
                 }
                 else
                 {
-                    clauses.add(f.or(alternatives)); // At least one
+                    clauses.add(formulaFactory.or(alternatives)); // At least one
                 }
             }
         });
@@ -360,7 +360,7 @@ public class DependencySATConverter
             if (loserVar != null && winnerVar != null)
             {
                 // ¬loserVar V winnerVar
-                clauses.add(f.or(loserVar.negate(), winnerVar));
+                clauses.add(formulaFactory.or(loserVar.negate(), winnerVar));
             }
         });
 
@@ -378,7 +378,7 @@ public class DependencySATConverter
 
     public FormulaFactory getFormulaFactory()
     {
-        return f;
+        return formulaFactory;
     }
 
 }

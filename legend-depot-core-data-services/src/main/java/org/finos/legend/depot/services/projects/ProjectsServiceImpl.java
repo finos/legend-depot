@@ -393,58 +393,23 @@ public class ProjectsServiceImpl implements ProjectsService
         // Solve and extract solution
         if (result == MaxSAT.MaxSATResult.OPTIMUM)
         {
-            return extractMaxSATSolution(maxSatSolver, satResult, projectDependencyVersions);
+            return extractSolutionFromModel(maxSatSolver.model(), satResult, projectDependencyVersions);
         }
 
         return Collections.emptyList();
     }
 
-    private List<ProjectVersion> extractMaxSATSolution(MaxSATSolver maxSatSolver, LogicNGSATResult satResult, List<ProjectVersion> originalRequiredProjects)
+    private List<ProjectVersion> extractSolutionFromModel(Assignment model, LogicNGSATResult satResult, List<ProjectVersion> originalRequiredProjects)
     {
         List<ProjectVersion> solution = new ArrayList<>();
-
-        // Get the model from MaxSAT result
-        Assignment model = maxSatSolver.model();
-
-        // Create a set of project coordinates (groupId:artifactId) from original required projects
         Set<String> requiredProjectCoordinates = originalRequiredProjects.stream()
                 .map(pv -> pv.getGroupId() + ":" + pv.getArtifactId())
                 .collect(Collectors.toSet());
 
-        satResult.getReverseVariableMap().forEach((variable, projectVersion) ->
-        {
-            if (model.evaluateLit(variable))
-            {
+        satResult.getReverseVariableMap().forEach((variable, projectVersion) -> {
+            if (model.evaluateLit(variable)) {
                 String projectCoordinate = projectVersion.getGroupId() + ":" + projectVersion.getArtifactId();
-                // Only include versions that match the original required projects
-                if (requiredProjectCoordinates.contains(projectCoordinate))
-                {
-                    solution.add(projectVersion);
-                }
-            }
-        });
-
-        return solution;
-    }
-
-    private List<ProjectVersion> extractSolution(SATSolver solver, LogicNGSATResult satResult, List<ProjectVersion> originalRequiredProjects)
-    {
-        List<ProjectVersion> solution = new ArrayList<>();
-        Assignment model = solver.model();
-
-        // Create a set of project coordinates (groupId:artifactId) from original required projects
-        Set<String> requiredProjectCoordinates = originalRequiredProjects.stream()
-                .map(pv -> pv.getGroupId() + ":" + pv.getArtifactId())
-                .collect(Collectors.toSet());
-
-        satResult.getReverseVariableMap().forEach((variable, projectVersion) ->
-        {
-            if (model.evaluateLit(variable))
-            {
-                String projectCoordinate = projectVersion.getGroupId() + ":" + projectVersion.getArtifactId();
-                // Only include versions that match the original required projects
-                if (requiredProjectCoordinates.contains(projectCoordinate))
-                {
+                if (requiredProjectCoordinates.contains(projectCoordinate)) {
                     solution.add(projectVersion);
                 }
             }
