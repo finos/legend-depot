@@ -406,10 +406,13 @@ public class ProjectsServiceImpl implements ProjectsService
                 .map(pv -> pv.getGroupId() + ":" + pv.getArtifactId())
                 .collect(Collectors.toSet());
 
-        satResult.getReverseVariableMap().forEach((variable, projectVersion) -> {
-            if (model.evaluateLit(variable)) {
+        satResult.getReverseVariableMap().forEach((variable, projectVersion) ->
+        {
+            if (model.evaluateLit(variable))
+            {
                 String projectCoordinate = projectVersion.getGroupId() + ":" + projectVersion.getArtifactId();
-                if (requiredProjectCoordinates.contains(projectCoordinate)) {
+                if (requiredProjectCoordinates.contains(projectCoordinate))
+                {
                     solution.add(projectVersion);
                 }
             }
