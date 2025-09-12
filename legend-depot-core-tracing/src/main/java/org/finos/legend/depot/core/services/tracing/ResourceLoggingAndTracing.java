@@ -71,7 +71,7 @@ public class ResourceLoggingAndTracing
     public static final String DELETE_SCHEDULE = "delete schedule";
     public static final String DELETE_SCHEDULES = "delete schedules";
     public static final String GET_QUEUE_COUNT = "queue count";
-
+    public static final String RESOLVE_COMPATIBLE_PROJECT_DEPENDENCY_VERSIONS = "resolve compatible project dependency versions";
 
     private ResourceLoggingAndTracing()
     {

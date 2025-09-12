@@ -18,36 +18,46 @@ package org.finos.legend.depot.services.projects;
 import org.eclipse.collections.api.factory.Sets;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.notifications.Priority;
-import org.finos.legend.depot.domain.project.ProjectVersionData;
-import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
-import org.finos.legend.depot.store.model.projects.StoreProjectData;
-import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyGraph;
-import org.finos.legend.depot.services.dependencies.ProjectDependencyGraphWalkerContext;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyReport;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyVersionNode;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
 import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.version.VersionValidator;
-import org.finos.legend.depot.services.api.projects.ProjectsService;
-import org.finos.legend.depot.services.dependencies.DependencyUtil;
-import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.api.projects.Projects;
-import org.finos.legend.depot.store.api.projects.ProjectsVersions;
-import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
-import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
+import org.finos.legend.depot.services.dependencies.DependencySATConverter;
+import org.finos.legend.depot.services.dependencies.DependencyUtil;
+import org.finos.legend.depot.services.dependencies.LogicNGSATResult;
+import org.finos.legend.depot.services.dependencies.ProjectDependencyGraphWalkerContext;
+import org.finos.legend.depot.store.api.projects.Projects;
+import org.finos.legend.depot.store.api.projects.ProjectsVersions;
+import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
+import org.finos.legend.depot.store.model.projects.StoreProjectData;
+import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
+import org.logicng.datastructures.Assignment;
+import org.logicng.formulas.FormulaFactory;
+import org.logicng.solvers.MaxSATSolver;
+import org.logicng.solvers.SATSolver;
+import org.logicng.solvers.maxsat.algorithms.MaxSAT;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Optional;
+import java.util.List;
+import java.util.HashSet;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -276,14 +286,14 @@ public class ProjectsServiceImpl implements ProjectsService
         projectDependencyVersions.forEach(pv ->
         {
             StoreProjectVersionData versionData = graphWalkerContext.getProjectData(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
-                if (versionData.getTransitiveDependenciesReport().isValid())
-                {
-                    dependencies.addAll(this.dependencyOverride.overrideWith(versionData.getTransitiveDependenciesReport().getTransitiveDependencies(), projectDependencyVersions, graphWalkerContext::getProjectDataDependencies));
-                }
-                else
-                {
-                    throw new IllegalStateException(String.format("Error calculating transitive dependencies for project version - %s-%s-%s", versionData.getGroupId(), versionData.getArtifactId(), versionData.getVersionId()));
-                }
+            if (versionData.getTransitiveDependenciesReport().isValid())
+            {
+                dependencies.addAll(this.dependencyOverride.overrideWith(versionData.getTransitiveDependenciesReport().getTransitiveDependencies(), projectDependencyVersions, graphWalkerContext::getProjectDataDependencies));
+            }
+            else
+            {
+                throw new IllegalStateException(String.format("Error calculating transitive dependencies for project version - %s-%s-%s", versionData.getGroupId(), versionData.getArtifactId(), versionData.getVersionId()));
+            }
         });
         dependencies.forEach(dep -> graphWalkerContext.addVersionToProject(dep.getGroupId(), dep.getArtifactId(), dep));
     }
@@ -336,7 +346,7 @@ public class ProjectsServiceImpl implements ProjectsService
                 projectsVersions.find(project.getGroupId(), project.getArtifactId()).parallelStream().forEach(projectData ->
                 {
                     Stream<ProjectVersion> dependencies = projectData.getVersionData().getDependencies().stream().filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId));
-                   dependencies.forEach(dep -> result.offer(new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep, projectData.getVersionData().getProperties())));
+                    dependencies.forEach(dep -> result.offer(new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep, projectData.getVersionData().getProperties())));
                 });
             });
         }
@@ -353,6 +363,83 @@ public class ProjectsServiceImpl implements ProjectsService
             });
         }
         return latestOnly ? filterProjectByLatest(result.stream().collect(Collectors.toList())) : result.stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProjectVersion> resolveCompatibleVersions(List<ProjectVersion> projectDependencyVersions, int backtrackVersions)
+    {
+        Map<ProjectVersion, List<ProjectVersion>> alternativeVersions = new HashMap<>();
+        if (projectDependencyVersions.isEmpty())
+        {
+            return Collections.emptyList();
+        }
+
+        projectDependencyVersions.forEach(pv ->
+        {
+            List<ProjectVersion> alternatives = getAlternativeVersions(pv, backtrackVersions);
+            alternativeVersions.put(pv, alternatives);
+        });
+
+        MaxSATSolver maxSatSolver = MaxSATSolver.wbo(new FormulaFactory());
+
+        // Convert to LogicNG formulas
+        DependencySATConverter converter = new DependencySATConverter(maxSatSolver.factory());
+        LogicNGSATResult satResult = converter.convertToLogicNGFormulas(projectDependencyVersions, alternativeVersions, this);
+
+        satResult.getClauses().forEach(maxSatSolver::addHardFormula);
+
+        satResult.getWeights().forEach(maxSatSolver::addSoftFormula);
+        MaxSAT.MaxSATResult result = maxSatSolver.solve();
+        // Solve and extract solution
+        if (result == MaxSAT.MaxSATResult.OPTIMUM)
+        {
+            return extractSolutionFromModel(maxSatSolver.model(), satResult, projectDependencyVersions);
+        }
+
+        return Collections.emptyList();
+    }
+
+    private List<ProjectVersion> extractSolutionFromModel(Assignment model, LogicNGSATResult satResult, List<ProjectVersion> originalRequiredProjects)
+    {
+        List<ProjectVersion> solution = new ArrayList<>();
+        Set<String> requiredProjectCoordinates = originalRequiredProjects.stream()
+                .map(pv -> pv.getGroupId() + ":" + pv.getArtifactId())
+                .collect(Collectors.toSet());
+
+        satResult.getReverseVariableMap().forEach((variable, projectVersion) ->
+        {
+            if (model.evaluateLit(variable))
+            {
+                String projectCoordinate = projectVersion.getGroupId() + ":" + projectVersion.getArtifactId();
+                if (requiredProjectCoordinates.contains(projectCoordinate))
+                {
+                    solution.add(projectVersion);
+                }
+            }
+        });
+
+        return solution;
+    }
+
+    private List<ProjectVersion> getAlternativeVersions(ProjectVersion pv, int backtrackVersions)
+    {
+        List<ProjectVersion> alternatives = new ArrayList<>();
+
+        // Always include the original requested version first
+        alternatives.add(pv);
+
+        if (backtrackVersions > 0)
+        {
+            // Only add alternative versions if backtrack is enabled
+            this.getVersions(pv.getGroupId(), pv.getArtifactId(), false)
+                    .stream()
+                    .filter(v -> !v.equals(pv.getVersionId()))
+                    .sorted(Comparator.reverseOrder())
+                    .limit(backtrackVersions)
+                    .forEach(v -> alternatives.add(new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), v)));
+        }
+
+        return alternatives;
     }
 
     private List<ProjectDependencyWithPlatformVersions> filterProjectByLatest(List<ProjectDependencyWithPlatformVersions> projects)

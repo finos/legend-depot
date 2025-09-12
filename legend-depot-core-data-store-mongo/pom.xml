@@ -62,6 +62,11 @@
             <artifactId>mongo-java-server</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.logicng</groupId>
+            <artifactId>logicng</artifactId>
+            <version>2.6.0</version>
+        </dependency>
 
 
     </dependencies>

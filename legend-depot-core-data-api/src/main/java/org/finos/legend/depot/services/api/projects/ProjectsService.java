@@ -77,4 +77,6 @@ public interface ProjectsService
     List<ProjectDependencyWithPlatformVersions> getDependantProjects(String groupId, String artifactId, String versionId, boolean latestOnly);
 
     void checkExists(String groupId, String artifactId) throws IllegalArgumentException;
+
+    List<ProjectVersion> resolveCompatibleVersions(List<ProjectVersion> projectDependencyVersions, int backtrackVersions);
 }
