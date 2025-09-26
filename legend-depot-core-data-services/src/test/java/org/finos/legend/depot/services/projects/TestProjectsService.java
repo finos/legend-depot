@@ -50,6 +50,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Collections;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
@@ -1658,5 +1659,49 @@ public class TestProjectsService extends TestBaseServices
 
         log.info("  Alternative valid solution (not chosen):");
         alternativeSolution.forEach(pv -> log.info("    - {} (older but compatible)", pv.getGav()));
+    }
+
+    @Test
+    public void canCreateMultipleProjectVersions()
+    {
+        List<ProjectVersion> alternatives = new ArrayList<>();
+        String[] versions =
+        {
+                "99.0.0",
+                "466.0.0",
+                "467.0.0",
+                "468.0.0",
+                "469.0.0",
+                "474.21.1",
+                "47.0.0",
+                "470.0.0",
+                "471.0.0",
+                "472.0.0",
+                "474.2.0",
+                "473.0.0",
+                "474.0.0",
+                "474.2.5",
+                "474.10.0",
+                "475.0.0",
+                "48.0.0",
+                "474.21.0",
+                "49.0.0",
+        };
+        List<String> versionsList = Arrays.asList(versions);
+        versionsList.sort(ProjectsServiceImpl::compareVersions);
+
+        versionsList.stream()
+                .limit(10)
+                .forEach(v -> alternatives.add(new ProjectVersion("org.finos.legend", "project_a", v)));
+        Assertions.assertEquals("org.finos.legend:project_a:475.0.0", alternatives.get(0).getGav());
+        Assertions.assertEquals("org.finos.legend:project_a:474.21.1", alternatives.get(1).getGav());
+        Assertions.assertEquals("org.finos.legend:project_a:474.21.0", alternatives.get(2).getGav());
+        Assertions.assertEquals("org.finos.legend:project_a:474.10.0", alternatives.get(3).getGav());
+        Assertions.assertEquals("org.finos.legend:project_a:474.2.5", alternatives.get(4).getGav());
+        Assertions.assertEquals("org.finos.legend:project_a:474.2.0", alternatives.get(5).getGav());
+        Assertions.assertEquals("org.finos.legend:project_a:474.0.0", alternatives.get(6).getGav());
+        Assertions.assertEquals("org.finos.legend:project_a:473.0.0", alternatives.get(7).getGav());
+        Assertions.assertEquals("org.finos.legend:project_a:472.0.0", alternatives.get(8).getGav());
+        Assertions.assertEquals("org.finos.legend:project_a:471.0.0", alternatives.get(9).getGav());
     }
 }
