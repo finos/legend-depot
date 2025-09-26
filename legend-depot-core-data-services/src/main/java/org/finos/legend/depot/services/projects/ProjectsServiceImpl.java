@@ -425,21 +425,42 @@ public class ProjectsServiceImpl implements ProjectsService
     {
         List<ProjectVersion> alternatives = new ArrayList<>();
 
-        // Always include the original requested version first
-        alternatives.add(pv);
-
         if (backtrackVersions > 0)
         {
             // Only add alternative versions if backtrack is enabled
-            this.getVersions(pv.getGroupId(), pv.getArtifactId(), false)
-                    .stream()
-                    .filter(v -> !v.equals(pv.getVersionId()))
+            List<String> versionStrings = this.getVersions(pv.getGroupId(), pv.getArtifactId(), false);
+            versionStrings.sort(ProjectsServiceImpl::compareVersions);
+
+            versionStrings.stream()
                     .sorted(Comparator.reverseOrder())
                     .limit(backtrackVersions)
                     .forEach(v -> alternatives.add(new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), v)));
         }
+        else
+        {
+            alternatives.add(pv);
+        }
 
         return alternatives;
+    }
+
+    public static int compareVersions(String v1, String v2)
+    {
+        String[] parts1 = v1.split("\\.");
+        String[] parts2 = v2.split("\\.");
+
+        int length = Math.max(parts1.length, parts2.length);
+        for (int i = 0; i < length; i++)
+        {
+            int part1 = i < parts1.length ? Integer.parseInt(parts1[i]) : 0;
+            int part2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
+
+            if (part1 != part2)
+            {
+                return Integer.compare(part2, part1);
+            }
+        }
+        return 0;
     }
 
     private List<ProjectDependencyWithPlatformVersions> filterProjectByLatest(List<ProjectDependencyWithPlatformVersions> projects)
