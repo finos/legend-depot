@@ -134,6 +134,7 @@
         <jetty.version>9.4.39.v20210325</jetty.version>
         <joda.time.version>2.10.14</joda.time.version>
         <json-smart.version>2.4.2</json-smart.version>
+        <io.netty.version>4.1.100.Final</io.netty.version>
 
         <junit.version>4.13.1</junit.version>
         <junit.groupId>org.junit.jupiter</junit.groupId>
@@ -1143,8 +1144,10 @@
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-                <version>${netty-all.version}</version>
+                <artifactId>netty-bom</artifactId>
+                <version>${io.netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
