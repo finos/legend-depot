@@ -46,6 +46,7 @@ import org.logicng.formulas.FormulaFactory;
 import org.logicng.solvers.MaxSATSolver;
 import org.logicng.solvers.SATSolver;
 import org.logicng.solvers.maxsat.algorithms.MaxSAT;
+import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -81,6 +82,7 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
     private static final String NOT_FOUND_IN_STORE = "project version not found for %s-%s-%s";
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ProjectsServiceImpl.class);
 
     @Inject
     public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyOverride") DependencyOverride dependencyOverride)
@@ -427,12 +429,11 @@ public class ProjectsServiceImpl implements ProjectsService
 
         if (backtrackVersions > 0)
         {
-            // Only add alternative versions if backtrack is enabled
+            LOGGER.info("Finding alternative versions for {}-{}-{} with backtrack {}", pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), backtrackVersions);
             List<String> versionStrings = this.getVersions(pv.getGroupId(), pv.getArtifactId(), false);
             versionStrings.sort(ProjectsServiceImpl::compareVersions);
-
+            LOGGER.info("Found {} versions for {}-{}, latest is {}", versionStrings.size(), pv.getGroupId(), pv.getArtifactId(), versionStrings.isEmpty() ? "N/A" : versionStrings.get(0));
             versionStrings.stream()
-                    .sorted(Comparator.reverseOrder())
                     .limit(backtrackVersions)
                     .forEach(v -> alternatives.add(new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), v)));
         }
@@ -441,6 +442,7 @@ public class ProjectsServiceImpl implements ProjectsService
             alternatives.add(pv);
         }
 
+        LOGGER.info("Found {} alternative versions for {}-{}-{} with backtrack {}", alternatives.size(), pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), backtrackVersions);
         return alternatives;
     }
 
