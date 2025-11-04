@@ -51,4 +51,10 @@ public class ProjectVersion extends VersionedData
     {
         return String.format("%s:%s:%s", this.getGroupId(), getArtifactId(), this.getVersionId());
     }
+
+    @JsonIgnore
+    public String getGa()
+    {
+        return String.format("%s:%s", this.getGroupId(), getArtifactId());
+    }
 }

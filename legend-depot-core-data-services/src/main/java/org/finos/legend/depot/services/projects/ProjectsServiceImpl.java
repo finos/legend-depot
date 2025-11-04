@@ -41,10 +41,10 @@ import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.logicng.datastructures.Assignment;
 import org.logicng.formulas.FormulaFactory;
 import org.logicng.solvers.MaxSATSolver;
-import org.logicng.solvers.SATSolver;
 import org.logicng.solvers.maxsat.algorithms.MaxSAT;
 import org.slf4j.Logger;
 
@@ -370,23 +370,25 @@ public class ProjectsServiceImpl implements ProjectsService
     @Override
     public List<ProjectVersion> resolveCompatibleVersions(List<ProjectVersion> projectDependencyVersions, int backtrackVersions)
     {
-        Map<ProjectVersion, List<ProjectVersion>> alternativeVersions = new HashMap<>();
+        Map<String, Set<ProjectVersion>> alternativeVersions = new HashMap<>();
         if (projectDependencyVersions.isEmpty())
         {
             return Collections.emptyList();
         }
 
-        projectDependencyVersions.forEach(pv ->
+        List<ProjectVersion> actualRequiredProjects = getActualRequiredProjects(projectDependencyVersions);
+
+        actualRequiredProjects.forEach(pv ->
         {
-            List<ProjectVersion> alternatives = getAlternativeVersions(pv, backtrackVersions);
-            alternativeVersions.put(pv, alternatives);
+            Set<ProjectVersion> alternatives = getAlternativeVersions(pv, backtrackVersions);
+            alternativeVersions.put(pv.getGa(), alternatives);
         });
 
         MaxSATSolver maxSatSolver = MaxSATSolver.wbo(new FormulaFactory());
 
         // Convert to LogicNG formulas
         DependencySATConverter converter = new DependencySATConverter(maxSatSolver.factory());
-        LogicNGSATResult satResult = converter.convertToLogicNGFormulas(projectDependencyVersions, alternativeVersions, this);
+        LogicNGSATResult satResult = converter.convertToLogicNGFormulas(alternativeVersions, this);
 
         satResult.getClauses().forEach(maxSatSolver::addHardFormula);
 
@@ -395,7 +397,7 @@ public class ProjectsServiceImpl implements ProjectsService
         // Solve and extract solution
         if (result == MaxSAT.MaxSATResult.OPTIMUM)
         {
-            return extractSolutionFromModel(maxSatSolver.model(), satResult, projectDependencyVersions);
+            return extractSolutionFromModel(maxSatSolver.model(), satResult, actualRequiredProjects);
         }
 
         return Collections.emptyList();
@@ -423,15 +425,36 @@ public class ProjectsServiceImpl implements ProjectsService
         return solution;
     }
 
-    private List<ProjectVersion> getAlternativeVersions(ProjectVersion pv, int backtrackVersions)
+    private List<ProjectVersion> getActualRequiredProjects(List<ProjectVersion> requiredProjects)
     {
-        List<ProjectVersion> alternatives = new ArrayList<>();
+        Set<String> seenProjects = new HashSet<>();
+        List<ProjectVersion> actualRequired = new ArrayList<>();
 
-        if (backtrackVersions > 0)
+        // Process in reverse order to prioritize later specifications
+        for (int i = requiredProjects.size() - 1; i >= 0; i--)
+        {
+            ProjectVersion pv = requiredProjects.get(i);
+            String projectKey = pv.getGroupId() + ":" + pv.getArtifactId();
+
+            if (!seenProjects.contains(projectKey))
+            {
+                seenProjects.add(projectKey);
+                actualRequired.add(0, pv); // Add to front to maintain original order
+            }
+        }
+
+        return actualRequired;
+    }
+
+    private Set<ProjectVersion> getAlternativeVersions(ProjectVersion pv, int backtrackVersions)
+    {
+        Set<ProjectVersion> alternatives = new HashSet<>();
+
+        if (backtrackVersions > 0 && !VersionValidator.isSnapshotVersion(pv.getVersionId()))
         {
             LOGGER.info("Finding alternative versions for {}-{}-{} with backtrack {}", pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), backtrackVersions);
             List<String> versionStrings = this.getVersions(pv.getGroupId(), pv.getArtifactId(), false);
-            versionStrings.sort(ProjectsServiceImpl::compareVersions);
+            versionStrings.sort((v1, v2) -> VersionId.parseVersionId(v2).compareTo(VersionId.parseVersionId(v1)));
             LOGGER.info("Found {} versions for {}-{}, latest is {}", versionStrings.size(), pv.getGroupId(), pv.getArtifactId(), versionStrings.isEmpty() ? "N/A" : versionStrings.get(0));
             versionStrings.stream()
                     .limit(backtrackVersions)
@@ -444,25 +467,6 @@ public class ProjectsServiceImpl implements ProjectsService
 
         LOGGER.info("Found {} alternative versions for {}-{}-{} with backtrack {}", alternatives.size(), pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), backtrackVersions);
         return alternatives;
-    }
-
-    public static int compareVersions(String v1, String v2)
-    {
-        String[] parts1 = v1.split("\\.");
-        String[] parts2 = v2.split("\\.");
-
-        int length = Math.max(parts1.length, parts2.length);
-        for (int i = 0; i < length; i++)
-        {
-            int part1 = i < parts1.length ? Integer.parseInt(parts1[i]) : 0;
-            int part2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
-
-            if (part1 != part2)
-            {
-                return Integer.compare(part2, part1);
-            }
-        }
-        return 0;
     }
 
     private List<ProjectDependencyWithPlatformVersions> filterProjectByLatest(List<ProjectDependencyWithPlatformVersions> projects)
