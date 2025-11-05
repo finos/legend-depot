@@ -174,7 +174,7 @@
 
         <git.commit.plugin.version>2.2.6</git.commit.plugin.version>
         <versions.maven.plugin.version>2.7</versions.maven.plugin.version>
-        <jacoco.maven.plugin.version>0.8.5</jacoco.maven.plugin.version>
+        <jacoco.maven.plugin.version>0.8.10</jacoco.maven.plugin.version>
         <sonar.maven.plugin.version>3.7.0.1746</sonar.maven.plugin.version>
         <dockerfile.maven.plugin.version>1.4.13</dockerfile.maven.plugin.version>
     </properties>
