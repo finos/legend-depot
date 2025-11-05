@@ -34,6 +34,7 @@ import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.store.mongo.notifications.queue.NotificationsQueueMongo;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +63,6 @@ public class TestProjectsService extends TestBaseServices
     private static final Logger log = LoggerFactory.getLogger(TestProjectsService.class);
     private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
     private final Queue queue = new NotificationsQueueMongo(mongoProvider);
-    private final FormulaFactory f = new FormulaFactory();
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
 
     @BeforeEach
@@ -645,28 +646,22 @@ public class TestProjectsService extends TestBaseServices
         projectsService.createOrUpdate(projectB_v1);
         projectsService.createOrUpdate(commonDep_v1);
 
-        // Set up required projects with alternatives
-        List<ProjectVersion> requiredProjects = Arrays.asList(
-                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
-                new ProjectVersion("org.finos.legend", "project_b", "1.0.0")
-        );
-
-        Map<ProjectVersion, List<ProjectVersion>> alternativeVersions = new HashMap<>();
+        Map<String, Set<ProjectVersion>> alternativeVersions = new HashMap<>();
         alternativeVersions.put(
-                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
-                Arrays.asList(
+                "org.finos.legend:project_a",
+                new HashSet<>(Arrays.asList(
                         new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
                         new ProjectVersion("org.finos.legend", "project_a", "2.0.0")
-                )
+                ))
         );
         alternativeVersions.put(
-                new ProjectVersion("org.finos.legend", "project_b", "1.0.0"),
-                Arrays.asList(new ProjectVersion("org.finos.legend", "project_b", "1.0.0"))
+                "org.finos.legend:project_b",
+                new HashSet<>(Arrays.asList(new ProjectVersion("org.finos.legend", "project_b", "1.0.0")))
         );
 
         // Test variable creation
         DependencySATConverter converter = new DependencySATConverter(new FormulaFactory());
-        LogicNGSATResult result = converter.convertToLogicNGFormulas(requiredProjects, alternativeVersions, projectsService);
+        LogicNGSATResult result = converter.convertToLogicNGFormulas(alternativeVersions, projectsService);
 
         // Verify variable map contains all expected projects and their alternatives
         Map<String, Variable> variableMap = result.getVariableMap();
@@ -719,34 +714,28 @@ public class TestProjectsService extends TestBaseServices
         projectsService.createOrUpdate(projectB_v1);
         projectsService.createOrUpdate(projectB_v2);
 
-        // Set up required projects with multiple alternatives
-        List<ProjectVersion> requiredProjects = Arrays.asList(
-                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
-                new ProjectVersion("org.apache.commons", "commons_util", "1.0.0")
-        );
-
-        Map<ProjectVersion, List<ProjectVersion>> alternativeVersions = new HashMap<>();
+        Map<String, Set<ProjectVersion>> alternativeVersions = new HashMap<>();
         // project_a has 3 alternative versions
         alternativeVersions.put(
-                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
-                Arrays.asList(
+                "org.finos.legend:project_a",
+                new HashSet<>(Arrays.asList(
                         new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
                         new ProjectVersion("org.finos.legend", "project_a", "2.0.0"),
                         new ProjectVersion("org.finos.legend", "project_a", "3.0.0")
-                )
+                ))
         );
         // commons_util has 2 alternative versions
         alternativeVersions.put(
-                new ProjectVersion("org.apache.commons", "commons_util", "1.0.0"),
-                Arrays.asList(
+                "org.apache.commons:commons_util",
+                new HashSet<>(Arrays.asList(
                         new ProjectVersion("org.apache.commons", "commons_util", "1.0.0"),
                         new ProjectVersion("org.apache.commons", "commons_util", "2.0.0")
-                )
+                ))
         );
 
         // Convert to LogicNG formulas
         DependencySATConverter converter = new DependencySATConverter(new FormulaFactory());
-        LogicNGSATResult result = converter.convertToLogicNGFormulas(requiredProjects, alternativeVersions, projectsService);
+        LogicNGSATResult result = converter.convertToLogicNGFormulas(alternativeVersions, projectsService);
         FormulaFactory converterFactory = converter.getFormulaFactory();
 
         List<Formula> clauses = result.getClauses();
@@ -836,40 +825,33 @@ public class TestProjectsService extends TestBaseServices
         projectsService.createOrUpdate(projectB_v1);
         projectsService.createOrUpdate(projectC_v1);
 
-        // Set up required projects
-        List<ProjectVersion> requiredProjects = Arrays.asList(
-                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
-                new ProjectVersion("org.apache.commons", "commons_util", "1.0.0"),
-                new ProjectVersion("org.springframework", "spring_core", "5.0.0")
-        );
-
-        Map<ProjectVersion, List<ProjectVersion>> alternativeVersions = new HashMap<>();
+        Map<String, Set<ProjectVersion>> alternativeVersions = new HashMap<>();
 
         // project_a has 3 alternative versions - should generate OR clause
         alternativeVersions.put(
-                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
-                Arrays.asList(
+                "org.finos.legend:project_a",
+                new HashSet<>(Arrays.asList(
                         new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
                         new ProjectVersion("org.finos.legend", "project_a", "2.0.0"),
                         new ProjectVersion("org.finos.legend", "project_a", "3.0.0")
-                )
+                ))
         );
 
         // commons_util has only 1 version - should generate unit clause
         alternativeVersions.put(
-                new ProjectVersion("org.apache.commons", "commons_util", "1.0.0"),
-                Arrays.asList(new ProjectVersion("org.apache.commons", "commons_util", "1.0.0"))
+                "org.apache.commons:commons_util",
+                new HashSet<>(List.of(new ProjectVersion("org.apache.commons", "commons_util", "1.0.0")))
         );
 
         // spring_core has only 1 version - should generate unit clause
         alternativeVersions.put(
-                new ProjectVersion("org.springframework", "spring_core", "5.0.0"),
-                Arrays.asList(new ProjectVersion("org.springframework", "spring_core", "5.0.0"))
+                "org.springframework:spring_core",
+                new HashSet<>(List.of(new ProjectVersion("org.springframework", "spring_core", "5.0.0")))
         );
 
         // Convert to LogicNG formulas
         DependencySATConverter converter = new DependencySATConverter(new FormulaFactory());
-        LogicNGSATResult result = converter.convertToLogicNGFormulas(requiredProjects, alternativeVersions, projectsService);
+        LogicNGSATResult result = converter.convertToLogicNGFormulas(alternativeVersions, projectsService);
 
         List<Formula> clauses = result.getClauses();
         Map<String, Variable> variableMap = result.getVariableMap();
@@ -1033,6 +1015,193 @@ public class TestProjectsService extends TestBaseServices
         // Should return empty list
         Assertions.assertTrue(result.isEmpty(), "Should return empty list for unsatisfiable constraints");
     }
+
+    @Test
+    public void canResolveNoConflictWithDirectRequiredProjects()
+    {
+        // Create project versions
+        StoreProjectVersionData projectA_v1 = new StoreProjectVersionData("org.finos.legend", "project_a", "1.0.0");
+        StoreProjectVersionData projectB_v1 = new StoreProjectVersionData("org.finos.legend", "project_b", "1.0.0");
+        StoreProjectVersionData projectB_v2 = new StoreProjectVersionData("org.finos.legend", "project_b", "2.0.0");
+        StoreProjectVersionData projectC_v1 = new StoreProjectVersionData("org.apache.commons", "commons_util", "1.0.0");
+        StoreProjectVersionData projectC_v2 = new StoreProjectVersionData("org.apache.commons", "commons_util", "2.0.0");
+
+        // Set up dependencies
+        // A1 depends on B1
+        ProjectVersion b1Dep = new ProjectVersion("org.finos.legend", "project_b", "1.0.0");
+        projectA_v1.getVersionData().addDependency(b1Dep);
+
+        // B1 depends on C1
+        ProjectVersion c1Dep = new ProjectVersion("org.apache.commons", "commons_util", "1.0.0");
+        projectB_v1.getVersionData().addDependency(c1Dep);
+        projectB_v1.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(c1Dep), true));
+
+        // A1 transitively depends on B1 and C1
+        projectA_v1.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(b1Dep, c1Dep), true));
+
+        // B2 depends on C2
+        ProjectVersion c2Dep = new ProjectVersion("org.apache.commons", "commons_util", "2.0.0");
+        projectB_v2.getVersionData().addDependency(c2Dep);
+        projectB_v2.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(c2Dep), true));
+
+        // Store all projects
+        projectsService.createOrUpdate(new StoreProjectData("PROD-1", "org.finos.legend", "project_a"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-2", "org.finos.legend", "project_b"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-3", "org.apache.commons", "commons_util"));
+        projectsService.createOrUpdate(projectA_v1);
+        projectsService.createOrUpdate(projectB_v1);
+        projectsService.createOrUpdate(projectB_v2);
+        projectsService.createOrUpdate(projectC_v1);
+        projectsService.createOrUpdate(projectC_v2);
+
+        // Required projects: A1 and B2 (no conflict since they're both directly required)
+        List<ProjectVersion> requiredProjects = Arrays.asList(
+                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
+                new ProjectVersion("org.finos.legend", "project_b", "2.0.0")
+        );
+
+        // Test without backtracking (backtrack = 0)
+        List<ProjectVersion> result = projectsService.resolveCompatibleVersions(requiredProjects, 0);
+
+        Assertions.assertEquals(2, result.size(), "Should resolve both required projects without backtracking");
+
+        Set<String> solutionGavs = result.stream()
+                .map(ProjectVersion::getGav)
+                .collect(Collectors.toSet());
+
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"), "Solution should include project_a:1.0.0");
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_b:2.0.0"), "Solution should include project_b:2.0.0");
+    }
+
+
+    @Test
+    public void canResolveConflictWithBacktrackingToCompatibleVersions()
+    {
+        // Create project versions
+        StoreProjectVersionData projectA_v1 = new StoreProjectVersionData("org.finos.legend", "project_a", "1.0.0");
+        StoreProjectVersionData projectB_v1 = new StoreProjectVersionData("org.finos.legend", "project_b", "1.0.0");
+        StoreProjectVersionData projectB_v2 = new StoreProjectVersionData("org.finos.legend", "project_b", "2.0.0");
+        StoreProjectVersionData projectB_v3 = new StoreProjectVersionData("org.finos.legend", "project_b", "3.0.0");
+        StoreProjectVersionData projectC_v1 = new StoreProjectVersionData("org.apache.commons", "commons_util", "1.0.0");
+        StoreProjectVersionData projectC_v2 = new StoreProjectVersionData("org.apache.commons", "commons_util", "2.0.0");
+
+        // Set up dependencies
+        // A1 depends on B1 and C2
+        ProjectVersion b1Dep = new ProjectVersion("org.finos.legend", "project_b", "1.0.0");
+        ProjectVersion c2Dep = new ProjectVersion("org.apache.commons", "commons_util", "2.0.0");
+        projectA_v1.getVersionData().addDependency(b1Dep);
+        projectA_v1.getVersionData().addDependency(c2Dep);
+        projectA_v1.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(b1Dep, c2Dep), true));
+
+        // B2 depends on C1
+        ProjectVersion c1Dep = new ProjectVersion("org.apache.commons", "commons_util", "1.0.0");
+        projectB_v2.getVersionData().addDependency(c1Dep);
+        projectB_v2.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(c1Dep), true));
+
+        // B3 depends on C2
+        projectB_v3.getVersionData().addDependency(c2Dep);
+        projectB_v3.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(c2Dep), true));
+
+        // Store all projects
+        projectsService.createOrUpdate(new StoreProjectData("PROD-1", "org.finos.legend", "project_a"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-2", "org.finos.legend", "project_b"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-3", "org.apache.commons", "commons_util"));
+        projectsService.createOrUpdate(projectA_v1);
+        projectsService.createOrUpdate(projectB_v1);
+        projectsService.createOrUpdate(projectB_v2);
+        projectsService.createOrUpdate(projectB_v3);
+        projectsService.createOrUpdate(projectC_v1);
+        projectsService.createOrUpdate(projectC_v2);
+
+        // Required projects: A1 and B2
+        List<ProjectVersion> requiredProjects = Arrays.asList(
+                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
+                new ProjectVersion("org.finos.legend", "project_b", "2.0.0")
+        );
+
+        // Test with backtracking enabled (backTrackVersions = 3) - B1 and B3 are both possible so B3 is chosen
+        List<ProjectVersion> result = projectsService.resolveCompatibleVersions(requiredProjects, 3);
+
+        Assertions.assertEquals(2, result.size(), "Should be able to discover compatible versions with backtracking");
+
+        Set<String> solutionGavs = result.stream()
+                .map(ProjectVersion::getGav)
+                .collect(Collectors.toSet());
+
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"),"Solution should include project_a");
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_b:3.0.0"),"Solution should include project_b");
+    }
+
+    @Test
+    public void canResolveTransitiveDependencyConflictWithBacktracking()
+    {
+        // Create project versions
+        // A1 depends on C2 and B1, B1 depends on C1 -- A1's transitive dependencies therefore only contains B1 and C2
+        // D1 depends on C1, D2 depends on C2
+        // Required: A1, D1 with backtrack=2
+        // Expected: A1, D2 (backtrack from D1 to D2 to match A1's C2 dependency)
+
+        StoreProjectVersionData projectA_v1 = new StoreProjectVersionData("org.finos.legend", "project_a", "1.0.0");
+        StoreProjectVersionData projectB_v1 = new StoreProjectVersionData("org.finos.legend", "project_b", "1.0.0");
+        StoreProjectVersionData projectC_v1 = new StoreProjectVersionData("org.apache.commons", "commons_util", "1.0.0");
+        StoreProjectVersionData projectC_v2 = new StoreProjectVersionData("org.apache.commons", "commons_util", "2.0.0");
+        StoreProjectVersionData projectD_v1 = new StoreProjectVersionData("org.finos.legend", "project_d", "1.0.0");
+        StoreProjectVersionData projectD_v2 = new StoreProjectVersionData("org.finos.legend", "project_d", "2.0.0");
+
+        // Set up dependencies
+        // A1 depends on C2 and B1
+        ProjectVersion b1Dep = new ProjectVersion("org.finos.legend", "project_b", "1.0.0");
+        ProjectVersion c1Dep = new ProjectVersion("org.apache.commons", "commons_util", "1.0.0");
+        ProjectVersion c2Dep = new ProjectVersion("org.apache.commons", "commons_util", "2.0.0");
+
+        projectA_v1.getVersionData().addDependency(c2Dep);
+        projectA_v1.getVersionData().addDependency(b1Dep);
+        // A1's transitive dependency report only contains B1 and C2 (not C1, which has been overridden by C2)
+        projectA_v1.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(b1Dep, c2Dep), true));
+
+        // B1 depends on C1
+        projectB_v1.getVersionData().addDependency(c1Dep);
+        projectB_v1.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(c1Dep), true));
+
+        // D1 depends on C1
+        projectD_v1.getVersionData().addDependency(c1Dep);
+        projectD_v1.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(c1Dep), true));
+
+        // D2 depends on C2
+        projectD_v2.getVersionData().addDependency(c2Dep);
+        projectD_v2.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(c2Dep), true));
+
+        // Store all projects
+        projectsService.createOrUpdate(new StoreProjectData("PROD-1", "org.finos.legend", "project_a"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-2", "org.finos.legend", "project_b"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-3", "org.apache.commons", "commons_util"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-4", "org.finos.legend", "project_d"));
+        projectsService.createOrUpdate(projectA_v1);
+        projectsService.createOrUpdate(projectB_v1);
+        projectsService.createOrUpdate(projectC_v1);
+        projectsService.createOrUpdate(projectC_v2);
+        projectsService.createOrUpdate(projectD_v1);
+        projectsService.createOrUpdate(projectD_v2);
+
+        // Required projects: A1 and D1
+        List<ProjectVersion> requiredProjects = Arrays.asList(
+                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
+                new ProjectVersion("org.finos.legend", "project_d", "1.0.0")
+        );
+
+        // Test with backtracking enabled (backTrackVersions = 2)
+        List<ProjectVersion> result = projectsService.resolveCompatibleVersions(requiredProjects, 2);
+
+        Assertions.assertEquals(2, result.size(), "Should be able to discover compatible versions with backtracking");
+
+        Set<String> solutionGavs = result.stream()
+                .map(ProjectVersion::getGav)
+                .collect(Collectors.toSet());
+
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"), "Solution should include project_a v1.0.0");
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_d:2.0.0"), "Solution should include project_d v2.0.0 (backtracked from v1.0.0)");
+    }
+
 
     @Test
     public void canResolveConflictingVersionsWithBacktrackAlternatives()
@@ -1688,7 +1857,7 @@ public class TestProjectsService extends TestBaseServices
                 "49.0.0",
         };
         List<String> versionsList = Arrays.asList(versions);
-        versionsList.sort(ProjectsServiceImpl::compareVersions);
+        versionsList.sort((v1, v2) -> VersionId.parseVersionId(v2).compareTo(VersionId.parseVersionId(v1)));
 
         versionsList.stream()
                 .limit(10)

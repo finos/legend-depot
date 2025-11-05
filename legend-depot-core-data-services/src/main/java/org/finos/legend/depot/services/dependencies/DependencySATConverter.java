@@ -16,13 +16,16 @@
 package org.finos.legend.depot.services.dependencies;
 
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
+import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
 import org.logicng.formulas.Variable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +38,7 @@ import java.util.stream.Collectors;
 public class DependencySATConverter
 {
     private final FormulaFactory formulaFactory;
+    private final Map<ProjectVersion, Set<ProjectVersion>> transitiveDependenciesMap = new HashMap<>();
     private final Map<String, Variable> variableMap = new HashMap<>();
     private final Map<Variable, ProjectVersion> reverseVariableMap = new HashMap<>();
 
@@ -43,53 +47,24 @@ public class DependencySATConverter
         this.formulaFactory = formulaFactory;
     }
 
-    public LogicNGSATResult convertToLogicNGFormulas(List<ProjectVersion> requiredProjects, Map<ProjectVersion, List<ProjectVersion>> alternativeVersions, ProjectsService projectsService)
+    public LogicNGSATResult convertToLogicNGFormulas(Map<String, Set<ProjectVersion>> alternativeVersions, ProjectsService projectsService)
     {
         List<Formula> clauses = new ArrayList<>();
         Map<Variable, Integer> weights = new HashMap<>();
 
-        // Extract overrides from requiredProjects and separate actual requirements
-        Map<ProjectVersion, ProjectVersion> detectedOverrides = extractOverrides(requiredProjects, projectsService);
-        List<ProjectVersion> actualRequiredProjects = getActualRequiredProjects(requiredProjects, detectedOverrides);
-
-        Map<ProjectVersion, List<ProjectVersion>> resolvedAlternatives = applyOverridesToAlternatives(alternativeVersions, detectedOverrides);
-        createVariables(actualRequiredProjects, resolvedAlternatives, projectsService);
+        createVariables(alternativeVersions, projectsService);
         assignVersionWeights(weights);
 
         // Add dependency constraints with override handling
-        addDependencyConstraintsWithOverrides(clauses, actualRequiredProjects, resolvedAlternatives, detectedOverrides, projectsService, new HashSet<>());
+        addDependencyConstraintsWithOverrides(clauses, alternativeVersions, projectsService);
 
         // Add mutual exclusion constraints
-        addMutualExclusionConstraints(clauses, resolvedAlternatives);
+        addMutualExclusionConstraints(clauses);
 
         // Add at-least-one constraints
-        addAtLeastOneConstraints(clauses, actualRequiredProjects, resolvedAlternatives);
-
-        // Add override constraints (force specific versions)
-        addOverrideConstraints(clauses, detectedOverrides);
+        addAtLeastOneConstraints(clauses, alternativeVersions);
 
         return new LogicNGSATResult(clauses, variableMap, reverseVariableMap, formulaFactory, weights);
-    }
-
-    private int calculateVersionWeight(ProjectVersion projectVersion)
-    {
-        String version = projectVersion.getVersionId();
-        // Parse semantic version (e.g., "1.2.3" -> 10203)
-        String[] parts = version.split("\\.");
-        int weight = 0;
-        for (int i = 0; i < Math.min(parts.length, 3); i++)
-        {
-            try
-            {
-                weight += Integer.parseInt(parts[i]) * (int) Math.pow(1000, 2 - i);
-            }
-            catch (NumberFormatException e)
-            {
-                // Handle non-numeric versions
-                weight += parts[i].hashCode() % 1000;
-            }
-        }
-        return weight;
     }
 
     private void assignVersionWeights(Map<Variable, Integer> weights)
@@ -99,7 +74,7 @@ public class DependencySATConverter
 
         reverseVariableMap.forEach((variable, projectVersion) ->
         {
-            String projectKey = projectVersion.getGroupId() + ":" + projectVersion.getArtifactId();
+            String projectKey = projectVersion.getGa();
             projectGroups.computeIfAbsent(projectKey, k -> new ArrayList<>()).add(variable);
         });
 
@@ -108,121 +83,34 @@ public class DependencySATConverter
         {
             if (variables.size() > 1)
             {
-                // Sort variables by version to assign relative weights
-                variables.sort((v1, v2) ->
-                {
-                    ProjectVersion pv1 = reverseVariableMap.get(v1);
-                    ProjectVersion pv2 = reverseVariableMap.get(v2);
-                    return Integer.compare(calculateVersionWeight(pv1), calculateVersionWeight(pv2));
-                });
+                List<Variable> sortedReleaseVersionsVariables = variables.stream().filter(v -> !VersionValidator.isSnapshotVersion(reverseVariableMap.get(v).getVersionId())).sorted(Comparator.comparing(v -> VersionId.parseVersionId(reverseVariableMap.get(v).getVersionId()))).collect(Collectors.toList());
+                List<Variable> snapshotVersionsVariables = variables.stream().filter(v -> VersionValidator.isSnapshotVersion(reverseVariableMap.get(v).getVersionId())).collect(Collectors.toList());
+                int size = sortedReleaseVersionsVariables.size();
 
                 // Assign increasing weights (higher for newer versions)
-                for (int i = 0; i < variables.size(); i++)
+                for (int i = 0; i < size; i++)
                 {
-                    weights.put(variables.get(i), i + 1);
+                    weights.put(sortedReleaseVersionsVariables.get(i), i + 1);
                 }
-            }
-            else
-            {
-                // Single version gets weight 1
-                weights.put(variables.get(0), 1);
-            }
-        });
-    }
-
-    private Map<ProjectVersion, List<ProjectVersion>> applyOverridesToAlternatives(Map<ProjectVersion, List<ProjectVersion>> alternatives, Map<ProjectVersion, ProjectVersion> overrides)
-    {
-        return alternatives.entrySet().stream()
-                .collect(Collectors.toMap(
-                        entry -> overrides.getOrDefault(entry.getKey(), entry.getKey()), // Override key
-                        entry -> entry.getValue().stream()
-                                .map(alt -> overrides.getOrDefault(alt, alt)) // Override alternatives
-                                .collect(Collectors.toList())
-                ));
-    }
-
-    private Map<ProjectVersion, ProjectVersion> extractOverrides(List<ProjectVersion> requiredProjects, ProjectsService projectsService)
-    {
-        Map<ProjectVersion, ProjectVersion> overrides = new HashMap<>();
-        Map<String, ProjectVersion> winningVersions = new HashMap<>();
-
-        // 1. Determine the "winning" version for each project in the initial required list.
-        // The last one in the list for a given G:A wins.
-        requiredProjects.forEach(pv ->
-        {
-            String projectKey = pv.getGroupId() + ":" + pv.getArtifactId();
-            winningVersions.put(projectKey, pv);
-        });
-
-        // 2. Collect all possible versions that could appear in the dependency graph.
-        Set<ProjectVersion> allPossibleVersions = new HashSet<>();
-        requiredProjects.forEach(pv ->
-        {
-            // Include the project itself and all its transitive dependencies
-            allPossibleVersions.add(pv);
-            allPossibleVersions.addAll(projectsService.getDependencies(Arrays.asList(pv), true));
-        });
-
-        // 3. For each "winning" version, find all other versions of the same project
-        // in the total set of dependencies and create an override rule.
-        winningVersions.forEach((projectKey, winner) ->
-        {
-            allPossibleVersions.forEach(p ->
-            {
-                String currentProjectKey = p.getGroupId() + ":" + p.getArtifactId();
-                if (projectKey.equals(currentProjectKey) && !p.equals(winner))
+                // preference to snapshot versions - snapshot versions can only be dependencies to other snapshot versions
+                snapshotVersionsVariables.forEach(v ->
                 {
-                    overrides.put(p, winner);
-                }
-            });
-        });
-
-        return overrides;
-    }
-
-    private List<ProjectVersion> getActualRequiredProjects(List<ProjectVersion> requiredProjects, Map<ProjectVersion, ProjectVersion> overrides)
-    {
-        Set<String> seenProjects = new HashSet<>();
-        List<ProjectVersion> actualRequired = new ArrayList<>();
-
-        // Process in reverse order to prioritize later specifications
-        for (int i = requiredProjects.size() - 1; i >= 0; i--)
-        {
-            ProjectVersion pv = requiredProjects.get(i);
-            String projectKey = pv.getGroupId() + ":" + pv.getArtifactId();
-
-            if (!seenProjects.contains(projectKey))
-            {
-                seenProjects.add(projectKey);
-                actualRequired.add(0, pv); // Add to front to maintain original order
+                    weights.put(v, size + 1);
+                });
             }
-        }
-
-        return actualRequired;
+        });
     }
 
-    private void createVariables(List<ProjectVersion> requiredProjects, Map<ProjectVersion, List<ProjectVersion>> alternativeVersions, ProjectsService projectsService)
+    private void createVariables(Map<String, Set<ProjectVersion>> alternativeVersions, ProjectsService projectsService)
     {
         Set<ProjectVersion> allVersions = new HashSet<>();
 
-        // Add all alternative versions for required projects
-        requiredProjects.forEach(pv ->
+        alternativeVersions.values().stream().flatMap(Set::stream).forEach(alt ->
         {
-            allVersions.add(pv);
-            Set<ProjectVersion> dependencies = projectsService.getDependencies(Arrays.asList(pv), true);
-            allVersions.addAll(dependencies);
-        });
-
-        // Add all transitive dependencies for each alternative
-        requiredProjects.forEach(pv ->
-        {
-            List<ProjectVersion> alternatives = alternativeVersions.getOrDefault(pv, Arrays.asList(pv));
-            alternatives.forEach(alt ->
-            {
-                allVersions.add(alt);
-                Set<ProjectVersion> dependencies = projectsService.getDependencies(Arrays.asList(alt), true);
-                allVersions.addAll(dependencies);
-            });
+            allVersions.add(alt);
+            Set<ProjectVersion> altDependencies = projectsService.getDependencies(Collections.singletonList(alt), true);
+            this.transitiveDependenciesMap.put(alt, altDependencies);
+            allVersions.addAll(altDependencies.stream().filter(dep -> !alternativeVersions.containsKey(dep.getGa()) || alternativeVersions.get(dep.getGa()).contains(dep)).collect(Collectors.toSet()));
         });
 
         // Create LogicNG variables for all versions
@@ -231,66 +119,43 @@ public class DependencySATConverter
             String gavKey = pv.getGav();
             if (!variableMap.containsKey(gavKey))
             {
-                String varName = gavKey.replaceAll("[^a-zA-Z0-9_]", "_");
-                Variable var = formulaFactory.variable(varName);
+                Variable var = formulaFactory.variable(gavKey);
                 variableMap.put(gavKey, var);
                 reverseVariableMap.put(var, pv);
             }
         });
     }
 
-    private void addDependencyConstraintsWithOverrides(List<Formula> clauses, List<ProjectVersion> requiredProjects, Map<ProjectVersion, List<ProjectVersion>> alternativeVersions, Map<ProjectVersion, ProjectVersion> overrides, ProjectsService projectsService, Set<ProjectVersion> processed)
+    private void addDependencyConstraintsWithOverrides(List<Formula> clauses, Map<String, Set<ProjectVersion>> alternativeVersions, ProjectsService projectsService)
     {
-        Set<ProjectVersion> requiredProjectsAndAlternatives = new HashSet<>();
-        requiredProjects.forEach(pv ->
+        alternativeVersions.values().stream().flatMap(Set::stream).forEach(pv ->
         {
-            requiredProjectsAndAlternatives.add(pv);
-            List<ProjectVersion> alternatives = alternativeVersions.getOrDefault(pv, Arrays.asList(pv));
-            requiredProjectsAndAlternatives.addAll(alternatives);
-        });
-
-        requiredProjectsAndAlternatives.forEach(pv -> processDependencyConstraintsWithOverrides(clauses, pv, overrides, projectsService, processed));
-    }
-
-    private void processDependencyConstraintsWithOverrides(List<Formula> clauses, ProjectVersion projectVersion, Map<ProjectVersion, ProjectVersion> overrides, ProjectsService projectsService, Set<ProjectVersion> processed)
-    {
-        if (processed.contains(projectVersion))
-        {
-            return;
-        }
-        processed.add(projectVersion);
-
-        Variable parentVar = variableMap.get(projectVersion.getGav());
-        if (parentVar == null)
-        {
-            return;
-        }
-
-        Set<ProjectVersion> dependencies = projectsService.getDependencies(Arrays.asList(projectVersion), false);
-
-        dependencies.forEach(dep ->
-        {
-            // Apply override if one exists for this dependency
-            ProjectVersion effectiveDep = overrides.getOrDefault(dep, dep);
-            Variable depVar = variableMap.get(effectiveDep.getGav());
-
-            if (depVar != null)
+            Variable parentVar = variableMap.get(pv.getGav());
+            Set<ProjectVersion> dependencies = this.transitiveDependenciesMap.get(pv);
+            Set<ProjectVersion> potentiallyOverriddenDependencies = dependencies.stream().filter(dep -> !variableMap.containsKey(dep.getGav()) || alternativeVersions.containsKey(dep.getGa())).collect(Collectors.toSet());
+            Set<ProjectVersion> dependenciesNotGuaranteed = potentiallyOverriddenDependencies.stream()
+                    .flatMap(dep -> this.transitiveDependenciesMap.computeIfAbsent(dep, key -> projectsService.getDependencies(Collections.singletonList(key), true)).stream())
+                    .collect(Collectors.toSet());
+            dependenciesNotGuaranteed.addAll(potentiallyOverriddenDependencies);
+            dependencies.forEach(dep ->
             {
-                // ¬parent ? dependency (using effective dependency)
-                clauses.add(formulaFactory.or(parentVar.negate(), depVar));
-                processDependencyConstraintsWithOverrides(clauses, effectiveDep, overrides, projectsService, processed);
-            }
+                if (!dependenciesNotGuaranteed.contains(dep))
+                {
+                    // we don't allow dep to be an alternativeVersion since apriori we don't know what version is to be picked up
+                    clauses.add(formulaFactory.or(parentVar.negate(), variableMap.get(dep.getGav())));
+                }
+            });
         });
     }
 
-    private void addMutualExclusionConstraints(List<Formula> clauses, Map<ProjectVersion, List<ProjectVersion>> alternativeVersions)
+    private void addMutualExclusionConstraints(List<Formula> clauses)
     {
         Map<String, List<Variable>> projectGroups = new HashMap<>();
 
         // Include all variables from the variable map, grouped by project coordinates
         reverseVariableMap.forEach((variable, projectVersion) ->
         {
-            String projectKey = projectVersion.getGroupId() + ":" + projectVersion.getArtifactId();
+            String projectKey = projectVersion.getGa();
             projectGroups.computeIfAbsent(projectKey, k -> new ArrayList<>()).add(variable);
         });
 
@@ -311,67 +176,25 @@ public class DependencySATConverter
         });
     }
 
-    private void addAtLeastOneConstraints(List<Formula> clauses, List<ProjectVersion> requiredProjects, Map<ProjectVersion, List<ProjectVersion>> alternativeVersions)
+    private void addAtLeastOneConstraints(List<Formula> clauses, Map<String, Set<ProjectVersion>> alternativeVersions)
     {
-        Map<String, List<Variable>> projectRequirements = new HashMap<>();
-
-        requiredProjects.forEach(pv ->
+        alternativeVersions.values().forEach(alternatives ->
         {
-            String projectKey = pv.getGroupId() + ":" + pv.getArtifactId();
-            List<Variable> alternatives = alternativeVersions.getOrDefault(pv, Arrays.asList(pv))
+            List<Variable> alternativeVariables = alternatives
                     .stream()
                     .map(v -> variableMap.get(v.getGav()))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
-            projectRequirements.put(projectKey, alternatives);
-        });
-
-        projectRequirements.values().forEach(alternatives ->
-        {
-            if (!alternatives.isEmpty())
+            if (!alternativeVariables.isEmpty())
             {
-                if (alternatives.size() == 1)
+                if (alternativeVariables.size() == 1)
                 {
-                    clauses.add(alternatives.get(0)); // Unit clause
+                    clauses.add(alternativeVariables.get(0)); // Unit clause
                 }
                 else
                 {
-                    clauses.add(formulaFactory.or(alternatives)); // At least one
+                    clauses.add(formulaFactory.or(alternativeVariables)); // At least one
                 }
-            }
-        });
-    }
-
-    private void addOverrideConstraints(List<Formula> clauses, Map<ProjectVersion, ProjectVersion> overrides)
-    {
-        overrides.forEach((loser, winner) ->
-        {
-            Variable loserVar = variableMap.get(loser.getGav());
-            Variable winnerVar = variableMap.get(winner.getGav());
-
-            // Ensure the overridden version is not selected
-            if (loserVar != null)
-            {
-                clauses.add(loserVar.negate());
-            }
-
-            // Add a constraint that if the loser was considered, the winner must be chosen.
-            // This helps reinforce the override logic.
-            if (loserVar != null && winnerVar != null)
-            {
-                // ¬loserVar V winnerVar
-                clauses.add(formulaFactory.or(loserVar.negate(), winnerVar));
-            }
-        });
-
-        // Also, explicitly force the selection of winning versions that override another
-        // version from the initial required projects list.
-        overrides.values().stream().distinct().forEach(winner ->
-        {
-            Variable winnerVar = variableMap.get(winner.getGav());
-            if (winnerVar != null)
-            {
-                clauses.add(winnerVar);
             }
         });
     }
