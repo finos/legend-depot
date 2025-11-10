@@ -40,6 +40,12 @@
             <artifactId>legend-depot-servers-common</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.diffblue.cover</groupId>
+            <artifactId>cover-annotations</artifactId>
+            <version>1.7.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.finos.legend.depot</groupId>
             <artifactId>legend-depot-metrics-query-services</artifactId>
         </dependency>
@@ -95,6 +101,29 @@
             <groupId>org.finos.legend.shared</groupId>
             <artifactId>legend-shared-pac4j-gitlab</artifactId>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.test-framework</groupId>
+            <artifactId>jersey-test-framework-core</artifactId>
+            <version>2.25.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+            <artifactId>jersey-test-framework-provider-inmemory</artifactId>
+            <version>2.25.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>5.3.8</version>
+            <scope>test</scope>
         </dependency>
         <!-- SHARED -->
 
