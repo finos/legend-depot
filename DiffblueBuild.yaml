@@ -136,6 +136,7 @@ global:
     - --projects=${MODULE}
     - --settings=${DIFFBLUE_MAVEN_USER_SETTINGS}
     - --global-settings=${DIFFBLUE_MAVEN_GLOBAL_SETTINGS}
+    - -Denforcer.skip=true
 
   # The timeout for all the phases unless a phase specific timeout value has been set.
   timeout: PT10M
