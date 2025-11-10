@@ -1,0 +1,417 @@
+# Overview
+# ========
+#
+# This file contains the arguments for invoking maven when using Diffblue Cover. Cover will render the command to
+# execute based on the "phase" that's being executed by assembling the flags, plugin options, and any filtering
+# arguments. For example, if we're trying to execute the build phase on windows without any of the named plugins
+# present, you can expect the invoked command to look (something) like (forgiving the abuse of line breaks):
+#
+# mvnw.cmd \
+#     -Dmaven.ext.class.path=/path/to/maven-spy.jar -Dcom.diffblue.cover.skipTests=true --batch-mode \
+#     --projects=project --settings=/path/to/user/settings.xml --global-settings=/path/to/global/settings.xml \
+#     install -Dmaven.compiler.failOnWarning=false --also-make
+#
+# The first line comes from the 'cmd' stanza (selected by the renderer based on detected operating system). The next
+# two lines of the command come from the 'global' stanza, while the final line comes from the specification of the
+# build phase.
+#
+# Phases
+# ======
+#
+# There are (currently) eight phases that Cover progresses through during the various executions. They are listed
+# below along with examples of commands where they're invoked:
+#
+# info      : dcover create             : gathering information about the structure of the project (child-modules, etc.);
+#                                         the classpath is not guaranteed to be correctly resolved at this stage.
+# classpath : dcover create             : computes the project structure and classpath of the project under test
+# launcher  : dcover create             : downloads the JUnit Jupiter Launcher if needed
+# clean     : dcover build --clean      : cleans the existing target/build files from the modules
+# build     : dcover build              : rebuilds the modules
+# test      : dcover create             : runs the tests of the module, can be filtered based on type (e.g. Diffblue,
+#                                         non-Diffblue, or a named test)
+# coverage  : dcover coverage-reports   : runs the tests and records the coverage, can be filtered like the test phase
+# refactor  : dcover fix-build          : applies any refactorings
+# validate  : dcover validate           : runs all the tests, both diffblue and manual
+#
+# Variable Substitution
+# =====================
+#
+# Throughout this file there are a number of variables that need to be substituted to make the commands work. These
+# are of the form ${VARIABLE}. For substitution to work the VARIABLE must match exactly one of the known variables
+# (listed below), if it doesn't match exactly it will be filtered out.
+#
+# Supported Variables and Their Purpose
+# -------------------------------------
+#
+# The list below contains all the variables that will be replaced.
+#
+# Launcher
+# ***********************
+# DIFFBLUE_GROUP_ID    : the group ID of the artifact to download (e.g. the JUnit Jupiter Launcher)
+# DIFFBLUE_ARTIFACT_ID : the artifact ID of the artifact to download (e.g. the JUnit Jupiter Launcher)
+# DIFFBLUE_VERSION     : the version of the artifact to download (e.g. the JUnit Jupiter Launcher)
+#
+# Refactor
+# ********
+# Refactoring requires installing jar files bundles with cover hence the long list of variables here
+#
+# DIFFBLUE_REWRITE_CONFIG                         : the location of the rewrite configuration to apply
+# DIFFBLUE_COVER_REFACTORING_RECIPES_JAR          : the location of the recipes for refactoring
+# DIFFBLUE_COVER_REFACTORING_RECIPES_GROUP_ID     : the group ID for the recipes for refactoring
+# DIFFBLUE_COVER_REFACTORING_RECIPES_ARTIFACT_ID  : the artifact ID for the recipes for refactoring
+# DIFFBLUE_COVER_REFACTORING_RECIPES_VERSION      : the version for the recipes for refactoring
+# DIFFBLUE_OPEN_REWRITE_JAR                       : the location of the rewrite jar file
+# DIFFBLUE_OPEN_REWRITE_POM                       : the location of the rewrite pom file
+# DIFFBLUE_OPEN_REWRITE_GROUP_ID                  : the group ID for the rewrite jar/pom files
+# DIFFBLUE_OPEN_REWRITE_ARTIFACT_ID               : the artifact ID for the rewrite jar/pom files
+# DIFFBLUE_OPEN_REWRITE_VERSION                   : the version for the rewrite jar/pom files
+#
+# Gradle Specific
+# ***************
+# MODULE_PATH                             : the path to the module separated by colons, e.g. project:application
+# DIFFBLUE_GRADLE_INIT_SCRIPT             : the location of the Gradle init script, e.g. .diffblue/init.gradle
+# DIFFBLUE_GRADLE_SPY_JAR                 : the location of the Gradle event listener classes
+# DIFFBLUE_TEST_CLASS                     : the name of a single class containing tests to execute, used during the env checks
+# DIFFBLUE_TEST_CLASS_REGEX               : the pattern matching class names containing created tests, e.g. **/*DiffblueTest**
+# DIFFBLUE_TEST_CLASS_GLOB_PATTERN        : the pattern matching file names containing created tests, e.g. **/*DiffblueTest**
+# DIFFBLUE_TEST_CLASS_REGEX_PATTERN       : the regex matching class names containing created tests, e.g. .*DiffblueTest.*
+# DIFFBLUE_COVER_REFACTORING_INIT_SCRIPT  : the location of the Gradle init script to apply when configuring refactoring
+#
+# Maven Specific
+# **************
+# MODULE                             : the name of the module, e.g. application
+# DIFFBLUE_JACOCO_VERSION            : the version of the Jacoco Maven plugin to use
+# DIFFBLUE_MAVEN_USER_SETTINGS       : the location of the Maven user settings.xml configuration file
+# DIFFBLUE_MAVEN_GLOBAL_SETTINGS     : the location of the Maven global settings.xml configuration file
+# DIFFBLUE_MAVEN_SPY_JAR             : the location of the Maven event listener classes
+# DIFFBLUE_TEST_FILE                 : the name of a single file containing tests to execute, used during the env checks
+# DIFFBLUE_TEST_FILE_REGEX           : the pattern matching file names containing created tests, e.g. **/*DiffblueTest*.java
+# DIFFBLUE_TEST_FILE_GLOB_PATTERN    : the pattern matching file names containing created tests, e.g. **/*DiffblueTest*.java
+# DIFFBLUE_TEST_FILE_REGEX_PATTERN   : the regex matching class names containing created tests, e.g. .*DiffblueTest.*\.java
+# DIFFBLUE_TEST_CLASS_GLOB_PATTERN   : the pattern matching file names containing created tests, e.g. **/*DiffblueTest**
+# DIFFBLUE_TEST_CLASS_REGEX_PATTERN  : the regex matching class names containing created tests, e.g. .*DiffblueTest.*
+#
+# Note: Only the MODULE_PATH can be the empty string, all other variables that evaluate to the empty string will be
+# filtered out before being executed.
+#
+# Plugins
+# =======
+#
+# There are times when Cover needs to enable or disable some plugins. For example, as part of the environment checks we
+# execute a DummyTest to check whether tests can be detected and executed by the build system, in this case we don't
+# need to worry about formatting the file to match any spotless or checkstyle configurations as it doesn't remain in the
+# project once the check has completed. However, the tests that are created will need to abide by whatever
+# spotless/checkstyle configuration is present. It only makes sense to include these flags if the specific plugin(s)
+# are present in the configuration for the build.
+#
+# In short: the plugins will be enabled/disabled conditionally and will only be included depending on their presence
+# in the project.
+
+meta:
+  version: 3.2
+  # The tool name is used to key the configuration internally. We have two known tool names, either maven or gradle.
+  # If one of these is used by a user-provided file, the intent is that the user-provided configuration will supersede
+  # the configuration here.
+  toolName: maven
+
+cmd:
+  # The commands to try to run when executing this build system. Configured on an operating system basis, and tried
+  # in turn (when there are multiple entries) until either the list is exhausted or one of the commands works.
+  windows:
+    - mvnw.cmd
+    - mvn.cmd
+  linux:
+    - mvnw
+    - mvn
+  macos:
+    - mvnw
+    - mvn
+global:
+  # The flags in the global section apply to all the invocations of the commands
+  flags:
+    - -Dmaven.ext.class.path=${DIFFBLUE_MAVEN_SPY_JAR}
+    - -Dcom.diffblue.cover.skipTests=true
+    - -DskipTestOptimizer
+    - --batch-mode
+    - --projects=${MODULE}
+    - --settings=${DIFFBLUE_MAVEN_USER_SETTINGS}
+    - --global-settings=${DIFFBLUE_MAVEN_GLOBAL_SETTINGS}
+
+  # The timeout for all the phases unless a phase specific timeout value has been set.
+  timeout: PT10M
+
+  plugins:
+    # These stanzas are of the form:
+    # - name:     plugin name, as used in the `id` stanza in a `plugins` block
+    #   disable:  the name of the goal (listed below) to use when this plugin should be disabled
+    #   enable:   the name of the goal (listed below) to use when this plugin should be enabled
+    #   flags:    any flags to apply to the plugin regardless of enablement/disablement
+    #   goals:
+    #     - name: the name of the goal, referenced in the enable/disable options above.
+    #             This should contain the name of the plugin to prevent ambiguity.
+    #       flags: any flags to apply to the named goal.
+    - name: com.mycila:license-maven-plugin
+      disable: disable
+      enable: format
+      flags: ~
+      goals:
+        - name: format
+          goal: com.mycila:license-maven-plugin:format
+          flags: ~
+        - name: disable
+          goal: ~
+          flags:
+            - -Dlicense.skip=true
+
+    - name: com.diffplug.spotless:spotless-maven-plugin
+      disable: disable
+      enable: apply
+      flags: ~
+      goals:
+        - name: apply
+          goal: com.diffplug.spotless:spotless-maven-plugin:apply
+          flags:
+            - -DspotlessFiles=${DIFFBLUE_TEST_FILE_REGEX_PATTERN}
+        - name: disable
+          goal: ~
+          flags:
+            - -Dspotless.check.skip=true
+
+    - name: org.apache.maven.plugins:maven-checkstyle-plugin
+      disable: disable
+      enable: check
+      flags: ~
+      goals:
+        - name: check
+          goal: org.apache.maven.plugins:maven-checkstyle-plugin:check
+          flags:
+            - -Dcheckstyle.failOnViolation=false
+        - name: disable
+          goal: ~
+          flags:
+            - -Dcheckstyle.skip=true
+
+    - name: io.spring.javaformat:spring-javaformat-maven-plugin
+      disable: disable
+      enable: apply
+      flags: ~
+      goals:
+        - name: apply
+          goal: io.spring.javaformat:spring-javaformat-maven-plugin:apply
+          flags: ~
+        - name: disable
+          goal: ~
+          flags:
+            - -Dspring-javaformat.skip=true
+
+    - name: org.apache.maven.plugins:maven-pmd-plugin
+      disable: disable
+      enable: apply
+      flags: ~
+      goals:
+        - name: apply
+          goal: ~
+          flags: ~
+        - name: disable
+          goal: ~
+          flags:
+            - -Dpmd.skip=true
+
+# The phases are named according to `dcover`'s needs and aren't specific to any build system (despite some overlap).
+# The idea is that each phase provides a list of build system `goals` which will be combined into a single invocation.
+phase:
+
+  # The info phase is used early on to gather information about the structure of the project under test.
+  info:
+    goals:
+      - name: ~
+        goal: validate
+        flags:
+          - --also-make
+
+  # The classpath phase is used to compute the classpath including the dependencies of the project under test.
+  # For maven projects, the dependencies have to have been resolved (i.e. be present on the file system and maven
+  # should be able to discover the path to them) for this to work correctly.
+  classpath:
+    goals:
+      - name: ~
+        goal: dependency:build-classpath
+
+
+  # The launcher phase is used to download the JUnit Jupiter launcher - run on a project (?)
+  launcher: ~
+
+  # The clean phase is used to remove any compiled class files, reports, etc. from the module under test
+  # (typically, removing the target or build directories on maven or gradle projects).
+  clean:
+    goals:
+      - name: ~
+        goal: clean
+        flags:
+          - --also-make
+
+  # The build phase is used to compile the module under test. We also include the modules that the module under
+  # test depends on.
+  build:
+    goals:
+      - name: ~
+        goal: install
+        flags:
+          - -Dmaven.compiler.failOnWarning=false
+          - --also-make
+          - -DskipTests
+          - -DskipITs
+          - --threads=1C
+
+  # The test phase is used to run the module under test's tests. This allows a filter to be specified to
+  # include/exclude tests that match patterns, or run a single named test.
+  test:
+
+    # Allow the tests to run for 60 minutes
+    timeout: PT60M
+
+    goals:
+      - name: ~
+        goal: test
+        flags:
+          - -DfailIfNoTests=false
+          - -Dsurefire.failIfNoSpecifiedTests=false
+          - -Dmaven.test.failure.ignore=True
+          - ${DIFFBLUE_TEST_FILTER}
+
+    filter:
+      # By default, all tests are executed
+      default: ~
+      # To execute tests that Diffblue hasn't created (often referred to manual tests in Cover Reports), this is the
+      # pattern to use to match file names. This is the default Maven Surefire pattern with the negation of the
+      # Diffblue test file names. This does not execute tests tagged with "MaintainedByDiffblue" so it should only be
+      # used when running by tag is not possible.
+      neverDiffblue:
+        - -Dtest=!${DIFFBLUE_TEST_FILE_GLOB_PATTERN},**/Test*.java,**/*Test.java,**/*Tests.java,**/*TestCase.java
+      # To execute tests that Diffblue hasn't created (often referred to manual tests in Cover Reports), this is the
+      # pattern to use to match file names. This is the default Maven Surefire pattern with the negation of the Diffblue
+      # test file names and excludes tests tagged with "MaintainedByDiffblue" or "ContributionFromDiffblue".
+      neverDiffblueTag:
+        - -Dtest=!${DIFFBLUE_TEST_FILE_GLOB_PATTERN},**/Test*.java,**/*Test.java,**/*Tests.java,**/*TestCase.java
+        - -DexcludedGroups=MaintainedByDiffblue,ContributionFromDiffblue
+      # To execute only the Diffblue-created tests, then pass this pattern to match the file names
+      onlyDiffblue:
+        - -Dtest=${DIFFBLUE_TEST_FILE_GLOB_PATTERN}
+      # To execute Tests tagged with "MaintainedByDiffblue" or "ContributionFromDiffblue", in classes that do not
+      # match the Diffblue test file names
+      onlyDiffblueTag:
+        - -Dtest=!${DIFFBLUE_TEST_FILE_GLOB_PATTERN},**/Test*.java,**/*Test.java,**/*Tests.java,**/*TestCase.java
+        - -Dgroups=MaintainedByDiffblue,ContributionFromDiffblue
+      # To run a single test, apply this option
+      named:
+        - -Dtest=${DIFFBLUE_TEST_FILE}
+
+  # The coverage phase measures the coverage of the tests. It's executed a number of times with different filters
+  # applied (to measure the coverage of all, non-diffblue, and diffblue tests).
+  coverage:
+    timeout: PT60M
+    goals:
+      # Specify the jacoco-maven-plugin as it may not be configured by default for the user's project, so we ask Maven
+      # to invoke that specific plugin's goal.
+      - name: org.jacoco:jacoco-maven-plugin${DIFFBLUE_JACOCO_VERSION}
+        goal: prepare-agent
+        flags:
+          - -Djacoco.skip=false
+
+      - name: ~
+        goal: test
+        flags:
+          - -DfailIfNoTests=false
+          - -Dsurefire.failIfNoSpecifiedTests=false
+          - -Dmaven.test.failure.ignore=True
+          - ${DIFFBLUE_TEST_FILTER}
+
+      - name: org.jacoco:jacoco-maven-plugin${DIFFBLUE_JACOCO_VERSION}
+        goal: report
+        flags:
+          - -Djacoco.skip=false
+
+    filter:
+      # By default, all tests are executed
+      default: ~
+      # To execute tests that Diffblue hasn't created (often referred to manual tests in Cover Reports), this is the
+      # pattern to use to match file names. This is the default Maven Surefire pattern with the negation of the
+      # Diffblue test file names. This does not execute tests tagged with "MaintainedByDiffblue" so it should only be
+      # used when running by tag is not possible.
+      neverDiffblue:
+        - -Dtest=!${DIFFBLUE_TEST_FILE_GLOB_PATTERN},**/Test*.java,**/*Test.java,**/*Tests.java,**/*TestCase.java
+      # To execute tests that Diffblue hasn't created (often referred to manual tests in Cover Reports), this is the
+      # pattern to use to match file names. This is the default Maven Surefire pattern with the negation of the Diffblue
+      # test file names and excluded Tests tagged with "MaintainedByDiffblue" or "ContributionFromDiffblue".
+      neverDiffblueTag:
+        - -Dtest=!${DIFFBLUE_TEST_FILE_GLOB_PATTERN},**/Test*.java,**/*Test.java,**/*Tests.java,**/*TestCase.java
+        - -DexcludedGroups=MaintainedByDiffblue,ContributionFromDiffblue
+      # To execute only the Diffblue-created tests, then pass this pattern to match the file names
+      onlyDiffblue:
+        - -Dtest=${DIFFBLUE_TEST_FILE_GLOB_PATTERN}
+      # To execute Tests tagged with "MaintainedByDiffblue" or "ContributionFromDiffblue", in classes that do not
+      # match the Diffblue test file names
+      onlyDiffblueTag:
+        - -Dtest=!${DIFFBLUE_TEST_FILE_GLOB_PATTERN},**/Test*.java,**/*Test.java,**/*Tests.java,**/*TestCase.java
+        - -Dgroups=MaintainedByDiffblue,ContributionFromDiffblue
+      # To run a single test, apply this option
+      named:
+        - -Dtest=${DIFFBLUE_TEST_FILE}
+
+  # The refactor phase is used to, for example, add missing dependencies to the user's project
+  refactor:
+    timeout: PT30M
+    goals:
+      # To apply the refactorings, we first need to install some packages that come bundled with Cover.
+      # The first is the recipes...
+      - name: ~
+        goal: install:install-file
+        once: true
+        flags:
+          - -Dfile=${DIFFBLUE_COVER_REFACTORING_RECIPES_JAR}
+          - -DgroupId=${DIFFBLUE_COVER_REFACTORING_RECIPES_GROUP_ID}
+          - -DartifactId=${DIFFBLUE_COVER_REFACTORING_RECIPES_ARTIFACT_ID}
+          - -Dversion=${DIFFBLUE_COVER_REFACTORING_RECIPES_VERSION}
+          - -Dpackaging=jar
+
+      # ... the second is the rewrite plugin jar file...
+      - name: ~
+        goal: install:install-file
+        once: true
+        flags:
+          - -Dfile=${DIFFBLUE_OPEN_REWRITE_JAR}
+          - -DgroupId=${DIFFBLUE_OPEN_REWRITE_GROUP_ID}
+          - -DartifactId=${DIFFBLUE_OPEN_REWRITE_ARTIFACT_ID}
+          - -Dversion=${DIFFBLUE_OPEN_REWRITE_VERSION}
+          - -Dpackaging=jar
+
+      # ... and finally, the rewrite plugin's pom.
+      - name: ~
+        goal: install:install-file
+        once: true
+        flags:
+          - -Dfile=${DIFFBLUE_OPEN_REWRITE_POM}
+          - -DgroupId=${DIFFBLUE_OPEN_REWRITE_GROUP_ID}
+          - -DartifactId=${DIFFBLUE_OPEN_REWRITE_ARTIFACT_ID}
+          - -Dversion=${DIFFBLUE_OPEN_REWRITE_VERSION}
+          - -Dpackaging=pom
+
+      # Once they've been installed, we can run the rewrite plugin to apply the suggested refactorings.
+      - name: org.openrewrite.maven:rewrite-maven-plugin
+        goal: run
+        flags:
+          - -Drewrite.activeRecipes=com.diffblue.cover.refactoring.Recipe
+          - -Drewrite.activeStyles=org.openrewrite.java.Autodetect
+          - -Drewrite.configLocation=${DIFFBLUE_REWRITE_CONFIG}
+
+  # The validate phase checks to make sure that the tests that have been created will work in the user's build system
+  validate:
+    timeout: PT60M
+    goals:
+      - name: ~
+        goal: clean
+        flags: ~
+
+      - name: ~
+        goal: test
+        flags: ~
