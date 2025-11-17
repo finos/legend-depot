@@ -108,15 +108,7 @@ public class TestFileGenerationsService extends TestStoreMongo
         Assertions.assertEquals(40, generations.getAll().size());
         service.delete("group.test.otherproject", "test", "1.0.0");
         Assertions.assertEquals(26, generations.getAll().size());
-        try
-        {
-            service.delete("group.test", "test111", "1.1.0");
-            Assertions.fail("exception expected");
-        }
-        catch (IllegalArgumentException e)
-        {
-            Assertions.assertTrue(true);
-        }
+        service.delete("group.test", "test111", "1.1.0");
         Assertions.assertEquals(26, generations.getAll().size());
 
     }

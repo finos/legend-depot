@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.domain.notifications;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -37,6 +38,14 @@ public class LakehouseMetadataNotification extends VersionedData
     public LakehouseMetadataNotification(String groupId, String artifactId, String versionId)
     {
         super(groupId, artifactId, versionId);
+    }
+
+    @JsonCreator
+    public LakehouseMetadataNotification(@JsonProperty("groupId") String groupId,@JsonProperty("artifactId") String artifactId, @JsonProperty("versionId") String versionId, @JsonProperty("entityDefinitionWithArtifacts") List<LakehouseCuratedArtifacts> entityDefinitionWithArtifacts, @JsonProperty(value = "dependencies") List<ProjectVersion> dependencies)
+    {
+        super(groupId, artifactId, versionId);
+        this.setEntityDefinitionWithArtifacts(entityDefinitionWithArtifacts);
+        this.setDependencies(dependencies != null ? dependencies : new ArrayList<>());
     }
 
     public List<ProjectVersion> getDependencies()
