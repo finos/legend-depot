@@ -31,7 +31,7 @@ public interface ArtifactsPurgeService
 
     void delete(String groupId, String artifactId, String versionId);
 
-    String deleteSnapshotVersions(String groupId, String artifactId, List<String> versions);
+    String deleteSnapshotVersions(String groupId, String artifactId, List<String> snapshotVersions);
 
     MetadataNotificationResponse deprecate(String groupId, String artifactId, String version);
 
