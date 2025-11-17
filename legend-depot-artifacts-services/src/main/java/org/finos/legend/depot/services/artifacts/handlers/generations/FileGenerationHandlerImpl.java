@@ -16,6 +16,7 @@
 package org.finos.legend.depot.services.artifacts.handlers.generations;
 
 import org.apache.commons.io.FilenameUtils;
+import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
@@ -174,5 +175,49 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
     public void delete(String groupId,String artifactId,String versionId)
     {
         generations.delete(groupId,artifactId, versionId);
+    }
+
+    @Override
+    public MetadataNotificationResponse refreshLakehouseArtifacts(String groupId, String artifactId, String versionId, List<LakehouseCuratedArtifacts> lakehouseCuratedElements)
+    {
+        MetadataNotificationResponse response = new MetadataNotificationResponse();
+        try
+        {
+            //handle files generated when a new master snapshot comes into picture
+            if (VersionValidator.isSnapshotVersion(versionId))
+            {
+                String message = String.format("removing prior %s artifacts for [%s-%s-%s]",provider.getType(), groupId, artifactId, versionId);
+                response.addMessage(message);
+                generations.delete(groupId, artifactId, versionId);
+                LOGGER.info(message);
+            }
+
+            List<StoredFileGeneration> newGenerations = lakehouseCuratedElements.stream()
+                    .map(entityWithArtifact ->
+                    {
+                        DepotGeneration depotGeneration = new DepotGeneration(entityWithArtifact.artifact.path, entityWithArtifact.artifact.content);
+
+                        return new StoredFileGeneration(
+                                groupId,
+                                artifactId,
+                                versionId,
+                                entityWithArtifact.entityDefinition.getPath(),
+                                entityWithArtifact.entityDefinition.getContent().get("_type").toString(),
+                                depotGeneration
+                        );
+                    })
+                    .collect(Collectors.toList());
+            generations.createOrUpdate(newGenerations);
+            String message = String.format("new [%s] generations for [%s-%s-%s] ", newGenerations.size(), groupId,artifactId, versionId);
+            LOGGER.info(message);
+            response.addMessage(message);
+        }
+        catch (Exception e)
+        {
+            String message = String.format("Error processing generations update for %s-%s-%s , ERROR: [%s]", groupId,artifactId,versionId,e.getMessage());
+            LOGGER.error(message);
+            response.addError(message);
+        }
+        return response;
     }
 }

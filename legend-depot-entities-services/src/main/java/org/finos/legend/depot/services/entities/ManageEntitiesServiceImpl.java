@@ -46,7 +46,6 @@ public class ManageEntitiesServiceImpl<T extends StoredEntity> extends EntitiesS
     @Override
     public long delete(String groupId, String artifactId, String versionId)
     {
-        this.projects.checkExists(groupId, artifactId);
         return entities.delete(groupId, artifactId, versionId);
     }
 

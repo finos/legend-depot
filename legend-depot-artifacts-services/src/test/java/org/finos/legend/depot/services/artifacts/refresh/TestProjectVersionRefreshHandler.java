@@ -15,18 +15,29 @@
 
 package org.finos.legend.depot.services.artifacts.refresh;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.collections.impl.factory.Lists;
+import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
+import org.finos.legend.depot.domain.notifications.LakehouseMetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationStatus;
+import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.services.api.artifacts.handlers.generations.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependenciesService;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
+import org.finos.legend.depot.services.api.generations.ManageFileGenerationsService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.artifacts.handlers.generations.FileGenerationHandlerImpl;
+import org.finos.legend.depot.services.artifacts.handlers.generations.FileGenerationsProvider;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
+import org.finos.legend.depot.services.generations.impl.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.api.admin.artifacts.ArtifactsFilesStore;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
+import org.finos.legend.depot.store.api.generations.UpdateFileGenerations;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.services.api.artifacts.configuration.IncludeProjectPropertiesConfiguration;
@@ -37,21 +48,25 @@ import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 import org.finos.legend.depot.services.artifacts.handlers.entities.EntitiesHandlerImpl;
 import org.finos.legend.depot.services.artifacts.handlers.entities.EntityProvider;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
+import org.finos.legend.depot.store.model.entities.EntityDefinition;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.TestStoreMongo;
 import org.finos.legend.depot.store.mongo.artifacts.ArtifactsFilesMongo;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
+import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.notifications.queue.NotificationsQueueMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.services.api.artifacts.handlers.ProjectArtifactHandlerFactory;
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntityArtifactsProvider;
+import org.finos.legend.engine.language.pure.dsl.generation.extension.Artifact;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -77,12 +92,15 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     protected ArtifactsFilesStore artifactsStore =  new ArtifactsFilesMongo(mongoProvider);
     protected UpdateProjectsVersions versionsStore = new ProjectsVersionsMongo(mongoProvider);
     protected UpdateEntities entitiesStore = new EntitiesMongo(mongoProvider);
+    protected UpdateFileGenerations fileGenerations = new FileGenerationsMongo(mongoProvider);
     private final QueryMetricsRegistry metrics = mock(QueryMetricsRegistry.class);
 
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(versionsStore, projectsStore, metrics, queue, new ProjectsConfiguration("master"));
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore,projectsService);
     protected EntityArtifactsProvider entitiesProvider = new EntityProvider();
+    protected ManageFileGenerationsService fileGenerationsService = new ManageFileGenerationsServiceImpl(fileGenerations, projectsService);
+    protected FileGenerationsArtifactsProvider generationsArtifactsProvider = new FileGenerationsProvider();
     protected ArtifactRepository repositoryServices = mock(ArtifactRepository.class);
 
     protected RefreshDependenciesService refreshDependenciesService = new RefreshDependenciesServiceImpl(projectsService, repositoryServices,new DependencyUtil());
@@ -94,6 +112,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     public void setUpData()
     {
         ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.ENTITIES, new EntitiesHandlerImpl(entitiesService, entitiesProvider));
+        ProjectArtifactHandlerFactory.registerArtifactHandler(ArtifactType.FILE_GENERATIONS, new FileGenerationHandlerImpl(repositoryServices, generationsArtifactsProvider, fileGenerationsService));
 
         List<StoreProjectData> projects = Arrays.asList(new StoreProjectData(PROJECT_B, TEST_GROUP_ID, TEST_DEPENDENCIES_ARTIFACT_ID),
                 new StoreProjectData(PROJECT_A, TEST_GROUP_ID, TEST_ARTIFACT_ID),
@@ -246,5 +265,67 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         List<String> errors = versionHandler.validate(new MetadataNotification("PROD-1", "examples.metadata", "test", "branch3-SNAPSHOT"));
 
         Assertions.assertEquals(0, errors.size());
+    }
+
+    @Test
+    public void canLoadLakehouseArtifacts() throws IOException
+    {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Artifact artifact = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseArtifact.json"), Artifact.class);
+        EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseEntityDefinition.json"), EntityDefinition.class);
+
+        LakehouseMetadataNotification notification = new LakehouseMetadataNotification("lakehouse123", TEST_ARTIFACT_ID, "1.0.0");
+        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new LakehouseCuratedArtifacts(entity, artifact)));
+
+        MetadataNotificationResponse response = versionHandler.handleLakehouseNotification(notification);
+        Assertions.assertEquals(0, response.getErrors().size());
+
+
+        StoreProjectVersionData versionData = versionsStore.getAll().get(0);
+        Assertions.assertEquals(1, entitiesStore.getAllStoredEntities().size());
+        Assertions.assertEquals(1, fileGenerations.getAll().size());
+        Assertions.assertEquals(TEST_ARTIFACT_ID, versionData.getArtifactId());
+        Assertions.assertEquals("lakehouse123", versionData.getGroupId());
+        Assertions.assertEquals("1.0.0", versionData.getVersionId());
+    }
+
+    @Test
+    public void cannotLoadInvalidLakehouseArtifacts() throws IOException
+    {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Artifact artifact = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseArtifact.json"), Artifact.class);
+        EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseEntityDefinition.json"), EntityDefinition.class);
+
+        LakehouseMetadataNotification notification = new LakehouseMetadataNotification("lakehouse-123", TEST_ARTIFACT_ID, "1.0.0");
+        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new LakehouseCuratedArtifacts(entity, artifact)));
+
+        MetadataNotificationResponse response = versionHandler.handleLakehouseNotification(notification);
+        Assertions.assertEquals(1, response.getErrors().size());
+    }
+
+    @Test
+    public void canLoadLakehouseArtifactsWithDependencies() throws IOException
+    {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Artifact artifact = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseArtifact.json"), Artifact.class);
+        EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseEntityDefinition.json"), EntityDefinition.class);
+
+        LakehouseMetadataNotification notification = new LakehouseMetadataNotification("lakehouse123", TEST_ARTIFACT_ID, "1.0.0");
+        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new LakehouseCuratedArtifacts(entity, artifact)));
+
+        MetadataNotificationResponse response = versionHandler.handleLakehouseNotification(notification);
+        Assertions.assertEquals(0, response.getErrors().size());
+
+        // add another project with this as dependency
+        notification = new LakehouseMetadataNotification("lakehouse1234", TEST_ARTIFACT_ID, "1.0.0");
+        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new LakehouseCuratedArtifacts(entity, artifact)));
+        notification.setDependencies(Lists.mutable.of(new ProjectVersion("lakehouse123", TEST_ARTIFACT_ID, "1.0.0")));
+
+        response = versionHandler.handleLakehouseNotification(notification);
+        Assertions.assertEquals(0, response.getErrors().size());
+        StoreProjectVersionData versionData = versionsStore.find("lakehouse1234", TEST_ARTIFACT_ID, "1.0.0").get();
+        Assertions.assertEquals(2, entitiesStore.getAllStoredEntities().size());
+        Assertions.assertEquals(2, fileGenerations.getAll().size());
+        Assertions.assertEquals(1, versionData.getVersionData().getDependencies().size());
     }
 }

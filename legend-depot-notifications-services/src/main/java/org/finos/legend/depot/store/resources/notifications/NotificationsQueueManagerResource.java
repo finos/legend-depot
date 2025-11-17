@@ -21,15 +21,19 @@ import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
+import org.finos.legend.depot.domain.notifications.LakehouseMetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
+import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.services.notifications.NotificationsQueueManager;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -104,6 +108,16 @@ public class NotificationsQueueManagerResource extends AuthorisedResource
                              @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
         return handle(ResourceLoggingAndTracing.ENQUEUE_EVENT, () -> notificationsManager.notify(projectId, groupId, artifactId, versionId));
+    }
+
+    @PUT
+    @Path("/queue/lakehouse")
+    @ApiOperation("store lakehouse curated elements")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public MetadataNotificationResponse queueLakehouseNotification(LakehouseMetadataNotification notification)
+    {
+        return this.notificationsManager.handleLakehouseMetadataNotification(notification);
     }
 
     @DELETE

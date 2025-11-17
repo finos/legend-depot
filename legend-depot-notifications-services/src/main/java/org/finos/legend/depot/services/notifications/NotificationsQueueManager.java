@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.services.notifications;
 
+import org.finos.legend.depot.domain.notifications.LakehouseMetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.notifications.Priority;
@@ -60,6 +61,11 @@ public class NotificationsQueueManager
         PrometheusMetricsFactory.getInstance().setGauge(QUEUE_WAITING,waitingInQueue);
         LOGGER.info("waiting in queue {}",waitingInQueue);
         return TracerFactory.get().executeWithTrace(ResourceLoggingAndTracing.HANDLE_EVENTS_IN_QUEUE, () -> handleEvents(queue.getFirstInQueue()));
+    }
+
+    public MetadataNotificationResponse handleLakehouseMetadataNotification(LakehouseMetadataNotification notification)
+    {
+        return this.eventHandler.handleLakehouseNotification(notification);
     }
 
     private int handleEvents(Optional<MetadataNotification> foundEvent)
