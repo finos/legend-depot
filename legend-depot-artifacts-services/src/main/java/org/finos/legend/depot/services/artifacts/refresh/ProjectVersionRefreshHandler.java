@@ -19,6 +19,8 @@ import com.google.inject.name.Named;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.maven.model.Model;
 import org.finos.legend.depot.domain.CoordinateValidator;
+import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
+import org.finos.legend.depot.domain.notifications.LakehouseMetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.ProjectVersion;
@@ -240,7 +242,7 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
                     if (!response.hasErrors())
                     {
 
-                        updateProjectVersionData(project, event.getVersionId(), newDependencies);
+                        updateProjectVersionData(project, event.getVersionId(), newDependencies, false);
                         updateProjectData(project, event.getVersionId());
                         //we let the version load but will check dependencies exists and report missing dependencies as errors
                         if (!event.isTransitive())
@@ -276,7 +278,44 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
             return response;
     }
 
-    private void updateProjectVersionData(StoreProjectData project, String versionId, List<ProjectVersion> newDependencies)
+    @Override
+    public MetadataNotificationResponse handleLakehouseNotification(LakehouseMetadataNotification event)
+    {
+        long refreshStartTime = System.currentTimeMillis();
+        MetadataNotificationResponse response = new MetadataNotificationResponse();
+        String message = String.format("Executing: [%s-%s-%s]", event.getGroupId(), event.getArtifactId(),
+                event.getVersionId());
+        response.addMessage(message);
+        LOGGER.info(message);
+        try
+        {
+            List<ProjectVersion> newDependencies = event.getDependencies();
+            if (!response.hasErrors())
+            {
+                LOGGER.info("Processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
+
+                ProjectArtifactHandlerFactory.getSupportedTypes().forEach(artifactType -> response.combine(handleLakehouseArtifacts(artifactType, event)));
+                LOGGER.info("Finished processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
+                if (!response.hasErrors())
+                {
+                    updateProjectVersionData(new StoreProjectData(null, event.getGroupId(), event.getArtifactId()), event.getVersionId(), newDependencies, true);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            String errorMessage = String.format("Exception executing: [%s-%s-%s], exception:[%s]", event.getGroupId(), event.getArtifactId(),
+                    event.getVersionId(), e.getMessage());
+            response.addError(errorMessage);
+            LOGGER.error(errorMessage);
+        }
+        long refreshEndTime = System.currentTimeMillis();
+        PrometheusMetricsFactory.getInstance().observeHistogram(VERSION_REFRESH_DURATION, refreshStartTime, refreshEndTime);
+        return response;
+
+    }
+
+    private void updateProjectVersionData(StoreProjectData project, String versionId, List<ProjectVersion> newDependencies, boolean isLakehouseData)
     {
         Optional<StoreProjectVersionData> projectVersionData = projects.find(project.getGroupId(), project.getArtifactId(), versionId);
         StoreProjectVersionData storeProjectVersionData = projectVersionData.isPresent() ? projectVersionData.get() : new StoreProjectVersionData(project.getGroupId(), project.getArtifactId(), versionId);
@@ -284,13 +323,13 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
         versionData.setDependencies(newDependencies);
         this.refreshDependenciesService.setProjectDataTransitiveDependencies(storeProjectVersionData);
 
-        if (this.projectPropertiesInScope != null && !this.projectPropertiesInScope.isEmpty())
+        if (this.projectPropertiesInScope != null && !this.projectPropertiesInScope.isEmpty() && !isLakehouseData)
         {
             List<Property> properties = calculateProjectProperties(project.getGroupId(), project.getArtifactId(), versionId);
             versionData.setProperties(properties);
         }
 
-        if (this.manifestPropertiesInScope != null && !this.manifestPropertiesInScope.isEmpty())
+        if (this.manifestPropertiesInScope != null && !this.manifestPropertiesInScope.isEmpty() && !isLakehouseData)
         {
             Map<String, String> manifestProperties = getPropertiesFromManifest(project.getGroupId(), project.getArtifactId(),versionId);
             versionData.setManifestProperties(manifestProperties);
@@ -388,6 +427,30 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
                 return;
             }
         });
+        return response;
+    }
+
+    private MetadataNotificationResponse handleLakehouseArtifacts(ArtifactType artifactType, LakehouseMetadataNotification event)
+    {
+        MetadataNotificationResponse response = new MetadataNotificationResponse();
+        ProjectArtifactsHandler refreshHandler = ProjectArtifactHandlerFactory.getArtifactHandler(artifactType);
+        if (refreshHandler != null)
+        {
+            List<LakehouseCuratedArtifacts> elements = event.getEntityDefinitionWithArtifacts();
+            if (elements != null && !elements.isEmpty())
+            {
+                response.addMessage(String.format("[%s] files found [%s] artifacts to process [%s-%s-%s]", elements.size(),artifactType,event.getGroupId(),event.getArtifactId(),event.getVersionId()));
+                response.combine(refreshHandler.refreshLakehouseArtifacts(event.getGroupId(),event.getArtifactId(), event.getVersionId(), elements));
+            }
+            else
+            {
+                response.addMessage(String.format("No %s artifacts to process [%s-%s-%s]",artifactType,event.getGroupId(),event.getArtifactId(),event.getVersionId()));
+            }
+        }
+        else
+        {
+            response.addError(String.format("handler not found for artifact type %s, please check your configuration",artifactType));
+        }
         return response;
     }
 

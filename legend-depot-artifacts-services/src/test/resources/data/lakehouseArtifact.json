@@ -1,0 +1,5 @@
+{
+  "content": "Some Lakehouse Output",
+  "format": "json",
+  "path": "generation.json"
+}

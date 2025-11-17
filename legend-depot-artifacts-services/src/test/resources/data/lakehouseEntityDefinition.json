@@ -1,0 +1,9 @@
+{
+  "classifierPath": "meta::test::lakehouse::entity",
+  "content": {
+    "_type": "LakehouseEntity",
+    "name": "TestLakehouseEntity",
+    "package": "examples::metadata::test"
+  },
+  "path": "examples::metadata::test::TestLakehouseEntity"
+}

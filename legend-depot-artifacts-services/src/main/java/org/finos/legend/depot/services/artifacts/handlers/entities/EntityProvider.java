@@ -16,6 +16,7 @@
 package org.finos.legend.depot.services.artifacts.handlers.entities;
 
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
+import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
 import org.finos.legend.depot.services.api.artifacts.handlers.ArtifactLoadingException;
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntityArtifactsProvider;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
@@ -62,6 +63,14 @@ public class EntityProvider implements EntityArtifactsProvider
             }
         });
         return entities;
+    }
+
+    @Override
+    public List<Entity> extractLakehouseArtifactsForType(Stream<LakehouseCuratedArtifacts> elements)
+    {
+        return elements
+                .map(entityWithArtifact -> entityWithArtifact.entityDefinition)
+                .collect(Collectors.toList());
     }
 
     @Override

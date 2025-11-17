@@ -133,7 +133,7 @@ public class ProjectsVersionsMongo extends BaseMongo<StoreProjectVersionData> im
     @Override
     protected void validateNewData(StoreProjectVersionData data)
     {
-        if (!CoordinateValidator.isValidGroupId(data.getGroupId()) || !CoordinateValidator.isValidArtifactId(data.getArtifactId()))
+        if ((!CoordinateValidator.isValidGroupId(data.getGroupId()) && !CoordinateValidator.isValidGroupIdForLakehouse(data.getGroupId())) || !CoordinateValidator.isValidArtifactId(data.getArtifactId()))
         {
             throw new IllegalArgumentException(String.format("invalid groupId [%s] or artifactId [%s]",data.getGroupId(),data.getArtifactId()));
         }

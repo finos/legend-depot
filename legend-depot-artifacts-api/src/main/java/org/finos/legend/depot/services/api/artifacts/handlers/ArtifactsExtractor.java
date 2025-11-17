@@ -16,6 +16,7 @@
 package org.finos.legend.depot.services.api.artifacts.handlers;
 
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
+import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
 
 import java.io.File;
 import java.util.List;
@@ -33,5 +34,7 @@ public interface ArtifactsExtractor<T>
     }
 
     List<T> extractArtifactsForType(Stream<File> files);
+
+    List<T> extractLakehouseArtifactsForType(Stream<LakehouseCuratedArtifacts> elements);
 
 }

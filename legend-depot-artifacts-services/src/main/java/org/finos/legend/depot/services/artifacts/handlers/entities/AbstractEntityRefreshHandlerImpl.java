@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.services.artifacts.handlers.entities;
 
+import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
@@ -66,12 +67,22 @@ public abstract class AbstractEntityRefreshHandlerImpl
 
     public MetadataNotificationResponse refreshVersionArtifacts(String groupId, String artifactId, String versionId, List<File> files)
     {
+        List<Entity> entityList = getEntities(files);
+        return refreshEntities(groupId, artifactId, versionId, entityList);
+    }
 
+    public MetadataNotificationResponse refreshLakehouseArtifacts(String groupId, String artifactId, String versionId, List<LakehouseCuratedArtifacts> lakehouseCuratedElements)
+    {
+        List<Entity> entityList = getLakehouseEntities(lakehouseCuratedElements);
+        return refreshEntities(groupId, artifactId, versionId, entityList);
+    }
+
+    private MetadataNotificationResponse refreshEntities(String groupId, String artifactId, String versionId, List<Entity> entityList)
+    {
         MetadataNotificationResponse response = new MetadataNotificationResponse();
         try
         {
             String gavCoordinates = getGAVCoordinates(groupId, artifactId, versionId);
-            List<Entity> entityList = getEntities(files);
             if (entityList != null && !entityList.isEmpty())
             {
                 String message = String.format("found [%s] %s for [%s] ", entityList.size(), this.entitiesProvider.getType(), gavCoordinates);
@@ -106,5 +117,10 @@ public abstract class AbstractEntityRefreshHandlerImpl
     private List<Entity> getEntities(List<File> files)
     {
         return entitiesProvider.extractArtifacts(files);
+    }
+
+    private List<Entity> getLakehouseEntities(List<LakehouseCuratedArtifacts> elements)
+    {
+        return entitiesProvider.extractLakehouseArtifactsForType(elements.stream());
     }
 }

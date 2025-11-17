@@ -36,4 +36,10 @@ public class CoordinateValidator
     {
         return groupId != null && !groupId.isEmpty() && SourceVersion.isName(groupId);
     }
+
+    public static boolean isValidGroupIdForLakehouse(String groupId)
+    {
+        Pattern pattern = Pattern.compile("^lakehouse\\.\\d{6}$");
+        return groupId != null && pattern.matcher(groupId).matches();
+    }
 }
