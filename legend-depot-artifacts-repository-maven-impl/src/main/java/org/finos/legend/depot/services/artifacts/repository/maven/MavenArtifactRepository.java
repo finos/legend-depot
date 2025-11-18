@@ -23,6 +23,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.io.DefaultSettingsReader;
 import org.apache.maven.settings.io.SettingsReader;
+import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryException;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryProviderConfiguration;
@@ -166,7 +167,7 @@ public class MavenArtifactRepository implements ArtifactRepository
     {
         List<File> files = new ArrayList<>();
         findDependenciesByArtifactType(type, group, artifact, version).forEach(dep ->
-                files.addAll(Arrays.asList(resolveArtifactFilesFromRepository(group, dep.getArtifactId(), dep.getVersion()))));
+                files.addAll(Arrays.asList(resolveArtifactFilesFromRepository(group, dep.getArtifactId(), dep.getVersionId()))));
         return files;
     }
 
@@ -179,7 +180,13 @@ public class MavenArtifactRepository implements ArtifactRepository
                 .stream()
                 .filter(mod -> mod.equals(moduleName))
                 .forEach(mod -> dependencies.addAll(getPOM(groupId, mod, versionId).getDependencies()));
-        return dependencies.stream().filter(dep -> dep.getArtifactId().endsWith(type.getModuleName())).map(dep -> new ArtifactDependency(dep.getGroupId(), dep.getArtifactId(), dep.getVersion())).collect(Collectors.toSet());
+        return dependencies.stream().filter(dep -> dep.getArtifactId().endsWith(type.getModuleName())).map(dep ->
+        {
+            List<DependencyExclusion> exclusions = dep.getExclusions().stream()
+                    .map(e -> new DependencyExclusion(e.getGroupId(), e.getArtifactId()))
+                    .collect(Collectors.toList());
+            return new ArtifactDependency(dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), exclusions);
+        }).collect(Collectors.toSet());
     }
 
     @Override
@@ -207,9 +214,12 @@ public class MavenArtifactRepository implements ArtifactRepository
                         .forEach(dependency ->
                                 {
                                     Parent parent = getPOM(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()).getParent();
+                                    List<DependencyExclusion> exclusions = dependency.getExclusions().stream()
+                                            .map(e -> new DependencyExclusion(e.getGroupId(), e.getArtifactId()))
+                                            .collect(Collectors.toList());
                                     if (parent != null)
                                     {
-                                        dependencies.add(new ArtifactDependency(parent.getGroupId(), parent.getArtifactId(), parent.getVersion()));
+                                        dependencies.add(new ArtifactDependency(parent.getGroupId(), parent.getArtifactId(), parent.getVersion(), exclusions));
                                     }
                                 }
                         );

@@ -15,23 +15,39 @@
 
 package org.finos.legend.depot.domain.artifacts.repository;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import java.util.Collections;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ArtifactDependency
 {
     private final String groupId;
     private final String artifactId;
-    private final String version;
+    private final String versionId;
+    private List<DependencyExclusion> exclusions;
 
-
-    public ArtifactDependency(String groupId, String artifactId, String version)
+    @JsonCreator
+    public ArtifactDependency(@JsonProperty("groupId") String groupId, @JsonProperty("artifactId") String artifactId, @JsonProperty("version") String versionId, @JsonProperty("exclusions") List<DependencyExclusion> exclusions)
     {
         this.groupId = groupId;
         this.artifactId = artifactId;
-        this.version = version;
+        this.versionId = versionId;
+        this.exclusions = exclusions != null ? exclusions : Collections.emptyList();
+    }
+
+
+    public ArtifactDependency(String groupId, String artifactId, String versionId)
+    {
+        this.groupId = groupId;
+        this.artifactId = artifactId;
+        this.versionId = versionId;
+        this.exclusions = Collections.emptyList();
     }
 
     public String getGroupId()
@@ -44,9 +60,14 @@ public class ArtifactDependency
         return artifactId;
     }
 
-    public String getVersion()
+    public String getVersionId()
     {
-        return version;
+        return versionId;
+    }
+
+    public List<DependencyExclusion> getExclusions()
+    {
+        return exclusions != null ? exclusions : Collections.emptyList();
     }
 
     @Override

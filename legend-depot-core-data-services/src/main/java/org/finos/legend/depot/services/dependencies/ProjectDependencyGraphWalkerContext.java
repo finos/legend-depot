@@ -36,6 +36,7 @@ public class ProjectDependencyGraphWalkerContext
     private final ConcurrentMutableMap<ProjectVersion, List<ProjectVersion>> projectVersionToDependencyMap = new ConcurrentHashMap<>();
     private final MutableMap<ProjectVersion, StoreProjectVersionData> projectDataMap = Maps.mutable.empty();
     private final MutableMap<DependencyProject, Set<ProjectVersion>> projectToVersions = Maps.mutable.empty();
+    private Map<String, List<ProjectVersion>> exclusions = Maps.mutable.empty();
 
     public static class DependencyProject extends CoordinateData
     {
@@ -79,5 +80,15 @@ public class ProjectDependencyGraphWalkerContext
     {
         return transitive == true ? pv.stream().map(p -> this.projectDataMap.get(p).getTransitiveDependenciesReport().getTransitiveDependencies()).flatMap(Collection::stream).collect(Collectors.toSet())
                 : pv.stream().map(p -> this.projectDataMap.get(p).getVersionData().getDependencies()).flatMap(Collection::stream).collect(Collectors.toSet());
+    }
+
+    public void setExclusions(Map<String, List<ProjectVersion>> exclusions)
+    {
+        this.exclusions = exclusions;
+    }
+
+    public Map<String, List<ProjectVersion>> getExclusions()
+    {
+        return this.exclusions;
     }
 }

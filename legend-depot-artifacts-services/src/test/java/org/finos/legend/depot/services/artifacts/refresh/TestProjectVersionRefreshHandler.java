@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.services.artifacts.refresh;
 
+import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.collections.impl.factory.Lists;
 import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
@@ -22,6 +23,8 @@ import org.finos.legend.depot.domain.notifications.LakehouseMetadataNotification
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationStatus;
+import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.services.api.artifacts.handlers.generations.FileGenerationsArtifactsProvider;
 import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependenciesService;
@@ -71,6 +74,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -327,5 +331,95 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         Assertions.assertEquals(2, entitiesStore.getAllStoredEntities().size());
         Assertions.assertEquals(2, fileGenerations.getAll().size());
         Assertions.assertEquals(1, versionData.getVersionData().getDependencies().size());
+    }
+
+    @Test
+    public void canStorePomExclusionsCorrectly() throws ArtifactRepositoryException
+    {
+        String groupId = "org.example";
+        String artifactId = "test-project";
+        String versionId = "1.0.0";
+        String projectId = "PROD-77777";
+
+        StoreProjectVersionData dependency1ProjectVersionData = new StoreProjectVersionData("com.example", "dependency1-entities","2.0.0");
+        StoreProjectVersionData dependency2ProjectVersionData = new StoreProjectVersionData("com.another", "dependency2-entities","3.0.0");
+        StoreProjectVersionData exclusion1ProjectVersionData = new StoreProjectVersionData("org.excluded", "excluded-artifact1","1.2.3");
+        StoreProjectVersionData exclusion2ProjectVersionData = new StoreProjectVersionData("org.excluded", "excluded-artifact2","4.5.6");
+        StoreProjectVersionData exclusion3ProjectVersionData = new StoreProjectVersionData("org.another.excluded", "another-excluded","7.8.9");
+        // Create mock dependencies with exclusions
+        Set<ArtifactDependency> mockArtifactDependencies = getArtifactDependencies();
+
+        // Mock project data
+        StoreProjectData mockProject = new StoreProjectData(projectId, groupId, artifactId);
+        ProjectVersion dependency1 = new ProjectVersion("com.example", "dependency1-entities", "2.0.0");
+        ProjectVersion dependency2 = new ProjectVersion("com.another", "dependency2-entities", "3.0.0");
+        ProjectVersion exclusion1 = new ProjectVersion("org.excluded", "excluded-artifact1", "1.2.3");
+        ProjectVersion exclusion2 = new ProjectVersion("org.excluded", "excluded-artifact2", "4.5.6");
+        ProjectVersion exclusion3 = new ProjectVersion("org.another.excluded", "another-excluded", "7.8.9");
+        dependency1ProjectVersionData.getVersionData().setDependencies(Arrays.asList(exclusion1, exclusion2));
+        dependency2ProjectVersionData.getVersionData().setDependencies(List.of(exclusion3));
+
+        projectsService.createOrUpdate(dependency1ProjectVersionData);
+        projectsService.createOrUpdate(dependency2ProjectVersionData);
+        projectsService.createOrUpdate(exclusion1ProjectVersionData);
+        projectsService.createOrUpdate(exclusion2ProjectVersionData);
+        projectsService.createOrUpdate(exclusion3ProjectVersionData);
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-55555", "com.example", "dependency1-entities"));
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-44444", "com.another", "dependency2-entities"));
+        projectsStore.createOrUpdate(mockProject);
+
+        when(projectsService.findCoordinates(groupId, artifactId)).thenReturn(Optional.of(mockProject));
+        when(repositoryServices.findVersion(groupId, artifactId, versionId)).thenReturn(Optional.of(versionId));
+        when(repositoryServices.findDependencies(groupId, artifactId, versionId)).thenReturn(mockArtifactDependencies);
+
+        MetadataNotification mockEvent = new MetadataNotification(projectId, groupId, artifactId, versionId, true, false, null);
+        MetadataNotificationResponse response = versionHandler.handleNotification(mockEvent);
+
+        Assertions.assertFalse(response.hasErrors());
+
+        // Find the captured StoreProjectVersionData
+        StoreProjectVersionData capturedVersionData = projectsService.find(groupId, artifactId, versionId).get();
+
+        // Verify exclusions are stored correctly
+        Map<String, List<ProjectVersion>> dependencyExclusions = capturedVersionData.getVersionData().getDependencyExclusions();
+        Assertions.assertNotNull(dependencyExclusions);
+        Assertions.assertFalse(dependencyExclusions.isEmpty());
+
+        // Check exclusions for dependency1
+        String dependency1Key = ProjectVersionData.createDependencyKey(dependency1);
+        Assertions.assertTrue(dependencyExclusions.containsKey(dependency1Key));
+
+        List<ProjectVersion> dependency1Exclusions = dependencyExclusions.get(dependency1Key);
+        Assertions.assertEquals(2, dependency1Exclusions.size());
+        Assertions.assertTrue(dependency1Exclusions.contains(new ProjectVersion("org.excluded", "excluded-artifact1", "1.2.3")));
+        Assertions.assertTrue(dependency1Exclusions.contains(new ProjectVersion("org.excluded", "excluded-artifact2", "4.5.6")));
+
+        // Check exclusions for dependency2
+        String dependency2Key = ProjectVersionData.createDependencyKey(dependency2);
+        Assertions.assertTrue(dependencyExclusions.containsKey(dependency2Key));
+
+        List<ProjectVersion> dependency2Exclusions = dependencyExclusions.get(dependency2Key);
+        Assertions.assertEquals(1, dependency2Exclusions.size());
+        Assertions.assertTrue(dependency2Exclusions.contains(new ProjectVersion("org.another.excluded", "another-excluded", "7.8.9")));
+    }
+
+    private static Set<ArtifactDependency> getArtifactDependencies()
+    {
+        DependencyExclusion exclusion1 = new DependencyExclusion("org.excluded", "excluded-artifact1");
+        DependencyExclusion exclusion2 = new DependencyExclusion("org.excluded", "excluded-artifact2");
+        DependencyExclusion exclusion3 = new DependencyExclusion("org.another.excluded", "another-excluded");
+        ArtifactDependency dependency1Artifact = new ArtifactDependency(
+                "com.example",
+                "dependency1-entities",
+                "2.0.0",
+                Arrays.asList(exclusion1, exclusion2)
+        );
+        ArtifactDependency dependency2Artifact = new ArtifactDependency(
+                "com.another",
+                "dependency2-entities",
+                "3.0.0",
+                Collections.singletonList(exclusion3)
+        );
+        return Set.of(dependency1Artifact, dependency2Artifact);
     }
 }

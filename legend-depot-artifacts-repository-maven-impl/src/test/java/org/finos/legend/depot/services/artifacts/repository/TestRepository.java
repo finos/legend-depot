@@ -88,7 +88,7 @@ public class TestRepository
         Assertions.assertEquals(1, dependencies.size());
         Assertions.assertEquals(GROUP_ID, dependencies.stream().findFirst().get().getGroupId());
         Assertions.assertEquals("test-dependencies", dependencies.stream().findFirst().get().getArtifactId());
-        Assertions.assertEquals("1.0.0", dependencies.stream().findFirst().get().getVersion());
+        Assertions.assertEquals("1.0.0", dependencies.stream().findFirst().get().getVersionId());
     }
 
     @Test
@@ -98,13 +98,13 @@ public class TestRepository
         Assertions.assertEquals(1, dependencies.size());
         Assertions.assertEquals(GROUP_ID, dependencies.stream().findFirst().get().getGroupId());
         Assertions.assertEquals("test-dependencies-entities", dependencies.stream().findFirst().get().getArtifactId());
-        Assertions.assertEquals("1.0.0", dependencies.stream().findFirst().get().getVersion());
+        Assertions.assertEquals("1.0.0", dependencies.stream().findFirst().get().getVersionId());
 
         Set<ArtifactDependency> dependencySet = repository.findDependenciesByArtifactType(ArtifactType.VERSIONED_ENTITIES,GROUP_ID, "test", "1.0.0");
         Assertions.assertEquals(1, dependencySet.size());
         Assertions.assertEquals(GROUP_ID, dependencySet.stream().findFirst().get().getGroupId());
         Assertions.assertEquals("test-dependencies-versioned-entities", dependencySet.stream().findFirst().get().getArtifactId());
-        Assertions.assertEquals("1.0.0", dependencySet.stream().findFirst().get().getVersion());
+        Assertions.assertEquals("1.0.0", dependencySet.stream().findFirst().get().getVersionId());
     }
 
     @Test

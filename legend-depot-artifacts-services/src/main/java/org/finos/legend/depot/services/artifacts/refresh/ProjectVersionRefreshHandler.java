@@ -19,6 +19,8 @@ import com.google.inject.name.Named;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.maven.model.Model;
 import org.finos.legend.depot.domain.CoordinateValidator;
+import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
+import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
 import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
 import org.finos.legend.depot.domain.notifications.LakehouseMetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
@@ -59,6 +61,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -218,64 +221,64 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
 
     MetadataNotificationResponse doRefresh(MetadataNotification event)
     {
-            long refreshStartTime = System.currentTimeMillis();
-            MetadataNotificationResponse response = new MetadataNotificationResponse();
-            String message = String.format("Executing: [%s-%s-%s], eventId: [%s], parentEventId: [%s], full/transitive: [%s/%s], attempts: [%s]", event.getGroupId(), event.getArtifactId(),
-                    event.getVersionId(), event.getEventId(), event.getParentEventId(), event.isFullUpdate(), event.isTransitive(), event.getAttempt());
-            response.addMessage(message);
-            LOGGER.info(message);
-            if (response.combine(validateGAV(event.getGroupId(), event.getArtifactId(), event.getVersionId())).hasErrors())
+        long refreshStartTime = System.currentTimeMillis();
+        MetadataNotificationResponse response = new MetadataNotificationResponse();
+        String message = String.format("Executing: [%s-%s-%s], eventId: [%s], parentEventId: [%s], full/transitive: [%s/%s], attempts: [%s]", event.getGroupId(), event.getArtifactId(),
+                event.getVersionId(), event.getEventId(), event.getParentEventId(), event.isFullUpdate(), event.isTransitive(), event.getAttempt());
+        response.addMessage(message);
+        LOGGER.info(message);
+        if (response.combine(validateGAV(event.getGroupId(), event.getArtifactId(), event.getVersionId())).hasErrors())
+        {
+            return response;
+        }
+        StoreProjectData project = getProject(event.getGroupId(), event.getArtifactId());
+        try
+        {
+            List<ProjectVersion> newDependencies = this.refreshDependenciesService.retrieveDependenciesFromRepository(event.getGroupId(), event.getArtifactId(), event.getVersionId());
+            this.refreshDependenciesService.validateDependencies(newDependencies, event.getVersionId()).forEach(error -> response.addError(error));
+            if (!response.hasErrors())
             {
-                return response;
-            }
-            StoreProjectData project = getProject(event.getGroupId(), event.getArtifactId());
-            try
-            {
-                List<ProjectVersion> newDependencies = this.refreshDependenciesService.retrieveDependenciesFromRepository(event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                this.refreshDependenciesService.validateDependencies(newDependencies, event.getVersionId()).forEach(error -> response.addError(error));
+                LOGGER.info("Processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
+
+                ProjectArtifactHandlerFactory.getSupportedTypes().forEach(artifactType -> response.combine(handleArtifacts(artifactType, project, event.getVersionId(), event.isFullUpdate())));
+                LOGGER.info("Finished processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
                 if (!response.hasErrors())
                 {
-                    LOGGER.info("Processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
 
-                    ProjectArtifactHandlerFactory.getSupportedTypes().forEach(artifactType -> response.combine(handleArtifacts(artifactType, project, event.getVersionId(), event.isFullUpdate())));
-                    LOGGER.info("Finished processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                    if (!response.hasErrors())
+                    updateProjectVersionData(project, event.getVersionId(), newDependencies, false);
+                    updateProjectData(project, event.getVersionId());
+                    //we let the version load but will check dependencies exists and report missing dependencies as errors
+                    if (!event.isTransitive())
                     {
-
-                        updateProjectVersionData(project, event.getVersionId(), newDependencies, false);
-                        updateProjectData(project, event.getVersionId());
-                        //we let the version load but will check dependencies exists and report missing dependencies as errors
-                        if (!event.isTransitive())
+                        newDependencies.stream().forEach(dep ->
                         {
-                            newDependencies.stream().forEach(dep ->
+                            if (!projects.find(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()).isPresent())
                             {
-                                if (!projects.find(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()).isPresent())
-                                {
-                                    String missingDepError = String.format("Dependency %s-%s-%s not found in store", dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
-                                    response.addError(missingDepError);
-                                    LOGGER.error(missingDepError);
-                                }
-                            });
-                        }
-                        else
-                        {
-                            LOGGER.info("Started updating {} dependencies for [{}{}{}]", newDependencies.size(), event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                            response.combine(handleDependencies(project, event.getVersionId(), newDependencies, event.isFullUpdate(), event.isTransitive(), event.getParentEventId()));
-                            LOGGER.info("Finished updating {} dependencies for [{}{}{}]", newDependencies.size(), event.getGroupId(), event.getArtifactId(), event.getVersionId());
-                        }
+                                String missingDepError = String.format("Dependency %s-%s-%s not found in store", dep.getGroupId(), dep.getArtifactId(), dep.getVersionId());
+                                response.addError(missingDepError);
+                                LOGGER.error(missingDepError);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        LOGGER.info("Started updating {} dependencies for [{}{}{}]", newDependencies.size(), event.getGroupId(), event.getArtifactId(), event.getVersionId());
+                        response.combine(handleDependencies(project, event.getVersionId(), newDependencies, event.isFullUpdate(), event.isTransitive(), event.getParentEventId()));
+                        LOGGER.info("Finished updating {} dependencies for [{}{}{}]", newDependencies.size(), event.getGroupId(), event.getArtifactId(), event.getVersionId());
                     }
                 }
             }
-            catch (Exception e)
-            {
-                String errorMessage = String.format("Exception executing: [%s-%s-%s], eventId: [%s], parentEventId: [%s], full/transitive: [%s/%s], attempts: [%s], exception[%s]", event.getGroupId(), event.getArtifactId(),
-                        event.getVersionId(), event.getEventId(), event.getParentEventId(), event.isFullUpdate(), event.isTransitive(), event.getAttempt(), e.getMessage());
-                response.addError(errorMessage);
-                LOGGER.error(errorMessage);
-            }
-            long refreshEndTime = System.currentTimeMillis();
-            PrometheusMetricsFactory.getInstance().observeHistogram(VERSION_REFRESH_DURATION, refreshStartTime, refreshEndTime);
-            return response;
+        }
+        catch (Exception e)
+        {
+            String errorMessage = String.format("Exception executing: [%s-%s-%s], eventId: [%s], parentEventId: [%s], full/transitive: [%s/%s], attempts: [%s], exception[%s]", event.getGroupId(), event.getArtifactId(),
+                    event.getVersionId(), event.getEventId(), event.getParentEventId(), event.isFullUpdate(), event.isTransitive(), event.getAttempt(), e.getMessage());
+            response.addError(errorMessage);
+            LOGGER.error(errorMessage);
+        }
+        long refreshEndTime = System.currentTimeMillis();
+        PrometheusMetricsFactory.getInstance().observeHistogram(VERSION_REFRESH_DURATION, refreshStartTime, refreshEndTime);
+        return response;
     }
 
     @Override
@@ -321,7 +324,21 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
         StoreProjectVersionData storeProjectVersionData = projectVersionData.isPresent() ? projectVersionData.get() : new StoreProjectVersionData(project.getGroupId(), project.getArtifactId(), versionId);
         ProjectVersionData versionData = storeProjectVersionData.getVersionData();
         versionData.setDependencies(newDependencies);
-        this.refreshDependenciesService.setProjectDataTransitiveDependencies(storeProjectVersionData);
+
+        versionData.setDependencyExclusions(new HashMap<>());
+
+        Set<ArtifactDependency> artifactDependencies = this.repositoryServices.findDependencies(project.getGroupId(), project.getArtifactId(), versionId);
+
+        for (ArtifactDependency artifactDep : artifactDependencies)
+        {
+            ProjectVersion dependency = new ProjectVersion(artifactDep.getGroupId(), artifactDep.getArtifactId(), artifactDep.getVersionId());
+
+            for (DependencyExclusion exclusion : artifactDep.getExclusions())
+            {
+                ProjectVersion excludedDep = new ProjectVersion(exclusion.getGroupId(), exclusion.getArtifactId(), null);
+                versionData.addExclusionForDependency(dependency, excludedDep);
+            }
+        }
 
         if (this.projectPropertiesInScope != null && !this.projectPropertiesInScope.isEmpty() && !isLakehouseData)
         {
@@ -336,6 +353,7 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
         }
 
         storeProjectVersionData.setVersionData(versionData);
+        this.refreshDependenciesService.setProjectDataTransitiveDependencies(storeProjectVersionData);
         storeProjectVersionData.setEvicted(false);
         storeProjectVersionData.getVersionData().setExcluded(false);
         storeProjectVersionData.getVersionData().setExclusionReason(null);
@@ -402,7 +420,8 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
     private MetadataNotificationResponse handleDependencies(StoreProjectData projectData, String versionId, List<ProjectVersion> dependencies, boolean fullUpdate, boolean transitive, String parentEventId)
     {
         MetadataNotificationResponse response = new MetadataNotificationResponse();
-        dependencies.stream().forEach(dependency ->
+
+        dependencies.forEach(dependency ->
         {
             Optional<StoreProjectData> dependent = projects.findCoordinates(dependency.getGroupId(), dependency.getArtifactId());
             if (dependent.isPresent())
