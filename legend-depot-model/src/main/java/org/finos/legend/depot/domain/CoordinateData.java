@@ -48,6 +48,11 @@ public abstract class CoordinateData
         return groupId;
     }
 
+    public void setGroupId(String groupId)
+    {
+        this.groupId = groupId;
+    }
+
     public String getArtifactId()
     {
         return artifactId;
