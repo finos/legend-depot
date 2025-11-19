@@ -27,21 +27,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class LakehouseMetadataNotification extends VersionedData
+public class RestMetadataNotification extends VersionedData
 {
     @JsonProperty("dependencies")
     List<ProjectVersion> dependencies = new ArrayList<>();
 
     @JsonProperty("entityDefinitionWithArtifacts")
-    List<LakehouseCuratedArtifacts> entityDefinitionWithArtifacts;
+    List<RestCuratedArtifacts> entityDefinitionWithArtifacts;
 
-    public LakehouseMetadataNotification(String groupId, String artifactId, String versionId)
+    public RestMetadataNotification(String groupId, String artifactId, String versionId)
     {
         super(groupId, artifactId, versionId);
     }
 
     @JsonCreator
-    public LakehouseMetadataNotification(@JsonProperty("groupId") String groupId,@JsonProperty("artifactId") String artifactId, @JsonProperty("versionId") String versionId, @JsonProperty("entityDefinitionWithArtifacts") List<LakehouseCuratedArtifacts> entityDefinitionWithArtifacts, @JsonProperty(value = "dependencies") List<ProjectVersion> dependencies)
+    public RestMetadataNotification(@JsonProperty("groupId") String groupId, @JsonProperty("artifactId") String artifactId, @JsonProperty("versionId") String versionId, @JsonProperty("entityDefinitionWithArtifacts") List<RestCuratedArtifacts> entityDefinitionWithArtifacts, @JsonProperty(value = "dependencies") List<ProjectVersion> dependencies)
     {
         super(groupId, artifactId, versionId);
         this.setEntityDefinitionWithArtifacts(entityDefinitionWithArtifacts);
@@ -58,12 +58,12 @@ public class LakehouseMetadataNotification extends VersionedData
         this.dependencies = dependencies;
     }
 
-    public List<LakehouseCuratedArtifacts> getEntityDefinitionWithArtifacts()
+    public List<RestCuratedArtifacts> getEntityDefinitionWithArtifacts()
     {
         return entityDefinitionWithArtifacts;
     }
 
-    public void setEntityDefinitionWithArtifacts(List<LakehouseCuratedArtifacts> entityDefinitionWithArtifacts)
+    public void setEntityDefinitionWithArtifacts(List<RestCuratedArtifacts> entityDefinitionWithArtifacts)
     {
         this.entityDefinitionWithArtifacts = entityDefinitionWithArtifacts;
     }

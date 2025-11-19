@@ -19,16 +19,16 @@ import org.finos.legend.depot.store.model.entities.EntityDefinition;
 import org.finos.legend.engine.language.pure.dsl.generation.extension.Artifact;
 
 
-public class LakehouseCuratedArtifacts
+public class RestCuratedArtifacts
 {
     public EntityDefinition entityDefinition;
     public Artifact artifact;
 
-    public LakehouseCuratedArtifacts()
+    public RestCuratedArtifacts()
     {
     }
 
-    public LakehouseCuratedArtifacts(EntityDefinition entityDefinition, Artifact artifact)
+    public RestCuratedArtifacts(EntityDefinition entityDefinition, Artifact artifact)
     {
         this.entityDefinition = entityDefinition;
         this.artifact = artifact;

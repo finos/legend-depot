@@ -94,7 +94,7 @@ public class EntitiesMongo<T extends StoredEntity> extends AbstractEntitiesMongo
     protected void validateNewData(T entity)
     {
         List<String> errors = new ArrayList<>();
-        if (!CoordinateValidator.isValidGroupId(entity.getGroupId()) && !CoordinateValidator.isValidGroupIdForLakehouse(entity.getGroupId()))
+        if (!CoordinateValidator.isValidGroupId(entity.getGroupId()) && !CoordinateValidator.isValidGroupIdForRest(entity.getGroupId()))
         {
             errors.add(String.format(EntityValidationErrors.INVALID_GROUP_ID, entity.getGroupId()));
         }
