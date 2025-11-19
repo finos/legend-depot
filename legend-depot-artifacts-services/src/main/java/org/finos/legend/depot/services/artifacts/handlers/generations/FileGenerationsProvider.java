@@ -17,7 +17,7 @@ package org.finos.legend.depot.services.artifacts.handlers.generations;
 
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 import org.finos.legend.depot.domain.generation.DepotGeneration;
-import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
+import org.finos.legend.depot.domain.notifications.RestCuratedArtifacts;
 import org.finos.legend.depot.services.generations.loader.FileGenerationLoader;
 import org.finos.legend.depot.services.api.artifacts.handlers.ArtifactLoadingException;
 import org.finos.legend.depot.services.api.artifacts.handlers.generations.FileGenerationsArtifactsProvider;
@@ -59,7 +59,7 @@ public class FileGenerationsProvider implements FileGenerationsArtifactsProvider
     }
 
     @Override
-    public List<DepotGeneration> extractLakehouseArtifactsForType(Stream<LakehouseCuratedArtifacts> elements)
+    public List<DepotGeneration> extractRestArtifactsForType(Stream<RestCuratedArtifacts> elements)
     {
         return elements.map(entityWithArtifact -> new DepotGeneration(entityWithArtifact.artifact.path, entityWithArtifact.artifact.content)).collect(Collectors.toList());
     }

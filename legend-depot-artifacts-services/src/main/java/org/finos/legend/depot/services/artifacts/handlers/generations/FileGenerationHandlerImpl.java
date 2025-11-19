@@ -16,7 +16,7 @@
 package org.finos.legend.depot.services.artifacts.handlers.generations;
 
 import org.apache.commons.io.FilenameUtils;
-import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
+import org.finos.legend.depot.domain.notifications.RestCuratedArtifacts;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
@@ -178,7 +178,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
     }
 
     @Override
-    public MetadataNotificationResponse refreshLakehouseArtifacts(String groupId, String artifactId, String versionId, List<LakehouseCuratedArtifacts> lakehouseCuratedElements)
+    public MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, List<RestCuratedArtifacts> restCuratedArtifacts)
     {
         MetadataNotificationResponse response = new MetadataNotificationResponse();
         try
@@ -192,7 +192,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
                 LOGGER.info(message);
             }
 
-            List<StoredFileGeneration> newGenerations = lakehouseCuratedElements.stream()
+            List<StoredFileGeneration> newGenerations = restCuratedArtifacts.stream()
                     .map(entityWithArtifact ->
                     {
                         DepotGeneration depotGeneration = new DepotGeneration(entityWithArtifact.artifact.path, entityWithArtifact.artifact.content);

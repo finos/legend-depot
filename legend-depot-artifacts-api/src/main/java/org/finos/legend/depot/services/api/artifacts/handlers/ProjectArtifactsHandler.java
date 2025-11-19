@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.services.api.artifacts.handlers;
 
-import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
+import org.finos.legend.depot.domain.notifications.RestCuratedArtifacts;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 
 import java.io.File;
@@ -28,5 +28,5 @@ public interface ProjectArtifactsHandler
 
     void delete(String groupId, String artifactId, String versionId);
 
-    MetadataNotificationResponse refreshLakehouseArtifacts(String groupId, String artifactId, String versionId, List<LakehouseCuratedArtifacts> lakehouseCuratedElements);
+    MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, List<RestCuratedArtifacts> restCuratedArtifacts);
 }
