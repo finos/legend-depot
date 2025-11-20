@@ -21,8 +21,8 @@ import org.apache.maven.model.Model;
 import org.finos.legend.depot.domain.CoordinateValidator;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
-import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
-import org.finos.legend.depot.domain.notifications.LakehouseMetadataNotification;
+import org.finos.legend.depot.domain.notifications.RestCuratedArtifacts;
+import org.finos.legend.depot.domain.notifications.RestMetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.ProjectVersion;
@@ -282,7 +282,7 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
     }
 
     @Override
-    public MetadataNotificationResponse handleLakehouseNotification(LakehouseMetadataNotification event)
+    public MetadataNotificationResponse handleRestNotification(RestMetadataNotification event)
     {
         long refreshStartTime = System.currentTimeMillis();
         MetadataNotificationResponse response = new MetadataNotificationResponse();
@@ -297,7 +297,7 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
             {
                 LOGGER.info("Processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
 
-                ProjectArtifactHandlerFactory.getSupportedTypes().forEach(artifactType -> response.combine(handleLakehouseArtifacts(artifactType, event)));
+                ProjectArtifactHandlerFactory.getSupportedTypes().forEach(artifactType -> response.combine(handleRestArtifacts(artifactType, event)));
                 LOGGER.info("Finished processing artifacts for [{}-{}-{}]", event.getGroupId(), event.getArtifactId(), event.getVersionId());
                 if (!response.hasErrors())
                 {
@@ -318,7 +318,7 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
 
     }
 
-    private void updateProjectVersionData(StoreProjectData project, String versionId, List<ProjectVersion> newDependencies, boolean isLakehouseData)
+    private void updateProjectVersionData(StoreProjectData project, String versionId, List<ProjectVersion> newDependencies, boolean isRestData)
     {
         Optional<StoreProjectVersionData> projectVersionData = projects.find(project.getGroupId(), project.getArtifactId(), versionId);
         StoreProjectVersionData storeProjectVersionData = projectVersionData.isPresent() ? projectVersionData.get() : new StoreProjectVersionData(project.getGroupId(), project.getArtifactId(), versionId);
@@ -340,13 +340,13 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
             }
         }
 
-        if (this.projectPropertiesInScope != null && !this.projectPropertiesInScope.isEmpty() && !isLakehouseData)
+        if (this.projectPropertiesInScope != null && !this.projectPropertiesInScope.isEmpty() && !isRestData)
         {
             List<Property> properties = calculateProjectProperties(project.getGroupId(), project.getArtifactId(), versionId);
             versionData.setProperties(properties);
         }
 
-        if (this.manifestPropertiesInScope != null && !this.manifestPropertiesInScope.isEmpty() && !isLakehouseData)
+        if (this.manifestPropertiesInScope != null && !this.manifestPropertiesInScope.isEmpty() && !isRestData)
         {
             Map<String, String> manifestProperties = getPropertiesFromManifest(project.getGroupId(), project.getArtifactId(),versionId);
             versionData.setManifestProperties(manifestProperties);
@@ -449,17 +449,17 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
         return response;
     }
 
-    private MetadataNotificationResponse handleLakehouseArtifacts(ArtifactType artifactType, LakehouseMetadataNotification event)
+    private MetadataNotificationResponse handleRestArtifacts(ArtifactType artifactType, RestMetadataNotification event)
     {
         MetadataNotificationResponse response = new MetadataNotificationResponse();
         ProjectArtifactsHandler refreshHandler = ProjectArtifactHandlerFactory.getArtifactHandler(artifactType);
         if (refreshHandler != null)
         {
-            List<LakehouseCuratedArtifacts> elements = event.getEntityDefinitionWithArtifacts();
+            List<RestCuratedArtifacts> elements = event.getEntityDefinitionWithArtifacts();
             if (elements != null && !elements.isEmpty())
             {
                 response.addMessage(String.format("[%s] files found [%s] artifacts to process [%s-%s-%s]", elements.size(),artifactType,event.getGroupId(),event.getArtifactId(),event.getVersionId()));
-                response.combine(refreshHandler.refreshLakehouseArtifacts(event.getGroupId(),event.getArtifactId(), event.getVersionId(), elements));
+                response.combine(refreshHandler.refreshRestArtifacts(event.getGroupId(),event.getArtifactId(), event.getVersionId(), elements));
             }
             else
             {

@@ -21,7 +21,7 @@ import io.swagger.annotations.ApiParam;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
-import org.finos.legend.depot.domain.notifications.LakehouseMetadataNotification;
+import org.finos.legend.depot.domain.notifications.RestMetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
@@ -111,13 +111,13 @@ public class NotificationsQueueManagerResource extends AuthorisedResource
     }
 
     @PUT
-    @Path("/queue/lakehouse")
-    @ApiOperation("store lakehouse curated elements")
+    @Path("/queue/rest/metadata")
+    @ApiOperation("store rest curated elements")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public MetadataNotificationResponse queueLakehouseNotification(LakehouseMetadataNotification notification)
+    public MetadataNotificationResponse queueRestNotification(RestMetadataNotification notification)
     {
-        return this.notificationsManager.handleLakehouseMetadataNotification(notification);
+        return this.notificationsManager.handleRestMetadataNotification(notification);
     }
 
     @DELETE

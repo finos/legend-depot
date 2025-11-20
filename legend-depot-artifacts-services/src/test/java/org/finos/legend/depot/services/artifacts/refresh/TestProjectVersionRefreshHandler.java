@@ -18,8 +18,8 @@ package org.finos.legend.depot.services.artifacts.refresh;
 import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.collections.impl.factory.Lists;
-import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
-import org.finos.legend.depot.domain.notifications.LakehouseMetadataNotification;
+import org.finos.legend.depot.domain.notifications.RestCuratedArtifacts;
+import org.finos.legend.depot.domain.notifications.RestMetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationStatus;
@@ -272,16 +272,16 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     }
 
     @Test
-    public void canLoadLakehouseArtifacts() throws IOException
+    public void canLoadRestArtifacts() throws IOException
     {
         ObjectMapper objectMapper = new ObjectMapper();
-        Artifact artifact = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseArtifact.json"), Artifact.class);
-        EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseEntityDefinition.json"), EntityDefinition.class);
+        Artifact artifact = objectMapper.readValue(getClass().getResourceAsStream("/data/restArtifact.json"), Artifact.class);
+        EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/restEntityDefinition.json"), EntityDefinition.class);
 
-        LakehouseMetadataNotification notification = new LakehouseMetadataNotification("lakehouse123", TEST_ARTIFACT_ID, "1.0.0");
-        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new LakehouseCuratedArtifacts(entity, artifact)));
+        RestMetadataNotification notification = new RestMetadataNotification("lakehouse123", TEST_ARTIFACT_ID, "1.0.0");
+        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new RestCuratedArtifacts(entity, artifact)));
 
-        MetadataNotificationResponse response = versionHandler.handleLakehouseNotification(notification);
+        MetadataNotificationResponse response = versionHandler.handleRestNotification(notification);
         Assertions.assertEquals(0, response.getErrors().size());
 
 
@@ -294,38 +294,38 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     }
 
     @Test
-    public void cannotLoadInvalidLakehouseArtifacts() throws IOException
+    public void cannotLoadInvalidRestArtifacts() throws IOException
     {
         ObjectMapper objectMapper = new ObjectMapper();
-        Artifact artifact = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseArtifact.json"), Artifact.class);
-        EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseEntityDefinition.json"), EntityDefinition.class);
+        Artifact artifact = objectMapper.readValue(getClass().getResourceAsStream("/data/restArtifact.json"), Artifact.class);
+        EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/restEntityDefinition.json"), EntityDefinition.class);
 
-        LakehouseMetadataNotification notification = new LakehouseMetadataNotification("lakehouse-123", TEST_ARTIFACT_ID, "1.0.0");
-        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new LakehouseCuratedArtifacts(entity, artifact)));
+        RestMetadataNotification notification = new RestMetadataNotification("lakehouse-123", TEST_ARTIFACT_ID, "1.0.0");
+        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new RestCuratedArtifacts(entity, artifact)));
 
-        MetadataNotificationResponse response = versionHandler.handleLakehouseNotification(notification);
+        MetadataNotificationResponse response = versionHandler.handleRestNotification(notification);
         Assertions.assertEquals(1, response.getErrors().size());
     }
 
     @Test
-    public void canLoadLakehouseArtifactsWithDependencies() throws IOException
+    public void canLoadRestArtifactsWithDependencies() throws IOException
     {
         ObjectMapper objectMapper = new ObjectMapper();
-        Artifact artifact = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseArtifact.json"), Artifact.class);
-        EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/lakehouseEntityDefinition.json"), EntityDefinition.class);
+        Artifact artifact = objectMapper.readValue(getClass().getResourceAsStream("/data/restArtifact.json"), Artifact.class);
+        EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/restEntityDefinition.json"), EntityDefinition.class);
 
-        LakehouseMetadataNotification notification = new LakehouseMetadataNotification("lakehouse123", TEST_ARTIFACT_ID, "1.0.0");
-        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new LakehouseCuratedArtifacts(entity, artifact)));
+        RestMetadataNotification notification = new RestMetadataNotification("lakehouse.123456", TEST_ARTIFACT_ID, "1.0.0");
+        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new RestCuratedArtifacts(entity, artifact)));
 
-        MetadataNotificationResponse response = versionHandler.handleLakehouseNotification(notification);
+        MetadataNotificationResponse response = versionHandler.handleRestNotification(notification);
         Assertions.assertEquals(0, response.getErrors().size());
 
         // add another project with this as dependency
-        notification = new LakehouseMetadataNotification("lakehouse1234", TEST_ARTIFACT_ID, "1.0.0");
-        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new LakehouseCuratedArtifacts(entity, artifact)));
+        notification = new RestMetadataNotification("lakehouse1234", TEST_ARTIFACT_ID, "1.0.0");
+        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new RestCuratedArtifacts(entity, artifact)));
         notification.setDependencies(Lists.mutable.of(new ProjectVersion("lakehouse123", TEST_ARTIFACT_ID, "1.0.0")));
 
-        response = versionHandler.handleLakehouseNotification(notification);
+        response = versionHandler.handleRestNotification(notification);
         Assertions.assertEquals(0, response.getErrors().size());
         StoreProjectVersionData versionData = versionsStore.find("lakehouse1234", TEST_ARTIFACT_ID, "1.0.0").get();
         Assertions.assertEquals(2, entitiesStore.getAllStoredEntities().size());

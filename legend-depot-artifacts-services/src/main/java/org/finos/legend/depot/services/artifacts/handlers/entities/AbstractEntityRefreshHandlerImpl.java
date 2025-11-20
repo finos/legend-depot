@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.services.artifacts.handlers.entities;
 
-import org.finos.legend.depot.domain.notifications.LakehouseCuratedArtifacts;
+import org.finos.legend.depot.domain.notifications.RestCuratedArtifacts;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
@@ -71,9 +71,9 @@ public abstract class AbstractEntityRefreshHandlerImpl
         return refreshEntities(groupId, artifactId, versionId, entityList);
     }
 
-    public MetadataNotificationResponse refreshLakehouseArtifacts(String groupId, String artifactId, String versionId, List<LakehouseCuratedArtifacts> lakehouseCuratedElements)
+    public MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, List<RestCuratedArtifacts> restCuratedArtifacts)
     {
-        List<Entity> entityList = getLakehouseEntities(lakehouseCuratedElements);
+        List<Entity> entityList = getRestEntities(restCuratedArtifacts);
         return refreshEntities(groupId, artifactId, versionId, entityList);
     }
 
@@ -119,8 +119,8 @@ public abstract class AbstractEntityRefreshHandlerImpl
         return entitiesProvider.extractArtifacts(files);
     }
 
-    private List<Entity> getLakehouseEntities(List<LakehouseCuratedArtifacts> elements)
+    private List<Entity> getRestEntities(List<RestCuratedArtifacts> elements)
     {
-        return entitiesProvider.extractLakehouseArtifactsForType(elements.stream());
+        return entitiesProvider.extractRestArtifactsForType(elements.stream());
     }
 }

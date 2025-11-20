@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.services.api.notifications;
 
-import org.finos.legend.depot.domain.notifications.LakehouseMetadataNotification;
+import org.finos.legend.depot.domain.notifications.RestMetadataNotification;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 
@@ -27,5 +27,5 @@ public interface NotificationHandler
 
     List<String> validate(MetadataNotification event);
 
-    MetadataNotificationResponse handleLakehouseNotification(LakehouseMetadataNotification metadataNotification);
+    MetadataNotificationResponse handleRestNotification(RestMetadataNotification metadataNotification);
 }
