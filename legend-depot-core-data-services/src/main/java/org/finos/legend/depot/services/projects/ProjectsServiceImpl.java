@@ -16,6 +16,8 @@
 package org.finos.legend.depot.services.projects;
 
 import org.eclipse.collections.api.factory.Sets;
+import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
+import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.notifications.Priority;
 import org.finos.legend.depot.domain.project.ProjectVersion;
@@ -31,6 +33,7 @@ import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
+import org.finos.legend.depot.services.dependencies.DependencyExclusionsUtil;
 import org.finos.legend.depot.services.dependencies.DependencySATConverter;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.services.dependencies.LogicNGSATResult;
@@ -273,30 +276,53 @@ public class ProjectsServiceImpl implements ProjectsService
         });
     }
 
-    public ProjectDependencyReport getProjectDependencyReport(List<ProjectVersion> projectDependencyVersions)
+    public ProjectDependencyReport getProjectDependencyReportFromProjectVersionList(List<ProjectVersion> projectDependencyVersions)
+    {
+        List<ArtifactDependency> artifactDependencies = projectDependencyVersions.stream().map(pv -> new ArtifactDependency(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId())).collect(Collectors.toList());
+        return getProjectDependencyReport(artifactDependencies);
+    }
+
+    public ProjectDependencyReport getProjectDependencyReport(List<ArtifactDependency> projectDependencyVersions)
     {
         ProjectDependencyGraph graph = new ProjectDependencyGraph();
-        ProjectDependencyGraphWalkerContext  graphWalkerContext =  new ProjectDependencyGraphWalkerContext();
-        buildDependencyGraph(graph, null, projectDependencyVersions, graphWalkerContext);
+        ProjectDependencyGraphWalkerContext graphWalkerContext = new ProjectDependencyGraphWalkerContext();
+
+        List<ProjectVersion> versions = this.dependencyOverride.getArtifactDependenciesAsProjectVersions(projectDependencyVersions);
+
+        buildDependencyGraph(graph, null, versions, graphWalkerContext);
         buildProjectVersionMap(projectDependencyVersions, graphWalkerContext);
         return buildReportFromGraph(graph, graphWalkerContext);
     }
 
-    private void buildProjectVersionMap(List<ProjectVersion> projectDependencyVersions, ProjectDependencyGraphWalkerContext graphWalkerContext)
+    private void buildProjectVersionMap(List<ArtifactDependency> projectDependencyVersions, ProjectDependencyGraphWalkerContext graphWalkerContext)
     {
         Set<ProjectVersion> dependencies = new HashSet<>();
+        Map<String, List<ProjectVersion>> allExclusions = new HashMap<>();
         projectDependencyVersions.forEach(pv ->
         {
             StoreProjectVersionData versionData = graphWalkerContext.getProjectData(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
             if (versionData.getTransitiveDependenciesReport().isValid())
             {
-                dependencies.addAll(this.dependencyOverride.overrideWith(versionData.getTransitiveDependenciesReport().getTransitiveDependencies(), projectDependencyVersions, graphWalkerContext::getProjectDataDependencies));
+                List<ProjectVersion> transitiveDeps = versionData.getTransitiveDependenciesReport().getTransitiveDependencies();
+                List<DependencyExclusion> exclusions = pv.getExclusions();
+                if (!exclusions.isEmpty())
+                {
+                    LOGGER.info("Applying exclusions for {}-{}-{}", pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+                    Map<String, List<ProjectVersion>> newExclusionsConverted = convertDependencyExclusionsMap(pv, exclusions);
+                    Map<String, List<ProjectVersion>> transitiveExclusionsForNew = DependencyExclusionsUtil.getTransitiveDependenciesOfExclusions(newExclusionsConverted, this);
+                    allExclusions.putAll(transitiveExclusionsForNew);
+                    ProjectVersion directDep = new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+                    transitiveDeps = this.dependencyOverride.applyExclusions(transitiveDeps, directDep, transitiveExclusionsForNew);
+                }
+                List<ProjectVersion> projectVersions = this.dependencyOverride.getArtifactDependenciesAsProjectVersions(projectDependencyVersions);
+                dependencies.addAll(this.dependencyOverride.overrideWith(transitiveDeps, projectVersions, graphWalkerContext::getProjectDataDependencies));
             }
             else
             {
                 throw new IllegalStateException(String.format("Error calculating transitive dependencies for project version - %s-%s-%s", versionData.getGroupId(), versionData.getArtifactId(), versionData.getVersionId()));
             }
         });
+        graphWalkerContext.setExclusions(allExclusions);
         dependencies.forEach(dep -> graphWalkerContext.addVersionToProject(dep.getGroupId(), dep.getArtifactId(), dep));
     }
 
@@ -304,7 +330,9 @@ public class ProjectsServiceImpl implements ProjectsService
     {
         ProjectDependencyReport report = new ProjectDependencyReport();
         ProjectDependencyReport.SerializedGraph graph = report.getGraph();
+        Map<String, List<ProjectVersion>> exclusions = graphWalkerContext.getExclusions();
 
+        removeExclusionsFromGraph(dependencyGraph, exclusions);
         dependencyGraph.getNodes().forEach(projectVersion ->
         {
             // add node
@@ -336,6 +364,57 @@ public class ProjectsServiceImpl implements ProjectsService
         });
         return report;
     }
+
+    private void removeExclusionsFromGraph(ProjectDependencyGraph dependencyGraph, Map<String, List<ProjectVersion>> exclusions)
+    {
+        dependencyGraph.getRootNodes().forEach(projectVersion ->
+        {
+            List<ProjectVersion> excludedVersions = exclusions.getOrDefault(ProjectVersionData.createDependencyKey(projectVersion), Collections.emptyList());
+            removeExclusionsFromSubtree(dependencyGraph, projectVersion, excludedVersions);
+        });
+    }
+
+    private void removeExclusionsFromSubtree(ProjectDependencyGraph dependencyGraph, ProjectVersion rootNode, List<ProjectVersion> excludedVersions)
+    {
+        if (excludedVersions.isEmpty())
+        {
+            return;
+        }
+
+        Set<ProjectVersion> forwardEdges = dependencyGraph.getForwardEdges().get(rootNode);
+        if (forwardEdges != null)
+        {
+            Set<ProjectVersion> childrenToProcess = new HashSet<>(forwardEdges);
+
+            excludedVersions.forEach(excludedVersion ->
+            {
+                if (forwardEdges.remove(excludedVersion))
+                {
+                    Set<ProjectVersion> backEdges = dependencyGraph.getBackEdges().get(excludedVersion);
+                    if (backEdges != null)
+                    {
+                        backEdges.remove(rootNode);
+
+                        if (backEdges.isEmpty())
+                        {
+                            dependencyGraph.getNodes().remove(excludedVersion);
+                            dependencyGraph.getBackEdges().remove(excludedVersion);
+                            dependencyGraph.getForwardEdges().remove(excludedVersion);
+                        }
+                    }
+                }
+            });
+
+            childrenToProcess.forEach(child ->
+            {
+                if (forwardEdges.contains(child))
+                {
+                    removeExclusionsFromSubtree(dependencyGraph, child, excludedVersions);
+                }
+            });
+        }
+    }
+
 
     @Override
     public List<ProjectDependencyWithPlatformVersions> getDependantProjects(String groupId, String artifactId, String versionId, boolean latestOnly)
@@ -469,6 +548,25 @@ public class ProjectsServiceImpl implements ProjectsService
         return alternatives;
     }
 
+    public static int compareVersions(String v1, String v2)
+    {
+        String[] parts1 = v1.split("\\.");
+        String[] parts2 = v2.split("\\.");
+
+        int length = Math.max(parts1.length, parts2.length);
+        for (int i = 0; i < length; i++)
+        {
+            int part1 = i < parts1.length ? Integer.parseInt(parts1[i]) : 0;
+            int part2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
+
+            if (part1 != part2)
+            {
+                return Integer.compare(part2, part1);
+            }
+        }
+        return 0;
+    }
+
     private List<ProjectDependencyWithPlatformVersions> filterProjectByLatest(List<ProjectDependencyWithPlatformVersions> projects)
     {
         Map<String, List<ProjectDependencyWithPlatformVersions>> groupedProjectDependencyWithPlatformVersions = projects.stream().filter(p -> !VersionValidator.isSnapshotVersion(p.getVersionId())).collect(Collectors.groupingBy(p -> p.getGroupId() + p.getArtifactId()));
@@ -488,5 +586,16 @@ public class ProjectsServiceImpl implements ProjectsService
             throw new IllegalArgumentException(String.format(EXCLUSION_FOUND_IN_STORE, groupId, artifactId, versionId, versionData.getExclusionReason()));
         }
         return projectData.get();
+    }
+
+    private Map<String, List<ProjectVersion>> convertDependencyExclusionsMap(ArtifactDependency pv, List<DependencyExclusion> exclusions)
+    {
+        Map<String, List<ProjectVersion>> dependencyExclusions = new HashMap<>();
+        ProjectVersion mainVersion = new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+        List<ProjectVersion> exclusionVersions = exclusions.stream()
+                .map(excl -> new ProjectVersion(excl.getGroupId(), excl.getArtifactId(), null))
+                .collect(Collectors.toList());
+        dependencyExclusions.put(ProjectVersionData.createDependencyKey(mainVersion), exclusionVersions);
+        return dependencyExclusions;
     }
 }

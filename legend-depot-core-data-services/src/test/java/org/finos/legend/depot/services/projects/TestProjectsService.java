@@ -17,7 +17,10 @@ package org.finos.legend.depot.services.projects;
 
 import org.eclipse.collections.api.factory.Sets;
 import org.eclipse.collections.api.map.MutableMap;
+import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
+import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
+import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.services.dependencies.DependencySATConverter;
 import org.finos.legend.depot.services.dependencies.LogicNGSATResult;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
@@ -203,7 +206,7 @@ public class TestProjectsService extends TestBaseServices
         projectsService.createOrUpdate(new StoreProjectVersionData("example.services.test", "test", "2.0.0"));
 
         // Dependency Tree
-        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReport(Arrays.asList(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), new ProjectVersion("example.services.test", "test-dependencies", "1.0.0")));
+        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReportFromProjectVersionList(Arrays.asList(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), new ProjectVersion("example.services.test", "test-dependencies", "1.0.0")));
 
         Assertions.assertEquals(1, dependencyReport.getConflicts().size());
         Assertions.assertEquals(dependencyReport.getConflicts().get(0).getVersions(), Sets.mutable.of("example.services.test:test:1.0.0","example.services.test:test:2.0.0"));
@@ -226,7 +229,7 @@ public class TestProjectsService extends TestBaseServices
         projectsService.createOrUpdate(new StoreProjectVersionData("example.services.test", "test", "2.0.0"));
 
         // Dependency Tree
-        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReport(Arrays.asList(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), new ProjectVersion("example.services.test", "test-dependencies", "1.0.0"), dependencyB));
+        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReportFromProjectVersionList(Arrays.asList(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), new ProjectVersion("example.services.test", "test-dependencies", "1.0.0"), dependencyB));
 
         Assertions.assertEquals(0, dependencyReport.getConflicts().size());
     }
@@ -251,7 +254,7 @@ public class TestProjectsService extends TestBaseServices
 
         // Dependency Tree
         List<ProjectVersion> projectDependencyVersions = Arrays.asList(new ProjectVersion("examples.metadata", "test", "2.3.1"), new ProjectVersion("examples.metadata", "test-dependencies", "2.0.0"));
-        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReport(projectDependencyVersions);
+        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReportFromProjectVersionList(projectDependencyVersions);
 
         Assertions.assertEquals(0, dependencyReport.getConflicts().size());
     }
@@ -543,7 +546,7 @@ public class TestProjectsService extends TestBaseServices
         ProjectVersion pv2 = new ProjectVersion("examples.metadata", "teste", "1.0.0");
 
         // Cv1 will be overridden by CV2 and incoming dependency Dv2 will override Dv1
-        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReport(Arrays.asList(pv1, pv2, dependency3));
+        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReportFromProjectVersionList(Arrays.asList(pv1, pv2, dependency3));
 
         Assertions.assertEquals(0, dependencyReport.getConflicts().size());
     }
@@ -594,7 +597,7 @@ public class TestProjectsService extends TestBaseServices
         ProjectVersion pv2 = new ProjectVersion("examples.metadata", "teste", "1.0.0");
 
         // Cv1 will be overridden by CV2 and incoming dependency Dv2 will be part of the list
-        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReport(Arrays.asList(pv1, pv2, dependency3));
+        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReportFromProjectVersionList(Arrays.asList(pv1, pv2, dependency3));
 
         Assertions.assertEquals(1, dependencyReport.getConflicts().size());
         Assertions.assertEquals(Sets.mutable.of("examples.metadata:testd:2.0.0", "examples.metadata:testd:1.0.0"),dependencyReport.getConflicts().get(0).getVersions());
@@ -1342,7 +1345,7 @@ public class TestProjectsService extends TestBaseServices
         Assertions.assertTrue(allSolutionGavs.contains("org.finos.legend:project_c:1.0.0"));
 
         // Test Case 3: Verify no conflicts are reported for valid circular dependencies
-        ProjectDependencyReport report = projectsService.getProjectDependencyReport(result);
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(result);
         Assertions.assertEquals(0, report.getConflicts().size(),"Valid circular dependencies should not create conflicts");
 
         log.info("Circular dependency resolution found {} projects:", result.size());
@@ -1417,7 +1420,7 @@ public class TestProjectsService extends TestBaseServices
         Assertions.assertEquals(3, resolvedResult.size(),"Solution should contain exactly 3 projects when override resolves the conflict");
 
         // Test Case 3: Verify dependency report shows no conflicts with override
-        ProjectDependencyReport reportWithOverride = projectsService.getProjectDependencyReport(resolvedResult);
+        ProjectDependencyReport reportWithOverride = projectsService.getProjectDependencyReportFromProjectVersionList(resolvedResult);
         Assertions.assertEquals(0, reportWithOverride.getConflicts().size(),
                 "Override dependency should eliminate version conflicts");
 
@@ -1441,7 +1444,7 @@ public class TestProjectsService extends TestBaseServices
         Assertions.assertTrue(altSolutionGavs.contains("org.apache.commons:commons_util:1.0.0"));
         Assertions.assertEquals(3, alternativeResult.size());
 
-        ProjectDependencyReport altReport = projectsService.getProjectDependencyReport(alternativeResult);
+        ProjectDependencyReport altReport = projectsService.getProjectDependencyReportFromProjectVersionList(alternativeResult);
         Assertions.assertEquals(0, altReport.getConflicts().size(),"Alternative override should also eliminate conflicts");
 
         log.info("Resolved dependencies with override:");
@@ -1579,7 +1582,7 @@ public class TestProjectsService extends TestBaseServices
         compatibleVersions.forEach(pv -> log.info("  - {}", pv.getGav()));
 
         // Verify that the resolution is consistent - no conflicts remain
-        ProjectDependencyReport report = projectsService.getProjectDependencyReport(compatibleVersions);
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(compatibleVersions);
         Assertions.assertEquals(0, report.getConflicts().size(), "Resolved versions should have no remaining conflicts");
 
         // Verify the override versions are properly selected
@@ -1666,7 +1669,7 @@ public class TestProjectsService extends TestBaseServices
                 new ProjectVersion("org.example.resolve", "project_beta", "1.0.0")
         );
 
-        ProjectDependencyReport report = projectsService.getProjectDependencyReport(conflictingProjects);
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(conflictingProjects);
         Assertions.assertFalse(report.getConflicts().isEmpty(), "Should report conflicts when trying to use conflicting versions");
 
         // Test Case 4: Prove that the solution would work if the alternative version was available
@@ -1795,7 +1798,7 @@ public class TestProjectsService extends TestBaseServices
         Assertions.assertTrue(solutionGavs.contains("org.example.optimal:project_beta:3.0.0"),"Solution should use project_beta v3.0.0 (newest compatible version)");
 
         // Test Case 3: Verify the solution has no conflicts
-        ProjectDependencyReport report = projectsService.getProjectDependencyReport(backtrackResult);
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(backtrackResult);
         Assertions.assertEquals(0, report.getConflicts().size(),"Optimal solution should have no remaining conflicts");
 
         // Test Case 4: Verify that other valid solutions exist but were not chosen
@@ -1806,7 +1809,7 @@ public class TestProjectsService extends TestBaseServices
                 new ProjectVersion("org.apache.commons", "commons_util", "2.0.0")
         );
 
-        ProjectDependencyReport alternativeReport = projectsService.getProjectDependencyReport(alternativeSolution);
+        ProjectDependencyReport alternativeReport = projectsService.getProjectDependencyReportFromProjectVersionList(alternativeSolution);
         Assertions.assertEquals(0, alternativeReport.getConflicts().size(),"Alternative solution with v2.0.0 should also be valid but less optimal");
 
         // Test Case 5: Verify version optimization by checking that newer versions were chosen over older ones
@@ -1828,6 +1831,83 @@ public class TestProjectsService extends TestBaseServices
 
         log.info("  Alternative valid solution (not chosen):");
         alternativeSolution.forEach(pv -> log.info("    - {} (older but compatible)", pv.getGav()));
+    }
+
+    @Test
+    public void canCreateProjectDependencyReportWithExclusions()
+    {
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-55555", "examples.metadata", "base-lib", "master", "1.0.0"));
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-99999", "examples.metadata", "base-dep", "master", "1.0.0"));
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-33333", "examples.test", "commons-lib", "master", "3.0.0"));
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-66666", "examples.metadata", "excluded-lib", "master", "1.0.0"));
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-11111", "examples.metadata", "another-project", "master", "2.0.0"));
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-77777", "examples.metadata", "excluded-transitive", "master", "1.0.0"));
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-88888", "examples.metadata", "main-project", "master", "1.0.0"));
+
+        // excluded-lib:1.0.0 depends on excluded-transitive:1.0.0
+        StoreProjectVersionData excludedLib = new StoreProjectVersionData("examples.metadata", "excluded-lib", "1.0.0");
+        ProjectVersion excludedTransitiveDep = new ProjectVersion("examples.metadata", "excluded-transitive", "1.0.0");
+        excludedLib.getVersionData().setDependencies(Collections.singletonList(excludedTransitiveDep));
+        excludedLib.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(excludedTransitiveDep), true));
+        projectsVersionsStore.createOrUpdate(excludedLib);
+
+        // base-dep:1.0.0 depends on excluded-lib:1.0.0 and another-project:2.0.0
+        StoreProjectVersionData baseDep = new StoreProjectVersionData("examples.metadata", "base-dep", "1.0.0");
+        StoreProjectVersionData anotherProject = new StoreProjectVersionData("examples.metadata", "another-project", "2.0.0");
+        ProjectVersion excludedLibDep = new ProjectVersion("examples.metadata", "excluded-lib", "1.0.0");
+        ProjectVersion nonExcludedLipDep = new ProjectVersion("examples.metadata", "another-project", "2.0.0"); // non-excluded dependency
+        baseDep.getVersionData().setDependencies(Arrays.asList(excludedLibDep, nonExcludedLipDep));
+        baseDep.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(excludedLibDep, excludedTransitiveDep, nonExcludedLipDep), true));
+        anotherProject.getVersionData().setDependencies(Collections.emptyList());
+        anotherProject.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
+        projectsVersionsStore.createOrUpdate(anotherProject);
+        projectsVersionsStore.createOrUpdate(baseDep);
+
+        // excluded-transitive:1.0.0 has no dependencies
+        StoreProjectVersionData excludedTransitive = new StoreProjectVersionData("examples.metadata", "excluded-transitive", "1.0.0");
+        excludedTransitive.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
+        projectsVersionsStore.createOrUpdate(excludedTransitive);
+
+        // base-lib:1.0.0 has no dependencies
+        StoreProjectVersionData baseLib = new StoreProjectVersionData("examples.metadata", "base-lib", "1.0.0");
+        baseLib.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
+        projectsVersionsStore.createOrUpdate(baseLib);
+
+        // commons-lib:3.0.0 depends on excluded-lib:1.0.0, but it is not excluded from this dependency
+        StoreProjectVersionData commonsLib = new StoreProjectVersionData("examples.test", "commons-lib", "3.0.0");
+        commonsLib.getVersionData().setDependencies(List.of(excludedLibDep));
+        commonsLib.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(excludedLibDep, excludedTransitiveDep), true));
+        projectsVersionsStore.createOrUpdate(commonsLib);
+
+        // Add exclusion for excluded-lib
+        ProjectVersion baseDepVersion = new ProjectVersion("examples.metadata", "base-dep", "1.0.0");
+        ProjectVersion baseLibVersion = new ProjectVersion("examples.metadata", "base-lib", "1.0.0");
+        ProjectVersion commonsLibVersion = new ProjectVersion("examples.test", "commons-lib", "3.0.0");
+
+        List<DependencyExclusion> exclusions = new ArrayList<>();
+        exclusions.add(new DependencyExclusion("examples.metadata", "excluded-lib"));
+        List<ArtifactDependency> inputDeps = Arrays.asList(
+                new ArtifactDependency("examples.metadata", "base-dep", "1.0.0", exclusions),
+                new ArtifactDependency("examples.metadata", "base-lib", "1.0.0"),
+                new ArtifactDependency("examples.test", "commons-lib", "3.0.0")
+        );
+        ProjectDependencyReport report = projectsService.getProjectDependencyReport(inputDeps);
+
+        Assertions.assertEquals(6, report.getGraph().getNodes().size(), "Graph should contain exactly 6 nodes");
+        report.getGraph().getNodes().get(baseDepVersion.getGav()).getForwardEdges().forEach(edge ->
+        {
+            Assertions.assertNotEquals(excludedLibDep.getGav(), edge, "Excluded dependency should not be present in the graph");
+            Assertions.assertNotEquals(excludedTransitiveDep.getGav(), edge, "Transitive dependency of excluded dependency should not be present in the graph");
+        });
+        report.getGraph().getNodes().get(commonsLibVersion.getGav()).getForwardEdges().forEach(edge ->
+        {
+            Assertions.assertEquals(excludedLibDep.getGav(), edge, "Dependency was not excluded from commons-lib, it should be present in the graph");
+        });
+        Assertions.assertEquals(1, report.getGraph().getNodes().get(excludedLibDep.getGav()).getBackEdges().size(), "There should be only one back edge for excluded-lib");
+        report.getGraph().getNodes().get(excludedLibDep.getGav()).getBackEdges().forEach(edge ->
+        {
+            Assertions.assertEquals(commonsLibVersion.getGav(), edge, "Back edge should point to commons-lib which depends on excluded-lib");
+        });
     }
 
     @Test

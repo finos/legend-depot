@@ -16,6 +16,7 @@
 package org.finos.legend.depot.services.artifacts.refresh;
 
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.domain.version.VersionValidator;
@@ -24,16 +25,21 @@ import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
+import org.finos.legend.depot.services.dependencies.DependencyExclusionsUtil;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.Optional;
+
 import java.util.stream.Collectors;
 
 public class RefreshDependenciesServiceImpl implements RefreshDependenciesService
@@ -59,12 +65,11 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
         LOGGER.info("Finding dependencies for [{}-{}-{}]", groupId, artifactId, versionId);
         Set<ArtifactDependency> dependencies = this.repositoryServices.findDependencies(groupId, artifactId, versionId);
         LOGGER.info("Found [{}] dependencies for [{}-{}-{}]", dependencies.size(), groupId, artifactId, versionId);
-        dependencies.forEach(dependency ->  versionDependencies.add(new ProjectVersion(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion())));
+        dependencies.forEach(dependency ->  versionDependencies.add(new ProjectVersion(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersionId())));
         return versionDependencies;
     }
 
-
-    private VersionDependencyReport calculateTransitiveDependencies(List<ProjectVersion> projectVersions)
+    private VersionDependencyReport calculateTransitiveDependencies(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusions)
     {
         Set<ProjectVersion> projectDependencies = new HashSet<>();
         try
@@ -85,21 +90,51 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
                     }
                     List<ProjectVersion> allDependencies = new ArrayList<>(projectData.get().getVersionData().getDependencies());
                     allDependencies.addAll(projectData.get().getTransitiveDependenciesReport().getTransitiveDependencies());
-                    projectDependencies.addAll(this.dependencyOverride.overrideWith(allDependencies, projectVersions, this::getCalculatedTransitiveDependencies));
+                    if (exclusions != null && !exclusions.isEmpty())
+                    {
+                        List<ProjectVersion> filteredDependencies = this.dependencyOverride.applyExclusions(allDependencies, deps, exclusions);
+                        LOGGER.info("Applied exclusions to dependencies for {}-{}-{}", deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
+                        projectDependencies.addAll(this.dependencyOverride.overrideWith(filteredDependencies, projectVersions, this::getCalculatedTransitiveDependencies));
+                    }
+                    else
+                    {
+                        projectDependencies.addAll(this.dependencyOverride.overrideWith(allDependencies, projectVersions, this::getCalculatedTransitiveDependencies));
+                    }
                 }
                 else
                 {
                     LOGGER.info(String.format("Finding dependencies for %s-%s-%s as no data is present in the store", deps.getGroupId(), deps.getArtifactId(), deps.getVersionId()));
-                    List<ProjectVersion> dependencies = this.retrieveDependenciesFromRepository(deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
-                    projectDependencies.addAll(dependencies);
-                    VersionDependencyReport report = calculateTransitiveDependencies(dependencies);
+                    List<ArtifactDependency> artifactDependencies = this.retrieveDependenciesFromRepositoryAsArtifactDependencies(deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
+                    List<ProjectVersion> dependencyVersions = this.dependencyOverride.getArtifactDependenciesAsProjectVersions(artifactDependencies);
+                    projectDependencies.addAll(dependencyVersions);
+                    Map<String, List<ProjectVersion>> exclusionsFromRepository = this.createExclusionsMapFromArtifactDependencies(artifactDependencies);
+                    VersionDependencyReport report;
+                    if (exclusionsFromRepository != null && !exclusionsFromRepository.isEmpty())
+                    {
+                        LOGGER.info("Applying exclusions retrieved from repository for {}-{}-{}", deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
+                        report = calculateTransitiveDependencies(dependencyVersions, exclusionsFromRepository);
+                    }
+                    else
+                    {
+                        report = calculateTransitiveDependencies(dependencyVersions);
+                    }
                     if (!report.isValid())
                     {
                         throw new IllegalStateException(String.format("Cannot calculate dependencies for project version: %s", deps.getGav()));
                     }
                     else
                     {
-                        projectDependencies.addAll(this.dependencyOverride.overrideWith(report.getTransitiveDependencies(), projectVersions, this::getCalculatedTransitiveDependencies));
+                        List<ProjectVersion> allDependencies = new ArrayList<>(report.getTransitiveDependencies());
+                        if (exclusions != null && !exclusions.isEmpty())
+                        {
+                            List<ProjectVersion> filteredDependencies = this.dependencyOverride.applyExclusions(allDependencies, deps, exclusions);
+                            projectDependencies.addAll(this.dependencyOverride.overrideWith(filteredDependencies, projectVersions, this::getCalculatedTransitiveDependencies));
+                            LOGGER.info("Applied exclusions to dependencies for {}-{}-{}", deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
+                        }
+                        else
+                        {
+                            projectDependencies.addAll(this.dependencyOverride.overrideWith(allDependencies, projectVersions, this::getCalculatedTransitiveDependencies));
+                        }
                     }
                 }
                 projectDependencies.add(deps);
@@ -117,6 +152,11 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
     private Set<ProjectVersion> getCalculatedTransitiveDependencies(List<ProjectVersion> directDependencies, boolean transitive)
     {
         return this.calculateTransitiveDependencies(directDependencies).getTransitiveDependencies().stream().collect(Collectors.toSet());
+    }
+
+    private VersionDependencyReport calculateTransitiveDependencies(List<ProjectVersion> projectVersions)
+    {
+        return this.calculateTransitiveDependencies(projectVersions, Collections.emptyMap());
     }
 
     @Override
@@ -157,6 +197,45 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
 
     public void setProjectDataTransitiveDependencies(StoreProjectVersionData projectData)
     {
-        projectData.setTransitiveDependenciesReport(calculateTransitiveDependencies(projectData.getVersionData().getDependencies()));
+        Map<String, List<ProjectVersion>> exclusions = projectData.getVersionData().getDependencyExclusions();
+        if (!exclusions.isEmpty())
+        {
+            LOGGER.info("Project data has exclusions, calculating transitive exclusions");
+            Map<String, List<ProjectVersion>> transitiveExclusions = DependencyExclusionsUtil.getTransitiveDependenciesOfExclusions(exclusions, this.projects);
+            projectData.setTransitiveDependenciesReport(calculateTransitiveDependencies(projectData.getVersionData().getDependencies(), transitiveExclusions));
+        }
+        else
+        {
+            projectData.setTransitiveDependenciesReport(calculateTransitiveDependencies(projectData.getVersionData().getDependencies()));
+        }
+    }
+
+    private List<ArtifactDependency> retrieveDependenciesFromRepositoryAsArtifactDependencies(String groupId, String artifactId, String versionId)
+    {
+        LOGGER.info("Finding dependencies for [{}-{}-{}]", groupId, artifactId, versionId);
+        return new ArrayList<>(this.repositoryServices.findDependencies(groupId, artifactId, versionId));
+    }
+
+    private Map<String, List<ProjectVersion>> createExclusionsMapFromArtifactDependencies(List<ArtifactDependency> artifactDependencies)
+    {
+        Map<String, List<ProjectVersion>> exclusions = new HashMap<>();
+        for (ArtifactDependency artifactDependency : artifactDependencies)
+        {
+            if (artifactDependency.getExclusions().isEmpty())
+            {
+                continue;
+            }
+            String key = ProjectVersionData.createDependencyKey(new ProjectVersion(artifactDependency.getGroupId(), artifactDependency.getArtifactId(), artifactDependency.getVersionId()));
+            List<ProjectVersion> exclusionsList = artifactDependency.getExclusions().stream()
+                    .map(exclusion -> new ProjectVersion(exclusion.getGroupId(), exclusion.getArtifactId(), null))
+                    .collect(Collectors.toList());
+            exclusions.put(key, exclusionsList);
+        }
+        if (exclusions.isEmpty())
+        {
+            return null;
+        }
+        DependencyExclusionsUtil.getTransitiveDependenciesOfExclusions(exclusions, this.projects);
+        return exclusions;
     }
 }

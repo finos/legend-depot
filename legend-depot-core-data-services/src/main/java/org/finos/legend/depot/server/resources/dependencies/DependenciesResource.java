@@ -23,6 +23,7 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.VersionedData;
+import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.Property;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
@@ -80,12 +81,21 @@ public class DependenciesResource extends TracingResource
     }
 
     @POST
+    @Path("/projects/analyzeDependencyTreeFromArtifactDependencies")
+    @ApiOperation(GET_PROJECT_DEPENDENCY_TREE)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response analyzeDependencyTreeFromArtifactDependencies(@ApiParam("projectDependencies") List<ArtifactDependency> projectDependencies)
+    {
+        return handleResponse(GET_PROJECT_DEPENDENCY_TREE, () -> this.projectApi.getProjectDependencyReport(projectDependencies));
+    }
+
+    @POST
     @Path("/projects/analyzeDependencyTree")
     @ApiOperation(GET_PROJECT_DEPENDENCY_TREE)
     @Produces(MediaType.APPLICATION_JSON)
     public Response analyzeDependencyTree(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies)
     {
-        return handleResponse(GET_PROJECT_DEPENDENCY_TREE, () -> this.projectApi.getProjectDependencyReport(projectDependencies));
+        return handleResponse(GET_PROJECT_DEPENDENCY_TREE, () -> this.projectApi.getProjectDependencyReportFromProjectVersionList(projectDependencies));
     }
 
     @GET
@@ -96,7 +106,7 @@ public class DependenciesResource extends TracingResource
                                          @PathParam("artifactId") String artifactId,
                                          @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                          @QueryParam("latestOnly") @DefaultValue("false")
-                                                                       @ApiParam("Whether to only return the latest version of dependant projects") boolean latestOnly
+                                         @ApiParam("Whether to only return the latest version of dependant projects") boolean latestOnly
     )
     {
         return handleResponse(GET_DEPENDANT_PROJECTS, GET_DEPENDANT_PROJECTS + groupId + artifactId, () -> transform(this.projectApi.getDependantProjects(groupId, artifactId, versionId, latestOnly)));
@@ -107,7 +117,7 @@ public class DependenciesResource extends TracingResource
     @ApiOperation(RESOLVE_COMPATIBLE_PROJECT_DEPENDENCY_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
     public Response resolveCompatibleProjectDependencyVersions(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies,
-                                                                 @QueryParam("backtrackVersions") @DefaultValue("0") int backtrackVersions)
+                                                               @QueryParam("backtrackVersions") @DefaultValue("0") int backtrackVersions)
     {
         return handleResponse(RESOLVE_COMPATIBLE_PROJECT_DEPENDENCY_VERSIONS, () -> this.projectApi.resolveCompatibleVersions(projectDependencies, backtrackVersions));
     }

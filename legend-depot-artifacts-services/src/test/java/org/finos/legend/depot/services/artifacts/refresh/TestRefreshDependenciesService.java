@@ -17,21 +17,21 @@ package org.finos.legend.depot.services.artifacts.refresh;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.dependencies.VersionDependencyReport;
 import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependenciesService;
-import org.finos.legend.depot.services.api.projects.ManageProjectsService;
-import org.finos.legend.depot.services.dependencies.DependencyUtil;
-import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
-import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.store.api.projects.UpdateProjects;
-import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
+import org.finos.legend.depot.services.api.notifications.queue.Queue;
+import org.finos.legend.depot.services.api.projects.ManageProjectsService;
+import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
+import org.finos.legend.depot.services.dependencies.DependencyUtil;
+import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
+import org.finos.legend.depot.store.api.projects.UpdateProjects;
+import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.mongo.CoreDataMongoStoreTests;
 import org.finos.legend.depot.store.mongo.notifications.queue.NotificationsQueueMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
-import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -253,4 +253,145 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
         Assertions.assertEquals(4, project.getTransitiveDependenciesReport().getTransitiveDependencies().size());
         Assertions.assertEquals(Arrays.asList(dependency3, dependency2, pv2, pv1), project.getTransitiveDependenciesReport().getTransitiveDependencies());
     }
+
+    @Test
+    public void canUpdateTransitiveDependenciesWithMavenExclusions()
+    {
+        // Test BEFORE adding exclusions - should have 4 transitive dependencies
+        StoreProjectVersionData resultBefore = refreshDependenciesService.updateTransitiveDependencies(GROUPID, "test", "3.0.0");
+
+        Assertions.assertTrue(resultBefore.getTransitiveDependenciesReport().isValid());
+        List<ProjectVersion> transitiveDepsBefore = resultBefore.getTransitiveDependenciesReport().getTransitiveDependencies();
+
+        // Expected: test-dependencies:2.0.0, art101:1.0.0, art102:1.0.0, art103:1.0.0
+        Assertions.assertEquals(4, transitiveDepsBefore.size());
+
+        // Now add Maven exclusion for art101
+        ProjectVersion dependencyToExcludeFrom = new ProjectVersion(GROUPID, "test-dependencies", "2.0.0");
+        ProjectVersion excludedDep = new ProjectVersion(GROUPID, "art101", null);
+
+        // Manually update the project version data with the exclusion and save it
+        StoreProjectVersionData projectToUpdate = projectsVersionsStore.find(GROUPID, "test", "3.0.0").get();
+        projectToUpdate.getVersionData().addExclusionForDependency(dependencyToExcludeFrom, excludedDep);
+        projectsVersionsStore.createOrUpdate(projectToUpdate);
+
+        // AFTER: Update transitive dependencies with exclusions
+        StoreProjectVersionData resultAfter = refreshDependenciesService.updateTransitiveDependencies(GROUPID, "test", "3.0.0");
+
+        // Verify art101 is excluded after adding Maven exclusion
+        Assertions.assertTrue(resultAfter.getTransitiveDependenciesReport().isValid());
+        List<ProjectVersion> transitiveDepsAfter = resultAfter.getTransitiveDependenciesReport().getTransitiveDependencies();
+
+        // Should now have 3 dependencies (art101 excluded)
+        Assertions.assertEquals(3, transitiveDepsAfter.size());
+        Assertions.assertTrue(transitiveDepsAfter.stream().noneMatch(dep -> "art101".equals(dep.getArtifactId())));
+    }
+
+    @Test
+    public void canExcludeMultipleTransitiveDependencies()
+    {
+        // Project `test:3.0.0` depends on `test-dependencies:2.0.0`.
+        // `test-dependencies:2.0.0` depends on `art101:1.0.0` and `art102:1.0.0`.
+        // We will exclude both `art101` and `art102`.
+        // Since art103 is a transitive dependency of art102, it should also be excluded.
+
+        StoreProjectVersionData projectToUpdate = projectsVersionsStore.find(GROUPID, "test", "3.0.0").get();
+        ProjectVersion dependencyToExcludeFrom = new ProjectVersion(GROUPID, "test-dependencies", "2.0.0");
+        ProjectVersion excludedDep1 = new ProjectVersion(GROUPID, "art101", null);
+        ProjectVersion excludedDep2 = new ProjectVersion(GROUPID, "art102", null);
+
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-00000", GROUPID, "some-other-dep", "master", "1.0.0"));
+        StoreProjectVersionData anotherProject = new StoreProjectVersionData(GROUPID, "some-other-dep", "1.0.0");
+        anotherProject.getVersionData().setDependencies(Collections.emptyList());
+        anotherProject.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
+        projectsVersionsStore.createOrUpdate(anotherProject);
+
+        ProjectVersion anotherDependency = new ProjectVersion(GROUPID, "some-other-dep", "1.0.0");
+        projectToUpdate.getVersionData().addExclusionForDependency(dependencyToExcludeFrom, excludedDep1);
+        projectToUpdate.getVersionData().addExclusionForDependency(dependencyToExcludeFrom, excludedDep2);
+        projectToUpdate.getVersionData().addDependency(anotherDependency);
+        projectsVersionsStore.createOrUpdate(projectToUpdate);
+
+        // Update transitive dependencies
+        StoreProjectVersionData result = refreshDependenciesService.updateTransitiveDependencies(GROUPID, "test", "3.0.0");
+        List<ProjectVersion> transitiveDeps = result.getTransitiveDependenciesReport().getTransitiveDependencies();
+
+        // Expected: `test-dependencies:2.0.0` and `some-other-dep:1.0.0` only
+        Assertions.assertEquals(2, transitiveDeps.size());
+        Assertions.assertTrue(transitiveDeps.stream().anyMatch(dep -> "test-dependencies".equals(dep.getArtifactId())));
+        Assertions.assertTrue(transitiveDeps.stream().noneMatch(dep -> "art101".equals(dep.getArtifactId())));
+        Assertions.assertTrue(transitiveDeps.stream().noneMatch(dep -> "art102".equals(dep.getArtifactId())));
+        Assertions.assertTrue(transitiveDeps.stream().noneMatch(dep -> "art103".equals(dep.getArtifactId())));
+    }
+
+    @Test
+    public void canExcludeFromDifferentDirectDependencies()
+    {
+        // Project `test-exclusions:1.0.0` depends on `another-dependency:1.0.0` and `test-dependencies:2.0.0`.
+        // `another-dependency:1.0.0` depends on `some-artifact:1.0.0`.
+        // `test-dependencies:2.0.0` depends on `art101:1.0.0` and `art102:1.0.0`.
+        // We will exclude `art101` from test-dependencies and some-artifact from another-dependency.
+
+        StoreProjectVersionData newProject = new StoreProjectVersionData(GROUPID, "test-exclusions", "1.0.0");
+
+        projectsService.createOrUpdate(new StoreProjectData("PROD-00001", "org.com.gs.finos", "another-dependency", "master", "1.0.0"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-00002", "org.com.gs.finos", "some-artifact", "master", "1.0.0"));
+        StoreProjectVersionData anotherProject = new StoreProjectVersionData("org.com.gs.finos", "another-dependency", "1.0.0");
+        StoreProjectVersionData anotherArtifact = new StoreProjectVersionData("org.com.gs.finos", "some-artifact", "1.0.0");
+        projectsVersionsStore.createOrUpdate(anotherArtifact);
+        ProjectVersion anotherArtifactVersion = new ProjectVersion("org.com.gs.finos", "some-artifact", "1.0.0");
+        anotherProject.getVersionData().addDependency(anotherArtifactVersion);
+        anotherProject.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(anotherArtifactVersion), true));
+        projectsVersionsStore.createOrUpdate(anotherProject);
+
+        ProjectVersion anotherDep = new ProjectVersion("org.com.gs.finos", "another-dependency", "1.0.0");
+        ProjectVersion dep2 = new ProjectVersion(GROUPID, "test-dependencies", "2.0.0");
+        newProject.getVersionData().setDependencies(Arrays.asList(anotherDep, dep2));
+
+        // Exclude art101 from test-dependencies:2.0.0
+        ProjectVersion excludedDep = new ProjectVersion(GROUPID, "art101", null);
+        newProject.getVersionData().addExclusionForDependency(dep2, excludedDep);
+        // Exclude some-artifact from another-dependency:1.0.0
+        newProject.getVersionData().addExclusionForDependency(anotherDep, anotherArtifactVersion);
+        projectsVersionsStore.createOrUpdate(newProject);
+
+        StoreProjectVersionData result = refreshDependenciesService.updateTransitiveDependencies(GROUPID, "test-exclusions", "1.0.0");
+        List<ProjectVersion> transitiveDeps = result.getTransitiveDependenciesReport().getTransitiveDependencies();
+
+        // Expected: test:3.0.0, test-dependencies:2.0.0, art102:1.0.0, art103:1.0.0
+        Assertions.assertEquals(4, transitiveDeps.size());
+        Assertions.assertTrue(transitiveDeps.stream().noneMatch(dep -> "art101".equals(dep.getArtifactId())), "art101 should be excluded");
+        Assertions.assertTrue(transitiveDeps.stream().anyMatch(dep -> "art102".equals(dep.getArtifactId())), "art102 should be present");
+        Assertions.assertTrue(transitiveDeps.stream().anyMatch(dep -> "art103".equals(dep.getArtifactId())), "art103 should be present");
+    }
+
+    @Test
+    public void canExcludeTransitiveButKeepDirectDependency()
+    {
+        // Project `test-direct:1.0.0` depends directly on `test-dependencies:2.0.0` and `art101:1.0.0`.
+        // `test-dependencies:2.0.0` also brings in `art101:1.0.0` transitively.
+        // We exclude `art101` from the `test-dependencies:2.0.0` path.
+        // `art101:1.0.0` should still be present because it is a direct dependency.
+
+        StoreProjectVersionData newProject = new StoreProjectVersionData(GROUPID, "test-direct", "1.0.0");
+        ProjectVersion directDep1 = new ProjectVersion(GROUPID, "test-dependencies", "2.0.0");
+        ProjectVersion directDep2 = new ProjectVersion(GROUPID, "art101", "1.0.0");
+        newProject.getVersionData().setDependencies(Arrays.asList(directDep1, directDep2));
+
+        // Exclude art101 from the transitive path via test-dependencies
+        ProjectVersion excludedDep = new ProjectVersion(GROUPID, "art101", null);
+        newProject.getVersionData().addExclusionForDependency(directDep1, excludedDep);
+        projectsVersionsStore.createOrUpdate(newProject);
+
+        StoreProjectVersionData result = refreshDependenciesService.updateTransitiveDependencies(GROUPID, "test-direct", "1.0.0");
+        List<ProjectVersion> transitiveDeps = result.getTransitiveDependenciesReport().getTransitiveDependencies();
+
+        // Expected: test-dependencies:2.0.0, art101:1.0.0, art102:1.0.0, art103:1.0.0
+        Assertions.assertEquals(4, transitiveDeps.size());
+        Assertions.assertTrue(transitiveDeps.stream().anyMatch(dep -> "art101".equals(dep.getArtifactId())), "art101 should be present as a direct dependency");
+        Assertions.assertTrue(transitiveDeps.stream().anyMatch(dep -> "test-dependencies".equals(dep.getArtifactId())));
+        Assertions.assertTrue(transitiveDeps.stream().anyMatch(dep -> "art102".equals(dep.getArtifactId())));
+        Assertions.assertTrue(transitiveDeps.stream().anyMatch(dep -> "art103".equals(dep.getArtifactId())));
+    }
+
 }

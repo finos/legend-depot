@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +39,8 @@ public class ProjectVersionData
     private boolean excluded = false;
     @JsonProperty
     private String exclusionReason = null;
+    @JsonProperty
+    private Map<String, List<ProjectVersion>> excludedDependencies = new HashMap<>();
 
     public ProjectVersionData()
     {
@@ -132,5 +136,39 @@ public class ProjectVersionData
     public void setExclusionReason(String exclusionReason)
     {
         this.exclusionReason = exclusionReason;
+    }
+
+    public Map<String, List<ProjectVersion>> getDependencyExclusions()
+    {
+        return excludedDependencies.isEmpty() ? Collections.emptyMap() : excludedDependencies;
+    }
+
+    public void addExclusionForDependency(ProjectVersion dependency, ProjectVersion exclusion)
+    {
+        String dependencyKey = createDependencyKey(dependency);
+        excludedDependencies.computeIfAbsent(dependencyKey, k -> new ArrayList<>()).add(exclusion);
+    }
+
+    public List<ProjectVersion> getExclusionsForDependency(ProjectVersion dependency)
+    {
+        String dependencyKey = createDependencyKey(dependency);
+        return excludedDependencies.getOrDefault(dependencyKey, Collections.emptyList());
+    }
+
+    public void setDependencyExclusions(Map<String, List<ProjectVersion>> dependencyExclusions)
+    {
+        this.excludedDependencies = dependencyExclusions;
+    }
+
+    public static String createDependencyKey(ProjectVersion dependency)
+    {
+        return dependency.getGav().replace(":","__").replace(".","_");
+    }
+
+    public static ProjectVersion reverseDependencyKey(String key)
+    {
+        String parts = key.replace("__",":").replace("_",".");
+        String[] gav = parts.split(":");
+        return new ProjectVersion(gav[0], gav[1], gav[2]);
     }
 }

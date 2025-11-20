@@ -20,11 +20,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.VersionedData;
+import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
+
+import java.util.Collections;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProjectVersion extends VersionedData
 {
-
     public ProjectVersion()
     {
     }
