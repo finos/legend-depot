@@ -68,7 +68,7 @@ public class EntityProvider implements EntityArtifactsProvider
     @Override
     public List<Entity> extractRestArtifactsForType(RestCuratedArtifacts elements)
     {
-        return elements.getEntityDefinitions().stream().map(entity -> (Entity) entity).collect(Collectors.toList());
+        return elements.getEntities().stream().map(entity -> (Entity) entity).collect(Collectors.toList());
     }
 
     @Override

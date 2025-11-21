@@ -81,7 +81,7 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
     @Override
     public MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, RestCuratedArtifacts restCuratedArtifacts)
     {
-        List<Entity> projectEntities = restCuratedArtifacts.getEntityDefinitions().stream().map(entity -> (Entity) entity).collect(Collectors.toList());
+        List<Entity> projectEntities = restCuratedArtifacts.getEntities().stream().map(entity -> (Entity) entity).collect(Collectors.toList());
         List<DepotGeneration> generatedFiles = provider.extractRestArtifactsForType(restCuratedArtifacts);
         return refreshGenerations(groupId, artifactId, versionId, projectEntities, generatedFiles);
     }

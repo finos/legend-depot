@@ -26,7 +26,7 @@ import java.util.List;
 public class RestCuratedArtifacts
 {
     @JsonProperty("entities")
-    public List<EntityDefinition> entityDefinition = new ArrayList<>();
+    public List<EntityDefinition> entities = new ArrayList<>();
     @JsonProperty("artifacts")
     public List<Artifact> artifact = new ArrayList<>();
 
@@ -34,21 +34,21 @@ public class RestCuratedArtifacts
     {
     }
 
-    public RestCuratedArtifacts(List<EntityDefinition> entityDefinition, List<Artifact> artifact)
+    public RestCuratedArtifacts(List<EntityDefinition> entities, List<Artifact> artifact)
     {
-        this.entityDefinition = entityDefinition;
+        this.entities = entities;
         this.artifact = artifact;
     }
 
 
-    public List<EntityDefinition> getEntityDefinitions()
+    public List<EntityDefinition> getEntities()
     {
-        return entityDefinition;
+        return entities;
     }
 
-    public void setEntityDefinition(List<EntityDefinition> entityDefinition)
+    public void setEntities(List<EntityDefinition> entities)
     {
-        this.entityDefinition = entityDefinition;
+        this.entities = entities;
     }
 
     public List<Artifact> getArtifacts()

@@ -439,7 +439,7 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
             RestCuratedArtifacts elements = event.getRestCuratedArtifacts();
             if (elements != null)
             {
-                response.addMessage(String.format("[%s] files found [%s] artifacts to process [%s-%s-%s]", elements.getEntityDefinitions().size() + elements.getArtifacts().size(),artifactType,event.getGroupId(),event.getArtifactId(),event.getVersionId()));
+                response.addMessage(String.format("[%s] files found [%s] artifacts to process [%s-%s-%s]", elements.getEntities().size() + elements.getArtifacts().size(),artifactType,event.getGroupId(),event.getArtifactId(),event.getVersionId()));
                 response.combine(refreshHandler.refreshRestArtifacts(event.getGroupId(),event.getArtifactId(), event.getVersionId(), elements));
             }
             else
