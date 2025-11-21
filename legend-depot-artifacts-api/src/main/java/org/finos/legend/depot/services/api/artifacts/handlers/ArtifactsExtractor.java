@@ -35,6 +35,6 @@ public interface ArtifactsExtractor<T>
 
     List<T> extractArtifactsForType(Stream<File> files);
 
-    List<T> extractRestArtifactsForType(Stream<RestCuratedArtifacts> elements);
+    List<T> extractRestArtifactsForType(RestCuratedArtifacts elements);
 
 }

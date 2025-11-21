@@ -59,9 +59,10 @@ public class FileGenerationsProvider implements FileGenerationsArtifactsProvider
     }
 
     @Override
-    public List<DepotGeneration> extractRestArtifactsForType(Stream<RestCuratedArtifacts> elements)
+    public List<DepotGeneration> extractRestArtifactsForType(RestCuratedArtifacts elements)
     {
-        return elements.map(entityWithArtifact -> new DepotGeneration(entityWithArtifact.artifact.path, entityWithArtifact.artifact.content)).collect(Collectors.toList());
+        return elements.getArtifacts().stream()
+                .map(artifact -> new DepotGeneration(artifact.path, artifact.content)).collect(Collectors.toList());
     }
 
     @Override

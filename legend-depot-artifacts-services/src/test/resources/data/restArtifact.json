@@ -1,5 +1,5 @@
 {
   "content": "Some Lakehouse Output",
   "format": "json",
-  "path": "generation.json"
+  "path": "/examples/metadata/test/TestLakehouseEntity/json"
 }

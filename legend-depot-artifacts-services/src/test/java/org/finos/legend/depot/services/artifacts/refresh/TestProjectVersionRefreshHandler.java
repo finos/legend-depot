@@ -274,8 +274,8 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         Artifact artifact = objectMapper.readValue(getClass().getResourceAsStream("/data/restArtifact.json"), Artifact.class);
         EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/restEntityDefinition.json"), EntityDefinition.class);
 
-        RestMetadataNotification notification = new RestMetadataNotification("lakehouse123", TEST_ARTIFACT_ID, "1.0.0");
-        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new RestCuratedArtifacts(entity, artifact)));
+        RestMetadataNotification notification = new RestMetadataNotification("lakehouse.123", TEST_ARTIFACT_ID, "1.0.0");
+        notification.setRestCuratedArtifacts(new RestCuratedArtifacts(Lists.fixedSize.of(entity), Lists.fixedSize.of(artifact)));
 
         MetadataNotificationResponse response = versionHandler.handleRestNotification(notification);
         Assertions.assertEquals(0, response.getErrors().size());
@@ -285,7 +285,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         Assertions.assertEquals(1, entitiesStore.getAllStoredEntities().size());
         Assertions.assertEquals(1, fileGenerations.getAll().size());
         Assertions.assertEquals(TEST_ARTIFACT_ID, versionData.getArtifactId());
-        Assertions.assertEquals("lakehouse123", versionData.getGroupId());
+        Assertions.assertEquals("lakehouse.123", versionData.getGroupId());
         Assertions.assertEquals("1.0.0", versionData.getVersionId());
     }
 
@@ -297,7 +297,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/restEntityDefinition.json"), EntityDefinition.class);
 
         RestMetadataNotification notification = new RestMetadataNotification("lakehouse-123", TEST_ARTIFACT_ID, "1.0.0");
-        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new RestCuratedArtifacts(entity, artifact)));
+        notification.setRestCuratedArtifacts(new RestCuratedArtifacts(Lists.fixedSize.of(entity), Lists.fixedSize.of(artifact)));
 
         MetadataNotificationResponse response = versionHandler.handleRestNotification(notification);
         Assertions.assertEquals(1, response.getErrors().size());
@@ -311,14 +311,14 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
         EntityDefinition entity = objectMapper.readValue(getClass().getResourceAsStream("/data/restEntityDefinition.json"), EntityDefinition.class);
 
         RestMetadataNotification notification = new RestMetadataNotification("lakehouse.123456", TEST_ARTIFACT_ID, "1.0.0");
-        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new RestCuratedArtifacts(entity, artifact)));
+        notification.setRestCuratedArtifacts(new RestCuratedArtifacts(Lists.fixedSize.of(entity), Lists.fixedSize.of(artifact)));
 
         MetadataNotificationResponse response = versionHandler.handleRestNotification(notification);
         Assertions.assertEquals(0, response.getErrors().size());
 
         // add another project with this as dependency
         notification = new RestMetadataNotification("lakehouse1234", TEST_ARTIFACT_ID, "1.0.0");
-        notification.setEntityDefinitionWithArtifacts(Lists.mutable.of(new RestCuratedArtifacts(entity, artifact)));
+        notification.setRestCuratedArtifacts(new RestCuratedArtifacts(Lists.fixedSize.of(entity), Lists.fixedSize.of(artifact)));
         notification.setDependencies(Lists.mutable.of(new ProjectVersion("lakehouse123", TEST_ARTIFACT_ID, "1.0.0")));
 
         response = versionHandler.handleRestNotification(notification);

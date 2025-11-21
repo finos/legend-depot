@@ -70,17 +70,29 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
         this.generations = generations;
     }
 
-
-
     public MetadataNotificationResponse refreshProjectVersionArtifacts(String groupId, String artifactId, String versionId, List<File> files)
+    {
+
+        List<Entity> projectEntities = getAllNonVersionedEntities(groupId, artifactId, versionId);
+        List<DepotGeneration> generatedFiles = provider.extractArtifacts(files);
+        return refreshGenerations(groupId, artifactId, versionId, projectEntities, generatedFiles);
+    }
+
+    @Override
+    public MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, RestCuratedArtifacts restCuratedArtifacts)
+    {
+        List<Entity> projectEntities = restCuratedArtifacts.getEntityDefinitions().stream().map(entity -> (Entity) entity).collect(Collectors.toList());
+        List<DepotGeneration> generatedFiles = provider.extractRestArtifactsForType(restCuratedArtifacts);
+        return refreshGenerations(groupId, artifactId, versionId, projectEntities, generatedFiles);
+    }
+
+    private MetadataNotificationResponse refreshGenerations(String groupId, String artifactId, String versionId, List<Entity> projectEntities, List<DepotGeneration> generatedFiles)
     {
         MetadataNotificationResponse response = new MetadataNotificationResponse();
         try
         {
             List<StoredFileGeneration> newGenerations = new ArrayList<>();
-            List<Entity> projectEntities = getAllNonVersionedEntities(groupId, artifactId, versionId);
             List<Entity> fileGenerationEntities = filterEntitiesByFileGenerationEntities(projectEntities);
-            List<DepotGeneration> generatedFiles = provider.extractArtifacts(files);
 
             //handle files generated when a new master snapshot comes into picture
             if (VersionValidator.isSnapshotVersion(versionId))
@@ -139,12 +151,13 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
         }
         catch (Exception e)
         {
-           String message = String.format("Error processing generations update for %s-%s-%s , ERROR: [%s]", groupId,artifactId,versionId,e.getMessage());
-           LOGGER.error(message);
-           response.addError(message);
+            String message = String.format("Error processing generations update for %s-%s-%s , ERROR: [%s]", groupId,artifactId,versionId,e.getMessage());
+            LOGGER.error(message);
+            response.addError(message);
         }
         return response;
     }
+
 
     private String getExtensionKeyFromGeneration(String path, String entityPath)
     {
@@ -175,49 +188,5 @@ public class FileGenerationHandlerImpl implements FileGenerationsArtifactsHandle
     public void delete(String groupId,String artifactId,String versionId)
     {
         generations.delete(groupId,artifactId, versionId);
-    }
-
-    @Override
-    public MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, List<RestCuratedArtifacts> restCuratedArtifacts)
-    {
-        MetadataNotificationResponse response = new MetadataNotificationResponse();
-        try
-        {
-            //handle files generated when a new master snapshot comes into picture
-            if (VersionValidator.isSnapshotVersion(versionId))
-            {
-                String message = String.format("removing prior %s artifacts for [%s-%s-%s]",provider.getType(), groupId, artifactId, versionId);
-                response.addMessage(message);
-                generations.delete(groupId, artifactId, versionId);
-                LOGGER.info(message);
-            }
-
-            List<StoredFileGeneration> newGenerations = restCuratedArtifacts.stream()
-                    .map(entityWithArtifact ->
-                    {
-                        DepotGeneration depotGeneration = new DepotGeneration(entityWithArtifact.artifact.path, entityWithArtifact.artifact.content);
-
-                        return new StoredFileGeneration(
-                                groupId,
-                                artifactId,
-                                versionId,
-                                entityWithArtifact.entityDefinition.getPath(),
-                                entityWithArtifact.entityDefinition.getContent().get("_type").toString(),
-                                depotGeneration
-                        );
-                    })
-                    .collect(Collectors.toList());
-            generations.createOrUpdate(newGenerations);
-            String message = String.format("new [%s] generations for [%s-%s-%s] ", newGenerations.size(), groupId,artifactId, versionId);
-            LOGGER.info(message);
-            response.addMessage(message);
-        }
-        catch (Exception e)
-        {
-            String message = String.format("Error processing generations update for %s-%s-%s , ERROR: [%s]", groupId,artifactId,versionId,e.getMessage());
-            LOGGER.error(message);
-            response.addError(message);
-        }
-        return response;
     }
 }

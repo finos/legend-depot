@@ -39,7 +39,7 @@ public class CoordinateValidator
 
     public static boolean isValidGroupIdForRest(String groupId)
     {
-        Pattern pattern = Pattern.compile("^lakehouse\\.\\d{6}$");
+        Pattern pattern = Pattern.compile("^lakehouse\\.\\d+$");
         return groupId != null && pattern.matcher(groupId).matches();
     }
 }

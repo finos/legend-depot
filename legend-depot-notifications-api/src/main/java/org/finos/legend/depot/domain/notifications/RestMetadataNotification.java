@@ -32,8 +32,8 @@ public class RestMetadataNotification extends VersionedData
     @JsonProperty("dependencies")
     List<ProjectVersion> dependencies = new ArrayList<>();
 
-    @JsonProperty("entityDefinitionWithArtifacts")
-    List<RestCuratedArtifacts> entityDefinitionWithArtifacts;
+    @JsonProperty("restCuratedArtifacts")
+    RestCuratedArtifacts restCuratedArtifacts;
 
     public RestMetadataNotification(String groupId, String artifactId, String versionId)
     {
@@ -41,10 +41,10 @@ public class RestMetadataNotification extends VersionedData
     }
 
     @JsonCreator
-    public RestMetadataNotification(@JsonProperty("groupId") String groupId, @JsonProperty("artifactId") String artifactId, @JsonProperty("versionId") String versionId, @JsonProperty("entityDefinitionWithArtifacts") List<RestCuratedArtifacts> entityDefinitionWithArtifacts, @JsonProperty(value = "dependencies") List<ProjectVersion> dependencies)
+    public RestMetadataNotification(@JsonProperty("groupId") String groupId, @JsonProperty("artifactId") String artifactId, @JsonProperty("versionId") String versionId, @JsonProperty("restCuratedArtifacts") RestCuratedArtifacts restCuratedArtifacts, @JsonProperty(value = "dependencies") List<ProjectVersion> dependencies)
     {
         super(groupId, artifactId, versionId);
-        this.setEntityDefinitionWithArtifacts(entityDefinitionWithArtifacts);
+        this.setRestCuratedArtifacts(restCuratedArtifacts);
         this.setDependencies(dependencies != null ? dependencies : new ArrayList<>());
     }
 
@@ -58,14 +58,14 @@ public class RestMetadataNotification extends VersionedData
         this.dependencies = dependencies;
     }
 
-    public List<RestCuratedArtifacts> getEntityDefinitionWithArtifacts()
+    public RestCuratedArtifacts getRestCuratedArtifacts()
     {
-        return entityDefinitionWithArtifacts;
+        return restCuratedArtifacts;
     }
 
-    public void setEntityDefinitionWithArtifacts(List<RestCuratedArtifacts> entityDefinitionWithArtifacts)
+    public void setRestCuratedArtifacts(RestCuratedArtifacts restCuratedArtifacts)
     {
-        this.entityDefinitionWithArtifacts = entityDefinitionWithArtifacts;
+        this.restCuratedArtifacts = restCuratedArtifacts;
     }
 
     @Override
