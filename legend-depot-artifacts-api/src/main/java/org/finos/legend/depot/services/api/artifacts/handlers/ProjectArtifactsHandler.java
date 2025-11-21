@@ -28,5 +28,5 @@ public interface ProjectArtifactsHandler
 
     void delete(String groupId, String artifactId, String versionId);
 
-    MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, List<RestCuratedArtifacts> restCuratedArtifacts);
+    MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, RestCuratedArtifacts restCuratedArtifacts);
 }

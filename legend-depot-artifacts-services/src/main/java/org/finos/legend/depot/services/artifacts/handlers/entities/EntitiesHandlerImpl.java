@@ -40,7 +40,7 @@ public class EntitiesHandlerImpl extends AbstractEntityRefreshHandlerImpl implem
     }
 
     @Override
-    public MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, List<RestCuratedArtifacts> restCuratedArtifacts)
+    public MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, RestCuratedArtifacts restCuratedArtifacts)
     {
         return super.refreshRestArtifacts(groupId, artifactId, versionId, restCuratedArtifacts);
     }

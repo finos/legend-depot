@@ -71,7 +71,7 @@ public abstract class AbstractEntityRefreshHandlerImpl
         return refreshEntities(groupId, artifactId, versionId, entityList);
     }
 
-    public MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, List<RestCuratedArtifacts> restCuratedArtifacts)
+    public MetadataNotificationResponse refreshRestArtifacts(String groupId, String artifactId, String versionId, RestCuratedArtifacts restCuratedArtifacts)
     {
         List<Entity> entityList = getRestEntities(restCuratedArtifacts);
         return refreshEntities(groupId, artifactId, versionId, entityList);
@@ -119,8 +119,8 @@ public abstract class AbstractEntityRefreshHandlerImpl
         return entitiesProvider.extractArtifacts(files);
     }
 
-    private List<Entity> getRestEntities(List<RestCuratedArtifacts> elements)
+    private List<Entity> getRestEntities(RestCuratedArtifacts elements)
     {
-        return entitiesProvider.extractRestArtifactsForType(elements.stream());
+        return entitiesProvider.extractRestArtifactsForType(elements);
     }
 }

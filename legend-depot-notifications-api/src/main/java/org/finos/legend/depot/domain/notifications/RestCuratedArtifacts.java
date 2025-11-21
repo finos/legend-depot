@@ -15,22 +15,49 @@
 
 package org.finos.legend.depot.domain.notifications;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.finos.legend.depot.store.model.entities.EntityDefinition;
 import org.finos.legend.engine.language.pure.dsl.generation.extension.Artifact;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class RestCuratedArtifacts
 {
-    public EntityDefinition entityDefinition;
-    public Artifact artifact;
+    @JsonProperty("entities")
+    public List<EntityDefinition> entities = new ArrayList<>();
+    @JsonProperty("artifacts")
+    public List<Artifact> artifacts = new ArrayList<>();
 
     public RestCuratedArtifacts()
     {
     }
 
-    public RestCuratedArtifacts(EntityDefinition entityDefinition, Artifact artifact)
+    public RestCuratedArtifacts(List<EntityDefinition> entities, List<Artifact> artifact)
     {
-        this.entityDefinition = entityDefinition;
-        this.artifact = artifact;
+        this.entities = entities;
+        this.artifacts = artifact;
+    }
+
+
+    public List<EntityDefinition> getEntities()
+    {
+        return entities;
+    }
+
+    public void setEntities(List<EntityDefinition> entities)
+    {
+        this.entities = entities;
+    }
+
+    public List<Artifact> getArtifacts()
+    {
+        return artifacts;
+    }
+
+    public void setArtifacts(List<Artifact> artifacts)
+    {
+        this.artifacts = artifacts;
     }
 }
