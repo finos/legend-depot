@@ -28,7 +28,7 @@ public class RestCuratedArtifacts
     @JsonProperty("entities")
     public List<EntityDefinition> entities = new ArrayList<>();
     @JsonProperty("artifacts")
-    public List<Artifact> artifact = new ArrayList<>();
+    public List<Artifact> artifacts = new ArrayList<>();
 
     public RestCuratedArtifacts()
     {
@@ -37,7 +37,7 @@ public class RestCuratedArtifacts
     public RestCuratedArtifacts(List<EntityDefinition> entities, List<Artifact> artifact)
     {
         this.entities = entities;
-        this.artifact = artifact;
+        this.artifacts = artifact;
     }
 
 
@@ -53,11 +53,11 @@ public class RestCuratedArtifacts
 
     public List<Artifact> getArtifacts()
     {
-        return artifact;
+        return artifacts;
     }
 
-    public void setArtifact(List<Artifact> artifact)
+    public void setArtifacts(List<Artifact> artifacts)
     {
-        this.artifact = artifact;
+        this.artifacts = artifacts;
     }
 }
