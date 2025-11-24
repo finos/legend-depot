@@ -324,19 +324,21 @@ public final class ProjectVersionRefreshHandler implements NotificationHandler
         StoreProjectVersionData storeProjectVersionData = projectVersionData.isPresent() ? projectVersionData.get() : new StoreProjectVersionData(project.getGroupId(), project.getArtifactId(), versionId);
         ProjectVersionData versionData = storeProjectVersionData.getVersionData();
         versionData.setDependencies(newDependencies);
-
         versionData.setDependencyExclusions(new HashMap<>());
 
-        Set<ArtifactDependency> artifactDependencies = this.repositoryServices.findDependencies(project.getGroupId(), project.getArtifactId(), versionId);
-
-        for (ArtifactDependency artifactDep : artifactDependencies)
+        if (!isRestData)
         {
-            ProjectVersion dependency = new ProjectVersion(artifactDep.getGroupId(), artifactDep.getArtifactId(), artifactDep.getVersionId());
+            Set<ArtifactDependency> artifactDependencies = this.repositoryServices.findDependencies(project.getGroupId(), project.getArtifactId(), versionId);
 
-            for (DependencyExclusion exclusion : artifactDep.getExclusions())
+            for (ArtifactDependency artifactDep : artifactDependencies)
             {
-                ProjectVersion excludedDep = new ProjectVersion(exclusion.getGroupId(), exclusion.getArtifactId(), null);
-                versionData.addExclusionForDependency(dependency, excludedDep);
+                ProjectVersion dependency = new ProjectVersion(artifactDep.getGroupId(), artifactDep.getArtifactId(), artifactDep.getVersionId());
+
+                for (DependencyExclusion exclusion : artifactDep.getExclusions())
+                {
+                    ProjectVersion excludedDep = new ProjectVersion(exclusion.getGroupId(), exclusion.getArtifactId(), null);
+                    versionData.addExclusionForDependency(dependency, excludedDep);
+                }
             }
         }
 
