@@ -15,9 +15,9 @@
 
 package org.finos.legend.depot.store.mongo.core;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.management.JMXConnectionPoolListener;
 
@@ -45,11 +45,15 @@ public abstract class AbstractMongoConnectionFactory implements ConnectionFactor
         return string == null || string.isEmpty();
     }
 
-    protected MongoClientURI buildMongoURI()
+    protected MongoClientSettings buildMongoClientSettings()
     {
-        MongoClientOptions.Builder optionsBuilder = MongoClientOptions.builder().applicationName(applicationName);
-        optionsBuilder.addConnectionPoolListener(new JMXConnectionPoolListener());
-        return new MongoClientURI(mongoURI, optionsBuilder);
+        ConnectionString cs = new ConnectionString(mongoURI);
+
+        return MongoClientSettings.builder()
+                .applyConnectionString(cs)
+                .applicationName(applicationName)
+                .applyToConnectionPoolSettings(builder -> builder.addConnectionPoolListener(new JMXConnectionPoolListener()))
+                .build();
     }
 
     public String getMongoURI()
