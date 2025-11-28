@@ -15,10 +15,11 @@
 
 package org.finos.legend.depot.store.mongo.core;
 
-import com.mongodb.MongoClientSettings;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import io.opentracing.Tracer;
+import io.opentracing.contrib.mongo.TracingMongoClient;
+import io.opentracing.contrib.mongo.common.TracingCommandListener;
 
 import javax.inject.Singleton;
 
@@ -34,15 +35,15 @@ public class MongoTracingConnectionFactory extends AbstractMongoConnectionFactor
 
     private MongoClient initClient(Tracer tracer)
     {
-        MongoClientSettings mongoClientSettings = super.buildMongoClientSettings();
+        MongoClientURI mongoURI = super.buildMongoURI();
         if (getMongoURI().contains("+srv://"))
         {
             // SRV doesn't work with TracingMongoClient, and it seems that it can't be supported without
             // changes to the Mongo driver
             // For now, don't use Tracing if we're using SRV
-            return MongoClients.create(mongoClientSettings);
+            return new MongoClient(mongoURI);
         }
-        MongoClientSettings tracerMongoSettings = MongoClientSettings.builder(mongoClientSettings).addCommandListener(new TracerCommandListener(tracer)).build();
-        return MongoClients.create(tracerMongoSettings);
+        return new TracingMongoClient(new TracingCommandListener.Builder(tracer).build(), mongoURI);
+
     }
 }
