@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.store.mongo.core;
 
-import com.mongodb.client.MongoClients;
+import com.mongodb.MongoClient;
 
 import javax.inject.Singleton;
 
@@ -25,6 +25,6 @@ public class MongoNonTracingConnectionFactory extends AbstractMongoConnectionFac
     public MongoNonTracingConnectionFactory(String applicationName, MongoConfiguration mongoConfiguration)
     {
         super(applicationName, mongoConfiguration);
-        client = MongoClients.create(super.buildMongoClientSettings());
+        client = new MongoClient(buildMongoURI());
     }
 }

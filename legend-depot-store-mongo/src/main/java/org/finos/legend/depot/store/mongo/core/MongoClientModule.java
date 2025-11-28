@@ -19,7 +19,7 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
-import com.mongodb.client.MongoClient;
+import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.finos.legend.depot.store.StorageConfiguration;
 import org.finos.legend.depot.core.services.api.tracing.configuration.OpenTracingConfiguration;
