@@ -101,8 +101,8 @@
 
         <!-- Legend dependency versions -->
         <legend.shared.version>0.29.0</legend.shared.version>
-        <legend.engine.version>4.112.0</legend.engine.version>
-        <legend.sdlc.version>0.211.0</legend.sdlc.version>
+        <legend.engine.version>4.113.1</legend.engine.version>
+        <legend.sdlc.version>0.211.1</legend.sdlc.version>
 
 
         <!-- Dependency versions -->
