@@ -94,12 +94,7 @@
     ],
     "clients": [
       {
-        "org.finos.legend.server.pac4j.gitlab.GitlabClient": {
-          "name": "depot",
-          "clientId": "...",
-          "secret": "...",
-          "discoveryUri": "https://gitlab.com/.well-known/openid-configuration",
-          "scope": "openid profile api"
+        "org.pac4j.core.client.direct.AnonymousClient": {
         }
       }
     ],
