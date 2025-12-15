@@ -100,9 +100,9 @@
         <publish.server.id>central</publish.server.id>
 
         <!-- Legend dependency versions -->
-        <legend.shared.version>0.29.0</legend.shared.version>
-        <legend.engine.version>4.113.1</legend.engine.version>
-        <legend.sdlc.version>0.211.1</legend.sdlc.version>
+        <legend.shared.version>0.30.0</legend.shared.version>
+        <legend.engine.version>4.114.2</legend.engine.version>
+        <legend.sdlc.version>0.213.0</legend.sdlc.version>
 
 
         <!-- Dependency versions -->
