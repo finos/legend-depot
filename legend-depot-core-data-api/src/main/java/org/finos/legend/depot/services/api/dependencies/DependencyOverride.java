@@ -18,7 +18,6 @@ package org.finos.legend.depot.services.api.dependencies;
 import org.eclipse.collections.api.block.function.Function2;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.project.ProjectVersion;
-import org.finos.legend.depot.domain.project.ProjectVersionData;
 
 import java.util.List;
 import java.util.Map;
@@ -31,4 +30,6 @@ public interface DependencyOverride
     List<ProjectVersion> applyExclusions(List<ProjectVersion> allDependencies, ProjectVersion directDep, Map<String, List<ProjectVersion>> exclusions);
 
     List<ProjectVersion> getArtifactDependenciesAsProjectVersions(List<ArtifactDependency> artifactDependencies);
+
+    List<ProjectVersion> applyExclusionsAndOverrides(List<ProjectVersion> dependencies, ProjectVersion sourceProject, List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusions, Function2<List<ProjectVersion>, Boolean, Set<ProjectVersion>> recursiveFunction);
 }

@@ -21,6 +21,7 @@ import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
+import org.finos.legend.depot.services.dependencies.DependencyExclusionsUtil;
 import org.finos.legend.depot.services.dependencies.DependencySATConverter;
 import org.finos.legend.depot.services.dependencies.LogicNGSATResult;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
@@ -37,6 +38,7 @@ import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.store.mongo.notifications.queue.NotificationsQueueMongo;
+import org.finos.legend.engine.language.pure.dsl.generation.extension.Artifact;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -495,6 +497,56 @@ public class TestProjectsService extends TestBaseServices
         List<ProjectVersion> dependencies = projectsService.getDependencies(Arrays.asList(pv1, pv2), true).stream().collect(Collectors.toList());
         Assertions.assertEquals(1, dependencies.size());
         Assertions.assertEquals(dependency2, dependencies.get(0));
+
+    }
+
+    @Test
+    public void canGetDependenciesWithExclusions()
+    {
+        // B -> C, D -> E -> F
+        // exclude E, thereby excluding F
+        StoreProjectVersionData projectB = new StoreProjectVersionData("examples.metadata", "testb", "1.0.0");
+        StoreProjectVersionData projectC = new StoreProjectVersionData("examples.metadata", "testc", "1.0.0");
+        ProjectVersion dependency1 = new ProjectVersion("examples.metadata", "testc", "1.0.0");
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(dependency1), true));
+        projectB.getVersionData().setDependencies(Arrays.asList(dependency1));
+
+        StoreProjectVersionData projectD = new StoreProjectVersionData("examples.metadata","testd","1.0.0");
+        StoreProjectVersionData projectE = new StoreProjectVersionData("examples.metadata","teste","1.0.0");
+        StoreProjectVersionData projectF = new StoreProjectVersionData("examples.metadata","testf","1.0.0");
+        ProjectVersion dependency2 = new ProjectVersion("examples.metadata", "teste", "1.0.0");
+        ProjectVersion dependency3 = new ProjectVersion("examples.metadata", "testf", "1.0.0");
+        projectE.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(dependency3), true));
+        projectE.getVersionData().setDependencies(Arrays.asList(dependency3));
+        projectD.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(dependency2, dependency3), true));
+        projectD.getVersionData().setDependencies(Arrays.asList(dependency2, dependency3));
+
+        projectsService.createOrUpdate(projectC);
+        projectsService.createOrUpdate(projectB);
+        projectsService.createOrUpdate(projectE);
+        projectsService.createOrUpdate(projectD);
+        projectsService.createOrUpdate(projectF);
+
+        DependencyExclusion exclusionE = new DependencyExclusion("examples.metadata", "teste");
+        List<DependencyExclusion> projectDExclusions = new ArrayList<>();
+        projectDExclusions.add(exclusionE);
+        ArtifactDependency depD = new ArtifactDependency("examples.metadata", "testd", "1.0.0", projectDExclusions);
+        ArtifactDependency depB = new ArtifactDependency("examples.metadata", "testb", "1.0.0");
+        // E and F will be excluded from the final dependencies list
+
+        List<ArtifactDependency> artifactDependencies = new ArrayList<>();
+        artifactDependencies.add(depB);
+        artifactDependencies.add(depD);
+        Map<String, List<ProjectVersion>> exclusionsMap = DependencyExclusionsUtil.createDependencyExclusionsMap(artifactDependencies);
+        Map<String, List<ProjectVersion>> allExclusionsMap = DependencyExclusionsUtil.getTransitiveDependenciesOfExclusions(exclusionsMap, projectsService);
+        List<ProjectVersion> projectVersions = Arrays.asList(
+                new ProjectVersion(depB.getGroupId(), depB.getArtifactId(), depB.getVersionId()),
+                new ProjectVersion(depD.getGroupId(), depD.getArtifactId(), depD.getVersionId())
+        );
+
+        List<ProjectVersion> dependencies = projectsService.getDependencies(projectVersions, allExclusionsMap, true).stream().collect(Collectors.toList());
+        Assertions.assertFalse(dependencies.isEmpty());
+        Assertions.assertEquals(1, dependencies.size());
 
     }
 

@@ -15,13 +15,16 @@
 
 package org.finos.legend.depot.services.dependencies;
 
+import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Collections;
+import java.util.stream.Collectors;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +53,23 @@ public class DependencyExclusionsUtil
                 List<ProjectVersion> updatedExclusions = new ArrayList<>(exclusions);
                 updatedExclusions.addAll(transitiveExclusions);
                 dependencyExclusions.put(key, updatedExclusions);
+            }
+        }
+        return dependencyExclusions;
+    }
+
+    public static Map<String, List<ProjectVersion>> createDependencyExclusionsMap(List<ArtifactDependency> dependencies)
+    {
+        HashMap<String, List<ProjectVersion>> dependencyExclusions = new HashMap<>();
+        if (dependencies != null)
+        {
+            for (ArtifactDependency dep : dependencies)
+            {
+                if (!dep.getExclusions().isEmpty() && dep.getExclusions() != null)
+                {
+                    String key = ProjectVersionData.createDependencyKey(new ProjectVersion(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId()));
+                    dependencyExclusions.put(key, dep.getExclusions().stream().map(e -> new ProjectVersion(e.getGroupId(), e.getArtifactId(), null)).collect(Collectors.toList()));
+                }
             }
         }
         return dependencyExclusions;

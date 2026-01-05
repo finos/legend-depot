@@ -26,6 +26,7 @@ import org.finos.legend.sdlc.domain.model.version.VersionId;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,10 +62,15 @@ public interface ProjectsService
 
     default Set<ProjectVersion> getDependencies(String groupId, String artifactId, String versionId, boolean transitive)
     {
-        return getDependencies(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)), transitive);
+        return getDependencies(Arrays.asList(new ProjectVersion(groupId, artifactId, versionId)), new HashMap<>(), transitive);
     }
 
-    Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, boolean transitive);
+    default Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, boolean transitive)
+    {
+        return getDependencies(projectVersions, new HashMap<>(), transitive);
+    }
+
+    Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusionsMap, boolean transitive);
 
     ProjectDependencyReport getProjectDependencyReportFromProjectVersionList(List<ProjectVersion> projectDependencyVersions);
 

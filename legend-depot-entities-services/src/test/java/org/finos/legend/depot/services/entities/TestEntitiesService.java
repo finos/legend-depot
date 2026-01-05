@@ -16,6 +16,8 @@
 package org.finos.legend.depot.services.entities;
 
 import org.eclipse.collections.api.factory.Lists;
+import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
+import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
 import org.finos.legend.depot.domain.entity.DepotEntity;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
 import org.finos.legend.depot.domain.project.ProjectVersion;
@@ -288,5 +290,39 @@ public class TestEntitiesService extends TestBaseServices
         Assertions.assertEquals(entity.size(), 0);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> entitiesService.getEntityFromDependencies("examples.metadata", "test", "3.0.1", Lists.fixedSize.of("covid::JHUCovid19"), false), "project version not found for examples.metadata-test-3.0.1");
+    }
+
+    @Test
+    public void canGetEntitiesRespectingExclusions()
+    {
+        StoreProjectVersionData mainProject = projectsService.find("examples.metadata", "test", "2.3.1").get();
+        mainProject.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(
+                new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"),
+                new ProjectVersion("example.services.test", "test", "2.0.1")
+        ), true));
+        projectsVersionsStore.createOrUpdate(mainProject);
+
+        ArtifactDependency dependency1Artifact = new ArtifactDependency("examples.metadata", "test", "2.3.1");
+        List<ProjectVersionEntities> dependencyListBeforeExclusions = entitiesService.getDependenciesEntitiesFromArtifactDependencies(Arrays.asList(dependency1Artifact), true, true);
+        Assertions.assertFalse(dependencyListBeforeExclusions.isEmpty());
+        Assertions.assertEquals(3, dependencyListBeforeExclusions.size());
+        Assertions.assertEquals(7, dependencyListBeforeExclusions.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
+        Assertions.assertEquals(1, dependencyListBeforeExclusions.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
+        Assertions.assertEquals(18, dependencyListBeforeExclusions.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+
+        DependencyExclusion exclusion1 = new DependencyExclusion("example.services.test", "test");
+        ArtifactDependency dependency1ArtifactWithExclusions = new ArtifactDependency(
+                "examples.metadata",
+                "test",
+                "2.3.1",
+                Arrays.asList(exclusion1)
+        );
+
+        List<ArtifactDependency> projectVersions = Arrays.asList(dependency1ArtifactWithExclusions);
+        List<ProjectVersionEntities> dependencyListAfterExclusions = entitiesService.getDependenciesEntitiesFromArtifactDependencies(projectVersions, true, true);
+        Assertions.assertFalse(dependencyListAfterExclusions.isEmpty());
+        Assertions.assertEquals(2, dependencyListAfterExclusions.size());
+        Assertions.assertEquals(7, dependencyListAfterExclusions.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
+        Assertions.assertEquals(1, dependencyListAfterExclusions.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
     }
 }
