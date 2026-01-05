@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.store.mongo.core;
 
-import com.mongodb.MongoClient;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 
 public interface ConnectionFactory

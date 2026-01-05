@@ -15,8 +15,8 @@
 
 package org.finos.legend.depot.store.mongo;
 
-import com.mongodb.MongoClient;
-import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
@@ -24,10 +24,12 @@ import org.finos.legend.depot.store.model.HasIdentifier;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.junit.jupiter.api.AfterEach;
 
+import java.net.InetSocketAddress;
+
 public abstract class TestStoreMongo
 {
-    private MongoServer server = new MongoServer(new MemoryBackend());
-    private MongoClient mongoClient = new MongoClient(new ServerAddress(server.bind()));
+    private InetSocketAddress socketAddress = new MongoServer(new MemoryBackend()).bind();
+    private MongoClient mongoClient = MongoClients.create("mongodb://" + socketAddress.getHostName() + ":" + socketAddress.getPort());
     protected MongoDatabase mongoProvider = mongoClient.getDatabase("test-db");
 
     @AfterEach
