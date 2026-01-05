@@ -19,7 +19,11 @@ import org.eclipse.collections.api.list.MutableList;
 import org.eclipse.collections.impl.list.mutable.FastList;
 import org.eclipse.collections.impl.parallel.ParallelIterate;
 import org.finos.legend.depot.core.services.metrics.PrometheusMetricsFactory;
+import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.entity.ProjectVersionEntities;
+import org.finos.legend.depot.domain.project.ProjectVersionData;
+import org.finos.legend.depot.services.dependencies.DependencyExclusionsUtil;
+import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
@@ -32,6 +36,10 @@ import org.slf4j.Logger;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -94,22 +102,29 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
         return entities.getEntitiesByPackage(groupId, artifactId, version, packageName, classifierPaths, includeSubPackages);
     }
 
-    public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin)
+    @Override
+    public List<ProjectVersionEntities> getDependenciesEntities(String classifier, boolean includeOrigin, List<ProjectVersion> originProjects, Supplier<Set<ProjectVersion>> dependencyCalculator)
     {
         Set<ProjectVersion> dependencies = (Set<ProjectVersion>) executeWithTrace(CALCULATE_PROJECT_DEPENDENCIES, () ->
         {
-            Set<ProjectVersion> deps = projects.getDependencies(projectDependencies, transitive);
+            Set<ProjectVersion> deps = dependencyCalculator.get();
             if (includeOrigin)
             {
-                deps.addAll(projectDependencies);
+                deps.addAll(originProjects);
             }
             return deps;
         });
+
         TracerFactory.get().log(String.format("dependencies: [%s] ",dependencies.size()));
         PrometheusMetricsFactory.getInstance().observeHistogram(DEPENDENCIES_SIZE,dependencies.size());
         LOGGER.info("finished calculating [{}] dependencies",dependencies.size());
 
-        return  (List<ProjectVersionEntities>) executeWithTrace(RETRIEVE_DEPENDENCY_ENTITIES, () ->
+        return retrieveEntitiesForDependencies(dependencies, classifier);
+    }
+
+    private List<ProjectVersionEntities> retrieveEntitiesForDependencies(Set<ProjectVersion> dependencies, String classifier)
+    {
+        return (List<ProjectVersionEntities>) executeWithTrace(RETRIEVE_DEPENDENCY_ENTITIES, () ->
         {
             MutableList<ProjectVersionEntities> depEntities = FastList.newList();
             final AtomicInteger totalEntities = new AtomicInteger();
@@ -137,13 +152,26 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
     @Override
     public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin)
     {
-        return getDependenciesEntities(projectDependencies, null, transitive, includeOrigin);
+        return getDependenciesEntities(null, includeOrigin, projectDependencies, () -> projects.getDependencies(projectDependencies, new HashMap<>(), transitive));
+    }
+
+    @Override
+    public List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependencies(List<ArtifactDependency> projectDependencies, boolean transitive, boolean includeOrigin)
+    {
+        Map<String, List<ProjectVersion>> directExclusionsMap = DependencyExclusionsUtil.createDependencyExclusionsMap(projectDependencies);
+        Map<String, List<ProjectVersion>> allExclusionsMap = DependencyExclusionsUtil.getTransitiveDependenciesOfExclusions(directExclusionsMap, projects);
+
+        List<ProjectVersion> projectVersionDeps = projectDependencies.stream()
+                .map(ad -> new ProjectVersion(ad.getGroupId(), ad.getArtifactId(), ad.getVersionId()))
+                .collect(Collectors.toList());
+
+        return getDependenciesEntities(null, includeOrigin, projectVersionDeps, () -> projects.getDependencies(projectVersionDeps, allExclusionsMap, transitive));
     }
 
     @Override
     public List<ProjectVersionEntities> getDependenciesEntitiesByClassifier(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin)
     {
-        return getDependenciesEntities(projectDependencies, classifier, transitive, includeOrigin);
+        return getDependenciesEntities(classifier, includeOrigin, projectDependencies, () -> projects.getDependencies(projectDependencies, new HashMap<>(), transitive));
     }
 
     private Object executeWithTrace(String label, Supplier<Object> functionToExecute)

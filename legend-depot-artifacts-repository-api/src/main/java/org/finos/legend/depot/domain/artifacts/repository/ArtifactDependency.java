@@ -41,7 +41,6 @@ public class ArtifactDependency
         this.exclusions = exclusions != null ? exclusions : Collections.emptyList();
     }
 
-
     public ArtifactDependency(String groupId, String artifactId, String versionId)
     {
         this.groupId = groupId;

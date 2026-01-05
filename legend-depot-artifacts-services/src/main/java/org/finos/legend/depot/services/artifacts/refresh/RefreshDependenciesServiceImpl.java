@@ -15,6 +15,7 @@
 
 package org.finos.legend.depot.services.artifacts.refresh;
 
+import org.eclipse.collections.api.block.function.Function2;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
@@ -90,16 +91,15 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
                     }
                     List<ProjectVersion> allDependencies = new ArrayList<>(projectData.get().getVersionData().getDependencies());
                     allDependencies.addAll(projectData.get().getTransitiveDependenciesReport().getTransitiveDependencies());
-                    if (exclusions != null && !exclusions.isEmpty())
-                    {
-                        List<ProjectVersion> filteredDependencies = this.dependencyOverride.applyExclusions(allDependencies, deps, exclusions);
-                        LOGGER.info("Applied exclusions to dependencies for {}-{}-{}", deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
-                        projectDependencies.addAll(this.dependencyOverride.overrideWith(filteredDependencies, projectVersions, this::getCalculatedTransitiveDependencies));
-                    }
-                    else
-                    {
-                        projectDependencies.addAll(this.dependencyOverride.overrideWith(allDependencies, projectVersions, this::getCalculatedTransitiveDependencies));
-                    }
+
+                    List<ProjectVersion> processedDependencies = this.dependencyOverride.applyExclusionsAndOverrides(
+                            allDependencies,
+                            deps,
+                            projectVersions,
+                            exclusions,
+                            this::getCalculatedTransitiveDependencies
+                    );
+                    projectDependencies.addAll(processedDependencies);
                 }
                 else
                 {
@@ -125,16 +125,14 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
                     else
                     {
                         List<ProjectVersion> allDependencies = new ArrayList<>(report.getTransitiveDependencies());
-                        if (exclusions != null && !exclusions.isEmpty())
-                        {
-                            List<ProjectVersion> filteredDependencies = this.dependencyOverride.applyExclusions(allDependencies, deps, exclusions);
-                            projectDependencies.addAll(this.dependencyOverride.overrideWith(filteredDependencies, projectVersions, this::getCalculatedTransitiveDependencies));
-                            LOGGER.info("Applied exclusions to dependencies for {}-{}-{}", deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
-                        }
-                        else
-                        {
-                            projectDependencies.addAll(this.dependencyOverride.overrideWith(allDependencies, projectVersions, this::getCalculatedTransitiveDependencies));
-                        }
+                        List<ProjectVersion> processedDependencies = this.dependencyOverride.applyExclusionsAndOverrides(
+                                allDependencies,
+                                deps,
+                                projectVersions,
+                                exclusions,
+                                this::getCalculatedTransitiveDependencies
+                        );
+                        projectDependencies.addAll(processedDependencies);
                     }
                 }
                 projectDependencies.add(deps);
@@ -148,6 +146,7 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
         LOGGER.info("Completed finding dependencies");
         return new VersionDependencyReport(projectDependencies.stream().collect(Collectors.toList()), true);
     }
+
 
     private Set<ProjectVersion> getCalculatedTransitiveDependencies(List<ProjectVersion> directDependencies, boolean transitive)
     {

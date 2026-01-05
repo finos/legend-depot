@@ -232,21 +232,59 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
-    public Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, boolean transitive)
+    public Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusionsMap, boolean transitive)
     {
+        boolean hasExclusions = exclusionsMap != null && !exclusionsMap.isEmpty();
         Set<ProjectVersion> dependencies = new HashSet<>();
+
         projectVersions.forEach(pv ->
         {
             String version = this.resolveAliasesAndCheckVersionExists(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
             StoreProjectVersionData projectData = this.getProject(pv.getGroupId(), pv.getArtifactId(), version);
             List<ProjectVersion> projectVersionDependencies = projectData.getVersionData().getDependencies();
-            dependencies.addAll(this.dependencyOverride.overrideWith(projectVersionDependencies, projectVersions, this::getDependencies));
+
+            if (hasExclusions)
+            {
+                ProjectVersion currentVersion = new ProjectVersion(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId());
+                dependencies.addAll(this.dependencyOverride.applyExclusionsAndOverrides(
+                        projectVersionDependencies,
+                        currentVersion,
+                        projectVersions,
+                        exclusionsMap,
+                        (pvList, trans) -> getDependencies(pvList, exclusionsMap, trans)
+                ));
+            }
+            else
+            {
+                dependencies.addAll(this.dependencyOverride.overrideWith(projectVersionDependencies, projectVersions, this::getDependencies));
+            }
+
             if (transitive && !projectVersionDependencies.isEmpty())
             {
                 if (projectData.getTransitiveDependenciesReport().isValid())
                 {
-                    // Transitive dependencies report contains both direct and transitive dependencies
-                    dependencies.addAll(this.dependencyOverride.overrideWith(projectData.getTransitiveDependenciesReport().getTransitiveDependencies(), projectVersions, this::getDependencies));
+                    List<ProjectVersion> transitiveDeps = projectData.getTransitiveDependenciesReport().getTransitiveDependencies();
+
+                    if (hasExclusions)
+                    {
+                        ProjectVersion currentVersion = new ProjectVersion(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId());
+                        List<ProjectVersion> allDependencies = new ArrayList<>(projectVersionDependencies);
+                        allDependencies.addAll(transitiveDeps);
+
+                        LOGGER.info("Checking exclusions for {}-{}-{}", projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId());
+
+                        dependencies.addAll(this.dependencyOverride.applyExclusionsAndOverrides(
+                                allDependencies,
+                                currentVersion,
+                                projectVersions,
+                                exclusionsMap,
+                                (pvList, trans) -> getDependencies(pvList, exclusionsMap, trans)
+                        ));
+                    }
+                    else
+                    {
+                        dependencies.addAll(this.dependencyOverride.overrideWith(transitiveDeps, projectVersions, this::getDependencies));
+                    }
                 }
                 else
                 {

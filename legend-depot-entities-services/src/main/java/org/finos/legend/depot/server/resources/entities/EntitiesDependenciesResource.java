@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
@@ -122,5 +123,18 @@ public class EntitiesDependenciesResource extends TracingResource
                                                                        @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
         return handleResponse(GET_VERSIONS_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, transitive, includeOrigin));
+    }
+
+    @POST
+    @Path("/projects/dependenciesFromArtifactDependencies")
+    @ApiOperation(GET_VERSIONS_DEPENDENCY_ENTITIES)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllEntitiesFromArtifactDependencies(@ApiParam("projectDependencies") List<ArtifactDependency> projectDependencies,
+                                                   @QueryParam("transitive") @DefaultValue("false")
+                                                   @ApiParam("Whether to return transitive dependencies") boolean transitive,
+                                                   @QueryParam("includeOrigin") @DefaultValue("false")
+                                                   @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
+    {
+        return handleResponse(GET_VERSIONS_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntitiesFromArtifactDependencies(projectDependencies, transitive, includeOrigin));
     }
 }

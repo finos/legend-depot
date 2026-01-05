@@ -20,7 +20,6 @@ import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
-import org.finos.legend.depot.store.model.projects.StoreProjectData;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -67,5 +66,19 @@ public class DependencyUtil implements DependencyOverride
     public List<ProjectVersion> getArtifactDependenciesAsProjectVersions(List<ArtifactDependency> dependencies)
     {
         return dependencies.stream().map(dep -> new ProjectVersion(dep.getGroupId(), dep.getArtifactId(), dep.getVersionId())).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProjectVersion> applyExclusionsAndOverrides(List<ProjectVersion> dependencies, ProjectVersion sourceProject, List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusions, Function2<List<ProjectVersion>, Boolean, Set<ProjectVersion>> recursiveFunction)
+    {
+        if (exclusions != null && !exclusions.isEmpty())
+        {
+            List<ProjectVersion> filteredDependencies = this.applyExclusions(dependencies, sourceProject, exclusions);
+            return this.overrideWith(filteredDependencies, projectVersions, recursiveFunction);
+        }
+        else
+        {
+            return this.overrideWith(dependencies, projectVersions, recursiveFunction);
+        }
     }
 }
