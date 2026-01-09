@@ -17,6 +17,7 @@ package org.finos.legend.depot.services.api.projects;
 
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
+import org.finos.legend.depot.services.api.dependencies.DependencyResponseModel;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.domain.project.ProjectVersion;
@@ -90,5 +91,5 @@ public interface ProjectsService
 
     void checkExists(String groupId, String artifactId) throws IllegalArgumentException;
 
-    List<ProjectVersion> resolveCompatibleVersions(List<ProjectVersion> projectDependencyVersions, int backtrackVersions);
+    DependencyResponseModel resolveCompatibleVersions(List<ProjectVersion> projectDependencyVersions, int backtrackVersions);
 }

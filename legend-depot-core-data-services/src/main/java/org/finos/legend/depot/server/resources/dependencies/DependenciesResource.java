@@ -117,7 +117,7 @@ public class DependenciesResource extends TracingResource
     @ApiOperation(RESOLVE_COMPATIBLE_PROJECT_DEPENDENCY_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
     public Response resolveCompatibleProjectDependencyVersions(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies,
-                                                               @QueryParam("backtrackVersions") @DefaultValue("0") int backtrackVersions)
+                                                               @QueryParam("backtrackVersions") @ApiParam("How many versions to check and backtrack from latest releases") @DefaultValue("0") int backtrackVersions)
     {
         return handleResponse(RESOLVE_COMPATIBLE_PROJECT_DEPENDENCY_VERSIONS, () -> this.projectApi.resolveCompatibleVersions(projectDependencies, backtrackVersions));
     }

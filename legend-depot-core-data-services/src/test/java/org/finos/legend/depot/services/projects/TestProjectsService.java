@@ -21,6 +21,8 @@ import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
 import org.finos.legend.depot.domain.notifications.MetadataNotification;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
+import org.finos.legend.depot.services.api.dependencies.DependencyConflict;
+import org.finos.legend.depot.services.api.dependencies.DependencyResponseModel;
 import org.finos.legend.depot.services.dependencies.DependencyExclusionsUtil;
 import org.finos.legend.depot.services.dependencies.DependencySATConverter;
 import org.finos.legend.depot.services.dependencies.LogicNGSATResult;
@@ -39,6 +41,7 @@ import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfig
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.store.mongo.notifications.queue.NotificationsQueueMongo;
 import org.finos.legend.engine.language.pure.dsl.generation.extension.Artifact;
+import org.finos.legend.sdlc.domain.model.project.Project;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -469,7 +472,7 @@ public class TestProjectsService extends TestBaseServices
         Assertions.assertEquals(Arrays.asList("master-SNAPSHOT", "branch1-SNAPSHOT"), versionData.stream().map(x -> x.getVersionId()).collect(Collectors.toList()));
     }
 
-     @Test
+    @Test
     public void canOverrideDependencies()
     {
         // B -> CV1
@@ -811,7 +814,7 @@ public class TestProjectsService extends TestBaseServices
         Variable projectB_v2_var = variableMap.get("org.apache.commons:commons_util:2.0.0");
 
         // Expected mutual exclusion clauses for project_a (3 versions = 3 pairs):
-        // ¬v1 ∨ ¬v2, ¬v1 ∨ ¬v3, ¬v2 ∨ ¬v3
+        // ¬v1 ? ¬v2, ¬v1 ? ¬v3, ¬v2 ? ¬v3
         List<String> expectedProjectAConstraints = Arrays.asList(
                 converterFactory.or(projectA_v1_var.negate(), projectA_v2_var.negate()).toString(),
                 converterFactory.or(projectA_v1_var.negate(), projectA_v3_var.negate()).toString(),
@@ -819,7 +822,7 @@ public class TestProjectsService extends TestBaseServices
         );
 
         // Expected mutual exclusion clause for commons_util (2 versions = 1 pair):
-        // ¬v1 ∨ ¬v2
+        // ¬v1 ? ¬v2
         String expectedProjectBConstraint = converterFactory.or(projectB_v1_var.negate(), projectB_v2_var.negate()).toString();
 
         // Convert clauses to strings for easier comparison
@@ -999,26 +1002,25 @@ public class TestProjectsService extends TestBaseServices
                 new ProjectVersion("org.finos.legend", "project_b", "1.0.0")
         );
 
-        // Test resolveCompatibleVersions
-        List<ProjectVersion> compatibleVersions = projectsService.resolveCompatibleVersions(requiredProjects, 0);
+        DependencyResponseModel response = projectsService.resolveCompatibleVersions(requiredProjects, 0);
 
         // Verify solution contains all required projects and their dependencies
-        Assertions.assertNotNull(compatibleVersions);
-        Assertions.assertFalse(compatibleVersions.isEmpty());
+        Assertions.assertTrue(response.isSuccess(), "Resolution should succeed");
+        Assertions.assertNotNull(response.getResolvedVersions());
+        Assertions.assertFalse(response.getResolvedVersions().isEmpty());
 
         // Should include both required projects and the common dependency
-        Set<String> solutionGavs = compatibleVersions.stream()
+        Set<String> solutionGavs = response.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
-        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"),"Solution should include project_a");
-        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_b:1.0.0"),"Solution should include project_b");
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"));
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_b:1.0.0"));
 
-        // Verify no duplicate dependencies
-        Assertions.assertEquals(2, compatibleVersions.size(), "Should have exactly 2 projects in solution");
+        Assertions.assertEquals(2, response.getResolvedVersions().size());
 
         log.info("Compatible versions found:");
-        compatibleVersions.forEach(pv -> log.info("  - {}", pv.getGav()));
+        response.getResolvedVersions().forEach(pv -> log.info("  - {}", pv.getGav()));
     }
 
     @Test
@@ -1060,15 +1062,16 @@ public class TestProjectsService extends TestBaseServices
         // This creates unsatisfiable constraints:
         // 1. projectA must be selected (required)
         // 2. projectB must be selected (required)
-        // 3. projectA → commons_util:1.0.0 (dependency implication)
-        // 4. projectB → commons_util:2.0.0 (dependency implication)
-        // 5. ¬commons_util:1.0.0 ∨ ¬commons_util:2.0.0 (mutual exclusion)
+        // 3. projectA ? commons_util:1.0.0 (dependency implication)
+        // 4. projectB ? commons_util:2.0.0 (dependency implication)
+        // 5. ¬commons_util:1.0.0 ? ¬commons_util:2.0.0 (mutual exclusion)
         // Result: UNSAT
 
-        List<ProjectVersion> result = projectsService.resolveCompatibleVersions(requiredProjects, 0);
+        DependencyResponseModel result = projectsService.resolveCompatibleVersions(requiredProjects, 0);
 
-        // Should return empty list
-        Assertions.assertTrue(result.isEmpty(), "Should return empty list for unsatisfiable constraints");
+        // Should return failure response
+        Assertions.assertFalse(result.isSuccess());
+        Assertions.assertTrue(result.getResolvedVersions().isEmpty());
     }
 
     @Test
@@ -1116,11 +1119,12 @@ public class TestProjectsService extends TestBaseServices
         );
 
         // Test without backtracking (backtrack = 0)
-        List<ProjectVersion> result = projectsService.resolveCompatibleVersions(requiredProjects, 0);
+        DependencyResponseModel result = projectsService.resolveCompatibleVersions(requiredProjects, 0);
 
-        Assertions.assertEquals(2, result.size(), "Should resolve both required projects without backtracking");
+        Assertions.assertTrue(result.isSuccess());
+        Assertions.assertEquals(2, result.getResolvedVersions().size());
 
-        Set<String> solutionGavs = result.stream()
+        Set<String> solutionGavs = result.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
@@ -1175,16 +1179,17 @@ public class TestProjectsService extends TestBaseServices
         );
 
         // Test with backtracking enabled (backTrackVersions = 3) - B1 and B3 are both possible so B3 is chosen
-        List<ProjectVersion> result = projectsService.resolveCompatibleVersions(requiredProjects, 3);
+        DependencyResponseModel result = projectsService.resolveCompatibleVersions(requiredProjects, 3);
 
-        Assertions.assertEquals(2, result.size(), "Should be able to discover compatible versions with backtracking");
+        Assertions.assertTrue(result.isSuccess());
+        Assertions.assertEquals(2, result.getResolvedVersions().size());
 
-        Set<String> solutionGavs = result.stream()
+        Set<String> solutionGavs = result.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
-        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"),"Solution should include project_a");
-        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_b:3.0.0"),"Solution should include project_b");
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"));
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_b:3.0.0"));
     }
 
     @Test
@@ -1245,16 +1250,17 @@ public class TestProjectsService extends TestBaseServices
         );
 
         // Test with backtracking enabled (backTrackVersions = 2)
-        List<ProjectVersion> result = projectsService.resolveCompatibleVersions(requiredProjects, 2);
+        DependencyResponseModel result = projectsService.resolveCompatibleVersions(requiredProjects, 2);
 
-        Assertions.assertEquals(2, result.size(), "Should be able to discover compatible versions with backtracking");
+        Assertions.assertTrue(result.isSuccess());
+        Assertions.assertEquals(2, result.getResolvedVersions().size());
 
-        Set<String> solutionGavs = result.stream()
+        Set<String> solutionGavs = result.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
-        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"), "Solution should include project_a v1.0.0");
-        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_d:2.0.0"), "Solution should include project_d v2.0.0 (backtracked from v1.0.0)");
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"));
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_d:2.0.0"));
     }
 
 
@@ -1309,24 +1315,26 @@ public class TestProjectsService extends TestBaseServices
         );
 
         // Test Case 1: No backtrack (backtrackVersions = 0) - should fail
-        List<ProjectVersion> noBacktrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 0);
-        Assertions.assertTrue(noBacktrackResult.isEmpty(),"Should return empty list with conflicting versions and no backtrack");
+        DependencyResponseModel noBacktrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 0);
+        Assertions.assertFalse(noBacktrackResult.isSuccess());
+        Assertions.assertEquals(1, noBacktrackResult.getConflicts().size());
 
         // Test Case 2: With backtrack enabled - should find satisfiable solution
-        List<ProjectVersion> backtrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 1);
-        Assertions.assertFalse(backtrackResult.isEmpty(),"Should find satisfiable solution with backtrack enabled");
+        DependencyResponseModel backtrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 1);
+        Assertions.assertTrue(backtrackResult.isSuccess());
+        Assertions.assertFalse(backtrackResult.getResolvedVersions().isEmpty());
 
         // Verify the solution uses the alternative version
-        Set<String> solutionGavs = backtrackResult.stream()
+        Set<String> solutionGavs = backtrackResult.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
         // The solution should contain project_a v2.0.0 (alternative) instead of v1.0.0
-        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:2.0.0"),"Solution should use project_a v2.0.0 (alternative) instead of v1.0.0");
-        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_b:1.0.0"),"Solution should include project_b v1.0.0");
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:2.0.0"));
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_b:1.0.0"));
 
         // Verify exactly 2 projects in solution (no duplicates or unexpected dependencies)
-        Assertions.assertEquals(2, backtrackResult.size(),"Solution should contain exactly 2 projects");
+        Assertions.assertEquals(2, backtrackResult.getResolvedVersions().size());
     }
 
     @Test
@@ -1364,17 +1372,18 @@ public class TestProjectsService extends TestBaseServices
                 new ProjectVersion("org.finos.legend", "project_a", "1.0.0")
         );
 
-        List<ProjectVersion> result = projectsService.resolveCompatibleVersions(requiredProjects, 0);
+        DependencyResponseModel result = projectsService.resolveCompatibleVersions(requiredProjects, 0);
 
-        Assertions.assertFalse(result.isEmpty(), "Should resolve circular dependencies successfully");
+        Assertions.assertTrue(result.isSuccess());
+        Assertions.assertFalse(result.getResolvedVersions().isEmpty());
 
-        Set<String> solutionGavs = result.stream()
+        Set<String> solutionGavs = result.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
         // All three projects should be included due to circular dependencies
-        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"),"Solution should include project_a");
-        Assertions.assertEquals(1, result.size(), "Should include original project");
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"));
+        Assertions.assertEquals(1, result.getResolvedVersions().size());
 
         // Test Case 2: Require all projects in the cycle - should still work
         List<ProjectVersion> allRequiredProjects = Arrays.asList(
@@ -1383,11 +1392,12 @@ public class TestProjectsService extends TestBaseServices
                 new ProjectVersion("org.finos.legend", "project_c", "1.0.0")
         );
 
-        List<ProjectVersion> allResult = projectsService.resolveCompatibleVersions(allRequiredProjects, 0);
+        DependencyResponseModel allResult = projectsService.resolveCompatibleVersions(allRequiredProjects, 0);
 
-        Assertions.assertFalse(allResult.isEmpty(), "Should resolve when all circular projects are required");
+        Assertions.assertTrue(allResult.isSuccess());
+        Assertions.assertFalse(allResult.getResolvedVersions().isEmpty());
 
-        Set<String> allSolutionGavs = allResult.stream()
+        Set<String> allSolutionGavs = allResult.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
@@ -1397,11 +1407,11 @@ public class TestProjectsService extends TestBaseServices
         Assertions.assertTrue(allSolutionGavs.contains("org.finos.legend:project_c:1.0.0"));
 
         // Test Case 3: Verify no conflicts are reported for valid circular dependencies
-        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(result);
-        Assertions.assertEquals(0, report.getConflicts().size(),"Valid circular dependencies should not create conflicts");
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(result.getResolvedVersions());
+        Assertions.assertEquals(0, report.getConflicts().size());
 
-        log.info("Circular dependency resolution found {} projects:", result.size());
-        result.forEach(pv -> log.info("  - {}", pv.getGav()));
+        log.info("Circular dependency resolution found {} projects:", result.getResolvedVersions().size());
+        result.getResolvedVersions().forEach(pv -> log.info("  - {}", pv.getGav()));
     }
 
     @Test
@@ -1445,8 +1455,9 @@ public class TestProjectsService extends TestBaseServices
                 new ProjectVersion("org.finos.legend", "project_b", "1.0.0")
         );
 
-        List<ProjectVersion> conflictingResult = projectsService.resolveCompatibleVersions(conflictingRequiredProjects, 0);
-        Assertions.assertTrue(conflictingResult.isEmpty(),"Should fail to resolve conflicting dependencies without override");
+        DependencyResponseModel conflictingResult = projectsService.resolveCompatibleVersions(conflictingRequiredProjects, 0);
+        Assertions.assertFalse(conflictingResult.isSuccess());
+        Assertions.assertTrue(conflictingResult.getResolvedVersions().isEmpty());
 
         // Test Case 2: With override dependency - should succeed
         // Override with commons_util v2.0.0 to resolve the conflict in favor of project B
@@ -1456,25 +1467,25 @@ public class TestProjectsService extends TestBaseServices
                 new ProjectVersion("org.apache.commons", "commons_util", "2.0.0")  // Override dependency
         );
 
-        List<ProjectVersion> resolvedResult = projectsService.resolveCompatibleVersions(requiredProjectsWithOverride, 0);
+        DependencyResponseModel resolvedResult = projectsService.resolveCompatibleVersions(requiredProjectsWithOverride, 0);
 
-        Assertions.assertFalse(resolvedResult.isEmpty(),"Should resolve successfully with override dependency");
+        Assertions.assertTrue(resolvedResult.isSuccess());
+        Assertions.assertFalse(resolvedResult.getResolvedVersions().isEmpty());
 
-        Set<String> solutionGavs = resolvedResult.stream()
+        Set<String> solutionGavs = resolvedResult.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
         // Verify the solution contains all required projects
-        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"),"Solution should include project_a");
-        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_b:1.0.0"),"Solution should include project_b");
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_a:1.0.0"));
+        Assertions.assertTrue(solutionGavs.contains("org.finos.legend:project_b:1.0.0"));
         Assertions.assertTrue(solutionGavs.contains("org.apache.commons:commons_util:2.0.0"));
 
-        Assertions.assertEquals(3, resolvedResult.size(),"Solution should contain exactly 3 projects when override resolves the conflict");
+        Assertions.assertEquals(3, resolvedResult.getResolvedVersions().size());
 
         // Test Case 3: Verify dependency report shows no conflicts with override
-        ProjectDependencyReport reportWithOverride = projectsService.getProjectDependencyReportFromProjectVersionList(resolvedResult);
-        Assertions.assertEquals(0, reportWithOverride.getConflicts().size(),
-                "Override dependency should eliminate version conflicts");
+        ProjectDependencyReport reportWithOverride = projectsService.getProjectDependencyReportFromProjectVersionList(resolvedResult.getResolvedVersions());
+        Assertions.assertEquals(0, reportWithOverride.getConflicts().size());
 
         // Test Case 4: Alternative override scenario - override with v1.0.0 instead
         List<ProjectVersion> alternativeOverride = Arrays.asList(
@@ -1483,27 +1494,28 @@ public class TestProjectsService extends TestBaseServices
                 new ProjectVersion("org.apache.commons", "commons_util", "1.0.0")  // Override with v1.0.0
         );
 
-        List<ProjectVersion> alternativeResult = projectsService.resolveCompatibleVersions(alternativeOverride, 0);
+        DependencyResponseModel alternativeResult = projectsService.resolveCompatibleVersions(alternativeOverride, 0);
 
-        Assertions.assertFalse(alternativeResult.isEmpty(),"Should also resolve with alternative override version");
+        Assertions.assertTrue(alternativeResult.isSuccess());
+        Assertions.assertFalse(alternativeResult.getResolvedVersions().isEmpty());
 
-        Set<String> altSolutionGavs = alternativeResult.stream()
+        Set<String> altSolutionGavs = alternativeResult.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
         Assertions.assertTrue(altSolutionGavs.contains("org.finos.legend:project_a:1.0.0"));
         Assertions.assertTrue(altSolutionGavs.contains("org.finos.legend:project_b:1.0.0"));
         Assertions.assertTrue(altSolutionGavs.contains("org.apache.commons:commons_util:1.0.0"));
-        Assertions.assertEquals(3, alternativeResult.size());
+        Assertions.assertEquals(3, alternativeResult.getResolvedVersions().size());
 
-        ProjectDependencyReport altReport = projectsService.getProjectDependencyReportFromProjectVersionList(alternativeResult);
-        Assertions.assertEquals(0, altReport.getConflicts().size(),"Alternative override should also eliminate conflicts");
+        ProjectDependencyReport altReport = projectsService.getProjectDependencyReportFromProjectVersionList(alternativeResult.getResolvedVersions());
+        Assertions.assertEquals(0, altReport.getConflicts().size());
 
         log.info("Resolved dependencies with override:");
-        resolvedResult.forEach(pv -> log.info("  - {}", pv.getGav()));
+        resolvedResult.getResolvedVersions().forEach(pv -> log.info("  - {}", pv.getGav()));
 
         log.info("Resolved dependencies with alternative override:");
-        alternativeResult.forEach(pv -> log.info("  - {}", pv.getGav()));
+        alternativeResult.getResolvedVersions().forEach(pv -> log.info("  - {}", pv.getGav()));
     }
 
     @Test
@@ -1597,61 +1609,61 @@ public class TestProjectsService extends TestBaseServices
         );
 
         // Resolve with backtrack to allow alternatives
-        List<ProjectVersion> compatibleVersions = projectsService.resolveCompatibleVersions(requiredProjectsWithOverrides, 2);
+        DependencyResponseModel compatibleVersions = projectsService.resolveCompatibleVersions(requiredProjectsWithOverrides, 2);
 
         // Verify resolution
         Assertions.assertNotNull(compatibleVersions);
-        Assertions.assertFalse(compatibleVersions.isEmpty(), "Should find a compatible solution with multiple overrides");
+        Assertions.assertTrue(compatibleVersions.isSuccess());
+        Assertions.assertFalse(compatibleVersions.getResolvedVersions().isEmpty());
 
-        Set<String> solutionGavs = compatibleVersions.stream()
+        Set<String> solutionGavs = compatibleVersions.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
         // Verify all root projects are included
-        Assertions.assertTrue(solutionGavs.contains("org.example.test:project_alpha:1.0.0"), "Solution should include project_alpha");
-        Assertions.assertTrue(solutionGavs.contains("org.example.test:project_beta:1.0.0"), "Solution should include project_beta");
-        Assertions.assertTrue(solutionGavs.contains("org.example.test:project_gamma:1.0.0"), "Solution should include project_gamma");
-        Assertions.assertTrue(solutionGavs.contains("org.example.test:project_delta:1.0.0"), "Solution should include project_delta");
+        Assertions.assertTrue(solutionGavs.contains("org.example.test:project_alpha:1.0.0"));
+        Assertions.assertTrue(solutionGavs.contains("org.example.test:project_beta:1.0.0"));
+        Assertions.assertTrue(solutionGavs.contains("org.example.test:project_gamma:1.0.0"));
+        Assertions.assertTrue(solutionGavs.contains("org.example.test:project_delta:1.0.0"));
 
         // Verify only one version of each overridden dependency
-        long commonsUtilCount = compatibleVersions.stream()
+        long commonsUtilCount = compatibleVersions.getResolvedVersions().stream()
                 .filter(pv -> pv.getGroupId().equals("org.apache.commons") && pv.getArtifactId().equals("commons_util"))
                 .count();
-        Assertions.assertEquals(1, commonsUtilCount, "Should have exactly one version of commons_util");
+        Assertions.assertEquals(1, commonsUtilCount);
 
-        long jacksonCount = compatibleVersions.stream()
+        long jacksonCount = compatibleVersions.getResolvedVersions().stream()
                 .filter(pv -> pv.getGroupId().equals("com.fasterxml.jackson.core") && pv.getArtifactId().equals("jackson_core"))
                 .count();
-        Assertions.assertEquals(1, jacksonCount, "Should have exactly one version of jackson_core");
+        Assertions.assertEquals(1, jacksonCount);
 
-        long loggingCount = compatibleVersions.stream()
+        long loggingCount = compatibleVersions.getResolvedVersions().stream()
                 .filter(pv -> pv.getGroupId().equals("org.apache.logging.log4j") && pv.getArtifactId().equals("log4j_core"))
                 .count();
-        Assertions.assertEquals(1, loggingCount, "Should have exactly one version of log4j_core");
+        Assertions.assertEquals(1, loggingCount);
 
-        // Log the resolution for verification
-        log.info("Multiple overrides resolution found {} compatible versions:", compatibleVersions.size());
-        compatibleVersions.forEach(pv -> log.info("  - {}", pv.getGav()));
+        log.info("Multiple overrides resolution found {} compatible versions:", compatibleVersions.getResolvedVersions().size());
+        compatibleVersions.getResolvedVersions().forEach(pv -> log.info("  - {}", pv.getGav()));
 
         // Verify that the resolution is consistent - no conflicts remain
-        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(compatibleVersions);
-        Assertions.assertEquals(0, report.getConflicts().size(), "Resolved versions should have no remaining conflicts");
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(compatibleVersions.getResolvedVersions());
+        Assertions.assertEquals(0, report.getConflicts().size());
 
         // Verify the override versions are properly selected
-        Optional<ProjectVersion> resolvedCommonsUtil = compatibleVersions.stream()
+        Optional<ProjectVersion> resolvedCommonsUtil = compatibleVersions.getResolvedVersions().stream()
                 .filter(pv -> pv.getGroupId().equals("org.apache.commons") && pv.getArtifactId().equals("commons_util"))
                 .findFirst();
-        Assertions.assertTrue(resolvedCommonsUtil.isPresent(), "Should resolve a commons_util version");
+        Assertions.assertTrue(resolvedCommonsUtil.isPresent());
 
-        Optional<ProjectVersion> resolvedJackson = compatibleVersions.stream()
+        Optional<ProjectVersion> resolvedJackson = compatibleVersions.getResolvedVersions().stream()
                 .filter(pv -> pv.getGroupId().equals("com.fasterxml.jackson.core") && pv.getArtifactId().equals("jackson_core"))
                 .findFirst();
-        Assertions.assertTrue(resolvedJackson.isPresent(), "Should resolve a jackson_core version");
+        Assertions.assertTrue(resolvedJackson.isPresent());
 
-        Optional<ProjectVersion> resolvedLogging = compatibleVersions.stream()
+        Optional<ProjectVersion> resolvedLogging = compatibleVersions.getResolvedVersions().stream()
                 .filter(pv -> pv.getGroupId().equals("org.apache.logging.log4j") && pv.getArtifactId().equals("log4j_core"))
                 .findFirst();
-        Assertions.assertTrue(resolvedLogging.isPresent(), "Should resolve a log4j_core version");
+        Assertions.assertTrue(resolvedLogging.isPresent());
     }
 
     @Test
@@ -1708,12 +1720,14 @@ public class TestProjectsService extends TestBaseServices
         );
 
         // Test Case 1: Without backtrack - should fail due to direct conflict
-        List<ProjectVersion> noBacktrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 0);
-        Assertions.assertTrue(noBacktrackResult.isEmpty(),"Should return empty list due to conflicting dependencies and no backtrack");
+        DependencyResponseModel noBacktrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 0);
+        Assertions.assertFalse(noBacktrackResult.isSuccess());
+        Assertions.assertTrue(noBacktrackResult.getResolvedVersions().isEmpty());
 
         // Test Case 2: With backtrack enabled - should still fail because alternative version is excluded
-        List<ProjectVersion> backtrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 2);
-        Assertions.assertTrue(backtrackResult.isEmpty(),"Should return empty list even with backtrack because the alternative version that would resolve the conflict is excluded");
+        DependencyResponseModel backtrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 2);
+        Assertions.assertFalse(backtrackResult.isSuccess());
+        Assertions.assertTrue(backtrackResult.getResolvedVersions().isEmpty());
 
         // Test Case 3: Verify the conflict exists in dependency report
         List<ProjectVersion> conflictingProjects = Arrays.asList(
@@ -1722,32 +1736,33 @@ public class TestProjectsService extends TestBaseServices
         );
 
         ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(conflictingProjects);
-        Assertions.assertFalse(report.getConflicts().isEmpty(), "Should report conflicts when trying to use conflicting versions");
+        Assertions.assertFalse(report.getConflicts().isEmpty());
 
         // Test Case 4: Prove that the solution would work if the alternative version was available
         // Add the excluded version back to the store
         projectsService.createOrUpdate(projectAlpha_v2);
 
         // Now test with the same required projects but allowing backtrack to find alternative
-        List<ProjectVersion> resolvedWithAlternative = projectsService.resolveCompatibleVersions(requiredProjects, 2);
-        Assertions.assertFalse(resolvedWithAlternative.isEmpty(),"Should resolve successfully when alternative version is available");
+        DependencyResponseModel resolvedWithAlternative = projectsService.resolveCompatibleVersions(requiredProjects, 2);
+        Assertions.assertTrue(resolvedWithAlternative.isSuccess());
+        Assertions.assertFalse(resolvedWithAlternative.getResolvedVersions().isEmpty());
 
-        Set<String> solutionGavs = resolvedWithAlternative.stream()
+        Set<String> solutionGavs = resolvedWithAlternative.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
         // Verify the solution uses the alternative version
-        Assertions.assertTrue(solutionGavs.contains("org.example.resolve:project_alpha:2.0.0"),"Solution should use project_alpha v2.0.0 (alternative) to resolve conflict");
-        Assertions.assertTrue(solutionGavs.contains("org.example.resolve:project_beta:1.0.0"),"Solution should include project_beta v1.0.0");
+        Assertions.assertTrue(solutionGavs.contains("org.example.resolve:project_alpha:2.0.0"));
+        Assertions.assertTrue(solutionGavs.contains("org.example.resolve:project_beta:1.0.0"));
 
         log.info("Test demonstrated that excluding alternative version prevents conflict resolution:");
-        log.info("  - Without alternative: {} projects resolved", backtrackResult.size());
-        log.info("  - With alternative: {} projects resolved", resolvedWithAlternative.size());
+        log.info("  - Without alternative: {} projects resolved", backtrackResult.getResolvedVersions().size());
+        log.info("  - With alternative: {} projects resolved", resolvedWithAlternative.getResolvedVersions().size());
 
-        if (!resolvedWithAlternative.isEmpty())
+        if (!resolvedWithAlternative.getResolvedVersions().isEmpty())
         {
             log.info("  Solution with alternative version:");
-            resolvedWithAlternative.forEach(pv -> log.info("    - {}", pv.getGav()));
+            resolvedWithAlternative.getResolvedVersions().forEach(pv -> log.info("    - {}", pv.getGav()));
         }
     }
 
@@ -1830,28 +1845,30 @@ public class TestProjectsService extends TestBaseServices
         );
 
         // Test Case 1: Without backtrack - should fail due to direct conflict
-        List<ProjectVersion> noBacktrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 0);
-        Assertions.assertTrue(noBacktrackResult.isEmpty(),"Should return empty list due to conflicting dependencies and no backtrack");
+        DependencyResponseModel noBacktrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 0);
+        Assertions.assertFalse(noBacktrackResult.isSuccess());
+        Assertions.assertTrue(noBacktrackResult.getResolvedVersions().isEmpty());
 
         // Test Case 2: With backtrack enabled - should find optimal solution with newer versions
-        List<ProjectVersion> backtrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 3);
-        Assertions.assertFalse(backtrackResult.isEmpty(),"Should find satisfiable solution with backtrack enabled");
+        DependencyResponseModel backtrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 3);
+        Assertions.assertTrue(backtrackResult.isSuccess());
+        Assertions.assertFalse(backtrackResult.getResolvedVersions().isEmpty());
 
-        Set<String> solutionGavs = backtrackResult.stream()
+        Set<String> solutionGavs = backtrackResult.getResolvedVersions().stream()
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
         // Verify the solution contains exactly 3 projects
-        Assertions.assertEquals(2, backtrackResult.size(),"Solution should contain exactly 2 projects");
+        Assertions.assertEquals(2, backtrackResult.getResolvedVersions().size());
 
         // The optimal solution should use the newest compatible versions
         // Expected optimal solution: projectAlpha v3.0.0 + projectBeta v3.0.0 + commons_util v3.0.0
-        Assertions.assertTrue(solutionGavs.contains("org.example.optimal:project_alpha:3.0.0"),"Solution should use project_alpha v3.0.0 (newest compatible version)");
-        Assertions.assertTrue(solutionGavs.contains("org.example.optimal:project_beta:3.0.0"),"Solution should use project_beta v3.0.0 (newest compatible version)");
+        Assertions.assertTrue(solutionGavs.contains("org.example.optimal:project_alpha:3.0.0"));
+        Assertions.assertTrue(solutionGavs.contains("org.example.optimal:project_beta:3.0.0"));
 
         // Test Case 3: Verify the solution has no conflicts
-        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(backtrackResult);
-        Assertions.assertEquals(0, report.getConflicts().size(),"Optimal solution should have no remaining conflicts");
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(backtrackResult.getResolvedVersions());
+        Assertions.assertEquals(0, report.getConflicts().size());
 
         // Test Case 4: Verify that other valid solutions exist but were not chosen
         // Manually test that solution with v2.0.0 versions would also work
@@ -1862,27 +1879,250 @@ public class TestProjectsService extends TestBaseServices
         );
 
         ProjectDependencyReport alternativeReport = projectsService.getProjectDependencyReportFromProjectVersionList(alternativeSolution);
-        Assertions.assertEquals(0, alternativeReport.getConflicts().size(),"Alternative solution with v2.0.0 should also be valid but less optimal");
+        Assertions.assertEquals(0, alternativeReport.getConflicts().size());
 
         // Test Case 5: Verify version optimization by checking that newer versions were chosen over older ones
-        Optional<ProjectVersion> resolvedAlpha = backtrackResult.stream()
+        Optional<ProjectVersion> resolvedAlpha = backtrackResult.getResolvedVersions().stream()
                 .filter(pv -> pv.getGroupId().equals("org.example.optimal") && pv.getArtifactId().equals("project_alpha"))
                 .findFirst();
 
-        Optional<ProjectVersion> resolvedBeta = backtrackResult.stream()
+        Optional<ProjectVersion> resolvedBeta = backtrackResult.getResolvedVersions().stream()
                 .filter(pv -> pv.getGroupId().equals("org.example.optimal") && pv.getArtifactId().equals("project_beta"))
                 .findFirst();
 
-        Assertions.assertTrue(resolvedAlpha.isPresent() && resolvedAlpha.get().getVersionId().equals("3.0.0"),"Should choose newest available version of project_alpha");
-        Assertions.assertTrue(resolvedBeta.isPresent() && resolvedBeta.get().getVersionId().equals("3.0.0"),"Should choose newest available version of project_beta");
+        Assertions.assertTrue(resolvedAlpha.isPresent() && resolvedAlpha.get().getVersionId().equals("3.0.0"));
+        Assertions.assertTrue(resolvedBeta.isPresent() && resolvedBeta.get().getVersionId().equals("3.0.0"));
 
         log.info("Optimal version selection test completed:");
         log.info("  Initial conflict: project_alpha v1.0.0 (needs commons_util v1.0.0) vs project_beta v1.0.0 (needs commons_util v3.0.0)");
-        log.info("  Optimal solution found with {} projects:", backtrackResult.size());
-        backtrackResult.forEach(pv -> log.info("    - {} (newest compatible version)", pv.getGav()));
+        log.info("  Optimal solution found with {} projects:", backtrackResult.getResolvedVersions().size());
+        backtrackResult.getResolvedVersions().forEach(pv -> log.info("    - {} (newest compatible version)", pv.getGav()));
 
         log.info("  Alternative valid solution (not chosen):");
         alternativeSolution.forEach(pv -> log.info("    - {} (older but compatible)", pv.getGav()));
+    }
+
+    @Test
+    public void canResolveCompatibleVersionsWithDetailsSuccess()
+    {
+        // Setup: Create projects with compatible dependencies
+        StoreProjectVersionData projectA = new StoreProjectVersionData("examples.metadata", "test-resolve", "1.0.0");
+        ProjectVersion commonsDep = new ProjectVersion("org.finos.legend", "commons", "1.0.0");
+        projectA.getVersionData().addDependency(commonsDep);
+        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsDep), true));
+
+        StoreProjectVersionData projectB = new StoreProjectVersionData("org.finos.legend", "project-resolve", "1.0.0");
+        projectB.getVersionData().addDependency(commonsDep);
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsDep), true));
+
+        StoreProjectVersionData commons = new StoreProjectVersionData("org.finos.legend", "commons-resolve", "1.0.0");
+
+        // Store all projects
+        projectsService.createOrUpdate(new StoreProjectData("PROD-15555", "examples.metadata", "test-resolve"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-25555", "org.finos.legend", "project-resolve"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-35555", "org.finos.legend", "commons-resolve"));
+        projectsService.createOrUpdate(projectA);
+        projectsService.createOrUpdate(projectB);
+        projectsService.createOrUpdate(commons);
+
+        List<ProjectVersion> requiredProjects = Arrays.asList(
+                new ProjectVersion("examples.metadata", "test-resolve", "1.0.0"),
+                new ProjectVersion("org.finos.legend", "project-resolve", "1.0.0")
+        );
+
+        DependencyResponseModel response = projectsService.resolveCompatibleVersions(requiredProjects, 0);
+
+        // Assert: Resolution should succeed
+        Assertions.assertTrue(response.isSuccess());
+        Assertions.assertNotNull(response.getResolvedVersions());
+        Assertions.assertEquals(2, response.getResolvedVersions().size());
+        Assertions.assertTrue(response.getConflicts().isEmpty());
+        Assertions.assertNull(response.getFailureReason());
+    }
+
+    @Test
+    public void canResolveCompatibleVersionsWithDetailsFailureWithConflict()
+    {
+        // Setup: Create projects with conflicting dependencies (diamond dependency problem)
+        StoreProjectVersionData projectA = new StoreProjectVersionData("org.finos.legend", "project_a", "1.0.0");
+        StoreProjectVersionData projectB = new StoreProjectVersionData("org.finos.legend", "project_b", "1.0.0");
+        StoreProjectVersionData commonsV1 = new StoreProjectVersionData("org.apache.commons", "commons_util", "1.0.0");
+        StoreProjectVersionData commonsV2 = new StoreProjectVersionData("org.apache.commons", "commons_util", "2.0.0");
+
+        ProjectVersion commonsV1Dep = new ProjectVersion("org.apache.commons", "commons_util", "1.0.0");
+        ProjectVersion commonsV2Dep = new ProjectVersion("org.apache.commons", "commons_util", "2.0.0");
+
+        // project_a requires commons_util v1.0.0
+        projectA.getVersionData().addDependency(commonsV1Dep);
+        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsV1Dep), true));
+
+        // project_b requires commons_util v2.0.0
+        projectB.getVersionData().addDependency(commonsV2Dep);
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsV2Dep), true));
+
+        // Store all projects
+        projectsService.createOrUpdate(new StoreProjectData("PROD-19999", "org.finos.legend", "project_a"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-29999", "org.finos.legend", "project_b"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-39999", "org.apache.commons", "commons_util"));
+        projectsService.createOrUpdate(projectA);
+        projectsService.createOrUpdate(projectB);
+        projectsService.createOrUpdate(commonsV1);
+        projectsService.createOrUpdate(commonsV2);
+
+        List<ProjectVersion> requiredProjects = Arrays.asList(
+                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
+                new ProjectVersion("org.finos.legend", "project_b", "1.0.0")
+        );
+
+        DependencyResponseModel response = projectsService.resolveCompatibleVersions(requiredProjects, 0);
+        // Assert: Resolution should fail
+        Assertions.assertFalse(response.isSuccess());
+        Assertions.assertTrue(response.getResolvedVersions().isEmpty());
+        Assertions.assertNotNull(response.getFailureReason());
+        Assertions.assertTrue(response.getFailureReason().contains("unsatisfiable") || response.getFailureReason().contains("conflict"));
+
+        Assertions.assertNotNull(response.getConflicts());
+        Assertions.assertFalse(response.getConflicts().isEmpty());
+
+        DependencyConflict commonsConflict =
+                response.getConflicts().stream()
+                        .filter(c -> "commons_util".equals(c.getArtifactId()))
+                        .findFirst()
+                        .orElse(null);
+
+        if (commonsConflict != null)
+        {
+            Assertions.assertEquals("org.apache.commons", commonsConflict.getGroupId());
+            Assertions.assertEquals("commons_util", commonsConflict.getArtifactId());
+
+            Assertions.assertFalse(commonsConflict.getConflictingVersions().isEmpty());
+
+            for (DependencyConflict.ConflictingVersion cv : commonsConflict.getConflictingVersions())
+            {
+                Assertions.assertNotNull(cv.getVersion());
+                Assertions.assertNotNull(cv.getRequiredBy());
+            }
+        }
+    }
+
+    @Test
+    public void canResolveCompatibleVersionsWithDetailsConflictResolution()
+    {
+        // Setup: Same conflicting scenario as above
+        StoreProjectVersionData projectA = new StoreProjectVersionData("org.finos.legend", "project_a", "1.0.0");
+        StoreProjectVersionData projectB = new StoreProjectVersionData("org.finos.legend", "project_b", "1.0.0");
+        StoreProjectVersionData commonsV1 = new StoreProjectVersionData("org.apache.commons", "commons_util", "1.0.0");
+        StoreProjectVersionData commonsV2 = new StoreProjectVersionData("org.apache.commons", "commons_util", "2.0.0");
+
+        ProjectVersion commonsV1Dep = new ProjectVersion("org.apache.commons", "commons_util", "1.0.0");
+        ProjectVersion commonsV2Dep = new ProjectVersion("org.apache.commons", "commons_util", "2.0.0");
+
+        projectA.getVersionData().addDependency(commonsV1Dep);
+        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsV1Dep), true));
+
+        projectB.getVersionData().addDependency(commonsV2Dep);
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsV2Dep), true));
+
+        // Store all projects
+        projectsService.createOrUpdate(new StoreProjectData("PROD-13333", "org.finos.legend", "project_a"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-23333", "org.finos.legend", "project_b"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-33333", "org.apache.commons", "commons_util"));
+        projectsService.createOrUpdate(projectA);
+        projectsService.createOrUpdate(projectB);
+        projectsService.createOrUpdate(commonsV1);
+        projectsService.createOrUpdate(commonsV2);
+
+        List<ProjectVersion> requiredProjectsNoOverride = Arrays.asList(
+                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
+                new ProjectVersion("org.finos.legend", "project_b", "1.0.0")
+        );
+
+        DependencyResponseModel failureResponse = projectsService.resolveCompatibleVersions(requiredProjectsNoOverride, 0);
+
+        Assertions.assertFalse(failureResponse.isSuccess());
+        Assertions.assertEquals(1, failureResponse.getConflicts().size());
+
+        List<ProjectVersion> requiredProjectsWithOverride = Arrays.asList(
+                new ProjectVersion("org.finos.legend", "project_a", "1.0.0"),
+                new ProjectVersion("org.finos.legend", "project_b", "1.0.0"),
+                new ProjectVersion("org.apache.commons", "commons_util", "2.0.0")  // Override to resolve conflict
+        );
+
+        DependencyResponseModel successResponse = projectsService.resolveCompatibleVersions(requiredProjectsWithOverride, 0);
+        Assertions.assertTrue(successResponse.isSuccess());
+        Assertions.assertFalse(successResponse.getResolvedVersions().isEmpty());
+
+        // Verify the override version was selected
+        boolean hasCommonsV2 = successResponse.getResolvedVersions().stream()
+                .anyMatch(pv -> "org.apache.commons".equals(pv.getGroupId()) &&
+                        "commons_util".equals(pv.getArtifactId()) &&
+                        "2.0.0".equals(pv.getVersionId()));
+
+        Assertions.assertTrue(hasCommonsV2);
+    }
+
+    @Test
+    public void canResolveCompatibleVersionsWithDetailsMultipleConflicts()
+    {
+        // Setup: Create a scenario with multiple conflicting dependencies
+        StoreProjectVersionData projectX = new StoreProjectVersionData("org.finos.legend", "project_x", "1.0.0");
+        StoreProjectVersionData projectY = new StoreProjectVersionData("org.finos.legend", "project_y", "1.0.0");
+        StoreProjectVersionData commonsA_v1 = new StoreProjectVersionData("org.apache.commons", "commons_a", "1.0.0");
+        StoreProjectVersionData commonsA_v2 = new StoreProjectVersionData("org.apache.commons", "commons_a", "2.0.0");
+        StoreProjectVersionData commonsB_v1 = new StoreProjectVersionData("org.apache.commons", "commons_b", "1.0.0");
+        StoreProjectVersionData commonsB_v2 = new StoreProjectVersionData("org.apache.commons", "commons_b", "2.0.0");
+
+        ProjectVersion commonsA_v1_dep = new ProjectVersion("org.apache.commons", "commons_a", "1.0.0");
+        ProjectVersion commonsA_v2_dep = new ProjectVersion("org.apache.commons", "commons_a", "2.0.0");
+        ProjectVersion commonsB_v1_dep = new ProjectVersion("org.apache.commons", "commons_b", "1.0.0");
+        ProjectVersion commonsB_v2_dep = new ProjectVersion("org.apache.commons", "commons_b", "2.0.0");
+
+        // project_x depends on commons_a:1.0.0 and commons_b:1.0.0
+        projectX.getVersionData().addDependency(commonsA_v1_dep);
+        projectX.getVersionData().addDependency(commonsB_v1_dep);
+        projectX.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsA_v1_dep, commonsB_v1_dep), true));
+
+        // project_y depends on commons_a:2.0.0 and commons_b:2.0.0
+        projectY.getVersionData().addDependency(commonsA_v2_dep);
+        projectY.getVersionData().addDependency(commonsB_v2_dep);
+        projectY.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsA_v2_dep, commonsB_v2_dep), true));
+
+        // Store all projects
+        projectsService.createOrUpdate(new StoreProjectData("PROD-16666", "org.finos.legend", "project_x"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-26666", "org.finos.legend", "project_y"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-36666", "org.apache.commons", "commons_a", null, "2.0.0"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-46666", "org.apache.commons", "commons_b", null, "2.0.0"));
+        projectsService.createOrUpdate(projectX);
+        projectsService.createOrUpdate(projectY);
+        projectsService.createOrUpdate(commonsA_v1);
+        projectsService.createOrUpdate(commonsA_v2);
+        projectsService.createOrUpdate(commonsB_v1);
+        projectsService.createOrUpdate(commonsB_v2);
+
+        // Execute
+        List<ProjectVersion> requiredProjects = Arrays.asList(
+                new ProjectVersion("org.finos.legend", "project_x", "1.0.0"),
+                new ProjectVersion("org.finos.legend", "project_y", "1.0.0")
+        );
+
+        DependencyResponseModel response = projectsService.resolveCompatibleVersions(requiredProjects, 1);
+        Assertions.assertFalse(response.isSuccess());
+
+        DependencyConflict commonsConflictA = response.getConflicts().stream().filter(c -> "commons_a".equals(c.getArtifactId())).collect(Collectors.toList()).get(0);
+        DependencyConflict commonsConflictB = response.getConflicts().stream().filter(c -> "commons_b".equals(c.getArtifactId())).collect(Collectors.toList()).get(0);
+
+        Assertions.assertEquals("org.apache.commons", commonsConflictA.getGroupId());
+        Assertions.assertEquals("commons_a", commonsConflictA.getArtifactId());
+        Assertions.assertEquals(2, commonsConflictA.getConflictingVersions().size());
+        Assertions.assertEquals("2.0.0", commonsConflictA.getSuggestedOverride().getVersionId());
+        Assertions.assertEquals("org.apache.commons", commonsConflictA.getSuggestedOverride().getGroupId());
+        Assertions.assertEquals("commons_a", commonsConflictA.getSuggestedOverride().getArtifactId());
+        Assertions.assertEquals("org.apache.commons", commonsConflictB.getGroupId());
+        Assertions.assertEquals("commons_b", commonsConflictB.getArtifactId());
+        Assertions.assertEquals(2, commonsConflictB.getConflictingVersions().size());
+        Assertions.assertEquals("org.apache.commons", commonsConflictB.getSuggestedOverride().getGroupId());
+        Assertions.assertEquals("commons_b", commonsConflictB.getSuggestedOverride().getArtifactId());
+        Assertions.assertEquals("2.0.0", commonsConflictB.getSuggestedOverride().getVersionId());
     }
 
     @Test
@@ -1945,21 +2185,76 @@ public class TestProjectsService extends TestBaseServices
         );
         ProjectDependencyReport report = projectsService.getProjectDependencyReport(inputDeps);
 
-        Assertions.assertEquals(6, report.getGraph().getNodes().size(), "Graph should contain exactly 6 nodes");
+        Assertions.assertEquals(6, report.getGraph().getNodes().size());
         report.getGraph().getNodes().get(baseDepVersion.getGav()).getForwardEdges().forEach(edge ->
         {
-            Assertions.assertNotEquals(excludedLibDep.getGav(), edge, "Excluded dependency should not be present in the graph");
-            Assertions.assertNotEquals(excludedTransitiveDep.getGav(), edge, "Transitive dependency of excluded dependency should not be present in the graph");
+            Assertions.assertNotEquals(excludedLibDep.getGav(), edge);
+            Assertions.assertNotEquals(excludedTransitiveDep.getGav(), edge);
         });
         report.getGraph().getNodes().get(commonsLibVersion.getGav()).getForwardEdges().forEach(edge ->
         {
-            Assertions.assertEquals(excludedLibDep.getGav(), edge, "Dependency was not excluded from commons-lib, it should be present in the graph");
+            Assertions.assertEquals(excludedLibDep.getGav(), edge);
         });
-        Assertions.assertEquals(1, report.getGraph().getNodes().get(excludedLibDep.getGav()).getBackEdges().size(), "There should be only one back edge for excluded-lib");
+        Assertions.assertEquals(1, report.getGraph().getNodes().get(excludedLibDep.getGav()).getBackEdges().size());
         report.getGraph().getNodes().get(excludedLibDep.getGav()).getBackEdges().forEach(edge ->
         {
-            Assertions.assertEquals(commonsLibVersion.getGav(), edge, "Back edge should point to commons-lib which depends on excluded-lib");
+            Assertions.assertEquals(commonsLibVersion.getGav(), edge);
         });
+    }
+
+
+    @Test
+    public void canGenerateSuggestedOverridesForConflicts()
+    {
+        // Setup: Create projects with conflicting transitive dependencies
+        StoreProjectVersionData projectA_v1 = new StoreProjectVersionData("org.example.suggest", "project_a", "1.0.0");
+        StoreProjectVersionData projectA_v2 = new StoreProjectVersionData("org.example.suggest", "project_a", "2.0.0");
+        StoreProjectVersionData projectB_v1 = new StoreProjectVersionData("org.example.suggest", "project_b", "1.0.0");
+        StoreProjectVersionData commonsV1 = new StoreProjectVersionData("org.example.suggest", "commons_util", "1.0.0");
+        StoreProjectVersionData commonsV2 = new StoreProjectVersionData("org.example.suggest", "commons_util", "2.0.0");
+        StoreProjectVersionData commonsV3 = new StoreProjectVersionData("org.example.suggest", "commons_util", "3.0.0");
+
+        // A1 depends on commons 1.0.0
+        ProjectVersion commonsV1Dep = new ProjectVersion("org.example.suggest", "commons_util", "1.0.0");
+        projectA_v1.getVersionData().addDependency(commonsV1Dep);
+        projectA_v1.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsV1Dep), true));
+
+        // A2 depends on commons 2.0.0
+        ProjectVersion commonsV2Dep = new ProjectVersion("org.example.suggest", "commons_util", "2.0.0");
+        projectA_v2.getVersionData().addDependency(commonsV2Dep);
+        projectA_v2.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsV2Dep), true));
+
+        // B1 depends on commons 3.0.0
+        ProjectVersion commonsV3Dep = new ProjectVersion("org.example.suggest", "commons_util", "3.0.0");
+        projectB_v1.getVersionData().addDependency(commonsV3Dep);
+        projectB_v1.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsV3Dep), true));
+
+        // Store all projects
+        projectsService.createOrUpdate(new StoreProjectData("PROD-34567", "org.example.suggest", "project_a"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-76543", "org.example.suggest", "project_b"));
+        projectsService.createOrUpdate(new StoreProjectData("PROD-09876", "org.example.suggest", "commons_util", null, "3.0.0"));
+        projectsService.createOrUpdate(projectA_v1);
+        projectsService.createOrUpdate(projectA_v2);
+        projectsService.createOrUpdate(projectB_v1);
+        projectsService.createOrUpdate(commonsV1);
+        projectsService.createOrUpdate(commonsV2);
+        projectsService.createOrUpdate(commonsV3);
+
+        // Required projects - will have conflicting commons_util versions
+        List<ProjectVersion> requiredProjects = Arrays.asList(
+                new ProjectVersion("org.example.suggest", "project_a", "1.0.0"),
+                new ProjectVersion("org.example.suggest", "project_b", "1.0.0")
+        );
+
+        // Test with backtracking with alt versions that don't work
+        DependencyResponseModel response = projectsService.resolveCompatibleVersions(requiredProjects, 3);
+        List<DependencyConflict> conflicts = response.getConflicts();
+
+        Assertions.assertFalse(response.isSuccess());
+        Assertions.assertEquals(1, conflicts.size());
+        Assertions.assertEquals("org.example.suggest", conflicts.get(0).getSuggestedOverride().getGroupId());
+        Assertions.assertEquals("commons_util", conflicts.get(0).getSuggestedOverride().getArtifactId());
+        Assertions.assertEquals("3.0.0", conflicts.get(0).getSuggestedOverride().getVersionId());
     }
 
     @Test
@@ -1967,27 +2262,27 @@ public class TestProjectsService extends TestBaseServices
     {
         List<ProjectVersion> alternatives = new ArrayList<>();
         String[] versions =
-        {
-                "99.0.0",
-                "466.0.0",
-                "467.0.0",
-                "468.0.0",
-                "469.0.0",
-                "474.21.1",
-                "47.0.0",
-                "470.0.0",
-                "471.0.0",
-                "472.0.0",
-                "474.2.0",
-                "473.0.0",
-                "474.0.0",
-                "474.2.5",
-                "474.10.0",
-                "475.0.0",
-                "48.0.0",
-                "474.21.0",
-                "49.0.0",
-        };
+                {
+                        "99.0.0",
+                        "466.0.0",
+                        "467.0.0",
+                        "468.0.0",
+                        "469.0.0",
+                        "474.21.1",
+                        "47.0.0",
+                        "470.0.0",
+                        "471.0.0",
+                        "472.0.0",
+                        "474.2.0",
+                        "473.0.0",
+                        "474.0.0",
+                        "474.2.5",
+                        "474.10.0",
+                        "475.0.0",
+                        "48.0.0",
+                        "474.21.0",
+                        "49.0.0",
+                };
         List<String> versionsList = Arrays.asList(versions);
         versionsList.sort((v1, v2) -> VersionId.parseVersionId(v2).compareTo(VersionId.parseVersionId(v1)));
 

@@ -20,8 +20,10 @@ import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
 import org.logicng.formulas.Variable;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class LogicNGSATResult
 {
@@ -30,17 +32,20 @@ public class LogicNGSATResult
     private final Map<Variable, ProjectVersion> reverseVariableMap;
     private final FormulaFactory factory;
     private final Map<Variable, Integer> weights;
+    private final Map<String, Set<ProjectVersion>> conflictingVersionsByGA;
+    private final Map<ProjectVersion, Set<ProjectVersion>> dependencyOrigins;
 
-    public LogicNGSATResult(List<Formula> clauses, Map<String, Variable> variableMap, Map<Variable, ProjectVersion> reverseVariableMap, FormulaFactory factory, Map<Variable, Integer> weights)
+    public LogicNGSATResult(List<Formula> clauses, Map<String, Variable> variableMap, Map<Variable, ProjectVersion> reverseVariableMap, FormulaFactory factory, Map<Variable, Integer> weights, Map<String, Set<ProjectVersion>> conflictingVersionsByGA, Map<ProjectVersion, Set<ProjectVersion>> dependencyOrigins)
     {
         this.clauses = clauses;
         this.variableMap = variableMap;
         this.reverseVariableMap = reverseVariableMap;
         this.factory = factory;
         this.weights = weights;
+        this.conflictingVersionsByGA = conflictingVersionsByGA;
+        this.dependencyOrigins = dependencyOrigins != null ? dependencyOrigins : new HashMap<>();
     }
 
-    // Getters
     public List<Formula> getClauses()
     {
         return clauses;
@@ -64,5 +69,16 @@ public class LogicNGSATResult
     public Map<Variable, Integer> getWeights()
     {
         return weights;
+    }
+
+
+    public Map<String, Set<ProjectVersion>> getConflictingVersionsByGA()
+    {
+        return conflictingVersionsByGA;
+    }
+
+    public Map<ProjectVersion, Set<ProjectVersion>> getDependencyOrigins()
+    {
+        return dependencyOrigins;
     }
 }
