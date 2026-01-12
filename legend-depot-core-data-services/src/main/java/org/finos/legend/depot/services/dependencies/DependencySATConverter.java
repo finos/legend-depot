@@ -41,6 +41,8 @@ public class DependencySATConverter
     private final Map<ProjectVersion, Set<ProjectVersion>> transitiveDependenciesMap = new HashMap<>();
     private final Map<String, Variable> variableMap = new HashMap<>();
     private final Map<Variable, ProjectVersion> reverseVariableMap = new HashMap<>();
+    private final Map<String, Set<ProjectVersion>> conflictingVersionsByGA = new HashMap<>(); // tracks conflicting versions for each GA
+    private final Map<ProjectVersion, Set<ProjectVersion>> dependencyOrigins = new HashMap<>(); // tracks which direct deps require each transitive dep
 
     public DependencySATConverter(FormulaFactory formulaFactory)
     {
@@ -64,7 +66,7 @@ public class DependencySATConverter
         // Add at-least-one constraints
         addAtLeastOneConstraints(clauses, alternativeVersions);
 
-        return new LogicNGSATResult(clauses, variableMap, reverseVariableMap, formulaFactory, weights);
+        return new LogicNGSATResult(clauses, variableMap, reverseVariableMap, formulaFactory, weights, conflictingVersionsByGA, dependencyOrigins);
     }
 
     private void assignVersionWeights(Map<Variable, Integer> weights)
@@ -110,6 +112,13 @@ public class DependencySATConverter
             allVersions.add(alt);
             Set<ProjectVersion> altDependencies = projectsService.getDependencies(Collections.singletonList(alt), true);
             this.transitiveDependenciesMap.put(alt, altDependencies);
+
+            // Track which direct dependency requires each transitive dependency
+            altDependencies.forEach(dep ->
+            {
+                dependencyOrigins.computeIfAbsent(dep, k -> new HashSet<>()).add(alt);
+            });
+
             allVersions.addAll(altDependencies.stream().filter(dep -> !alternativeVersions.containsKey(dep.getGa()) || alternativeVersions.get(dep.getGa()).contains(dep)).collect(Collectors.toSet()));
         });
 
@@ -170,6 +179,14 @@ public class DependencySATConverter
                     {
                         // ¬version1 ? ¬version2 (at most one version per project)
                         clauses.add(formulaFactory.or(versions.get(i).negate(), versions.get(j).negate()));
+
+                        ProjectVersion pv1 = reverseVariableMap.get(versions.get(i));
+                        ProjectVersion pv2 = reverseVariableMap.get(versions.get(j));
+
+                        // Track conflicting versions for conflict analysis
+                        String projectKey = pv1.getGa();
+                        conflictingVersionsByGA.computeIfAbsent(projectKey, k -> new HashSet<>()).add(pv1);
+                        conflictingVersionsByGA.computeIfAbsent(projectKey, k -> new HashSet<>()).add(pv2);
                     }
                 }
             }
@@ -187,14 +204,16 @@ public class DependencySATConverter
                     .collect(Collectors.toList());
             if (!alternativeVariables.isEmpty())
             {
+                Formula clause;
                 if (alternativeVariables.size() == 1)
                 {
-                    clauses.add(alternativeVariables.get(0)); // Unit clause
+                    clause = alternativeVariables.get(0); // Unit clause
                 }
                 else
                 {
-                    clauses.add(formulaFactory.or(alternativeVariables)); // At least one
+                    clause = formulaFactory.or(alternativeVariables); // At least one
                 }
+                clauses.add(clause);
             }
         });
     }

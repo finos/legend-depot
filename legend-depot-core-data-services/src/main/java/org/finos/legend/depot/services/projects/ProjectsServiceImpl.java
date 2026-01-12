@@ -29,15 +29,18 @@ import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithP
 import org.finos.legend.depot.domain.version.VersionAlias;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
+import org.finos.legend.depot.services.api.dependencies.DependencyResponseModel;
+import org.finos.legend.depot.services.api.dependencies.DependencyConflict;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
-import org.finos.legend.depot.services.dependencies.DependencyExclusionsUtil;
 import org.finos.legend.depot.services.dependencies.DependencySATConverter;
-import org.finos.legend.depot.services.dependencies.DependencyUtil;
+import org.finos.legend.depot.services.dependencies.DependencyResolutionFailureAnalyzer;
 import org.finos.legend.depot.services.dependencies.LogicNGSATResult;
+import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.services.dependencies.ProjectDependencyGraphWalkerContext;
+import org.finos.legend.depot.services.dependencies.DependencyExclusionsUtil;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
@@ -82,6 +85,8 @@ public class ProjectsServiceImpl implements ProjectsService
     private final ProjectsConfiguration configuration;
 
     private final DependencyOverride dependencyOverride;
+
+    private final Map<ProjectVersion, Set<ProjectVersion>> transitiveDependenciesMap = new HashMap<>();
 
     private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
     private static final String NOT_FOUND_IN_STORE = "project version not found for %s-%s-%s";
@@ -485,20 +490,38 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
-    public List<ProjectVersion> resolveCompatibleVersions(List<ProjectVersion> projectDependencyVersions, int backtrackVersions)
+    public DependencyResponseModel resolveCompatibleVersions(List<ProjectVersion> projectDependencyVersions, int backtrackVersions)
     {
-        Map<String, Set<ProjectVersion>> alternativeVersions = new HashMap<>();
+        transitiveDependenciesMap.clear();
+
         if (projectDependencyVersions.isEmpty())
         {
-            return Collections.emptyList();
+            return DependencyResponseModel.success(Collections.emptyList());
+        }
+        if (backtrackVersions > 30)
+        {
+            DependencyResponseModel response = new DependencyResponseModel();
+            response.setFailureReason("Dependency resolution failed with high backtracking limit. Consider reducing backtrackVersions to limit analysis scope.");
+            return response;
         }
 
+        Map<String, Set<ProjectVersion>> alternativeVersions = new HashMap<>();
         List<ProjectVersion> actualRequiredProjects = getActualRequiredProjects(projectDependencyVersions);
 
+        // Populate alternatives and cache transitive dependencies
         actualRequiredProjects.forEach(pv ->
         {
             Set<ProjectVersion> alternatives = getAlternativeVersions(pv, backtrackVersions);
             alternativeVersions.put(pv.getGa(), alternatives);
+
+            alternatives.forEach(alt ->
+            {
+                if (!transitiveDependenciesMap.containsKey(alt))
+                {
+                    Set<ProjectVersion> deps = this.getDependencies(Collections.singletonList(alt), true);
+                    transitiveDependenciesMap.put(alt, deps);
+                }
+            });
         });
 
         MaxSATSolver maxSatSolver = MaxSATSolver.wbo(new FormulaFactory());
@@ -508,17 +531,84 @@ public class ProjectsServiceImpl implements ProjectsService
         LogicNGSATResult satResult = converter.convertToLogicNGFormulas(alternativeVersions, this);
 
         satResult.getClauses().forEach(maxSatSolver::addHardFormula);
-
         satResult.getWeights().forEach(maxSatSolver::addSoftFormula);
+
         MaxSAT.MaxSATResult result = maxSatSolver.solve();
-        // Solve and extract solution
+
         if (result == MaxSAT.MaxSATResult.OPTIMUM)
         {
-            return extractSolutionFromModel(maxSatSolver.model(), satResult, actualRequiredProjects);
+            List<ProjectVersion> solution = extractSolutionFromModel(maxSatSolver.model(), satResult, actualRequiredProjects);
+            return DependencyResponseModel.success(solution);
         }
+        else
+        {
+            DependencyResponseModel analyzedResponse = DependencyResolutionFailureAnalyzer.analyzeAndReportFailure(result, satResult, actualRequiredProjects);
 
-        return Collections.emptyList();
+            if (!analyzedResponse.getConflicts().isEmpty())
+            {
+                generateMinimalOverrides(analyzedResponse, actualRequiredProjects);
+            }
+
+            return analyzedResponse;
+        }
     }
+
+    private void generateMinimalOverrides(DependencyResponseModel failedResponse, List<ProjectVersion> originalRequirements)
+    {
+        Set<String> processedProjects = new HashSet<>();
+
+        // Track which projects are in the original requirements (root projects)
+        Set<String> rootProjectKeys = originalRequirements.stream()
+                .map(pv -> pv.getGa())
+                .collect(Collectors.toSet());
+
+        // Sort conflicts by number of conflicting versions (prioritize simpler conflicts first)
+        List<DependencyConflict> sortedConflicts = failedResponse.getConflicts().stream()
+                .sorted(Comparator.comparingInt(c -> c.getConflictingVersions().size()))
+                .collect(Collectors.toList());
+
+        for (DependencyConflict conflict : sortedConflicts)
+        {
+            String projectKey = conflict.getGroupId() + ":" + conflict.getArtifactId();
+
+            if (processedProjects.contains(projectKey))
+            {
+                continue;
+            }
+
+            // Skip if this is a root project - we don't want to suggest changing those
+            if (rootProjectKeys.contains(projectKey))
+            {
+                LOGGER.info("Skipping conflict in root project: {}", projectKey);
+                continue;
+            }
+
+            Optional<StoreProjectData> latestVersion = this.findCoordinates(conflict.getGroupId(), conflict.getArtifactId());
+
+            if (latestVersion.isEmpty())
+            {
+                LOGGER.warn("Unable to find project data for conflicting dependency: {}", projectKey);
+                continue;
+            }
+
+            String recommendedVersion = latestVersion.get().getLatestVersion();
+
+            ProjectVersion override = new ProjectVersion(
+                    conflict.getGroupId(),
+                    conflict.getArtifactId(),
+                    recommendedVersion
+            );
+            conflict.setSuggestedOverride(override);
+            processedProjects.add(projectKey);
+
+            LOGGER.info("Suggested override: {} to resolve conflict with versions {}",
+                    override.getGav(),
+                    conflict.getConflictingVersions().stream()
+                            .map(DependencyConflict.ConflictingVersion::getVersion)
+                            .collect(Collectors.joining(", ")));
+        }
+    }
+
 
     private List<ProjectVersion> extractSolutionFromModel(Assignment model, LogicNGSATResult satResult, List<ProjectVersion> originalRequiredProjects)
     {
@@ -584,25 +674,6 @@ public class ProjectsServiceImpl implements ProjectsService
 
         LOGGER.info("Found {} alternative versions for {}-{}-{} with backtrack {}", alternatives.size(), pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), backtrackVersions);
         return alternatives;
-    }
-
-    public static int compareVersions(String v1, String v2)
-    {
-        String[] parts1 = v1.split("\\.");
-        String[] parts2 = v2.split("\\.");
-
-        int length = Math.max(parts1.length, parts2.length);
-        for (int i = 0; i < length; i++)
-        {
-            int part1 = i < parts1.length ? Integer.parseInt(parts1[i]) : 0;
-            int part2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
-
-            if (part1 != part2)
-            {
-                return Integer.compare(part2, part1);
-            }
-        }
-        return 0;
     }
 
     private List<ProjectDependencyWithPlatformVersions> filterProjectByLatest(List<ProjectDependencyWithPlatformVersions> projects)
