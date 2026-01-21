@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -8,7 +23,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class CoordinateValidatorDiffblueTest {
+class CoordinateValidatorDiffblueTest
+
+
+
+{
   /**
    * Test {@link CoordinateValidator#isValidArtifactId(String)}.
    *
@@ -24,7 +43,8 @@ class CoordinateValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean CoordinateValidator.isValidArtifactId(String)"})
-  void testIsValidArtifactId_when42_thenReturnFalse() {
+  void testIsValidArtifactId_when42_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(CoordinateValidator.isValidArtifactId("42"));
   }
@@ -44,7 +64,8 @@ class CoordinateValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean CoordinateValidator.isValidArtifactId(String)"})
-  void testIsValidArtifactId_whenEmptyString_thenReturnFalse() {
+  void testIsValidArtifactId_whenEmptyString_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(CoordinateValidator.isValidArtifactId(""));
   }
@@ -64,7 +85,8 @@ class CoordinateValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean CoordinateValidator.isValidArtifactId(String)"})
-  void testIsValidArtifactId_whenLllLllLll_thenReturnTrue() {
+  void testIsValidArtifactId_whenLllLllLll_thenReturnTrue()
+  {
     // Arrange, Act and Assert
     assertTrue(CoordinateValidator.isValidArtifactId("lll-lll-lll"));
   }
@@ -84,7 +106,8 @@ class CoordinateValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean CoordinateValidator.isValidArtifactId(String)"})
-  void testIsValidArtifactId_whenNull_thenReturnFalse() {
+  void testIsValidArtifactId_whenNull_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(CoordinateValidator.isValidArtifactId(null));
   }
@@ -103,7 +126,8 @@ class CoordinateValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean CoordinateValidator.isValidGroupId(String)"})
-  void testIsValidGroupId_when42() {
+  void testIsValidGroupId_when42()
+  {
     // Arrange, Act and Assert
     assertFalse(CoordinateValidator.isValidGroupId("42"));
   }
@@ -122,7 +146,8 @@ class CoordinateValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean CoordinateValidator.isValidGroupId(String)"})
-  void testIsValidGroupId_whenEmptyString() {
+  void testIsValidGroupId_whenEmptyString()
+  {
     // Arrange, Act and Assert
     assertFalse(CoordinateValidator.isValidGroupId(""));
   }
@@ -141,7 +166,8 @@ class CoordinateValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean CoordinateValidator.isValidGroupId(String)"})
-  void testIsValidGroupId_whenNull() {
+  void testIsValidGroupId_whenNull()
+  {
     // Arrange, Act and Assert
     assertFalse(CoordinateValidator.isValidGroupId(null));
   }

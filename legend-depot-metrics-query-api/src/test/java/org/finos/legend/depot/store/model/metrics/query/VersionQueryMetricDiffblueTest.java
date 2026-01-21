@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.store.model.metrics.query;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,7 +27,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class VersionQueryMetricDiffblueTest {
+class VersionQueryMetricDiffblueTest 
+
+
+{
   /**
    * Test getters and setters.
    *
@@ -43,7 +61,8 @@ class VersionQueryMetricDiffblueTest {
     "String VersionQueryMetric.getVersionId()",
     "void VersionQueryMetric.setLastQueryTime(Date)"
   })
-  void testGettersAndSetters() {
+  void testGettersAndSetters()
+  {
     // Arrange
     Date lastQueryTime =
         Date.from(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant());
@@ -101,7 +120,8 @@ class VersionQueryMetricDiffblueTest {
     "String VersionQueryMetric.getVersionId()",
     "void VersionQueryMetric.setLastQueryTime(Date)"
   })
-  void testGettersAndSetters_thenReturnArtifactIdIsNull() {
+  void testGettersAndSetters_thenReturnArtifactIdIsNull()
+  {
     // Arrange and Act
     VersionQueryMetric actualVersionQueryMetric = new VersionQueryMetric();
     Date time =
@@ -155,7 +175,8 @@ class VersionQueryMetricDiffblueTest {
     "String VersionQueryMetric.getVersionId()",
     "void VersionQueryMetric.setLastQueryTime(Date)"
   })
-  void testGettersAndSetters_when42_thenReturnArtifactIdIs42() {
+  void testGettersAndSetters_when42_thenReturnArtifactIdIs42()
+  {
     // Arrange and Act
     VersionQueryMetric actualVersionQueryMetric = new VersionQueryMetric("42", "42", "42");
     Date time =

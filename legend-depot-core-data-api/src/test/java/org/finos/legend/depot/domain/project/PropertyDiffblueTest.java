@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.project;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,7 +24,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class PropertyDiffblueTest {
+class PropertyDiffblueTest 
+
+
+{
   /**
    * Test getters and setters.
    *
@@ -35,7 +53,8 @@ class PropertyDiffblueTest {
     "String Property.getPropertyName()",
     "String Property.getValue()"
   })
-  void testGettersAndSetters_thenReturnPropertyNameIsNull() {
+  void testGettersAndSetters_thenReturnPropertyNameIsNull()
+  {
     // Arrange and Act
     Property actualProperty = new Property();
     String actualPropertyName = actualProperty.getPropertyName();
@@ -71,7 +90,8 @@ class PropertyDiffblueTest {
     "String Property.getPropertyName()",
     "String Property.getValue()"
   })
-  void testGettersAndSetters_whenPropertyName_thenReturnValueIs42() {
+  void testGettersAndSetters_whenPropertyName_thenReturnValueIs42()
+  {
     // Arrange and Act
     Property actualProperty = new Property("Property Name", "42");
     String actualPropertyName = actualProperty.getPropertyName();
@@ -101,7 +121,8 @@ class PropertyDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean Property.equals(Object)", "int Property.hashCode()"})
-  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual()
+  {
     // Arrange
     Property property = new Property("Property Name", "42");
     Property property2 = new Property("Property Name", "42");
@@ -131,7 +152,8 @@ class PropertyDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean Property.equals(Object)", "int Property.hashCode()"})
-  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual()
+  {
     // Arrange
     Property property = new Property("Property Name", "42");
 
@@ -156,7 +178,8 @@ class PropertyDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean Property.equals(Object)", "int Property.hashCode()"})
-  void testEquals_whenOtherIsDifferent_thenReturnNotEqual() {
+  void testEquals_whenOtherIsDifferent_thenReturnNotEqual()
+  {
     // Arrange
     Property property = new Property("42", "42");
 
@@ -179,7 +202,8 @@ class PropertyDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean Property.equals(Object)", "int Property.hashCode()"})
-  void testEquals_whenOtherIsNull_thenReturnNotEqual() {
+  void testEquals_whenOtherIsNull_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(new Property("Property Name", "42"), null);
   }
@@ -199,7 +223,8 @@ class PropertyDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean Property.equals(Object)", "int Property.hashCode()"})
-  void testEquals_whenOtherIsWrongType_thenReturnNotEqual() {
+  void testEquals_whenOtherIsWrongType_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(new Property("Property Name", "42"), "Different type to Property");
   }

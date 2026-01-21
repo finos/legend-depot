@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.services.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,7 +24,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class EtagBuilderDiffblueTest {
+class EtagBuilderDiffblueTest 
+
+
+{
   /**
    * Test {@link EtagBuilder#create()}.
    *
@@ -20,7 +38,8 @@ class EtagBuilderDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"EtagBuilder EtagBuilder.create()"})
-  void testCreate() {
+  void testCreate()
+  {
     // Arrange, Act and Assert
     String actualString = EtagBuilder.create().build();
     assertEquals("", actualString);
@@ -43,7 +62,8 @@ class EtagBuilderDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"EtagBuilder EtagBuilder.withGAV(String, String, String)"})
-  void testWithGAV_givenCreate_when42_thenCreateBuildIs424242() {
+  void testWithGAV_givenCreate_when42_thenCreateBuildIs424242()
+  {
     // Arrange
     EtagBuilder createResult = EtagBuilder.create();
 
@@ -73,7 +93,8 @@ class EtagBuilderDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"EtagBuilder EtagBuilder.withGAV(String, String, String)"})
-  void testWithGAV_givenCreate_whenSnapshot_thenCreateBuildIsNull() {
+  void testWithGAV_givenCreate_whenSnapshot_thenCreateBuildIsNull()
+  {
     // Arrange
     EtagBuilder createResult = EtagBuilder.create();
 
@@ -101,7 +122,8 @@ class EtagBuilderDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"EtagBuilder EtagBuilder.withProtocolVersion(String)"})
-  void testWithProtocolVersion_when102_thenCreateBuildIs102() {
+  void testWithProtocolVersion_when102_thenCreateBuildIs102()
+  {
     // Arrange
     EtagBuilder createResult = EtagBuilder.create();
 
@@ -129,7 +151,8 @@ class EtagBuilderDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"EtagBuilder EtagBuilder.withProtocolVersion(String)"})
-  void testWithProtocolVersion_whenNull_thenCreateBuildIsNull() {
+  void testWithProtocolVersion_whenNull_thenCreateBuildIsNull()
+  {
     // Arrange
     EtagBuilder createResult = EtagBuilder.create();
 
@@ -157,7 +180,8 @@ class EtagBuilderDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"EtagBuilder EtagBuilder.withProtocolVersion(String)"})
-  void testWithProtocolVersion_whenVXXX_thenCreateBuildIsNull() {
+  void testWithProtocolVersion_whenVXXX_thenCreateBuildIsNull()
+  {
     // Arrange
     EtagBuilder createResult = EtagBuilder.create();
 
@@ -185,7 +209,8 @@ class EtagBuilderDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"String EtagBuilder.build()"})
-  void testBuild_givenCreateWithProtocolVersionVXXX_thenReturnNull() {
+  void testBuild_givenCreateWithProtocolVersionVXXX_thenReturnNull()
+  {
     // Arrange
     EtagBuilder createResult = EtagBuilder.create();
     createResult.withProtocolVersion("vX_X_X");
@@ -212,7 +237,8 @@ class EtagBuilderDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"String EtagBuilder.build()"})
-  void testBuild_givenCreate_thenReturnEmptyString() {
+  void testBuild_givenCreate_thenReturnEmptyString()
+  {
     // Arrange and Act
     String actualString = EtagBuilder.create().build();
 
@@ -234,7 +260,8 @@ class EtagBuilderDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"String EtagBuilder.build()"})
-  void testBuild_thenReturn424242() {
+  void testBuild_thenReturn424242()
+  {
     // Arrange
     EtagBuilder createResult = EtagBuilder.create();
     createResult.withGAV("42", "42", "42");

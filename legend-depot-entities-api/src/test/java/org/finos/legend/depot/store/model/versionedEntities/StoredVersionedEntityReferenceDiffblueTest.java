@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.store.model.versionedEntities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,7 +28,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class StoredVersionedEntityReferenceDiffblueTest {
+class StoredVersionedEntityReferenceDiffblueTest 
+
+
+{
   /**
    * Test getters and setters.
    *
@@ -39,7 +57,8 @@ class StoredVersionedEntityReferenceDiffblueTest {
     "void StoredVersionedEntityReference.<init>(String, String, String, String, Map)",
     "String StoredVersionedEntityReference.getReference()"
   })
-  void testGettersAndSetters_when42_thenReturnReferenceIsNull() {
+  void testGettersAndSetters_when42_thenReturnReferenceIsNull()
+  {
     // Arrange and Act
     StoredVersionedEntityReference actualStoredVersionedEntityReference =
         new StoredVersionedEntityReference("42", "42", "42");
@@ -78,7 +97,8 @@ class StoredVersionedEntityReferenceDiffblueTest {
     "void StoredVersionedEntityReference.<init>(String, String, String, String, Map)",
     "String StoredVersionedEntityReference.getReference()"
   })
-  void testGettersAndSetters_whenReference_thenReturnReference() {
+  void testGettersAndSetters_whenReference_thenReturnReference()
+  {
     // Arrange
     HashMap<String, Object> entityAttributes = new HashMap<>();
 
@@ -121,7 +141,8 @@ class StoredVersionedEntityReferenceDiffblueTest {
     "boolean StoredVersionedEntityReference.equals(Object)",
     "int StoredVersionedEntityReference.hashCode()"
   })
-  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual()
+  {
     // Arrange
     StoredVersionedEntityReference storedVersionedEntityReference =
         new StoredVersionedEntityReference("42", "42", "42");
@@ -158,7 +179,8 @@ class StoredVersionedEntityReferenceDiffblueTest {
     "boolean StoredVersionedEntityReference.equals(Object)",
     "int StoredVersionedEntityReference.hashCode()"
   })
-  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual()
+  {
     // Arrange
     StoredVersionedEntityReference storedVersionedEntityReference =
         new StoredVersionedEntityReference("42", "42", "42");
@@ -187,7 +209,8 @@ class StoredVersionedEntityReferenceDiffblueTest {
     "boolean StoredVersionedEntityReference.equals(Object)",
     "int StoredVersionedEntityReference.hashCode()"
   })
-  void testEquals_whenOtherIsDifferent_thenReturnNotEqual() {
+  void testEquals_whenOtherIsDifferent_thenReturnNotEqual()
+  {
     // Arrange
     StoredVersionedEntityReference storedVersionedEntityReference =
         new StoredVersionedEntityReference("Group Id", "42", "42");
@@ -215,7 +238,8 @@ class StoredVersionedEntityReferenceDiffblueTest {
     "boolean StoredVersionedEntityReference.equals(Object)",
     "int StoredVersionedEntityReference.hashCode()"
   })
-  void testEquals_whenOtherIsNull_thenReturnNotEqual() {
+  void testEquals_whenOtherIsNull_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(new StoredVersionedEntityReference("42", "42", "42"), null);
   }
@@ -238,7 +262,8 @@ class StoredVersionedEntityReferenceDiffblueTest {
     "boolean StoredVersionedEntityReference.equals(Object)",
     "int StoredVersionedEntityReference.hashCode()"
   })
-  void testEquals_whenOtherIsWrongType_thenReturnNotEqual() {
+  void testEquals_whenOtherIsWrongType_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(
         new StoredVersionedEntityReference("42", "42", "42"),

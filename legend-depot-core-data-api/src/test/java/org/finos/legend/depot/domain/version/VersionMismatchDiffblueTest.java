@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.version;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,7 +26,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class VersionMismatchDiffblueTest {
+class VersionMismatchDiffblueTest 
+
+
+{
   /**
    * Test {@link VersionMismatch#VersionMismatch(String, String, String, List, List)}.
    *
@@ -30,7 +48,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List)"})
-  void testNewVersionMismatch_given42_thenReturnVersionsNotInRepositoryIsArrayList() {
+  void testNewVersionMismatch_given42_thenReturnVersionsNotInRepositoryIsArrayList()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
 
@@ -64,7 +83,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List, List)"})
-  void testNewVersionMismatch_given42_thenReturnVersionsNotInRepositoryIsArrayList2() {
+  void testNewVersionMismatch_given42_thenReturnVersionsNotInRepositoryIsArrayList2()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
 
@@ -98,7 +118,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List)"})
-  void testNewVersionMismatch_given42_thenReturnVersionsNotInStoreIsArrayList() {
+  void testNewVersionMismatch_given42_thenReturnVersionsNotInStoreIsArrayList()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
     versionsNotInCache.add("42");
@@ -134,7 +155,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List, List)"})
-  void testNewVersionMismatch_given42_thenReturnVersionsNotInStoreIsArrayList2() {
+  void testNewVersionMismatch_given42_thenReturnVersionsNotInStoreIsArrayList2()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
     versionsNotInCache.add("42");
@@ -171,7 +193,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List, List)"})
-  void testNewVersionMismatch_given42_whenArrayListAdd42_thenReturnErrorsIsArrayList() {
+  void testNewVersionMismatch_given42_whenArrayListAdd42_thenReturnErrorsIsArrayList()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
     ArrayList<String> versionsNotInRepo = new ArrayList<>();
@@ -205,7 +228,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List)"})
-  void testNewVersionMismatch_givenFoo_thenReturnVersionsNotInRepositorySizeIsOne() {
+  void testNewVersionMismatch_givenFoo_thenReturnVersionsNotInRepositorySizeIsOne()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
 
@@ -240,7 +264,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List, List)"})
-  void testNewVersionMismatch_givenFoo_thenReturnVersionsNotInRepositorySizeIsOne2() {
+  void testNewVersionMismatch_givenFoo_thenReturnVersionsNotInRepositorySizeIsOne2()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
 
@@ -276,7 +301,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List)"})
-  void testNewVersionMismatch_givenFoo_thenReturnVersionsNotInStoreIsArrayList() {
+  void testNewVersionMismatch_givenFoo_thenReturnVersionsNotInStoreIsArrayList()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
     versionsNotInCache.add("foo");
@@ -311,7 +337,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List, List)"})
-  void testNewVersionMismatch_givenFoo_thenReturnVersionsNotInStoreIsArrayList2() {
+  void testNewVersionMismatch_givenFoo_thenReturnVersionsNotInStoreIsArrayList2()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
     versionsNotInCache.add("foo");
@@ -347,7 +374,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List, List)"})
-  void testNewVersionMismatch_givenFoo_whenArrayListAddFoo_thenReturnErrorsSizeIsOne() {
+  void testNewVersionMismatch_givenFoo_whenArrayListAddFoo_thenReturnErrorsSizeIsOne()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
     ArrayList<String> versionsNotInRepo = new ArrayList<>();
@@ -383,7 +411,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List, List)"})
-  void testNewVersionMismatch_whenArrayList_thenReturnArtifactIdIs42() {
+  void testNewVersionMismatch_whenArrayList_thenReturnArtifactIdIs42()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
     ArrayList<String> versionsNotInRepo = new ArrayList<>();
@@ -417,7 +446,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void VersionMismatch.<init>(String, String, String, List, List)"})
-  void testNewVersionMismatch_whenArrayList_thenReturnVersionsNotInStoreEmpty() {
+  void testNewVersionMismatch_whenArrayList_thenReturnVersionsNotInStoreEmpty()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
 
@@ -454,7 +484,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionMismatch.equals(Object)", "int VersionMismatch.hashCode()"})
-  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
     VersionMismatch versionMismatch =
@@ -488,7 +519,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionMismatch.equals(Object)", "int VersionMismatch.hashCode()"})
-  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
     VersionMismatch versionMismatch =
@@ -515,7 +547,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionMismatch.equals(Object)", "int VersionMismatch.hashCode()"})
-  void testEquals_whenOtherIsDifferent_thenReturnNotEqual() {
+  void testEquals_whenOtherIsDifferent_thenReturnNotEqual()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
     VersionMismatch versionMismatch =
@@ -543,7 +576,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionMismatch.equals(Object)", "int VersionMismatch.hashCode()"})
-  void testEquals_whenOtherIsNull_thenReturnNotEqual() {
+  void testEquals_whenOtherIsNull_thenReturnNotEqual()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
 
@@ -567,7 +601,8 @@ class VersionMismatchDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionMismatch.equals(Object)", "int VersionMismatch.hashCode()"})
-  void testEquals_whenOtherIsWrongType_thenReturnNotEqual() {
+  void testEquals_whenOtherIsWrongType_thenReturnNotEqual()
+  {
     // Arrange
     ArrayList<String> versionsNotInCache = new ArrayList<>();
 

@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.notifications;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,7 +27,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class MetadataNotificationResponseDiffblueTest {
+class MetadataNotificationResponseDiffblueTest 
+
+
+{
   /**
    * Test {@link MetadataNotificationResponse#getStatus()}.
    *
@@ -29,7 +47,8 @@ class MetadataNotificationResponseDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotificationStatus MetadataNotificationResponse.getStatus()"})
-  void testGetStatus_givenMetadataNotificationResponse_thenReturnSuccess() {
+  void testGetStatus_givenMetadataNotificationResponse_thenReturnSuccess()
+  {
     // Arrange, Act and Assert
     assertEquals(
         MetadataNotificationStatus.SUCCESS, new MetadataNotificationResponse().getStatus());
@@ -49,7 +68,8 @@ class MetadataNotificationResponseDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotificationStatus MetadataNotificationResponse.getStatus()"})
-  void testGetStatus_thenReturnFailed() {
+  void testGetStatus_thenReturnFailed()
+  {
     // Arrange
     MetadataNotificationResponse metadataNotificationResponse = new MetadataNotificationResponse();
     metadataNotificationResponse.addError("Not all who wander are lost");
@@ -68,7 +88,8 @@ class MetadataNotificationResponseDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotificationResponse MetadataNotificationResponse.addError(String)"})
-  void testAddError() {
+  void testAddError()
+  {
     // Arrange
     MetadataNotificationResponse metadataNotificationResponse = new MetadataNotificationResponse();
 
@@ -94,7 +115,8 @@ class MetadataNotificationResponseDiffblueTest {
   @MethodsUnderTest({
     "MetadataNotificationResponse MetadataNotificationResponse.addMessage(String)"
   })
-  void testAddMessage() {
+  void testAddMessage()
+  {
     // Arrange
     MetadataNotificationResponse metadataNotificationResponse = new MetadataNotificationResponse();
 
@@ -121,7 +143,8 @@ class MetadataNotificationResponseDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotificationResponse MetadataNotificationResponse.addMessages(List)"})
-  void testAddMessages_given42_whenArrayListAdd42() {
+  void testAddMessages_given42_whenArrayListAdd42()
+  {
     // Arrange
     MetadataNotificationResponse metadataNotificationResponse = new MetadataNotificationResponse();
 
@@ -152,7 +175,8 @@ class MetadataNotificationResponseDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotificationResponse MetadataNotificationResponse.addMessages(List)"})
-  void testAddMessages_givenFoo_whenArrayListAddFoo() {
+  void testAddMessages_givenFoo_whenArrayListAddFoo()
+  {
     // Arrange
     MetadataNotificationResponse metadataNotificationResponse = new MetadataNotificationResponse();
 
@@ -181,7 +205,8 @@ class MetadataNotificationResponseDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotificationResponse MetadataNotificationResponse.addMessages(List)"})
-  void testAddMessages_whenArrayList() {
+  void testAddMessages_whenArrayList()
+  {
     // Arrange
     MetadataNotificationResponse metadataNotificationResponse = new MetadataNotificationResponse();
 
@@ -203,7 +228,8 @@ class MetadataNotificationResponseDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void MetadataNotificationResponse.logError(String)"})
-  void testLogError() {
+  void testLogError()
+  {
     // Arrange
     MetadataNotificationResponse metadataNotificationResponse = new MetadataNotificationResponse();
 
@@ -234,7 +260,8 @@ class MetadataNotificationResponseDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean MetadataNotificationResponse.hasErrors()"})
-  void testHasErrors_givenMetadataNotificationResponse_thenReturnFalse() {
+  void testHasErrors_givenMetadataNotificationResponse_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(new MetadataNotificationResponse().hasErrors());
   }
@@ -253,7 +280,8 @@ class MetadataNotificationResponseDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean MetadataNotificationResponse.hasErrors()"})
-  void testHasErrors_thenReturnTrue() {
+  void testHasErrors_thenReturnTrue()
+  {
     // Arrange
     MetadataNotificationResponse metadataNotificationResponse = new MetadataNotificationResponse();
     metadataNotificationResponse.addError("Not all who wander are lost");
@@ -280,7 +308,8 @@ class MetadataNotificationResponseDiffblueTest {
   @MethodsUnderTest({
     "MetadataNotificationResponse MetadataNotificationResponse.combine(MetadataNotificationResponse)"
   })
-  void testCombine_whenMetadataNotificationResponse() {
+  void testCombine_whenMetadataNotificationResponse()
+  {
     // Arrange
     MetadataNotificationResponse metadataNotificationResponse = new MetadataNotificationResponse();
 
@@ -309,7 +338,8 @@ class MetadataNotificationResponseDiffblueTest {
   @MethodsUnderTest({
     "MetadataNotificationResponse MetadataNotificationResponse.combine(MetadataNotificationResponse)"
   })
-  void testCombine_whenNull() {
+  void testCombine_whenNull()
+  {
     // Arrange
     MetadataNotificationResponse metadataNotificationResponse = new MetadataNotificationResponse();
 
@@ -342,7 +372,8 @@ class MetadataNotificationResponseDiffblueTest {
     "List MetadataNotificationResponse.getMessages()",
     "String MetadataNotificationResponse.toString()"
   })
-  void testGettersAndSetters() {
+  void testGettersAndSetters()
+  {
     // Arrange and Act
     MetadataNotificationResponse actualMetadataNotificationResponse =
         new MetadataNotificationResponse();

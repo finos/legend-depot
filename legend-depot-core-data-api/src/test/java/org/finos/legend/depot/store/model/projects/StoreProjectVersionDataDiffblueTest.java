@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.store.model.projects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +32,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class StoreProjectVersionDataDiffblueTest {
+class StoreProjectVersionDataDiffblueTest 
+
+
+{
   /**
    * Test {@link StoreProjectVersionData#StoreProjectVersionData()}.
    *
@@ -28,7 +46,8 @@ class StoreProjectVersionDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void StoreProjectVersionData.<init>()"})
-  void testNewStoreProjectVersionData() {
+  void testNewStoreProjectVersionData()
+  {
     // Arrange and Act
     StoreProjectVersionData actualStoreProjectVersionData = new StoreProjectVersionData();
 
@@ -64,7 +83,8 @@ class StoreProjectVersionDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void StoreProjectVersionData.<init>(String, String, String)"})
-  void testNewStoreProjectVersionData2() {
+  void testNewStoreProjectVersionData2()
+  {
     // Arrange and Act
     StoreProjectVersionData actualStoreProjectVersionData =
         new StoreProjectVersionData("42", "42", "42");
@@ -104,7 +124,8 @@ class StoreProjectVersionDataDiffblueTest {
   @MethodsUnderTest({
     "void StoreProjectVersionData.<init>(String, String, String, boolean, ProjectVersionData)"
   })
-  void testNewStoreProjectVersionData3() {
+  void testNewStoreProjectVersionData3()
+  {
     // Arrange
     ProjectVersionData versionData = new ProjectVersionData();
 
@@ -158,7 +179,8 @@ class StoreProjectVersionDataDiffblueTest {
     "void StoreProjectVersionData.setUpdated(Date)",
     "void StoreProjectVersionData.setVersionData(ProjectVersionData)"
   })
-  void testGettersAndSetters() {
+  void testGettersAndSetters()
+  {
     // Arrange
     StoreProjectVersionData storeProjectVersionData = new StoreProjectVersionData();
     Date created =
@@ -214,7 +236,8 @@ class StoreProjectVersionDataDiffblueTest {
     "boolean StoreProjectVersionData.equals(Object)",
     "int StoreProjectVersionData.hashCode()"
   })
-  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual()
+  {
     // Arrange
     StoreProjectVersionData storeProjectVersionData = new StoreProjectVersionData();
 
@@ -242,7 +265,8 @@ class StoreProjectVersionDataDiffblueTest {
     "boolean StoreProjectVersionData.equals(Object)",
     "int StoreProjectVersionData.hashCode()"
   })
-  void testEquals_whenOtherIsDifferent_thenReturnNotEqual() {
+  void testEquals_whenOtherIsDifferent_thenReturnNotEqual()
+  {
     // Arrange
     StoreProjectVersionData storeProjectVersionData = new StoreProjectVersionData();
 
@@ -268,7 +292,8 @@ class StoreProjectVersionDataDiffblueTest {
     "boolean StoreProjectVersionData.equals(Object)",
     "int StoreProjectVersionData.hashCode()"
   })
-  void testEquals_whenOtherIsNull_thenReturnNotEqual() {
+  void testEquals_whenOtherIsNull_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(new StoreProjectVersionData(), null);
   }
@@ -291,7 +316,8 @@ class StoreProjectVersionDataDiffblueTest {
     "boolean StoreProjectVersionData.equals(Object)",
     "int StoreProjectVersionData.hashCode()"
   })
-  void testEquals_whenOtherIsWrongType_thenReturnNotEqual() {
+  void testEquals_whenOtherIsWrongType_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(new StoreProjectVersionData(), "Different type to StoreProjectVersionData");
   }

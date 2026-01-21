@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.store.model.entities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,7 +28,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class StoredEntityStringDataDiffblueTest {
+class StoredEntityStringDataDiffblueTest 
+
+
+{
   /**
    * Test getters and setters.
    *
@@ -38,7 +56,8 @@ class StoredEntityStringDataDiffblueTest {
     "void StoredEntityStringData.<init>(String, String, String, String, Map)",
     "String StoredEntityStringData.getData()"
   })
-  void testGettersAndSetters_when42_thenReturnDataIsNull() {
+  void testGettersAndSetters_when42_thenReturnDataIsNull()
+  {
     // Arrange and Act
     StoredEntityStringData actualStoredEntityStringData =
         new StoredEntityStringData("42", "42", "42");
@@ -77,7 +96,8 @@ class StoredEntityStringDataDiffblueTest {
     "void StoredEntityStringData.<init>(String, String, String, String, Map)",
     "String StoredEntityStringData.getData()"
   })
-  void testGettersAndSetters_whenData_thenReturnData() {
+  void testGettersAndSetters_whenData_thenReturnData()
+  {
     // Arrange
     HashMap<String, Object> entityAttributes = new HashMap<>();
 
@@ -120,7 +140,8 @@ class StoredEntityStringDataDiffblueTest {
     "boolean StoredEntityStringData.equals(Object)",
     "int StoredEntityStringData.hashCode()"
   })
-  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual()
+  {
     // Arrange
     StoredEntityStringData storedEntityStringData = new StoredEntityStringData("42", "42", "42");
     StoredEntityStringData storedEntityStringData2 = new StoredEntityStringData("42", "42", "42");
@@ -154,7 +175,8 @@ class StoredEntityStringDataDiffblueTest {
     "boolean StoredEntityStringData.equals(Object)",
     "int StoredEntityStringData.hashCode()"
   })
-  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual()
+  {
     // Arrange
     StoredEntityStringData storedEntityStringData = new StoredEntityStringData("42", "42", "42");
 
@@ -182,7 +204,8 @@ class StoredEntityStringDataDiffblueTest {
     "boolean StoredEntityStringData.equals(Object)",
     "int StoredEntityStringData.hashCode()"
   })
-  void testEquals_whenOtherIsDifferent_thenReturnNotEqual() {
+  void testEquals_whenOtherIsDifferent_thenReturnNotEqual()
+  {
     // Arrange
     StoredEntityStringData storedEntityStringData =
         new StoredEntityStringData("Group Id", "42", "42");
@@ -209,7 +232,8 @@ class StoredEntityStringDataDiffblueTest {
     "boolean StoredEntityStringData.equals(Object)",
     "int StoredEntityStringData.hashCode()"
   })
-  void testEquals_whenOtherIsNull_thenReturnNotEqual() {
+  void testEquals_whenOtherIsNull_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(new StoredEntityStringData("42", "42", "42"), null);
   }
@@ -232,7 +256,8 @@ class StoredEntityStringDataDiffblueTest {
     "boolean StoredEntityStringData.equals(Object)",
     "int StoredEntityStringData.hashCode()"
   })
-  void testEquals_whenOtherIsWrongType_thenReturnNotEqual() {
+  void testEquals_whenOtherIsWrongType_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(
         new StoredEntityStringData("42", "42", "42"), "Different type to StoredEntityStringData");

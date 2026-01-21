@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.project.dependencies;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,7 +28,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class ProjectDependencyGraphDiffblueTest {
+class ProjectDependencyGraphDiffblueTest 
+
+
+{
   /**
    * Test new {@link ProjectDependencyGraph} (default constructor).
    *
@@ -24,7 +42,8 @@ class ProjectDependencyGraphDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectDependencyGraph.<init>()"})
-  void testNewProjectDependencyGraph() {
+  void testNewProjectDependencyGraph()
+  {
     // Arrange and Act
     ProjectDependencyGraph actualProjectDependencyGraph = new ProjectDependencyGraph();
 
@@ -59,7 +78,8 @@ class ProjectDependencyGraphDiffblueTest {
     "Set ProjectDependencyGraph.getNodes()",
     "Set ProjectDependencyGraph.getRootNodes()"
   })
-  void testGettersAndSetters() {
+  void testGettersAndSetters()
+  {
     // Arrange
     ProjectDependencyGraph projectDependencyGraph = new ProjectDependencyGraph();
 
@@ -93,7 +113,8 @@ class ProjectDependencyGraphDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean ProjectDependencyGraph.hasNode(ProjectVersion)"})
-  void testHasNode_givenProjectDependencyGraph_thenReturnFalse() {
+  void testHasNode_givenProjectDependencyGraph_thenReturnFalse()
+  {
     // Arrange
     ProjectDependencyGraph projectDependencyGraph = new ProjectDependencyGraph();
     ProjectVersion node = new ProjectVersion("42", "42", "42");
@@ -119,7 +140,8 @@ class ProjectDependencyGraphDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean ProjectDependencyGraph.hasNode(ProjectVersion)"})
-  void testHasNode_thenReturnTrue() {
+  void testHasNode_thenReturnTrue()
+  {
     // Arrange
     ProjectDependencyGraph projectDependencyGraph = new ProjectDependencyGraph();
     ProjectVersion node = new ProjectVersion("42", "42", "42");
@@ -149,7 +171,8 @@ class ProjectDependencyGraphDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectDependencyGraph.addNode(ProjectVersion, ProjectVersion)"})
-  void testAddNode_whenNull() {
+  void testAddNode_whenNull()
+  {
     // Arrange
     ProjectDependencyGraph projectDependencyGraph = new ProjectDependencyGraph();
     ProjectVersion node = new ProjectVersion("42", "42", "42");
@@ -177,7 +200,8 @@ class ProjectDependencyGraphDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectDependencyGraph.addNode(ProjectVersion, ProjectVersion)"})
-  void testAddNode_whenProjectVersionWithGroupIdIs42AndArtifactIdIs42AndVersionIdIs42() {
+  void testAddNode_whenProjectVersionWithGroupIdIs42AndArtifactIdIs42AndVersionIdIs42()
+  {
     // Arrange
     ProjectDependencyGraph projectDependencyGraph = new ProjectDependencyGraph();
     ProjectVersion node = new ProjectVersion("42", "42", "42");
@@ -200,7 +224,8 @@ class ProjectDependencyGraphDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectDependencyGraph.setEdges(ProjectVersion, ProjectVersion)"})
-  void testSetEdges() {
+  void testSetEdges()
+  {
     // Arrange
     ProjectDependencyGraph projectDependencyGraph = new ProjectDependencyGraph();
     ProjectVersion from = new ProjectVersion("42", "42", "42");

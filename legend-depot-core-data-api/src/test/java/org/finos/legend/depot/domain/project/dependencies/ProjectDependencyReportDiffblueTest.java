@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.project.dependencies;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,7 +31,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class ProjectDependencyReportDiffblueTest {
+class ProjectDependencyReportDiffblueTest 
+
+
+{
   /**
    * Test new {@link ProjectDependencyReport} (default constructor).
    *
@@ -27,7 +45,8 @@ class ProjectDependencyReportDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectDependencyReport.<init>()"})
-  void testNewProjectDependencyReport() {
+  void testNewProjectDependencyReport()
+  {
     // Arrange and Act
     ProjectDependencyReport actualProjectDependencyReport = new ProjectDependencyReport();
 
@@ -53,7 +72,8 @@ class ProjectDependencyReportDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectDependencyReport.addConflict(String, String, Set)"})
-  void testAddConflict_given42_whenHashSetAdd42() {
+  void testAddConflict_given42_whenHashSetAdd42()
+  {
     // Arrange
     ProjectDependencyReport projectDependencyReport = new ProjectDependencyReport();
 
@@ -88,7 +108,8 @@ class ProjectDependencyReportDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectDependencyReport.addConflict(String, String, Set)"})
-  void testAddConflict_thenProjectDependencyReportConflictsSizeIsOne() {
+  void testAddConflict_thenProjectDependencyReportConflictsSizeIsOne()
+  {
     // Arrange
     ProjectDependencyReport projectDependencyReport = new ProjectDependencyReport();
 
@@ -123,7 +144,8 @@ class ProjectDependencyReportDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectDependencyReport.addConflict(String, String, Set)"})
-  void testAddConflict_whenHashSet_thenThrowUnsupportedOperationException() {
+  void testAddConflict_whenHashSet_thenThrowUnsupportedOperationException()
+  {
     // Arrange
     ProjectDependencyReport projectDependencyReport = new ProjectDependencyReport();
 
@@ -151,7 +173,8 @@ class ProjectDependencyReportDiffblueTest {
     "List ProjectDependencyReport.getConflicts()",
     "SerializedGraph ProjectDependencyReport.getGraph()"
   })
-  void testGettersAndSetters() {
+  void testGettersAndSetters()
+  {
     // Arrange
     ProjectDependencyReport projectDependencyReport = new ProjectDependencyReport();
 
@@ -179,7 +202,8 @@ class ProjectDependencyReportDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MutableMap SerializedGraph.getNodes()", "Set SerializedGraph.getRootNodes()"})
-  void testSerializedGraphGettersAndSetters() {
+  void testSerializedGraphGettersAndSetters()
+  {
     // Arrange
     SerializedGraph serializedGraph = new SerializedGraph();
 
@@ -202,7 +226,8 @@ class ProjectDependencyReportDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void SerializedGraph.<init>()"})
-  void testSerializedGraphNewSerializedGraph() {
+  void testSerializedGraphNewSerializedGraph()
+  {
     // Arrange and Act
     SerializedGraph actualSerializedGraph = new SerializedGraph();
 

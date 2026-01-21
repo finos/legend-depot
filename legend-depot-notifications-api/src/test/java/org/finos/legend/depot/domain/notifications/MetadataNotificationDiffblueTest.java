@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.notifications;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +32,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class MetadataNotificationDiffblueTest {
+class MetadataNotificationDiffblueTest 
+
+
+{
   /**
    * Test getters and setters.
    *
@@ -86,7 +104,8 @@ class MetadataNotificationDiffblueTest {
     "void MetadataNotification.setTransitive(boolean)",
     "MetadataNotification MetadataNotification.setUpdated(Date)"
   })
-  void testGettersAndSetters() {
+  void testGettersAndSetters()
+  {
     // Arrange and Act
     MetadataNotification actualMetadataNotification = new MetadataNotification();
     MetadataNotification actualSetAttemptResult = actualMetadataNotification.setAttempt(1);
@@ -164,7 +183,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void MetadataNotification.<init>(String, String, String, String)"})
-  void testNewMetadataNotification() {
+  void testNewMetadataNotification()
+  {
     // Arrange and Act
     MetadataNotification actualMetadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -210,7 +230,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, String, String, Boolean, Boolean, Integer, Integer, Map, Date, Date, Date, Priority)"
   })
-  void testNewMetadataNotification_whenNull_thenReturnAttemptIsZero() {
+  void testNewMetadataNotification_whenNull_thenReturnAttemptIsZero()
+  {
     // Arrange
     HashMap<Integer, MetadataNotificationResponse> responses = new HashMap<>();
     Date created =
@@ -266,7 +287,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, Boolean, Boolean, String)"
   })
-  void testNewMetadataNotification_whenNull_thenReturnNotFullUpdate() {
+  void testNewMetadataNotification_whenNull_thenReturnNotFullUpdate()
+  {
     // Arrange and Act
     MetadataNotification actualMetadataNotification =
         new MetadataNotification("myproject", "42", "42", "42", null, true, "Parent Event");
@@ -312,7 +334,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, Boolean, Boolean, String, Priority)"
   })
-  void testNewMetadataNotification_whenNull_thenReturnNotFullUpdate2() {
+  void testNewMetadataNotification_whenNull_thenReturnNotFullUpdate2()
+  {
     // Arrange and Act
     MetadataNotification actualMetadataNotification =
         new MetadataNotification(
@@ -359,7 +382,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, String, String, Boolean, Boolean, Integer, Integer, Map, Date, Date, Date, Priority)"
   })
-  void testNewMetadataNotification_whenNull_thenReturnNotFullUpdate3() {
+  void testNewMetadataNotification_whenNull_thenReturnNotFullUpdate3()
+  {
     // Arrange
     HashMap<Integer, MetadataNotificationResponse> responses = new HashMap<>();
     Date created =
@@ -415,7 +439,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, Boolean, Boolean, String)"
   })
-  void testNewMetadataNotification_whenNull_thenReturnNotTransitive() {
+  void testNewMetadataNotification_whenNull_thenReturnNotTransitive()
+  {
     // Arrange and Act
     MetadataNotification actualMetadataNotification =
         new MetadataNotification("myproject", "42", "42", "42", true, null, "Parent Event");
@@ -461,7 +486,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, Boolean, Boolean, String, Priority)"
   })
-  void testNewMetadataNotification_whenNull_thenReturnNotTransitive2() {
+  void testNewMetadataNotification_whenNull_thenReturnNotTransitive2()
+  {
     // Arrange and Act
     MetadataNotification actualMetadataNotification =
         new MetadataNotification(
@@ -508,7 +534,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, String, String, Boolean, Boolean, Integer, Integer, Map, Date, Date, Date, Priority)"
   })
-  void testNewMetadataNotification_whenNull_thenReturnNotTransitive3() {
+  void testNewMetadataNotification_whenNull_thenReturnNotTransitive3()
+  {
     // Arrange
     HashMap<Integer, MetadataNotificationResponse> responses = new HashMap<>();
     Date created =
@@ -564,7 +591,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, String, String, Boolean, Boolean, Integer, Integer, Map, Date, Date, Date, Priority)"
   })
-  void testNewMetadataNotification_whenOne_thenReturnAttemptIsOne() {
+  void testNewMetadataNotification_whenOne_thenReturnAttemptIsOne()
+  {
     // Arrange
     HashMap<Integer, MetadataNotificationResponse> responses = new HashMap<>();
     Date created =
@@ -620,7 +648,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, String, String, Boolean, Boolean, Integer, Integer, Map, Date, Date, Date, Priority)"
   })
-  void testNewMetadataNotification_whenOne_thenReturnAttemptIsOne2() {
+  void testNewMetadataNotification_whenOne_thenReturnAttemptIsOne2()
+  {
     // Arrange
     Date created =
         Date.from(LocalDate.of(1970, 1, 1).atStartOfDay().atZone(ZoneOffset.UTC).toInstant());
@@ -675,7 +704,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, String, String, Boolean, Boolean, Integer, Integer, Map, Date, Date, Date, Priority)"
   })
-  void testNewMetadataNotification_whenOne_thenReturnMaxAttemptsIsTwo() {
+  void testNewMetadataNotification_whenOne_thenReturnMaxAttemptsIsTwo()
+  {
     // Arrange
     HashMap<Integer, MetadataNotificationResponse> responses = new HashMap<>();
     Date created =
@@ -731,7 +761,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, Boolean, Boolean, String)"
   })
-  void testNewMetadataNotification_whenParentEvent_thenReturnFullUpdate() {
+  void testNewMetadataNotification_whenParentEvent_thenReturnFullUpdate()
+  {
     // Arrange and Act
     MetadataNotification actualMetadataNotification =
         new MetadataNotification("myproject", "42", "42", "42", true, true, "Parent Event");
@@ -777,7 +808,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "void MetadataNotification.<init>(String, String, String, String, Boolean, Boolean, String, Priority)"
   })
-  void testNewMetadataNotification_whenParentEvent_thenReturnFullUpdate2() {
+  void testNewMetadataNotification_whenParentEvent_thenReturnFullUpdate2()
+  {
     // Arrange and Act
     MetadataNotification actualMetadataNotification =
         new MetadataNotification(
@@ -818,7 +850,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotificationStatus MetadataNotification.getStatus()"})
-  void testGetStatus_thenReturnFailed() {
+  void testGetStatus_thenReturnFailed()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -842,7 +875,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotificationStatus MetadataNotification.getStatus()"})
-  void testGetStatus_thenReturnSuccess() {
+  void testGetStatus_thenReturnSuccess()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -861,7 +895,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotification MetadataNotification.complete()"})
-  void testComplete() {
+  void testComplete()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -888,7 +923,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean MetadataNotification.retriesExceeded()"})
-  void testRetriesExceeded_givenMetadataNotification_thenReturnTrue() {
+  void testRetriesExceeded_givenMetadataNotification_thenReturnTrue()
+  {
     // Arrange, Act and Assert
     assertTrue(new MetadataNotification().retriesExceeded());
   }
@@ -907,7 +943,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean MetadataNotification.retriesExceeded()"})
-  void testRetriesExceeded_thenReturnFalse() {
+  void testRetriesExceeded_thenReturnFalse()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -926,7 +963,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"Map MetadataNotification.getResponses()"})
-  void testGetResponses() {
+  void testGetResponses()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -945,7 +983,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"Map MetadataNotification.getResponses()"})
-  void testGetResponses2() {
+  void testGetResponses2()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -965,7 +1004,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotification MetadataNotification.addError(String)"})
-  void testAddError() {
+  void testAddError()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -988,7 +1028,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotification MetadataNotification.addError(String)"})
-  void testAddError2() {
+  void testAddError2()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -1012,7 +1053,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void MetadataNotification.setResponse(MetadataNotificationResponse)"})
-  void testSetResponse() {
+  void testSetResponse()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -1038,7 +1080,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void MetadataNotification.setResponse(MetadataNotificationResponse)"})
-  void testSetResponse2() {
+  void testSetResponse2()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -1068,7 +1111,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "MetadataNotification MetadataNotification.combineResponse(MetadataNotificationResponse)"
   })
-  void testCombineResponse() {
+  void testCombineResponse()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -1102,7 +1146,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "MetadataNotification MetadataNotification.combineResponse(MetadataNotificationResponse)"
   })
-  void testCombineResponse2() {
+  void testCombineResponse2()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -1128,7 +1173,8 @@ class MetadataNotificationDiffblueTest {
   @MethodsUnderTest({
     "MetadataNotification MetadataNotification.combineResponse(MetadataNotificationResponse)"
   })
-  void testCombineResponse3() {
+  void testCombineResponse3()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -1160,7 +1206,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotificationResponse MetadataNotification.getCurrentResponse()"})
-  void testGetCurrentResponse() {
+  void testGetCurrentResponse()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -1179,7 +1226,8 @@ class MetadataNotificationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"MetadataNotificationResponse MetadataNotification.getCurrentResponse()"})
-  void testGetCurrentResponse2() {
+  void testGetCurrentResponse2()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -1212,7 +1260,8 @@ class MetadataNotificationDiffblueTest {
     "boolean MetadataNotification.equals(Object)",
     "int MetadataNotification.hashCode()"
   })
-  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -1247,7 +1296,8 @@ class MetadataNotificationDiffblueTest {
     "boolean MetadataNotification.equals(Object)",
     "int MetadataNotification.hashCode()"
   })
-  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual()
+  {
     // Arrange
     MetadataNotification metadataNotification =
         new MetadataNotification("myproject", "42", "42", "42");
@@ -1276,7 +1326,8 @@ class MetadataNotificationDiffblueTest {
     "boolean MetadataNotification.equals(Object)",
     "int MetadataNotification.hashCode()"
   })
-  void testEquals_whenOtherIsDifferent_thenReturnNotEqual() {
+  void testEquals_whenOtherIsDifferent_thenReturnNotEqual()
+  {
     // Arrange
     MetadataNotification metadataNotification = new MetadataNotification("42", "42", "42", "42");
 
@@ -1302,7 +1353,8 @@ class MetadataNotificationDiffblueTest {
     "boolean MetadataNotification.equals(Object)",
     "int MetadataNotification.hashCode()"
   })
-  void testEquals_whenOtherIsNull_thenReturnNotEqual() {
+  void testEquals_whenOtherIsNull_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(new MetadataNotification("myproject", "42", "42", "42"), null);
   }
@@ -1325,7 +1377,8 @@ class MetadataNotificationDiffblueTest {
     "boolean MetadataNotification.equals(Object)",
     "int MetadataNotification.hashCode()"
   })
-  void testEquals_whenOtherIsWrongType_thenReturnNotEqual() {
+  void testEquals_whenOtherIsWrongType_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(
         new MetadataNotification("myproject", "42", "42", "42"),

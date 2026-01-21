@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.project;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,7 +24,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class ProjectValidatorDiffblueTest {
+class ProjectValidatorDiffblueTest 
+
+
+{
   /**
    * Test {@link ProjectValidator#isValid(StoreProjectData)}.
    *
@@ -20,7 +38,8 @@ class ProjectValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean ProjectValidator.isValid(StoreProjectData)"})
-  void testIsValid() {
+  void testIsValid()
+  {
     // Arrange
     StoreProjectData projectData = new StoreProjectData("myproject", "42", "42");
 
@@ -38,7 +57,8 @@ class ProjectValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean ProjectValidator.isValid(StoreProjectData)"})
-  void testIsValid2() {
+  void testIsValid2()
+  {
     // Arrange
     StoreProjectData projectData = new StoreProjectData(null, "", "");
 
@@ -56,7 +76,8 @@ class ProjectValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean ProjectValidator.isValid(StoreProjectData)"})
-  void testIsValid3() {
+  void testIsValid3()
+  {
     // Arrange
     StoreProjectData projectData = new StoreProjectData("PROD-9", "42", "42");
 
@@ -74,7 +95,8 @@ class ProjectValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean ProjectValidator.isValid(StoreProjectData)"})
-  void testIsValid4() {
+  void testIsValid4()
+  {
     // Arrange
     StoreProjectData projectData = new StoreProjectData("PROD-9", null, "42");
 
@@ -92,7 +114,8 @@ class ProjectValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean ProjectValidator.isValid(StoreProjectData)"})
-  void testIsValid5() {
+  void testIsValid5()
+  {
     // Arrange
     StoreProjectData projectData = new StoreProjectData("PROD-9", "", "42");
 
@@ -115,7 +138,8 @@ class ProjectValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean ProjectValidator.isValidProjectId(String)"})
-  void testIsValidProjectId_whenMyproject_thenReturnFalse() {
+  void testIsValidProjectId_whenMyproject_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(ProjectValidator.isValidProjectId("myproject"));
   }
@@ -135,7 +159,8 @@ class ProjectValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean ProjectValidator.isValidProjectId(String)"})
-  void testIsValidProjectId_whenNull_thenReturnFalse() {
+  void testIsValidProjectId_whenNull_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(ProjectValidator.isValidProjectId(null));
   }
@@ -155,7 +180,8 @@ class ProjectValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean ProjectValidator.isValidProjectId(String)"})
-  void testIsValidProjectId_whenProd9_thenReturnTrue() {
+  void testIsValidProjectId_whenProd9_thenReturnTrue()
+  {
     // Arrange, Act and Assert
     assertTrue(ProjectValidator.isValidProjectId("PROD-9"));
   }

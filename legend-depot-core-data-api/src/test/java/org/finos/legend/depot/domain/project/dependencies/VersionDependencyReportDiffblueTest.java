@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.project.dependencies;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,7 +28,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class VersionDependencyReportDiffblueTest {
+class VersionDependencyReportDiffblueTest 
+
+
+{
   /**
    * Test getters and setters.
    *
@@ -39,7 +57,8 @@ class VersionDependencyReportDiffblueTest {
     "void VersionDependencyReport.setTransitiveDependencies(List)",
     "void VersionDependencyReport.setValid(boolean)"
   })
-  void testGettersAndSetters() {
+  void testGettersAndSetters()
+  {
     // Arrange and Act
     VersionDependencyReport actualVersionDependencyReport = new VersionDependencyReport();
     ArrayList<ProjectVersion> transitiveDependencies = new ArrayList<>();
@@ -84,7 +103,8 @@ class VersionDependencyReportDiffblueTest {
     "void VersionDependencyReport.setTransitiveDependencies(List)",
     "void VersionDependencyReport.setValid(boolean)"
   })
-  void testGettersAndSetters_whenArrayList() {
+  void testGettersAndSetters_whenArrayList()
+  {
     // Arrange and Act
     VersionDependencyReport actualVersionDependencyReport =
         new VersionDependencyReport(new ArrayList<>(), true);
@@ -125,7 +145,8 @@ class VersionDependencyReportDiffblueTest {
     "boolean VersionDependencyReport.equals(Object)",
     "int VersionDependencyReport.hashCode()"
   })
-  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual()
+  {
     // Arrange
     VersionDependencyReport versionDependencyReport = new VersionDependencyReport();
     VersionDependencyReport versionDependencyReport2 = new VersionDependencyReport();
@@ -159,7 +180,8 @@ class VersionDependencyReportDiffblueTest {
     "boolean VersionDependencyReport.equals(Object)",
     "int VersionDependencyReport.hashCode()"
   })
-  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual()
+  {
     // Arrange
     VersionDependencyReport versionDependencyReport = new VersionDependencyReport();
 
@@ -187,7 +209,8 @@ class VersionDependencyReportDiffblueTest {
     "boolean VersionDependencyReport.equals(Object)",
     "int VersionDependencyReport.hashCode()"
   })
-  void testEquals_whenOtherIsDifferent_thenReturnNotEqual() {
+  void testEquals_whenOtherIsDifferent_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(new VersionDependencyReport(), 4);
   }
@@ -210,7 +233,8 @@ class VersionDependencyReportDiffblueTest {
     "boolean VersionDependencyReport.equals(Object)",
     "int VersionDependencyReport.hashCode()"
   })
-  void testEquals_whenOtherIsNull_thenReturnNotEqual() {
+  void testEquals_whenOtherIsNull_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(new VersionDependencyReport(), null);
   }
@@ -233,7 +257,8 @@ class VersionDependencyReportDiffblueTest {
     "boolean VersionDependencyReport.equals(Object)",
     "int VersionDependencyReport.hashCode()"
   })
-  void testEquals_whenOtherIsWrongType_thenReturnNotEqual() {
+  void testEquals_whenOtherIsWrongType_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(new VersionDependencyReport(), "Different type to VersionDependencyReport");
   }

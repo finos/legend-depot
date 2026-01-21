@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.project;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,7 +28,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class ProjectVersionDataDiffblueTest {
+class ProjectVersionDataDiffblueTest 
+
+
+{
   /**
    * Test getters and setters.
    *
@@ -56,7 +74,8 @@ class ProjectVersionDataDiffblueTest {
     "void ProjectVersionData.setManifestProperties(Map)",
     "void ProjectVersionData.setProperties(List)"
   })
-  void testGettersAndSetters() {
+  void testGettersAndSetters()
+  {
     // Arrange and Act
     ProjectVersionData actualProjectVersionData = new ProjectVersionData();
     ArrayList<ProjectVersion> dependencies = new ArrayList<>();
@@ -133,7 +152,8 @@ class ProjectVersionDataDiffblueTest {
     "void ProjectVersionData.setManifestProperties(Map)",
     "void ProjectVersionData.setProperties(List)"
   })
-  void testGettersAndSetters_whenArrayList() {
+  void testGettersAndSetters_whenArrayList()
+  {
     // Arrange
     ArrayList<ProjectVersion> dependencies = new ArrayList<>();
 
@@ -214,7 +234,8 @@ class ProjectVersionDataDiffblueTest {
     "void ProjectVersionData.setManifestProperties(Map)",
     "void ProjectVersionData.setProperties(List)"
   })
-  void testGettersAndSetters_whenTrue() {
+  void testGettersAndSetters_whenTrue()
+  {
     // Arrange
     ArrayList<ProjectVersion> dependencies = new ArrayList<>();
 
@@ -264,7 +285,8 @@ class ProjectVersionDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectVersionData.addDependencies(List)"})
-  void testAddDependencies_thenProjectVersionDataDependenciesIsArrayList() {
+  void testAddDependencies_thenProjectVersionDataDependenciesIsArrayList()
+  {
     // Arrange
     ProjectVersionData projectVersionData = new ProjectVersionData();
 
@@ -295,7 +317,8 @@ class ProjectVersionDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectVersionData.addDependencies(List)"})
-  void testAddDependencies_thenProjectVersionDataDependenciesSizeIsOne() {
+  void testAddDependencies_thenProjectVersionDataDependenciesSizeIsOne()
+  {
     // Arrange
     ProjectVersionData projectVersionData = new ProjectVersionData();
 
@@ -328,7 +351,8 @@ class ProjectVersionDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectVersionData.addDependencies(List)"})
-  void testAddDependencies_whenArrayList_thenProjectVersionDataDependenciesEmpty() {
+  void testAddDependencies_whenArrayList_thenProjectVersionDataDependenciesEmpty()
+  {
     // Arrange
     ProjectVersionData projectVersionData = new ProjectVersionData();
 
@@ -349,7 +373,8 @@ class ProjectVersionDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectVersionData.addDependency(ProjectVersion)"})
-  void testAddDependency() {
+  void testAddDependency()
+  {
     // Arrange
     ProjectVersionData projectVersionData = new ProjectVersionData();
     ProjectVersion dependency = new ProjectVersion("42", "42", "42");
@@ -379,7 +404,8 @@ class ProjectVersionDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectVersionData.addDependency(ProjectVersion)"})
-  void testAddDependency_givenProjectVersionData() {
+  void testAddDependency_givenProjectVersionData()
+  {
     // Arrange
     ProjectVersionData projectVersionData = new ProjectVersionData();
     ProjectVersion dependency = new ProjectVersion("42", "42", "42");
@@ -407,7 +433,8 @@ class ProjectVersionDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectVersionData.addProperties(List)"})
-  void testAddProperties_thenProjectVersionDataPropertiesSizeIsOne() {
+  void testAddProperties_thenProjectVersionDataPropertiesSizeIsOne()
+  {
     // Arrange
     ProjectVersionData projectVersionData = new ProjectVersionData();
 
@@ -438,7 +465,8 @@ class ProjectVersionDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectVersionData.addProperties(List)"})
-  void testAddProperties_thenProjectVersionDataPropertiesSizeIsOne2() {
+  void testAddProperties_thenProjectVersionDataPropertiesSizeIsOne2()
+  {
     // Arrange
     ProjectVersionData projectVersionData = new ProjectVersionData();
 
@@ -472,7 +500,8 @@ class ProjectVersionDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectVersionData.addProperties(List)"})
-  void testAddProperties_whenArrayList_thenProjectVersionDataPropertiesEmpty() {
+  void testAddProperties_whenArrayList_thenProjectVersionDataPropertiesEmpty()
+  {
     // Arrange
     ProjectVersionData projectVersionData = new ProjectVersionData();
 

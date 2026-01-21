@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.project.dependencies;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,7 +26,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class ProjectDependencyVersionNodeDiffblueTest {
+class ProjectDependencyVersionNodeDiffblueTest 
+
+
+{
   /**
    * Test {@link ProjectDependencyVersionNode#ProjectDependencyVersionNode(String, String, String)}.
    *
@@ -23,7 +41,8 @@ class ProjectDependencyVersionNodeDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"void ProjectDependencyVersionNode.<init>(String, String, String)"})
-  void testNewProjectDependencyVersionNode() {
+  void testNewProjectDependencyVersionNode()
+  {
     // Arrange and Act
     ProjectDependencyVersionNode actualProjectDependencyVersionNode =
         new ProjectDependencyVersionNode("42", "42", "42");
@@ -57,7 +76,8 @@ class ProjectDependencyVersionNodeDiffblueTest {
   @MethodsUnderTest({
     "ProjectDependencyVersionNode ProjectDependencyVersionNode.buildFromProjectVersion(ProjectVersion)"
   })
-  void testBuildFromProjectVersion_thenReturnArtifactIdIs42() {
+  void testBuildFromProjectVersion_thenReturnArtifactIdIs42()
+  {
     // Arrange
     ProjectVersion version = new ProjectVersion("42", "42", "42");
 
@@ -99,7 +119,8 @@ class ProjectDependencyVersionNodeDiffblueTest {
     "String ProjectDependencyVersionNode.getProjectId()",
     "void ProjectDependencyVersionNode.setProjectId(String)"
   })
-  void testGettersAndSetters() {
+  void testGettersAndSetters()
+  {
     // Arrange
     ProjectDependencyVersionNode projectDependencyVersionNode =
         new ProjectDependencyVersionNode("42", "42", "42");
@@ -125,7 +146,8 @@ class ProjectDependencyVersionNodeDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"String ProjectDependencyVersionNode.getGav()"})
-  void testGetGav() {
+  void testGetGav()
+  {
     // Arrange
     ProjectDependencyVersionNode projectDependencyVersionNode =
         new ProjectDependencyVersionNode("42", "42", "42");
@@ -144,7 +166,8 @@ class ProjectDependencyVersionNodeDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"String ProjectDependencyVersionNode.getCoordinates()"})
-  void testGetCoordinates() {
+  void testGetCoordinates()
+  {
     // Arrange
     ProjectDependencyVersionNode projectDependencyVersionNode =
         new ProjectDependencyVersionNode("42", "42", "42");
@@ -163,7 +186,8 @@ class ProjectDependencyVersionNodeDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"String ProjectDependencyVersionNode.getId()"})
-  void testGetId() {
+  void testGetId()
+  {
     // Arrange
     ProjectDependencyVersionNode projectDependencyVersionNode =
         new ProjectDependencyVersionNode("42", "42", "42");

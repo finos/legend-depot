@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.store.model.projects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,7 +26,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class StoreProjectDataDiffblueTest {
+class StoreProjectDataDiffblueTest 
+
+
+{
   /**
    * Test getters and setters.
    *
@@ -46,7 +64,8 @@ class StoreProjectDataDiffblueTest {
     "void StoreProjectData.setDefaultBranch(String)",
     "void StoreProjectData.setLatestVersion(String)"
   })
-  void testGettersAndSetters_thenReturnArtifactIdIsNull() {
+  void testGettersAndSetters_thenReturnArtifactIdIsNull()
+  {
     // Arrange and Act
     StoreProjectData actualStoreProjectData = new StoreProjectData();
     actualStoreProjectData.setDefaultBranch("janedoe/featurebranch");
@@ -101,7 +120,8 @@ class StoreProjectDataDiffblueTest {
     "void StoreProjectData.setDefaultBranch(String)",
     "void StoreProjectData.setLatestVersion(String)"
   })
-  void testGettersAndSetters_whenJanedoeFeaturebranch_thenReturnArtifactIdIs42() {
+  void testGettersAndSetters_whenJanedoeFeaturebranch_thenReturnArtifactIdIs42()
+  {
     // Arrange and Act
     StoreProjectData actualStoreProjectData =
         new StoreProjectData("myproject", "42", "42", "janedoe/featurebranch", "1.0.2");
@@ -156,7 +176,8 @@ class StoreProjectDataDiffblueTest {
     "void StoreProjectData.setDefaultBranch(String)",
     "void StoreProjectData.setLatestVersion(String)"
   })
-  void testGettersAndSetters_whenMyproject_thenReturnArtifactIdIs42() {
+  void testGettersAndSetters_whenMyproject_thenReturnArtifactIdIs42()
+  {
     // Arrange and Act
     StoreProjectData actualStoreProjectData = new StoreProjectData("myproject", "42", "42");
     actualStoreProjectData.setDefaultBranch("janedoe/featurebranch");
@@ -185,7 +206,8 @@ class StoreProjectDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean StoreProjectData.evaluateLatestVersionAndUpdate(String)"})
-  void testEvaluateLatestVersionAndUpdate() {
+  void testEvaluateLatestVersionAndUpdate()
+  {
     // Arrange
     StoreProjectData storeProjectData = new StoreProjectData("myproject", "42", "42");
 
@@ -208,7 +230,8 @@ class StoreProjectDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean StoreProjectData.evaluateLatestVersionAndUpdate(String)"})
-  void testEvaluateLatestVersionAndUpdate2() {
+  void testEvaluateLatestVersionAndUpdate2()
+  {
     // Arrange
     StoreProjectData storeProjectData = new StoreProjectData("myproject", "42", "42");
     storeProjectData.setLatestVersion("foo");
@@ -232,7 +255,8 @@ class StoreProjectDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean StoreProjectData.evaluateLatestVersionAndUpdate(String)"})
-  void testEvaluateLatestVersionAndUpdate3() {
+  void testEvaluateLatestVersionAndUpdate3()
+  {
     // Arrange
     StoreProjectData storeProjectData =
         new StoreProjectData("myproject", "42", "42", "janedoe/featurebranch", "1.0.2");
@@ -266,7 +290,8 @@ class StoreProjectDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean StoreProjectData.equals(Object)", "int StoreProjectData.hashCode()"})
-  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual()
+  {
     // Arrange
     StoreProjectData storeProjectData = new StoreProjectData("myproject", "42", "42");
     StoreProjectData storeProjectData2 = new StoreProjectData("myproject", "42", "42");
@@ -296,7 +321,8 @@ class StoreProjectDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean StoreProjectData.equals(Object)", "int StoreProjectData.hashCode()"})
-  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual()
+  {
     // Arrange
     StoreProjectData storeProjectData = new StoreProjectData("myproject", "42", "42");
 
@@ -321,7 +347,8 @@ class StoreProjectDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean StoreProjectData.equals(Object)", "int StoreProjectData.hashCode()"})
-  void testEquals_whenOtherIsDifferent_thenReturnNotEqual() {
+  void testEquals_whenOtherIsDifferent_thenReturnNotEqual()
+  {
     // Arrange
     StoreProjectData storeProjectData = new StoreProjectData("42", "42", "42");
 
@@ -344,7 +371,8 @@ class StoreProjectDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean StoreProjectData.equals(Object)", "int StoreProjectData.hashCode()"})
-  void testEquals_whenOtherIsNull_thenReturnNotEqual() {
+  void testEquals_whenOtherIsNull_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(new StoreProjectData("myproject", "42", "42"), null);
   }
@@ -364,7 +392,8 @@ class StoreProjectDataDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean StoreProjectData.equals(Object)", "int StoreProjectData.hashCode()"})
-  void testEquals_whenOtherIsWrongType_thenReturnNotEqual() {
+  void testEquals_whenOtherIsWrongType_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(
         new StoreProjectData("myproject", "42", "42"), "Different type to StoreProjectData");

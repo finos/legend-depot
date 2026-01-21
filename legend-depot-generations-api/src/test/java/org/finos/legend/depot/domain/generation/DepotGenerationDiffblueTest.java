@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.generation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,7 +23,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class DepotGenerationDiffblueTest {
+class DepotGenerationDiffblueTest 
+
+
+{
   /**
    * Test getters and setters.
    *
@@ -29,7 +47,8 @@ class DepotGenerationDiffblueTest {
     "String DepotGeneration.getContent()",
     "String DepotGeneration.getPath()"
   })
-  void testGettersAndSetters() {
+  void testGettersAndSetters()
+  {
     // Arrange and Act
     DepotGeneration actualDepotGeneration =
         new DepotGeneration("/etc/config.properties", "Not all who wander are lost");
@@ -60,7 +79,8 @@ class DepotGenerationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean DepotGeneration.equals(Object)", "int DepotGeneration.hashCode()"})
-  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsEqual_thenReturnEqual()
+  {
     // Arrange
     DepotGeneration depotGeneration =
         new DepotGeneration("/etc/config.properties", "Not all who wander are lost");
@@ -92,7 +112,8 @@ class DepotGenerationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean DepotGeneration.equals(Object)", "int DepotGeneration.hashCode()"})
-  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual() {
+  void testEqualsAndHashCode_whenOtherIsSame_thenReturnEqual()
+  {
     // Arrange
     DepotGeneration depotGeneration =
         new DepotGeneration("/etc/config.properties", "Not all who wander are lost");
@@ -118,7 +139,8 @@ class DepotGenerationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean DepotGeneration.equals(Object)", "int DepotGeneration.hashCode()"})
-  void testEquals_whenOtherIsDifferent_thenReturnNotEqual() {
+  void testEquals_whenOtherIsDifferent_thenReturnNotEqual()
+  {
     // Arrange
     DepotGeneration depotGeneration =
         new DepotGeneration("/home/user/documents", "Not all who wander are lost");
@@ -144,7 +166,8 @@ class DepotGenerationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean DepotGeneration.equals(Object)", "int DepotGeneration.hashCode()"})
-  void testEquals_whenOtherIsNull_thenReturnNotEqual() {
+  void testEquals_whenOtherIsNull_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(
         new DepotGeneration("/etc/config.properties", "Not all who wander are lost"), null);
@@ -165,7 +188,8 @@ class DepotGenerationDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean DepotGeneration.equals(Object)", "int DepotGeneration.hashCode()"})
-  void testEquals_whenOtherIsWrongType_thenReturnNotEqual() {
+  void testEquals_whenOtherIsWrongType_thenReturnNotEqual()
+  {
     // Arrange, Act and Assert
     assertNotEquals(
         new DepotGeneration("/etc/config.properties", "Not all who wander are lost"),

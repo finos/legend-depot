@@ -1,3 +1,18 @@
+//  Copyright 2021 Goldman Sachs
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
 package org.finos.legend.depot.domain.version;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,7 +24,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-class VersionValidatorDiffblueTest {
+class VersionValidatorDiffblueTest
+
+
+
+{
   /**
    * Test {@link VersionValidator#BRANCH_SNAPSHOT(String)}.
    *
@@ -20,7 +39,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"String VersionValidator.BRANCH_SNAPSHOT(String)"})
-  void testBRANCH_SNAPSHOT() {
+  void testBRANCH_SNAPSHOT()
+  {
     // Arrange, Act and Assert
     assertEquals(
         "janedoe/featurebranch-SNAPSHOT",
@@ -42,7 +62,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValid(String)"})
-  void testIsValid_when42_thenReturnFalse() {
+  void testIsValid_when42_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isValid("42"));
   }
@@ -62,7 +83,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValid(String)"})
-  void testIsValid_when102VersionId_thenReturnFalse() {
+  void testIsValid_when102VersionId_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isValid("1.0.2Version Id"));
   }
@@ -82,7 +104,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValid(String)"})
-  void testIsValid_when102_thenReturnTrue() {
+  void testIsValid_when102_thenReturnTrue()
+  {
     // Arrange, Act and Assert
     assertTrue(VersionValidator.isValid("1.0.2"));
   }
@@ -102,7 +125,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValid(String)"})
-  void testIsValid_when42102_thenReturnTrue() {
+  void testIsValid_when42102_thenReturnTrue()
+  {
     // Arrange, Act and Assert
     assertTrue(VersionValidator.isValid("421.0.2"));
   }
@@ -122,7 +146,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValid(String)"})
-  void testIsValid_when102102_thenReturnFalse() {
+  void testIsValid_when102102_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isValid("1.0.21.0.2"));
   }
@@ -142,7 +167,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValid(String)"})
-  void testIsValid_whenEmptyString_thenReturnFalse() {
+  void testIsValid_whenEmptyString_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isValid(""));
   }
@@ -162,7 +188,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValid(String)"})
-  void testIsValid_whenNull_thenReturnFalse() {
+  void testIsValid_whenNull_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isValid(null));
   }
@@ -182,7 +209,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValid(String)"})
-  void testIsValid_whenSnapshot_thenReturnTrue() {
+  void testIsValid_whenSnapshot_thenReturnTrue()
+  {
     // Arrange, Act and Assert
     assertTrue(VersionValidator.isValid("-SNAPSHOT"));
   }
@@ -202,7 +230,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValid(String)"})
-  void testIsValid_whenVersionId102_thenReturnFalse() {
+  void testIsValid_whenVersionId102_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isValid("Version Id1.0.2"));
   }
@@ -222,7 +251,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValidReleaseVersion(String)"})
-  void testIsValidReleaseVersion_when42_thenReturnFalse() {
+  void testIsValidReleaseVersion_when42_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isValidReleaseVersion("42"));
   }
@@ -243,7 +273,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValidReleaseVersion(String)"})
-  void testIsValidReleaseVersion_when102InvalidVersionString_thenReturnFalse() {
+  void testIsValidReleaseVersion_when102InvalidVersionString_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isValidReleaseVersion("1.0.2Invalid version string: \""));
   }
@@ -263,7 +294,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValidReleaseVersion(String)"})
-  void testIsValidReleaseVersion_when102_thenReturnTrue() {
+  void testIsValidReleaseVersion_when102_thenReturnTrue()
+  {
     // Arrange, Act and Assert
     assertTrue(VersionValidator.isValidReleaseVersion("1.0.2"));
   }
@@ -283,7 +315,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValidReleaseVersion(String)"})
-  void testIsValidReleaseVersion_when42102_thenReturnTrue() {
+  void testIsValidReleaseVersion_when42102_thenReturnTrue()
+  {
     // Arrange, Act and Assert
     assertTrue(VersionValidator.isValidReleaseVersion("421.0.2"));
   }
@@ -303,7 +336,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValidReleaseVersion(String)"})
-  void testIsValidReleaseVersion_when102102_thenReturnFalse() {
+  void testIsValidReleaseVersion_when102102_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isValidReleaseVersion("1.0.21.0.2"));
   }
@@ -324,7 +358,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValidReleaseVersion(String)"})
-  void testIsValidReleaseVersion_whenInvalidVersionString102_thenReturnFalse() {
+  void testIsValidReleaseVersion_whenInvalidVersionString102_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isValidReleaseVersion("Invalid version string: \"1.0.2"));
   }
@@ -344,7 +379,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isValidReleaseVersion(String)"})
-  void testIsValidReleaseVersion_whenNull_thenReturnFalse() {
+  void testIsValidReleaseVersion_whenNull_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isValidReleaseVersion(null));
   }
@@ -364,7 +400,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isSnapshotVersion(String)"})
-  void testIsSnapshotVersion_when42_thenReturnFalse() {
+  void testIsSnapshotVersion_when42_thenReturnFalse()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isSnapshotVersion("42"));
   }
@@ -384,7 +421,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isSnapshotVersion(String)"})
-  void testIsSnapshotVersion_whenSnapshot_thenReturnTrue() {
+  void testIsSnapshotVersion_whenSnapshot_thenReturnTrue()
+  {
     // Arrange, Act and Assert
     assertTrue(VersionValidator.isSnapshotVersion("-SNAPSHOT"));
   }
@@ -399,7 +437,8 @@ class VersionValidatorDiffblueTest {
   @Tag("ContributionFromDiffblue")
   @ManagedByDiffblue
   @MethodsUnderTest({"boolean VersionValidator.isVersionAlias(String)"})
-  void testIsVersionAlias() {
+  void testIsVersionAlias()
+  {
     // Arrange, Act and Assert
     assertFalse(VersionValidator.isVersionAlias("42"));
   }
