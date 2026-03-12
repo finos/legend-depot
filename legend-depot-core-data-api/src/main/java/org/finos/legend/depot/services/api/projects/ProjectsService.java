@@ -73,9 +73,13 @@ public interface ProjectsService
 
     Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusionsMap, boolean transitive);
 
+    Set<ProjectVersion> getDependenciesMaven(List<ArtifactDependency> artifactDependencies, boolean transitive);
+
     ProjectDependencyReport getProjectDependencyReportFromProjectVersionList(List<ProjectVersion> projectDependencyVersions);
 
     ProjectDependencyReport getProjectDependencyReport(List<ArtifactDependency> projectDependencyVersions);
+
+    ProjectDependencyReport getProjectDependencyReportMaven(List<ArtifactDependency> projectDependencyVersions);
 
     default ProjectDependencyReport getProjectDependencyReport(String groupId, String artifactId, String versionId)
     {

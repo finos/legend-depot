@@ -47,6 +47,7 @@ import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
+import org.finos.legend.sdlc.domain.model.project.Project;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.logicng.datastructures.Assignment;
 import org.logicng.formulas.FormulaFactory;
@@ -56,6 +57,7 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
@@ -69,6 +71,34 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
+import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.collection.CollectResult;
+import org.eclipse.aether.collection.DependencyCollectionException;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.graph.DependencyNode;
+import org.eclipse.aether.impl.ArtifactDescriptorReader;
+import org.eclipse.aether.spi.connector.transport.TransporterFactory;
+import org.eclipse.aether.graph.Exclusion;
+import org.eclipse.aether.transport.file.FileTransporterFactory;
+import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
+import org.eclipse.aether.impl.DefaultServiceLocator;
+import org.eclipse.aether.repository.LocalRepository;
+import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
+import org.eclipse.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
+import org.eclipse.aether.util.graph.transformer.JavaScopeDeriver;
+import org.eclipse.aether.util.graph.transformer.JavaScopeSelector;
+import org.eclipse.aether.util.graph.transformer.NearestVersionSelector;
+import org.eclipse.aether.util.graph.transformer.SimpleOptionalitySelector;
+import org.eclipse.aether.util.repository.SimpleArtifactDescriptorPolicy;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.resolution.ArtifactDescriptorRequest;
+import org.eclipse.aether.resolution.ArtifactDescriptorResult;
+import org.eclipse.aether.util.graph.transformer.ConflictResolver;
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 public class ProjectsServiceImpl implements ProjectsService
@@ -166,6 +196,54 @@ public class ProjectsServiceImpl implements ProjectsService
     {
         return projects.find(groupId, artifactId);
     }
+
+    @SuppressWarnings("deprecation")
+    private RepositorySystem newRepositorySystem()
+    {
+        DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
+
+        // Create the reader with this service instance
+        InMemoryArtifactDescriptorReader reader = new InMemoryArtifactDescriptorReader(this);
+        locator.setServices(ArtifactDescriptorReader.class, reader);
+
+        locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
+
+        locator.setErrorHandler(new DefaultServiceLocator.ErrorHandler()
+        {
+            @Override
+            public void serviceCreationFailed(Class<?> type, Class<?> impl, Throwable exception)
+            {
+                LOGGER.error("Service creation failed for {} with implementation {}", type.getName(), impl.getName(), exception);
+            }
+        });
+
+        return locator.getService(RepositorySystem.class);
+    }
+
+    private DefaultRepositorySystemSession newSession(RepositorySystem system)
+    {
+        DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
+
+        session.setLocalRepositoryManager(
+                system.newLocalRepositoryManager(session, new LocalRepository("target/local-repo"))
+        );
+
+        session.setArtifactDescriptorPolicy(new SimpleArtifactDescriptorPolicy(true, true));
+
+        session.setDependencyGraphTransformer(
+                new ChainedDependencyGraphTransformer(
+                        new ConflictResolver(
+                                new NearestVersionSelector(),
+                                new JavaScopeSelector(),
+                                new SimpleOptionalitySelector(),
+                                new JavaScopeDeriver()
+                        )
+                )
+        );
+
+        return session;
+    }
+
 
     @Override
     public Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId)
@@ -300,6 +378,93 @@ public class ProjectsServiceImpl implements ProjectsService
         return dependencies;
     }
 
+    @Override
+    public Set<ProjectVersion> getDependenciesMaven(List<ArtifactDependency> artifactDependencies, boolean transitive)
+    {
+        RepositorySystem system = newRepositorySystem();
+        DefaultRepositorySystemSession session = newSession(system);
+
+        InMemoryArtifactDescriptorReader reader = new InMemoryArtifactDescriptorReader(this);
+
+        CollectRequest request = new CollectRequest();
+
+        List<Dependency> rootDependencies = artifactDependencies.stream()
+                .map(ad ->
+                {
+                    String gav = ad.getGroupId() + ":" + ad.getArtifactId() + ":" + ad.getVersionId();
+
+                    reader.setExclusions(gav, ad.getExclusions());
+
+                    Collection<Exclusion> aetherExclusions = ad.getExclusions().stream()
+                            .map(ex -> new Exclusion(ex.getGroupId(), ex.getArtifactId(), "*", "*"))
+                            .collect(Collectors.toList());
+
+                    return new Dependency(
+                            new DefaultArtifact(ad.getGroupId(), ad.getArtifactId(), "jar", ad.getVersionId()),
+                            "compile",
+                            false,
+                            aetherExclusions);
+                })
+                .collect(Collectors.toList());
+
+        request.setDependencies(rootDependencies);
+
+        try
+        {
+            CollectResult result = system.collectDependencies(session, request);
+            DependencyNode root = result.getRoot();
+
+            Set<ProjectVersion> dependencies = new HashSet<>();
+            collectDependenciesFromNode(root, dependencies);
+
+            if (transitive)
+            {
+                for (ProjectVersion pv : new HashSet<>(dependencies))
+                {
+                    String version = this.resolveAliasesAndCheckVersionExists(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
+                    StoreProjectVersionData projectData = this.getProject(pv.getGroupId(), pv.getArtifactId(), version);
+                    if (projectData.getTransitiveDependenciesReport().isValid())
+                    {
+                        List<ProjectVersion> transitiveDeps = projectData.getTransitiveDependenciesReport().getTransitiveDependencies();
+                        dependencies.addAll(transitiveDeps);
+                    }
+                    else
+                    {
+                        throw new IllegalStateException(String.format("Error calculating transitive dependencies for project version - %s-%s-%s", projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId()));
+                    }
+                }
+            }
+
+            return dependencies;
+        }
+        catch (DependencyCollectionException e)
+        {
+            LOGGER.error("Failed to collect dependencies", e);
+            throw new IllegalStateException("Error collecting dependencies: " + e.getMessage(), e);
+        }
+    }
+
+    private void collectDependenciesFromNode(DependencyNode node, Set<ProjectVersion> dependencies)
+    {
+        Dependency dependency = node.getDependency();
+        if (dependency != null)
+        {
+            Artifact artifact = dependency.getArtifact();
+            dependencies.add(new ProjectVersion(
+                    artifact.getGroupId(),
+                    artifact.getArtifactId(),
+                    artifact.getVersion()
+            ));
+        }
+
+        for (DependencyNode child : node.getChildren())
+        {
+            collectDependenciesFromNode(child, dependencies);
+        }
+    }
+
+
+
     public void buildDependencyGraph(ProjectDependencyGraph graph, ProjectVersion parent, List<ProjectVersion> children, ProjectDependencyGraphWalkerContext context)
     {
         children.forEach(projectVersion ->
@@ -324,6 +489,111 @@ public class ProjectsServiceImpl implements ProjectsService
         List<ArtifactDependency> artifactDependencies = projectDependencyVersions.stream().map(pv -> new ArtifactDependency(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId())).collect(Collectors.toList());
         return getProjectDependencyReport(artifactDependencies);
     }
+
+
+    private ProjectDependencyReport buildReportFromDependencyNode(DependencyNode root)
+    {
+        ProjectDependencyReport report = new ProjectDependencyReport();
+        ProjectDependencyReport.SerializedGraph graph = report.getGraph();
+
+        walkDependencyNode(root, graph, null);
+
+        return report;
+    }
+
+    private void walkDependencyNode(DependencyNode node, ProjectDependencyReport.SerializedGraph graph, ProjectVersion parent)
+    {
+        Dependency dependency = node.getDependency();
+        if (dependency != null)
+        {
+            Artifact artifact = dependency.getArtifact();
+            ProjectVersion projectVersion = new ProjectVersion(
+                    artifact.getGroupId(),
+                    artifact.getArtifactId(),
+                    artifact.getVersion()
+            );
+
+            ProjectDependencyVersionNode versionNode = ProjectDependencyVersionNode.buildFromProjectVersion(projectVersion);
+            graph.getNodes().putIfAbsent(versionNode.getId(), versionNode);
+
+            if (parent == null)
+            {
+                graph.getRootNodes().add(projectVersion.getGav());
+            }
+            else
+            {
+                ProjectDependencyVersionNode parentNode = graph.getNodes().get(parent.getGav());
+                if (parentNode != null)
+                {
+                    parentNode.getForwardEdges().add(projectVersion.getGav());
+                    versionNode.getBackEdges().add(parent.getGav());
+                }
+            }
+
+            for (DependencyNode child : node.getChildren())
+            {
+                walkDependencyNode(child, graph, projectVersion);
+            }
+        }
+        else
+        {
+            // Root node without dependency - process children
+            for (DependencyNode child : node.getChildren())
+            {
+                walkDependencyNode(child, graph, null);
+            }
+        }
+    }
+
+    public ProjectDependencyReport getProjectDependencyReportMaven(List<ArtifactDependency> projectDependencyVersions)
+    {
+        RepositorySystem system = newRepositorySystem();
+        DefaultRepositorySystemSession session = newSession(system);
+
+        // Get the reader to set exclusions
+        InMemoryArtifactDescriptorReader reader = new InMemoryArtifactDescriptorReader(this);
+
+        CollectRequest request = new CollectRequest();
+
+        // Convert ArtifactDependency to Aether Dependency with exclusions
+        List<Dependency> rootDependencies = projectDependencyVersions.stream()
+                .map(ad ->
+                {
+                    String gav = ad.getGroupId() + ":" + ad.getArtifactId() + ":" + ad.getVersionId();
+
+                    // Store exclusions for this artifact
+                    reader.setExclusions(gav, ad.getExclusions());
+
+                    // Convert exclusions to Aether format
+                    Collection<Exclusion> aetherExclusions = ad.getExclusions().stream()
+                            .map(ex -> new Exclusion(ex.getGroupId(), ex.getArtifactId(), "*", "*"))
+                            .collect(Collectors.toList());
+
+                    return new Dependency(
+                            new DefaultArtifact(ad.getGroupId(), ad.getArtifactId(), "jar", ad.getVersionId()),
+                            "compile",
+                            false,
+                            aetherExclusions);
+                })
+                .collect(Collectors.toList());
+
+        request.setDependencies(rootDependencies);
+
+        try
+        {
+            CollectResult result = system.collectDependencies(session, request);
+            DependencyNode root = result.getRoot();
+
+            return buildReportFromDependencyNode(root);
+        }
+        catch (DependencyCollectionException e)
+        {
+            LOGGER.error("Failed to collect dependencies", e);
+            throw new IllegalStateException("Error collecting dependencies: " + e.getMessage(), e);
+        }
+    }
+
+
 
     public ProjectDependencyReport getProjectDependencyReport(List<ArtifactDependency> projectDependencyVersions)
     {

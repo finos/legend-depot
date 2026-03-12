@@ -52,6 +52,7 @@ import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTra
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCIES;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCY_TREE;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.RESOLVE_COMPATIBLE_PROJECT_DEPENDENCY_VERSIONS;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_PROJECT_DEPENDENCY_TREE_FROM_MAVEN;
 
 
 @Path("")
@@ -87,6 +88,15 @@ public class DependenciesResource extends TracingResource
     public Response analyzeDependencyTreeFromArtifactDependencies(@ApiParam("projectDependencies") List<ArtifactDependency> projectDependencies)
     {
         return handleResponse(GET_PROJECT_DEPENDENCY_TREE, () -> this.projectApi.getProjectDependencyReport(projectDependencies));
+    }
+
+    @POST
+    @Path("/projects/analyzeDependencyTreeFromArtifactDependenciesMaven")
+    @ApiOperation(GET_PROJECT_DEPENDENCY_TREE)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response analyzeDependencyTreeFromArtifactDependenciesMaven(@ApiParam("projectDependencies") List<ArtifactDependency> projectDependencies)
+    {
+        return handleResponse(GET_PROJECT_DEPENDENCY_TREE, () -> this.projectApi.getProjectDependencyReportMaven(projectDependencies));
     }
 
     @POST

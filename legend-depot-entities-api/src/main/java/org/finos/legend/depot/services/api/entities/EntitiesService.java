@@ -48,6 +48,8 @@ public interface EntitiesService<T extends StoredEntity>
 
     List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependencies(List<ArtifactDependency> projectDependencies, boolean transitive, boolean includeOrigin);
 
+    List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependenciesMaven(List<ArtifactDependency> projectDependencies, boolean transitive, boolean includeOrigin);
+
     List<ProjectVersionEntities> getDependenciesEntitiesByClassifier(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin);
 
     default List<ProjectVersionEntities> getDependenciesEntities(String groupId, String artifactId, String versionId, boolean transitive, boolean includeOrigin)

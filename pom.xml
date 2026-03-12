@@ -143,8 +143,8 @@
         <mockito.version>3.9.0</mockito.version>
         <slf4j.version>1.7.36</slf4j.version>
 
-        <apache.maven.version>3.6.2</apache.maven.version>
-        <shrinkwrap-resolver-api.version>3.1.2</shrinkwrap-resolver-api.version>
+        <apache.maven.version>3.9.12</apache.maven.version>
+        <shrinkwrap-resolver-api.version>3.3.5</shrinkwrap-resolver-api.version>
         <plexus-utils.version>3.1.0</plexus-utils.version>
         <guava.version>30.1-jre</guava.version>
 
@@ -423,7 +423,7 @@
                 <artifactId>central-publishing-maven-plugin</artifactId>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
-                     <autoPublish>true</autoPublish>
+                    <autoPublish>true</autoPublish>
                     <waitUntil>published</waitUntil>
                     <waitMaxTime>3600</waitMaxTime>
                 </configuration>
@@ -1233,9 +1233,9 @@
             </dependency>
 
 
-<!--             TEST -->
+            <!--             TEST -->
             <dependency>
-                  <groupId>${junit.groupId}</groupId>
+                <groupId>${junit.groupId}</groupId>
                 <artifactId>${junit.artifactId}</artifactId>
                 <version>${junit5-version}</version>
                 <scope>test</scope>
@@ -1345,12 +1345,47 @@
                         <groupId>com.google.guava</groupId>
                         <artifactId>guava</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.maven</groupId>
+                        <artifactId>maven-resolver-provider</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.maven</groupId>
+                        <artifactId>maven-model-builder</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>failureaccess</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.errorprone</groupId>
+                        <artifactId>error_prone_annotations</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-resolver-provider</artifactId>
+                <version>${apache.maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-model-builder</artifactId>
+                <version>${apache.maven.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>9.9</version>
             </dependency>
 
             <!-- PROMETHEUS -->
