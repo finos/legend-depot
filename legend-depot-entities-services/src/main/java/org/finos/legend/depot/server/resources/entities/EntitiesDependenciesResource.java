@@ -42,6 +42,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSIONS_DEPENDENCY_ENTITIES;
+import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSIONS_DEPENDENCY_ENTITIES_MAVEN;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_DEPENDENCY_ENTITIES;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_ENTITY_FROM_DEPENDENCIES;
 
@@ -127,14 +128,14 @@ public class EntitiesDependenciesResource extends TracingResource
 
     @POST
     @Path("/projects/dependenciesFromArtifactDependencies")
-    @ApiOperation(GET_VERSIONS_DEPENDENCY_ENTITIES)
+    @ApiOperation(GET_VERSIONS_DEPENDENCY_ENTITIES_MAVEN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllEntitiesFromArtifactDependencies(@ApiParam("projectDependencies") List<ArtifactDependency> projectDependencies,
-                                                   @QueryParam("transitive") @DefaultValue("false")
-                                                   @ApiParam("Whether to return transitive dependencies") boolean transitive,
-                                                   @QueryParam("includeOrigin") @DefaultValue("false")
-                                                   @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
+    public Response getAllEntitiesFromArtifactDependenciesMaven(@ApiParam("projectDependencies") List<ArtifactDependency> projectDependencies,
+                                                           @QueryParam("transitive") @DefaultValue("false")
+                                                           @ApiParam("Whether to return transitive dependencies") boolean transitive,
+                                                           @QueryParam("includeOrigin") @DefaultValue("false")
+                                                           @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
     {
-        return handleResponse(GET_VERSIONS_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntitiesFromArtifactDependencies(projectDependencies, transitive, includeOrigin));
+        return handleResponse(GET_VERSIONS_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntitiesFromArtifactDependenciesMaven(projectDependencies, transitive, includeOrigin));
     }
 }

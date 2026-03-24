@@ -303,7 +303,7 @@ public class TestEntitiesService extends TestBaseServices
         projectsVersionsStore.createOrUpdate(mainProject);
 
         ArtifactDependency dependency1Artifact = new ArtifactDependency("examples.metadata", "test", "2.3.1");
-        List<ProjectVersionEntities> dependencyListBeforeExclusions = entitiesService.getDependenciesEntitiesFromArtifactDependencies(Arrays.asList(dependency1Artifact), true, true);
+        List<ProjectVersionEntities> dependencyListBeforeExclusions = entitiesService.getDependenciesEntitiesFromArtifactDependenciesMaven(Arrays.asList(dependency1Artifact), true, true);
         Assertions.assertFalse(dependencyListBeforeExclusions.isEmpty());
         Assertions.assertEquals(3, dependencyListBeforeExclusions.size());
         Assertions.assertEquals(7, dependencyListBeforeExclusions.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
@@ -319,7 +319,7 @@ public class TestEntitiesService extends TestBaseServices
         );
 
         List<ArtifactDependency> projectVersions = Arrays.asList(dependency1ArtifactWithExclusions);
-        List<ProjectVersionEntities> dependencyListAfterExclusions = entitiesService.getDependenciesEntitiesFromArtifactDependencies(projectVersions, true, true);
+        List<ProjectVersionEntities> dependencyListAfterExclusions = entitiesService.getDependenciesEntitiesFromArtifactDependenciesMaven(projectVersions, true, true);
         Assertions.assertFalse(dependencyListAfterExclusions.isEmpty());
         Assertions.assertEquals(2, dependencyListAfterExclusions.size());
         Assertions.assertEquals(7, dependencyListAfterExclusions.stream().filter(projectToArtifactFilter("examples.metadata", "test")).findFirst().get().getEntities().size());
