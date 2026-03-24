@@ -23,6 +23,7 @@ import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
+import org.finos.legend.depot.services.dependencies.MavenDependencyResolverImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
@@ -50,7 +51,7 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore,projectsStore,metrics,queue,new ProjectsConfiguration("master"));
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
-    protected RefreshDependenciesService refreshDependenciesService = new RefreshDependenciesServiceImpl(projectsService, repository,new DependencyUtil());
+    protected RefreshDependenciesService refreshDependenciesService = new RefreshDependenciesServiceImpl(projectsService, repository,new DependencyUtil(), new MavenDependencyResolverImpl(projectsService));
 
     private static final String GROUPID = "examples.metadata";
 
