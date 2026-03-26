@@ -26,12 +26,14 @@ public class ResourceLoggingAndTracing
     public static final String CREATE_UPDATE_PROJECT = "create update project";
     public static final String GET_PROJECT_DEPENDENCIES = "get upstream project dependencies";
     public static final String GET_PROJECT_DEPENDENCY_TREE = "get project dependency tree";
+    public static final String GET_PROJECT_DEPENDENCY_TREE_FROM_MAVEN = "get project dependency tree using maven resolution";
     public static final String GET_DEPENDANT_PROJECTS = "get downstream projects";
     public static final String UPDATE_ALL_SNAPSHOTS = "refresh all snapshots";
     public static final String UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES = "update project transitive dependencies";
     public static final String GET_VERSION_ENTITIES = "get version entities";
     public static final String GET_VERSION_DEPENDENCY_ENTITIES = "get version dependencies entities";
     public static final String GET_VERSIONS_DEPENDENCY_ENTITIES = "get versions dependencies entities";
+    public static final String GET_VERSIONS_DEPENDENCY_ENTITIES_MAVEN = "get versions dependencies entities using maven resolution";
     public static final String GET_VERSION_ENTITIES_AS_PMCD = "get version entities as PMCD";
     public static final String GET_VERSIONS_DEPENDENCY_ENTITIES_AS_PMCD = "get versions dependencies entities as PMCD";
     public static final String GET_VERSION_ENTITY = "get version entity";
