@@ -36,7 +36,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          ref: 'master'
+          ref: ${{ github.ref }}
           token: ${{ secrets.FINOS_GITHUB_TOKEN }}
 
       - name: Configure git
