@@ -260,13 +260,6 @@ public class MavenDependencyResolverImpl implements MavenDependencyResolver
             ProjectDependencyVersionNode versionNode = ProjectDependencyVersionNode.buildFromProjectVersion(projectVersion);
             graph.getNodes().putIfAbsent(versionNode.getId(), versionNode);
 
-            // Look up and set the projectId from the project store
-            if (versionNode.getProjectId() == null)
-            {
-                projectsService.findCoordinates(projectVersion.getGroupId(), projectVersion.getArtifactId())
-                        .ifPresent(projectData -> versionNode.setProjectId(projectData.getProjectId()));
-            }
-
             if (parent == null)
             {
                 graph.getRootNodes().add(projectVersion.getGav());

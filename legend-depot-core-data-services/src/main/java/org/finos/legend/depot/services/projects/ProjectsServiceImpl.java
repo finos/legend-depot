@@ -58,7 +58,6 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
@@ -88,7 +87,7 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private final DependencyOverride dependencyOverride;
 
-    private final Provider<MavenDependencyResolver> mavenDependencyResolverProvider;
+    private final MavenDependencyResolver mavenDependencyResolver;
 
     private final Map<ProjectVersion, Set<ProjectVersion>> transitiveDependenciesMap = new HashMap<>();
 
@@ -97,7 +96,7 @@ public class ProjectsServiceImpl implements ProjectsService
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ProjectsServiceImpl.class);
 
     @Inject
-    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyOverride") DependencyOverride dependencyOverride, Provider<MavenDependencyResolver> mavenDependencyResolverProvider)
+    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyOverride") DependencyOverride dependencyOverride, MavenDependencyResolver mavenDependencyResolver)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
@@ -105,7 +104,7 @@ public class ProjectsServiceImpl implements ProjectsService
         this.queue = queue;
         this.configuration = configuration;
         this.dependencyOverride = dependencyOverride;
-        this.mavenDependencyResolverProvider = mavenDependencyResolverProvider;
+        this.mavenDependencyResolver = mavenDependencyResolver;
     }
 
     public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration)
@@ -116,8 +115,7 @@ public class ProjectsServiceImpl implements ProjectsService
         this.queue = queue;
         this.configuration = configuration;
         this.dependencyOverride = new DependencyUtil();
-        MavenDependencyResolverImpl resolver = new MavenDependencyResolverImpl(this);
-        this.mavenDependencyResolverProvider = () -> resolver;
+        this.mavenDependencyResolver = new MavenDependencyResolverImpl(this);
     }
 
     @Override
@@ -323,7 +321,7 @@ public class ProjectsServiceImpl implements ProjectsService
         // Aether resolves the full transitive tree via InMemoryArtifactDescriptorReader,
         // so no manual transitive expansion is needed. The 'transitive' flag controls
         // whether we return only direct deps or the full tree.
-        Set<ProjectVersion> dependencies = mavenDependencyResolverProvider.get().collectDependencies(resolvedVersions, exclusionsMap);
+        Set<ProjectVersion> dependencies = mavenDependencyResolver.collectDependencies(resolvedVersions, exclusionsMap);
 
         if (!transitive)
         {
@@ -364,13 +362,13 @@ public class ProjectsServiceImpl implements ProjectsService
     public ProjectDependencyReport getProjectDependencyReportFromProjectVersionList(List<ProjectVersion> projectDependencyVersions)
     {
         List<ArtifactDependency> artifactDependencies = projectDependencyVersions.stream().map(pv -> new ArtifactDependency(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId())).collect(Collectors.toList());
-        return getProjectDependencyReportMaven(artifactDependencies);
+        return getProjectDependencyReport(artifactDependencies);
     }
 
 
     public ProjectDependencyReport getProjectDependencyReportMaven(List<ArtifactDependency> projectDependencyVersions)
     {
-        return mavenDependencyResolverProvider.get().collectDependencyReport(projectDependencyVersions);
+        return mavenDependencyResolver.collectDependencyReport(projectDependencyVersions);
     }
 
 
