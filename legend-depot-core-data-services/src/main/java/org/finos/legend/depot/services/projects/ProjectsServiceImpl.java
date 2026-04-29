@@ -41,8 +41,6 @@ import org.finos.legend.depot.services.dependencies.LogicNGSATResult;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
 import org.finos.legend.depot.services.dependencies.ProjectDependencyGraphWalkerContext;
 import org.finos.legend.depot.services.dependencies.DependencyExclusionsUtil;
-import org.finos.legend.depot.services.api.dependencies.MavenDependencyResolver;
-import org.finos.legend.depot.services.dependencies.MavenDependencyResolverImpl;
 import org.finos.legend.depot.store.api.projects.Projects;
 import org.finos.legend.depot.store.api.projects.ProjectsVersions;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
@@ -70,6 +68,7 @@ import java.util.Comparator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 public class ProjectsServiceImpl implements ProjectsService
@@ -87,8 +86,6 @@ public class ProjectsServiceImpl implements ProjectsService
 
     private final DependencyOverride dependencyOverride;
 
-    private final MavenDependencyResolver mavenDependencyResolver;
-
     private final Map<ProjectVersion, Set<ProjectVersion>> transitiveDependenciesMap = new HashMap<>();
 
     private static final String EXCLUSION_FOUND_IN_STORE = "project version not found for %s-%s-%s, exclusion reason: %s";
@@ -96,7 +93,7 @@ public class ProjectsServiceImpl implements ProjectsService
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ProjectsServiceImpl.class);
 
     @Inject
-    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyOverride") DependencyOverride dependencyOverride, MavenDependencyResolver mavenDependencyResolver)
+    public ProjectsServiceImpl(ProjectsVersions projectsVersions, Projects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyOverride") DependencyOverride dependencyOverride)
     {
         this.projectsVersions = projectsVersions;
         this.projects = projects;
@@ -104,7 +101,6 @@ public class ProjectsServiceImpl implements ProjectsService
         this.queue = queue;
         this.configuration = configuration;
         this.dependencyOverride = dependencyOverride;
-        this.mavenDependencyResolver = mavenDependencyResolver;
     }
 
     public ProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration)
@@ -115,7 +111,6 @@ public class ProjectsServiceImpl implements ProjectsService
         this.queue = queue;
         this.configuration = configuration;
         this.dependencyOverride = new DependencyUtil();
-        this.mavenDependencyResolver = new MavenDependencyResolverImpl(this);
     }
 
     @Override
@@ -171,7 +166,6 @@ public class ProjectsServiceImpl implements ProjectsService
     {
         return projects.find(groupId, artifactId);
     }
-
 
     @Override
     public Optional<StoreProjectVersionData> find(String groupId, String artifactId, String versionId)
@@ -306,40 +300,6 @@ public class ProjectsServiceImpl implements ProjectsService
         return dependencies;
     }
 
-    @Override
-    public Set<ProjectVersion> getDependenciesMaven(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusionsMap, boolean transitive)
-    {
-        // Resolve aliases before passing to the resolver
-        List<ProjectVersion> resolvedVersions = projectVersions.stream()
-                .map(pv ->
-                {
-                    String version = this.resolveAliasesAndCheckVersionExists(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
-                    return new ProjectVersion(pv.getGroupId(), pv.getArtifactId(), version);
-                })
-                .collect(Collectors.toList());
-
-        // Aether resolves the full transitive tree via InMemoryArtifactDescriptorReader,
-        // so no manual transitive expansion is needed. The 'transitive' flag controls
-        // whether we return only direct deps or the full tree.
-        Set<ProjectVersion> dependencies = mavenDependencyResolver.collectDependencies(resolvedVersions, exclusionsMap);
-
-        if (!transitive)
-        {
-            // Keep only direct dependencies (first-level children in Aether tree)
-            Set<ProjectVersion> directDeps = new HashSet<>();
-            for (ProjectVersion pv : resolvedVersions)
-            {
-                StoreProjectVersionData projectData = this.getProject(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId());
-                directDeps.addAll(projectData.getVersionData().getDependencies());
-            }
-            dependencies.retainAll(directDeps);
-        }
-
-        return dependencies;
-    }
-
-
-
     public void buildDependencyGraph(ProjectDependencyGraph graph, ProjectVersion parent, List<ProjectVersion> children, ProjectDependencyGraphWalkerContext context)
     {
         children.forEach(projectVersion ->
@@ -364,14 +324,6 @@ public class ProjectsServiceImpl implements ProjectsService
         List<ArtifactDependency> artifactDependencies = projectDependencyVersions.stream().map(pv -> new ArtifactDependency(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId())).collect(Collectors.toList());
         return getProjectDependencyReport(artifactDependencies);
     }
-
-
-    public ProjectDependencyReport getProjectDependencyReportMaven(List<ArtifactDependency> projectDependencyVersions)
-    {
-        return mavenDependencyResolver.collectDependencyReport(projectDependencyVersions);
-    }
-
-
 
     public ProjectDependencyReport getProjectDependencyReport(List<ArtifactDependency> projectDependencyVersions)
     {

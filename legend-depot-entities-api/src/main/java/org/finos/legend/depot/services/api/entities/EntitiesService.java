@@ -46,7 +46,7 @@ public interface EntitiesService<T extends StoredEntity>
 
     List<ProjectVersionEntities> getDependenciesEntities(String classifier, boolean includeOrigin, List<ProjectVersion> originProjects, Supplier<Set<ProjectVersion>> dependencyCalculator);
 
-    List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependenciesMaven(List<ArtifactDependency> projectDependencies, boolean transitive, boolean includeOrigin);
+    List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependencies(List<ArtifactDependency> projectDependencies, boolean transitive, boolean includeOrigin);
 
     List<ProjectVersionEntities> getDependenciesEntitiesByClassifier(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin);
 
