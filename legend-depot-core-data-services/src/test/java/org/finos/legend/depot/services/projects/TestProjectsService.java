@@ -195,6 +195,29 @@ public class TestProjectsService extends TestBaseServices
     }
 
     @Test
+    public void canGetProjectDependenciesWithConflicts()
+    {
+        StoreProjectVersionData projectA = projectsService.find("examples.metadata", "test-dependencies", "1.0.0").get();
+        ProjectVersion dependencyA = new ProjectVersion("example.services.test", "test", "1.0.0");
+        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(dependencyA), true));
+        projectsService.createOrUpdate(projectA);
+
+        StoreProjectVersionData projectB = new StoreProjectVersionData("example.services.test", "test-dependencies", "1.0.0");
+        projectsService.createOrUpdate(new StoreProjectData("PROD-72", "example.services.test", "test-dependencies"));
+        ProjectVersion dependencyB = new ProjectVersion("example.services.test", "test", "2.0.0");
+        projectB.getVersionData().addDependency(dependencyB);
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(dependencyB), true));
+        projectsService.createOrUpdate(projectB);
+        projectsService.createOrUpdate(new StoreProjectVersionData("example.services.test", "test", "2.0.0"));
+
+        // Dependency Tree
+        ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReportFromProjectVersionList(Arrays.asList(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), new ProjectVersion("example.services.test", "test-dependencies", "1.0.0")));
+
+        Assertions.assertEquals(1, dependencyReport.getConflicts().size());
+        Assertions.assertEquals(dependencyReport.getConflicts().get(0).getVersions(), Sets.mutable.of("example.services.test:test:1.0.0","example.services.test:test:2.0.0"));
+    }
+
+    @Test
     public void canGetProjectDependenciesReportWithOverrides()
     {
         StoreProjectVersionData projectA = projectsService.find("examples.metadata", "test-dependencies", "1.0.0").get();
@@ -631,7 +654,8 @@ public class TestProjectsService extends TestBaseServices
         // Cv1 will be overridden by CV2 and incoming dependency Dv2 will be part of the list
         ProjectDependencyReport dependencyReport = projectsService.getProjectDependencyReportFromProjectVersionList(Arrays.asList(pv1, pv2, dependency3));
 
-        Assertions.assertEquals(0, dependencyReport.getConflicts().size());
+        Assertions.assertEquals(1, dependencyReport.getConflicts().size());
+        Assertions.assertEquals(Sets.mutable.of("examples.metadata:testd:2.0.0", "examples.metadata:testd:1.0.0"),dependencyReport.getConflicts().get(0).getVersions());
 
     }
 
@@ -1643,19 +1667,14 @@ public class TestProjectsService extends TestBaseServices
     }
 
     @Test
-    public void canResolveWithNearestWinsWhenAlternativeVersionIsExcluded()
+    public void cannotResolveWhenAlternativeVersionIsExcluded()
     {
         // Test scenario:
         // - projectAlpha depends on commons_util v1.0.0
-        // - projectBeta depends on commons_util v2.0.0
-        // - projectAlpha has alternative v2.0.0 that depends on commons_util v2.0.0
+        // - projectBeta depends on commons_util v2.0.0 (CONFLICT!)
+        // - projectAlpha has alternative v2.0.0 that depends on commons_util v2.0.0 (would resolve conflict)
         // - BUT projectAlpha v2.0.0 is EXCLUDED from the store
-        //
-        // The SAT-based resolveCompatibleVersions still detects the version conflict
-        // between commons_util v1.0.0 and v2.0.0 because it requires exact version
-        // agreement. However, the Maven dependency report (which uses nearest-wins)
-        // resolves the conflict automatically by picking the nearest version, so
-        // the dependency report has NO conflicts.
+        // - Result: Should be unsatisfiable even with backtrack enabled
 
         // Create all project data entries with valid project IDs
         projectsService.createOrUpdate(new StoreProjectData("PROD-201", "org.example.resolve", "project_alpha"));
@@ -1675,11 +1694,11 @@ public class TestProjectsService extends TestBaseServices
         ProjectVersion commonsUtil_v1_dep = new ProjectVersion("org.apache.commons", "commons_util", "1.0.0");
         ProjectVersion commonsUtil_v2_dep = new ProjectVersion("org.apache.commons", "commons_util", "2.0.0");
 
-        // Configure projectAlpha v1.0.0 dependencies: commons_util v1.0.0
+        // Configure projectAlpha v1.0.0 dependencies: commons_util v1.0.0 (conflicts with Beta)
         projectAlpha_v1.getVersionData().addDependency(commonsUtil_v1_dep);
         projectAlpha_v1.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsUtil_v1_dep), true));
 
-        // Configure projectAlpha v2.0.0 dependencies: commons_util v2.0.0
+        // Configure projectAlpha v2.0.0 dependencies: commons_util v2.0.0 (would be compatible with Beta)
         projectAlpha_v2.getVersionData().addDependency(commonsUtil_v2_dep);
         projectAlpha_v2.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(commonsUtil_v2_dep), true));
 
@@ -1694,42 +1713,36 @@ public class TestProjectsService extends TestBaseServices
         projectsService.createOrUpdate(commonsUtil_v1);
         projectsService.createOrUpdate(commonsUtil_v2);
 
-        // Test resolution with different versions of commons_util required by each project
+        // Test resolution with conflicting requirements
         List<ProjectVersion> requiredProjects = Arrays.asList(
-                new ProjectVersion("org.example.resolve", "project_alpha", "1.0.0"),  // depends on commons_util v1.0.0
-                new ProjectVersion("org.example.resolve", "project_beta", "1.0.0")    // depends on commons_util v2.0.0
+                new ProjectVersion("org.example.resolve", "project_alpha", "1.0.0"),  // Available, but depends on commons_util v1.0.0
+                new ProjectVersion("org.example.resolve", "project_beta", "1.0.0")    // Depends on commons_util v2.0.0 (CONFLICT!)
         );
 
-        // Test Case 1: Without backtrack - SAT solver still fails due to version conflict
+        // Test Case 1: Without backtrack - should fail due to direct conflict
         DependencyResponseModel noBacktrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 0);
         Assertions.assertFalse(noBacktrackResult.isSuccess());
         Assertions.assertTrue(noBacktrackResult.getResolvedVersions().isEmpty());
 
-        // Test Case 2: With backtrack enabled - SAT solver still fails because the
-        // alternative projectAlpha v2.0.0 is excluded from the store
+        // Test Case 2: With backtrack enabled - should still fail because alternative version is excluded
         DependencyResponseModel backtrackResult = projectsService.resolveCompatibleVersions(requiredProjects, 2);
         Assertions.assertFalse(backtrackResult.isSuccess());
         Assertions.assertTrue(backtrackResult.getResolvedVersions().isEmpty());
 
-        // Test Case 3: Maven dependency report uses nearest-wins, so there are NO conflicts
-        // (nearest-wins simply picks one version of commons_util rather than reporting a conflict)
-        List<ProjectVersion> projectsForReport = Arrays.asList(
+        // Test Case 3: Verify the conflict exists in dependency report
+        List<ProjectVersion> conflictingProjects = Arrays.asList(
                 new ProjectVersion("org.example.resolve", "project_alpha", "1.0.0"),
                 new ProjectVersion("org.example.resolve", "project_beta", "1.0.0")
         );
 
-        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(projectsForReport);
-        Assertions.assertTrue(report.getConflicts().isEmpty(), "Maven nearest-wins should produce no conflicts");
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportFromProjectVersionList(conflictingProjects);
+        Assertions.assertFalse(report.getConflicts().isEmpty());
 
-        // Verify the graph contains only one version of commons_util (the winner)
-        long commonsUtilNodeCount = report.getGraph().getNodes().keySet().stream()
-                .filter(gav -> gav.startsWith("org.apache.commons:commons_util:"))
-                .count();
-        Assertions.assertEquals(1, commonsUtilNodeCount, "Nearest-wins should resolve to exactly one version of commons_util in the graph");
-
-        // Test Case 4: Prove that the SAT solver solution works if the alternative version is available
+        // Test Case 4: Prove that the solution would work if the alternative version was available
+        // Add the excluded version back to the store
         projectsService.createOrUpdate(projectAlpha_v2);
 
+        // Now test with the same required projects but allowing backtrack to find alternative
         DependencyResponseModel resolvedWithAlternative = projectsService.resolveCompatibleVersions(requiredProjects, 2);
         Assertions.assertTrue(resolvedWithAlternative.isSuccess());
         Assertions.assertFalse(resolvedWithAlternative.getResolvedVersions().isEmpty());
@@ -1738,14 +1751,19 @@ public class TestProjectsService extends TestBaseServices
                 .map(ProjectVersion::getGav)
                 .collect(Collectors.toSet());
 
+        // Verify the solution uses the alternative version
         Assertions.assertTrue(solutionGavs.contains("org.example.resolve:project_alpha:2.0.0"));
         Assertions.assertTrue(solutionGavs.contains("org.example.resolve:project_beta:1.0.0"));
 
-        log.info("Test demonstrated nearest-wins vs SAT solver behavior:");
-        log.info("  - SAT solver without alternative: FAILED (version conflict)");
-        log.info("  - SAT solver with alternative: {} projects resolved", resolvedWithAlternative.getResolvedVersions().size());
-        log.info("  - Maven dependency report: no conflicts (nearest-wins)");
-        resolvedWithAlternative.getResolvedVersions().forEach(pv -> log.info("    - {}", pv.getGav()));
+        log.info("Test demonstrated that excluding alternative version prevents conflict resolution:");
+        log.info("  - Without alternative: {} projects resolved", backtrackResult.getResolvedVersions().size());
+        log.info("  - With alternative: {} projects resolved", resolvedWithAlternative.getResolvedVersions().size());
+
+        if (!resolvedWithAlternative.getResolvedVersions().isEmpty())
+        {
+            log.info("  Solution with alternative version:");
+            resolvedWithAlternative.getResolvedVersions().forEach(pv -> log.info("    - {}", pv.getGav()));
+        }
     }
 
     @Test
@@ -2281,430 +2299,5 @@ public class TestProjectsService extends TestBaseServices
         Assertions.assertEquals("org.finos.legend:project_a:473.0.0", alternatives.get(7).getGav());
         Assertions.assertEquals("org.finos.legend:project_a:472.0.0", alternatives.get(8).getGav());
         Assertions.assertEquals("org.finos.legend:project_a:471.0.0", alternatives.get(9).getGav());
-    }
-
-
-    @Test
-    public void canGetProjectDependencyReportMaven()
-    {
-        // Setup: A:1.0.0 --> B:1.0.0 --> C:1.0.0
-        // Use existing test data pattern from other tests
-        StoreProjectVersionData projectA = new StoreProjectVersionData("examples.metadata", "test-a", "1.0.0");
-        StoreProjectVersionData projectB = new StoreProjectVersionData("examples.metadata", "test-b", "1.0.0");
-        StoreProjectVersionData projectC = new StoreProjectVersionData("examples.metadata", "test-c", "1.0.0");
-
-        // C:1.0.0 has no dependencies
-        projectC.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(projectC);
-
-        // B:1.0.0 depends on C:1.0.0
-        ProjectVersion cDep = new ProjectVersion("examples.metadata", "test-c", "1.0.0");
-        projectB.getVersionData().addDependency(cDep);
-        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(cDep), true));
-        projectsVersionsStore.createOrUpdate(projectB);
-
-        // A:1.0.0 depends on B:1.0.0
-        ProjectVersion bDep = new ProjectVersion("examples.metadata", "test-b", "1.0.0");
-        projectA.getVersionData().addDependency(bDep);
-        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(bDep, cDep), true));
-        projectsVersionsStore.createOrUpdate(projectA);
-
-        // Execute
-        List<ArtifactDependency> inputDeps = Collections.singletonList(
-                new ArtifactDependency("examples.metadata", "test-a", "1.0.0")
-        );
-        ProjectDependencyReport report = projectsService.getProjectDependencyReportMaven(inputDeps);
-
-        // Assert
-        Assertions.assertNotNull(report);
-        Assertions.assertEquals(3, report.getGraph().getNodes().size());
-        Assertions.assertTrue(report.getGraph().getNodes().containsKey("examples.metadata:test-a:1.0.0"));
-        Assertions.assertTrue(report.getGraph().getNodes().containsKey("examples.metadata:test-b:1.0.0"));
-        Assertions.assertTrue(report.getGraph().getNodes().containsKey("examples.metadata:test-c:1.0.0"));
-        Assertions.assertEquals(0, report.getConflicts().size());
-    }
-
-
-    @Test
-    public void canGetProjectDependencyReportMavenWithExclusions()
-    {
-        projectsStore.createOrUpdate(new StoreProjectData("PROD-55555", "examples.metadata", "base-lib", "master", "1.0.0"));
-        projectsStore.createOrUpdate(new StoreProjectData("PROD-99999", "examples.metadata", "base-dep", "master", "1.0.0"));
-        projectsStore.createOrUpdate(new StoreProjectData("PROD-33333", "examples.test", "commons-lib", "master", "3.0.0"));
-        projectsStore.createOrUpdate(new StoreProjectData("PROD-66666", "examples.metadata", "excluded-lib", "master", "1.0.0"));
-        projectsStore.createOrUpdate(new StoreProjectData("PROD-11111", "examples.metadata", "another-project", "master", "2.0.0"));
-        projectsStore.createOrUpdate(new StoreProjectData("PROD-77777", "examples.metadata", "excluded-transitive", "master", "1.0.0"));
-        projectsStore.createOrUpdate(new StoreProjectData("PROD-88888", "examples.metadata", "main-project", "master", "1.0.0"));
-
-        // excluded-lib:1.0.0 depends on excluded-transitive:1.0.0
-        StoreProjectVersionData excludedLib = new StoreProjectVersionData("examples.metadata", "excluded-lib", "1.0.0");
-        ProjectVersion excludedTransitiveDep = new ProjectVersion("examples.metadata", "excluded-transitive", "1.0.0");
-        excludedLib.getVersionData().setDependencies(Collections.singletonList(excludedTransitiveDep));
-        excludedLib.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(excludedTransitiveDep), true));
-        projectsVersionsStore.createOrUpdate(excludedLib);
-
-        // base-dep:1.0.0 depends on excluded-lib:1.0.0 and another-project:2.0.0
-        StoreProjectVersionData baseDep = new StoreProjectVersionData("examples.metadata", "base-dep", "1.0.0");
-        StoreProjectVersionData anotherProject = new StoreProjectVersionData("examples.metadata", "another-project", "2.0.0");
-        ProjectVersion excludedLibDep = new ProjectVersion("examples.metadata", "excluded-lib", "1.0.0");
-        ProjectVersion nonExcludedLipDep = new ProjectVersion("examples.metadata", "another-project", "2.0.0"); // non-excluded dependency
-        baseDep.getVersionData().setDependencies(Arrays.asList(excludedLibDep, nonExcludedLipDep));
-        baseDep.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(excludedLibDep, excludedTransitiveDep, nonExcludedLipDep), true));
-        anotherProject.getVersionData().setDependencies(Collections.emptyList());
-        anotherProject.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(anotherProject);
-        projectsVersionsStore.createOrUpdate(baseDep);
-
-        // excluded-transitive:1.0.0 has no dependencies
-        StoreProjectVersionData excludedTransitive = new StoreProjectVersionData("examples.metadata", "excluded-transitive", "1.0.0");
-        excludedTransitive.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(excludedTransitive);
-
-        // base-lib:1.0.0 has no dependencies
-        StoreProjectVersionData baseLib = new StoreProjectVersionData("examples.metadata", "base-lib", "1.0.0");
-        baseLib.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(baseLib);
-
-        // commons-lib:3.0.0 depends on excluded-lib:1.0.0, but it is not excluded from this dependency
-        StoreProjectVersionData commonsLib = new StoreProjectVersionData("examples.test", "commons-lib", "3.0.0");
-        commonsLib.getVersionData().setDependencies(List.of(excludedLibDep));
-        commonsLib.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(excludedLibDep, excludedTransitiveDep), true));
-        projectsVersionsStore.createOrUpdate(commonsLib);
-
-        // Add exclusion for excluded-lib
-        ProjectVersion baseDepVersion = new ProjectVersion("examples.metadata", "base-dep", "1.0.0");
-        ProjectVersion baseLibVersion = new ProjectVersion("examples.metadata", "base-lib", "1.0.0");
-        ProjectVersion commonsLibVersion = new ProjectVersion("examples.test", "commons-lib", "3.0.0");
-
-        List<DependencyExclusion> exclusions = new ArrayList<>();
-        exclusions.add(new DependencyExclusion("examples.metadata", "excluded-lib"));
-        List<ArtifactDependency> inputDeps = Arrays.asList(
-                new ArtifactDependency("examples.metadata", "base-dep", "1.0.0", exclusions),
-                new ArtifactDependency("examples.metadata", "base-lib", "1.0.0"),
-                new ArtifactDependency("examples.test", "commons-lib", "3.0.0")
-        );
-        ProjectDependencyReport report = projectsService.getProjectDependencyReportMaven(inputDeps);
-
-        Assertions.assertEquals(6, report.getGraph().getNodes().size());
-        report.getGraph().getNodes().get(baseDepVersion.getGav()).getForwardEdges().forEach(edge ->
-        {
-            Assertions.assertNotEquals(excludedLibDep.getGav(), edge);
-            Assertions.assertNotEquals(excludedTransitiveDep.getGav(), edge);
-        });
-        report.getGraph().getNodes().get(commonsLibVersion.getGav()).getForwardEdges().forEach(edge ->
-        {
-            Assertions.assertEquals(excludedLibDep.getGav(), edge);
-        });
-        Assertions.assertEquals(1, report.getGraph().getNodes().get(excludedLibDep.getGav()).getBackEdges().size());
-        report.getGraph().getNodes().get(excludedLibDep.getGav()).getBackEdges().forEach(edge ->
-        {
-            Assertions.assertEquals(commonsLibVersion.getGav(), edge);
-        });
-    }
-
-    @Test
-    public void canGetProjectDependencyReportMavenWithDiamondDependency()
-    {
-        // Diamond dependency:
-        // test-a:1.0.0 --> test-b:1.0.0 --> test-d:1.0.0
-        //             --> test-c:1.0.0 --> test-d:1.0.0
-
-        StoreProjectVersionData projectA = new StoreProjectVersionData("examples.metadata", "test-a", "1.0.0");
-        StoreProjectVersionData projectB = new StoreProjectVersionData("examples.metadata", "test-b", "1.0.0");
-        StoreProjectVersionData projectC = new StoreProjectVersionData("examples.metadata", "test-c", "1.0.0");
-        StoreProjectVersionData projectD = new StoreProjectVersionData("examples.metadata", "test-d", "1.0.0");
-
-        // D:1.0.0 has no dependencies (leaf node)
-        projectD.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(projectD);
-
-        // B:1.0.0 depends on D:1.0.0
-        ProjectVersion dDep = new ProjectVersion("examples.metadata", "test-d", "1.0.0");
-        projectB.getVersionData().addDependency(dDep);
-        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(dDep), true));
-        projectsVersionsStore.createOrUpdate(projectB);
-
-        // C:1.0.0 depends on D:1.0.0
-        projectC.getVersionData().addDependency(dDep);
-        projectC.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(dDep), true));
-        projectsVersionsStore.createOrUpdate(projectC);
-
-        // A:1.0.0 depends on B:1.0.0 and C:1.0.0
-        ProjectVersion bDep = new ProjectVersion("examples.metadata", "test-b", "1.0.0");
-        ProjectVersion cDep = new ProjectVersion("examples.metadata", "test-c", "1.0.0");
-        projectA.getVersionData().addDependency(bDep);
-        projectA.getVersionData().addDependency(cDep);
-        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(bDep, cDep, dDep), true));
-        projectsVersionsStore.createOrUpdate(projectA);
-
-
-        // Execute
-        List<ArtifactDependency> inputDeps = Collections.singletonList(
-                new ArtifactDependency("examples.metadata", "test-a", "1.0.0")
-        );
-
-        ProjectDependencyReport report = projectsService.getProjectDependencyReportMaven(inputDeps);
-
-        // Verify D appears only once in the graph nodes
-        Map<String, ProjectDependencyVersionNode> nodes = report.getGraph().getNodes();
-
-        long dCount = nodes.keySet().stream()
-                .filter(gav -> gav.equals("examples.metadata:test-d:1.0.0"))
-                .count();
-
-        Assertions.assertEquals(1, dCount, "test-d:1.0.0 should appear exactly once in the dependency graph");
-
-        // Verify all expected nodes are present
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-a:1.0.0"), "test-a should be in graph");
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-b:1.0.0"), "test-b should be in graph");
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-c:1.0.0"), "test-c should be in graph");
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-d:1.0.0"), "test-d should be in graph");
-        Assertions.assertEquals(4, nodes.size(), "Should have exactly 4 nodes");
-    }
-
-    @Test
-    public void canGetProjectDependencyReportMavenWithDiamondDependencyConflict()
-    {
-        // Diamond dependency with version conflict:
-        // test-a:1.0.0 --> test-b:1.0.0 --> test-d:1.0.0
-        //             --> test-c:1.0.0 --> test-d:2.0.0
-
-        StoreProjectVersionData projectA = new StoreProjectVersionData("examples.metadata", "test-a", "1.0.0");
-        StoreProjectVersionData projectB = new StoreProjectVersionData("examples.metadata", "test-b", "1.0.0");
-        StoreProjectVersionData projectC = new StoreProjectVersionData("examples.metadata", "test-c", "1.0.0");
-        StoreProjectVersionData projectD_v1 = new StoreProjectVersionData("examples.metadata", "test-d", "1.0.0");
-        StoreProjectVersionData projectD_v2 = new StoreProjectVersionData("examples.metadata", "test-d", "2.0.0");
-
-        // D:1.0.0 and D:2.0.0 have no dependencies (leaf nodes)
-        projectD_v1.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(projectD_v1);
-        projectD_v2.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(projectD_v2);
-
-        // B:1.0.0 depends on D:1.0.0
-        ProjectVersion dDep_v1 = new ProjectVersion("examples.metadata", "test-d", "1.0.0");
-        projectB.getVersionData().addDependency(dDep_v1);
-        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(dDep_v1), true));
-        projectsVersionsStore.createOrUpdate(projectB);
-
-        // C:1.0.0 depends on D:2.0.0
-        ProjectVersion dDep_v2 = new ProjectVersion("examples.metadata", "test-d", "2.0.0");
-        projectC.getVersionData().addDependency(dDep_v2);
-        projectC.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(dDep_v2), true));
-        projectsVersionsStore.createOrUpdate(projectC);
-
-        // A:1.0.0 depends on B:1.0.0 and C:1.0.0
-        ProjectVersion bDep = new ProjectVersion("examples.metadata", "test-b", "1.0.0");
-        ProjectVersion cDep = new ProjectVersion("examples.metadata", "test-c", "1.0.0");
-        projectA.getVersionData().addDependency(bDep);
-        projectA.getVersionData().addDependency(cDep);
-        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(bDep, cDep, dDep_v1, dDep_v2), true));
-        projectsVersionsStore.createOrUpdate(projectA);
-
-        // Execute
-        List<ArtifactDependency> inputDeps = Collections.singletonList(
-                new ArtifactDependency("examples.metadata", "test-a", "1.0.0")
-        );
-
-        ProjectDependencyReport report = projectsService.getProjectDependencyReportMaven(inputDeps);
-
-        // Maven's NearestVersionSelector should resolve to D:1.0.0 (B is declared first, closer path wins)
-        Map<String, ProjectDependencyVersionNode> nodes = report.getGraph().getNodes();
-
-        // D should appear only once (Maven resolves the conflict)
-        long dCount = nodes.keySet().stream()
-                .filter(gav -> gav.startsWith("examples.metadata:test-d:"))
-                .count();
-
-        Assertions.assertEquals(1, dCount, "test-d should appear exactly once after Maven conflict resolution");
-
-        // Verify all expected nodes are present (A, B, C, and one version of D)
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-a:1.0.0"), "test-a should be in graph");
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-b:1.0.0"), "test-b should be in graph");
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-c:1.0.0"), "test-c should be in graph");
-        Assertions.assertEquals(4, nodes.size(), "Should have exactly 4 nodes (A, B, C, and one D)");
-
-        // Maven's nearest wins strategy should pick D:1.0.0 (same depth, but B declared before C)
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-d:1.0.0"), "D:1.0.0 should win (nearest/first wins)");
-    }
-
-    @Test
-    public void canGetProjectDependencyReportMavenWithDiamondDependencyOverride()
-    {
-        // Diamond dependency with direct override:
-        // test-a:1.0.0 --> test-b:1.0.0 --> test-d:1.0.0
-        //             --> test-c:1.0.0 --> test-d:2.0.0
-        //             --> test-d:3.0.0 (direct dependency - should win)
-
-        StoreProjectVersionData projectA = new StoreProjectVersionData("examples.metadata", "test-a", "1.0.0");
-        StoreProjectVersionData projectB = new StoreProjectVersionData("examples.metadata", "test-b", "1.0.0");
-        StoreProjectVersionData projectC = new StoreProjectVersionData("examples.metadata", "test-c", "1.0.0");
-        StoreProjectVersionData projectD_v1 = new StoreProjectVersionData("examples.metadata", "test-d", "1.0.0");
-        StoreProjectVersionData projectD_v2 = new StoreProjectVersionData("examples.metadata", "test-d", "2.0.0");
-        StoreProjectVersionData projectD_v3 = new StoreProjectVersionData("examples.metadata", "test-d", "3.0.0");
-
-        // D versions have no dependencies (leaf nodes)
-        projectD_v1.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(projectD_v1);
-        projectD_v2.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(projectD_v2);
-        projectD_v3.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(projectD_v3);
-
-        // B:1.0.0 depends on D:1.0.0
-        ProjectVersion dDep_v1 = new ProjectVersion("examples.metadata", "test-d", "1.0.0");
-        projectB.getVersionData().addDependency(dDep_v1);
-        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(dDep_v1), true));
-        projectsVersionsStore.createOrUpdate(projectB);
-
-        // C:1.0.0 depends on D:2.0.0
-        ProjectVersion dDep_v2 = new ProjectVersion("examples.metadata", "test-d", "2.0.0");
-        projectC.getVersionData().addDependency(dDep_v2);
-        projectC.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(dDep_v2), true));
-        projectsVersionsStore.createOrUpdate(projectC);
-
-        // A:1.0.0 depends on B:1.0.0, C:1.0.0, and D:3.0.0 (direct override)
-        ProjectVersion bDep = new ProjectVersion("examples.metadata", "test-b", "1.0.0");
-        ProjectVersion cDep = new ProjectVersion("examples.metadata", "test-c", "1.0.0");
-        ProjectVersion dDep_v3 = new ProjectVersion("examples.metadata", "test-d", "3.0.0");
-        projectA.getVersionData().addDependency(bDep);
-        projectA.getVersionData().addDependency(cDep);
-        projectA.getVersionData().addDependency(dDep_v3);
-        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(bDep, cDep, dDep_v1, dDep_v2, dDep_v3), true));
-        projectsVersionsStore.createOrUpdate(projectA);
-
-        // Execute
-        List<ArtifactDependency> inputDeps = Collections.singletonList(
-                new ArtifactDependency("examples.metadata", "test-a", "1.0.0")
-        );
-
-        ProjectDependencyReport report = projectsService.getProjectDependencyReportMaven(inputDeps);
-
-        Map<String, ProjectDependencyVersionNode> nodes = report.getGraph().getNodes();
-
-        // D should appear only once (Maven resolves the conflict)
-        long dCount = nodes.keySet().stream()
-                .filter(gav -> gav.startsWith("examples.metadata:test-d:"))
-                .count();
-
-        Assertions.assertEquals(1, dCount, "test-d should appear exactly once after Maven conflict resolution");
-
-        // Verify all expected nodes are present (A, B, C, and one version of D)
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-a:1.0.0"), "test-a should be in graph");
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-b:1.0.0"), "test-b should be in graph");
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-c:1.0.0"), "test-c should be in graph");
-        Assertions.assertEquals(4, nodes.size(), "Should have exactly 4 nodes (A, B, C, and one D)");
-
-        // Maven's nearest wins strategy should pick D:3.0.0 (direct dependency at depth 1)
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-d:3.0.0"), "D:3.0.0 should win (direct dependency is nearest)");
-    }
-
-    @Test
-    public void canGetProjectDependencyReportMavenWithSimpleExclusion()
-    {
-        // Setup: A:1.0.0 --> B:1.0.0 --> D:1.0.0
-        // With exclusion: A excludes D
-
-        StoreProjectVersionData projectA = new StoreProjectVersionData("examples.metadata", "test-a", "1.0.0");
-        StoreProjectVersionData projectB = new StoreProjectVersionData("examples.metadata", "test-b", "1.0.0");
-        StoreProjectVersionData projectD = new StoreProjectVersionData("examples.metadata", "test-d", "1.0.0");
-
-        // D:1.0.0 has no dependencies (leaf node)
-        projectD.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(projectD);
-
-        // B:1.0.0 depends on D:1.0.0
-        ProjectVersion dDep = new ProjectVersion("examples.metadata", "test-d", "1.0.0");
-        projectB.getVersionData().addDependency(dDep);
-        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(dDep), true));
-        projectsVersionsStore.createOrUpdate(projectB);
-
-        // A:1.0.0 depends on B:1.0.0
-        ProjectVersion bDep = new ProjectVersion("examples.metadata", "test-b", "1.0.0");
-        projectA.getVersionData().addDependency(bDep);
-        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(bDep, dDep), true));
-        projectsVersionsStore.createOrUpdate(projectA);
-
-        // Create exclusion: exclude D from A's dependencies
-        DependencyExclusion excludeD = new DependencyExclusion("examples.metadata", "test-d");
-
-        // Execute with exclusion
-        List<ArtifactDependency> inputDeps = Collections.singletonList(
-                new ArtifactDependency("examples.metadata", "test-a", "1.0.0", Collections.singletonList(excludeD))
-        );
-        ProjectDependencyReport report = projectsService.getProjectDependencyReportMaven(inputDeps);
-
-        // Assert
-        Assertions.assertNotNull(report);
-        Map<String, ProjectDependencyVersionNode> nodes = report.getGraph().getNodes();
-
-        // Should have A and B, but NOT D (excluded)
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-a:1.0.0"), "test-a should be in graph");
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-b:1.0.0"), "test-b should be in graph");
-        Assertions.assertFalse(nodes.containsKey("examples.metadata:test-d:1.0.0"), "test-d should be excluded");
-        Assertions.assertEquals(2, nodes.size(), "Should have exactly 2 nodes (A and B, D excluded)");
-    }
-
-    @Test
-    public void canGetProjectDependencyReportMavenWithExclusionOnOnePath()
-    {
-        // Setup: A:1.0.0 --> B:1.0.0 --> D:1.0.0 (D excluded from B)
-        //        A:1.0.0 --> C:1.0.0 --> D:1.0.0 (D NOT excluded from C)
-        // D should still appear through C's path
-
-        StoreProjectVersionData projectA = new StoreProjectVersionData("examples.metadata", "test-a", "1.0.0");
-        StoreProjectVersionData projectB = new StoreProjectVersionData("examples.metadata", "test-b", "1.0.0");
-        StoreProjectVersionData projectC = new StoreProjectVersionData("examples.metadata", "test-c", "1.0.0");
-        StoreProjectVersionData projectD = new StoreProjectVersionData("examples.metadata", "test-d", "1.0.0");
-
-        // D:1.0.0 has no dependencies (leaf node)
-        projectD.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
-        projectsVersionsStore.createOrUpdate(projectD);
-
-        // B:1.0.0 depends on D:1.0.0
-        ProjectVersion dDep = new ProjectVersion("examples.metadata", "test-d", "1.0.0");
-        projectB.getVersionData().addDependency(dDep);
-        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(dDep), true));
-        projectsVersionsStore.createOrUpdate(projectB);
-
-        // C:1.0.0 depends on D:1.0.0
-        projectC.getVersionData().addDependency(dDep);
-        projectC.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(dDep), true));
-        projectsVersionsStore.createOrUpdate(projectC);
-
-        // A:1.0.0 depends on B:1.0.0 and C:1.0.0
-        ProjectVersion bDep = new ProjectVersion("examples.metadata", "test-b", "1.0.0");
-        ProjectVersion cDep = new ProjectVersion("examples.metadata", "test-c", "1.0.0");
-        projectA.getVersionData().addDependency(bDep);
-        projectA.getVersionData().addDependency(cDep);
-        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(bDep, cDep, dDep), true));
-        projectsVersionsStore.createOrUpdate(projectA);
-
-        // Create exclusion: exclude D only from B's dependencies
-        DependencyExclusion excludeD = new DependencyExclusion("examples.metadata", "test-d");
-
-        // Execute: A with B (excluding D) and C (no exclusions)
-        List<ArtifactDependency> inputDeps = Arrays.asList(
-                new ArtifactDependency("examples.metadata", "test-b", "1.0.0", Collections.singletonList(excludeD)),
-                new ArtifactDependency("examples.metadata", "test-c", "1.0.0", Collections.emptyList())
-        );
-        ProjectDependencyReport report = projectsService.getProjectDependencyReportMaven(inputDeps);
-
-        // Assert
-        Assertions.assertNotNull(report);
-        Map<String, ProjectDependencyVersionNode> nodes = report.getGraph().getNodes();
-
-        // Should have B, C, and D (D comes through C's path)
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-b:1.0.0"), "test-b should be in graph");
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-c:1.0.0"), "test-c should be in graph");
-        Assertions.assertTrue(nodes.containsKey("examples.metadata:test-d:1.0.0"), "test-d should be in graph (via C)");
-        Assertions.assertEquals(3, nodes.size(), "Should have exactly 3 nodes (B, C, and D via C)");
-
-        // Verify D is connected through C, not B
-        ProjectDependencyVersionNode cNode = nodes.get("examples.metadata:test-c:1.0.0");
-        Assertions.assertTrue(cNode.getForwardEdges().contains("examples.metadata:test-d:1.0.0"), "C should have edge to D");
-
-        ProjectDependencyVersionNode bNode = nodes.get("examples.metadata:test-b:1.0.0");
-        Assertions.assertFalse(bNode.getForwardEdges().contains("examples.metadata:test-d:1.0.0"), "B should NOT have edge to D (excluded)");
     }
 }

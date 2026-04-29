@@ -23,7 +23,6 @@ import org.finos.legend.depot.services.api.notifications.queue.Queue;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
-import org.finos.legend.depot.services.dependencies.MavenDependencyResolverImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
 import org.finos.legend.depot.store.api.projects.UpdateProjects;
 import org.finos.legend.depot.store.api.projects.UpdateProjectsVersions;
@@ -51,7 +50,7 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
     protected Queue queue = new NotificationsQueueMongo(mongoProvider);
     protected ManageProjectsService projectsService = new ManageProjectsServiceImpl(projectsVersionsStore,projectsStore,metrics,queue,new ProjectsConfiguration("master"));
     protected ArtifactRepository repository = mock(ArtifactRepository.class);
-    protected RefreshDependenciesService refreshDependenciesService = new RefreshDependenciesServiceImpl(projectsService, repository,new DependencyUtil(), new MavenDependencyResolverImpl(projectsService));
+    protected RefreshDependenciesService refreshDependenciesService = new RefreshDependenciesServiceImpl(projectsService, repository,new DependencyUtil());
 
     private static final String GROUPID = "examples.metadata";
 
@@ -114,7 +113,7 @@ public class TestRefreshDependenciesService extends CoreDataMongoStoreTests
 
         project3 = projectsService.find(GROUPID, "art106", "branch1-SNAPSHOT").get();
         Assertions.assertTrue(project3.getTransitiveDependenciesReport().isValid());
-        Assertions.assertEquals(new java.util.HashSet<>(Arrays.asList(dependency2, dependency1, dependency3)), new java.util.HashSet<>(project3.getTransitiveDependenciesReport().getTransitiveDependencies()));
+        Assertions.assertEquals(Arrays.asList(dependency2, dependency1, dependency3), project3.getTransitiveDependenciesReport().getTransitiveDependencies());
     }
 
     @Test

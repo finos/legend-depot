@@ -156,17 +156,16 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
     }
 
     @Override
-    public List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependenciesMaven(List<ArtifactDependency> projectDependencies, boolean transitive, boolean includeOrigin)
+    public List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependencies(List<ArtifactDependency> projectDependencies, boolean transitive, boolean includeOrigin)
     {
         Map<String, List<ProjectVersion>> directExclusionsMap = DependencyExclusionsUtil.createDependencyExclusionsMap(projectDependencies);
         Map<String, List<ProjectVersion>> allExclusionsMap = DependencyExclusionsUtil.getTransitiveDependenciesOfExclusions(directExclusionsMap, projects);
 
-        // Get a list of ArtifactDependency dependencies
         List<ProjectVersion> projectVersionDeps = projectDependencies.stream()
                 .map(ad -> new ProjectVersion(ad.getGroupId(), ad.getArtifactId(), ad.getVersionId()))
                 .collect(Collectors.toList());
 
-        return getDependenciesEntities(null, includeOrigin, projectVersionDeps, () -> projects.getDependenciesMaven(projectVersionDeps, allExclusionsMap, transitive));
+        return getDependenciesEntities(null, includeOrigin, projectVersionDeps, () -> projects.getDependencies(projectVersionDeps, allExclusionsMap, transitive));
     }
 
     @Override

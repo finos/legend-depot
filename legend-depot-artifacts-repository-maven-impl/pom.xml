@@ -60,10 +60,9 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
-
         <!-- testing -->
         <dependency>
-            <groupId>${junit.groupId}</groupId>
+              <groupId>${junit.groupId}</groupId>
             <artifactId>${junit.artifactId}</artifactId>
             <scope>test</scope>
         </dependency>

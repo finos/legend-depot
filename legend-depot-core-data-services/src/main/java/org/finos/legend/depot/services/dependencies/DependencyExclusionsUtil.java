@@ -47,7 +47,7 @@ public class DependencyExclusionsUtil
                 Set<ProjectVersion> transitiveExclusions = new HashSet<>();
                 for (ProjectVersion exclusion : exclusions)
                 {
-                    transitiveExclusions.addAll(projects.getDependenciesMaven(Collections.singletonList(exclusion), new HashMap<>(), true));
+                    transitiveExclusions.addAll(projects.getDependencies(Collections.singletonList(exclusion), true));
                     LOGGER.info("Found {} transitive dependencies for exclusion {} ", transitiveExclusions.size(), exclusion.getGa());
                 }
                 List<ProjectVersion> updatedExclusions = new ArrayList<>(exclusions);

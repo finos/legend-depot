@@ -24,7 +24,6 @@ import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependencies
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
-import org.finos.legend.depot.services.dependencies.MavenDependencyResolverImpl;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.generations.impl.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.notifications.NotificationsQueueManager;
@@ -102,7 +101,7 @@ public class TestArtifactsRefreshService extends TestStoreMongo
     protected FileGenerationsArtifactsProvider fileGenerationsProvider = new FileGenerationsProvider();
     protected ManageEntitiesService entitiesService = new ManageEntitiesServiceImpl(entitiesStore, projectsService);
     protected ArtifactRepository repository = new TestMavenArtifactsRepository();
-    protected RefreshDependenciesService refreshDependenciesService = new RefreshDependenciesServiceImpl(projectsService, repository, new DependencyUtil(), new MavenDependencyResolverImpl(projectsService));
+    protected RefreshDependenciesService refreshDependenciesService = new RefreshDependenciesServiceImpl(projectsService, repository, new DependencyUtil());
 
     protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repository, queue, artifacts, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), refreshDependenciesService, 10);
 
