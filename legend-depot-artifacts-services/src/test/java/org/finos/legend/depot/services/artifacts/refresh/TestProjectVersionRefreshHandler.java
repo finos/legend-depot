@@ -34,6 +34,7 @@ import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.artifacts.handlers.generations.FileGenerationHandlerImpl;
 import org.finos.legend.depot.services.artifacts.handlers.generations.FileGenerationsProvider;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
+import org.finos.legend.depot.services.dependencies.MavenDependencyResolverImpl;
 import org.finos.legend.depot.services.entities.ManageEntitiesServiceImpl;
 import org.finos.legend.depot.services.generations.impl.ManageFileGenerationsServiceImpl;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
@@ -107,7 +108,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
     protected FileGenerationsArtifactsProvider generationsArtifactsProvider = new FileGenerationsProvider();
     protected ArtifactRepository repositoryServices = mock(ArtifactRepository.class);
 
-    protected RefreshDependenciesService refreshDependenciesService = new RefreshDependenciesServiceImpl(projectsService, repositoryServices,new DependencyUtil());
+    protected RefreshDependenciesService refreshDependenciesService = new RefreshDependenciesServiceImpl(projectsService, repositoryServices,new DependencyUtil(), new MavenDependencyResolverImpl(projectsService));
 
     protected ProjectVersionRefreshHandler versionHandler = new ProjectVersionRefreshHandler(projectsService, repositoryServices, queue, artifactsStore, new IncludeProjectPropertiesConfiguration(properties, manifestProperties), refreshDependenciesService, 3);
 
@@ -391,8 +392,8 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
 
         List<ProjectVersion> dependency1Exclusions = dependencyExclusions.get(dependency1Key);
         Assertions.assertEquals(2, dependency1Exclusions.size());
-        Assertions.assertTrue(dependency1Exclusions.contains(new ProjectVersion("org.excluded", "excluded-artifact1", "1.2.3")));
-        Assertions.assertTrue(dependency1Exclusions.contains(new ProjectVersion("org.excluded", "excluded-artifact2", "4.5.6")));
+        Assertions.assertTrue(dependency1Exclusions.contains(new ProjectVersion("org.excluded", "excluded-artifact1", null)));
+        Assertions.assertTrue(dependency1Exclusions.contains(new ProjectVersion("org.excluded", "excluded-artifact2", null)));
 
         // Check exclusions for dependency2
         String dependency2Key = ProjectVersionData.createDependencyKey(dependency2);
@@ -400,7 +401,7 @@ public class TestProjectVersionRefreshHandler extends TestStoreMongo
 
         List<ProjectVersion> dependency2Exclusions = dependencyExclusions.get(dependency2Key);
         Assertions.assertEquals(1, dependency2Exclusions.size());
-        Assertions.assertTrue(dependency2Exclusions.contains(new ProjectVersion("org.another.excluded", "another-excluded", "7.8.9")));
+        Assertions.assertTrue(dependency2Exclusions.contains(new ProjectVersion("org.another.excluded", "another-excluded", null)));
     }
 
     private static Set<ArtifactDependency> getArtifactDependencies()
