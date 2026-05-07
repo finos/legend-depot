@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.services.artifacts.refresh;
 
-import org.eclipse.collections.api.block.function.Function2;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.domain.project.dependencies.ProjectDependencyWithPlatformVersions;
@@ -23,6 +22,7 @@ import org.finos.legend.depot.domain.project.dependencies.VersionDependencyRepor
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependenciesService;
 import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
+import org.finos.legend.depot.services.api.dependencies.MavenDependencyResolver;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
@@ -50,13 +50,15 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
     private final ManageProjectsService projects;
     private final ArtifactRepository repositoryServices;
     private final DependencyOverride dependencyOverride;
+    private final MavenDependencyResolver mavenDependencyResolver;
 
     @Inject
-    public RefreshDependenciesServiceImpl(ManageProjectsService projects, ArtifactRepository repositoryServices,@Named("dependencyOverride") DependencyOverride dependencyOverride)
+    public RefreshDependenciesServiceImpl(ManageProjectsService projects, ArtifactRepository repositoryServices, @Named("dependencyOverride") DependencyOverride dependencyOverride, MavenDependencyResolver mavenDependencyResolver)
     {
         this.projects = projects;
         this.repositoryServices = repositoryServices;
         this.dependencyOverride = dependencyOverride;
+        this.mavenDependencyResolver = mavenDependencyResolver;
     }
 
     @Override
@@ -70,92 +72,27 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
         return versionDependencies;
     }
 
-    private VersionDependencyReport calculateTransitiveDependencies(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusions)
+    private VersionDependencyReport calculateTransitiveDependenciesMaven(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusions)
     {
-        Set<ProjectVersion> projectDependencies = new HashSet<>();
         try
         {
-            projectVersions.forEach(deps ->
-            {
-                LOGGER.info(String.format("Finding dependencies for %s-%s-%s", deps.getGroupId(), deps.getArtifactId(), deps.getVersionId()));
-                Optional<StoreProjectVersionData> projectData = this.projects.find(deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
-                if (projectData.isPresent())
-                {
-                    if (projectData.get().getVersionData().isExcluded())
-                    {
-                        throw new IllegalStateException(String.format("Project Version depending on an excluded version: %s", deps.getGav()));
-                    }
-                    else if (!projectData.get().getTransitiveDependenciesReport().isValid())
-                    {
-                        throw new IllegalStateException(String.format("Cannot calculate dependencies for project version: %s", deps.getGav()));
-                    }
-                    List<ProjectVersion> allDependencies = new ArrayList<>(projectData.get().getVersionData().getDependencies());
-                    allDependencies.addAll(projectData.get().getTransitiveDependenciesReport().getTransitiveDependencies());
+            Set<ProjectVersion> dependencies = mavenDependencyResolver.collectDependencies(projectVersions, exclusions);
 
-                    List<ProjectVersion> processedDependencies = this.dependencyOverride.applyExclusionsAndOverrides(
-                            allDependencies,
-                            deps,
-                            projectVersions,
-                            exclusions,
-                            this::getCalculatedTransitiveDependencies
-                    );
-                    projectDependencies.addAll(processedDependencies);
-                }
-                else
-                {
-                    LOGGER.info(String.format("Finding dependencies for %s-%s-%s as no data is present in the store", deps.getGroupId(), deps.getArtifactId(), deps.getVersionId()));
-                    List<ArtifactDependency> artifactDependencies = this.retrieveDependenciesFromRepositoryAsArtifactDependencies(deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
-                    List<ProjectVersion> dependencyVersions = this.dependencyOverride.getArtifactDependenciesAsProjectVersions(artifactDependencies);
-                    projectDependencies.addAll(dependencyVersions);
-                    Map<String, List<ProjectVersion>> exclusionsFromRepository = this.createExclusionsMapFromArtifactDependencies(artifactDependencies);
-                    VersionDependencyReport report;
-                    if (exclusionsFromRepository != null && !exclusionsFromRepository.isEmpty())
-                    {
-                        LOGGER.info("Applying exclusions retrieved from repository for {}-{}-{}", deps.getGroupId(), deps.getArtifactId(), deps.getVersionId());
-                        report = calculateTransitiveDependencies(dependencyVersions, exclusionsFromRepository);
-                    }
-                    else
-                    {
-                        report = calculateTransitiveDependencies(dependencyVersions);
-                    }
-                    if (!report.isValid())
-                    {
-                        throw new IllegalStateException(String.format("Cannot calculate dependencies for project version: %s", deps.getGav()));
-                    }
-                    else
-                    {
-                        List<ProjectVersion> allDependencies = new ArrayList<>(report.getTransitiveDependencies());
-                        List<ProjectVersion> processedDependencies = this.dependencyOverride.applyExclusionsAndOverrides(
-                                allDependencies,
-                                deps,
-                                projectVersions,
-                                exclusions,
-                                this::getCalculatedTransitiveDependencies
-                        );
-                        projectDependencies.addAll(processedDependencies);
-                    }
-                }
-                projectDependencies.add(deps);
-            });
+            // Add each root project version itself (matching original behavior)
+            dependencies.addAll(projectVersions);
+
+            return new VersionDependencyReport(new ArrayList<>(dependencies), true);
         }
         catch (IllegalStateException e)
         {
             LOGGER.error(e.getMessage());
             return new VersionDependencyReport(new ArrayList<>(), false);
         }
-        LOGGER.info("Completed finding dependencies");
-        return new VersionDependencyReport(projectDependencies.stream().collect(Collectors.toList()), true);
     }
 
-
-    private Set<ProjectVersion> getCalculatedTransitiveDependencies(List<ProjectVersion> directDependencies, boolean transitive)
+    private VersionDependencyReport calculateTransitiveDependenciesMaven(List<ProjectVersion> projectVersions)
     {
-        return this.calculateTransitiveDependencies(directDependencies).getTransitiveDependencies().stream().collect(Collectors.toSet());
-    }
-
-    private VersionDependencyReport calculateTransitiveDependencies(List<ProjectVersion> projectVersions)
-    {
-        return this.calculateTransitiveDependencies(projectVersions, Collections.emptyMap());
+        return this.calculateTransitiveDependenciesMaven(projectVersions, Collections.emptyMap());
     }
 
     @Override
@@ -199,13 +136,12 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
         Map<String, List<ProjectVersion>> exclusions = projectData.getVersionData().getDependencyExclusions();
         if (!exclusions.isEmpty())
         {
-            LOGGER.info("Project data has exclusions, calculating transitive exclusions");
-            Map<String, List<ProjectVersion>> transitiveExclusions = DependencyExclusionsUtil.getTransitiveDependenciesOfExclusions(exclusions, this.projects);
-            projectData.setTransitiveDependenciesReport(calculateTransitiveDependencies(projectData.getVersionData().getDependencies(), transitiveExclusions));
+            LOGGER.info("Project data has exclusions, passing direct exclusions to Maven resolution");
+            projectData.setTransitiveDependenciesReport(calculateTransitiveDependenciesMaven(projectData.getVersionData().getDependencies(), exclusions));
         }
         else
         {
-            projectData.setTransitiveDependenciesReport(calculateTransitiveDependencies(projectData.getVersionData().getDependencies()));
+            projectData.setTransitiveDependenciesReport(calculateTransitiveDependenciesMaven(projectData.getVersionData().getDependencies()));
         }
     }
 
