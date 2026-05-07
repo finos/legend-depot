@@ -61,8 +61,8 @@
   "logging": {
     "level": "INFO",
     "loggers": {
-      "org.jboss.shrinkwrap.resolver": "off",
-      "org.eclipse.aether": "off",
+      "org.jboss.shrinkwrap.resolver": "on",
+      "org.eclipse.aether": "on",
       "Legend Depot Store Manager": {
         "level": "info",
         "appenders": [

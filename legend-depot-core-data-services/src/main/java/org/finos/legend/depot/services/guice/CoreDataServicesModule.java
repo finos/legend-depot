@@ -20,8 +20,10 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
+import org.finos.legend.depot.services.api.dependencies.MavenDependencyResolver;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.dependencies.DependencyUtil;
+import org.finos.legend.depot.services.dependencies.MavenDependencyResolverImpl;
 import org.finos.legend.depot.services.projects.ProjectsServiceImpl;
 
 import javax.inject.Named;
@@ -32,8 +34,10 @@ public class CoreDataServicesModule extends PrivateModule
     protected void configure()
     {
         bind(ProjectsService.class).to(ProjectsServiceImpl.class);
+        bind(MavenDependencyResolver.class).to(MavenDependencyResolverImpl.class);
 
         expose(ProjectsService.class);
+        expose(MavenDependencyResolver.class);
         expose(DependencyOverride.class).annotatedWith(Names.named("dependencyOverride"));
     }
 
