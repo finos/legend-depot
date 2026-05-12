@@ -53,6 +53,14 @@
         </dependency>
         <!-- DEPOT -->
         <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-resolver-provider</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.shrinkwrap.resolver</groupId>
+            <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
@@ -110,7 +118,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-              <groupId>${junit.groupId}</groupId>
+            <groupId>${junit.groupId}</groupId>
             <artifactId>${junit.artifactId}</artifactId>
             <scope>test</scope>
         </dependency>

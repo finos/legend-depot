@@ -19,6 +19,7 @@ import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
+import org.apache.maven.model.Repository;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.io.DefaultSettingsReader;
@@ -39,6 +40,9 @@ import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenResolverSystem;
 import org.jboss.shrinkwrap.resolver.api.maven.MavenVersionRangeResult;
 import org.jboss.shrinkwrap.resolver.api.maven.PackagingType;
+import org.jboss.shrinkwrap.resolver.api.maven.repository.MavenRemoteRepositories;
+import org.jboss.shrinkwrap.resolver.api.maven.repository.MavenRemoteRepository;
+import org.jboss.shrinkwrap.resolver.api.maven.repository.MavenUpdatePolicy;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -71,6 +75,7 @@ public class MavenArtifactRepository implements ArtifactRepository
     private final MavenXpp3Reader mavenReader = new MavenXpp3Reader();
     private final String settingsLocation;
     private String localRepository;
+    private List<Repository> remoteRepositories = new ArrayList<>();
 
 
     public MavenArtifactRepository(ArtifactRepositoryProviderConfiguration configuration)
@@ -94,10 +99,20 @@ public class MavenArtifactRepository implements ArtifactRepository
 
     private MavenResolverSystem getResolver()
     {
-        return Maven.configureResolver()
+        org.jboss.shrinkwrap.resolver.api.maven.ConfigurableMavenResolverSystem configurator = Maven.configureResolver()
                 .withMavenCentralRepo(false)
-                .withClassPathResolution(false)
-                .fromFile(settingsLocation);
+                .withClassPathResolution(false);
+
+        for (Repository repo : this.remoteRepositories)
+        {
+            String layout = repo.getLayout() != null ? repo.getLayout() : "default";
+            MavenRemoteRepository remoteRepo = MavenRemoteRepositories.createRemoteRepository(
+                    repo.getId(), repo.getUrl(), layout);
+            remoteRepo.setUpdatePolicy(MavenUpdatePolicy.UPDATE_POLICY_ALWAYS);
+            configurator = configurator.withRemoteRepo(remoteRepo);
+        }
+
+        return configurator.fromFile(settingsLocation);
     }
 
     private void loadSettings(String settingsFile)
@@ -112,6 +127,26 @@ public class MavenArtifactRepository implements ArtifactRepository
                 throw new ArtifactRepositoryException("Please provide a valid local repository in settings.xml");
             }
             this.localRepository = settings.getLocalRepository();
+            if (settings.getProfiles() != null)
+            {
+                settings.getProfiles().forEach(profile ->
+                {
+                    if (profile.getRepositories() != null)
+                    {
+                        profile.getRepositories().forEach(repo ->
+                        {
+                            LOGGER.info("Settings profile [{}] repository [{}] url [{}] updatePolicy [{}]",
+                                    profile.getId(), repo.getId(), repo.getUrl(),
+                                    repo.getReleases() != null ? repo.getReleases().getUpdatePolicy() : "default");
+                            Repository mavenRepo = new Repository();
+                            mavenRepo.setId(repo.getId());
+                            mavenRepo.setUrl(repo.getUrl());
+                            mavenRepo.setLayout(repo.getLayout());
+                            this.remoteRepositories.add(mavenRepo);
+                        });
+                    }
+                });
+            }
 
         }
         catch (Exception e)
@@ -325,7 +360,11 @@ public class MavenArtifactRepository implements ArtifactRepository
     @Override
     public List<VersionId> findVersions(String group, String artifact) throws ArtifactRepositoryException
     {
-        return findAllVersions(group,artifact).stream().filter(v -> VersionValidator.isValidReleaseVersion(v)).map(v -> VersionId.parseVersionId(v)).collect(Collectors.toList());
+        List<String> allVersions = findAllVersions(group, artifact);
+        LOGGER.info("findVersions [{}-{}]: total raw versions [{}]", group, artifact, allVersions.size());
+        List<VersionId> validVersions = allVersions.stream().filter(v -> VersionValidator.isValidReleaseVersion(v)).map(v -> VersionId.parseVersionId(v)).collect(Collectors.toList());
+        LOGGER.info("findVersions [{}-{}]: valid release versions [{}], filtered out [{}]", group, artifact, validVersions.size(), allVersions.size() - validVersions.size());
+        return validVersions;
     }
 
 
@@ -334,12 +373,16 @@ public class MavenArtifactRepository implements ArtifactRepository
     {
         List<String> result = new ArrayList<>();
         long start = System.currentTimeMillis();
+        LOGGER.info("findAllVersions [{}-{}]: settingsLocation=[{}], localRepository=[{}]", group, artifact, settingsLocation, localRepository);
         try
         {
             String groupArtifactVersionRange = gavCoordinates(group, artifact, ALL_VERSIONS_SCOPE);
+            LOGGER.info("resolveVersionsFromRepository querying range: [{}]", groupArtifactVersionRange);
             final MavenVersionRangeResult versionRangeResult = (MavenVersionRangeResult) executeWithTrace("resolveVersionsFromRepository",group,artifact,"ALL",() -> getResolver().resolveVersionRange(groupArtifactVersionRange));
-            LOGGER.debug("resolveVersionsFromRepository {}{}{} , Version data: [{}]", group, artifact, ALL_VERSIONS_SCOPE, versionRangeResult);
-            result.addAll(versionRangeResult.getVersions().stream().map(c -> c.getVersion()).collect(Collectors.toList()));
+            List<String> allVersions = versionRangeResult.getVersions().stream().map(c -> c.getVersion()).collect(Collectors.toList());
+            LOGGER.info("resolveVersionsFromRepository {}{}{} , total versions found: [{}], versions: {}", group, artifact, ALL_VERSIONS_SCOPE, allVersions.size(), allVersions);
+            LOGGER.info("resolveVersionsFromRepository lowestVersion: [{}], highestVersion: [{}]", versionRangeResult.getLowestVersion(), versionRangeResult.getHighestVersion());
+            result.addAll(allVersions);
         }
         catch (VersionResolutionException ex)
         {
@@ -361,7 +404,13 @@ public class MavenArtifactRepository implements ArtifactRepository
     @Override
     public Optional<String> findVersion(String group, String artifact, String versionId) throws ArtifactRepositoryException
     {
-        return this.findAllVersions(group,artifact).stream().filter(v -> v.equals(versionId)).findFirst();
+        List<String> allVersions = this.findAllVersions(group, artifact);
+        LOGGER.info("findVersion looking for [{}] in [{}] versions for [{}-{}]. Contains match: [{}]", versionId, allVersions.size(), group, artifact, allVersions.contains(versionId));
+        if (!allVersions.contains(versionId))
+        {
+            LOGGER.warn("findVersion [{}] NOT found for [{}-{}]. Last 10 versions: {}", versionId, group, artifact, allVersions.subList(Math.max(0, allVersions.size() - 10), allVersions.size()));
+        }
+        return allVersions.stream().filter(v -> v.equals(versionId)).findFirst();
     }
 
     private Object executeWithTrace(String label, String groupId, String artifactId, String version, Supplier<Object> functionToExecute)

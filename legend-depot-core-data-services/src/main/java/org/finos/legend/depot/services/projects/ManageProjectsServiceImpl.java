@@ -17,6 +17,7 @@ package org.finos.legend.depot.services.projects;
 
 import org.finos.legend.depot.domain.project.ProjectSummary;
 import org.finos.legend.depot.services.api.dependencies.DependencyOverride;
+import org.finos.legend.depot.services.api.dependencies.MavenDependencyResolver;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
@@ -28,6 +29,7 @@ import org.finos.legend.depot.services.api.notifications.queue.Queue;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,9 +41,9 @@ public class ManageProjectsServiceImpl extends ProjectsServiceImpl implements Ma
     private final UpdateProjects projects;
 
     @Inject
-    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyOverride") DependencyOverride dependencyUtil)
+    public ManageProjectsServiceImpl(UpdateProjectsVersions projectsVersions, UpdateProjects projects, @Named("queryMetricsRegistry") QueryMetricsRegistry metricsRegistry, Queue queue, ProjectsConfiguration configuration, @Named("dependencyOverride") DependencyOverride dependencyUtil, Provider<MavenDependencyResolver> mavenDependencyResolverProvider)
     {
-        super(projectsVersions,projects, metricsRegistry, queue, configuration, dependencyUtil);
+        super(projectsVersions,projects, metricsRegistry, queue, configuration, dependencyUtil, mavenDependencyResolverProvider);
         this.projects = projects;
         this.projectsVersions = projectsVersions;
     }
