@@ -2707,4 +2707,221 @@ public class TestProjectsService extends TestBaseServices
         ProjectDependencyVersionNode bNode = nodes.get("examples.metadata:test-b:1.0.0");
         Assertions.assertFalse(bNode.getForwardEdges().contains("examples.metadata:test-d:1.0.0"), "B should NOT have edge to D (excluded)");
     }
+
+    @Test
+    public void canGetProjectDependencyReportMavenWithIntermediateExclusionsHonored()
+    {
+        // Setup: Root depends on A:1.0.0
+        //        A:1.0.0 depends on B:1.0.0 (A excludes X on this dependency)
+        //        B:1.0.0 depends on X:1.0.0
+        // Expected: X:1.0.0 should NOT appear because A excludes X on its dependency to B
+
+        String groupId = "examples.metadata";
+
+        // X (leaf)
+        StoreProjectVersionData projectX = new StoreProjectVersionData(groupId, "test-x", "1.0.0");
+        projectX.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
+        projectsVersionsStore.createOrUpdate(projectX);
+
+        // B depends on X
+        ProjectVersion xDep = new ProjectVersion(groupId, "test-x", "1.0.0");
+        StoreProjectVersionData projectB = new StoreProjectVersionData(groupId, "test-b", "1.0.0");
+        projectB.getVersionData().addDependency(xDep);
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(xDep), true));
+        projectsVersionsStore.createOrUpdate(projectB);
+
+        // A depends on B; A excludes X on its dependency to B
+        ProjectVersion bDep = new ProjectVersion(groupId, "test-b", "1.0.0");
+        StoreProjectVersionData projectA = new StoreProjectVersionData(groupId, "test-a", "1.0.0");
+        projectA.getVersionData().addDependency(bDep);
+        projectA.getVersionData().addExclusionForDependency(bDep, new ProjectVersion(groupId, "test-x", null));
+        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(bDep), true));
+        projectsVersionsStore.createOrUpdate(projectA);
+
+        // Resolve
+        List<ArtifactDependency> inputDeps = Collections.singletonList(
+                new ArtifactDependency(groupId, "test-a", "1.0.0")
+        );
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportMaven(inputDeps);
+
+        // Assert
+        Assertions.assertNotNull(report);
+        Map<String, ProjectDependencyVersionNode> nodes = report.getGraph().getNodes();
+
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-a:1.0.0"), "test-a should be in graph");
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-b:1.0.0"), "test-b should be in graph");
+        Assertions.assertFalse(nodes.containsKey(groupId + ":test-x:1.0.0"), "test-x should be excluded by A's per-dependency exclusion");
+        Assertions.assertEquals(2, nodes.size(), "Should have exactly 2 nodes (A and B, X excluded)");
+    }
+
+    @Test
+    public void canGetProjectDependencyReportMavenWithIntermediateExclusionsPerDependency()
+    {
+        // Setup: Root depends on A:1.0.0
+        //        A:1.0.0 depends on B:1.0.0 and C:1.0.0
+        //        A excludes X on its dependency to B (but NOT on its dependency to C)
+        //        B:1.0.0 depends on X:1.0.0
+        //        C:1.0.0 depends on X:1.0.0
+        // Expected: X:1.0.0 SHOULD still appear because it comes through C's path
+
+        String groupId = "examples.metadata";
+
+        // X (leaf)
+        StoreProjectVersionData projectX = new StoreProjectVersionData(groupId, "test-x", "1.0.0");
+        projectX.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
+        projectsVersionsStore.createOrUpdate(projectX);
+
+        // B depends on X
+        ProjectVersion xDep = new ProjectVersion(groupId, "test-x", "1.0.0");
+        StoreProjectVersionData projectB = new StoreProjectVersionData(groupId, "test-b", "1.0.0");
+        projectB.getVersionData().addDependency(xDep);
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(xDep), true));
+        projectsVersionsStore.createOrUpdate(projectB);
+
+        // C depends on X
+        StoreProjectVersionData projectC = new StoreProjectVersionData(groupId, "test-c", "1.0.0");
+        projectC.getVersionData().addDependency(xDep);
+        projectC.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(xDep), true));
+        projectsVersionsStore.createOrUpdate(projectC);
+
+        // A depends on B and C; A excludes X on dependency to B only
+        ProjectVersion bDep = new ProjectVersion(groupId, "test-b", "1.0.0");
+        ProjectVersion cDep = new ProjectVersion(groupId, "test-c", "1.0.0");
+        StoreProjectVersionData projectA = new StoreProjectVersionData(groupId, "test-a", "1.0.0");
+        projectA.getVersionData().addDependency(bDep);
+        projectA.getVersionData().addDependency(cDep);
+        projectA.getVersionData().addExclusionForDependency(bDep, new ProjectVersion(groupId, "test-x", null));
+        // NO exclusion added for cDep
+        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(bDep, cDep), true));
+        projectsVersionsStore.createOrUpdate(projectA);
+
+        // Resolve
+        List<ArtifactDependency> inputDeps = Collections.singletonList(
+                new ArtifactDependency(groupId, "test-a", "1.0.0")
+        );
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportMaven(inputDeps);
+
+        // Assert
+        Assertions.assertNotNull(report);
+        Map<String, ProjectDependencyVersionNode> nodes = report.getGraph().getNodes();
+
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-a:1.0.0"), "test-a should be in graph");
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-b:1.0.0"), "test-b should be in graph");
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-c:1.0.0"), "test-c should be in graph");
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-x:1.0.0"), "test-x should still appear via C's path");
+        Assertions.assertEquals(4, nodes.size(), "Should have exactly 4 nodes (A, B, C, and X via C)");
+    }
+
+    @Test
+    public void canGetProjectDependencyReportMavenWithDirectExclusionOnSubtree()
+    {
+        // Setup: Root depends on A:1.0.0 (with root-level exclusion of X)
+        //        A:1.0.0 depends on B:1.0.0 and C:1.0.0
+        //        B:1.0.0 depends on X:1.0.0
+        //        C:1.0.0 depends on X:1.0.0
+        // No stored per-dependency exclusions on A
+        // Expected: X:1.0.0 should NOT appear (root-level exclusion propagates down entire A subtree)
+
+        String groupId = "examples.metadata";
+
+        // X (leaf)
+        StoreProjectVersionData projectX = new StoreProjectVersionData(groupId, "test-x", "1.0.0");
+        projectX.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
+        projectsVersionsStore.createOrUpdate(projectX);
+
+        // B depends on X
+        ProjectVersion xDep = new ProjectVersion(groupId, "test-x", "1.0.0");
+        StoreProjectVersionData projectB = new StoreProjectVersionData(groupId, "test-b", "1.0.0");
+        projectB.getVersionData().addDependency(xDep);
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(xDep), true));
+        projectsVersionsStore.createOrUpdate(projectB);
+
+        // C depends on X
+        StoreProjectVersionData projectC = new StoreProjectVersionData(groupId, "test-c", "1.0.0");
+        projectC.getVersionData().addDependency(xDep);
+        projectC.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(xDep), true));
+        projectsVersionsStore.createOrUpdate(projectC);
+
+        // A depends on B and C (no per-dependency exclusions)
+        ProjectVersion bDep = new ProjectVersion(groupId, "test-b", "1.0.0");
+        ProjectVersion cDep = new ProjectVersion(groupId, "test-c", "1.0.0");
+        StoreProjectVersionData projectA = new StoreProjectVersionData(groupId, "test-a", "1.0.0");
+        projectA.getVersionData().addDependency(bDep);
+        projectA.getVersionData().addDependency(cDep);
+        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Arrays.asList(bDep, cDep), true));
+        projectsVersionsStore.createOrUpdate(projectA);
+
+        // Resolve with root-level exclusion on A
+        DependencyExclusion excludeX = new DependencyExclusion(groupId, "test-x");
+        List<ArtifactDependency> inputDeps = Collections.singletonList(
+                new ArtifactDependency(groupId, "test-a", "1.0.0", Collections.singletonList(excludeX))
+        );
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportMaven(inputDeps);
+
+        // Assert
+        Assertions.assertNotNull(report);
+        Map<String, ProjectDependencyVersionNode> nodes = report.getGraph().getNodes();
+
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-a:1.0.0"), "test-a should be in graph");
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-b:1.0.0"), "test-b should be in graph");
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-c:1.0.0"), "test-c should be in graph");
+        Assertions.assertFalse(nodes.containsKey(groupId + ":test-x:1.0.0"), "test-x should be excluded by root-level exclusion");
+        Assertions.assertEquals(3, nodes.size(), "Should have exactly 3 nodes (A, B, and C; X excluded everywhere)");
+    }
+
+    @Test
+    public void canGetProjectDependencyReportMavenWithExclusionDeclaredAtIntermediateTransitivelyHonored()
+    {
+        // Setup: Root depends on A:1.0.0
+        //        A:1.0.0 depends on B:1.0.0 (no exclusions on A)
+        //        B:1.0.0 depends on C:1.0.0, and B excludes X on this dependency
+        //        C:1.0.0 depends on X:1.0.0
+        // NO exclusions on A or at the root level
+        // Expected: X:1.0.0 should NOT appear because B's stored exclusion of X on C is honored
+
+        String groupId = "examples.metadata";
+
+        // X (leaf)
+        StoreProjectVersionData projectX = new StoreProjectVersionData(groupId, "test-x", "1.0.0");
+        projectX.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.emptyList(), true));
+        projectsVersionsStore.createOrUpdate(projectX);
+
+        // C depends on X
+        ProjectVersion xDep = new ProjectVersion(groupId, "test-x", "1.0.0");
+        StoreProjectVersionData projectC = new StoreProjectVersionData(groupId, "test-c", "1.0.0");
+        projectC.getVersionData().addDependency(xDep);
+        projectC.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(xDep), true));
+        projectsVersionsStore.createOrUpdate(projectC);
+
+        // B depends on C; B excludes X on its dependency to C
+        ProjectVersion cDep = new ProjectVersion(groupId, "test-c", "1.0.0");
+        StoreProjectVersionData projectB = new StoreProjectVersionData(groupId, "test-b", "1.0.0");
+        projectB.getVersionData().addDependency(cDep);
+        projectB.getVersionData().addExclusionForDependency(cDep, new ProjectVersion(groupId, "test-x", null));
+        projectB.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(cDep), true));
+        projectsVersionsStore.createOrUpdate(projectB);
+
+        // A depends on B (no exclusions on A)
+        ProjectVersion bDep = new ProjectVersion(groupId, "test-b", "1.0.0");
+        StoreProjectVersionData projectA = new StoreProjectVersionData(groupId, "test-a", "1.0.0");
+        projectA.getVersionData().addDependency(bDep);
+        projectA.setTransitiveDependenciesReport(new VersionDependencyReport(Collections.singletonList(bDep), true));
+        projectsVersionsStore.createOrUpdate(projectA);
+
+        // Resolve via getProjectDependencyReportMaven with no API-level exclusions
+        List<ArtifactDependency> inputDeps = Collections.singletonList(
+                new ArtifactDependency(groupId, "test-a", "1.0.0")
+        );
+        ProjectDependencyReport report = projectsService.getProjectDependencyReportMaven(inputDeps);
+
+        // Assert
+        Assertions.assertNotNull(report);
+        Map<String, ProjectDependencyVersionNode> nodes = report.getGraph().getNodes();
+
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-a:1.0.0"), "test-a should be in graph");
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-b:1.0.0"), "test-b should be in graph");
+        Assertions.assertTrue(nodes.containsKey(groupId + ":test-c:1.0.0"), "test-c should be in graph");
+        Assertions.assertFalse(nodes.containsKey(groupId + ":test-x:1.0.0"), "test-x should NOT appear (B's exclusion on C honored)");
+        Assertions.assertEquals(3, nodes.size(), "Should have exactly 3 nodes (A, B, and C; X excluded)");
+    }
 }

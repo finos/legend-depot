@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Comparator;
 import java.util.Optional;
 
 import java.util.stream.Collectors;
@@ -69,6 +70,9 @@ public class RefreshDependenciesServiceImpl implements RefreshDependenciesServic
         Set<ArtifactDependency> dependencies = this.repositoryServices.findDependencies(groupId, artifactId, versionId);
         LOGGER.info("Found [{}] dependencies for [{}-{}-{}]", dependencies.size(), groupId, artifactId, versionId);
         dependencies.forEach(dependency ->  versionDependencies.add(new ProjectVersion(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersionId())));
+        versionDependencies.sort(Comparator.comparing(ProjectVersion::getGroupId)
+                .thenComparing(ProjectVersion::getArtifactId));
+
         return versionDependencies;
     }
 
