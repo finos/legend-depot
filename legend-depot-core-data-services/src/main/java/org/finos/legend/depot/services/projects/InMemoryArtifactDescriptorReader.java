@@ -25,17 +25,18 @@ import org.eclipse.aether.resolution.ArtifactDescriptorResult;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
 import org.finos.legend.depot.domain.project.ProjectVersion;
+import org.finos.legend.depot.domain.project.ProjectVersionData;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 
 public class InMemoryArtifactDescriptorReader implements ArtifactDescriptorReader
@@ -74,14 +75,34 @@ public class InMemoryArtifactDescriptorReader implements ArtifactDescriptorReade
         if (projectData.isPresent())
         {
             List<ProjectVersion> directDependencies = projectData.get().getVersionData().getDependencies();
-            List<DependencyExclusion> exclusions = exclusionsMap.getOrDefault(gav, Collections.emptyList());
+
+            directDependencies = directDependencies.stream()
+                    .sorted(Comparator.comparing(ProjectVersion::getGroupId)
+                            .thenComparing(ProjectVersion::getArtifactId))
+                    .collect(Collectors.toList());
+
+            // Root-level exclusions (set by MavenDependencyResolverImpl for API-provided exclusions)
+            List<DependencyExclusion> rootExclusions = exclusionsMap.getOrDefault(gav, Collections.emptyList());
+
+            // Per-dependency exclusions from the store (POM-level exclusions owned by this artifact)
+            Map<String, List<ProjectVersion>> storedExclusions = projectData.get().getVersionData().getDependencyExclusions();
 
             dependencies = directDependencies.stream()
                     .map(pv ->
                     {
-                        Collection<Exclusion> aetherExclusions = exclusions.stream()
-                                .map(ex -> new Exclusion(ex.getGroupId(), ex.getArtifactId(), "*", "*"))
-                                .collect(Collectors.toList());
+                        List<Exclusion> aetherExclusions = new ArrayList<>();
+
+                        // 1. Add root-level exclusions (propagate down subtree via Aether)
+                        rootExclusions.forEach(ex ->
+                            aetherExclusions.add(new Exclusion(ex.getGroupId(), ex.getArtifactId(), "*", "*"))
+                        );
+
+                        // 2. Add per-dependency exclusions from the store for this specific child
+                        String childKey = ProjectVersionData.createDependencyKey(pv);
+                        List<ProjectVersion> childExclusions = storedExclusions.getOrDefault(childKey, Collections.emptyList());
+                        childExclusions.forEach(ex ->
+                            aetherExclusions.add(new Exclusion(ex.getGroupId(), ex.getArtifactId(), "*", "*"))
+                        );
 
                         return new Dependency(
                                 new DefaultArtifact(pv.getGroupId(), pv.getArtifactId(), "jar", pv.getVersionId()),

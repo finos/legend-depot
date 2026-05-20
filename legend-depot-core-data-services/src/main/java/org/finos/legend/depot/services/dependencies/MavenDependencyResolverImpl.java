@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 public class MavenDependencyResolverImpl implements MavenDependencyResolver
@@ -75,8 +76,12 @@ public class MavenDependencyResolverImpl implements MavenDependencyResolver
     {
         boolean hasExclusions = exclusionsMap != null && !exclusionsMap.isEmpty();
         InMemoryArtifactDescriptorReader reader = new InMemoryArtifactDescriptorReader(projectsService);
+        List<ProjectVersion> sortedProjectVersions = projectVersions.stream()
+                .sorted(Comparator.comparing(ProjectVersion::getGroupId)
+                        .thenComparing(ProjectVersion::getArtifactId))
+                .collect(Collectors.toList());
 
-        List<Dependency> rootDependencies = projectVersions.stream()
+        List<Dependency> rootDependencies = sortedProjectVersions.stream()
                 .map(pv ->
                 {
                     String gav = pv.getGroupId() + ":" + pv.getArtifactId() + ":" + pv.getVersionId();
@@ -117,8 +122,12 @@ public class MavenDependencyResolverImpl implements MavenDependencyResolver
     public Set<ProjectVersion> collectDependencies(List<ArtifactDependency> artifactDependencies)
     {
         InMemoryArtifactDescriptorReader reader = new InMemoryArtifactDescriptorReader(projectsService);
+        List<ArtifactDependency> sortedArtifactDependencies = artifactDependencies.stream()
+                .sorted(Comparator.comparing(ArtifactDependency::getGroupId)
+                        .thenComparing(ArtifactDependency::getArtifactId))
+                .collect(Collectors.toList());
 
-        List<Dependency> rootDependencies = artifactDependencies.stream()
+        List<Dependency> rootDependencies = sortedArtifactDependencies.stream()
                 .map(ad ->
                 {
                     String gav = ad.getGroupId() + ":" + ad.getArtifactId() + ":" + ad.getVersionId();
@@ -144,8 +153,12 @@ public class MavenDependencyResolverImpl implements MavenDependencyResolver
     public ProjectDependencyReport collectDependencyReport(List<ArtifactDependency> artifactDependencies)
     {
         InMemoryArtifactDescriptorReader reader = new InMemoryArtifactDescriptorReader(projectsService);
+        List<ArtifactDependency> sortedArtifactDependencies = artifactDependencies.stream()
+                .sorted(Comparator.comparing(ArtifactDependency::getGroupId)
+                        .thenComparing(ArtifactDependency::getArtifactId))
+                .collect(Collectors.toList());
 
-        List<Dependency> rootDependencies = artifactDependencies.stream()
+        List<Dependency> rootDependencies = sortedArtifactDependencies.stream()
                 .map(ad ->
                 {
                     String gav = ad.getGroupId() + ":" + ad.getArtifactId() + ":" + ad.getVersionId();
