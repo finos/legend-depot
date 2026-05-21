@@ -61,4 +61,46 @@ public class TestProjectUtilities
 
         Assertions.assertFalse(projectData.evaluateLatestVersionAndUpdate("master-SNAPSHOT"));
     }
+
+    @Test
+    public void testDependencyKeyRoundtripWithDots()
+    {
+        ProjectVersion pv = new ProjectVersion("org.example", "my-artifact", "1.0.0");
+        String key = ProjectVersionData.createDependencyKey(pv);
+        ProjectVersion reversed = ProjectVersionData.reverseDependencyKey(key);
+        Assertions.assertEquals(pv.getGroupId(), reversed.getGroupId());
+        Assertions.assertEquals(pv.getArtifactId(), reversed.getArtifactId());
+        Assertions.assertEquals(pv.getVersionId(), reversed.getVersionId());
+    }
+
+    @Test
+    public void testDependencyKeyRoundtripWithUnderscores()
+    {
+        ProjectVersion pv = new ProjectVersion("org.example", "my-artifact", "feature_branch-SNAPSHOT");
+        String key = ProjectVersionData.createDependencyKey(pv);
+        ProjectVersion reversed = ProjectVersionData.reverseDependencyKey(key);
+        Assertions.assertEquals(pv.getGroupId(), reversed.getGroupId());
+        Assertions.assertEquals(pv.getArtifactId(), reversed.getArtifactId());
+        Assertions.assertEquals(pv.getVersionId(), reversed.getVersionId());
+    }
+
+    @Test
+    public void testDependencyKeyRoundtripWithMixedDotsAndUnderscores()
+    {
+        ProjectVersion pv = new ProjectVersion("org.example", "my_artifact", "1.0_beta");
+        String key = ProjectVersionData.createDependencyKey(pv);
+        ProjectVersion reversed = ProjectVersionData.reverseDependencyKey(key);
+        Assertions.assertEquals("org.example", reversed.getGroupId());
+        Assertions.assertEquals("my_artifact", reversed.getArtifactId());
+        Assertions.assertEquals("1.0_beta", reversed.getVersionId());
+    }
+
+    @Test
+    public void testDependencyKeyNoDotsInEncodedForm()
+    {
+        ProjectVersion pv = new ProjectVersion("org.example", "my_artifact", "1.0_beta");
+        String key = ProjectVersionData.createDependencyKey(pv);
+        Assertions.assertFalse(key.contains("."));
+        Assertions.assertFalse(key.contains(":"));
+    }
 }

@@ -162,12 +162,12 @@ public class ProjectVersionData
 
     public static String createDependencyKey(ProjectVersion dependency)
     {
-        return dependency.getGav().replace(":","__").replace(".","_");
+        return dependency.getGav().replace(":","__").replace(".","~");
     }
 
     public static ProjectVersion reverseDependencyKey(String key)
     {
-        String parts = key.replace("__",":").replace("_",".");
+        String parts = key.replace("__",":").replace("~",".");
         String[] gav = parts.split(":");
         return new ProjectVersion(gav[0], gav[1], gav[2]);
     }
