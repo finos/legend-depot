@@ -152,7 +152,10 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
     @Override
     public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin)
     {
-        return getDependenciesEntities(null, includeOrigin, projectDependencies, () -> projects.getDependencies(projectDependencies, new HashMap<>(), transitive));
+        List<ArtifactDependency> artifactDependencies = projectDependencies.stream()
+                .map(projectVersion -> new ArtifactDependency(projectVersion.getGroupId(), projectVersion.getArtifactId(), projectVersion.getVersionId()))
+                .collect(Collectors.toList());
+        return getDependenciesEntitiesFromArtifactDependenciesMaven(artifactDependencies, transitive, includeOrigin);
     }
 
     @Override
