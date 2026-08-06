@@ -164,16 +164,13 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
         Map<String, List<ProjectVersion>> directExclusionsMap = DependencyExclusionsUtil.createDependencyExclusionsMap(projectDependencies);
         Map<String, List<ProjectVersion>> allExclusionsMap = DependencyExclusionsUtil.getTransitiveDependenciesOfExclusions(directExclusionsMap, projects);
 
-        // Get a list of ArtifactDependency dependencies
         List<ProjectVersion> projectVersionDeps = projectDependencies.stream()
                 .map(ad -> new ProjectVersion(ad.getGroupId(), ad.getArtifactId(), ad.getVersionId()))
                 .collect(Collectors.toList());
 
-        // Aether returns the root/origin projects as part of its result. To match the
-        // pre-existing contract of getDependenciesEntities (transitive deps only, origin
-        // added back only when includeOrigin=true) and to avoid duplicates when origins
-        // are passed as aliases, we resolve origins up front and subtract them from the
-        // Maven-returned closure.
+        // Resolve origin aliases up front so the returned closure contains only
+        // transitive dependencies; origins are re-added by the shared helper when
+        // includeOrigin is true.
         List<ProjectVersion> resolvedOrigins = projectVersionDeps.stream()
                 .map(pv -> new ProjectVersion(pv.getGroupId(), pv.getArtifactId(),
                         projects.resolveAliasesAndCheckVersionExists(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId())))

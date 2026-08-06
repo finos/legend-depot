@@ -234,9 +234,8 @@ public class TestEntitiesService extends TestBaseServices
     @Test
     public void multipleTransitiveVersionsOfSameProjectAreDeduplicatedToOne()
     {
-        // Reproduces the original bug scenario: same GA (test-dependencies) shows up at
-        // multiple versions in the dependency tree. The Maven-aware resolver must dedupe
-        // it down to a single version so registration doesn't fail with "Duplicated element".
+        // Verifies that when the same groupId:artifactId appears at multiple versions in
+        // the transitive tree, the resolver dedupes it to a single version per project.
         projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata", "test-dependencies", "1.0.1"));
 
         StoreProjectVersionData test231 = projectsVersionsStore.find("examples.metadata", "test", "2.3.1").get();
@@ -257,8 +256,8 @@ public class TestEntitiesService extends TestBaseServices
     @Test
     public void legacyAndMavenPathsReturnSameDependencyClosure()
     {
-        // Full-interactive uses the Maven (ArtifactDependency) path; semi-interactive/prod
-        // uses the legacy (ProjectVersion) path. After the fix both must return the same closure.
+        // Verifies that the ProjectVersion and ArtifactDependency entry points produce
+        // the same resolved dependency closure.
         List<ProjectVersion> pvs = Collections.singletonList(new ProjectVersion("examples.metadata", "test", "2.3.1"));
         List<ArtifactDependency> ads = Collections.singletonList(new ArtifactDependency("examples.metadata", "test", "2.3.1"));
 
@@ -274,14 +273,13 @@ public class TestEntitiesService extends TestBaseServices
                 .collect(Collectors.toSet());
 
         Assertions.assertEquals(mavenClosure, legacyClosure,
-                "Legacy and Maven dependency-resolution paths must produce the same closure");
+                "ProjectVersion and ArtifactDependency resolution paths must produce the same closure");
     }
 
     @Test
     public void noDuplicateEntityPathsAcrossReturnedDependencies()
     {
-        // Directly asserts the failing symptom of the original bug ("Duplicated element ...")
-        // cannot recur: entity paths must be unique across all returned dependencies.
+        // Verifies that entity paths are unique across all returned dependency projects.
         List<ProjectVersionEntities> deps = entitiesService.getDependenciesEntities(
                 Collections.singletonList(new ProjectVersion("examples.metadata", "test", "2.3.1")),
                 true, true);
@@ -299,9 +297,8 @@ public class TestEntitiesService extends TestBaseServices
     @Test
     public void legacyGavOverloadAlsoUsesMavenResolution()
     {
-        // Registration flows call the GAV overload getDependenciesEntities(groupId, artifactId, versionId, ...)
-        // which delegates to the legacy List<ProjectVersion> overload. Ensure that entry point
-        // also routes through the Maven-aware resolver.
+        // Verifies that the GAV overload getDependenciesEntities(groupId, artifactId, versionId, ...)
+        // routes through the Maven-aware resolver.
         Entities entities = mock(Entities.class);
         ProjectsService projects = mock(ProjectsService.class);
         EntitiesServiceImpl<StoredEntity> service = new EntitiesServiceImpl<StoredEntity>(entities, projects);
