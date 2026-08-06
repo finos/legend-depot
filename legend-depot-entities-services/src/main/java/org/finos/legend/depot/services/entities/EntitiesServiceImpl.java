@@ -169,7 +169,22 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
                 .map(ad -> new ProjectVersion(ad.getGroupId(), ad.getArtifactId(), ad.getVersionId()))
                 .collect(Collectors.toList());
 
-        return getDependenciesEntities(null, includeOrigin, projectVersionDeps, () -> projects.getDependenciesMaven(projectVersionDeps, allExclusionsMap, transitive));
+        // Aether returns the root/origin projects as part of its result. To match the
+        // pre-existing contract of getDependenciesEntities (transitive deps only, origin
+        // added back only when includeOrigin=true) and to avoid duplicates when origins
+        // are passed as aliases, we resolve origins up front and subtract them from the
+        // Maven-returned closure.
+        List<ProjectVersion> resolvedOrigins = projectVersionDeps.stream()
+                .map(pv -> new ProjectVersion(pv.getGroupId(), pv.getArtifactId(),
+                        projects.resolveAliasesAndCheckVersionExists(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId())))
+                .collect(Collectors.toList());
+
+        return getDependenciesEntities(null, includeOrigin, resolvedOrigins, () ->
+        {
+            Set<ProjectVersion> full = projects.getDependenciesMaven(projectVersionDeps, allExclusionsMap, transitive);
+            full.removeAll(resolvedOrigins);
+            return full;
+        });
     }
 
     @Override

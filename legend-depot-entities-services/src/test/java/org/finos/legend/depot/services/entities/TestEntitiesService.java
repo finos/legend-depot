@@ -50,11 +50,18 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.eq;
@@ -222,6 +229,91 @@ public class TestEntitiesService extends TestBaseServices
         Assertions.assertTrue(dependencyList.get(0).getEntities().isEmpty());
         verify(projects).getDependenciesMaven(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), eq(true));
         verify(projects, never()).getDependencies(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), org.mockito.ArgumentMatchers.anyBoolean());
+    }
+
+    @Test
+    public void multipleTransitiveVersionsOfSameProjectAreDeduplicatedToOne()
+    {
+        // Reproduces the original bug scenario: same GA (test-dependencies) shows up at
+        // multiple versions in the dependency tree. The Maven-aware resolver must dedupe
+        // it down to a single version so registration doesn't fail with "Duplicated element".
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata", "test-dependencies", "1.0.1"));
+
+        StoreProjectVersionData test231 = projectsVersionsStore.find("examples.metadata", "test", "2.3.1").get();
+        test231.getVersionData().addDependency(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.1"));
+        projectsVersionsStore.createOrUpdate(test231);
+
+        List<ProjectVersionEntities> deps = entitiesService.getDependenciesEntities(
+                Collections.singletonList(new ProjectVersion("examples.metadata", "test", "2.3.1")),
+                true, false);
+
+        long testDependenciesCount = deps.stream()
+                .filter(d -> d.getGroupId().equals("examples.metadata") && d.getArtifactId().equals("test-dependencies"))
+                .count();
+        Assertions.assertEquals(1, testDependenciesCount,
+                "test-dependencies must appear exactly once even when multiple transitive versions exist");
+    }
+
+    @Test
+    public void legacyAndMavenPathsReturnSameDependencyClosure()
+    {
+        // Full-interactive uses the Maven (ArtifactDependency) path; semi-interactive/prod
+        // uses the legacy (ProjectVersion) path. After the fix both must return the same closure.
+        List<ProjectVersion> pvs = Collections.singletonList(new ProjectVersion("examples.metadata", "test", "2.3.1"));
+        List<ArtifactDependency> ads = Collections.singletonList(new ArtifactDependency("examples.metadata", "test", "2.3.1"));
+
+        List<ProjectVersionEntities> legacyList = entitiesService.getDependenciesEntities(pvs, true, false);
+        List<ProjectVersionEntities> mavenList = entitiesService.getDependenciesEntitiesFromArtifactDependenciesMaven(ads, true, false);
+
+        Set<String> legacyClosure = legacyList.stream()
+                .map(p -> p.getGroupId() + ":" + p.getArtifactId() + ":" + p.getVersionId())
+                .collect(Collectors.toSet());
+
+        Set<String> mavenClosure = mavenList.stream()
+                .map(p -> p.getGroupId() + ":" + p.getArtifactId() + ":" + p.getVersionId())
+                .collect(Collectors.toSet());
+
+        Assertions.assertEquals(mavenClosure, legacyClosure,
+                "Legacy and Maven dependency-resolution paths must produce the same closure");
+    }
+
+    @Test
+    public void noDuplicateEntityPathsAcrossReturnedDependencies()
+    {
+        // Directly asserts the failing symptom of the original bug ("Duplicated element ...")
+        // cannot recur: entity paths must be unique across all returned dependencies.
+        List<ProjectVersionEntities> deps = entitiesService.getDependenciesEntities(
+                Collections.singletonList(new ProjectVersion("examples.metadata", "test", "2.3.1")),
+                true, true);
+
+        List<String> allPaths = deps.stream()
+                .flatMap(pve -> pve.getEntities().stream())
+                .map(Entity::getPath)
+                .collect(Collectors.toList());
+
+        Set<String> uniquePaths = new HashSet<>(allPaths);
+        Assertions.assertEquals(allPaths.size(), uniquePaths.size(),
+                "Entity paths must be unique across all returned dependency projects");
+    }
+
+    @Test
+    public void legacyGavOverloadAlsoUsesMavenResolution()
+    {
+        // Registration flows call the GAV overload getDependenciesEntities(groupId, artifactId, versionId, ...)
+        // which delegates to the legacy List<ProjectVersion> overload. Ensure that entry point
+        // also routes through the Maven-aware resolver.
+        Entities entities = mock(Entities.class);
+        ProjectsService projects = mock(ProjectsService.class);
+        EntitiesServiceImpl<StoredEntity> service = new EntitiesServiceImpl<StoredEntity>(entities, projects);
+
+        when(projects.resolveAliasesAndCheckVersionExists("examples.metadata", "test", "2.3.1")).thenReturn("2.3.1");
+        when(projects.getDependenciesMaven(anyList(), anyMap(), eq(true))).thenReturn(new HashSet<>());
+        when(entities.getAllEntities(anyString(), anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        service.getDependenciesEntities("examples.metadata", "test", "2.3.1", true, false);
+
+        verify(projects).getDependenciesMaven(anyList(), anyMap(), eq(true));
+        verify(projects, never()).getDependencies(anyList(), anyMap(), anyBoolean());
     }
 
     @Test
