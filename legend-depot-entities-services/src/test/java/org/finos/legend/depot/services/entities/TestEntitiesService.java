@@ -213,7 +213,7 @@ public class TestEntitiesService extends TestBaseServices
 
         ProjectVersion projectVersion = new ProjectVersion("examples.metadata", "test", "2.3.1");
         when(projects.resolveAliasesAndCheckVersionExists("examples.metadata", "test", "2.3.1")).thenReturn("2.3.1");
-        when(projects.getDependenciesMaven(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), eq(true))).thenReturn(Collections.emptySet());
+        when(projects.getDependenciesMaven(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), eq(true))).thenReturn(new java.util.HashSet<>());
         when(entities.getAllEntities("examples.metadata", "test", "2.3.1")).thenReturn(Collections.emptyList());
 
         List<ProjectVersionEntities> dependencyList = service.getDependenciesEntities(Collections.singletonList(projectVersion), true, true);
