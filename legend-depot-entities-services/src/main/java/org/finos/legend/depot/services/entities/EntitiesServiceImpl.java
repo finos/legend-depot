@@ -122,7 +122,7 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
         return retrieveEntitiesForDependencies(dependencies, classifier);
     }
 
-    private List<ProjectVersionEntities> retrieveEntitiesForDependencies(Set<ProjectVersion> dependencies, String classifier)
+    protected List<ProjectVersionEntities> retrieveEntitiesForDependencies(Set<ProjectVersion> dependencies, String classifier)
     {
         return (List<ProjectVersionEntities>) executeWithTrace(RETRIEVE_DEPENDENCY_ENTITIES, () ->
         {
@@ -168,26 +168,15 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
                 .map(ad -> new ProjectVersion(ad.getGroupId(), ad.getArtifactId(), ad.getVersionId()))
                 .collect(Collectors.toList());
 
-        // Resolve origin aliases up front so the returned closure contains only
-        // transitive dependencies; origins are re-added by the shared helper when
-        // includeOrigin is true.
-        List<ProjectVersion> resolvedOrigins = projectVersionDeps.stream()
-                .map(pv -> new ProjectVersion(pv.getGroupId(), pv.getArtifactId(),
-                        projects.resolveAliasesAndCheckVersionExists(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId())))
-                .collect(Collectors.toList());
-
-        return getDependenciesEntities(null, includeOrigin, resolvedOrigins, () ->
-        {
-            Set<ProjectVersion> full = projects.getDependenciesMaven(projectVersionDeps, allExclusionsMap, transitive);
-            full.removeAll(resolvedOrigins);
-            return full;
-        });
+        return getDependenciesEntities(null, false, projectVersionDeps,
+                () -> projects.getDependenciesMaven(projectVersionDeps, allExclusionsMap, transitive, includeOrigin));
     }
 
     @Override
     public List<ProjectVersionEntities> getDependenciesEntitiesByClassifier(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin)
     {
-        return getDependenciesEntities(classifier, includeOrigin, projectDependencies, () -> projects.getDependencies(projectDependencies, new HashMap<>(), transitive));
+        return getDependenciesEntities(classifier, false, projectDependencies,
+                () -> projects.getDependenciesMaven(projectDependencies, new HashMap<>(), transitive, includeOrigin));
     }
 
     private Object executeWithTrace(String label, Supplier<Object> functionToExecute)

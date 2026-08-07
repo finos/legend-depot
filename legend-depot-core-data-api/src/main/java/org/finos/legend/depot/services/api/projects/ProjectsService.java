@@ -73,7 +73,7 @@ public interface ProjectsService
 
     Set<ProjectVersion> getDependencies(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusionsMap, boolean transitive);
 
-    Set<ProjectVersion> getDependenciesMaven(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusionsMap, boolean transitive);
+    Set<ProjectVersion> getDependenciesMaven(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusionsMap, boolean transitive, boolean includeOrigin);
 
     ProjectDependencyReport getProjectDependencyReportFromProjectVersionList(List<ProjectVersion> projectDependencyVersions);
 

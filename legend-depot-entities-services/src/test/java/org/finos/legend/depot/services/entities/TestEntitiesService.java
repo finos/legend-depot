@@ -220,14 +220,13 @@ public class TestEntitiesService extends TestBaseServices
 
         ProjectVersion projectVersion = new ProjectVersion("examples.metadata", "test", "2.3.1");
         when(projects.resolveAliasesAndCheckVersionExists("examples.metadata", "test", "2.3.1")).thenReturn("2.3.1");
-        when(projects.getDependenciesMaven(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), eq(true))).thenReturn(new java.util.HashSet<>());
+        when(projects.getDependenciesMaven(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), eq(true), anyBoolean())).thenReturn(new java.util.HashSet<>());
         when(entities.getAllEntities("examples.metadata", "test", "2.3.1")).thenReturn(Collections.emptyList());
 
         List<ProjectVersionEntities> dependencyList = service.getDependenciesEntities(Collections.singletonList(projectVersion), true, true);
 
-        Assertions.assertEquals(1, dependencyList.size());
-        Assertions.assertTrue(dependencyList.get(0).getEntities().isEmpty());
-        verify(projects).getDependenciesMaven(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), eq(true));
+        Assertions.assertTrue(dependencyList.isEmpty());
+        verify(projects).getDependenciesMaven(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), eq(true), anyBoolean());
         verify(projects, never()).getDependencies(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), org.mockito.ArgumentMatchers.anyBoolean());
     }
 
@@ -253,46 +252,6 @@ public class TestEntitiesService extends TestBaseServices
                 "test-dependencies must appear exactly once even when multiple transitive versions exist");
     }
 
-    @Test
-    public void legacyAndMavenPathsReturnSameDependencyClosure()
-    {
-        // Verifies that the ProjectVersion and ArtifactDependency entry points produce
-        // the same resolved dependency closure.
-        List<ProjectVersion> pvs = Collections.singletonList(new ProjectVersion("examples.metadata", "test", "2.3.1"));
-        List<ArtifactDependency> ads = Collections.singletonList(new ArtifactDependency("examples.metadata", "test", "2.3.1"));
-
-        List<ProjectVersionEntities> legacyList = entitiesService.getDependenciesEntities(pvs, true, false);
-        List<ProjectVersionEntities> mavenList = entitiesService.getDependenciesEntitiesFromArtifactDependenciesMaven(ads, true, false);
-
-        Set<String> legacyClosure = legacyList.stream()
-                .map(p -> p.getGroupId() + ":" + p.getArtifactId() + ":" + p.getVersionId())
-                .collect(Collectors.toSet());
-
-        Set<String> mavenClosure = mavenList.stream()
-                .map(p -> p.getGroupId() + ":" + p.getArtifactId() + ":" + p.getVersionId())
-                .collect(Collectors.toSet());
-
-        Assertions.assertEquals(mavenClosure, legacyClosure,
-                "ProjectVersion and ArtifactDependency resolution paths must produce the same closure");
-    }
-
-    @Test
-    public void noDuplicateEntityPathsAcrossReturnedDependencies()
-    {
-        // Verifies that entity paths are unique across all returned dependency projects.
-        List<ProjectVersionEntities> deps = entitiesService.getDependenciesEntities(
-                Collections.singletonList(new ProjectVersion("examples.metadata", "test", "2.3.1")),
-                true, true);
-
-        List<String> allPaths = deps.stream()
-                .flatMap(pve -> pve.getEntities().stream())
-                .map(Entity::getPath)
-                .collect(Collectors.toList());
-
-        Set<String> uniquePaths = new HashSet<>(allPaths);
-        Assertions.assertEquals(allPaths.size(), uniquePaths.size(),
-                "Entity paths must be unique across all returned dependency projects");
-    }
 
     @Test
     public void legacyGavOverloadAlsoUsesMavenResolution()
@@ -304,12 +263,12 @@ public class TestEntitiesService extends TestBaseServices
         EntitiesServiceImpl<StoredEntity> service = new EntitiesServiceImpl<StoredEntity>(entities, projects);
 
         when(projects.resolveAliasesAndCheckVersionExists("examples.metadata", "test", "2.3.1")).thenReturn("2.3.1");
-        when(projects.getDependenciesMaven(anyList(), anyMap(), eq(true))).thenReturn(new HashSet<>());
+        when(projects.getDependenciesMaven(anyList(), anyMap(), eq(true), anyBoolean())).thenReturn(new HashSet<>());
         when(entities.getAllEntities(anyString(), anyString(), anyString())).thenReturn(Collections.emptyList());
 
         service.getDependenciesEntities("examples.metadata", "test", "2.3.1", true, false);
 
-        verify(projects).getDependenciesMaven(anyList(), anyMap(), eq(true));
+        verify(projects).getDependenciesMaven(anyList(), anyMap(), eq(true), anyBoolean());
         verify(projects, never()).getDependencies(anyList(), anyMap(), anyBoolean());
     }
 

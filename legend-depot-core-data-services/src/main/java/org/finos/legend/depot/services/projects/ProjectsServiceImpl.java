@@ -309,7 +309,7 @@ public class ProjectsServiceImpl implements ProjectsService
     }
 
     @Override
-    public Set<ProjectVersion> getDependenciesMaven(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusionsMap, boolean transitive)
+    public Set<ProjectVersion> getDependenciesMaven(List<ProjectVersion> projectVersions, Map<String, List<ProjectVersion>> exclusionsMap, boolean transitive, boolean includeOrigin)
     {
         // Resolve aliases before passing to the resolver
         List<ProjectVersion> resolvedVersions = projectVersions.stream()
@@ -335,6 +335,11 @@ public class ProjectsServiceImpl implements ProjectsService
                 directDeps.addAll(projectData.getVersionData().getDependencies());
             }
             dependencies.retainAll(directDeps);
+        }
+
+        if (!includeOrigin)
+        {
+            dependencies.removeAll(resolvedVersions);
         }
 
         return dependencies;
