@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 
 public interface EntitiesService<T extends StoredEntity>
@@ -42,13 +43,19 @@ public interface EntitiesService<T extends StoredEntity>
 
     List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages);
 
-    List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin);
-
     List<ProjectVersionEntities> getDependenciesEntities(String classifier, boolean includeOrigin, List<ProjectVersion> originProjects, Supplier<Set<ProjectVersion>> dependencyCalculator);
 
     List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependenciesMaven(List<ArtifactDependency> projectDependencies, boolean transitive, boolean includeOrigin);
 
     List<ProjectVersionEntities> getDependenciesEntitiesByClassifier(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin);
+
+    default List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin)
+    {
+        List<ArtifactDependency> artifactDependencies = projectDependencies.stream()
+                .map(pv -> new ArtifactDependency(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()))
+                .collect(Collectors.toList());
+        return getDependenciesEntitiesFromArtifactDependenciesMaven(artifactDependencies, transitive, includeOrigin);
+    }
 
     default List<ProjectVersionEntities> getDependenciesEntities(String groupId, String artifactId, String versionId, boolean transitive, boolean includeOrigin)
     {
