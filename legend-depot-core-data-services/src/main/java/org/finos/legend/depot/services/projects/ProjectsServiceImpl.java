@@ -337,7 +337,11 @@ public class ProjectsServiceImpl implements ProjectsService
             dependencies.retainAll(directDeps);
         }
 
-        if (!includeOrigin)
+        if (includeOrigin)
+        {
+            dependencies.addAll(resolvedVersions);
+        }
+        else
         {
             dependencies.removeAll(resolvedVersions);
         }

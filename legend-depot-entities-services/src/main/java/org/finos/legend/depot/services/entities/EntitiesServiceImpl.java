@@ -103,17 +103,9 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
     }
 
     @Override
-    public List<ProjectVersionEntities> getDependenciesEntities(String classifier, boolean includeOrigin, List<ProjectVersion> originProjects, Supplier<Set<ProjectVersion>> dependencyCalculator)
+    public List<ProjectVersionEntities> getDependenciesEntities(String classifier, Supplier<Set<ProjectVersion>> dependencyCalculator)
     {
-        Set<ProjectVersion> dependencies = (Set<ProjectVersion>) executeWithTrace(CALCULATE_PROJECT_DEPENDENCIES, () ->
-        {
-            Set<ProjectVersion> deps = dependencyCalculator.get();
-            if (includeOrigin)
-            {
-                deps.addAll(originProjects);
-            }
-            return deps;
-        });
+        Set<ProjectVersion> dependencies = (Set<ProjectVersion>) executeWithTrace(CALCULATE_PROJECT_DEPENDENCIES, dependencyCalculator::get);
 
         TracerFactory.get().log(String.format("dependencies: [%s] ",dependencies.size()));
         PrometheusMetricsFactory.getInstance().observeHistogram(DEPENDENCIES_SIZE,dependencies.size());
@@ -164,7 +156,7 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
                 .map(ad -> new ProjectVersion(ad.getGroupId(), ad.getArtifactId(), ad.getVersionId()))
                 .collect(Collectors.toList());
 
-        return getDependenciesEntities(classifier, false, projectVersionDeps,
+        return getDependenciesEntities(classifier,
                 () -> projects.getDependenciesMaven(projectVersionDeps, allExclusionsMap, transitive, includeOrigin));
     }
 

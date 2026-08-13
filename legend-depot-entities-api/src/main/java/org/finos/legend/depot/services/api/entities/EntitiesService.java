@@ -43,7 +43,7 @@ public interface EntitiesService<T extends StoredEntity>
 
     List<Entity> getEntitiesByPackage(String groupId, String artifactId, String versionId, String packageName, Set<String> classifierPaths, boolean includeSubPackages);
 
-    List<ProjectVersionEntities> getDependenciesEntities(String classifier, boolean includeOrigin, List<ProjectVersion> originProjects, Supplier<Set<ProjectVersion>> dependencyCalculator);
+    List<ProjectVersionEntities> getDependenciesEntities(String classifier, Supplier<Set<ProjectVersion>> dependencyCalculator);
 
     List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependenciesMaven(List<ArtifactDependency> projectDependencies, boolean transitive, boolean includeOrigin);
 
