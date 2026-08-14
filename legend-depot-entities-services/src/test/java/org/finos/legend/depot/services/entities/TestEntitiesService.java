@@ -28,11 +28,14 @@ import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.services.api.entities.ManageEntitiesService;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.services.api.notifications.queue.Queue;
+import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.services.projects.ManageProjectsServiceImpl;
+import org.finos.legend.depot.store.api.entities.Entities;
 import org.finos.legend.depot.store.api.entities.UpdateEntities;
 import org.finos.legend.depot.store.model.entities.EntityDefinition;
+import org.finos.legend.depot.store.model.entities.StoredEntity;
 import org.finos.legend.depot.store.model.entities.StoredEntityData;
 import org.finos.legend.depot.store.model.entities.StoredEntityStringData;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
@@ -47,12 +50,23 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class TestEntitiesService extends TestBaseServices
 {
@@ -195,6 +209,67 @@ public class TestEntitiesService extends TestBaseServices
         Assertions.assertEquals(3, dependencyList3.size());
         Assertions.assertEquals(1, dependencyList3.stream().filter(projectToArtifactFilter("examples.metadata", "test-dependencies")).findFirst().get().getEntities().size());
         Assertions.assertEquals(18, dependencyList3.stream().filter(projectToArtifactFilter("example.services.test", "test")).findFirst().get().getEntities().size());
+    }
+
+    @Test
+    public void legacyDependenciesLookupUsesMavenResolution()
+    {
+        Entities entities = mock(Entities.class);
+        ProjectsService projects = mock(ProjectsService.class);
+        EntitiesServiceImpl<StoredEntity> service = new EntitiesServiceImpl<StoredEntity>(entities, projects);
+
+        ProjectVersion projectVersion = new ProjectVersion("examples.metadata", "test", "2.3.1");
+        when(projects.resolveAliasesAndCheckVersionExists("examples.metadata", "test", "2.3.1")).thenReturn("2.3.1");
+        when(projects.getDependenciesMaven(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), eq(true), anyBoolean())).thenReturn(new java.util.HashSet<>());
+        when(entities.getAllEntities("examples.metadata", "test", "2.3.1")).thenReturn(Collections.emptyList());
+
+        List<ProjectVersionEntities> dependencyList = service.getDependenciesEntities(Collections.singletonList(projectVersion), true, true);
+
+        Assertions.assertTrue(dependencyList.isEmpty());
+        verify(projects).getDependenciesMaven(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), eq(true), anyBoolean());
+        verify(projects, never()).getDependencies(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.anyMap(), org.mockito.ArgumentMatchers.anyBoolean());
+    }
+
+    @Test
+    public void multipleTransitiveVersionsOfSameProjectAreDeduplicatedToOne()
+    {
+        // Verifies that when the same groupId:artifactId appears at multiple versions in
+        // the transitive tree, the resolver dedupes it to a single version per project.
+        projectsVersionsStore.createOrUpdate(new StoreProjectVersionData("examples.metadata", "test-dependencies", "1.0.1"));
+
+        StoreProjectVersionData test231 = projectsVersionsStore.find("examples.metadata", "test", "2.3.1").get();
+        test231.getVersionData().addDependency(new ProjectVersion("examples.metadata", "test-dependencies", "1.0.1"));
+        projectsVersionsStore.createOrUpdate(test231);
+
+        List<ProjectVersionEntities> deps = entitiesService.getDependenciesEntities(
+                Collections.singletonList(new ProjectVersion("examples.metadata", "test", "2.3.1")),
+                true, false);
+
+        long testDependenciesCount = deps.stream()
+                .filter(d -> d.getGroupId().equals("examples.metadata") && d.getArtifactId().equals("test-dependencies"))
+                .count();
+        Assertions.assertEquals(1, testDependenciesCount,
+                "test-dependencies must appear exactly once even when multiple transitive versions exist");
+    }
+
+
+    @Test
+    public void legacyGavOverloadAlsoUsesMavenResolution()
+    {
+        // Verifies that the GAV overload getDependenciesEntities(groupId, artifactId, versionId, ...)
+        // routes through the Maven-aware resolver.
+        Entities entities = mock(Entities.class);
+        ProjectsService projects = mock(ProjectsService.class);
+        EntitiesServiceImpl<StoredEntity> service = new EntitiesServiceImpl<StoredEntity>(entities, projects);
+
+        when(projects.resolveAliasesAndCheckVersionExists("examples.metadata", "test", "2.3.1")).thenReturn("2.3.1");
+        when(projects.getDependenciesMaven(anyList(), anyMap(), eq(true), anyBoolean())).thenReturn(new HashSet<>());
+        when(entities.getAllEntities(anyString(), anyString(), anyString())).thenReturn(Collections.emptyList());
+
+        service.getDependenciesEntities("examples.metadata", "test", "2.3.1", true, false);
+
+        verify(projects).getDependenciesMaven(anyList(), anyMap(), eq(true), anyBoolean());
+        verify(projects, never()).getDependencies(anyList(), anyMap(), anyBoolean());
     }
 
     @Test

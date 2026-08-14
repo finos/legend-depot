@@ -163,6 +163,42 @@ public class TestProjectsService extends TestBaseServices
     }
 
     @Test
+    public void canGetProjectDependenciesMavenWithIncludeOriginAndTransitiveFlags()
+    {
+        ProjectVersion origin = new ProjectVersion("examples.metadata", "test", "2.3.1");
+        ProjectVersion directDep = new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0");
+        ProjectVersion transitiveDep = new ProjectVersion("example.services.test", "test", "1.0.0");
+
+        // transitive=false, includeOrigin=false: only direct deps
+        Set<ProjectVersion> directOnly = projectsService.getDependenciesMaven(
+                Collections.singletonList(origin), new HashMap<>(), false, false);
+        Assertions.assertFalse(directOnly.contains(origin));
+        Assertions.assertTrue(directOnly.contains(directDep));
+        Assertions.assertFalse(directOnly.contains(transitiveDep));
+
+        // transitive=false, includeOrigin=true: origin + direct deps
+        Set<ProjectVersion> directWithOrigin = projectsService.getDependenciesMaven(
+                Collections.singletonList(origin), new HashMap<>(), false, true);
+        Assertions.assertTrue(directWithOrigin.contains(origin));
+        Assertions.assertTrue(directWithOrigin.contains(directDep));
+        Assertions.assertFalse(directWithOrigin.contains(transitiveDep));
+
+        // transitive=true, includeOrigin=false: full transitive closure without origin
+        Set<ProjectVersion> transitiveOnly = projectsService.getDependenciesMaven(
+                Collections.singletonList(origin), new HashMap<>(), true, false);
+        Assertions.assertFalse(transitiveOnly.contains(origin));
+        Assertions.assertTrue(transitiveOnly.contains(directDep));
+        Assertions.assertTrue(transitiveOnly.contains(transitiveDep));
+
+        // transitive=true, includeOrigin=true: full transitive closure including origin
+        Set<ProjectVersion> transitiveWithOrigin = projectsService.getDependenciesMaven(
+                Collections.singletonList(origin), new HashMap<>(), true, true);
+        Assertions.assertTrue(transitiveWithOrigin.contains(origin));
+        Assertions.assertTrue(transitiveWithOrigin.contains(directDep));
+        Assertions.assertTrue(transitiveWithOrigin.contains(transitiveDep));
+    }
+
+    @Test
     public void canGetProjectDependenciesWithOutDuplicates()
     {
 
