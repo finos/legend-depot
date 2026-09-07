@@ -12,6 +12,7 @@ Thumbs.db
 **/lib
 **/surefire-reports-aggregate
 **/dependency-reduced-pom.xml
+**/.flattened-pom.xml
 **/jsconfig.json
 /temp/
 .settings

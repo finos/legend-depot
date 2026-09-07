@@ -41,6 +41,21 @@ jobs:
           git config --global user.email "37706051+finos-admin@users.noreply.github.com"
           git config --global user.name "FINOS Administrator"
 
+      - name: Check release version is unused
+        env:
+          RELEASE_VERSION: ${{ github.event.client_payload.releaseVersion }}
+          TAG: ${{ github.event.repository.name }}-${{ github.event.client_payload.releaseVersion }}
+        run: |
+          set -euo pipefail
+          if ! [[ "${RELEASE_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::releaseVersion must be MAJOR.MINOR.PATCH; got '${RELEASE_VERSION}'."
+            exit 1
+          fi
+          if git ls-remote --exit-code origin "refs/tags/${TAG}" > /dev/null 2>&1; then
+            echo "::error::Tag ${TAG} already exists; ${RELEASE_VERSION} has been released."
+            exit 1
+          fi
+
       - name: Set up Maven Central
         uses: actions/setup-java@v2
         with:
@@ -75,22 +90,34 @@ jobs:
             git push origin master
           fi
 
-      - name: Compute next development version
-        run: |
-          releaseVersion=${{ github.event.client_payload.releaseVersion }}
-          n=${releaseVersion//[!0-9]/ }
-          a=(${n//\./ })
-          nextPatch=$((${a[2]} + 1))
-          developmentVersion="${a[0]}.${a[1]}.${nextPatch}-SNAPSHOT"
-          echo "DEVELOPMENT_VERSION=${developmentVersion}" >> $GITHUB_ENV
-
       - name: Collect Workflow Telemetry
         uses: runforesight/workflow-telemetry-action@v1
         with:
           theme: dark
 
-      - name: Prepare release
-        run: mvn -B -DpreparationGoals=clean release:prepare -DreleaseVersion=${{ github.event.client_payload.releaseVersion }} -DdevelopmentVersion=${{ env.DEVELOPMENT_VERSION }} -P release
+      - name: Build and deploy release
+        env:
+          RELEASE_VERSION: ${{ github.event.client_payload.releaseVersion }}
+        run: mvn -B -e -Drevision="${RELEASE_VERSION}" deploy -P release,docker
 
-      - name: Perform release
-        run: mvn -B release:perform -P release,docker
+      - name: Create and push git tag
+        env:
+          TAG: ${{ github.event.repository.name }}-${{ github.event.client_payload.releaseVersion }}
+        run: |
+          set -euo pipefail
+          git tag "${TAG}"
+          git push origin "refs/tags/${TAG}"
+
+      - name: Compute and set next SNAPSHOT
+        env:
+          RELEASE_VERSION: ${{ github.event.client_payload.releaseVersion }}
+        run: |
+          set -euo pipefail
+          IFS=. read -r major minor patch <<< "${RELEASE_VERSION}"
+          nextSnapshot="${major}.${minor}.$((patch + 1))-SNAPSHOT"
+          git fetch origin "${GITHUB_REF_NAME}"
+          git checkout -B "${GITHUB_REF_NAME}" "origin/${GITHUB_REF_NAME}"
+          sed -i "s|<revision>.*</revision>|<revision>${nextSnapshot}</revision>|" pom.xml
+          git add pom.xml
+          git commit -m "Bump version to ${nextSnapshot}"
+          git push origin "${GITHUB_REF_NAME}"
