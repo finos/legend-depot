@@ -23,7 +23,7 @@ from urllib.error import HTTPError, URLError
 
 def main() -> int:
     if len(sys.argv) != 2:
-        print("::error::Expected exactly one release version argument.")
+        print("::error::Expected exactly one release version argument.", file=sys.stderr)
         return 1
 
     release_version = sys.argv[1]
@@ -40,16 +40,20 @@ def main() -> int:
             if response.status != 200:
                 print(
                     "::error::Failed to verify Maven Central availability for "
-                    f"version {release_version}: unexpected HTTP status {response.status}"
+                    f"version {release_version}: unexpected HTTP status {response.status}",
+                    file=sys.stderr,
                 )
                 return 1
             match_count = json.load(response)["response"]["numFound"]
     except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, KeyError) as error:
-        print(f"::error::Failed to verify Maven Central availability for version {release_version}: {error}")
+        print(
+            f"::error::Failed to verify Maven Central availability for version {release_version}: {error}",
+            file=sys.stderr,
+        )
         return 1
 
     if match_count != 0:
-        print(f"::error::Artifacts for version {release_version} already exist in Maven Central.")
+        print(f"::error::Artifacts for version {release_version} already exist in Maven Central.", file=sys.stderr)
         return 1
 
     print(f"Version {release_version} is available for release.")
