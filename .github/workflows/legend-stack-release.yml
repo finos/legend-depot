@@ -55,11 +55,7 @@ jobs:
             echo "::error::Tag ${TAG} already exists; ${RELEASE_VERSION} has been released."
             exit 1
           fi
-          centralVersionMatchCount="$(python -c "import json, urllib.parse, urllib.request; query = urllib.parse.urlencode({'q': 'g:\"org.finos.legend.depot\" AND a:\"legend-depot\" AND v:\"${RELEASE_VERSION}\"', 'rows': 1, 'wt': 'json'}); print(json.load(urllib.request.urlopen(f'https://search.maven.org/solrsearch/select?{query}'))['response']['numFound'])")"
-          if [ "${centralVersionMatchCount}" != "0" ]; then
-            echo "::error::Artifacts for version ${RELEASE_VERSION} already exist in Maven Central."
-            exit 1
-          fi
+          python .github/scripts/check_maven_central_release.py "${RELEASE_VERSION}"
 
       - name: Set up Maven Central
         uses: actions/setup-java@v2
