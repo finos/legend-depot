@@ -58,7 +58,7 @@ jobs:
             echo "::error::Tag ${TAG} already exists; ${RELEASE_VERSION} has been released."
             exit 1
           fi
-          python .github/scripts/check_maven_central_release.py "${RELEASE_VERSION}"
+          python3 .github/scripts/check_maven_central_release.py "${RELEASE_VERSION}"
 
       - name: Set up Maven Central
         uses: actions/setup-java@v2
