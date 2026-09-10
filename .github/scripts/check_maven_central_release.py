@@ -46,7 +46,7 @@ def main() -> int:
                 )
                 return 1
             match_count = json.load(response)["response"]["numFound"]
-    except (HTTPError, URLError, TimeoutError, socket.timeout, json.JSONDecodeError, KeyError) as error:
+    except (HTTPError, URLError, TimeoutError, socket.timeout, TypeError, json.JSONDecodeError, KeyError) as error:
         print(
             f"::error::Failed to verify Maven Central availability for version {release_version}: {error}",
             file=sys.stderr,
