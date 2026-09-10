@@ -22,6 +22,10 @@ from urllib.error import HTTPError, URLError
 
 
 def main() -> int:
+    if len(sys.argv) != 2:
+        print("::error::Expected exactly one release version argument.")
+        return 1
+
     release_version = sys.argv[1]
     query = urllib.parse.urlencode(
         {
@@ -33,6 +37,12 @@ def main() -> int:
     url = f"https://search.maven.org/solrsearch/select?{query}"
     try:
         with urllib.request.urlopen(url, timeout=30) as response:
+            if response.status != 200:
+                print(
+                    "::error::Failed to verify Maven Central availability for "
+                    f"version {release_version}: unexpected HTTP status {response.status}"
+                )
+                return 1
             match_count = json.load(response)["response"]["numFound"]
     except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, KeyError) as error:
         print(f"::error::Failed to verify Maven Central availability for version {release_version}: {error}")
