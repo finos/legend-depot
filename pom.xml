@@ -103,9 +103,9 @@
         <publish.server.id>central</publish.server.id>
 
         <!-- Legend dependency versions -->
-        <legend.shared.version>0.35.4</legend.shared.version>
-        <legend.engine.version>4.140.6</legend.engine.version>
-        <legend.sdlc.version>0.232.5</legend.sdlc.version>
+        <legend.shared.version>0.37.0</legend.shared.version>
+        <legend.engine.version>4.143.6</legend.engine.version>
+        <legend.sdlc.version>0.233.4</legend.sdlc.version>
 
 
         <!-- Dependency versions -->
