@@ -218,7 +218,7 @@ public class MavenArtifactRepository implements ArtifactRepository
         return dependencies.stream().filter(dep -> dep.getArtifactId().endsWith(type.getModuleName())).map(dep ->
         {
             List<DependencyExclusion> exclusions = dep.getExclusions().stream()
-                    .map(e -> new DependencyExclusion(e.getGroupId(), stripModuleSuffix(e.getArtifactId())))
+                    .map(e -> new DependencyExclusion(e.getGroupId(), e.getArtifactId()))
                     .collect(Collectors.toList());
             return new ArtifactDependency(dep.getGroupId(), dep.getArtifactId(), dep.getVersion(), exclusions);
         }).collect(Collectors.toSet());
@@ -250,7 +250,7 @@ public class MavenArtifactRepository implements ArtifactRepository
                                 {
                                     Parent parent = getPOM(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()).getParent();
                                     List<DependencyExclusion> exclusions = dependency.getExclusions().stream()
-                                            .map(e -> new DependencyExclusion(e.getGroupId(), e.getArtifactId()))
+                                            .map(e -> new DependencyExclusion(e.getGroupId(), stripModuleSuffix(e.getArtifactId())))
                                             .collect(Collectors.toList());
                                     if (parent != null)
                                     {
