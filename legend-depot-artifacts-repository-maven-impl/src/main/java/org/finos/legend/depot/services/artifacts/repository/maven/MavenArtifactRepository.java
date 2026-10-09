@@ -250,7 +250,7 @@ public class MavenArtifactRepository implements ArtifactRepository
                                 {
                                     Parent parent = getPOM(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion()).getParent();
                                     List<DependencyExclusion> exclusions = dependency.getExclusions().stream()
-                                            .map(e -> new DependencyExclusion(e.getGroupId(), e.getArtifactId()))
+                                            .map(e -> new DependencyExclusion(e.getGroupId(), stripModuleSuffix(e.getArtifactId())))
                                             .collect(Collectors.toList());
                                     if (parent != null)
                                     {
@@ -263,6 +263,24 @@ public class MavenArtifactRepository implements ArtifactRepository
         }
 
         return dependencies;
+    }
+
+    static String stripModuleSuffix(String artifactId)
+    {
+        if (artifactId == null)
+        {
+            return null;
+        }
+        String longestMatch = null;
+        for (ArtifactType type : ArtifactType.values())
+        {
+            String suffix = SEPARATOR + type.getModuleName();
+            if (artifactId.endsWith(suffix) && (longestMatch == null || suffix.length() > longestMatch.length()))
+            {
+                longestMatch = suffix;
+            }
+        }
+        return longestMatch == null ? artifactId : artifactId.substring(0, artifactId.length() - longestMatch.length());
     }
 
     @Override

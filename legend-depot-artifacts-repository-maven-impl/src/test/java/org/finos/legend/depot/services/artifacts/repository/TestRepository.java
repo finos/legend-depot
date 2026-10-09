@@ -19,6 +19,7 @@ import org.finos.legend.depot.services.api.artifacts.repository.ArtifactNotFound
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
+import org.finos.legend.depot.domain.artifacts.repository.DependencyExclusion;
 import org.finos.legend.depot.services.artifacts.repository.maven.TestMavenArtifactsRepository;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.junit.jupiter.api.Assertions;
@@ -89,6 +90,17 @@ public class TestRepository
         Assertions.assertEquals(GROUP_ID, dependencies.stream().findFirst().get().getGroupId());
         Assertions.assertEquals("test-dependencies", dependencies.stream().findFirst().get().getArtifactId());
         Assertions.assertEquals("1.0.0", dependencies.stream().findFirst().get().getVersionId());
+    }
+
+    @Test
+    public void dependencyExclusionsHaveModuleSuffixStripped()
+    {
+        Set<ArtifactDependency> dependencies = repository.findDependencies(GROUP_ID, "test", "1.0.0");
+        ArtifactDependency dependency = dependencies.stream().findFirst().get();
+        Assertions.assertEquals(1, dependency.getExclusions().size());
+        DependencyExclusion exclusion = dependency.getExclusions().get(0);
+        Assertions.assertEquals(GROUP_ID, exclusion.getGroupId());
+        Assertions.assertEquals("test-excluded", exclusion.getArtifactId());
     }
 
     @Test

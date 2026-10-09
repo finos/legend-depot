@@ -33,6 +33,12 @@
             <groupId>examples.metadata</groupId>
             <artifactId>test-dependencies-entities</artifactId>
             <version>1.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>examples.metadata</groupId>
+                    <artifactId>test-excluded-entities</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
