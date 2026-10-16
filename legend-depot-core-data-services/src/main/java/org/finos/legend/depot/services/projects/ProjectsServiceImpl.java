@@ -67,10 +67,10 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Collections;
 import java.util.ArrayList;
+import java.util.function.Predicate;
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import static org.finos.legend.depot.domain.version.VersionValidator.BRANCH_SNAPSHOT;
 
 public class ProjectsServiceImpl implements ProjectsService
@@ -512,31 +512,38 @@ public class ProjectsServiceImpl implements ProjectsService
     @Override
     public List<ProjectDependencyWithPlatformVersions> getDependantProjects(String groupId, String artifactId, String versionId, boolean latestOnly)
     {
-        ConcurrentLinkedQueue<ProjectDependencyWithPlatformVersions> result = new ConcurrentLinkedQueue<>();
+        String version;
         if (versionId.equalsIgnoreCase("ALL"))
         {
-            this.getAllProjectCoordinates().parallelStream().forEach(project ->
-            {
-                projectsVersions.find(project.getGroupId(), project.getArtifactId()).parallelStream().forEach(projectData ->
-                {
-                    Stream<ProjectVersion> dependencies = projectData.getVersionData().getDependencies().stream().filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId));
-                    dependencies.forEach(dep -> result.offer(new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep, projectData.getVersionData().getProperties())));
-                });
-            });
+            version = null;
         }
         else
         {
-            String version =  this.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
-            this.getAllProjectCoordinates().parallelStream().forEach(project ->
-            {
-                projectsVersions.find(project.getGroupId(), project.getArtifactId()).parallelStream().forEach(projectData ->
-                {
-                    Stream<ProjectVersion> dependencies = projectData.getVersionData().getDependencies().stream().filter(dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId) && dep.getVersionId().equals(version));
-                    dependencies.forEach(dep -> result.offer(new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep, projectData.getVersionData().getProperties())));
-                });
-            });
+            version = this.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
         }
-        return latestOnly ? filterProjectByLatest(result.stream().collect(Collectors.toList())) : result.stream().collect(Collectors.toList());
+        Predicate<ProjectVersion> matchesTarget = dep -> dep.getGroupId().equals(groupId) && dep.getArtifactId().equals(artifactId) && (version == null || dep.getVersionId().equals(version));
+
+        ConcurrentLinkedQueue<ProjectDependencyWithPlatformVersions> result = new ConcurrentLinkedQueue<>();
+        this.getAllProjectCoordinates().parallelStream().forEach(project ->
+        {
+            List<StoreProjectVersionData> candidates = new ArrayList<>();
+            if (latestOnly)
+            {
+                // only inspect each project's current latest release, not its whole version history
+                if (project.getLatestVersion() != null)
+                {
+                    projectsVersions.find(project.getGroupId(), project.getArtifactId(), project.getLatestVersion()).ifPresent(candidates::add);
+                }
+            }
+            else
+            {
+                candidates.addAll(projectsVersions.find(project.getGroupId(), project.getArtifactId()));
+            }
+            candidates.forEach(projectData ->
+                    projectData.getVersionData().getDependencies().stream().filter(matchesTarget).forEach(dep ->
+                            result.offer(new ProjectDependencyWithPlatformVersions(projectData.getGroupId(), projectData.getArtifactId(), projectData.getVersionId(), dep, projectData.getVersionData().getProperties()))));
+        });
+        return new ArrayList<>(result);
     }
 
     @Override
@@ -724,12 +731,6 @@ public class ProjectsServiceImpl implements ProjectsService
 
         LOGGER.info("Found {} alternative versions for {}-{}-{} with backtrack {}", alternatives.size(), pv.getGroupId(), pv.getArtifactId(), pv.getVersionId(), backtrackVersions);
         return alternatives;
-    }
-
-    private List<ProjectDependencyWithPlatformVersions> filterProjectByLatest(List<ProjectDependencyWithPlatformVersions> projects)
-    {
-        Map<String, List<ProjectDependencyWithPlatformVersions>> groupedProjectDependencyWithPlatformVersions = projects.stream().filter(p -> !VersionValidator.isSnapshotVersion(p.getVersionId())).collect(Collectors.groupingBy(p -> p.getGroupId() + p.getArtifactId()));
-        return groupedProjectDependencyWithPlatformVersions.entrySet().stream().map(set -> set.getValue().stream().max(Comparator.comparing(ProjectDependencyWithPlatformVersions::getVersionId)).get()).collect(Collectors.toList());
     }
 
     private StoreProjectVersionData getProject(String groupId, String artifactId, String versionId)
