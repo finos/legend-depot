@@ -62,11 +62,6 @@ jobs:
         env:
           MAVEN_OPTS: -Xmx6g
 
-      - name: Collect Workflow Telemetry
-        uses: runforesight/workflow-telemetry-action@v1
-        with:
-          theme: dark
-
       - name: Build + Test
         if: (github.repository != 'finos/legend-depot') || (github.ref != 'refs/heads/master') || (github.ref != 'refs/heads/integration')
         run: mvn install javadoc:javadoc
