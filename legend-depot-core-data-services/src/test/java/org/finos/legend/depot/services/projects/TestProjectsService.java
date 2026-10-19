@@ -344,7 +344,8 @@ public class TestProjectsService extends TestBaseServices
         List<ProjectDependencyWithPlatformVersions> dependencyList5 = projectsService.getDependantProjects("examples.metadata", "test-dependencies", "all", true);
         Assertions.assertFalse(dependencyList5.isEmpty());
         Assertions.assertEquals(1, dependencyList5.size());
-        Assertions.assertTrue(dependencyList5.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "3.0.0", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
+        // latestOnly looks at the project's latest release (2.3.1), not the newest version that happens to depend on the target
+        Assertions.assertTrue(dependencyList5.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
 
         List<ProjectDependencyWithPlatformVersions> dependencyList6 = projectsService.getDependantProjects("examples.metadata", "test-dependencies", "all", false);
         Assertions.assertFalse(dependencyList6.isEmpty());
@@ -352,6 +353,39 @@ public class TestProjectsService extends TestBaseServices
         Assertions.assertTrue(dependencyList6.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "2.3.1", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
         Assertions.assertTrue(dependencyList6.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "master-SNAPSHOT", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
         Assertions.assertTrue(dependencyList6.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "test", "3.0.0", new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0"), Collections.emptyList())));
+    }
+
+    @Test
+    public void latestOnlyDependantProjectsUseEachProjectsLatestVersion()
+    {
+        ProjectVersion targetV1 = new ProjectVersion("examples.metadata", "test-dependencies", "1.0.0");
+        ProjectVersion targetV2 = new ProjectVersion("examples.metadata", "test-dependencies", "2.0.0");
+
+        // still-on-v1: latest release 1.10.0 depends on the target 1.0.0
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-998", "examples.metadata", "still-on-v1", null, "1.10.0"));
+        for (String v : Arrays.asList("1.9.0", "1.10.0"))
+        {
+            StoreProjectVersionData data = new StoreProjectVersionData("examples.metadata", "still-on-v1", v);
+            data.getVersionData().addDependency(targetV1);
+            projectsVersionsStore.createOrUpdate(data);
+        }
+
+        // moved-to-v2: an older release depended on 1.0.0 but the latest release moved to 2.0.0
+        projectsStore.createOrUpdate(new StoreProjectData("PROD-999", "examples.metadata", "moved-to-v2", null, "5.0.0"));
+        StoreProjectVersionData old = new StoreProjectVersionData("examples.metadata", "moved-to-v2", "3.0.0");
+        old.getVersionData().addDependency(targetV1);
+        projectsVersionsStore.createOrUpdate(old);
+        StoreProjectVersionData latest = new StoreProjectVersionData("examples.metadata", "moved-to-v2", "5.0.0");
+        latest.getVersionData().addDependency(targetV2);
+        projectsVersionsStore.createOrUpdate(latest);
+
+        List<ProjectDependencyWithPlatformVersions> latestDependants = projectsService.getDependantProjects("examples.metadata", "test-dependencies", "1.0.0", true);
+        Assertions.assertTrue(latestDependants.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "still-on-v1", "1.10.0", targetV1, Collections.emptyList())));
+        Assertions.assertFalse(latestDependants.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "still-on-v1", "1.9.0", targetV1, Collections.emptyList())));
+        Assertions.assertTrue(latestDependants.stream().noneMatch(d -> d.getArtifactId().equals("moved-to-v2")));
+
+        List<ProjectDependencyWithPlatformVersions> allDependants = projectsService.getDependantProjects("examples.metadata", "test-dependencies", "1.0.0", false);
+        Assertions.assertTrue(allDependants.contains(new ProjectDependencyWithPlatformVersions("examples.metadata", "moved-to-v2", "3.0.0", targetV1, Collections.emptyList())));
     }
 
     @Test
