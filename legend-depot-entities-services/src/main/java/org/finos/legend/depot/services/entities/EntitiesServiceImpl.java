@@ -103,17 +103,9 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
     }
 
     @Override
-    public List<ProjectVersionEntities> getDependenciesEntities(String classifier, boolean includeOrigin, List<ProjectVersion> originProjects, Supplier<Set<ProjectVersion>> dependencyCalculator)
+    public List<ProjectVersionEntities> getDependenciesEntities(String classifier, Supplier<Set<ProjectVersion>> dependencyCalculator)
     {
-        Set<ProjectVersion> dependencies = (Set<ProjectVersion>) executeWithTrace(CALCULATE_PROJECT_DEPENDENCIES, () ->
-        {
-            Set<ProjectVersion> deps = dependencyCalculator.get();
-            if (includeOrigin)
-            {
-                deps.addAll(originProjects);
-            }
-            return deps;
-        });
+        Set<ProjectVersion> dependencies = (Set<ProjectVersion>) executeWithTrace(CALCULATE_PROJECT_DEPENDENCIES, dependencyCalculator::get);
 
         TracerFactory.get().log(String.format("dependencies: [%s] ",dependencies.size()));
         PrometheusMetricsFactory.getInstance().observeHistogram(DEPENDENCIES_SIZE,dependencies.size());
@@ -122,7 +114,7 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
         return retrieveEntitiesForDependencies(dependencies, classifier);
     }
 
-    private List<ProjectVersionEntities> retrieveEntitiesForDependencies(Set<ProjectVersion> dependencies, String classifier)
+    protected List<ProjectVersionEntities> retrieveEntitiesForDependencies(Set<ProjectVersion> dependencies, String classifier)
     {
         return (List<ProjectVersionEntities>) executeWithTrace(RETRIEVE_DEPENDENCY_ENTITIES, () ->
         {
@@ -150,29 +142,31 @@ public class EntitiesServiceImpl<T extends StoredEntity> implements EntitiesServ
     }
 
     @Override
-    public List<ProjectVersionEntities> getDependenciesEntities(List<ProjectVersion> projectDependencies, boolean transitive, boolean includeOrigin)
+    public List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependenciesMaven(List<ArtifactDependency> projectDependencies, boolean transitive, boolean includeOrigin)
     {
-        return getDependenciesEntities(null, includeOrigin, projectDependencies, () -> projects.getDependencies(projectDependencies, new HashMap<>(), transitive));
+        return getDependenciesEntitiesFromArtifactDependenciesMaven(projectDependencies, null, transitive, includeOrigin);
     }
 
-    @Override
-    public List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependenciesMaven(List<ArtifactDependency> projectDependencies, boolean transitive, boolean includeOrigin)
+    private List<ProjectVersionEntities> getDependenciesEntitiesFromArtifactDependenciesMaven(List<ArtifactDependency> projectDependencies, String classifier, boolean transitive, boolean includeOrigin)
     {
         Map<String, List<ProjectVersion>> directExclusionsMap = DependencyExclusionsUtil.createDependencyExclusionsMap(projectDependencies);
         Map<String, List<ProjectVersion>> allExclusionsMap = DependencyExclusionsUtil.getTransitiveDependenciesOfExclusions(directExclusionsMap, projects);
 
-        // Get a list of ArtifactDependency dependencies
         List<ProjectVersion> projectVersionDeps = projectDependencies.stream()
                 .map(ad -> new ProjectVersion(ad.getGroupId(), ad.getArtifactId(), ad.getVersionId()))
                 .collect(Collectors.toList());
 
-        return getDependenciesEntities(null, includeOrigin, projectVersionDeps, () -> projects.getDependenciesMaven(projectVersionDeps, allExclusionsMap, transitive));
+        return getDependenciesEntities(classifier,
+                () -> projects.getDependenciesMaven(projectVersionDeps, allExclusionsMap, transitive, includeOrigin));
     }
 
     @Override
     public List<ProjectVersionEntities> getDependenciesEntitiesByClassifier(List<ProjectVersion> projectDependencies, String classifier, boolean transitive, boolean includeOrigin)
     {
-        return getDependenciesEntities(classifier, includeOrigin, projectDependencies, () -> projects.getDependencies(projectDependencies, new HashMap<>(), transitive));
+        List<ArtifactDependency> artifactDependencies = projectDependencies.stream()
+                .map(pv -> new ArtifactDependency(pv.getGroupId(), pv.getArtifactId(), pv.getVersionId()))
+                .collect(Collectors.toList());
+        return getDependenciesEntitiesFromArtifactDependenciesMaven(artifactDependencies, classifier, transitive, includeOrigin);
     }
 
     private Object executeWithTrace(String label, Supplier<Object> functionToExecute)
