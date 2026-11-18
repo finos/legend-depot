@@ -16,6 +16,7 @@ This file lists the maintainers of this repository.
 | @ivan-kyosev-gs | Ivan Kyosev | Goldman Sachs |  |
 | @kevin-m-knight-gs | Kevin Knight | Goldman Sachs |  |
 | @mimi-tam | Mimi Tam | Goldman Sachs |  |
+| @nschue-gs | Nicholas Schuetze | Goldman Sachs |  |
 | @rafaelbey | Rafael Bey-Hernandez | Goldman Sachs |  |
 | @wisecodecraft | Bella Wiseman | Goldman Sachs |  |
 
