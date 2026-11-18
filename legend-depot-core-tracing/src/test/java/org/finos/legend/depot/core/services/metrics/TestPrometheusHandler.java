@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+
 public class TestPrometheusHandler
 {
     DepotPrometheusMetricsHandler prometheusMetrics = (DepotPrometheusMetricsHandler) PrometheusMetricsFactory.configure(new PrometheusConfiguration(true,new DepotPrometheusMetricsHandler("test")));
@@ -89,6 +91,24 @@ public class TestPrometheusHandler
     }
 
 
+
+    @Test
+    public void helpMessageIsExported()
+    {
+        prometheusMetrics.registerCounter("test3", "counts test3");
+        prometheusMetrics.registerSummary("test4", null);
+        Assertions.assertEquals("counts test3", help("test_test3"));
+        Assertions.assertEquals("test4", help("test_test4"));
+    }
+
+    private static String help(String metricName)
+    {
+        return Collections.list(CollectorRegistry.defaultRegistry.metricFamilySamples()).stream()
+                .filter(samples -> samples.name.equals(metricName))
+                .map(samples -> samples.help)
+                .findFirst()
+                .orElseThrow();
+    }
 
     @Test
     public void testSummaryRegistration()

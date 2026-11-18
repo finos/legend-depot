@@ -22,7 +22,7 @@ import org.finos.legend.depot.store.api.generations.UpdateFileGenerations;
 import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 public class ManageGenerationsStoreMongoModule extends GenerationsStoreMongoModule
 {

@@ -21,7 +21,7 @@ import com.google.inject.Singleton;
 import org.finos.legend.depot.services.api.schedules.SchedulesFactory;
 import org.finos.legend.depot.store.mongo.admin.metrics.StorageMetricsHandler;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 public class ManageMongoStoreSchedulesModule extends PrivateModule
 {

@@ -22,8 +22,8 @@ import org.finos.legend.depot.services.generations.loader.FileGenerationLoader;
 import org.finos.legend.depot.services.api.artifacts.handlers.ArtifactLoadingException;
 import org.finos.legend.depot.services.api.artifacts.handlers.generations.FileGenerationsArtifactsProvider;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

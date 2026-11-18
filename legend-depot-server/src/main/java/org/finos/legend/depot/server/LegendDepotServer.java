@@ -17,8 +17,8 @@ package org.finos.legend.depot.server;
 
 import com.google.inject.Module;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
-import io.dropwizard.setup.Environment;
-import org.eclipse.jetty.servlets.CrossOriginFilter;
+import io.dropwizard.core.setup.Environment;
+import org.eclipse.jetty.ee10.servlets.CrossOriginFilter;
 import org.finos.legend.depot.core.server.BaseServer;
 import org.finos.legend.depot.core.server.guice.ServerInfoModule;
 import org.finos.legend.depot.server.configuration.DepotServerConfiguration;
@@ -44,8 +44,8 @@ import org.finos.legend.depot.store.mongo.guice.EntitiesStoreMongoModule;
 import org.finos.legend.depot.store.mongo.guice.GenerationsStoreMongoModule;
 import org.finos.legend.depot.core.services.guice.MonitoringModule;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.FilterRegistration;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;

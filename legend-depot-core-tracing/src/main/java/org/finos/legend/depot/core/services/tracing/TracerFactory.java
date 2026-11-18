@@ -25,7 +25,7 @@ import io.opentracing.util.GlobalTracer;
 import org.finos.legend.depot.core.services.api.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.core.services.api.tracing.configuration.TracerProvider;
 import org.slf4j.Logger;
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.core.server.error;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;

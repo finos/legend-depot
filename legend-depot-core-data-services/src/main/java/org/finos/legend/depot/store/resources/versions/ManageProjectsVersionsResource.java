@@ -15,30 +15,30 @@
 
 package org.finos.legend.depot.store.resources.versions;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 import java.security.Principal;
 import java.util.List;
 
 @Path("")
-@Api("Versions")
+@Tag(name = "Versions")
 public class ManageProjectsVersionsResource extends AuthorisedResource
 {
 
@@ -61,7 +61,7 @@ public class ManageProjectsVersionsResource extends AuthorisedResource
 
     @GET
     @Path("/versions")
-    @ApiOperation(ResourceLoggingAndTracing.FIND_PROJECT_VERSIONS)
+    @Operation(summary = ResourceLoggingAndTracing.FIND_PROJECT_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
     public List<StoreProjectVersionData> findProjectVersion(@QueryParam("excluded") Boolean excluded)
     {
@@ -71,9 +71,9 @@ public class ManageProjectsVersionsResource extends AuthorisedResource
 
     @PUT
     @Path("/versions/{groupId}/{artifactId}/{versionId}/{exclusionReason}")
-    @ApiOperation(ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION)
+    @Operation(summary = ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
-    public StoreProjectVersionData excludeProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("exclusionReason") String exclusionReason)
+    public StoreProjectVersionData excludeProjectVersion(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @PathParam("versionId") @Parameter(description = "a valid version string: x.y.z, master-SNAPSHOT") String versionId, @PathParam("exclusionReason") String exclusionReason)
     {
         return handle(ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION, ResourceLoggingAndTracing.EXCLUDE_PROJECT_VERSION + groupId + artifactId + versionId + exclusionReason, () ->
             projectVersionApi.excludeProjectVersion(groupId, artifactId, versionId, exclusionReason)

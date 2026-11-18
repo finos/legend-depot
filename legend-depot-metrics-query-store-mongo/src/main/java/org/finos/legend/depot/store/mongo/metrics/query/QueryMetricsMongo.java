@@ -32,8 +32,8 @@ import org.finos.legend.depot.store.model.metrics.query.VersionQueryMetric;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import com.mongodb.client.model.IndexModel;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

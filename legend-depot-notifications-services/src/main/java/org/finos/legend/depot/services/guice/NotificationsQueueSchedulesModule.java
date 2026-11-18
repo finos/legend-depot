@@ -22,7 +22,7 @@ import org.finos.legend.depot.services.api.notifications.queue.QueueManagerConfi
 import org.finos.legend.depot.services.api.schedules.SchedulesFactory;
 import org.finos.legend.depot.services.notifications.NotificationsQueueManager;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 public class NotificationsQueueSchedulesModule extends PrivateModule
 {

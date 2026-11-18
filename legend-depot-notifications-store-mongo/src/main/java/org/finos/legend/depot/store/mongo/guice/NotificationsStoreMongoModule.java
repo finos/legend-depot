@@ -22,7 +22,7 @@ import org.finos.legend.depot.store.mongo.notifications.NotificationsMongo;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.api.notifications.Notifications;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 
 public class NotificationsStoreMongoModule extends PrivateModule

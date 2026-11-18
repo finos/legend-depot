@@ -17,7 +17,7 @@ package org.finos.legend.depot.store.mongo.core;
 
 import com.mongodb.MongoClient;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class MongoNonTracingConnectionFactory extends AbstractMongoConnectionFactory

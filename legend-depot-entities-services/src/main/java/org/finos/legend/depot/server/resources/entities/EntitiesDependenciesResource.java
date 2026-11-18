@@ -15,9 +15,10 @@
 
 package org.finos.legend.depot.server.resources.entities;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
 import org.finos.legend.depot.domain.project.ProjectVersion;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactDependency;
@@ -26,19 +27,19 @@ import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 import org.finos.legend.depot.services.api.EtagBuilder;
 
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSIONS_DEPENDENCY_ENTITIES;
@@ -47,7 +48,7 @@ import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTra
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_ENTITY_FROM_DEPENDENCIES;
 
 @Path("")
-@Api("Dependencies")
+@Tag(name = "Dependencies")
 public class EntitiesDependenciesResource extends TracingResource
 {
     private final EntitiesService entitiesService;
@@ -60,16 +61,16 @@ public class EntitiesDependenciesResource extends TracingResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/dependencies")
-    @ApiOperation(GET_VERSION_DEPENDENCY_ENTITIES)
+    @Operation(summary = GET_VERSION_DEPENDENCY_ENTITIES)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEntitiesFromDependencies(@PathParam("groupId") String groupId,
                                                 @PathParam("artifactId") String artifactId,
-                                                @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                                @PathParam("versionId") @Parameter(description = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                                 @QueryParam("transitive") @DefaultValue("false")
-                                                @ApiParam("Whether to return transitive dependencies") boolean transitive,
+                                                @Parameter(description = "Whether to return transitive dependencies") boolean transitive,
                                                 @QueryParam("includeOrigin") @DefaultValue("false")
-                                                @ApiParam("Whether to return start of dependency tree") boolean includeOrigin,
+                                                @Parameter(description = "Whether to return start of dependency tree") boolean includeOrigin,
                                                 @Context Request request)
     {
         return handle(GET_VERSION_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(groupId, artifactId, versionId, transitive, includeOrigin), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
@@ -77,17 +78,17 @@ public class EntitiesDependenciesResource extends TracingResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/classifiers/{classifier}/dependencies")
-    @ApiOperation(value = GET_VERSION_DEPENDENCY_ENTITIES, hidden = true)
+    @Operation(summary = GET_VERSION_DEPENDENCY_ENTITIES, hidden = true)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEntitiesFromDependenciesByClassifier(@PathParam("groupId") String groupId,
                                                             @PathParam("artifactId") String artifactId,
-                                                            @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                                            @PathParam("versionId") @Parameter(description = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                                             @PathParam("classifier") String classifier,
                                                             @QueryParam("transitive") @DefaultValue("false")
-                                                            @ApiParam("Whether to return transitive dependencies") boolean transitive,
+                                                            @Parameter(description = "Whether to return transitive dependencies") boolean transitive,
                                                             @QueryParam("includeOrigin") @DefaultValue("false")
-                                                            @ApiParam("Whether to return start of dependency tree") boolean includeOrigin,
+                                                            @Parameter(description = "Whether to return start of dependency tree") boolean includeOrigin,
                                                             @Context Request request)
     {
         if (classifier == null)
@@ -99,15 +100,15 @@ public class EntitiesDependenciesResource extends TracingResource
 
     @POST
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/dependencies/paths")
-    @ApiOperation(value = GET_VERSION_ENTITY_FROM_DEPENDENCIES, hidden = true)
+    @Operation(summary = GET_VERSION_ENTITY_FROM_DEPENDENCIES, hidden = true)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEntityFromDependencies(@PathParam("groupId") String groupId,
                                               @PathParam("artifactId") String artifactId,
-                                              @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
-                                              @ApiParam("entityPaths") List<String> entityPaths,
+                                              @PathParam("versionId") @Parameter(description = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                              @RequestBody(description = "entityPaths") List<String> entityPaths,
                                               @QueryParam("includeOrigin")
                                               @DefaultValue("false")
-                                              @ApiParam("Whether to find entity in the GAV provided") boolean includeOrigin,
+                                              @Parameter(description = "Whether to find entity in the GAV provided") boolean includeOrigin,
                                               @Context Request request)
     {
         return handle(GET_VERSION_ENTITY_FROM_DEPENDENCIES, GET_VERSION_ENTITY_FROM_DEPENDENCIES + StringUtils.join(entityPaths, ","), () -> this.entitiesService.getEntityFromDependencies(groupId, artifactId, versionId, entityPaths, includeOrigin), request, () -> EtagBuilder.create().withGAV(groupId, artifactId, versionId).build());
@@ -115,26 +116,26 @@ public class EntitiesDependenciesResource extends TracingResource
 
     @POST
     @Path("/projects/dependencies")
-    @ApiOperation(GET_VERSIONS_DEPENDENCY_ENTITIES)
+    @Operation(summary = GET_VERSIONS_DEPENDENCY_ENTITIES)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllEntitiesFromDependencies(@ApiParam("projectDependencies") List<ProjectVersion> projectDependencies,
+    public Response getAllEntitiesFromDependencies(@RequestBody(description = "projectDependencies") List<ProjectVersion> projectDependencies,
                                                                        @QueryParam("transitive") @DefaultValue("false")
-                                                                       @ApiParam("Whether to return transitive dependencies") boolean transitive,
+                                                                       @Parameter(description = "Whether to return transitive dependencies") boolean transitive,
                                                                        @QueryParam("includeOrigin") @DefaultValue("false")
-                                                                       @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
+                                                                       @Parameter(description = "Whether to return start of dependency tree") boolean includeOrigin)
     {
         return handleResponse(GET_VERSIONS_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntities(projectDependencies, transitive, includeOrigin));
     }
 
     @POST
     @Path("/projects/dependenciesFromArtifactDependencies")
-    @ApiOperation(GET_VERSIONS_DEPENDENCY_ENTITIES_MAVEN)
+    @Operation(summary = GET_VERSIONS_DEPENDENCY_ENTITIES_MAVEN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllEntitiesFromArtifactDependenciesMaven(@ApiParam("projectDependencies") List<ArtifactDependency> projectDependencies,
+    public Response getAllEntitiesFromArtifactDependenciesMaven(@RequestBody(description = "projectDependencies") List<ArtifactDependency> projectDependencies,
                                                            @QueryParam("transitive") @DefaultValue("false")
-                                                           @ApiParam("Whether to return transitive dependencies") boolean transitive,
+                                                           @Parameter(description = "Whether to return transitive dependencies") boolean transitive,
                                                            @QueryParam("includeOrigin") @DefaultValue("false")
-                                                           @ApiParam("Whether to return start of dependency tree") boolean includeOrigin)
+                                                           @Parameter(description = "Whether to return start of dependency tree") boolean includeOrigin)
     {
         return handleResponse(GET_VERSIONS_DEPENDENCY_ENTITIES, () -> this.entitiesService.getDependenciesEntitiesFromArtifactDependenciesMaven(projectDependencies, transitive, includeOrigin));
     }

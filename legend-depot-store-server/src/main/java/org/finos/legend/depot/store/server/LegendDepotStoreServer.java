@@ -17,9 +17,9 @@ package org.finos.legend.depot.store.server;
 
 import com.google.inject.Module;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
-import org.eclipse.jetty.servlets.CrossOriginFilter;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
+import org.eclipse.jetty.ee10.servlets.CrossOriginFilter;
 import org.finos.legend.depot.core.server.BaseServer;
 import org.finos.legend.depot.core.server.guice.ServerInfoModule;
 import org.finos.legend.depot.core.services.guice.AuthorisationModule;
@@ -60,8 +60,8 @@ import org.finos.legend.depot.store.resources.guice.RepositoryResourcesModule;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
 import org.finos.legend.depot.store.server.guice.DepotStoreServerModule;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.FilterRegistration;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;

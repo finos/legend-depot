@@ -18,21 +18,19 @@ package org.finos.legend.depot.core.server;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.health.HealthCheck;
 import com.google.inject.Module;
-import com.hubspot.dropwizard.guicier.GuiceBundle;
-import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
-import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
-import io.prometheus.client.exporter.MetricsServlet;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlets.CrossOriginFilter;
+import io.prometheus.client.servlet.jakarta.exporter.MetricsServlet;
+import org.eclipse.jetty.ee10.servlet.FilterHolder;
+import org.eclipse.jetty.ee10.servlet.SessionHandler;
 import org.eclipse.jetty.util.component.LifeCycle;
 import org.finos.legend.depot.core.server.error.CatchAllExceptionMapper;
 import org.finos.legend.depot.core.server.error.DepotServerExceptionMapper;
@@ -46,11 +44,12 @@ import org.finos.legend.server.shared.bundles.HostnameHeaderBundle;
 import org.finos.legend.server.shared.bundles.OpenTracingBundle;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.slf4j.Logger;
+import ru.vyarus.dropwizard.guice.GuiceBundle;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
-import java.util.EnumSet;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public abstract class BaseServer<T extends ServerConfiguration> extends Application<T>
 {
@@ -65,10 +64,19 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
     @Override
     public void initialize(Bootstrap<T> bootstrap)
     {
+        UnlimitedStreamConstraints.install(bootstrap.getObjectMapper());
         bootstrap.addBundle(new HostnameHeaderBundle());
         bootstrap.addBundle(new LegendPac4jBundle<>(ServerConfiguration::getPac4jConfiguration));
-        bootstrap.addBundle(new SwaggerBundle<ServerConfiguration>()
+        bootstrap.addBundle(new ServerUrlSwaggerBundle<ServerConfiguration>()
         {
+            @Override
+            public void run(ServerConfiguration configuration, Environment environment) throws Exception
+            {
+                configuration.resolveSwaggerUriPrefix();
+                super.run(configuration, environment);
+                mountAssetsUnderJerseyPrefix(configuration, configuration.getSwaggerBundleConfiguration(), configuration.jerseyUriPrefix(), environment);
+            }
+
             @Override
             protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(ServerConfiguration configuration)
             {
@@ -78,7 +86,7 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
 
         // Enable variable substitution with environment variables
         bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(isEnvironmentVariableSubstitutionStrict())));
-        bootstrap.addBundle(GuiceBundle.defaultBuilder(bootstrap.getApplication().getConfigurationClass()).modules(getServerModules()).build());
+        bootstrap.addBundle(GuiceBundle.builder().modules(getServerModules().toArray(new Module[0])).build());
         configureObjectMapper(bootstrap);
     }
 
@@ -110,8 +118,12 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
 
         if (configuration.getFilterPriorities() != null)
         {
-            ChainFixingFilterHandler.apply(environment.getApplicationContext(), configuration.getFilterPriorities());
+            Map<String, Integer> filterPriorities = FilterPriorities.withCurrentFilterNames(configuration.getFilterPriorities());
+            ChainFixingFilterHandler.apply(environment.getApplicationContext(), filterPriorities);
+            warnOnUnknownFilterPriorities(configuration, environment, filterPriorities);
         }
+        EncodedPathSeparators.allowOnApplicationConnectors(configuration.getServerFactory());
+        EncodedPathSeparators.install(environment.getApplicationContext());
 
         if (configuration.getUrlPattern() != null && !configuration.getUrlPattern().isEmpty())
         {
@@ -135,14 +147,14 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
 
         initialiseCors(environment);
         initialisePrometheusMetrics(environment);
-        initialiseOpenTracing(environment);
+        initialiseOpenTracing(configuration, environment);
     }
 
     protected abstract void registerJacksonJsonProvider(JerseyEnvironment jerseyEnvironment);
 
     private void registerLifeCycleListener(T configuration, Environment environment)
     {
-        environment.lifecycle().addLifeCycleListener(new LifeCycle.Listener()
+        environment.lifecycle().addEventListener(new LifeCycle.Listener()
         {
             private long shutDownStartTime = 0L;
             @Override
@@ -179,9 +191,28 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
         });
     }
 
-    private void initialiseOpenTracing(Environment environment)
+    // every filter is registered by the time the server starts, and ChainFixingFilterHandler only reorders on the first request
+    private void warnOnUnknownFilterPriorities(T configuration, Environment environment, Map<String, Integer> filterPriorities)
     {
-        new OpenTracingBundle().run(environment);
+        environment.lifecycle().addEventListener(new LifeCycle.Listener()
+        {
+            @Override
+            public void lifeCycleStarting(LifeCycle event)
+            {
+                List<String> filterNames = Arrays.stream(environment.getApplicationContext().getServletHandler().getFilters()).map(FilterHolder::getName).collect(Collectors.toList());
+                boolean tracingEnabled = configuration.getOpenTracingConfiguration() != null && configuration.getOpenTracingConfiguration().isEnabled();
+                List<String> unknown = FilterPriorities.unknownFilterNames(filterPriorities.keySet(), filterNames, tracingEnabled);
+                if (!unknown.isEmpty())
+                {
+                    LOGGER.warn("filterPriorities {} match no filter and are ignored; the filters are {}", unknown, filterNames);
+                }
+            }
+        });
+    }
+
+    private void initialiseOpenTracing(T configuration, Environment environment)
+    {
+        new OpenTracingBundle().run(configuration, environment);
     }
 
     private void initialisePrometheusMetrics(Environment environment)
@@ -189,7 +220,8 @@ public abstract class BaseServer<T extends ServerConfiguration> extends Applicat
         MetricRegistry metricRegistry = environment.metrics();
         CollectorRegistry collectorRegistry = CollectorRegistry.defaultRegistry;
         collectorRegistry.register(new DropwizardExports(metricRegistry));
-        environment.admin().addServlet("prometheus", new MetricsServlet(collectorRegistry)).addMapping("/prometheus");
+        // simpleclient adds a <name>_created sample to every counter and summary, which depot does not export
+        environment.admin().addServlet("prometheus", new MetricsServlet(collectorRegistry, name -> !name.endsWith("_created"))).addMapping("/prometheus");
     }
 
     protected abstract void initialiseCors(Environment environment);

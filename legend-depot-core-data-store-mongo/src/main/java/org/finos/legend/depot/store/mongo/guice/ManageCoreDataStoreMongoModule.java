@@ -23,7 +23,7 @@ import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 public class ManageCoreDataStoreMongoModule extends CoreDataStoreMongoModule
 {

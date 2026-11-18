@@ -16,33 +16,33 @@
 package org.finos.legend.depot.store.mongo.resources;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.bson.Document;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.admin.metrics.StorageMetricsHandler;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
 @Path("")
-@Api("Mongo Store Administration")
+@Tag(name = "Mongo Store Administration")
 public class MongoStoreAdministrationResource extends AuthorisedResource
 {
 
@@ -69,7 +69,7 @@ public class MongoStoreAdministrationResource extends AuthorisedResource
 
     @GET
     @Path("/indexes")
-    @ApiOperation("get indexes")
+    @Operation(summary = "get indexes")
     public Map<String,List<Document>> getIndexed()
     {
         return handle("Get indexes", this::getAllIndexes);
@@ -78,7 +78,7 @@ public class MongoStoreAdministrationResource extends AuthorisedResource
 
     @PUT
     @Path("/indexes")
-    @ApiOperation("createIndexes if absent")
+    @Operation(summary = "createIndexes if absent")
     public List<String> createIndexesIfAbsent()
     {
         return handle("Create indexes", this::createIndexes);
@@ -93,7 +93,7 @@ public class MongoStoreAdministrationResource extends AuthorisedResource
 
     @DELETE
     @Path("/indexes/{index}/{collection}")
-    @ApiOperation("remove")
+    @Operation(summary = "remove")
     public boolean remove(@PathParam("index") String index, @PathParam("collection") String collection)
     {
         return handle("delete index", () ->
@@ -106,7 +106,7 @@ public class MongoStoreAdministrationResource extends AuthorisedResource
 
     @GET
     @Path("/collections/stats")
-    @ApiOperation("get collections stats")
+    @Operation(summary = "get collections stats")
     public Object getCollectionStats()
     {
         return handle("Get collections stats", () -> this.storageMetrics.reportMetrics());
@@ -115,7 +115,7 @@ public class MongoStoreAdministrationResource extends AuthorisedResource
 
     @GET
     @Path("/collections")
-    @ApiOperation("get collections")
+    @Operation(summary = "get collections")
     public List<String> getCollections()
     {
         validateUser();
@@ -124,7 +124,7 @@ public class MongoStoreAdministrationResource extends AuthorisedResource
 
     @DELETE
     @Path("/collections/{id}")
-    @ApiOperation("delete collection")
+    @Operation(summary = "delete collection")
     public Response deleteCollections(@PathParam("id") String collId)
     {
         return handle("delete collection", () ->
@@ -147,7 +147,7 @@ public class MongoStoreAdministrationResource extends AuthorisedResource
 
     @GET
     @Path("/collections/pipeline/{collectionName}")
-    @ApiOperation("run collection pipeline")
+    @Operation(summary = "run collection pipeline")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response runPipeline(@PathParam("collectionName") String collectionMame, @QueryParam("pipeline") String jsonPipeline) throws JsonProcessingException

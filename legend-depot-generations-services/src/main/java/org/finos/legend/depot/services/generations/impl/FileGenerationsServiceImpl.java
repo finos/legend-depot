@@ -21,7 +21,7 @@ import org.finos.legend.depot.domain.generation.DepotGeneration;
 import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
 import org.finos.legend.depot.store.api.generations.FileGenerations;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

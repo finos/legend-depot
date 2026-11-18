@@ -15,24 +15,35 @@
 
 package org.finos.legend.depot.core.server.resources.info;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.dropwizard.jackson.Jackson;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.core.server.ServerConfiguration;
 import org.finos.legend.depot.core.server.info.InfoService;
+import org.pac4j.core.config.Config;
+import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 
-@Api("Info")
+@Tag(name = "Info")
 @Path("")
 public class InfoResource
 {
+    // Dropwizard's mapper handles the Optional getters on Configuration
+    private static final ObjectMapper CONFIG_MAPPER = Jackson.newObjectMapper()
+            .addMixIn(Logger.class, IgnoredType.class)
+            .addMixIn(Config.class, IgnoredType.class)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+
     private final InfoService infoService;
     private final ServerConfiguration configuration;
 
@@ -46,7 +57,7 @@ public class InfoResource
     @GET
     @Path("/info")
     @Produces({"application/json"})
-    @ApiOperation("Provides server information")
+    @Operation(summary = "Provides server information")
     public InfoService.ServerInfo getServerInfo()
     {
         return this.infoService.getServerInfo();
@@ -55,9 +66,16 @@ public class InfoResource
 
     @GET
     @Path("/config")
-    @ApiOperation("Provides server config")
+    @Operation(summary = "Provides server config")
     public String getServerConfig() throws JsonProcessingException
     {
-        return new ObjectMapper().disable(SerializationFeature.FAIL_ON_EMPTY_BEANS).setSerializationInclusion(JsonInclude.Include.NON_EMPTY).writeValueAsString(configuration);
+        return CONFIG_MAPPER.writeValueAsString(configuration);
+    }
+
+    // pac4j clients expose their Logger, and once the server is running each client refers back
+    // to the pac4j Config that holds it (client -> config -> clients -> client)
+    @JsonIgnoreType
+    private abstract static class IgnoredType
+    {
     }
 }

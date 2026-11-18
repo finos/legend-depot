@@ -20,8 +20,8 @@ import org.finos.legend.depot.store.mongo.admin.migrations.DependenciesMigration
 import org.finos.legend.depot.store.mongo.admin.migrations.MongoMigrations;
 import org.finos.legend.depot.store.mongo.admin.migrations.ProjectToProjectVersionMigration;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Deprecated
 public final class CoreDataMigrations extends MongoMigrations

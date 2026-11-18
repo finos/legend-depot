@@ -17,8 +17,8 @@ package org.finos.legend.depot.store.mongo.admin.migrations;
 
 import com.mongodb.client.MongoDatabase;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 
 public abstract class MongoMigrations

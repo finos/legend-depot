@@ -15,9 +15,9 @@
 
 package org.finos.legend.depot.store.resources.schedules;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.services.api.schedules.SchedulesFactory;
@@ -27,25 +27,25 @@ import org.finos.legend.depot.store.model.admin.schedules.ScheduleInfo;
 import org.finos.legend.depot.store.model.admin.schedules.ScheduleInstance;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Path("")
-@Api("Schedules")
+@Tag(name = "Schedules")
 public class ManageSchedulesResource extends AuthorisedResource
 {
 
@@ -72,7 +72,7 @@ public class ManageSchedulesResource extends AuthorisedResource
 
     @GET
     @Path("/schedules")
-    @ApiOperation(value = ResourceLoggingAndTracing.SCHEDULES_STATUS, notes = "Toggle to true for checking disabled schedules or toggle to false for checking enabled schedules")
+    @Operation(summary = ResourceLoggingAndTracing.SCHEDULES_STATUS, description = "Toggle to true for checking disabled schedules or toggle to false for checking enabled schedules")
     @Produces(MediaType.APPLICATION_JSON)
     public List<ScheduleInfo> getSchedulerStatus(@QueryParam("disabled") @DefaultValue("false") Boolean disabled)
     {
@@ -87,7 +87,7 @@ public class ManageSchedulesResource extends AuthorisedResource
 
     @GET
     @Path("/scheduleInstances")
-    @ApiOperation(ResourceLoggingAndTracing.SCHEDULES_RUNS)
+    @Operation(summary = ResourceLoggingAndTracing.SCHEDULES_RUNS)
     @Produces(MediaType.APPLICATION_JSON)
     public List<ScheduleInstance> getSchedulerInstances()
     {
@@ -97,10 +97,10 @@ public class ManageSchedulesResource extends AuthorisedResource
 
     @PUT
     @Path("/schedules/{scheduleName}")
-    @ApiOperation(ResourceLoggingAndTracing.TRIGGER_SCHEDULE)
+    @Operation(summary = ResourceLoggingAndTracing.TRIGGER_SCHEDULE)
     @Produces(MediaType.APPLICATION_JSON)
     public Response forceScheduler(@PathParam("scheduleName") String scheduleName,
-                                   @QueryParam("forceRun") @DefaultValue("false") @ApiParam("Whether to run the schedule if disabled") boolean forceRun)
+                                   @QueryParam("forceRun") @DefaultValue("false") @Parameter(description = "Whether to run the schedule if disabled") boolean forceRun)
     {
         return handle(ResourceLoggingAndTracing.TRIGGER_SCHEDULE, () ->
         {
@@ -112,7 +112,7 @@ public class ManageSchedulesResource extends AuthorisedResource
 
     @DELETE
     @Path("/schedules/{scheduleName}")
-    @ApiOperation(ResourceLoggingAndTracing.DELETE_SCHEDULE)
+    @Operation(summary = ResourceLoggingAndTracing.DELETE_SCHEDULE)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteScheduler(@PathParam("scheduleName") String scheduleName)
     {
@@ -126,7 +126,7 @@ public class ManageSchedulesResource extends AuthorisedResource
 
     @DELETE
     @Path("/schedules/")
-    @ApiOperation(ResourceLoggingAndTracing.DELETE_SCHEDULES)
+    @Operation(summary = ResourceLoggingAndTracing.DELETE_SCHEDULES)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteSchedules()
     {
@@ -140,7 +140,7 @@ public class ManageSchedulesResource extends AuthorisedResource
 
     @PUT
     @Path("/schedules/{scheduleName}/disable/{toggle}")
-    @ApiOperation(value = ResourceLoggingAndTracing.TOGGLE_SCHEDULE, notes = "Toggle to true for disabling the schedule mentioned or toggle to false for enabling the schedule")
+    @Operation(summary = ResourceLoggingAndTracing.TOGGLE_SCHEDULE, description = "Toggle to true for disabling the schedule mentioned or toggle to false for enabling the schedule")
     @Produces(MediaType.APPLICATION_JSON)
     public Response toggleScheduler(@PathParam("scheduleName") String scheduleName, @PathParam("toggle") boolean toggle)
     {
@@ -155,7 +155,7 @@ public class ManageSchedulesResource extends AuthorisedResource
 
     @PUT
     @Path("/schedules/all/disable/{toggle}")
-    @ApiOperation(value = ResourceLoggingAndTracing.TOGGLE_SCHEDULES, notes = "Toggle to true for disabling all schedules or toggle to false for enabling all schedules")
+    @Operation(summary = ResourceLoggingAndTracing.TOGGLE_SCHEDULES, description = "Toggle to true for disabling all schedules or toggle to false for enabling all schedules")
     @Produces(MediaType.APPLICATION_JSON)
     public Response toggleScheduler(@PathParam("toggle") boolean toggle)
     {

@@ -15,7 +15,7 @@
 
 package org.finos.legend.depot.core.services.api.authorisation;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import java.security.Principal;
 
 public interface AuthorisationProvider

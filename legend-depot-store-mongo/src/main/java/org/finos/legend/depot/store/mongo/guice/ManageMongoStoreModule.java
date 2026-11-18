@@ -23,7 +23,7 @@ import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.admin.metrics.StorageMetricsHandler;
 import org.finos.legend.depot.store.mongo.resources.MongoStoreAdministrationResource;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 public class ManageMongoStoreModule extends PrivateModule
 {

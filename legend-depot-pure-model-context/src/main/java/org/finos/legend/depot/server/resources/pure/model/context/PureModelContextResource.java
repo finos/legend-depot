@@ -15,22 +15,23 @@
 
 package org.finos.legend.depot.server.resources.pure.model.context;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSIONS_DEPENDENCY_ENTITIES_AS_PMCD;
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_ENTITIES_AS_PMCD;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
@@ -40,7 +41,7 @@ import org.finos.legend.depot.services.api.EtagBuilder;
 import org.finos.legend.depot.services.api.pure.model.context.PureModelContextService;
 
 @Path("")
-@Api("Pure Model Context Data")
+@Tag(name = "Pure Model Context Data")
 public class PureModelContextResource extends TracingResource
 {
     private final PureModelContextService service;
@@ -54,23 +55,23 @@ public class PureModelContextResource extends TracingResource
 
     @GET
     @Path("projects/{groupId}/{artifactId}/versions/{versionId}/pureModelContextData")
-    @ApiOperation(GET_VERSION_ENTITIES_AS_PMCD)
+    @Operation(summary = GET_VERSION_ENTITIES_AS_PMCD)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPureModelContextData(@PathParam("groupId")
                                             String groupId,
                                             @PathParam("artifactId")
                                             String artifactId,
-                                            @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT)
+                                            @PathParam("versionId") @Parameter(description = VersionValidator.VALID_VERSION_ID_TXT)
                                             String versionId,
                                             @QueryParam("clientVersion")
                                             String clientVersion,
                                             @QueryParam("getDependencies")
                                             @DefaultValue("true")
-                                            @ApiParam("Whether to include entities from dependencies")
+                                            @Parameter(description = "Whether to include entities from dependencies")
                                             boolean transitive,
                                             @QueryParam("convertToNewProtocol")
                                             @DefaultValue("true")
-                                            @ApiParam("Whether to convert the protocol to latest or return the protocol as initially published")
+                                            @Parameter(description = "Whether to convert the protocol to latest or return the protocol as initially published")
                                             boolean convertToNewProtocol,
                                             @Context Request request)
     {
@@ -79,18 +80,18 @@ public class PureModelContextResource extends TracingResource
 
     @POST
     @Path("projects/dependencies/pureModelContextData")
-    @ApiOperation(GET_VERSIONS_DEPENDENCY_ENTITIES_AS_PMCD)
+    @Operation(summary = GET_VERSIONS_DEPENDENCY_ENTITIES_AS_PMCD)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getPureModelContextData(@ApiParam("projectDependencies")
+    public Response getPureModelContextData(@RequestBody(description = "projectDependencies")
                                             List<ProjectVersion> projectDependencies,
                                             @QueryParam("clientVersion")
                                             String clientVersion,
                                             @QueryParam("transitive") @DefaultValue("true")
-                                            @ApiParam("Whether to return transitive dependencies")
+                                            @Parameter(description = "Whether to return transitive dependencies")
                                             boolean transitive,
                                             @QueryParam("convertToNewProtocol")
                                             @DefaultValue("true")
-                                            @ApiParam("Whether to convert the protocol to latest or return the protocol as initially published")
+                                            @Parameter(description = "Whether to convert the protocol to latest or return the protocol as initially published")
                                             boolean convertToNewProtocol,
                                             @Context Request request)
     {

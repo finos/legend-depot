@@ -20,7 +20,7 @@ import org.finos.legend.depot.services.api.generations.ManageFileGenerationsServ
 import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
 import org.finos.legend.depot.store.api.generations.UpdateFileGenerations;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.List;
 
 public class ManageFileGenerationsServiceImpl extends  FileGenerationsServiceImpl implements ManageFileGenerationsService

@@ -17,7 +17,7 @@ package org.finos.legend.depot.services.api.artifacts.handlers;
 
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.EnumMap;
 import java.util.Set;
 

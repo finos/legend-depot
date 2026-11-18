@@ -17,10 +17,15 @@ package org.finos.legend.depot.core.server.error;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import io.dropwizard.jersey.errors.ErrorMessage;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Instant;
@@ -38,6 +43,7 @@ class ExtendedErrorMessage extends ErrorMessage
     }
 
     @JsonProperty("timestamp")
+    @JsonSerialize(using = InstantFieldsSerializer.class)
     public Instant getTimestamp()
     {
         return this.timestamp;
@@ -125,5 +131,24 @@ class ExtendedErrorMessage extends ErrorMessage
     private static int getDefaultStatusCode()
     {
         return getDefaultStatus().getStatusCode();
+    }
+
+    // Without the JSR-310 module Jackson refuses java.time types. Older Jackson wrote Instant as a bean,
+    // {"nano":...,"epochSecond":...}, and error bodies keep that form; the module would write a number instead
+    static class InstantFieldsSerializer extends StdSerializer<Instant>
+    {
+        InstantFieldsSerializer()
+        {
+            super(Instant.class);
+        }
+
+        @Override
+        public void serialize(Instant value, JsonGenerator generator, SerializerProvider provider) throws IOException
+        {
+            generator.writeStartObject();
+            generator.writeNumberField("nano", value.getNano());
+            generator.writeNumberField("epochSecond", value.getEpochSecond());
+            generator.writeEndObject();
+        }
     }
 }

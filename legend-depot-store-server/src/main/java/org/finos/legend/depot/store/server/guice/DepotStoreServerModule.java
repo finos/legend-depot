@@ -15,7 +15,6 @@
 
 package org.finos.legend.depot.store.server.guice;
 
-import com.google.inject.Binder;
 import org.finos.legend.depot.core.server.guice.BaseServerModule;
 import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRefreshPolicyConfiguration;
 import org.finos.legend.depot.services.api.artifacts.configuration.ArtifactsRetentionPolicyConfiguration;
@@ -28,39 +27,39 @@ public class DepotStoreServerModule extends BaseServerModule<DepotStoreServerCon
 {
 
     @Override
-    public void configure(Binder binder)
+    protected void configure()
     {
-        super.configure(binder);
-        binder.bind(ArtifactRepositoryProviderConfiguration.class).toProvider(this::getArtifactRepositoryConfiguration);
-        binder.bind(ArtifactsRefreshPolicyConfiguration.class).toProvider(this::getRefreshPolicyConfiguration);
-        binder.bind(IncludeProjectPropertiesConfiguration.class).toProvider(this::getIncludePropertiesConfiguration);
-        binder.bind(ArtifactsRetentionPolicyConfiguration.class).toProvider(this::getRetentionPolicyConfiguration);
-        binder.bind(QueueManagerConfiguration.class).toProvider(this::getQueueManagerConfiguration);
+        super.configure();
+        bind(ArtifactRepositoryProviderConfiguration.class).toProvider(this::getArtifactRepositoryConfiguration);
+        bind(ArtifactsRefreshPolicyConfiguration.class).toProvider(this::getRefreshPolicyConfiguration);
+        bind(IncludeProjectPropertiesConfiguration.class).toProvider(this::getIncludePropertiesConfiguration);
+        bind(ArtifactsRetentionPolicyConfiguration.class).toProvider(this::getRetentionPolicyConfiguration);
+        bind(QueueManagerConfiguration.class).toProvider(this::getQueueManagerConfiguration);
     }
 
     private QueueManagerConfiguration getQueueManagerConfiguration()
     {
-        return getConfiguration().getQueueManagerConfiguration() != null ? getConfiguration().getQueueManagerConfiguration() : new QueueManagerConfiguration();
+        return configuration().getQueueManagerConfiguration() != null ? configuration().getQueueManagerConfiguration() : new QueueManagerConfiguration();
     }
 
     private IncludeProjectPropertiesConfiguration getIncludePropertiesConfiguration()
     {
-        return getConfiguration().getArtifactsRefreshPolicyConfiguration().getIncludeProjectPropertiesConfiguration();
+        return configuration().getArtifactsRefreshPolicyConfiguration().getIncludeProjectPropertiesConfiguration();
     }
 
     private ArtifactsRefreshPolicyConfiguration getRefreshPolicyConfiguration()
     {
-        return getConfiguration().getArtifactsRefreshPolicyConfiguration();
+        return configuration().getArtifactsRefreshPolicyConfiguration();
     }
 
     private ArtifactsRetentionPolicyConfiguration getRetentionPolicyConfiguration()
     {
-        return getConfiguration().getRetentionPolicyConfiguration();
+        return configuration().getRetentionPolicyConfiguration();
     }
 
     private ArtifactRepositoryProviderConfiguration getArtifactRepositoryConfiguration()
     {
-        ArtifactRepositoryProviderConfiguration configuration = getConfiguration().getArtifactRepositoryProviderConfiguration();
+        ArtifactRepositoryProviderConfiguration configuration = configuration().getArtifactRepositoryProviderConfiguration();
         return (configuration == null) ? ArtifactRepositoryProviderConfiguration.voidConfiguration() : configuration;
     }
 

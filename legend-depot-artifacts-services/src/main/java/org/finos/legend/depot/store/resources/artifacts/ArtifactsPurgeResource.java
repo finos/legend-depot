@@ -15,29 +15,30 @@
 
 package org.finos.legend.depot.store.resources.artifacts;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.domain.notifications.MetadataNotificationResponse;
 import org.finos.legend.depot.services.api.artifacts.purge.ArtifactsPurgeService;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import java.security.Principal;
 import java.util.List;
 
 
 @Path("")
-@Api("Artifacts Purge")
+@Tag(name = "Artifacts Purge")
 public class ArtifactsPurgeResource extends AuthorisedResource
 {
     public static final String ARTIFACTS_RESOURCE = "ArtifactsPurge";
@@ -55,11 +56,11 @@ public class ArtifactsPurgeResource extends AuthorisedResource
 
     @DELETE
     @Path("/artifactEviction/{groupId}/{artifactId}/versions/{versionId}")
-    @ApiOperation(ResourceLoggingAndTracing.EVICT_VERSION)
+    @Operation(summary = ResourceLoggingAndTracing.EVICT_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataNotificationResponse evictVersion(@PathParam("groupId") String groupId,
                                                      @PathParam("artifactId") String artifactId,
-                                                     @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
+                                                     @PathParam("versionId") @Parameter(description = "a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
 
         return handle(ResourceLoggingAndTracing.EVICT_VERSION, () ->
@@ -72,11 +73,11 @@ public class ArtifactsPurgeResource extends AuthorisedResource
 
     @DELETE
     @Path("/artifactDelete/{groupId}/{artifactId}/versions/{versionId}")
-    @ApiOperation(ResourceLoggingAndTracing.DELETE_VERSION)
+    @Operation(summary = ResourceLoggingAndTracing.DELETE_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataNotificationResponse deleteVersion(@PathParam("groupId") String groupId,
                                                       @PathParam("artifactId") String artifactId,
-                                                      @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
+                                                      @PathParam("versionId") @Parameter(description = "a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
 
         return handle(ResourceLoggingAndTracing.DELETE_VERSION, () ->
@@ -89,18 +90,18 @@ public class ArtifactsPurgeResource extends AuthorisedResource
 
     @DELETE
     @Path("/artifactDelete/{groupId}/{artifactId}/snapshotVersions")
-    @ApiOperation(ResourceLoggingAndTracing.DELETE_SNAPSHOT_VERSIONS)
+    @Operation(summary = ResourceLoggingAndTracing.DELETE_SNAPSHOT_VERSIONS)
     @Produces(MediaType.TEXT_PLAIN)
     public String deleteSnapshotVersion(@PathParam("groupId") String groupId,
                                         @PathParam("artifactId") String artifactId,
-                                        @ApiParam("snapshotVersions") List<String> snapshotVersions)
+                                        @RequestBody(description = "snapshotVersions") List<String> snapshotVersions)
     {
         return handle(ResourceLoggingAndTracing.DELETE_SNAPSHOT_VERSIONS, () -> artifactsPurgeService.deleteSnapshotVersions(groupId, artifactId, snapshotVersions));
     }
 
     @DELETE
     @Path("/artifactEviction/{groupId}/{artifactId}/old/{keepVersions}")
-    @ApiOperation(ResourceLoggingAndTracing.EVICT_OLD_VERSIONS)
+    @Operation(summary = ResourceLoggingAndTracing.EVICT_OLD_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataNotificationResponse evictOldVersions(@PathParam("groupId") String groupId,
                                                          @PathParam("artifactId") String artifactId,
@@ -116,11 +117,11 @@ public class ArtifactsPurgeResource extends AuthorisedResource
 
     @DELETE
     @Path("/artifactDeprecate/{groupId}/{artifactId}/versions/{versionId}")
-    @ApiOperation(ResourceLoggingAndTracing.DEPRECATE_VERSION)
+    @Operation(summary = ResourceLoggingAndTracing.DEPRECATE_VERSION)
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataNotificationResponse deprecateVersion(@PathParam("groupId") String groupId,
                                                          @PathParam("artifactId") String artifactId,
-                                                         @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
+                                                         @PathParam("versionId") @Parameter(description = "a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
 
         return handle(ResourceLoggingAndTracing.DEPRECATE_VERSION, () ->
@@ -132,7 +133,7 @@ public class ArtifactsPurgeResource extends AuthorisedResource
 
     @DELETE
     @Path("/artifactEviction/versions/notUsed")
-    @ApiOperation(ResourceLoggingAndTracing.EVICT_VERSIONS_NOT_USED)
+    @Operation(summary = ResourceLoggingAndTracing.EVICT_VERSIONS_NOT_USED)
     @Produces(MediaType.APPLICATION_JSON)
     public MetadataNotificationResponse evictVersionsNotUsed()
     {
