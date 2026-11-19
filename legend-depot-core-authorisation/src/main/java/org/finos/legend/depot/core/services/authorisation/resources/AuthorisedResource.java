@@ -18,9 +18,9 @@ package org.finos.legend.depot.core.services.authorisation.resources;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
 import java.security.Principal;
 
 public abstract class AuthorisedResource extends TracingResource

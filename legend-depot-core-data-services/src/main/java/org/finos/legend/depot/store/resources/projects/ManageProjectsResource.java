@@ -15,29 +15,29 @@
 
 package org.finos.legend.depot.store.resources.projects;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.store.model.projects.StoreProjectData;
 import org.finos.legend.depot.services.api.projects.ManageProjectsService;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 import java.security.Principal;
 
 @Path("")
-@Api("Projects")
+@Tag(name = "Projects")
 public class ManageProjectsResource extends AuthorisedResource
 {
 
@@ -60,9 +60,9 @@ public class ManageProjectsResource extends AuthorisedResource
 
     @PUT
     @Path("/projects/{projectId}/{groupId}/{artifactId}")
-    @ApiOperation(ResourceLoggingAndTracing.CREATE_UPDATE_PROJECT)
+    @Operation(summary = ResourceLoggingAndTracing.CREATE_UPDATE_PROJECT)
     @Produces(MediaType.APPLICATION_JSON)
-    public StoreProjectData updateProject(@PathParam("projectId") String projectId, @PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @QueryParam("defaultBranch") @ApiParam String defaultBranch, @QueryParam("latestVersion") @ApiParam String latestVersion)
+    public StoreProjectData updateProject(@PathParam("projectId") String projectId, @PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId, @QueryParam("defaultBranch") @Parameter String defaultBranch, @QueryParam("latestVersion") @Parameter String latestVersion)
     {
         return handle(
                 ResourceLoggingAndTracing.CREATE_UPDATE_PROJECT,
@@ -76,7 +76,7 @@ public class ManageProjectsResource extends AuthorisedResource
 
     @DELETE
     @Path("/projects/{groupId}/{artifactId}")
-    @ApiOperation(ResourceLoggingAndTracing.DELETE_PROJECT)
+    @Operation(summary = ResourceLoggingAndTracing.DELETE_PROJECT)
     @Produces(MediaType.APPLICATION_JSON)
     public long deleteProject(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId)
     {

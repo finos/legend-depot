@@ -21,7 +21,7 @@ import io.opentracing.Tracer;
 import io.opentracing.contrib.mongo.TracingMongoClient;
 import io.opentracing.contrib.mongo.common.TracingCommandListener;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class MongoTracingConnectionFactory extends AbstractMongoConnectionFactory

@@ -20,7 +20,7 @@ import org.finos.legend.depot.services.api.notifications.NotificationsService;
 import org.finos.legend.depot.store.api.notifications.Notifications;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

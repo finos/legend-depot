@@ -19,7 +19,7 @@ import org.finos.legend.depot.core.services.api.metrics.PrometheusMetricsHandler
 import org.finos.legend.depot.core.services.api.metrics.VoidPrometheusMetricsHandler;
 import org.finos.legend.depot.core.services.api.metrics.configuration.PrometheusConfiguration;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public final class PrometheusMetricsFactory

@@ -15,26 +15,26 @@
 
 package org.finos.legend.depot.store.resources.artifacts;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.domain.version.VersionMismatch;
 import org.finos.legend.depot.services.api.artifacts.reconciliation.VersionsReconciliationService;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import java.security.Principal;
 import java.util.List;
 
 @Path("")
-@Api("Repository")
+@Tag(name = "Repository")
 public class VersionsReconciliationResource extends AuthorisedResource
 {
     private static final String REPOSITORY = "Repository";
@@ -56,7 +56,7 @@ public class VersionsReconciliationResource extends AuthorisedResource
 
     @GET
     @Path("/versions/mismatch")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES)
+    @Operation(summary = ResourceLoggingAndTracing.GET_PROJECT_CACHE_MISMATCHES)
     @Produces(MediaType.APPLICATION_JSON)
     public List<VersionMismatch> getVersionMissMatches()
     {

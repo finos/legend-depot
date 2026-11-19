@@ -15,7 +15,10 @@
 
 package org.finos.legend.depot.core.services.metrics;
 
+import io.swagger.v3.oas.annotations.Operation;
+import jakarta.ws.rs.core.Response;
 import org.finos.legend.depot.core.services.api.metrics.configuration.PrometheusConfiguration;
+import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -29,5 +32,21 @@ public class TestResourceApiTracing
         prometheusMetrics.registerResourceSummaries(TestTracingResource.class);
         Assertions.assertEquals(1,prometheusMetrics.allSummaries.keySet().size());
 
+    }
+
+    @Test
+    public void operationWithoutSummaryOrOperationIdIsNotRegistered()
+    {
+        prometheusMetrics.registerResourceSummaries(DescriptionOnlyResource.class);
+        Assertions.assertTrue(prometheusMetrics.allSummaries.isEmpty());
+    }
+
+    public static class DescriptionOnlyResource extends TracingResource
+    {
+        @Operation(description = "no summary or operationId")
+        public Response describedOnly()
+        {
+            return Response.noContent().build();
+        }
     }
 }

@@ -22,7 +22,7 @@ import org.finos.legend.depot.store.api.admin.artifacts.ArtifactsFilesStore;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.artifacts.ArtifactsFilesMongo;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 public class ArtifactsStoreMongoModule extends PrivateModule
 {

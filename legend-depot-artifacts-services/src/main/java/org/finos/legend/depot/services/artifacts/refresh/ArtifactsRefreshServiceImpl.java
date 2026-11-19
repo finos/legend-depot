@@ -32,7 +32,7 @@ import org.finos.legend.depot.core.services.tracing.TracerFactory;
 import org.finos.legend.sdlc.domain.model.version.VersionId;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -18,7 +18,7 @@ package org.finos.legend.depot.services.metrics.query;
 import org.finos.legend.depot.services.api.metrics.query.QueryMetricsRegistry;
 import org.finos.legend.depot.store.model.metrics.query.VersionQueryMetric;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;

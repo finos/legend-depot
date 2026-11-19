@@ -15,27 +15,27 @@
 
 package org.finos.legend.depot.server.resources.entities;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.domain.version.Scope;
 import org.finos.legend.depot.services.api.entities.EntityClassifierService;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 
-import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_ENTITIES_BY_CLASSIFIER_PATH;
 
 @Path("")
-@Api("Classifiers")
+@Tag(name = "Classifiers")
 public class EntityClassifierResource extends TracingResource
 {
     private final EntityClassifierService graphService;
@@ -51,12 +51,12 @@ public class EntityClassifierResource extends TracingResource
     // This API is built temporarily to address needs to query entities by classifier path
     // The bigger plan is to allow a generic execution endpoint to fire arbitrary query against the metadata
     // graph built in depot server.
-    @ApiOperation(value = GET_ENTITIES_BY_CLASSIFIER_PATH, hidden = true)
+    @Operation(summary = GET_ENTITIES_BY_CLASSIFIER_PATH, hidden = true)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getEntities(@PathParam("classifierPath") @ApiParam("The classifier path of the entities") String classifierPath,
-                                @QueryParam("search") @ApiParam("The search string that the entity path contains") String search,
-                                @QueryParam("scope") @ApiParam("Whether to return entities for the latest released version or snapshot") @DefaultValue("RELEASES") Scope scope,
-                                @QueryParam("limit") @ApiParam("Limit the number of entities returned") Integer limit)
+    public Response getEntities(@PathParam("classifierPath") @Parameter(description = "The classifier path of the entities") String classifierPath,
+                                @QueryParam("search") @Parameter(description = "The search string that the entity path contains") String search,
+                                @QueryParam("scope") @Parameter(description = "Whether to return entities for the latest released version or snapshot") @DefaultValue("RELEASES") Scope scope,
+                                @QueryParam("limit") @Parameter(description = "Limit the number of entities returned") Integer limit)
     {
         return handleResponse(GET_ENTITIES_BY_CLASSIFIER_PATH, () -> this.graphService.getEntitiesByClassifierPath(classifierPath, search, limit, scope, true));
     }

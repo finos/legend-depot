@@ -20,7 +20,7 @@ import com.google.inject.Singleton;
 import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.notifications.queue.NotificationsQueueMongo;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 
 public class ManageNotificationsQueueMongoModule extends NotificationsQueueMongoModule

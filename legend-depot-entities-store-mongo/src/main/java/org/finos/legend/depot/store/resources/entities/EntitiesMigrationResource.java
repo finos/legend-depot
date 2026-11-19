@@ -16,24 +16,24 @@
 package org.finos.legend.depot.store.resources.entities;
 
 import com.mongodb.client.result.DeleteResult;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.store.mongo.admin.migrations.MongoEntitiesMigrations;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
 import java.security.Principal;
 
 @Deprecated
 @Path("")
-@Api("Mongo Store Administration")
+@Tag(name = "Mongo Store Administration")
 public class EntitiesMigrationResource extends AuthorisedResource
 {
 
@@ -59,7 +59,7 @@ public class EntitiesMigrationResource extends AuthorisedResource
 
     @DELETE
     @Path("/migrations/deleteVersionedEntities")
-    @ApiOperation("Delete versioned entities from entities collection")
+    @Operation(summary = "Delete versioned entities from entities collection")
     @Deprecated
     public Response deleteVersionedEntities()
     {
@@ -73,7 +73,7 @@ public class EntitiesMigrationResource extends AuthorisedResource
 
     @PUT
     @Path("/migrations/migrateToStoredEntityData")
-    @ApiOperation("Migrate entities to stored entity data")
+    @Operation(summary = "Migrate entities to stored entity data")
     @Deprecated
     public Response migrateEntitiesToStoredEntityData()
     {

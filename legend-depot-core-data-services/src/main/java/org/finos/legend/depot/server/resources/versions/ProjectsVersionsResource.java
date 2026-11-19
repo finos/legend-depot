@@ -17,9 +17,12 @@ package org.finos.legend.depot.server.resources.versions;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.finos.legend.depot.domain.VersionedData;
@@ -30,21 +33,21 @@ import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.finos.legend.depot.domain.DatesHandler.toTime;
 
 @Path("")
-@Api("Versions")
+@Tag(name = "Versions")
 public class ProjectsVersionsResource extends TracingResource
 {
 
@@ -59,10 +62,10 @@ public class ProjectsVersionsResource extends TracingResource
 
     @GET
     @Path("/projects/versions/{updatedFrom}")
-    @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE)
+    @Operation(summary = ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response findByUpdatedDate(@PathParam("updatedFrom") @ApiParam(value = "Updated From Date value in milliseconds (UTC) ") long updatedFrom,
-                                      @QueryParam("updatedTo") @ApiParam(value = "Updated To Date value in milliseconds (UTC) ")  Long updatedTo)
+    public Response findByUpdatedDate(@PathParam("updatedFrom") @Parameter(description = "Updated From Date value in milliseconds (UTC) ") long updatedFrom,
+                                      @QueryParam("updatedTo") @Parameter(description = "Updated To Date value in milliseconds (UTC) ")  Long updatedTo)
     {
         return handleResponse(ResourceLoggingAndTracing.GET_VERSIONS_BY_LASTUPDATE_DATE,
                 () -> projectVersionApi.findByUpdatedDate(updatedFrom, updatedTo == null ? toTime(LocalDateTime.now()) : updatedTo));
@@ -70,11 +73,12 @@ public class ProjectsVersionsResource extends TracingResource
 
     @GET
     @Path("/versions/{groupId}/{artifactId}/{versionId}")
-    @ApiOperation(value = ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV, response = ProjectVersionDTO.class)
+    @Operation(summary = ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV)
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = ProjectVersionDTO.class)))
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProjectVersion(@PathParam("groupId") String groupId,
                                       @PathParam("artifactId") String artifactId,
-                                      @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
+                                      @PathParam("versionId") @Parameter(description = VersionValidator.VALID_VERSION_ID_TXT) String versionId)
     {
         return handleResponse(ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV, ResourceLoggingAndTracing.GET_PROJECT_VERSION_BY_GAV + groupId + artifactId + versionId, () ->
         {

@@ -18,7 +18,7 @@ package org.finos.legend.depot.services.guice;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.finos.legend.depot.services.api.notifications.NotificationsService;
 import org.finos.legend.depot.services.notifications.NotificationsQueueManager;

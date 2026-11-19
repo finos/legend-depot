@@ -15,7 +15,7 @@ Legend Depot has two main components:
 
 ### Development setup
 
-This application uses `Maven 3.6+` and `JDK 11` to build. Simply run `mvn install` to compile.
+This application uses `Maven 3.6+` and `JDK 17` to build. Simply run `mvn install` to compile.
 In order to start the `Depot Server` and `Depot Store Server`, follow the instructions below.
 
 #### Setup Gitlab OAuth

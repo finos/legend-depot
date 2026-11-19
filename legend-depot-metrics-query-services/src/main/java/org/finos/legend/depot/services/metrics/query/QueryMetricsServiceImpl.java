@@ -22,7 +22,7 @@ import org.finos.legend.depot.store.api.metrics.query.QueryMetrics;
 import org.finos.legend.depot.store.model.metrics.query.VersionQueryMetric;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.time.Duration;
 import java.util.Comparator;
 import java.util.Date;

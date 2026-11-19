@@ -25,8 +25,8 @@ import org.finos.legend.depot.store.api.admin.schedules.SchedulesStore;
 import org.finos.legend.depot.store.model.admin.schedules.ScheduleInfo;
 import org.finos.legend.depot.store.mongo.core.BaseMongo;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

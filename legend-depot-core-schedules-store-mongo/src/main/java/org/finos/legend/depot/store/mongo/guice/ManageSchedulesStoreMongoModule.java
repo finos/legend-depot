@@ -21,7 +21,7 @@ import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.schedules.ScheduleInstancesMongo;
 import org.finos.legend.depot.store.mongo.schedules.SchedulesMongo;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 public class ManageSchedulesStoreMongoModule extends SchedulesStoreMongoModule
 {

@@ -18,8 +18,8 @@ package org.finos.legend.depot.store.mongo.admin.migrations;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Deprecated
 public class MongoEntitiesMigrations extends MongoMigrations

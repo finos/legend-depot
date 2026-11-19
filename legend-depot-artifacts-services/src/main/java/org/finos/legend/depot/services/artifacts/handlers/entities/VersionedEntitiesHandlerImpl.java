@@ -20,7 +20,7 @@ import org.finos.legend.depot.services.api.artifacts.handlers.entties.EntityArti
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.VersionedEntitiesArtifactsHandler;
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.VersionedEntityArtifactsProvider;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class VersionedEntitiesHandlerImpl extends EntitiesHandlerImpl implements VersionedEntitiesArtifactsHandler
 {

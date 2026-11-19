@@ -15,26 +15,26 @@
 
 package org.finos.legend.depot.store.resources.artifacts.repository;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepository;
 import org.finos.legend.depot.services.api.artifacts.repository.ArtifactRepositoryException;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Path("")
-@Api("Repository")
+@Tag(name = "Repository")
 public class RepositoryResource extends TracingResource
 {
 
@@ -48,7 +48,7 @@ public class RepositoryResource extends TracingResource
 
     @GET
     @Path("/repository/versions/{groupId}/{artifactId}")
-    @ApiOperation(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)
+    @Operation(summary = ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
     public List<String> getRepositoryVersions(@PathParam("groupId") String groupId,
                                                  @PathParam("artifactId") String artifactId)
@@ -69,11 +69,11 @@ public class RepositoryResource extends TracingResource
 
     @GET
     @Path("/repository/versions/{groupId}/{artifactId}/{versionId}")
-    @ApiOperation(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)
+    @Operation(summary = ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS)
     @Produces(MediaType.TEXT_PLAIN)
     public Optional<String> getRepositoryVersion(@PathParam("groupId") String groupId,
                                                  @PathParam("artifactId") String artifactId,
-                                                 @PathParam("versionId") @ApiParam("a valid version string: x.y.z, master-SNAPSHOT") String versionId)
+                                                 @PathParam("versionId") @Parameter(description = "a valid version string: x.y.z, master-SNAPSHOT") String versionId)
     {
         return handle(ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS, ResourceLoggingAndTracing.REPOSITORY_PROJECT_VERSIONS + groupId + artifactId + versionId, () ->
         {

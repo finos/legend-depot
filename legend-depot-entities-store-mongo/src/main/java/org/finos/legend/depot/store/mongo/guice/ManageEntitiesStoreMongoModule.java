@@ -23,7 +23,7 @@ import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.versionedEntities.VersionedEntitiesMongo;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 public class ManageEntitiesStoreMongoModule extends EntitiesStoreMongoModule
 {

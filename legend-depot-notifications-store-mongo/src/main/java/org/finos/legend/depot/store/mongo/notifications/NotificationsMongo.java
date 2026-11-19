@@ -31,8 +31,8 @@ import org.finos.legend.depot.store.mongo.core.BaseMongo;
 import org.finos.legend.depot.store.api.notifications.Notifications;
 import org.finos.legend.depot.store.mongo.notifications.queue.NotificationKeyFilter;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -15,20 +15,19 @@
 
 package org.finos.legend.depot.core.server.guice;
 
-import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.servlet.RequestScoped;
-import com.hubspot.dropwizard.guicier.DropwizardAwareModule;
 import org.finos.legend.depot.core.server.ServerConfiguration;
 
 import org.finos.legend.depot.services.api.projects.configuration.ProjectsConfiguration;
 import org.finos.legend.depot.store.StorageConfiguration;
 import org.finos.legend.depot.core.services.api.tracing.configuration.OpenTracingConfiguration;
 import org.finos.legend.depot.core.services.api.metrics.configuration.PrometheusConfiguration;
+import ru.vyarus.dropwizard.guice.module.support.DropwizardAwareModule;
 
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.List;
 
@@ -36,12 +35,12 @@ public abstract class BaseServerModule<T extends ServerConfiguration> extends Dr
 {
 
     @Override
-    public void configure(Binder binder)
+    protected void configure()
     {
-        binder.bind(ProjectsConfiguration.class).toProvider(this::getProjectsConfig);
-        binder.bind(new TypeLiteral<List<StorageConfiguration>>() {}).toInstance(this.getStorageConfig());
-        binder.bind(OpenTracingConfiguration.class).toProvider(this::getTracingConfig);
-        binder.bind(PrometheusConfiguration.class).toProvider(this::getPrometheusConfig);
+        bind(ProjectsConfiguration.class).toProvider(this::getProjectsConfig);
+        bind(new TypeLiteral<List<StorageConfiguration>>() {}).toInstance(this.getStorageConfig());
+        bind(OpenTracingConfiguration.class).toProvider(this::getTracingConfig);
+        bind(PrometheusConfiguration.class).toProvider(this::getPrometheusConfig);
     }
 
     @RequestScoped
@@ -60,30 +59,24 @@ public abstract class BaseServerModule<T extends ServerConfiguration> extends Dr
         return configuration.getApplicationName();
     }
 
-    @Provides
-    public ServerConfiguration getConfig(T configuration)
-    {
-        return configuration;
-    }
-    
     private List<StorageConfiguration> getStorageConfig()
     {
-        return getConfiguration().getStorageConfiguration();
+        return configuration().getStorageConfiguration();
     }
 
     private ProjectsConfiguration getProjectsConfig()
     {
-        return getConfiguration().getProjectsConfiguration() != null ? getConfiguration().getProjectsConfiguration() : new ProjectsConfiguration("master");
+        return configuration().getProjectsConfiguration() != null ? configuration().getProjectsConfiguration() : new ProjectsConfiguration("master");
     }
 
     private OpenTracingConfiguration getTracingConfig()
     {
-        return getConfiguration().getOpenTracingConfiguration() != null ? getConfiguration().getOpenTracingConfiguration() : new OpenTracingConfiguration();
+        return configuration().getOpenTracingConfiguration() != null ? configuration().getOpenTracingConfiguration() : new OpenTracingConfiguration();
     }
 
     private PrometheusConfiguration getPrometheusConfig()
     {
-        return getConfiguration().getPrometheusConfiguration() != null ? getConfiguration().getPrometheusConfiguration() : new PrometheusConfiguration();
+        return configuration().getPrometheusConfiguration() != null ? configuration().getPrometheusConfiguration() : new PrometheusConfiguration();
     }
 
 }

@@ -15,27 +15,27 @@
 
 package org.finos.legend.depot.store.resources.artifacts;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.core.services.api.authorisation.AuthorisationProvider;
 import org.finos.legend.depot.core.services.authorisation.resources.AuthorisedResource;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.finos.legend.depot.services.api.artifacts.refresh.RefreshDependenciesService;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import java.security.Principal;
 
 
 @Path("")
-@Api("Artifacts Refresh")
+@Tag(name = "Artifacts Refresh")
 public class ArtifactDependenciesRefreshResource extends AuthorisedResource
 {
     public static final String ARTIFACTS_RESOURCE = "ArtifactsRefresh";
@@ -52,7 +52,7 @@ public class ArtifactDependenciesRefreshResource extends AuthorisedResource
 
     @PUT
     @Path("/artifactsRefresh/dependencies/{groupId}/{artifactId}/{versionId}")
-    @ApiOperation(ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES)
+    @Operation(summary = ResourceLoggingAndTracing.UPDATE_PROJECT_TRANSITIVE_DEPENDENCIES)
     @Produces(MediaType.APPLICATION_JSON)
     public StoreProjectVersionData updateTransitiveDependencies(@PathParam("groupId") String groupId,
                                                                           @PathParam("artifactId") String artifactId,

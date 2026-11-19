@@ -29,8 +29,8 @@ import org.finos.legend.depot.store.model.versionedEntities.StoredVersionedEntit
 import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.sdlc.domain.model.entity.Entity;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

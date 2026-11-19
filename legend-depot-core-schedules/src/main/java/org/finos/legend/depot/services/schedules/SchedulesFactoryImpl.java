@@ -24,7 +24,7 @@ import org.finos.legend.depot.store.model.admin.schedules.ScheduleInfo;
 import org.finos.legend.depot.store.model.admin.schedules.ScheduleInstance;
 import org.slf4j.Logger;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

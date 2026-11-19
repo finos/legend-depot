@@ -21,7 +21,7 @@ import com.google.inject.Singleton;
 import org.finos.legend.depot.services.api.notifications.NotificationsService;
 import org.finos.legend.depot.services.api.schedules.SchedulesFactory;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 public class NotificationsSchedulesModule extends PrivateModule
 {

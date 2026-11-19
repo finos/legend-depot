@@ -15,26 +15,26 @@
 
 package org.finos.legend.depot.server.resources.entities;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.domain.version.VersionValidator;
 import org.finos.legend.depot.services.api.entities.EntitiesService;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 import org.finos.legend.depot.services.api.EtagBuilder;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 
-import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Request;
+import jakarta.ws.rs.core.Response;
 import java.util.Set;
 
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_ENTITIES;
@@ -42,7 +42,7 @@ import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTra
 import static org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing.GET_VERSION_ENTITY;
 
 @Path("")
-@Api("Entities")
+@Tag(name = "Entities")
 public class EntitiesResource extends TracingResource
 {
     private final EntitiesService entitiesService;
@@ -57,11 +57,11 @@ public class EntitiesResource extends TracingResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}")
-    @ApiOperation(GET_VERSION_ENTITIES)
+    @Operation(summary = GET_VERSION_ENTITIES)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEntities(@PathParam("groupId") String groupId,
                                 @PathParam("artifactId") String artifactId,
-                                @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                @PathParam("versionId") @Parameter(description = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                 @Context Request request)
     {
         String resolvedVersionId = this.projectsService.resolveAliasesAndCheckVersionExists(groupId, artifactId, versionId);
@@ -70,11 +70,11 @@ public class EntitiesResource extends TracingResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/classifiers/{classifier}")
-    @ApiOperation(value = GET_VERSION_ENTITIES, hidden = true)
+    @Operation(summary = GET_VERSION_ENTITIES, hidden = true)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEntitiesByClassifier(@PathParam("groupId") String groupId,
                                 @PathParam("artifactId") String artifactId,
-                                @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                @PathParam("versionId") @Parameter(description = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                 @PathParam("classifier") String classifier,
                                 @Context Request request)
     {
@@ -87,11 +87,11 @@ public class EntitiesResource extends TracingResource
     
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/entities/{path}")
-    @ApiOperation(GET_VERSION_ENTITY)
+    @Operation(summary = GET_VERSION_ENTITY)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEntity(@PathParam("groupId") String groupId,
                                       @PathParam("artifactId") String artifactId,
-                                      @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                      @PathParam("versionId") @Parameter(description = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                       @PathParam("path") String entityPath,
                                       @Context Request request)
     {
@@ -100,17 +100,17 @@ public class EntitiesResource extends TracingResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions/{versionId}/entities")
-    @ApiOperation(GET_VERSION_ENTITIES_BY_FILTER)
+    @Operation(summary = GET_VERSION_ENTITIES_BY_FILTER)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEntities(@PathParam("groupId") String groupId,
                                     @PathParam("artifactId") String artifactId,
-                                    @PathParam("versionId") @ApiParam(value = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
+                                    @PathParam("versionId") @Parameter(description = VersionValidator.VALID_VERSION_ID_TXT) String versionId,
                                     @QueryParam("package")
-                                    @ApiParam("Restrict ENTITIES to only this package if provided") String packageName,
-                                    @QueryParam("classifierPath") @ApiParam("Only include ENTITIES with one of these classifier paths.") Set<String> classifierPaths,
+                                    @Parameter(description = "Restrict ENTITIES to only this package if provided") String packageName,
+                                    @QueryParam("classifierPath") @Parameter(description = "Only include ENTITIES with one of these classifier paths.") Set<String> classifierPaths,
                                     @QueryParam("includeSubPackages")
                                     @DefaultValue("true")
-                                    @ApiParam("Whether to include ENTITIES from subpackages or only directly in one of the given packages. Only used if packageName is provided") boolean includeSubPackages,
+                                    @Parameter(description = "Whether to include ENTITIES from subpackages or only directly in one of the given packages. Only used if packageName is provided") boolean includeSubPackages,
                                     @Context Request request
     )
     {

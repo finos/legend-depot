@@ -23,7 +23,7 @@ import org.finos.legend.depot.store.mongo.admin.MongoAdminStore;
 import org.finos.legend.depot.core.services.api.metrics.PrometheusMetricsHandler;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

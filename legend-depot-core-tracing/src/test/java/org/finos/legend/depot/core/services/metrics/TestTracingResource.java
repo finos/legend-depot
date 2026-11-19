@@ -15,23 +15,23 @@
 
 package org.finos.legend.depot.core.services.metrics;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("")
-@Api("Test Tracing")
+@Tag(name = "Test Tracing")
 class TestTracingResource extends TracingResource
 {
     @GET
     @Path("/tracing/test")
-    @ApiOperation("get test method")
+    @Operation(summary = "get test method")
     @Produces(MediaType.APPLICATION_JSON)
     public Response testMethod()
     {

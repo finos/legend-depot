@@ -18,8 +18,8 @@ package org.finos.legend.depot.services.artifacts.handlers.entities;
 import org.finos.legend.depot.domain.artifacts.repository.ArtifactType;
 import org.finos.legend.depot.services.api.artifacts.handlers.entties.VersionedEntityArtifactsProvider;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.File;
 
 

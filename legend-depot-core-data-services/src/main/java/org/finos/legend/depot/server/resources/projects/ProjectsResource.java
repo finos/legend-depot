@@ -17,29 +17,31 @@ package org.finos.legend.depot.server.resources.projects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.finos.legend.depot.services.api.projects.ProjectsService;
 import org.finos.legend.depot.core.services.tracing.resources.TracingResource;
 import org.finos.legend.depot.core.services.tracing.ResourceLoggingAndTracing;
 
-import javax.inject.Inject;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("")
-@Api("Projects")
+@Tag(name = "Projects")
 public class ProjectsResource extends TracingResource
 {
 
@@ -54,7 +56,7 @@ public class ProjectsResource extends TracingResource
 
     @GET
     @Path("/project-configurations")
-    @ApiOperation(ResourceLoggingAndTracing.GET_ALL_PROJECTS)
+    @Operation(summary = ResourceLoggingAndTracing.GET_ALL_PROJECTS)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProjectsWithCoordinates()
     {
@@ -63,7 +65,7 @@ public class ProjectsResource extends TracingResource
 
     @GET
     @Path("/project-configurations/{groupId}/{artifactId}")
-    @ApiOperation(ResourceLoggingAndTracing.GET_PROJECT_CONFIG_BY_GA)
+    @Operation(summary = ResourceLoggingAndTracing.GET_PROJECT_CONFIG_BY_GA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProjectCoordinates(@PathParam("groupId")String groupId, @PathParam("artifactId") String artifactId)
     {
@@ -72,11 +74,11 @@ public class ProjectsResource extends TracingResource
 
     @GET
     @Path("/projects/{groupId}/{artifactId}/versions")
-    @ApiOperation(ResourceLoggingAndTracing.GET_VERSIONS)
+    @Operation(summary = ResourceLoggingAndTracing.GET_VERSIONS)
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiResponses(@ApiResponse(response = String.class, code = 200, message = "successful operation", responseContainer = "List"))
+    @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(array = @ArraySchema(schema = @Schema(implementation = String.class))))
     public Response getVersions(@PathParam("groupId") String groupId, @PathParam("artifactId") String artifactId,
-                                @QueryParam("snapshots") @ApiParam("wether to return snapshot versions too") @DefaultValue("false") boolean includeSnapshots)
+                                @QueryParam("snapshots") @Parameter(description = "wether to return snapshot versions too") @DefaultValue("false") boolean includeSnapshots)
     {
         return handleResponse(ResourceLoggingAndTracing.GET_VERSIONS, () -> projectApi.getVersions(groupId, artifactId,includeSnapshots));
     }

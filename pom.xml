@@ -98,14 +98,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
-        <maven.compiler>11</maven.compiler>
-        <java.version.range>[11,12),[17,18)</java.version.range>
+        <maven.compiler.release>17</maven.compiler.release>
+        <java.version.range>[17,18),[21,22),[25,26)</java.version.range>
         <publish.server.id>central</publish.server.id>
 
         <!-- Legend dependency versions -->
-        <legend.shared.version>0.37.0</legend.shared.version>
-        <legend.engine.version>4.152.3</legend.engine.version>
-        <legend.sdlc.version>0.237.2</legend.sdlc.version>
+        <legend.shared.version>1.0.5</legend.shared.version>
+        <legend.engine.version>5.0.6</legend.engine.version>
+        <legend.sdlc.version>1.0.2</legend.sdlc.version>
 
 
         <!-- Dependency versions -->
@@ -115,70 +115,74 @@
         <commons-compress.version>1.21</commons-compress.version>
         <commons-io.version>2.7</commons-io.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
-        <dropwizard.version>1.3.29</dropwizard.version>
-        <dropwizard.metrics.version>4.1.16</dropwizard.metrics.version>
-        <dropwizard-guicier.version>1.3.5.2</dropwizard-guicier.version>
-        <dropwizard-swagger.version>1.3.17-1</dropwizard-swagger.version>
-        <swagger-annotations.version>1.5.20</swagger-annotations.version>
+        <dropwizard.version>5.0.2</dropwizard.version>
+        <dropwizard.metrics.version>4.2.39</dropwizard.metrics.version>
+        <dropwizard-guicey.version>8.0.2</dropwizard-guicey.version>
+        <dropwizard-swagger.version>4.0.5-1</dropwizard-swagger.version>
+        <swagger-annotations.version>2.2.22</swagger-annotations.version>
         <eclipse.collections.version>10.2.0</eclipse.collections.version>
         <findbugs.version>3.0.0</findbugs.version>
-        <freemaker.version>2.3.31</freemaker.version>
-        <guice.version>4.2.1</guice.version>
-        <hk2.version>2.5.0-b32</hk2.version>
-        <hibernate.validator.version>5.4.2.Final</hibernate.validator.version>
-        <jackson.version>2.10.5</jackson.version>
-        <jackson.databind.version>2.10.5.1</jackson.databind.version>
-        <javassist.version>3.21.0-GA</javassist.version>
-        <javax.servlet.version>3.1.0</javax.servlet.version>
-        <javax.ws.rs.version>2.1.1</javax.ws.rs.version>
-        <jaxb.version>2.3.1</jaxb.version>
-        <jersey.version>2.25.1</jersey.version>
-        <jersey2-guice.version>1.0.6</jersey2-guice.version>
-        <jetty.version>9.4.39.v20210325</jetty.version>
+        <freemaker.version>2.3.35</freemaker.version>
+        <guice.version>7.0.0</guice.version>
+        <!-- the hk2 line Jersey 3.1.x is built against (jersey project pom), as in legend-sdlc -->
+        <hk2.version>3.0.6</hk2.version>
+        <hibernate.validator.version>8.0.3.Final</hibernate.validator.version>
+        <jackson.version>2.21.8</jackson.version>
+        <jakarta.activation.version>2.1.4</jakarta.activation.version>
+        <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
+        <jakarta.el.version>5.0.1</jakarta.el.version>
+        <jakarta.inject.version>2.0.1</jakarta.inject.version>
+        <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
+        <jakarta.validation.version>3.0.2</jakarta.validation.version>
+        <jakarta.ws.rs.version>3.1.0</jakarta.ws.rs.version>
+        <jakarta.xml.bind.version>4.0.5</jakarta.xml.bind.version>
+        <javassist.version>3.31.0-GA</javassist.version>
+        <jersey.version>3.1.11</jersey.version>
+        <jetty.version>12.1.13</jetty.version>
         <joda.time.version>2.10.14</joda.time.version>
-        <json-smart.version>2.4.2</json-smart.version>
+        <json-smart.version>2.6.0</json-smart.version>
 
         <junit.version>4.13.1</junit.version>
         <junit.groupId>org.junit.jupiter</junit.groupId>
         <junit.artifactId>junit-jupiter-engine</junit.artifactId>
-        <junit5-version>5.9.3</junit5-version>
+        <junit5-version>5.11.0</junit5-version>
 
-        <mockito.version>3.9.0</mockito.version>
-        <slf4j.version>1.7.36</slf4j.version>
+        <mockito.version>5.2.0</mockito.version>
+        <slf4j.version>2.0.17</slf4j.version>
+        <logback.version>1.5.33</logback.version>
+        <logback.access.version>2.0.12</logback.access.version>
 
         <apache.maven.version>3.9.12</apache.maven.version>
         <shrinkwrap-resolver-api.version>3.3.5</shrinkwrap-resolver-api.version>
         <plexus-utils.version>3.1.0</plexus-utils.version>
-        <guava.version>30.1-jre</guava.version>
+        <guava.version>33.4.6-jre</guava.version>
 
         <!-- TRACING -->
         <zipkin-reporter.version>2.15.0</zipkin-reporter.version>
         <zipkin.version>2.21.1</zipkin.version>
         <opentracing.version>0.32.0</opentracing.version>
         <opentracing-mongo-driver.version>0.1.4</opentracing-mongo-driver.version>
-        <prometheus.version>0.8.1</prometheus.version>
+        <prometheus.version>0.16.0</prometheus.version>
 
         <!-- MONGO -->
         <bson.version>5.3.1</bson.version>
         <mongodb.version>5.3.1</mongodb.version>
         <mongo-test-server.version>1.46.0</mongo-test-server.version>
 
-        <validation-api.version>1.1.0.Final</validation-api.version>
-
-        <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
         <maven.clean.plugin.version>3.1.0</maven.clean.plugin.version>
         <maven.checkstyle.plugin.version>3.1.2</maven.checkstyle.plugin.version>
-        <maven.surefire.plugin.version>3.0.0-M3</maven.surefire.plugin.version>
-        <maven.dependency.plugin.version>2.10</maven.dependency.plugin.version>
-        <maven.shade.plugin.version>3.2.1</maven.shade.plugin.version>
+        <maven.surefire.plugin.version>3.1.0</maven.surefire.plugin.version>
+        <maven.dependency.plugin.version>3.6.1</maven.dependency.plugin.version>
+        <maven.shade.plugin.version>3.4.1</maven.shade.plugin.version>
         <maven.plugin.plugin.version>3.6.0</maven.plugin.plugin.version>
-        <maven.enforcer.plugin.version>3.0.0-M1</maven.enforcer.plugin.version>
+        <maven.enforcer.plugin.version>3.5.0</maven.enforcer.plugin.version>
+        <extra-enforcer-rules.version>1.12.0</extra-enforcer-rules.version>
         <maven.jar.plugin.version>3.1.2</maven.jar.plugin.version>
 
         <git.commit.plugin.version>2.2.6</git.commit.plugin.version>
         <versions.maven.plugin.version>2.7</versions.maven.plugin.version>
-        <jacoco.maven.plugin.version>0.8.10</jacoco.maven.plugin.version>
-        <sonar.maven.plugin.version>3.7.0.1746</sonar.maven.plugin.version>
+        <jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
         <dockerfile.maven.plugin.version>1.4.13</dockerfile.maven.plugin.version>
     </properties>
 
@@ -194,10 +198,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven.compiler.plugin.version}</version>
-                    <configuration>
-                        <source>${maven.compiler}</source>
-                        <target>${maven.compiler}</target>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -285,6 +285,13 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>${maven.enforcer.plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>extra-enforcer-rules</artifactId>
+                            <version>${extra-enforcer-rules.version}</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
                             <id>enforce</id>
@@ -309,6 +316,34 @@
                                             <include>org.slf4j:slf4j-ext:${slf4j.version}</include>
                                         </includes>
                                     </bannedDependencies>
+                                    <bannedDependencies>
+                                        <!-- these releases still ship javax packages under jakarta coordinates,
+                                             and the javax APIs themselves have no place on a Jetty 12 / Jersey 3 classpath -->
+                                        <excludes>
+                                            <exclude>jakarta.ws.rs:jakarta.ws.rs-api:[,3.0.0)</exclude>
+                                            <exclude>jakarta.servlet:jakarta.servlet-api:[,5.0.0)</exclude>
+                                            <exclude>jakarta.inject:jakarta.inject-api:[,2.0.0)</exclude>
+                                            <exclude>jakarta.validation:jakarta.validation-api:[,3.0.0)</exclude>
+                                            <exclude>javax.ws.rs:javax.ws.rs-api</exclude>
+                                            <exclude>javax.servlet:javax.servlet-api</exclude>
+                                            <exclude>javax.validation:validation-api</exclude>
+                                        </excludes>
+                                    </bannedDependencies>
+                                    <bannedDependencies>
+                                        <!-- the 3.x uber jar carries its own copy of com.mongodb.ConnectionString, which breaks
+                                             the legacy MongoClient against the 4.x+ driver-core; use mongodb-driver-legacy instead -->
+                                        <excludes>
+                                            <exclude>org.mongodb:mongo-java-driver</exclude>
+                                        </excludes>
+                                    </bannedDependencies>
+                                    <requireProperty>
+                                        <property>maven.compiler.release</property>
+                                        <regex>17</regex>
+                                        <regexMessage>Every module compiles to Java 17; do not override maven.compiler.release</regexMessage>
+                                    </requireProperty>
+                                    <enforceBytecodeVersion>
+                                        <maxJdkVersion>${maven.compiler.release}</maxJdkVersion>
+                                    </enforceBytecodeVersion>
                                 </rules>
                             </configuration>
                             <goals>
@@ -346,11 +381,6 @@
                             </goals>
                         </execution>
                     </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.sonarsource.scanner.maven</groupId>
-                    <artifactId>sonar-maven-plugin</artifactId>
-                    <version>${sonar.maven.plugin.version}</version>
                 </plugin>
 
                 <plugin>
@@ -402,6 +432,9 @@
                             </goals>
                             <configuration>
                                 <shadedArtifactAttached>true</shadedArtifactAttached>
+                                <!-- since shade 3.3.0 the reduced pom is also written when the shaded jar is attached, which would strip the
+                                     thin artifact's dependencies for downstream consumers -->
+                                <createDependencyReducedPom>false</createDependencyReducedPom>
                                 <transformers>
                                     <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
                                     <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -723,10 +756,6 @@
                 <version>${legend.shared.version}</version>
                 <exclusions>
                     <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>javax.ws.rs-api</artifactId>
-                    </exclusion>
-                    <exclusion>
                         <groupId>org.finos.legend.shared</groupId>
                         <artifactId>legend-shared-pac4j-gitlab</artifactId>
                     </exclusion>
@@ -738,6 +767,15 @@
                         <groupId>com.google.guava</groupId>
                         <artifactId>guava</artifactId>
                     </exclusion>
+                    <!-- unused javax-namespace transitives, as in legend-engine -->
+                    <exclusion>
+                        <groupId>io.opentracing.contrib</groupId>
+                        <artifactId>opentracing-web-servlet-filter</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.microprofile.opentracing</groupId>
+                        <artifactId>microprofile-opentracing-api</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -745,10 +783,6 @@
                 <artifactId>legend-shared-pac4j</artifactId>
                 <version>${legend.shared.version}</version>
                 <exclusions>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>javax.ws.rs-api</artifactId>
-                    </exclusion>
                     <exclusion>
                         <groupId>org.mongodb</groupId>
                         <artifactId>mongo-driver-sync</artifactId>
@@ -799,10 +833,6 @@
                     <exclusion>
                         <groupId>org.pac4j</groupId>
                         <artifactId>pac4j-core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>com.google.guava</groupId>
@@ -863,37 +893,6 @@
                 <groupId>org.finos.legend.sdlc</groupId>
                 <artifactId>legend-sdlc-model</artifactId>
                 <version>${legend.sdlc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.finos.legend.sdlc</groupId>
-                <artifactId>legend-sdlc-server-shared</artifactId>
-                <version>${legend.sdlc.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-server</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-servlets</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>javax.ws.rs</groupId>
-                        <artifactId>javax.ws.rs-api</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.finos.legend.shared</groupId>
-                        <artifactId>legend-shared-pac4j-kerberos</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.finos.legend.shared</groupId>
-                        <artifactId>legend-shared-pac4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.finos.legend.shared</groupId>
-                        <artifactId>legend-shared-server</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.finos.legend.sdlc</groupId>
@@ -959,7 +958,7 @@
                 <version>${freemaker.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.hibernate</groupId>
+                <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
                 <version>${hibernate.validator.version}</version>
             </dependency>
@@ -980,9 +979,9 @@
                 <version>${joda.time.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.validation</groupId>
-                <artifactId>validation-api</artifactId>
-                <version>${validation-api.version}</version>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>${jakarta.validation.version}</version>
             </dependency>
 
             <!-- LOGGING-->
@@ -995,6 +994,21 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>jul-to-slf4j</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback.access</groupId>
+                <artifactId>logback-access-common</artifactId>
+                <version>${logback.access.version}</version>
             </dependency>
             <!-- LOGGING-->
 
@@ -1016,10 +1030,83 @@
             </dependency>
 
             <!-- WEB-->
+            <!-- dropwizard-dependencies is deliberately not imported: its third-party pins disagree with legend-engine's -->
             <dependency>
-                <groupId>javax.ws.rs</groupId>
-                <artifactId>javax.ws.rs-api</artifactId>
-                <version>${javax.ws.rs.version}</version>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-bom</artifactId>
+                <version>${dropwizard.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard.metrics</groupId>
+                <artifactId>metrics-bom</artifactId>
+                <version>${dropwizard.metrics.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-bom</artifactId>
+                <version>${jetty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.ee10</groupId>
+                <artifactId>jetty-ee10-bom</artifactId>
+                <version>${jetty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey</groupId>
+                <artifactId>jersey-bom</artifactId>
+                <version>${jersey.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.ws.rs</groupId>
+                <artifactId>jakarta.ws.rs-api</artifactId>
+                <version>${jakarta.ws.rs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.inject</groupId>
+                <artifactId>jakarta.inject-api</artifactId>
+                <version>${jakarta.inject.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>${jakarta.annotation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.el</groupId>
+                <artifactId>jakarta.el-api</artifactId>
+                <version>${jakarta.el.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>${jakarta.xml.bind.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.activation</groupId>
+                <artifactId>jakarta.activation-api</artifactId>
+                <version>${jakarta.activation.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -1044,17 +1131,6 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.glassfish.jersey.core</groupId>
-                <artifactId>jersey-client</artifactId>
-                <version>${jersey.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.glassfish.jersey.containers</groupId>
-                <artifactId>jersey-container-servlet-core</artifactId>
-                <version>${jersey.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.glassfish.hk2</groupId>
                 <artifactId>hk2-api</artifactId>
                 <version>${hk2.version}</version>
@@ -1069,7 +1145,6 @@
                 <artifactId>hk2-utils</artifactId>
                 <version>${hk2.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.glassfish.hk2.external</groupId>
                 <artifactId>aopalliance-repackaged</artifactId>
@@ -1100,6 +1175,21 @@
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-logging</artifactId>
+                <version>${dropwizard.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>log4j-over-slf4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>jcl-over-slf4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-assets</artifactId>
                 <version>${dropwizard.version}</version>
             </dependency>
@@ -1107,6 +1197,12 @@
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-configuration</artifactId>
                 <version>${dropwizard.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-testing</artifactId>
+                <version>${dropwizard.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.smoketurner</groupId>
@@ -1120,61 +1216,35 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-annotations</artifactId>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations-jakarta</artifactId>
                 <version>${swagger-annotations.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.hubspot.dropwizard</groupId>
-                <artifactId>dropwizard-guicier</artifactId>
-                <version>${dropwizard-guicier.version}</version>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-core-jakarta</artifactId>
+                <version>${swagger-annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-models-jakarta</artifactId>
+                <version>${swagger-annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-integration-jakarta</artifactId>
+                <version>${swagger-annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-jaxrs2-jakarta</artifactId>
+                <version>${swagger-annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ru.vyarus</groupId>
+                <artifactId>dropwizard-guicey</artifactId>
+                <version>${dropwizard-guicey.version}</version>
                 <exclusions>
-                    <!-- cannot use wildcards because of bug in enforcer -->
-                    <!-- https://issues.apache.org/jira/browse/MENFORCER-195 -->
-                    <exclusion>
-                        <groupId>io.dropwizard</groupId>
-                        <artifactId>dropwizard-jersey</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.dropwizard</groupId>
-                        <artifactId>dropwizard-jackson</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.dropwizard</groupId>
-                        <artifactId>dropwizard-jetty</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.dropwizard</groupId>
-                        <artifactId>dropwizard-lifecycle</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.dropwizard</groupId>
-                        <artifactId>dropwizard-servlets</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.dropwizard</groupId>
-                        <artifactId>dropwizard-util</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.dropwizard.metrics</groupId>
-                        <artifactId>metrics-core</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.dropwizard.metrics</groupId>
-                        <artifactId>metrics-healthchecks</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>io.dropwizard.metrics</groupId>
-                        <artifactId>metrics-logback</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-server</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.glassfish.hk2.external</groupId>
-                        <artifactId>javax.inject</artifactId>
-                    </exclusion>
                     <exclusion>
                         <groupId>com.google.guava</groupId>
                         <artifactId>guava</artifactId>
@@ -1182,70 +1252,9 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${javax.servlet.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
-                <version>${jaxb.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars.npm</groupId>
-                <artifactId>swagger-ui-dist</artifactId>
-                <version>${swagger-ui-dist.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.jaxrs</groupId>
-                <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+                <artifactId>jackson-jakarta-rs-json-provider</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.databind.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-afterburner</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jdk8</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-joda</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-yaml</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>javax.inject</groupId>
-                <artifactId>javax.inject</artifactId>
-                <version>1</version>
             </dependency>
 
             <!--MONGO-->
@@ -1254,6 +1263,11 @@
                 <artifactId>mongodb-driver-sync</artifactId>
                 <version>${mongodb.version}</version>
                 <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-legacy</artifactId>
+                <version>${mongodb.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.mongodb</groupId>
@@ -1338,6 +1352,10 @@
                         <groupId>org.mongodb</groupId>
                     </exclusion>
                     <exclusion>
+                        <groupId>org.mongodb</groupId>
+                        <artifactId>mongo-java-driver</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>io.opentracing</groupId>
                         <artifactId>opentracing-util</artifactId>
                     </exclusion>
@@ -1417,6 +1435,48 @@
                 <version>9.9</version>
             </dependency>
 
+            <!-- CONVERGENCE: transitive versions where Dropwizard 5, legend-shared, legend-engine and swagger disagree -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.pac4j</groupId>
+                <artifactId>pac4j-jakartaee</artifactId>
+                <version>6.5.8</version>
+            </dependency>
+            <!-- swagger-core asks for 4.8.165, but legend-engine, legend-pure and legend-sdlc all build and test on 4.8.25 -->
+            <dependency>
+                <groupId>io.github.classgraph</groupId>
+                <artifactId>classgraph</artifactId>
+                <version>4.8.25</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>2.49.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>2.5</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging</artifactId>
+                <version>3.6.1.Final</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>3.2.4</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml</groupId>
+                <artifactId>classmate</artifactId>
+                <version>1.7.3</version>
+            </dependency>
             <!-- PROMETHEUS -->
             <dependency>
                 <groupId>io.prometheus</groupId>
@@ -1425,7 +1485,7 @@
             </dependency>
             <dependency>
                 <groupId>io.prometheus</groupId>
-                <artifactId>simpleclient_servlet</artifactId>
+                <artifactId>simpleclient_servlet_jakarta</artifactId>
                 <version>${prometheus.version}</version>
             </dependency>
             <dependency>

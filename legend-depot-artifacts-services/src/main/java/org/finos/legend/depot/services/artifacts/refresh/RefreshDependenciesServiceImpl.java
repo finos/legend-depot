@@ -30,8 +30,8 @@ import org.finos.legend.depot.services.dependencies.DependencyExclusionsUtil;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
