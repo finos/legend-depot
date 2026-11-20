@@ -86,7 +86,7 @@
 
     <properties>
         <!-- CI-Friendly Version -->
-        <revision>3.0.1-SNAPSHOT</revision>
+        <revision>3.0.2-SNAPSHOT</revision>
 
         <sonar.projectKey>finos_legend-depot</sonar.projectKey>
         <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
