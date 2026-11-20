@@ -31,8 +31,10 @@ import org.finos.legend.depot.domain.generation.DepotGeneration;
 import org.finos.legend.depot.server.configuration.DepotServerConfiguration;
 import org.finos.legend.depot.store.model.generations.StoredFileGeneration;
 import org.finos.legend.depot.store.model.projects.StoreProjectVersionData;
+import org.finos.legend.depot.store.mongo.entities.EntitiesMongo;
 import org.finos.legend.depot.store.mongo.generations.FileGenerationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsVersionsMongo;
+import org.finos.legend.sdlc.domain.model.entity.Entity;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -50,6 +52,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
@@ -88,6 +91,10 @@ public class TestLegendDepotServer
             new ProjectsVersionsMongo(database).createOrUpdate(new StoreProjectVersionData("org.finos.test", "generated", "1.0.0"));
             new FileGenerationsMongo(database).createOrUpdate(new StoredFileGeneration("org.finos.test", "generated", "1.0.0", "model::Thing", "json",
                     new DepotGeneration("/model/Thing.json", "{\"generated\":true}")));
+            // stored as published by older SDLC versions: stereotypes and tags as plain strings
+            new ProjectsVersionsMongo(database).createOrUpdate(new StoreProjectVersionData("org.finos.test", "profiles", "1.0.0"));
+            new EntitiesMongo<>(database).createOrUpdate("org.finos.test", "profiles", "1.0.0", List.of(Entity.newEntity("model::DataBrowser", "meta::pure::metamodel::extension::Profile",
+                    Map.of("_type", "profile", "name", "DataBrowser", "package", "model", "stereotypes", List.of("hidden"), "tags", List.of()))));
         }
     }
 
@@ -214,5 +221,37 @@ public class TestLegendDepotServer
     {
         Assertions.assertEquals(400, getRaw("/depot/api/generations/org.finos.test/generated/versions/1.0.0/file/%25model%25Thing.json").statusCode());
         Assertions.assertEquals(400, getRaw("/depot/api/generations/org.finos.test/generated/versions/1.0.0/file//model/Thing.json").statusCode());
+    }
+
+    @Test
+    public void pureModelContextDataIsWrittenWithThePureProtocolMapper() throws Exception
+    {
+        assertWrittenWithThePureProtocolMapper(getRaw("/depot/api/projects/org.finos.test/profiles/versions/1.0.0/pureModelContextData?getDependencies=false"));
+    }
+
+    @Test
+    public void pureModelContextDataWithDependenciesIsWrittenWithThePureProtocolMapper() throws Exception
+    {
+        assertWrittenWithThePureProtocolMapper(getRaw("/depot/api/projects/org.finos.test/profiles/versions/1.0.0/pureModelContextData"));
+    }
+
+    @Test
+    public void pureModelContextDataOfDependenciesIsWrittenWithThePureProtocolMapper() throws Exception
+    {
+        HttpRequest request = HttpRequest.newBuilder(URI.create("http://localhost:" + APP.getLocalPort() + "/depot/api/projects/dependencies/pureModelContextData?transitive=false"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("[{\"groupId\":\"org.finos.test\",\"artifactId\":\"profiles\",\"versionId\":\"1.0.0\"}]"))
+                .build();
+        assertWrittenWithThePureProtocolMapper(HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString()));
+    }
+
+    private static void assertWrittenWithThePureProtocolMapper(HttpResponse<String> response) throws Exception
+    {
+        Assertions.assertEquals(200, response.statusCode(), response.body());
+        // Dropwizard's own mapper would write the class name ("Profile") as the type and every null field
+        JsonNode profile = new ObjectMapper().readTree(response.body()).at("/elements/0");
+        Assertions.assertEquals("profile", profile.get("_type").asText(), response.body());
+        Assertions.assertEquals("{\"value\":\"hidden\"}", profile.at("/stereotypes/0").toString(), response.body());
+        Assertions.assertFalse(response.body().contains("null"), response.body());
     }
 }

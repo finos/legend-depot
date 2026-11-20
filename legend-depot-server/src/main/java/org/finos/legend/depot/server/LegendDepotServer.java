@@ -101,7 +101,8 @@ public class LegendDepotServer extends BaseServer<DepotServerConfiguration>
     @Override
     public void registerJacksonJsonProvider(JerseyEnvironment jerseyEnvironment)
     {
-        jerseyEnvironment.register(new LegendDepotServerJacksonJsonProvider());
+        // every other type is written by Dropwizard's writer, with the bootstrap mapper
+        jerseyEnvironment.register(new PureModelContextDataJsonWriter());
     }
 
     @Override

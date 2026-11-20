@@ -62,9 +62,11 @@ import org.finos.legend.depot.store.server.guice.DepotStoreServerModule;
 
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.FilterRegistration;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.TimeZone;
 
 public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfiguration>
 {
@@ -83,12 +85,17 @@ public class LegendDepotStoreServer extends BaseServer<DepotStoreServerConfigura
     {
         super.configureObjectMapper(bootstrap);
         ArtifactRepositoryProviderConfiguration.configureObjectMapper(bootstrap.getObjectMapper());
+        // Dropwizard's writer uses this mapper for every response
+        bootstrap.getObjectMapper()
+                .setTimeZone(TimeZone.getDefault())
+                .setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
     }
 
     @Override
     public void registerJacksonJsonProvider(JerseyEnvironment jerseyEnvironment)
     {
-        jerseyEnvironment.register(LegendDepotStoreServerJacksonJsonProvider.class);
+        // a second Jackson provider for Object would tie with Dropwizard's, and which of the two writes would change
+        // from one start to the next; the store's date format is set on Dropwizard's mapper in configureObjectMapper
     }
 
     @Override
