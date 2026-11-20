@@ -28,10 +28,13 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.jetty.ee10.servlet.FilterMapping;
+import org.finos.legend.depot.domain.notifications.MetadataNotification;
+import org.finos.legend.depot.store.mongo.notifications.NotificationsMongo;
 import org.finos.legend.depot.store.mongo.projects.ProjectsMongo;
 import org.finos.legend.depot.store.server.configuration.DepotStoreServerConfiguration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import ru.vyarus.dropwizard.guice.module.jersey.GuiceWebModule;
@@ -45,6 +48,7 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -74,6 +78,16 @@ public class TestLegendDepotStoreServer
         catch (Exception e)
         {
             throw new RuntimeException(e);
+        }
+    }
+
+    @BeforeAll
+    public static void storeANotification()
+    {
+        InetSocketAddress mongo = MONGO.getLocalAddress();
+        try (MongoClient client = MongoClients.create("mongodb://" + mongo.getHostString() + ":" + mongo.getPort()))
+        {
+            new NotificationsMongo(client.getDatabase("depot-dev")).insert(new MetadataNotification("PROD-1", "org.finos.test", "dated", "1.0.0").complete().setUpdated(new Date()));
         }
     }
 
@@ -193,5 +207,13 @@ public class TestLegendDepotStoreServer
         HttpResponse<String> response = HttpClient.newHttpClient().send(HttpRequest.newBuilder(uri).build(), HttpResponse.BodyHandlers.ofString());
         Assertions.assertEquals(404, response.statusCode(), response.body());
         Assertions.assertTrue(APP.getEnvironment().getApplicationContext().getServletHandler().isDecodeAmbiguousURIs());
+    }
+
+    @Test
+    public void datesAreWrittenInTheStoreDateFormat()
+    {
+        JsonNode notifications = get("/depot-store/api/notifications?groupId=org.finos.test&artifactId=dated").readEntity(JsonNode.class);
+        Assertions.assertEquals(1, notifications.size(), notifications.toString());
+        Assertions.assertTrue(notifications.get(0).get("updated").asText().matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}"), notifications.toString());
     }
 }
