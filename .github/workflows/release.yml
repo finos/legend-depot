@@ -28,6 +28,10 @@ on:
       releaseVersion:
         description: "New release version"
         required: true
+      fullStackVersion:
+        description: "Full stack release: MAJOR.MINOR of the full stack version (e.g. 5.3). Creates branch legend-release-<version> once the release completes. Leave empty for a regular release."
+        required: false
+        default: ""
 
 jobs:
   release:
@@ -43,6 +47,21 @@ jobs:
         run: |
           git config --global user.email "37706051+finos-admin@users.noreply.github.com"
           git config --global user.name "FINOS Administrator"
+
+      - name: Check full stack version and release branch
+        env:
+          FULL_STACK_VERSION: ${{ github.event.inputs.fullStackVersion }}
+        run: |
+          [ -n "${FULL_STACK_VERSION}" ] || exit 0
+          if ! [[ "${FULL_STACK_VERSION}" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::fullStackVersion must be MAJOR.MINOR; got '${FULL_STACK_VERSION}'."
+            exit 1
+          fi
+          BRANCH="legend-release-${FULL_STACK_VERSION}"
+          if git ls-remote --exit-code --heads origin "refs/heads/${BRANCH}" > /dev/null 2>&1; then
+            echo "::error::Branch ${BRANCH} already exists; full stack version ${FULL_STACK_VERSION} already has a release branch."
+            exit 1
+          fi
 
       - name: Check release version is unused
         env:
@@ -102,6 +121,21 @@ jobs:
           set -euo pipefail
           git tag "${TAG}"
           git push origin "refs/tags/${TAG}"
+
+      - name: Create full stack release branch
+        if: ${{ github.event.inputs.fullStackVersion != '' }}
+        env:
+          BRANCH_NAME: legend-release-${{ github.event.inputs.fullStackVersion }}
+          GH_TOKEN: ${{ secrets.FINOS_GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git push origin "HEAD:refs/heads/${BRANCH_NAME}"
+          gh label create "backport ${BRANCH_NAME}" \
+            --repo "${{ github.repository }}" \
+            --color "0E8A16" \
+            --description "Apply to a PR to auto-open a backport PR against ${BRANCH_NAME} when merged" \
+            --force \
+            || echo "::warning::Could not create label 'backport ${BRANCH_NAME}' - create it manually"
 
       - name: Compute and set next SNAPSHOT
         env:
